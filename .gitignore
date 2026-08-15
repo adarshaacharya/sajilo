@@ -1,0 +1,32 @@
+# Xcode and Swift Package Manager
+.build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+.swiftpm/
+Package.resolved
+
+# App build products and archives
+*.app
+*.dSYM
+*.ipa
+*.xcarchive
+
+# Local tooling and generated artifacts
+.agents/
+.claude/
+build/
+documents/
+skills-lock.json
+
+# Local configuration and secrets
+.env
+.env.*
+*.pem
+*.p12
+*.mobileprovision
+
+# macOS
+.DS_Store

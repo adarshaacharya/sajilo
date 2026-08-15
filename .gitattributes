@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.swift text diff=swift
+*.md text diff=markdown
+*.xcodeproj/project.pbxproj text
