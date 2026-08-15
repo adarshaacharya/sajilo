@@ -1,9 +1,13 @@
 import Foundation
 
-struct NepaliDate: Equatable, Hashable, Sendable {
+struct NepaliDate: Equatable, Hashable, Comparable, Sendable {
     let year: Int
     let month: Int
     let day: Int
+
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        (lhs.year, lhs.month, lhs.day) < (rhs.year, rhs.month, rhs.day)
+    }
 
     var nepaliMonthName: String {
         NepaliMonth(rawValue: month)?.nepaliName ?? ""

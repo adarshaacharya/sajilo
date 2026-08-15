@@ -3,9 +3,32 @@ import SwiftUI
 
 struct DashboardView: View {
     let model: AppModel
-    @State private var activeSheet: DashboardSheet?
+    @State private var route: DashboardRoute = .dashboard
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // Both routes stay in the hierarchy rather than being swapped by an
+        // `if`. The popover then takes the height of the taller one and holds
+        // it, instead of snapping to a new size mid-transition — which is what
+        // makes a menu-bar panel feel unstable.
+        ZStack(alignment: .top) {
+            dashboard
+                .modifier(RouteLayer(isActive: route == .dashboard, edge: -1, reduceMotion: reduceMotion))
+
+            DateConverterView(onBack: { navigate(to: .dashboard) })
+                .modifier(RouteLayer(isActive: route == .converter, edge: 1, reduceMotion: reduceMotion))
+        }
+        .frame(width: Theme.Metric.popoverWidth)
+        .background(.regularMaterial)
+        .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: route)
+        // Escape backs out of a route before the system closes the popover.
+        .onExitCommand {
+            guard route != .dashboard else { return }
+            navigate(to: .dashboard)
+        }
+    }
+
+    private var dashboard: some View {
         VStack(spacing: 0) {
             DateHeaderView(model: model)
             MonthCalendarView(model: model)
@@ -15,24 +38,40 @@ struct DashboardView: View {
             DashboardCardsView(cards: model.visibleCards)
                 .padding(.horizontal, Theme.Space.m)
                 .padding(.vertical, Theme.Space.m)
-            ActionBarView(openConverter: { activeSheet = .dateConverter })
+            ActionBarView(openConverter: { navigate(to: .converter) })
         }
-        .frame(width: Theme.Metric.popoverWidth)
-        .background(.regularMaterial)
         .accessibilityLabel("Sajilo dashboard")
-        .sheet(item: $activeSheet) { sheet in
-            switch sheet {
-            case .dateConverter:
-                DateConverterView()
-            }
-        }
+    }
+
+    private func navigate(to destination: DashboardRoute) {
+        route = destination
     }
 }
 
-private enum DashboardSheet: Identifiable {
-    case dateConverter
+private enum DashboardRoute {
+    case dashboard
+    case converter
+}
 
-    var id: String { "date-converter" }
+/// Presents one route of the popover. The inactive layer stays mounted so the
+/// container keeps a constant height, but is pushed aside, faded out, and taken
+/// out of both hit-testing and the accessibility tree.
+private struct RouteLayer: ViewModifier {
+    let isActive: Bool
+    /// -1 exits to the leading edge, 1 to the trailing edge.
+    let edge: CGFloat
+    let reduceMotion: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isActive ? 1 : 0)
+            .offset(x: isActive || reduceMotion ? 0 : edge * 28)
+            // `disabled` rather than `allowsHitTesting`: the hidden layer keeps
+            // real text fields, and only disabling takes them out of the
+            // keyboard focus chain as well as out of the way of the pointer.
+            .disabled(!isActive)
+            .accessibilityHidden(!isActive)
+    }
 }
 
 // MARK: - Header
@@ -87,6 +126,9 @@ private struct DateHeaderView: View {
 private struct MonthCalendarView: View {
     let model: AppModel
 
+    @State private var isMovingForward = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private static let weekdaySymbols = ["आ", "सो", "मं", "बु", "बि", "शु", "श"]
     private static let columns = Array(repeating: GridItem(.flexible(), spacing: Theme.Space.xs), count: 7)
     /// Six rows covers the widest case (six leading blanks plus a 32-day
@@ -113,31 +155,61 @@ private struct MonthCalendarView: View {
                 }
             }
             .frame(height: Self.gridHeight, alignment: .top)
+            // A new identity per month is what lets the grid transition as a
+            // unit rather than having 30-odd cells animate independently.
+            .id(model.selectedMonth.firstDate)
+            .transition(pushTransition)
+            .clipped()
 
             if model.isShowingProvisionalYear {
                 Label("Provisional — not yet officially published", systemImage: "exclamationmark.circle")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .transition(.opacity)
             }
         }
         .focusable()
         .onKeyPress(.leftArrow) {
-            model.moveMonth(by: -1)
+            move(by: -1)
             return .handled
         }
         .onKeyPress(.rightArrow) {
-            model.moveMonth(by: 1)
+            move(by: 1)
             return .handled
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Month calendar for \(model.selectedMonth.title)")
     }
 
+    /// Slides the outgoing month out the way the user is travelling and brings
+    /// the new one in behind it, so the direction of navigation is legible.
+    private var pushTransition: AnyTransition {
+        guard !reduceMotion else { return .opacity }
+        return .asymmetric(
+            insertion: .move(edge: isMovingForward ? .trailing : .leading).combined(with: .opacity),
+            removal: .move(edge: isMovingForward ? .leading : .trailing).combined(with: .opacity)
+        )
+    }
+
+    private func move(by amount: Int) {
+        isMovingForward = amount > 0
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.28)) {
+            model.moveMonth(by: amount)
+        }
+    }
+
+    private func jumpToToday() {
+        isMovingForward = model.selectedMonth.firstDate < model.today
+        withAnimation(reduceMotion ? nil : .snappy(duration: 0.28)) {
+            model.jumpToToday()
+        }
+    }
+
     private var header: some View {
         HStack(spacing: Theme.Space.xs) {
             Button("Previous month", systemImage: "chevron.left") {
-                model.moveMonth(by: -1)
+                move(by: -1)
             }
             .labelStyle(.iconOnly)
 
@@ -145,20 +217,22 @@ private struct MonthCalendarView: View {
 
             Text(model.selectedMonth.title)
                 .font(.nepali(15, weight: .semibold))
+                .id(model.selectedMonth.firstDate)
+                .transition(.opacity)
 
             Spacer(minLength: 0)
 
             // Kept in the layout while disabled so the month title does not
             // shift as the user navigates away from the current month.
             Button("Jump to today", systemImage: "smallcircle.filled.circle") {
-                model.jumpToToday()
+                jumpToToday()
             }
             .labelStyle(.iconOnly)
             .disabled(model.isShowingCurrentMonth)
             .opacity(model.isShowingCurrentMonth ? 0 : 1)
 
             Button("Next month", systemImage: "chevron.right") {
-                model.moveMonth(by: 1)
+                move(by: 1)
             }
             .labelStyle(.iconOnly)
         }
@@ -306,3 +380,34 @@ private struct ActionBarView: View {
         .background(.bar)
     }
 }
+
+// MARK: - Previews
+
+#if DEBUG
+private func previewDate(year: Int, month: Int, day: Int) -> Date {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
+    return calendar.date(from: DateComponents(year: year, month: month, day: day))!
+}
+
+#Preview("Dashboard") {
+    DashboardView(model: .preview(now: previewDate(year: 2026, month: 8, day: 15)))
+}
+
+/// The month calendar has to survive a six-row month without changing height;
+/// Shrawan 2083 is the case that forced the fixed grid.
+#Preview("Six-row month") {
+    DashboardView(model: .preview(now: previewDate(year: 2026, month: 7, day: 17)))
+}
+
+/// Renders the provisional banner, which only appears past BS 2084.
+#Preview("Provisional year") {
+    let model = AppModel.preview(now: previewDate(year: 2026, month: 8, day: 15))
+    model.moveMonth(by: 24)
+    return DashboardView(model: model)
+}
+
+#Preview("Converter") {
+    DateConverterView(onBack: {})
+}
+#endif

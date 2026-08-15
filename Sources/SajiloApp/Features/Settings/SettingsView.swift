@@ -48,3 +48,10 @@ struct SettingsView: View {
         .padding()
     }
 }
+
+#if DEBUG
+#Preview("Settings") {
+    SettingsView(model: .preview())
+        .frame(width: 440, height: 320)
+}
+#endif
