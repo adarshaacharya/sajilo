@@ -41,6 +41,17 @@ struct ConversionOutcome: Equatable, Sendable {
         }
     }
 
+    /// Resolves a Bikram Sambat date into a full outcome, so the day-detail
+    /// route renders through exactly the same path as the converter.
+    static func make(for nepali: NepaliDate) -> ConversionOutcome? {
+        guard let gregorian = try? BikramSambatCalendar.gregorianDate(from: nepali) else { return nil }
+        return ConversionOutcome(
+            nepali: nepali,
+            gregorian: gregorian,
+            event: CalendarEventStore.events(year: nepali.year, month: nepali.month)[nepali.day]
+        )
+    }
+
     func text(for format: CopyFormat) -> String {
         switch format {
         case .nepaliNumerals:

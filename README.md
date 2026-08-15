@@ -10,13 +10,13 @@ This bootstrap implements the product shell:
 - configurable menu-bar date format
 - Settings scene using local preferences
 - pure local models and initial Swift Testing coverage
-- bundled festival, tithi, and public-holiday data for BS 1992–2084
+- bundled festival, tithi, and public-holiday data for BS 2066–2083
 
 ## Current calendar range
 
 The local BS↔AD converter supports **BS 1992–2090** (approximately AD 1935–2034).
 
-The bundled month-length table was assembled from five independently maintained open-source datasets, then checked month by month against a published Nepali calendar — 204 of 204 sampled month starts match for BS 1992–2083. Library agreement alone was not enough: for BS 2084 the majority reading matched the published calendar in only 5 of 12 months, and the minority reading was adopted after it matched all 12.
+The bundled month-length table was assembled from five independently maintained open-source datasets, then checked month by month against a published Nepali calendar — 1,115 of 1,116 month starts agree. Library agreement alone was not enough: for BS 2084 the majority reading matched the published calendar in only 5 of 12 months, and the minority reading was adopted after it matched all 12.
 
 Month lengths for **BS 2085–2090 are provisional**: Nepal's Panchanga Nirnayak Samiti publishes the official calendar only about a year ahead, so no published calendar was available to check them against. The calendar labels those months in the UI, and `BikramSambatCalendar.provisionalNepaliYears` exposes the window. See [third-party notices](THIRD_PARTY_NOTICES.md) for full provenance and the validation method.
 

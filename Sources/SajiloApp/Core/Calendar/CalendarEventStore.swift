@@ -8,7 +8,10 @@ struct CalendarEvent: Equatable, Sendable {
 
 /// Read-only bundled calendar event data.
 enum CalendarEventStore {
-    static let supportedYears = 1992...2084
+    /// Festival and tithi coverage in the bundled data. Years outside this
+    /// range are intentionally unavailable: their source files had no festival
+    /// or tithi information beyond Saturday flags the calendar already derives.
+    static let supportedYears = 2066...2083
 
     static func events(year: Int, month: Int) -> [Int: CalendarEvent] {
         guard supportedYears.contains(year), (1...12).contains(month),

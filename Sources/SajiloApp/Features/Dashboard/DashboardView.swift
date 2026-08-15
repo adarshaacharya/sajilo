@@ -4,7 +4,15 @@ import SwiftUI
 struct DashboardView: View {
     let model: AppModel
     @State private var route: DashboardRoute = .dashboard
+    /// Kept after navigating back so the detail layer can animate out with its
+    /// content intact instead of blanking mid-transition.
+    @State private var selectedDate: NepaliDate?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var isShowingDayDetail: Bool {
+        if case .dayDetail = route { return true }
+        return false
+    }
 
     var body: some View {
         // Both routes stay in the hierarchy rather than being swapped by an
@@ -17,6 +25,20 @@ struct DashboardView: View {
 
             DateConverterView(onBack: { navigate(to: .dashboard) })
                 .modifier(RouteLayer(isActive: route == .converter, edge: 1, reduceMotion: reduceMotion))
+
+            // Mounted only once a day has been picked, so the popover does not
+            // pay for a detail view nobody has opened yet.
+            if let selectedDate {
+                DayDetailView(date: selectedDate, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: isShowingDayDetail, edge: 1, reduceMotion: reduceMotion))
+            }
+
+            UpcomingEventsView(
+                events: model.upcomingEvents,
+                onBack: { navigate(to: .dashboard) },
+                onSelectDate: select(_:)
+            )
+            .modifier(RouteLayer(isActive: route == .upcoming, edge: 1, reduceMotion: reduceMotion))
         }
         .frame(width: Theme.Metric.popoverWidth)
         .background(.regularMaterial)
@@ -31,14 +53,23 @@ struct DashboardView: View {
     private var dashboard: some View {
         VStack(spacing: 0) {
             DateHeaderView(model: model)
-            MonthCalendarView(model: model)
+            MonthCalendarView(model: model, onSelectDate: select(_:))
                 .cardSection()
                 .padding(.horizontal, Theme.Space.m)
                 .padding(.top, Theme.Space.m)
-            DashboardCardsView(cards: model.visibleCards)
-                .padding(.horizontal, Theme.Space.m)
-                .padding(.vertical, Theme.Space.m)
-            ActionBarView(openConverter: { navigate(to: .converter) })
+            VStack(spacing: Theme.Space.s) {
+                if let nextEvent = model.nextEvent {
+                    NextEventRow(event: nextEvent) { navigate(to: .upcoming) }
+                }
+                DashboardCardsView(cards: model.visibleCards)
+            }
+            .padding(.horizontal, Theme.Space.m)
+            .padding(.vertical, Theme.Space.m)
+
+            ActionBarView(
+                openUpcoming: { navigate(to: .upcoming) },
+                openConverter: { navigate(to: .converter) }
+            )
         }
         .accessibilityLabel("Sajilo dashboard")
     }
@@ -46,11 +77,18 @@ struct DashboardView: View {
     private func navigate(to destination: DashboardRoute) {
         route = destination
     }
+
+    private func select(_ date: NepaliDate) {
+        selectedDate = date
+        navigate(to: .dayDetail(date))
+    }
 }
 
-private enum DashboardRoute {
+private enum DashboardRoute: Equatable {
     case dashboard
     case converter
+    case dayDetail(NepaliDate)
+    case upcoming
 }
 
 /// Presents one route of the popover. The inactive layer stays mounted so the
@@ -102,6 +140,14 @@ private struct DateHeaderView: View {
             Text(model.gregorianDate)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            if let summary = todaySummary {
+                Text(summary)
+                    .font(.nepali(12))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
         }
         .padding(Theme.Space.m)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,7 +163,15 @@ private struct DateHeaderView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             "Today: \(model.nepaliWeekday), \(model.today.day) \(model.today.englishMonthName) \(model.today.year). \(model.gregorianDate)."
+                + (todaySummary.map { " \($0)." } ?? "")
         )
+    }
+
+    /// Tithi and festival for today, joined into one line. Both come from the
+    /// bundled dataset, so nothing is inferred.
+    private var todaySummary: String? {
+        let parts = [model.todayEvent?.tithi, model.todayEvent?.name].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }
 
@@ -125,6 +179,7 @@ private struct DateHeaderView: View {
 
 private struct MonthCalendarView: View {
     let model: AppModel
+    let onSelectDate: (NepaliDate) -> Void
 
     @State private var isMovingForward = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -151,7 +206,7 @@ private struct MonthCalendarView: View {
 
             LazyVGrid(columns: Self.columns, spacing: Theme.Space.xs) {
                 ForEach(model.selectedMonth.days) { day in
-                    CalendarDayView(day: day)
+                    CalendarDayView(day: day, onSelect: onSelectDate)
                 }
             }
             .frame(height: Self.gridHeight, alignment: .top)
@@ -242,12 +297,14 @@ private struct MonthCalendarView: View {
 
 private struct CalendarDayView: View {
     let day: CalendarDay
+    let onSelect: (NepaliDate) -> Void
+
     @State private var isHovering = false
 
     var body: some View {
         if let date = day.date {
             Button {
-                // Date detail scene is the next calendar milestone.
+                onSelect(date)
             } label: {
                 VStack(spacing: 0) {
                     Text(NepaliNumerals.string(from: date.day))
@@ -271,14 +328,24 @@ private struct CalendarDayView: View {
             .buttonStyle(.plain)
             .onHover { isHovering = $0 }
             .animation(.easeOut(duration: 0.12), value: isHovering)
-            .accessibilityLabel("\(date.day) \(date.englishMonthName)\(day.isHoliday ? ", holiday" : "")")
-            .accessibilityHint(day.eventName ?? day.tithi ?? "Open date details")
+            .accessibilityLabel(accessibilityDescription(for: date))
+            .accessibilityHint("Open date details")
             .accessibilityAddTraits(day.isToday ? .isSelected : [])
         } else {
             Color.clear
                 .frame(height: Theme.Metric.dayCell)
                 .accessibilityHidden(true)
         }
+    }
+
+    /// Built in steps: the type-checker times out on a single concatenated
+    /// expression with this many optional branches.
+    private func accessibilityDescription(for date: NepaliDate) -> String {
+        var parts: [String] = ["\(date.day) \(date.englishMonthName)"]
+        if let tithi = day.tithi { parts.append(tithi) }
+        if let eventName = day.eventName { parts.append(eventName) }
+        if day.isHoliday { parts.append("public holiday") }
+        return parts.joined(separator: ", ")
     }
 
     private var foreground: AnyShapeStyle {
@@ -363,11 +430,12 @@ private struct DashboardCardView: View {
 // MARK: - Actions
 
 private struct ActionBarView: View {
+    let openUpcoming: () -> Void
     let openConverter: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
-            Button("Calendar", systemImage: "calendar") {}
+            Button("Festivals", systemImage: "sparkles", action: openUpcoming)
             Button("Convert", systemImage: "arrow.left.arrow.right", action: openConverter)
             Button("Tools", systemImage: "wrench.and.screwdriver") {}
             Button("Quit", systemImage: "power") {
@@ -409,5 +477,21 @@ private func previewDate(year: Int, month: Int, day: Int) -> Date {
 
 #Preview("Converter") {
     DateConverterView(onBack: {})
+        .frame(width: Theme.Metric.popoverWidth)
+        .background(.regularMaterial)
+}
+
+/// A day carrying a festival, tithi, and holiday flag from the bundled data.
+#Preview("Day detail") {
+    DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 1), onBack: {})
+        .frame(width: Theme.Metric.popoverWidth)
+        .background(.regularMaterial)
+}
+
+/// A day the source grid truncated, so it has no event at all.
+#Preview("Day detail — no event") {
+    DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 31), onBack: {})
+        .frame(width: Theme.Metric.popoverWidth)
+        .background(.regularMaterial)
 }
 #endif

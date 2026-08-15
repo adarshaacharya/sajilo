@@ -51,6 +51,12 @@ final class AppModel {
     var selectedMonth: CalendarMonth
     private(set) var today: NepaliDate
     private(set) var referenceDate: Date
+    /// Cached rather than computed: reading it decodes a bundled JSON file, and
+    /// the header would otherwise re-decode on every redraw.
+    private(set) var todayEvent: CalendarEvent?
+    /// Scanning ahead decodes a JSON file per month, so it runs once per day
+    /// rather than on every redraw.
+    private(set) var upcomingEvents: [UpcomingEvent] = []
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
@@ -75,6 +81,11 @@ final class AppModel {
             freshness: "Prototype data"
         )
     ]
+
+    /// The soonest festival after today, used for the dashboard teaser.
+    var nextEvent: UpcomingEvent? {
+        upcomingEvents.first
+    }
 
     var menuBarTitle: String {
         selectedMenuBarFormat.title(for: today)
@@ -125,6 +136,8 @@ final class AppModel {
         today = resolvedToday
         selectedMonth = (try? BikramSambatCalendar.month(containing: resolvedToday, today: resolvedToday))
             ?? CalendarMonth(firstDate: fallbackDate, title: "साउन २०८३", days: [])
+        todayEvent = CalendarEventStore.events(year: resolvedToday.year, month: resolvedToday.month)[resolvedToday.day]
+        upcomingEvents = UpcomingEventsService.events(from: resolvedToday)
 
         scheduleMidnightRefresh()
     }
@@ -179,6 +192,8 @@ final class AppModel {
         if let resolved = try? BikramSambatCalendar.nepaliDate(from: referenceDate) {
             today = resolved
         }
+        todayEvent = CalendarEventStore.events(year: today.year, month: today.month)[today.day]
+        upcomingEvents = UpcomingEventsService.events(from: today)
         // Rebuild the visible month so the `isToday` highlight moves even when
         // the user left the popover open on another month.
         if let month = try? BikramSambatCalendar.month(containing: selectedMonth.firstDate, today: today) {

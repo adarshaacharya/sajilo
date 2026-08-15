@@ -10,8 +10,19 @@ struct CalendarEventStoreTests {
         #expect(events[2]?.isPublicHoliday == true)
     }
 
-    @Test func returnsNoDataOutsideTheBundledRange() {
-        #expect(CalendarEventStore.events(year: 2085, month: 1).isEmpty)
+    /// Festival and tithi data only exists for BS 2066–2083. The app must
+    /// refuse dates outside that range rather than reporting "no events today"
+    /// when no data is available.
+    @Test(arguments: [1992, 2000, 2065, 2084, 2085])
+    func returnsNoDataOutsideTheFestivalRange(year: Int) {
+        #expect(CalendarEventStore.events(year: year, month: 1).isEmpty)
+    }
+
+    @Test func coversTheFullDeclaredRange() {
+        for year in CalendarEventStore.supportedYears {
+            let events = CalendarEventStore.events(year: year, month: 1)
+            #expect(!events.isEmpty, "BS \(year) is declared supported but has no data")
+        }
     }
 
     /// The leading cell of each source grid belongs to the preceding month and
@@ -33,8 +44,8 @@ struct CalendarEventStoreTests {
         (2083, 2, 31, 31),
         (2083, 4, 31, 31),
         (2083, 11, 30, 30),
-        (2084, 2, 31, 30),
-        (2084, 4, 31, 30)
+        (2082, 7, 30, 30),
+        (2081, 1, 31, 30)
     ])
     func documentsTruncatedTrailingDays(
         year: Int,
@@ -59,7 +70,7 @@ struct CalendarEventStoreTests {
     /// The gap is always a trailing run, never a hole in the middle of a month.
     /// An interior gap would mean the grid parser had drifted.
     @Test func gapsAreAlwaysTrailingNeverInterior() {
-        for year in [2082, 2083, 2084] {
+        for year in [2081, 2082, 2083] {
             for month in 1...12 {
                 guard let length = BikramSambatCalendar.daysInMonth(year: year, month: month) else { continue }
                 let events = CalendarEventStore.events(year: year, month: month)
