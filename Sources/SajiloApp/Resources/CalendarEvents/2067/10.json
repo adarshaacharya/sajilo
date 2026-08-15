@@ -1,0 +1,315 @@
+{
+  "metadata": {
+    "en": "Jan/Feb 2011",
+    "np": "माघ २०६७"
+  },
+  "days": [
+    {
+      "d": 1,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१",
+      "e": "15",
+      "t": "एकादशी",
+      "f": "माघे संक्रान्ति,देवघाट मकरस्नान",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२",
+      "e": "16",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "३",
+      "e": "17",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "४",
+      "e": "18",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "५",
+      "e": "19",
+      "t": "पुर्णिमा",
+      "f": "स्वस्थानी व्रत आरम्भ",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "६",
+      "e": "20",
+      "t": "प्रतिपदा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "७",
+      "e": "21",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "८",
+      "e": "22",
+      "t": "तृतीया",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "९",
+      "e": "23",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१०",
+      "e": "24",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "११",
+      "e": "25",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१२",
+      "e": "26",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "१३",
+      "e": "27",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१४",
+      "e": "28",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१५",
+      "e": "29",
+      "t": "दशमी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१६",
+      "e": "30",
+      "t": "द्वादशी",
+      "f": "सहिद दिवस",
+      "h": true
+    },
+    {
+      "d": 2,
+      "n": "१७",
+      "e": "31",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१८",
+      "e": "01",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१९",
+      "e": "02",
+      "t": "औशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२०",
+      "e": "03",
+      "t": "औशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२१",
+      "e": "04",
+      "t": "प्रतिपदा",
+      "f": "सोनाम ल्होछार",
+      "h": true
+    },
+    {
+      "d": 7,
+      "n": "२२",
+      "e": "05",
+      "t": "द्दितीया",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२३",
+      "e": "06",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२४",
+      "e": "07",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२५",
+      "e": "08",
+      "t": "पञ्चमी",
+      "f": "सरस्वतीपुजा श्रीपंचमी,शिक्षणसंस्था विदा",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२६",
+      "e": "09",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२७",
+      "e": "10",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२८",
+      "e": "11",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२९",
+      "e": "12",
+      "t": "नवमी",
+      "f": "",
+      "h": true
+    }
+  ],
+  "holiFest": [
+    "1 maghi Parba,Ghiu:Chaku Sanhu, Tribeni Makar snan mela, Kusmakunda sarobar mela, Smartanam Putrada Ekadashi",
+    "2 Baishanabanam Putrada Ekadashi, Musyaduli",
+    "3 Pradosh Bratam",
+    "5 Swasthani Brat Arambha, Milapunhi, Arya Diwas",
+    "9 Kashistha Bada ganesh Janma Jayanti",
+    "12 Asthami Bratam, International Bhansar Diwas",
+    "15 Smartanam Ekadashi bratam",
+    "16 Martyrs Day, Baishabanam Shadtila Ekadashi brata",
+    "17 International Tuberclosis Day",
+    "18 Lai cha:hey puja",
+    "19 Darsha Shraddam, Nashibarne",
+    "20 Snandanadau amawasya, Aryaghat Chetre madhav narayan mela, Butwal Chetre Triveni mela",
+    "21 sonal lochar, Shree Ballav Jayanti",
+    "23 Til Kund Chaturthi",
+    "25 shree panchami (Schools Holiday)",
+    "26 Skanda sasthi",
+    "27 Achala and Rath Samapti",
+    "28 bhismasthami",
+    "29 Dron Nawami<"
+  ],
+  "marriage": [
+    "७, ९, १०, १२, २४, २५ र  २९ गते"
+  ],
+  "bratabandha": [
+    "२ ,७ ,१० र २१  गते"
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "metadata": {
+    "en": "Apr/May 2021",
+    "np": "बैशाख २०७८"
+  },
+  "days": [
+    {
+      "d": 1,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१",
+      "e": "14",
+      "t": "द्दितीया",
+      "f": "नव बर्ष २०७८",
+      "h": true
+    },
+    {
+      "d": 5,
+      "n": "२",
+      "e": "15",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "३",
+      "e": "16",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "४",
+      "e": "17",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "५",
+      "e": "18",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "६",
+      "e": "19",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "७",
+      "e": "20",
+      "t": "अष्टमी",
+      "f": "चैते दशै",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "८",
+      "e": "21",
+      "t": "नवमी",
+      "f": "राम नवमी",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "९",
+      "e": "22",
+      "t": "दशमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१०",
+      "e": "23",
+      "t": "एकादशी",
+      "f": "कामदा एकादशी व्रत",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "११",
+      "e": "24",
+      "t": "द्वादशी",
+      "f": "लोकतन्त्र दिवस",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१२",
+      "e": "25",
+      "t": "त्रयोदशी",
+      "f": "महावीर जयन्ती(जैनहरुलाई बिदा)",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१३",
+      "e": "26",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१४",
+      "e": "27",
+      "t": "पुर्णिमा",
+      "f": "हनुमान जयन्ती, बालाजु बाईसधारामेला",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१५",
+      "e": "28",
+      "t": "प्रतिपदा",
+      "f": "ल पु मत्स्येन्द्रनाथ स्नान",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "१६",
+      "e": "29",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१७",
+      "e": "30",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१८",
+      "e": "01",
+      "t": "पञ्चमी",
+      "f": "अन्त्राष्ट्रिय श्रमिक दिवस",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१९",
+      "e": "02",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२०",
+      "e": "03",
+      "t": "सप्तमी",
+      "f": "अन्तर्राष्ट्रिय प्रेस स्वतन्त्रता दिवस",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२१",
+      "e": "04",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२२",
+      "e": "05",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२३",
+      "e": "06",
+      "t": "दशमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२४",
+      "e": "07",
+      "t": "एकादशी",
+      "f": "बरूथिनी एकादशी व्रत",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२५",
+      "e": "08",
+      "t": "द्वादशी",
+      "f": "रेडक्रस दिवस",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२६",
+      "e": "09",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२७",
+      "e": "10",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२८",
+      "e": "11",
+      "t": "औशी",
+      "f": "माता तिर्थ औसी, आमाको मुख हेर्ने दिन",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२९",
+      "e": "12",
+      "t": "प्रतिपदा",
+      "f": "ल.पु. मत्स्येन्द्रनाथ रथारोहण",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "३०",
+      "e": "13",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "३१",
+      "e": "14",
+      "t": "तृतीया",
+      "f": "अक्षय तृतीया",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": true
+    }
+  ],
+  "holiFest": [
+    "1 New Year 2078, Matsyanarayan Mela, Bkt. Bishwadhwojpatan (Biska Jatra)",
+    "7 Chaite Dashain, Gorakhkali Puja, Seto Matsyandranath Rath Yatra",
+    "8 Shree Ram Jayanti, Chanda Diwas, Ram Nawami Brat",
+    "9 International Earth Day",
+    "10 Kamada Ekadashi Brat",
+    "11 Loktantra Diwas",
+    "12 Mahabir Jayanti",
+    "13 National Photo Journalism Day",
+    "14 Hanuman Jayanti, Balaju Bayesdhara Mela, Lutipunhi:",
+    "15 L.P. Rato Matsyendranath Snan",
+    "18 International Labour Day",
+    "21 Gorakhkali Puja, Bhaumastami Brat",
+    "22 Rastriya Suchana Ayog Sthapana Diwas",
+    "24 Baruthini Ekadashi Brat, Kirant Samaj Sudhar Diwas",
+    "25 Redcross Day",
+    "26 Kanun Diwas",
+    "28 Matatirtha Snaan, Aama Ko mukh herne din",
+    "29 L.P. Matsyandranath Ratharohan",
+    "31 Akshyaya Tritiya, Parashuram Jayanti",
+    "Siruwa Parba (Holidays for specific religions and cultures)<"
+  ],
+  "marriage": [
+    "१०, ११, १७ र  २४ गते"
+  ],
+  "bratabandha": [
+    "यो महिना को लागी ब्रतबन्ध मुर्हुत छैन ।"
+  ]
+}

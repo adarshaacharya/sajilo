@@ -189,6 +189,15 @@ final class AppModel {
 
     static let prototype = AppModel()
 
+    #if DEBUG
+    /// A throwaway model for `#Preview`. It writes to its own defaults suite so
+    /// rendering a preview can never mutate the real settings, and takes an
+    /// explicit date so previews stay deterministic.
+    static func preview(now: Date = .now) -> AppModel {
+        AppModel(now: now, defaults: UserDefaults(suiteName: "com.sajilo.preview") ?? .standard)
+    }
+    #endif
+
     private static let nepaliWeekdayNames = [
         "आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहीबार", "शुक्रबार", "शनिबार"
     ]

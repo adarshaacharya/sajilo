@@ -10,7 +10,8 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "SajiloApp",
-            path: "Sources/SajiloApp"
+            path: "Sources/SajiloApp",
+            resources: [.copy("Resources/CalendarEvents")]
         ),
         .testTarget(
             name: "SajiloAppTests",

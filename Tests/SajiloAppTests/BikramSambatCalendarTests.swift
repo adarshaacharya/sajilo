@@ -10,7 +10,10 @@ struct BikramSambatCalendarTests {
         (1943, 4, 14, NepaliDate(year: 2000, month: 1, day: 1)),
         (2023, 4, 14, NepaliDate(year: 2080, month: 1, day: 1)),
         (2025, 4, 14, NepaliDate(year: 2082, month: 1, day: 1)),
-        (2026, 8, 15, NepaliDate(year: 2083, month: 4, day: 30))
+        (2026, 8, 15, NepaliDate(year: 2083, month: 4, day: 30)),
+        // BS 2084 is the last year checked against a published calendar; an
+        // earlier draft of this table had it wrong for seven of twelve months.
+        (2027, 4, 14, NepaliDate(year: 2084, month: 1, day: 1))
     ])
     func convertsGregorianDatesToBikramSambat(
         year: Int,

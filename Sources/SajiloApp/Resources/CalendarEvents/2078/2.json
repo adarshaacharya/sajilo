@@ -1,0 +1,310 @@
+{
+  "metadata": {
+    "en": "May/Jun 2021",
+    "np": "जेष्ठ २०७८"
+  },
+  "days": [
+    {
+      "d": 1,
+      "n": "३०",
+      "e": "13",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "३१",
+      "e": "14",
+      "t": "चतुर्थी",
+      "f": "विश्व रक्तदाता दिवस",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१",
+      "e": "15",
+      "t": "तृतीया",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२",
+      "e": "16",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "३",
+      "e": "17",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "४",
+      "e": "18",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "५",
+      "e": "19",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "६",
+      "e": "20",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "७",
+      "e": "21",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "८",
+      "e": "22",
+      "t": "एकादशी",
+      "f": "मोहिनी एकादशी",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "९",
+      "e": "23",
+      "t": "द्वादशी",
+      "f": "à¤µà¥ˆà¤·à¥à¤£à¤µà¤¹à¤°à¥‚à¤•à¥‹ à¤®à¥‹à¤¹à¤¿à¤¨à¥€ à¤à¤•à¤¾à¤¦à¤¶à¥€à¤µà¥à¤°à¤¤",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१०",
+      "e": "24",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "११",
+      "e": "25",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१२",
+      "e": "26",
+      "t": "पुर्णिमा",
+      "f": "बुद्ध जयन्ती, उभौली पर्व",
+      "h": true
+    },
+    {
+      "d": 5,
+      "n": "१३",
+      "e": "27",
+      "t": "प्रतिपदा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१४",
+      "e": "28",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१५",
+      "e": "29",
+      "t": "तृतीया",
+      "f": "गणतन्त्र दिवस",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१६",
+      "e": "30",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१७",
+      "e": "31",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१८",
+      "e": "01",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१९",
+      "e": "02",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२०",
+      "e": "03",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२१",
+      "e": "04",
+      "t": "नवमी",
+      "f": "भेदभाव उन्मुलन दिवस",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२२",
+      "e": "05",
+      "t": "दशमी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२३",
+      "e": "06",
+      "t": "एकादशी",
+      "f": "अपरा एकादशी",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२४",
+      "e": "07",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२५",
+      "e": "08",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२६",
+      "e": "09",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२७",
+      "e": "10",
+      "t": "औशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२८",
+      "e": "11",
+      "t": "प्रतिपदा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२९",
+      "e": "12",
+      "t": "द्दितीया",
+      "f": "",
+      "h": true
+    }
+  ],
+  "holiFest": [
+    "1 L.P. Matsyandranath Rathyatrarambha",
+    "6 Sita Jayanti, Gorakhkali Puja",
+    "8 Smartaharuko Mohini Ekadashi Brat",
+    "9 Baishnabharuko Mohini Ekadashi Brat",
+    "11 Narsinha Jayanti, Syanjalasargha Aalamdevi Puja",
+    "12 Gautam Buddha Jayanti, Kirant, Rai, Yakhya, Sunuwar, Limbu peoples Urvyauli parba, Chandi Purnima(Holiday only for related religion, culture, geography and location), Baisakh Snan Samapti",
+    "15 Ganatantra Diwas",
+    "19 Gorakhkali Puja",
+    "21 Jatiya Bhedbhab tatha chuwachut unmulan rastriya diwas",
+    "23 Apara Ekadashi Brat",
+    "28 Gosaikunda Snanarambha, Dashahara Snanarambha",
+    "*  Eid (Eid-ul-Fitr) for Muslims (Holiday for related religion, culture)",
+    "* L.P. Rato Matsyandranathko bhoto dekhaune jatra (Holiday Only for Ktm.)",
+    "1"
+  ],
+  "marriage": [
+    "७, ८, १०, १५, २०, २१ र  २२ गते"
+  ],
+  "bratabandha": [
+    "९  गते"
+  ]
+}

@@ -8,22 +8,24 @@ enum BikramSambatCalendar {
         var errorDescription: String? {
             switch self {
             case .unsupportedGregorianDate:
-                "This Gregorian date is outside Sajilo\u{2019}s bundled calendar range."
+                "This Gregorian date is outside Sajilo’s bundled calendar range."
             case .unsupportedNepaliDate:
-                "This Bikram Sambat date is outside Sajilo\u{2019}s bundled calendar range."
+                "This Bikram Sambat date is outside Sajilo’s bundled calendar range."
             }
         }
     }
 
-    /// BS 1992\u{2013}2099, roughly AD 1935\u{2013}2043.
-    static let supportedNepaliYears = 1992...2099
+    /// BS 1992–2090, roughly AD 1935–2034.
+    static let supportedNepaliYears = 1992...2090
 
-    /// Nepal\u{2019}s Panchanga Nirnayak Samiti publishes the official calendar
-    /// only about a year ahead, so month lengths from BS 2084 on are the
-    /// consensus of the source libraries rather than published fact. The
-    /// bundled sources disagree here; treat these years as provisional and
-    /// re-verify each one as it is officially published.
-    static let provisionalNepaliYears = 2084...2099
+    /// Nepal’s Panchanga Nirnayak Samiti publishes the official calendar
+    /// only about a year ahead. Every year through BS 2084 was checked against
+    /// a published calendar month by month; BS 2085 onward was not, and the
+    /// source datasets genuinely disagree there — in some years even on
+    /// whether the year runs 365 or 366 days. Re-verify each against the
+    /// official calendar as it is published, and extend the supported range
+    /// only with the same check, never on library agreement alone.
+    static let provisionalNepaliYears = 2085...2090
 
     private static let timeZone = TimeZone(identifier: "Asia/Kathmandu")!
     private static let gregorian: Calendar = {
@@ -38,7 +40,7 @@ enum BikramSambatCalendar {
     private static let epoch = gregorian.date(from: DateComponents(year: 1935, month: 4, day: 13))!
 
     /// Month lengths in days, one row per year from `supportedNepaliYears`.
-    /// Bikram Sambat months run 29\u{2013}32 days with no closed-form rule, so the
+    /// Bikram Sambat months run 29–32 days with no closed-form rule, so the
     /// table is bundled data rather than computed.
     private static let monthLengths: [[Int]] = [
         [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], // 1992
@@ -133,22 +135,13 @@ enum BikramSambatCalendar {
         [31, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], // 2081
         [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2082
         [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2083
-        [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], // 2084
-        [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], // 2085
-        [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2086
-        [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], // 2087
-        [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], // 2088
-        [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 29, 31], // 2089
-        [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2090
-        [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], // 2091
-        [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], // 2092
-        [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 29, 31], // 2093
-        [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2094
-        [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], // 2095
-        [31, 32, 31, 32, 31, 30, 30, 30, 29, 29, 30, 31], // 2096
-        [31, 31, 31, 32, 31, 31, 29, 30, 30, 29, 30, 30], // 2097
-        [31, 31, 32, 31, 31, 31, 30, 29, 30, 29, 30, 30], // 2098
-        [31, 31, 32, 32, 31, 30, 30, 29, 30, 29, 30, 30], // 2099
+        [31, 31, 32, 31, 31, 30, 30, 30, 29, 30, 30, 30], // 2084
+        [31, 32, 31, 32, 30, 31, 30, 30, 29, 30, 30, 30], // 2085
+        [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], // 2086
+        [31, 31, 32, 31, 31, 31, 30, 30, 29, 30, 30, 30], // 2087
+        [30, 31, 32, 32, 30, 31, 30, 30, 29, 30, 30, 30], // 2088
+        [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], // 2089
+        [30, 32, 31, 32, 31, 30, 30, 30, 29, 30, 30, 30], // 2090
     ]
 
     /// Days elapsed from the epoch to the first day of each supported year,
@@ -226,6 +219,7 @@ enum BikramSambatCalendar {
         let firstDate = NepaliDate(year: date.year, month: date.month, day: 1)
         let firstGregorianDate = try gregorianDate(from: firstDate)
         let leadingDays = gregorian.component(.weekday, from: firstGregorianDate) - 1
+        let sourceEvents = CalendarEventStore.events(year: date.year, month: date.month)
 
         let blankDays = (0..<leadingDays).map { offset in
             CalendarDay(
@@ -234,21 +228,23 @@ enum BikramSambatCalendar {
                 adDay: nil,
                 isToday: false,
                 isHoliday: false,
-                eventName: nil
+                eventName: nil,
+                tithi: nil
             )
         }
         let numberedDays = (1...numberOfDays).map { day in
             let bsDate = NepaliDate(year: date.year, month: date.month, day: day)
             let adDate = try? gregorianDate(from: bsDate)
+            let sourceEvent = sourceEvents[day]
             return CalendarDay(
                 id: "\(date.year)-\(date.month)-\(day)",
                 date: bsDate,
                 adDay: adDate.map { gregorian.component(.day, from: $0) },
                 isToday: bsDate == today,
-                // Saturday is Nepal\u{2019}s weekly public holiday. Festival and
-                // named-holiday marking waits on the versioned dataset.
-                isHoliday: adDate.map { gregorian.component(.weekday, from: $0) == 7 } ?? false,
-                eventName: nil
+                isHoliday: (adDate.map { gregorian.component(.weekday, from: $0) == 7 } ?? false)
+                    || (sourceEvent?.isPublicHoliday ?? false),
+                eventName: sourceEvent?.name,
+                tithi: sourceEvent?.tithi
             )
         }
 

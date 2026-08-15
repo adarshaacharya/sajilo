@@ -183,6 +183,12 @@ private struct CalendarDayView: View {
                             .font(.system(size: 9))
                             .opacity(0.6)
                     }
+                    if day.eventName != nil {
+                        Circle()
+                            .fill(day.isToday ? .white : Theme.Palette.brand)
+                            .frame(width: 3, height: 3)
+                            .accessibilityHidden(true)
+                    }
                 }
                 .foregroundStyle(foreground)
                 .frame(maxWidth: .infinity, minHeight: Theme.Metric.dayCell)
@@ -192,7 +198,7 @@ private struct CalendarDayView: View {
             .onHover { isHovering = $0 }
             .animation(.easeOut(duration: 0.12), value: isHovering)
             .accessibilityLabel("\(date.day) \(date.englishMonthName)\(day.isHoliday ? ", holiday" : "")")
-            .accessibilityHint(day.eventName ?? "Open date details")
+            .accessibilityHint(day.eventName ?? day.tithi ?? "Open date details")
             .accessibilityAddTraits(day.isToday ? .isSelected : [])
         } else {
             Color.clear

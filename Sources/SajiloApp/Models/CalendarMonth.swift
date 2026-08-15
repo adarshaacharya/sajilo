@@ -9,6 +9,7 @@ struct CalendarDay: Identifiable, Equatable, Sendable {
     /// Saturday today; extended by the versioned holiday dataset later.
     let isHoliday: Bool
     let eventName: String?
+    let tithi: String?
 
     var day: Int? { date?.day }
 }

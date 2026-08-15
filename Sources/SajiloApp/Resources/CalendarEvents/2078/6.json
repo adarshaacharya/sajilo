@@ -1,0 +1,313 @@
+{
+  "metadata": {
+    "en": "Sep/Oct 2021",
+    "np": "असोज २०७८"
+  },
+  "days": [
+    {
+      "d": 1,
+      "n": "३१",
+      "e": "17",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१",
+      "e": "17",
+      "t": "एकादशी",
+      "f": "विश्वकर्मा पूजा, हरिपरिवर्तनी एकादशी",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२",
+      "e": "18",
+      "t": "द्वादशी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "३",
+      "e": "19",
+      "t": "चतुर्दशी",
+      "f": "संविधान दिवस (राष्ट्रिय दिवस)",
+      "h": true
+    },
+    {
+      "d": 2,
+      "n": "४",
+      "e": "20",
+      "t": "पुर्णिमा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "५",
+      "e": "21",
+      "t": "प्रतिपदा",
+      "f": "सोह्रश्राद्ध आरम्भ",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "६",
+      "e": "22",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "७",
+      "e": "23",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "८",
+      "e": "24",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "९",
+      "e": "25",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१०",
+      "e": "26",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "११",
+      "e": "27",
+      "t": "षष्ठी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१२",
+      "e": "28",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१३",
+      "e": "29",
+      "t": "अष्टमी",
+      "f": "à¤œà¤¿à¤¤à¥€à¤¯à¤¾ à¤ªà¤°à¥à¤µ(à¤®à¤¨à¤¾à¤‰à¤¨à¥‡à¤•à¤¾ à¤²à¤¾à¤—à¤¿  à¤¬à¤¿à¤¦à¤¾)",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "१४",
+      "e": "30",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१५",
+      "e": "01",
+      "t": "दशमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१६",
+      "e": "02",
+      "t": "एकादशी",
+      "f": "इन्दिरा एकादशी",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१७",
+      "e": "03",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१८",
+      "e": "04",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१९",
+      "e": "05",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२०",
+      "e": "06",
+      "t": "औशी",
+      "f": "à¤¸à¥‹à¤¹à¥à¤°à¤¶à¥à¤°à¤¾à¤¦à¥à¤§ à¤¸à¤®à¤¾à¤ªà¥à¤¤à¤¿",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२१",
+      "e": "07",
+      "t": "प्रतिपदा",
+      "f": "घटस्थापना, नवरात्री आरम्भ",
+      "h": true
+    },
+    {
+      "d": 6,
+      "n": "२२",
+      "e": "08",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२३",
+      "e": "09",
+      "t": "तृतीया",
+      "f": "हुलाक दिवस",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२४",
+      "e": "10",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२५",
+      "e": "11",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२६",
+      "e": "12",
+      "t": "सप्तमी",
+      "f": "फूलपाती, नवपत्रिका प्रवेश",
+      "h": true
+    },
+    {
+      "d": 4,
+      "n": "२७",
+      "e": "13",
+      "t": "अष्टमी",
+      "f": "महाअष्ठमी, काल रात्री",
+      "h": true
+    },
+    {
+      "d": 5,
+      "n": "२८",
+      "e": "14",
+      "t": "नवमी",
+      "f": "महानवमी",
+      "h": true
+    },
+    {
+      "d": 6,
+      "n": "२९",
+      "e": "15",
+      "t": "दशमी",
+      "f": "बिजया दशमी, दशैंको टिका २०७८",
+      "h": true
+    },
+    {
+      "d": 7,
+      "n": "३०",
+      "e": "16",
+      "t": "एकादशी",
+      "f": "पापांकुश एकादशी",
+      "h": true
+    }
+  ],
+  "holiFest": [
+    "1 Hariparwartini Ekadashi Brat, Bishwakarma Puja, Bastu Diwas",
+    "2 Indradhwojothan",
+    "3 Sambidhan Diwas (Rastriya Diwas), Kumari Indrajatra, Ananta Chaturdashi",
+    "4 Ynanya:Punhi, Chepang Chonam Parba",
+    "5 Sohra Shradda, Pratipadashradda",
+    "8 Indradhwojpatan, Nanichaya, Chaturdashi Shradda",
+    "11 Paryatan Diwas, Saptami Shradda",
+    "13 Jitiya Parba (Holiday for those women who celebrates), Astami Brat, Gorakhkali Puja",
+    "16 Indira Ekadashi Brat, Ekadashi Shradda",
+    "18 Trayodashi Shradda, Jumla Khalanga Chandan Nath ko Lingo Thadyaune",
+    "20 Darsha Shradda, Aunshi Shradda, Pitri Bisarjan, Sohra Shradda Samapti",
+    "21 Ghatasthapana, Nawa Ratri Aarambha",
+    "26 Phulpati, Nawapatrika Prabesh",
+    "27 Mahaastami Brat, Kaal Ratri, Gorakhkali Puja",
+    "28 Mahanawami",
+    "29 Bijayadashami, Dashainko Tika 2078 2021",
+    "30 Papangkusha Ekadashi Brat, Annapurna Yatra, Asan Chaln1"
+  ],
+  "marriage": [
+    "यो महिना को लागी विवाह मुर्हुत छैन ।"
+  ],
+  "bratabandha": [
+    "यो महिना को लागी ब्रतबन्ध मुर्हुत छैन ।"
+  ]
+}

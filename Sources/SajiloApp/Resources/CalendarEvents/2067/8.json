@@ -1,0 +1,314 @@
+{
+  "metadata": {
+    "en": "Nov/Dec 2010",
+    "np": "मंसिर २०६७"
+  },
+  "days": [
+    {
+      "d": 1,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१",
+      "e": "17",
+      "t": "एकादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२",
+      "e": "18",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "३",
+      "e": "19",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "४",
+      "e": "20",
+      "t": "चतुर्दशी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "५",
+      "e": "21",
+      "t": "पुर्णिमा",
+      "f": "गुरुनानक जयन्ती",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "६",
+      "e": "22",
+      "t": "प्रतिपदा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "७",
+      "e": "23",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "८",
+      "e": "24",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "९",
+      "e": "25",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१०",
+      "e": "26",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "११",
+      "e": "27",
+      "t": "षष्ठी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१२",
+      "e": "28",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "१३",
+      "e": "29",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "१४",
+      "e": "30",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "१५",
+      "e": "01",
+      "t": "दशमी",
+      "f": "बिश्व एडस दिवस",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "१६",
+      "e": "02",
+      "t": "द्वादशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "१७",
+      "e": "03",
+      "t": "त्रयोदशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "१८",
+      "e": "04",
+      "t": "चतुर्दशी",
+      "f": "अपाङ्ग दिवस,बाल चतुर्दशी सतविजरोपाणं",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "१९",
+      "e": "05",
+      "t": "औशी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२०",
+      "e": "06",
+      "t": "प्रतिपदा",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२१",
+      "e": "07",
+      "t": "द्दितीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२२",
+      "e": "08",
+      "t": "तृतीया",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "२३",
+      "e": "09",
+      "t": "चतुर्थी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "२४",
+      "e": "10",
+      "t": "पञ्चमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "२५",
+      "e": "11",
+      "t": "षष्ठी",
+      "f": "",
+      "h": true
+    },
+    {
+      "d": 1,
+      "n": "२६",
+      "e": "12",
+      "t": "सप्तमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 2,
+      "n": "२७",
+      "e": "13",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 3,
+      "n": "२८",
+      "e": "14",
+      "t": "अष्टमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 4,
+      "n": "२९",
+      "e": "15",
+      "t": "नवमी",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 5,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 6,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": false
+    },
+    {
+      "d": 7,
+      "n": "",
+      "e": "",
+      "t": "",
+      "f": "",
+      "h": true
+    }
+  ],
+  "holiFest": [
+    "1 Khotange barah pokhari mela, Haribodhini ekadashi bratam, Tulashi bibah",
+    "2 Changunarayan Akhandadeep Darshanam Ruru(ridi) mela",
+    "3 Prodosh Brat, Palpa mahakali Bhagwati yatra",
+    "4 Baikuntha Chaturdashi, International Children right day",
+    "5 Sakimanipunhi, Guru nanak jayanti, World TV day",
+    "6 Krijatidhyardanam, Sthankote mahalaxmi Yatra",
+    "12 Rabi saptami, Sayam bhairabopatti:",
+    "15 Guhyaswori yatra, World AIDS day",
+    "Smartanam Upatika Ekadashi Bratam",
+    "16 International Labor End day, Baishabanam Upatika Ekadashi Brat",
+    "17 halise (Khotange) Mahadev Mela, International Disability Day(Disabled Employee Holiday)",
+    "18 Baal Chaturdashi(Shatbijropanam)",
+    "19 International Helper Day",
+    "21 International Civil Airline Day",
+    "24 Bibah Panchami, World Human Right day",
+    "26 Rabi Saptami Bratam",
+    "28 Bakhun Mad: Asthami",
+    "29 Panga Baishnabi Deviko Jatra1"
+  ],
+  "marriage": [
+    "६, ७, १२, २२ र  २९ गते"
+  ],
+  "bratabandha": [
+    "यो महिना को लागी ब्रतबन्ध मुर्हुत छैन ।"
+  ]
+}
