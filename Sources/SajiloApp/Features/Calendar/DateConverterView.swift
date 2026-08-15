@@ -88,9 +88,7 @@ struct DateConverterView: View {
 
             Spacer(minLength: 0)
         }
-        .padding(Theme.Space.m)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Palette.brandWash)
+        .routeHeader()
     }
 
 

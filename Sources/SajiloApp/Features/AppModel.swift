@@ -34,6 +34,13 @@ final class AppModel {
         static let menuBarFormat = "menuBarFormat"
         static let weatherEnabled = "weatherEnabled"
         static let forexEnabled = "forexEnabled"
+        static let weatherLocation = "weatherLocation"
+
+        /// Cached per location, so switching cities never shows one city's
+        /// reading under another's name, and switching back keeps the old one.
+        static func weatherCache(for location: WeatherLocation) -> String {
+            "weatherCache.\(location.rawValue)"
+        }
     }
 
     var selectedMenuBarFormat: MenuBarFormat {
@@ -48,6 +55,18 @@ final class AppModel {
         didSet { defaults.set(isForexEnabled, forKey: DefaultsKey.forexEnabled) }
     }
 
+    var selectedWeatherLocation: WeatherLocation {
+        didSet {
+            guard oldValue != selectedWeatherLocation else { return }
+            defaults.set(selectedWeatherLocation.rawValue, forKey: DefaultsKey.weatherLocation)
+            // Swap to that city's cache immediately so the card never shows the
+            // previous city's numbers under the new name, then refresh.
+            weather = Self.readWeatherCache(from: defaults, location: selectedWeatherLocation)
+            weatherError = nil
+            Task { [weak self] in await self?.refreshWeatherIfStale() }
+        }
+    }
+
     var selectedMonth: CalendarMonth
     private(set) var today: NepaliDate
     private(set) var referenceDate: Date
@@ -57,30 +76,16 @@ final class AppModel {
     /// Scanning ahead decodes a JSON file per month, so it runs once per day
     /// rather than on every redraw.
     private(set) var upcomingEvents: [UpcomingEvent] = []
+    private(set) var weather: WeatherSnapshot?
+    private(set) var isWeatherLoading = false
+    private(set) var weatherError: String?
 
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let weatherProvider: any WeatherProviding
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
+    @ObservationIgnored private var weatherTimerTask: Task<Void, Never>?
 
-    let cards: [DashboardCard] = [
-        DashboardCard(
-            id: "weather",
-            kind: .weather,
-            title: "Kathmandu",
-            primaryValue: "27°",
-            detail: "Mostly clear · H 29° L 21°",
-            symbol: "sun.max.fill",
-            freshness: "Prototype data"
-        ),
-        DashboardCard(
-            id: "forex",
-            kind: .forex,
-            title: "USD / NPR",
-            primaryValue: "152.39",
-            detail: "Buy · Sell 152.99",
-            symbol: "dollarsign.circle.fill",
-            freshness: "Prototype data"
-        )
-    ]
+    var cards: [DashboardCard] { [weatherCard, Self.forexCard] }
 
     /// The soonest festival after today, used for the dashboard teaser.
     var nextEvent: UpcomingEvent? {
@@ -120,8 +125,14 @@ final class AppModel {
         Self.nepaliWeekdayNames[Self.nepalCalendar.component(.weekday, from: referenceDate) - 1]
     }
 
-    init(now: Date = .now, defaults: UserDefaults = .standard) {
+    init(
+        now: Date = .now,
+        defaults: UserDefaults = .standard,
+        weatherProvider: any WeatherProviding = OpenMeteoWeatherProvider(),
+        autoLoadWeather: Bool = true
+    ) {
         self.defaults = defaults
+        self.weatherProvider = weatherProvider
         referenceDate = now
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
@@ -130,6 +141,10 @@ final class AppModel {
         // user who disables a card keeps it disabled across relaunches.
         isWeatherEnabled = defaults.object(forKey: DefaultsKey.weatherEnabled) as? Bool ?? true
         isForexEnabled = defaults.object(forKey: DefaultsKey.forexEnabled) as? Bool ?? true
+        let location = defaults.string(forKey: DefaultsKey.weatherLocation)
+            .flatMap(WeatherLocation.init(rawValue:)) ?? .default
+        selectedWeatherLocation = location
+        weather = Self.readWeatherCache(from: defaults, location: location)
 
         let fallbackDate = NepaliDate(year: 2083, month: 4, day: 30)
         let resolvedToday = (try? BikramSambatCalendar.nepaliDate(from: now)) ?? fallbackDate
@@ -140,10 +155,17 @@ final class AppModel {
         upcomingEvents = UpcomingEventsService.events(from: resolvedToday)
 
         scheduleMidnightRefresh()
+        if autoLoadWeather {
+            startWeatherRefreshTimer()
+            Task { [weak self] in
+                await self?.refreshWeatherIfStale()
+            }
+        }
     }
 
     deinit {
         midnightTask?.cancel()
+        weatherTimerTask?.cancel()
     }
 
     func moveMonth(by direction: Int) {
@@ -157,6 +179,75 @@ final class AppModel {
     func jumpToToday() {
         guard let month = try? BikramSambatCalendar.month(containing: today, today: today) else { return }
         selectedMonth = month
+    }
+
+    // MARK: - Weather
+
+    /// PRD §5.4 targets a refresh every 30–60 minutes.
+    static let weatherStaleInterval: TimeInterval = 30 * 60
+
+    /// Whether the cached reading has aged past the refresh target. No cache at
+    /// all counts as stale, so the first popover open fetches.
+    var isWeatherStale: Bool {
+        guard let weather else { return true }
+        return Date.now.timeIntervalSince(weather.fetchedAt) >= Self.weatherStaleInterval
+    }
+
+    /// Called when the popover opens. Cheap when the cache is warm, so opening
+    /// the panel repeatedly does not hammer the provider.
+    func refreshWeatherIfStale() async {
+        guard isWeatherEnabled, isWeatherStale else { return }
+        await refreshWeather()
+    }
+
+    /// Refreshes the Kathmandu weather card. A cached result stays visible
+    /// while the request runs, so a slow connection never turns the dashboard
+    /// into an empty loading state.
+    func refreshWeather() async {
+        guard !isWeatherLoading else { return }
+        isWeatherLoading = true
+        weatherError = nil
+        defer { isWeatherLoading = false }
+
+        do {
+            let requested = selectedWeatherLocation
+            let result = try await weatherProvider.currentWeather(at: requested)
+            // The user may have switched cities mid-request; a late reply for
+            // the previous one must not overwrite the current card.
+            guard requested == selectedWeatherLocation else { return }
+            weather = result
+            defaults.set(try? JSONEncoder().encode(result), forKey: DefaultsKey.weatherCache(for: requested))
+        } catch {
+            weatherError = Self.weatherErrorText(for: error)
+        }
+    }
+
+    /// A background refresh so a popover left closed for hours still opens on
+    /// something recent. It only fires the request when the cache is actually
+    /// stale, so the cost is a wakeup, not a network call.
+    private func startWeatherRefreshTimer() {
+        weatherTimerTask?.cancel()
+        weatherTimerTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(Self.weatherStaleInterval))
+                guard !Task.isCancelled, let self else { return }
+                await self.refreshWeatherIfStale()
+            }
+        }
+    }
+
+    private static func weatherErrorText(for error: any Error) -> String {
+        guard let urlError = error as? URLError else { return "Unable to refresh weather" }
+        switch urlError.code {
+        case .notConnectedToInternet, .dataNotAllowed:
+            return "No internet connection"
+        case .timedOut:
+            return "Weather request timed out"
+        case .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed:
+            return "Cannot reach the weather service"
+        default:
+            return "Unable to refresh weather"
+        }
     }
 
     // MARK: - Date rollover
@@ -208,8 +299,25 @@ final class AppModel {
     /// A throwaway model for `#Preview`. It writes to its own defaults suite so
     /// rendering a preview can never mutate the real settings, and takes an
     /// explicit date so previews stay deterministic.
+    /// A preview model already holding a reading, so the weather previews can
+    /// render every sky and condition without touching the network.
+    static func previewWeather(_ snapshot: WeatherSnapshot) -> AppModel {
+        let model = preview()
+        model.applyPreviewWeather(snapshot)
+        return model
+    }
+
+    private func applyPreviewWeather(_ snapshot: WeatherSnapshot) {
+        weather = snapshot
+        selectedWeatherLocation = snapshot.location
+    }
+
     static func preview(now: Date = .now) -> AppModel {
-        AppModel(now: now, defaults: UserDefaults(suiteName: "com.sajilo.preview") ?? .standard)
+        AppModel(
+            now: now,
+            defaults: UserDefaults(suiteName: "com.sajilo.preview") ?? .standard,
+            autoLoadWeather: false
+        )
     }
     #endif
 
@@ -230,4 +338,73 @@ final class AppModel {
         formatter.dateFormat = "EEEE, MMMM d, yyyy"
         return formatter
     }()
+
+    private var weatherCard: DashboardCard {
+        if let weather {
+            return DashboardCard(
+                id: "weather",
+                kind: .weather,
+                title: weather.location.displayName,
+                primaryValue: weather.temperatureText,
+                detail: "\(weather.condition.title) · \(weather.rangeText)",
+                symbol: weather.condition.symbolName,
+                freshness: isWeatherLoading ? "Refreshing…" : Self.freshnessText(for: weather.observedAt)
+            )
+        }
+
+        return DashboardCard(
+            id: "weather",
+            kind: .weather,
+            title: selectedWeatherLocation.displayName,
+            primaryValue: isWeatherLoading ? "Loading…" : "Unavailable",
+            detail: weatherError ?? "Tap to refresh",
+            symbol: "cloud.fill",
+            freshness: isWeatherLoading ? "Contacting the weather service" : "Tap to try again"
+        )
+    }
+
+    private static let forexCard = DashboardCard(
+        id: "forex",
+        kind: .forex,
+        title: "USD / NPR",
+        primaryValue: "152.39",
+        detail: "Buy · Sell 152.99",
+        symbol: "dollarsign.circle.fill",
+        freshness: "Prototype data"
+    )
+
+    private static func readWeatherCache(
+        from defaults: UserDefaults,
+        location: WeatherLocation
+    ) -> WeatherSnapshot? {
+        guard let data = defaults.data(forKey: DefaultsKey.weatherCache(for: location)),
+              let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data),
+              // Belt and braces: a key collision or an older cache format must
+              // never surface another city's reading.
+              snapshot.location == location else {
+            return nil
+        }
+        return snapshot
+    }
+
+    /// PRD §6 requires cached data to be labelled with its age, so this has to
+    /// keep resolving past an hour — otherwise a day-old reading and a
+    /// 61-minute-old one are presented identically.
+    static func freshnessText(for date: Date, now: Date = .now) -> String {
+        let minutes = Int(now.timeIntervalSince(date) / 60)
+        switch minutes {
+        case ..<1: return "Updated just now"
+        case 1: return "Updated 1 min ago"
+        case 2..<60: return "Updated \(minutes) min ago"
+        default: break
+        }
+
+        let hours = minutes / 60
+        switch hours {
+        case 1: return "Updated 1 hour ago"
+        case 2..<24: return "Updated \(hours) hours ago"
+        case 24..<48: return "Updated yesterday"
+        default: return "Updated \(hours / 24) days ago"
+        }
+    }
 }

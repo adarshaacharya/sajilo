@@ -39,9 +39,27 @@ struct DashboardView: View {
                 onSelectDate: select(_:)
             )
             .modifier(RouteLayer(isActive: route == .upcoming, edge: 1, reduceMotion: reduceMotion))
+
+            SettingsView(model: model, onBack: { navigate(to: .dashboard) })
+                .modifier(RouteLayer(isActive: route == .settings, edge: 1, reduceMotion: reduceMotion))
+
+            WeatherDetailView(
+                model: model,
+                isActive: route == .weather,
+                onBack: { navigate(to: .dashboard) }
+            )
+            .modifier(RouteLayer(isActive: route == .weather, edge: 1, reduceMotion: reduceMotion))
         }
         .frame(width: Theme.Metric.popoverWidth)
-        .background(.regularMaterial)
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
+                .overlay(Theme.Palette.canvas)
+        }
+        // PRD §5.4: refresh on popover open when the cached reading is stale.
+        // `MenuBarExtra` builds this view each time the panel opens, so the
+        // task runs per open and no-ops while the cache is warm.
+        .task { await model.refreshWeatherIfStale() }
         .animation(reduceMotion ? nil : .snappy(duration: 0.3), value: route)
         // Escape backs out of a route before the system closes the popover.
         .onExitCommand {
@@ -52,7 +70,7 @@ struct DashboardView: View {
 
     private var dashboard: some View {
         VStack(spacing: 0) {
-            DateHeaderView(model: model)
+            DateHeaderView(model: model, openSettings: { navigate(to: .settings) })
             MonthCalendarView(model: model, onSelectDate: select(_:))
                 .cardSection()
                 .padding(.horizontal, Theme.Space.m)
@@ -61,7 +79,14 @@ struct DashboardView: View {
                 if let nextEvent = model.nextEvent {
                     NextEventRow(event: nextEvent) { navigate(to: .upcoming) }
                 }
-                DashboardCardsView(cards: model.visibleCards)
+                DashboardCardsView(
+                    cards: model.visibleCards,
+                    weather: model.weather,
+                    // Paused unless the dashboard itself is showing, so the
+                    // card stops animating behind the other routes.
+                    isActive: route == .dashboard,
+                    openWeather: { navigate(to: .weather) }
+                )
             }
             .padding(.horizontal, Theme.Space.m)
             .padding(.vertical, Theme.Space.m)
@@ -89,6 +114,8 @@ private enum DashboardRoute: Equatable {
     case converter
     case dayDetail(NepaliDate)
     case upcoming
+    case settings
+    case weather
 }
 
 /// Presents one route of the popover. The inactive layer stays mounted so the
@@ -118,13 +145,17 @@ private struct RouteLayer: ViewModifier {
 /// element on screen; everything else is supporting detail (PRD §4.2).
 private struct DateHeaderView: View {
     let model: AppModel
+    let openSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
             HStack(alignment: .firstTextBaseline, spacing: Theme.Space.s) {
+                // Deliberately not the accent. At 40pt this is already the
+                // largest element on the surface, so tinting it too says
+                // "today" twice and leaves the accent with nothing to mark.
                 Text(NepaliNumerals.string(from: model.today.day))
                     .font(.nepali(Theme.Metric.heroNumeral, weight: .bold))
-                    .foregroundStyle(Theme.Palette.brand)
+                    .foregroundStyle(.primary)
 
                 VStack(alignment: .leading, spacing: Theme.Space.xxs) {
                     Text("\(model.today.nepaliMonthName) \(NepaliNumerals.string(from: model.today.year))")
@@ -139,6 +170,7 @@ private struct DateHeaderView: View {
 
             Text(model.gregorianDate)
                 .font(.caption)
+                .tracking(0.4)
                 .foregroundStyle(.secondary)
 
             if let summary = todaySummary {
@@ -149,22 +181,23 @@ private struct DateHeaderView: View {
                     .truncationMode(.tail)
             }
         }
-        .padding(Theme.Space.m)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.Palette.brandWash)
+        // Grouped before the overlay is added: `.combine` collapses everything
+        // beneath it into a single element, so a settings button added earlier
+        // would stop being reachable as its own control under VoiceOver.
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            "Today: \(model.nepaliWeekday), \(model.today.day) \(model.today.englishMonthName) \(model.today.year). \(model.gregorianDate)."
+                + (todaySummary.map { " \($0)." } ?? "")
+        )
+        .routeHeader()
         .overlay(alignment: .topTrailing) {
-            SettingsLink {
+            Button(action: openSettings) {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(IconButtonStyle())
             .padding(Theme.Space.s)
             .accessibilityLabel("Open Settings")
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(
-            "Today: \(model.nepaliWeekday), \(model.today.day) \(model.today.englishMonthName) \(model.today.year). \(model.gregorianDate)."
-                + (todaySummary.map { " \($0)." } ?? "")
-        )
     }
 
     /// Tithi and festival for today, joined into one line. Both come from the
@@ -225,6 +258,19 @@ private struct MonthCalendarView: View {
             }
         }
         .focusable()
+        .focused($isFocused)
+        // AppKit's default focus ring lands on the focusable region rather than
+        // the card, so it wrapped the header and first row only and read as a
+        // rendering fault. The ring is replaced below with one that follows the
+        // card — keyboard users still get an indicator, it just fits.
+        .focusEffectDisabled()
+        .overlay {
+            RoundedRectangle(cornerRadius: Theme.Radius.card)
+                .strokeBorder(Theme.Palette.brand, lineWidth: 1.5)
+                .padding(-Theme.Space.m)
+                .opacity(isFocused ? 0.55 : 0)
+        }
+        .animation(.easeOut(duration: 0.12), value: isFocused)
         .onKeyPress(.leftArrow) {
             move(by: -1)
             return .handled
@@ -312,12 +358,17 @@ private struct CalendarDayView: View {
                     if let adDay = day.adDay {
                         Text(verbatim: "\(adDay)")
                             .font(.system(size: 9))
-                            .opacity(0.6)
+                            .opacity(0.75)
                     }
                     if day.eventName != nil {
+                        // Roughly a third of days carry a festival, so an
+                        // accent dot on each would repaint the whole grid and
+                        // undo the point of demoting the accent. The marker
+                        // inherits the cell's own colour instead.
                         Circle()
-                            .fill(day.isToday ? .white : Theme.Palette.brand)
+                            .fill(.secondary)
                             .frame(width: 3, height: 3)
+                            .opacity(day.isToday ? 0.9 : 0.55)
                             .accessibilityHidden(true)
                     }
                 }
@@ -350,7 +401,7 @@ private struct CalendarDayView: View {
 
     private var foreground: AnyShapeStyle {
         if day.isToday {
-            AnyShapeStyle(.white)
+            AnyShapeStyle(Theme.Palette.onBrand)
         } else if day.isHoliday {
             AnyShapeStyle(Theme.Palette.holiday)
         } else {
@@ -373,18 +424,30 @@ private struct CalendarDayView: View {
 
 private struct DashboardCardsView: View {
     let cards: [DashboardCard]
+    let weather: WeatherSnapshot?
+    let isActive: Bool
+    let openWeather: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
             HStack(spacing: Theme.Space.m) {
                 ForEach(cards) { card in
-                    DashboardCardView(card: card)
+                    DashboardCardView(card: card, weather: weather, isActive: isActive, openWeather: openWeather)
                 }
             }
 
-            // One shared freshness line instead of a timestamp per card; the
-            // state model in PRD §6 replaces this once providers are wired up.
-            if let freshness = cards.first?.freshness {
+            if let weatherCard = cards.first(where: { card in
+                if case .weather = card.kind { return true }
+                return false
+            }) {
+                HStack(spacing: Theme.Space.xs) {
+                    Text(weatherCard.freshness)
+                    Spacer(minLength: 0)
+                    Link("Open-Meteo", destination: URL(string: "https://open-meteo.com/")!)
+                }
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+            } else if let freshness = cards.first?.freshness {
                 Text(freshness)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
@@ -395,35 +458,78 @@ private struct DashboardCardsView: View {
 
 private struct DashboardCardView: View {
     let card: DashboardCard
+    let weather: WeatherSnapshot?
+    let isActive: Bool
+    let openWeather: () -> Void
 
     var body: some View {
-        Button {
-            // Detail scenes are introduced once each provider is live.
-        } label: {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                HStack(spacing: Theme.Space.xs) {
-                    Image(systemName: card.symbol)
-                        .font(.system(size: 11))
-                        .foregroundStyle(card.kind.tint)
-                    Text(card.title)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
+        switch card.kind {
+        case .weather:
+            Button(action: openWeather) {
+                content
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("\(card.title), \(card.primaryValue). \(card.detail). \(card.freshness)")
+            .accessibilityHint("Open the weather forecast")
+        case .forex:
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(card.title), \(card.primaryValue). \(card.detail). \(card.freshness)")
+        }
+    }
 
-                Text(card.primaryValue)
-                    .font(.title3.weight(.semibold))
-
-                Text(card.detail)
-                    .font(.caption2)
+    private var content: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.xs) {
+            HStack(spacing: Theme.Space.xs) {
+                Image(systemName: card.symbol)
+                    .font(.system(size: 11))
+                    .foregroundStyle(card.kind.tint)
+                    .accessibilityHidden(true)
+                Text(card.title)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
-            .frame(maxWidth: .infinity, minHeight: 62, alignment: .topLeading)
-            .cardSection(padding: Theme.Space.s)
+
+            Text(card.primaryValue)
+                .font(.title3.weight(.semibold))
+
+            Text(card.detail)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("\(card.title), \(card.primaryValue). \(card.detail). \(card.freshness)")
+        .frame(maxWidth: .infinity, minHeight: 62, alignment: .topLeading)
+        .background(atmosphere)
+        .cardSection(padding: Theme.Space.s)
+    }
+
+    /// A miniature of the detail hero: a faint sky wash so time of day reads at
+    /// a glance, plus the same precipitation at a fraction of the density.
+    ///
+    /// Kept deliberately low-contrast — the card sits next to the calendar, and
+    /// the popover should stay calm. Text keeps its normal colours rather than
+    /// going white, so nothing here can hurt legibility.
+    @ViewBuilder
+    private var atmosphere: some View {
+        if card.kind == .weather, let weather {
+            let phase = SkyPhase.current(sunrise: weather.sunrise, sunset: weather.sunset)
+
+            ZStack {
+                LinearGradient(sky: phase)
+                    .opacity(0.16)
+
+                WeatherAtmosphereView(
+                    condition: weather.condition,
+                    phase: phase,
+                    isActive: isActive,
+                    tint: Theme.Palette.particle,
+                    densityScale: 0.16
+                )
+            }
+            .clipShape(.rect(cornerRadius: Theme.Radius.card))
+            .accessibilityHidden(true)
+        }
     }
 }
 
@@ -458,6 +564,13 @@ private func previewDate(year: Int, month: Int, day: Int) -> Date {
     return calendar.date(from: DateComponents(year: year, month: month, day: day))!
 }
 
+#Preview("Settings route") {
+    let model = AppModel.preview(now: previewDate(year: 2026, month: 8, day: 15))
+    return SettingsView(model: model, onBack: {})
+        .frame(width: Theme.Metric.popoverWidth, height: 600)
+        .background(.regularMaterial)
+}
+
 #Preview("Dashboard") {
     DashboardView(model: .preview(now: previewDate(year: 2026, month: 8, day: 15)))
 }
@@ -478,20 +591,57 @@ private func previewDate(year: Int, month: Int, day: Int) -> Date {
 #Preview("Converter") {
     DateConverterView(onBack: {})
         .frame(width: Theme.Metric.popoverWidth)
-        .background(.regularMaterial)
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
+                .overlay(Theme.Palette.canvas)
+        }
 }
 
 /// A day carrying a festival, tithi, and holiday flag from the bundled data.
 #Preview("Day detail") {
     DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 1), onBack: {})
         .frame(width: Theme.Metric.popoverWidth)
-        .background(.regularMaterial)
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
+                .overlay(Theme.Palette.canvas)
+        }
 }
 
 /// A day the source grid truncated, so it has no event at all.
 #Preview("Day detail — no event") {
     DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 31), onBack: {})
         .frame(width: Theme.Metric.popoverWidth)
-        .background(.regularMaterial)
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
+                .overlay(Theme.Palette.canvas)
+        }
+}
+#endif
+
+#if DEBUG
+// MARK: - Skin comparison
+//
+// One preview per skin so the three directions can be judged side by side
+// rather than described. `Theme.skin` is set before the view is built.
+
+@MainActor
+private func skinnedDashboard(_ skin: Theme.Skin) -> some View {
+    Theme.skin = skin
+    return DashboardView(model: .preview(now: previewDate(year: 2026, month: 8, day: 15)))
+}
+
+#Preview("Skin — Himalayan Dusk") {
+    skinnedDashboard(.himalayanDusk)
+}
+
+#Preview("Skin — Ink & Paper") {
+    skinnedDashboard(.inkAndPaper)
+}
+
+#Preview("Skin — Mac Native") {
+    skinnedDashboard(.macNative)
 }
 #endif

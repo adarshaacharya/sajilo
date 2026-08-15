@@ -11,6 +11,7 @@ This bootstrap implements the product shell:
 - Settings scene using local preferences
 - pure local models and initial Swift Testing coverage
 - bundled festival, tithi, and public-holiday data for BS 2066–2083
+- live Kathmandu weather through Open-Meteo, with a cached last result and attribution
 
 ## Current calendar range
 
@@ -37,7 +38,7 @@ Run the test suite with `swift test`. It needs full Xcode selected — Command L
 1. Add a date-detail scene for a selected date, including the bundled festival
    and tithi context.
 2. Add a calendar detail scene for a selected date.
-3. Add weather and NRB forex through protocol-backed providers and cached repositories.
+3. Add NRB forex through a protocol-backed provider and cached repository.
 4. Add launch-at-login, the Dock icon preference, and localization.
 5. Re-verify each provisional BS year against the official calendar as it is published.
 

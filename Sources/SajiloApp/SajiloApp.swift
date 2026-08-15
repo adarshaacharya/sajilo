@@ -16,11 +16,6 @@ struct SajiloApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Settings {
-            SettingsView(model: appModel)
-                .frame(width: 440, height: 320)
-        }
-
         #if DEBUG
         // A menu-bar popover cannot be opened by a preview canvas, and a
         // SwiftPM-only checkout has no Xcode previews at all. This window

@@ -17,7 +17,7 @@ struct DateSummaryPanel: View {
             if leadsWithNepali {
                 Text(outcome.nepaliLongText)
                     .font(.nepali(22, weight: .bold))
-                    .foregroundStyle(Theme.Palette.brand)
+                    .foregroundStyle(.primary)
                 Text(outcome.gregorianLongText)
                     .font(.callout)
                     .foregroundStyle(.secondary)

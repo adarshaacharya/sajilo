@@ -1,5 +1,24 @@
 # Third-party notices
 
+## Open-Meteo weather data
+
+The weather card is served by the [Open-Meteo](https://open-meteo.com) forecast
+API. No API key, no sign-up, and no user location is transmitted — the request
+carries fixed Kathmandu coordinates.
+
+Weather data is licensed **[CC BY 4.0](https://open-meteo.com/en/license)**,
+which requires giving appropriate credit, linking the licence, and indicating
+whether changes were made. The licence permits doing so "in any reasonable
+manner", so Sajilo credits the source in **Settings → Data → Sources** and here,
+rather than on the face of the dashboard card.
+
+> **Commercial-use constraint.** The free Open-Meteo API tier is for
+> **non-commercial use only**, up to 10,000 calls per day. Sajilo currently
+> qualifies: it is free, has no advertising, and no subscription. Adding any of
+> those — or exceeding the call ceiling — requires a paid Open-Meteo plan or a
+> different provider. `WeatherProviding` exists so the provider can be swapped
+> without touching the UI.
+
 ## S4NKALP festival, tithi, and holiday data
 
 Sajilo bundles the monthly JSON data files from

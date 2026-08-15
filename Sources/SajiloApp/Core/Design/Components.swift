@@ -28,6 +28,26 @@ extension View {
     }
 }
 
+/// The header strip at the top of every route. Separation comes from a raised
+/// surface and a hairline rather than a block of accent colour.
+struct RouteHeader: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(Theme.Space.m)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.Palette.headerSurface)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Theme.Palette.surfaceBorder)
+                    .frame(height: 1)
+            }
+    }
+}
+
+extension View {
+    func routeHeader() -> some View { modifier(RouteHeader()) }
+}
+
 // MARK: - Buttons
 
 /// The single prominent action per surface, in the app's accent.
@@ -37,7 +57,7 @@ struct BrandButtonStyle: ButtonStyle {
             .font(.callout.weight(.medium))
             .padding(.horizontal, Theme.Space.m)
             .padding(.vertical, Theme.Space.s)
-            .foregroundStyle(.white)
+            .foregroundStyle(Theme.Palette.onBrand)
             .background(
                 Theme.Palette.brand.opacity(configuration.isPressed ? 0.72 : 1),
                 in: .rect(cornerRadius: Theme.Radius.day)
