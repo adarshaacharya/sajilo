@@ -83,29 +83,6 @@ enum RashiSign: String, Codable, Equatable, Sendable, CaseIterable, Identifiable
         }
     }
 
-    /// The zodiac sign as a character rather than an image. SF Symbols has no
-    /// zodiac glyphs at all, and the plain code points (U+2648…) default to
-    /// *emoji* presentation — coloured tiles that ignore `foregroundStyle` and
-    /// fight the palette. The trailing U+FE0E forces text presentation, so the
-    /// glyph takes the brass like any other type.
-    var glyph: String {
-        let scalar: Unicode.Scalar = switch self {
-        case .mesh: "\u{2648}"
-        case .vrish: "\u{2649}"
-        case .mithun: "\u{264A}"
-        case .karkat: "\u{264B}"
-        case .simha: "\u{264C}"
-        case .kanya: "\u{264D}"
-        case .tula: "\u{264E}"
-        case .vrishchik: "\u{264F}"
-        case .dhanu: "\u{2650}"
-        case .makar: "\u{2651}"
-        case .kumbha: "\u{2652}"
-        case .meen: "\u{2653}"
-        }
-        return "\(scalar)\u{FE0E}"
-    }
-
     /// The नामाक्षर — the syllables a name beginning with places you in this
     /// rashi. This is how most Nepalis actually know their sign, so it is what
     /// the picker is built around.

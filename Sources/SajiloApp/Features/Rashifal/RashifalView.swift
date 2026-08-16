@@ -94,25 +94,20 @@ struct RashifalContent: View {
         }
     }
 
-    /// Credited beside the words, not tucked into Settings. These paragraphs
-    /// are Hamro Patro's writing, carried here by their permission, so the
-    /// attribution travels with them.
+    /// Published date beside the forecast text.
+    @ViewBuilder
     private var credit: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.xxs) {
-            if let published = model.rashifal?.publishedOn {
-                // `Text("…\(someInt)")` runs through localized-key
-                // interpolation, which number-formats integers — so a year
-                // renders as "2,083". Built as a string first, and through the
-                // numeral preference so it matches every other date on screen.
-                Text(verbatim: publishedText(published))
-            }
-            Text(L10n.rashifalCredit)
-            Link("Hamro Patro", destination: URL(string: "https://www.hamropatro.com/rashifal")!)
+        if let published = model.rashifal?.publishedOn {
+            // `Text("…\(someInt)")` runs through localized-key
+            // interpolation, which number-formats integers — so a year
+            // renders as "2,083". Built as a string first, and through the
+            // numeral preference so it matches every other date on screen.
+            Text(verbatim: publishedText(published))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, Theme.Space.xs)
         }
-        .font(.caption2)
-        .foregroundStyle(.tertiary)
-        .fixedSize(horizontal: false, vertical: true)
-        .padding(.top, Theme.Space.xs)
     }
 
     private func publishedText(_ date: NepaliDate) -> String {
@@ -133,8 +128,6 @@ private struct ReadingCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
             HStack(alignment: .top, spacing: Theme.Space.s) {
-                SignPlate(sign: reading.sign, size: 46, isProminent: true)
-
                 VStack(alignment: .leading, spacing: 1) {
                     Text(verbatim: reading.sign.nepaliName)
                         .font(.nepali(20, weight: .semibold))
@@ -222,8 +215,6 @@ private struct SignFinder: View {
                 ForEach(RashiSign.allCases) { sign in
                     Button { choose(sign) } label: {
                         HStack(alignment: .top, spacing: Theme.Space.xs) {
-                            SignPlate(sign: sign, size: 30, isProminent: false)
-
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(verbatim: sign.nepaliName)
                                     .font(.nepali(13, weight: .semibold))
@@ -259,6 +250,7 @@ private struct SignStrip: View {
     let shown: RashiSign?
     let mine: RashiSign?
     let select: (RashiSign) -> Void
+    @State private var hoveredSign: RashiSign?
 
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: Theme.Space.xs),
@@ -274,19 +266,21 @@ private struct SignStrip: View {
             LazyVGrid(columns: columns, spacing: Theme.Space.xs) {
                 ForEach(signs) { sign in
                     Button { select(sign) } label: {
-                        VStack(spacing: 1) {
-                            Text(verbatim: sign.glyph)
-                                .font(.system(size: 15))
-                            Text(verbatim: sign.nepaliName)
-                                .font(.nepali(11, weight: .medium))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                        }
-                        .foregroundStyle(sign == shown ? AnyShapeStyle(Theme.Palette.brand) : AnyShapeStyle(.secondary))
+                        Text(verbatim: sign.nepaliName)
+                            .font(.nepali(11, weight: .medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                        .foregroundStyle(
+                            sign == shown
+                                ? AnyShapeStyle(Theme.Palette.brand)
+                                : AnyShapeStyle(hoveredSign == sign ? .primary : .secondary)
+                        )
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, Theme.Space.xs)
                         .background(
-                            sign == shown ? Theme.Palette.brand.opacity(0.12) : Color.clear,
+                            sign == shown
+                                ? Theme.Palette.brand.opacity(0.12)
+                                : (hoveredSign == sign ? Theme.Palette.hover : Color.clear),
                             in: .rect(cornerRadius: Theme.Radius.day)
                         )
                         .overlay(
@@ -300,6 +294,11 @@ private struct SignStrip: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    .contentShape(.rect)
+                    .onHover { isHovering in
+                        hoveredSign = isHovering ? sign : nil
+                    }
+                    .animation(.easeOut(duration: 0.12), value: hoveredSign)
                     .accessibilityLabel(
                         sign == mine ? "\(sign.romanName), your rashi" : sign.romanName
                     )
@@ -307,29 +306,6 @@ private struct SignStrip: View {
             }
         }
         .cardSection()
-    }
-}
-
-// MARK: - Shared
-
-/// The sign's glyph on a rounded plate — the same language as the date tile on
-/// the dashboard, so the two screens read as one app.
-private struct SignPlate: View {
-    let sign: RashiSign
-    let size: CGFloat
-    let isProminent: Bool
-
-    var body: some View {
-        Text(verbatim: sign.glyph)
-            .font(.system(size: size * 0.5))
-            .foregroundStyle(Theme.Palette.brand)
-            .frame(width: size, height: size)
-            .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.card))
-            .overlay(
-                RoundedRectangle(cornerRadius: Theme.Radius.card)
-                    .strokeBorder(Theme.Palette.brand.opacity(isProminent ? 0.35 : 0), lineWidth: 1)
-            )
-            .accessibilityHidden(true)
     }
 }
 

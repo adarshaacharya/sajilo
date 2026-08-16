@@ -24,7 +24,7 @@ struct ActionBarView: View {
                 Button(L10n.bazar, systemImage: "storefront", action: openBazar)
             }
             if let openRashifal {
-                Button(L10n.rashifal, systemImage: "sparkles", action: openRashifal)
+                Button(L10n.rashifal, systemImage: "moon.stars.fill", action: openRashifal)
             }
             Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
             // Quit moved up beside the settings gear in the header. It is used

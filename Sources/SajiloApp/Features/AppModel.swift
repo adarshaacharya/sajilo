@@ -573,7 +573,7 @@ final class AppModel {
             fetchedAt: \.fetchedAt,
             describeError: { error in
                 if case .incompleteReading = error as? RashifalProviderError {
-                    return "Today's rashifal could not be read from Hamro Patro"
+                    return "Today's rashifal could not be read from the source"
                 }
                 return nil
             }

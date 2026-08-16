@@ -84,7 +84,7 @@ struct RashifalModelTests {
         await model.refreshRashifalIfStale()
 
         #expect(model.rashifal == nil)
-        #expect(model.rashifalError == "Today's rashifal could not be read from Hamro Patro")
+        #expect(model.rashifalError == "Today's rashifal could not be read from the source")
     }
 
     @Test func aWarmCacheIsNotRefetched() async {

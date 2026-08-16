@@ -48,7 +48,6 @@ enum L10n {
     static let rashifalChangeSign = LocalizedStringResource("rashifal.change-sign", bundle: .sajiloResources)
     static let rashifalAllSigns = LocalizedStringResource("rashifal.all-signs", bundle: .sajiloResources)
     static let rashifalBackToMine = LocalizedStringResource("rashifal.back-to-mine", bundle: .sajiloResources)
-    static let rashifalCredit = LocalizedStringResource("rashifal.credit", bundle: .sajiloResources)
     static let rashifalStale = LocalizedStringResource("rashifal.stale", bundle: .sajiloResources)
     static let settingsRashifal = LocalizedStringResource("settings.rashifal", bundle: .sajiloResources)
     static let bazarMetals = LocalizedStringResource("bazar.metals", bundle: .sajiloResources)
