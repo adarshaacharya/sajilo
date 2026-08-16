@@ -23,7 +23,13 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           APP_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' scripts/AppBundleInfo.plist)
-          test "$TAG" = "v$APP_VERSION"
+          case "$TAG" in
+            "v$APP_VERSION"|"v$APP_VERSION-beta."*) ;;
+            *)
+              echo "Tag $TAG must match v$APP_VERSION or v$APP_VERSION-beta.N"
+              exit 1
+              ;;
+          esac
 
       - name: Run tests
         run: swift test
@@ -37,10 +43,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
+          PRERELEASE=()
+          if [[ "$TAG" == *-beta.* ]]; then
+            PRERELEASE=(--prerelease)
+          fi
           gh release create "$TAG" \
             .build/release-package/Sajilo-macos-arm64.dmg \
             .build/release-package/Sajilo-macos-arm64.zip \
             --title "Sajilo ${TAG#v}" \
+            "${PRERELEASE[@]}" \
             --generate-notes
 
       - name: Upload release archive

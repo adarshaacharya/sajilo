@@ -9,16 +9,18 @@ GitHub Actions builds and publishes the Mac download for you.
 3. Change `CFBundleVersion` to a higher number each release.
 4. Commit and push your changes to GitHub.
 
-## Publish a release
+## Publish a beta
 
-Create and push a tag matching the version:
+For the first beta of version `0.1.0`, create and push this tag:
 
 ```bash
-git tag -a v0.1.0 -m "Sajilo 0.1.0"
-git push origin v0.1.0
+git tag -a v0.1.0-beta.1 -m "Sajilo 0.1.0 beta 1"
+git push origin v0.1.0-beta.1
 ```
 
-GitHub Actions will test the app, create the DMG and ZIP, and publish a GitHub Release. When it finishes, this link downloads the newest Mac version:
+GitHub Actions will test the app, create the DMG and ZIP, then publish a GitHub prerelease. For a stable release, use the matching tag without `-beta.1`, for example `v0.1.0`.
+
+The latest stable release is available at:
 
 `https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg`
 
