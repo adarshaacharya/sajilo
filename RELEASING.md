@@ -33,6 +33,30 @@ git push origin v0.1.0-beta.1
 
 GitHub Actions will test the app, create the DMG and ZIP, then publish a GitHub prerelease. For a stable release, use the matching tag without `-beta.1`, for example `v0.1.0`.
 
+## After every release: update the appcast
+
+Sparkle only offers an update if it appears in `appcast.xml`. Publishing a
+release does not add it — run this once the GitHub release exists:
+
+```bash
+./scripts/update-appcast.sh
+```
+
+It rebuilds the whole file from the releases GitHub actually has, signing each
+one with your private EdDSA key. Then commit and push it:
+
+```bash
+git add appcast.xml && git commit -m "Update the appcast" && git push
+```
+
+Sajilo reads the feed from `main`, so it takes effect as soon as that push
+lands. Existing users get the update in place, which also skips the Gatekeeper
+warning a fresh download shows.
+
+**This step cannot run in CI.** The signing key lives in your login Keychain and
+is the only thing proving an update came from you, since the app is not
+notarized. Do not export it into GitHub secrets.
+
 After you publish a stable release, this permanent link will download it:
 
 `https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg`
