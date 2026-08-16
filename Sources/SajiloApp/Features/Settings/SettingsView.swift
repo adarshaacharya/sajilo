@@ -128,20 +128,6 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsSection(L10n.data) {
-                        SettingsRow(
-                            L10n.calendarRange,
-                            value: "BS \(BikramSambatCalendar.supportedNepaliYears.lowerBound)–\(BikramSambatCalendar.supportedNepaliYears.upperBound)"
-                        )
-                        SettingsRow(
-                            L10n.festivalsRange,
-                            value: "BS \(CalendarEventStore.supportedYears.lowerBound)–\(CalendarEventStore.supportedYears.upperBound)"
-                        )
-                        SettingsRow(L10n.weatherSource, value: "Open-Meteo")
-                        SettingsRow(L10n.ratesSource, value: "Nepal Rastra Bank")
-                        SettingsRow(L10n.festivalSource, value: "nepalicalendar.rat32.com")
-                        SettingsRow(L10n.bazarSource, value: "FENEGOSIDA · Nepal Oil Corporation")
-                    }
                 }
                 .padding(Theme.Space.m)
             }
@@ -238,29 +224,6 @@ private struct SettingsSection<Content: View>: View {
             }
             .cardSection()
         }
-    }
-}
-
-private struct SettingsRow: View {
-    let label: LocalizedStringResource
-    let value: String
-
-    init(_ label: LocalizedStringResource, value: String) {
-        self.label = label
-        self.value = value
-    }
-
-    var body: some View {
-        HStack(spacing: Theme.Space.s) {
-            Text(label)
-            Spacer(minLength: Theme.Space.s)
-            Text(value)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.trailing)
-        }
-        .font(.callout)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(String(localized: label)): \(value)")
     }
 }
 
