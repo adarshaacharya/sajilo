@@ -19,8 +19,9 @@ enum LaunchAtLoginState: Equatable, Sendable {
     /// Settings. Reporting this as "on" would be a lie, and as "off" would make
     /// the toggle look broken when it flips back.
     case requiresApproval
-    /// The app is not in a location macOS will register — most often a build
-    /// running from a temporary directory rather than /Applications.
+    /// The framework could not locate an existing login-item record. This is
+    /// not necessarily an invalid installation: a newly-installed app can
+    /// still create the record by calling `register()`.
     case unavailable
 
     var isEnabled: Bool { self == .enabled }

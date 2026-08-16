@@ -111,7 +111,7 @@
 "settings.language" = "भाषा";
 "settings.launch-approval-note" = "System Settings › General › Login Items मा स्वीकृतिको प्रतीक्षा हुँदैछ।";
 "settings.launch-at-login" = "लगइनमा सुरु गर्नुहोस्";
-"settings.launch-unavailable-note" = "यो सुविधा चलाउन Sajilo लाई तपाईंको Applications फोल्डरमा सार्नुहोस्।";
+"settings.launch-unavailable-note" = "macOS ले लगइन आइटम अझै फेला पार्न सकेन। तपाईं यसलाई सुरु गर्न प्रयास गर्न सक्नुहुन्छ।";
 "settings.menu-bar" = "मेनु बार";
 "settings.menu-bar-custom" = "अनुकूलन…";
 "settings.menu-bar-show-flag" = "नेपालको झण्डा देखाउनुहोस्";

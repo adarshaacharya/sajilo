@@ -299,8 +299,14 @@ final class AppModel {
     /// `UserDefaults`: the user can change it in System Settings, and a stored
     /// copy would drift out of agreement with what macOS actually does.
     var launchAtLogin: LaunchAtLoginState {
-        launchAtLoginManager.state
+        _ = launchAtLoginRevision
+        return launchAtLoginManager.state
     }
+
+    /// Invalidates Settings after a registration attempt. The system state is
+    /// deliberately computed rather than stored, so it needs this lightweight
+    /// observation token to redraw immediately after `register()` returns.
+    private var launchAtLoginRevision = 0
 
     /// Set when a registration attempt fails, so the UI can explain instead of
     /// silently snapping the toggle back.
@@ -760,17 +766,17 @@ final class AppModel {
 
     // MARK: - System integration
 
-    /// Toggling this can fail — macOS refuses to register an app running from
-    /// a temporary directory — so the result is reported rather than assumed.
+    /// Toggling this can fail, so the result is reported rather than assumed.
     func setLaunchAtLogin(_ enabled: Bool) {
         do {
             try launchAtLoginManager.setEnabled(enabled)
             launchAtLoginError = nil
         } catch {
             launchAtLoginError = enabled
-                ? "Could not enable launch at login. Move Sajilo to your Applications folder and try again."
+                ? "Could not enable launch at login. \(error.localizedDescription)"
                 : "Could not disable launch at login. You can remove it in System Settings › General › Login Items."
         }
+        launchAtLoginRevision &+= 1
     }
 
     /// PRD §4.1: menu-bar-only by default, with the Dock icon behind a

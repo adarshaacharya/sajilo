@@ -38,8 +38,8 @@ struct LaunchAtLoginTests {
         #expect(model.launchAtLoginError == nil)
     }
 
-    /// macOS refuses to register an app running from a temporary directory,
-    /// which is exactly what a local build does. The failure has to surface.
+    /// A failed system registration must be surfaced rather than pretending
+    /// the setting was enabled.
     @Test func reportsAFailedRegistrationInsteadOfPretending() {
         let manager = StubLaunchAtLogin(state: .disabled, failsWith: StubError.refused)
         let model = makeModel(manager: manager)
@@ -47,7 +47,7 @@ struct LaunchAtLoginTests {
         model.setLaunchAtLogin(true)
 
         #expect(model.launchAtLogin.isEnabled == false, "state must still come from the system")
-        #expect(model.launchAtLoginError?.contains("Applications folder") == true)
+        #expect(model.launchAtLoginError?.contains("Could not enable launch at login") == true)
     }
 
     @Test func clearsAPreviousErrorOnASuccessfulRetry() {

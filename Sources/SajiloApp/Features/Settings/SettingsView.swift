@@ -34,7 +34,6 @@ struct SettingsView: View {
                                 set: { model.setLaunchAtLogin($0) }
                             )
                         )
-                        .disabled(model.launchAtLogin == .unavailable)
 
                         if let error = model.launchAtLoginError {
                             Text(verbatim: error)
@@ -166,8 +165,10 @@ struct SettingsView: View {
     }
 
     /// Explains the states a plain on/off toggle cannot: macOS may hold the
-    /// registration pending approval, or refuse it outright for an app running
-    /// outside /Applications.
+    /// registration pending approval, or fail to find a previous registration.
+    /// A `.notFound` status is not enough evidence to disable the control: a
+    /// freshly-installed app can still successfully register when the user
+    /// turns it on.
     private var launchAtLoginNote: LocalizedStringResource? {
         switch model.launchAtLogin {
         case .requiresApproval:
