@@ -7,14 +7,25 @@ import SwiftUI
 /// This is the app's replacement for `Divider()`: sections read as separate
 /// because they sit on their own surface, not because a rule was drawn between
 /// them. macOS popovers group by material, not by lines.
-struct CardSection: ViewModifier {
+struct CardSection<Backdrop: View>: ViewModifier {
     var padding: CGFloat = Theme.Space.m
+    @ViewBuilder var backdrop: Backdrop
 
     func body(content: Content) -> some View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.card))
+            // The backdrop is composed inside the card's own shape, after the
+            // padding is applied. Attaching it to the content instead sizes it
+            // to the unpadded frame, which leaves a visible inset rectangle
+            // floating inside the card.
+            .background {
+                ZStack {
+                    Theme.Palette.surface
+                    backdrop
+                }
+                .clipShape(.rect(cornerRadius: Theme.Radius.card))
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.card)
                     .strokeBorder(Theme.Palette.surfaceBorder, lineWidth: 1)
@@ -24,7 +35,16 @@ struct CardSection: ViewModifier {
 
 extension View {
     func cardSection(padding: CGFloat = Theme.Space.m) -> some View {
-        modifier(CardSection(padding: padding))
+        modifier(CardSection(padding: padding) { EmptyView() })
+    }
+
+    /// A card with something rendered behind its content — the weather card's
+    /// sky tint and precipitation — drawn to the card's exact geometry.
+    func cardSection<Backdrop: View>(
+        padding: CGFloat = Theme.Space.m,
+        @ViewBuilder backdrop: () -> Backdrop
+    ) -> some View {
+        modifier(CardSection(padding: padding, backdrop: backdrop))
     }
 }
 

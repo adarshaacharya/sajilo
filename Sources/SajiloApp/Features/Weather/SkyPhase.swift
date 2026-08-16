@@ -71,16 +71,6 @@ enum SkyPhase: Equatable, Sendable {
     }
 }
 
-extension Calendar {
-    /// Weather is reported for Nepal, so time of day is judged there rather
-    /// than wherever the user happens to be.
-    static let nepal: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        return calendar
-    }()
-}
-
 extension LinearGradient {
     init(sky phase: SkyPhase) {
         self.init(

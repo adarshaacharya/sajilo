@@ -115,7 +115,9 @@ struct WeatherCardTests {
 
         await model.refreshWeather()
 
-        #expect(model.weatherError == "Weather request timed out")
+        // Wording is shared with forex now: the card already names its
+        // subject, so the message does not repeat it.
+        #expect(model.weatherError == "Request timed out")
     }
 
     private func weatherCard(_ model: AppModel) -> DashboardCard? {

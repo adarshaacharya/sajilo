@@ -75,19 +75,8 @@ struct ConversionOutcome: Equatable, Sendable {
         Self.nepalCalendar.component(.weekday, from: gregorian) == 7
     }
 
-    private static let nepalCalendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        return calendar
-    }()
-
-    private static let longDateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.timeZone = TimeZone(identifier: "Asia/Kathmandu")
-        formatter.dateFormat = "EEEE, MMMM d, yyyy"
-        return formatter
-    }()
+    private static let nepalCalendar = NepalTime.calendar
+    private static let longDateFormatter = NepalTime.displayFormatter("EEEE, MMMM d, yyyy")
 }
 
 @MainActor
@@ -182,19 +171,18 @@ final class DateConverterStore {
         dayText = String(format: "%02d", day)
     }
 
+    /// Round-trips the components so an impossible date such as 31 February is
+    /// rejected rather than silently rolled forward by `Calendar`.
     private func makeGregorianDate(year: Int, month: Int, day: Int) throws -> Date {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        guard let date = calendar.date(from: DateComponents(year: year, month: month, day: day)),
-              calendar.dateComponents([.year, .month, .day], from: date) == DateComponents(year: year, month: month, day: day) else {
+        let requested = DateComponents(year: year, month: month, day: day)
+        guard let date = NepalTime.calendar.date(from: requested),
+              NepalTime.calendar.dateComponents([.year, .month, .day], from: date) == requested else {
             throw BikramSambatCalendar.ConversionError.unsupportedGregorianDate
         }
         return date
     }
 
     private func gregorianComponents(for date: Date) -> DateComponents {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        return calendar.dateComponents([.year, .month, .day], from: date)
+        NepalTime.calendar.dateComponents([.year, .month, .day], from: date)
     }
 }

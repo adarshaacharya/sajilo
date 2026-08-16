@@ -1,5 +1,21 @@
 # Third-party notices
 
+## Nepal Rastra Bank exchange rates
+
+Rates come from Nepal Rastra Bank's published forex API
+(`https://www.nrb.org.np/api/forex/v1/rates`) — the country's central bank, and
+the official source PRD §5.5 names in preference to an aggregator. No API key
+and no user data are involved.
+
+NRB quotes some currencies in blocks rather than per unit: **INR per 100, JPY
+per 10, KRW per 100**. Sajilo normalises these and labels them (`INR (per 100)`)
+so a quote is never silently per-something-else. Buy and sell are kept distinct
+and each conversion direction uses the side the customer actually gets.
+
+Sajilo requests a seven-day window and takes the most recent published day, so a
+date on which the bank does not publish falls back to the rates still in force
+rather than showing nothing.
+
 ## Open-Meteo weather data
 
 The weather card is served by the [Open-Meteo](https://open-meteo.com) forecast

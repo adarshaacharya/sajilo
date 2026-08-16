@@ -41,6 +41,15 @@ struct SettingsView: View {
                         }
                     }
 
+                    SettingsSection("Forex favourites") {
+                        ForEach(ForexCurrency.selectable, id: \.self) { code in
+                            Toggle(
+                                "\(code) · \(ForexCurrency.name(for: code))",
+                                isOn: binding(for: code)
+                            )
+                        }
+                    }
+
                     SettingsSection("Data") {
                         SettingsRow(
                             "Calendar",
@@ -51,6 +60,7 @@ struct SettingsView: View {
                             value: "BS \(CalendarEventStore.supportedYears.lowerBound)–\(CalendarEventStore.supportedYears.upperBound)"
                         )
                         SettingsRow("Weather source", value: "Open-Meteo")
+                        SettingsRow("Rates source", value: "Nepal Rastra Bank")
                         SettingsRow("Festival source", value: "nepalicalendar.rat32.com")
                     }
 
@@ -62,6 +72,24 @@ struct SettingsView: View {
                 .padding(Theme.Space.m)
             }
         }
+    }
+
+    /// Keeps the user's chosen order rather than the catalogue's: the first
+    /// favourite is what the dashboard card shows.
+    private func binding(for code: String) -> Binding<Bool> {
+        Binding(
+            get: { model.forexFavourites.contains(code) },
+            set: { isOn in
+                var favourites = model.forexFavourites
+                if isOn {
+                    guard !favourites.contains(code) else { return }
+                    favourites.append(code)
+                } else {
+                    favourites.removeAll { $0 == code }
+                }
+                model.forexFavourites = favourites
+            }
+        )
     }
 
     private var header: some View {

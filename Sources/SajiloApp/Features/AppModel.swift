@@ -35,6 +35,8 @@ final class AppModel {
         static let weatherEnabled = "weatherEnabled"
         static let forexEnabled = "forexEnabled"
         static let weatherLocation = "weatherLocation"
+        static let forexCache = "forexCache"
+        static let forexFavourites = "forexFavourites"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -59,10 +61,9 @@ final class AppModel {
         didSet {
             guard oldValue != selectedWeatherLocation else { return }
             defaults.set(selectedWeatherLocation.rawValue, forKey: DefaultsKey.weatherLocation)
-            // Swap to that city's cache immediately so the card never shows the
-            // previous city's numbers under the new name, then refresh.
-            weather = Self.readWeatherCache(from: defaults, location: selectedWeatherLocation)
-            weatherError = nil
+            // Point the feed at that city's cache immediately so the card
+            // never shows the previous city's numbers under the new name.
+            weatherFeed.rebind(cacheKey: DefaultsKey.weatherCache(for: selectedWeatherLocation))
             Task { [weak self] in await self?.refreshWeatherIfStale() }
         }
     }
@@ -76,16 +77,45 @@ final class AppModel {
     /// Scanning ahead decodes a JSON file per month, so it runs once per day
     /// rather than on every redraw.
     private(set) var upcomingEvents: [UpcomingEvent] = []
-    private(set) var weather: WeatherSnapshot?
-    private(set) var isWeatherLoading = false
-    private(set) var weatherError: String?
+    /// Both remote modules share one cache/staleness/refresh implementation.
+    /// The members below forward to it, so views and tests keep reading
+    /// `model.weather` rather than reaching through a feed.
+    @ObservationIgnored private var weatherFeed: RemoteFeed<WeatherSnapshot>!
+    @ObservationIgnored private var forexFeed: RemoteFeed<ForexSnapshot>!
+
+    var weather: WeatherSnapshot? { weatherFeed.value }
+    var isWeatherLoading: Bool { weatherFeed.isLoading }
+    var weatherError: String? { weatherFeed.errorMessage }
+    var isWeatherStale: Bool { weatherFeed.isStale }
+
+    var forex: ForexSnapshot? { forexFeed.value }
+    var isForexLoading: Bool { forexFeed.isLoading }
+    var forexError: String? { forexFeed.errorMessage }
+    var isForexStale: Bool { forexFeed.isStale }
+
+    var forexFavourites: [String] {
+        didSet {
+            guard oldValue != forexFavourites else { return }
+            defaults.set(forexFavourites, forKey: DefaultsKey.forexFavourites)
+        }
+    }
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let weatherProvider: any WeatherProviding
+    @ObservationIgnored private let forexProvider: any ForexProviding
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
-    @ObservationIgnored private var weatherTimerTask: Task<Void, Never>?
 
-    var cards: [DashboardCard] { [weatherCard, Self.forexCard] }
+    var cards: [DashboardCard] { [weatherCard, forexCard] }
+
+    /// Whichever favourite leads the list; the card has room for one.
+    var headlineRate: ForexRate? {
+        guard let forex else { return nil }
+        return forex.rates(for: forexFavourites).first ?? forex.rate(for: "USD")
+    }
+
+    var favouriteRates: [ForexRate] {
+        forex?.rates(for: forexFavourites) ?? []
+    }
 
     /// The soonest festival after today, used for the dashboard teaser.
     var nextEvent: UpcomingEvent? {
@@ -129,10 +159,12 @@ final class AppModel {
         now: Date = .now,
         defaults: UserDefaults = .standard,
         weatherProvider: any WeatherProviding = OpenMeteoWeatherProvider(),
+        forexProvider: any ForexProviding = NRBForexProvider(),
         autoLoadWeather: Bool = true
     ) {
         self.defaults = defaults
         self.weatherProvider = weatherProvider
+        self.forexProvider = forexProvider
         referenceDate = now
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
@@ -144,7 +176,8 @@ final class AppModel {
         let location = defaults.string(forKey: DefaultsKey.weatherLocation)
             .flatMap(WeatherLocation.init(rawValue:)) ?? .default
         selectedWeatherLocation = location
-        weather = Self.readWeatherCache(from: defaults, location: location)
+        forexFavourites = defaults.stringArray(forKey: DefaultsKey.forexFavourites)
+            ?? ForexCurrency.defaultFavourites
 
         let fallbackDate = NepaliDate(year: 2083, month: 4, day: 30)
         let resolvedToday = (try? BikramSambatCalendar.nepaliDate(from: now)) ?? fallbackDate
@@ -154,18 +187,47 @@ final class AppModel {
         todayEvent = CalendarEventStore.events(year: resolvedToday.year, month: resolvedToday.month)[resolvedToday.day]
         upcomingEvents = UpcomingEventsService.events(from: resolvedToday)
 
+        weatherFeed = RemoteFeed(
+            subject: "weather",
+            cacheKey: DefaultsKey.weatherCache(for: location),
+            staleInterval: Self.weatherStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt
+        ) { [weak self, weatherProvider] in
+            // Resolved per request, not captured: the user can change city
+            // between the feed being built and this running.
+            guard let self else { throw CancellationError() }
+            return try await weatherProvider.currentWeather(at: self.selectedWeatherLocation)
+        }
+
+        forexFeed = RemoteFeed(
+            subject: "rates",
+            cacheKey: DefaultsKey.forexCache,
+            staleInterval: Self.forexStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                (error as? ForexProviderError) == .noRatesPublished
+                    ? "Nepal Rastra Bank has not published rates yet"
+                    : nil
+            }
+        ) { [forexProvider] in
+            try await forexProvider.latestRates()
+        }
+
         scheduleMidnightRefresh()
         if autoLoadWeather {
-            startWeatherRefreshTimer()
+            weatherFeed.startPeriodicRefresh()
+            forexFeed.startPeriodicRefresh()
             Task { [weak self] in
                 await self?.refreshWeatherIfStale()
+                await self?.refreshForexIfStale()
             }
         }
     }
 
     deinit {
         midnightTask?.cancel()
-        weatherTimerTask?.cancel()
     }
 
     func moveMonth(by direction: Int) {
@@ -186,68 +248,28 @@ final class AppModel {
     /// PRD §5.4 targets a refresh every 30–60 minutes.
     static let weatherStaleInterval: TimeInterval = 30 * 60
 
-    /// Whether the cached reading has aged past the refresh target. No cache at
-    /// all counts as stale, so the first popover open fetches.
-    var isWeatherStale: Bool {
-        guard let weather else { return true }
-        return Date.now.timeIntervalSince(weather.fetchedAt) >= Self.weatherStaleInterval
-    }
-
-    /// Called when the popover opens. Cheap when the cache is warm, so opening
-    /// the panel repeatedly does not hammer the provider.
     func refreshWeatherIfStale() async {
-        guard isWeatherEnabled, isWeatherStale else { return }
-        await refreshWeather()
+        guard isWeatherEnabled else { return }
+        await weatherFeed.refreshIfStale()
     }
 
-    /// Refreshes the Kathmandu weather card. A cached result stays visible
-    /// while the request runs, so a slow connection never turns the dashboard
-    /// into an empty loading state.
     func refreshWeather() async {
-        guard !isWeatherLoading else { return }
-        isWeatherLoading = true
-        weatherError = nil
-        defer { isWeatherLoading = false }
-
-        do {
-            let requested = selectedWeatherLocation
-            let result = try await weatherProvider.currentWeather(at: requested)
-            // The user may have switched cities mid-request; a late reply for
-            // the previous one must not overwrite the current card.
-            guard requested == selectedWeatherLocation else { return }
-            weather = result
-            defaults.set(try? JSONEncoder().encode(result), forKey: DefaultsKey.weatherCache(for: requested))
-        } catch {
-            weatherError = Self.weatherErrorText(for: error)
-        }
+        await weatherFeed.refresh()
     }
 
-    /// A background refresh so a popover left closed for hours still opens on
-    /// something recent. It only fires the request when the cache is actually
-    /// stale, so the cost is a wakeup, not a network call.
-    private func startWeatherRefreshTimer() {
-        weatherTimerTask?.cancel()
-        weatherTimerTask = Task { @MainActor [weak self] in
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(Self.weatherStaleInterval))
-                guard !Task.isCancelled, let self else { return }
-                await self.refreshWeatherIfStale()
-            }
-        }
+    // MARK: - Forex
+
+    /// PRD §5.5 targets 6–12 hours. NRB publishes once a day, so refreshing
+    /// harder than this adds load without adding information.
+    static let forexStaleInterval: TimeInterval = 6 * 60 * 60
+
+    func refreshForexIfStale() async {
+        guard isForexEnabled else { return }
+        await forexFeed.refreshIfStale()
     }
 
-    private static func weatherErrorText(for error: any Error) -> String {
-        guard let urlError = error as? URLError else { return "Unable to refresh weather" }
-        switch urlError.code {
-        case .notConnectedToInternet, .dataNotAllowed:
-            return "No internet connection"
-        case .timedOut:
-            return "Weather request timed out"
-        case .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed:
-            return "Cannot reach the weather service"
-        default:
-            return "Unable to refresh weather"
-        }
+    func refreshForex() async {
+        await forexFeed.refresh()
     }
 
     // MARK: - Date rollover
@@ -308,8 +330,8 @@ final class AppModel {
     }
 
     private func applyPreviewWeather(_ snapshot: WeatherSnapshot) {
-        weather = snapshot
         selectedWeatherLocation = snapshot.location
+        weatherFeed.seed(snapshot)
     }
 
     static func preview(now: Date = .now) -> AppModel {
@@ -325,19 +347,9 @@ final class AppModel {
         "आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहीबार", "शुक्रबार", "शनिबार"
     ]
 
-    private static let nepalCalendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        return calendar
-    }()
+    private static let nepalCalendar = NepalTime.calendar
 
-    private static let gregorianFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.timeZone = TimeZone(identifier: "Asia/Kathmandu")
-        formatter.dateFormat = "EEEE, MMMM d, yyyy"
-        return formatter
-    }()
+    private static let gregorianFormatter = NepalTime.displayFormatter("EEEE, MMMM d, yyyy")
 
     private var weatherCard: DashboardCard {
         if let weather {
@@ -363,29 +375,30 @@ final class AppModel {
         )
     }
 
-    private static let forexCard = DashboardCard(
-        id: "forex",
-        kind: .forex,
-        title: "USD / NPR",
-        primaryValue: "152.39",
-        detail: "Buy · Sell 152.99",
-        symbol: "dollarsign.circle.fill",
-        freshness: "Prototype data"
-    )
-
-    private static func readWeatherCache(
-        from defaults: UserDefaults,
-        location: WeatherLocation
-    ) -> WeatherSnapshot? {
-        guard let data = defaults.data(forKey: DefaultsKey.weatherCache(for: location)),
-              let snapshot = try? JSONDecoder().decode(WeatherSnapshot.self, from: data),
-              // Belt and braces: a key collision or an older cache format must
-              // never surface another city's reading.
-              snapshot.location == location else {
-            return nil
+    private var forexCard: DashboardCard {
+        if let rate = headlineRate, let forex {
+            return DashboardCard(
+                id: "forex",
+                kind: .forex,
+                title: "\(rate.unitLabel) / NPR",
+                primaryValue: rate.buyText,
+                detail: "Buy · Sell \(rate.sellText)",
+                symbol: "banknote.fill",
+                freshness: Self.freshnessText(for: forex.sourceTimestamp)
+            )
         }
-        return snapshot
+
+        return DashboardCard(
+            id: "forex",
+            kind: .forex,
+            title: "NPR rates",
+            primaryValue: isForexLoading ? "Loading…" : "Unavailable",
+            detail: forexError ?? "Tap to try again",
+            symbol: "banknote",
+            freshness: "Nepal Rastra Bank"
+        )
     }
+
 
     /// PRD §6 requires cached data to be labelled with its age, so this has to
     /// keep resolving past an hour — otherwise a day-old reading and a

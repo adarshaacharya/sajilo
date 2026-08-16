@@ -8,22 +8,9 @@ struct OpenMeteoWeatherProvider: WeatherProviding {
     private let session: URLSession
 
     init(session: URLSession? = nil) {
-        self.session = session ?? Self.makeSession()
+        self.session = session ?? .sajilo()
     }
 
-    /// `URLSession.shared` waits 60 seconds by default, which on a menu-bar
-    /// popover means a minute of "Loading…" before anything is reported.
-    /// Ephemeral because Sajilo caches the decoded snapshot itself and has no
-    /// use for a second copy in URLSession's on-disk cache.
-    private static func makeSession() -> URLSession {
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.timeoutIntervalForRequest = 10
-        configuration.timeoutIntervalForResource = 20
-        // Fail fast when offline rather than holding the request open until
-        // connectivity returns; the cached snapshot is the better answer.
-        configuration.waitsForConnectivity = false
-        return URLSession(configuration: configuration)
-    }
 
     func currentWeather(at location: WeatherLocation) async throws -> WeatherSnapshot {
         var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
@@ -98,16 +85,8 @@ struct OpenMeteoWeatherProvider: WeatherProviding {
 
     /// Open-Meteo returns local time without an offset, and the request pins
     /// `timezone=Asia/Kathmandu`, so it is parsed in that zone.
-    private static let timeFormatter = makeFormatter(format: "yyyy-MM-dd'T'HH:mm")
-    private static let dayFormatter = makeFormatter(format: "yyyy-MM-dd")
-
-    private static func makeFormatter(format: String) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(identifier: "Asia/Kathmandu")
-        formatter.dateFormat = format
-        return formatter
-    }
+    private static let timeFormatter = NepalTime.formatter("yyyy-MM-dd'T'HH:mm")
+    private static let dayFormatter = NepalTime.formatter("yyyy-MM-dd")
 
     private struct Response: Decodable {
         let current: Current

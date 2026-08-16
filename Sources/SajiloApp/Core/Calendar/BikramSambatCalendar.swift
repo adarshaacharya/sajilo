@@ -27,12 +27,7 @@ enum BikramSambatCalendar {
     /// only with the same check, never on library agreement alone.
     static let provisionalNepaliYears = 2085...2090
 
-    private static let timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-    private static let gregorian: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timeZone
-        return calendar
-    }()
+    private static let gregorian = NepalTime.calendar
 
     // 1992-01-01 BS = 1935-04-13 AD. Cross-checked against an independent
     // published reference (2000-01-01 BS = 1943-04-14 AD) that the table was

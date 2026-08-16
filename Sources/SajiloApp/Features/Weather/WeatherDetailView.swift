@@ -195,13 +195,7 @@ private struct ForecastRow: View {
             + "\(forecast.precipitationChance)% chance of rain"
     }
 
-    private static let weekdayFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.timeZone = TimeZone(identifier: "Asia/Kathmandu")
-        formatter.dateFormat = "EEE"
-        return formatter
-    }()
+    private static let weekdayFormatter = NepalTime.displayFormatter("EEE")
 }
 
 /// An icon button legible on top of the sky gradient, where the standard

@@ -74,9 +74,5 @@ enum UpcomingEventsService {
         return results
     }
 
-    private static let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "Asia/Kathmandu")!
-        return calendar
-    }()
+    private static let calendar = NepalTime.calendar
 }
