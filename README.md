@@ -1,3 +1,5 @@
+<img src="docs/icon.png" alt="" width="120" height="120">
+
 # Sajilo
 
 Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
@@ -9,6 +11,7 @@ Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
 - Bikram Sambat calendar with AD dates, tithi, festivals, and public holidays
 - Personal plans and optional reminders, saved only on your Mac
 - Upcoming festivals and daily calendar details
+- Bikram Sambat ↔ AD date converter
 - Kathmandu weather and air quality
 - Nepal Rastra Bank exchange rates
 - Gold and silver rates, and Nepal Oil Corporation fuel prices
