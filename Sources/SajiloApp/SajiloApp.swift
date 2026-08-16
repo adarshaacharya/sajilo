@@ -31,14 +31,14 @@ struct SajiloApp: App {
 
 private final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Sajilo has a `MenuBarExtra` as its only shipping scene, so it must
-        // stay an agent application: AppKit would otherwise try to restore a
-        // document window that does not exist. Debug builds take a regular
-        // policy so the preview window can come to the front.
+        // Menu-bar-only unless the user asked for a Dock icon (PRD §4.1).
+        // `.accessory` also keeps AppKit from trying to restore a document
+        // window this app does not have. Debug builds stay regular so the
+        // preview window can come to the front.
         #if DEBUG
         NSApp.setActivationPolicy(.regular)
         #else
-        NSApp.setActivationPolicy(.accessory)
+        AppModel.prototype.applyActivationPolicy()
         #endif
     }
 }

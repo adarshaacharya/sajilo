@@ -17,6 +17,26 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Space.m) {
+                    SettingsSection("General") {
+                        Toggle(
+                            "Launch at login",
+                            isOn: Binding(
+                                get: { model.launchAtLogin.isEnabled },
+                                set: { model.setLaunchAtLogin($0) }
+                            )
+                        )
+                        .disabled(model.launchAtLogin == .unavailable)
+
+                        if let note = launchAtLoginNote {
+                            Text(note)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        Toggle("Show Dock icon", isOn: $model.showsDockIcon)
+                    }
+
                     SettingsSection("Menu bar") {
                         // Each option renders against today's date, so the
                         // picker previews exactly what appears in the menu bar.
@@ -38,6 +58,30 @@ struct SettingsView: View {
                                 Text(verbatim: "\(location.displayName) · \(location.nepaliName)")
                                     .tag(location)
                             }
+                        }
+                    }
+
+                    SettingsSection("Reminders") {
+                        Toggle(
+                            "Public holiday tomorrow",
+                            isOn: Binding(
+                                get: { model.notificationOptions.eveOfPublicHoliday },
+                                set: { model.notificationOptions.eveOfPublicHoliday = $0 }
+                            )
+                        )
+                        Toggle(
+                            "Festival tomorrow",
+                            isOn: Binding(
+                                get: { model.notificationOptions.eveOfFestival },
+                                set: { model.notificationOptions.eveOfFestival = $0 }
+                            )
+                        )
+
+                        if let note = notificationNote {
+                            Text(note)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
 
@@ -71,6 +115,40 @@ struct SettingsView: View {
                 }
                 .padding(Theme.Space.m)
             }
+        }
+        // Reads the current permission; it never prompts, so opening Settings
+        // cannot trigger a system dialog.
+        .task { await model.refreshNotificationAuthorization() }
+    }
+
+    /// A reminder switched on but denied at the system level would otherwise
+    /// look enabled and never fire.
+    private var notificationNote: String? {
+        guard model.notificationOptions.isAnyEnabled else {
+            return "Reminders arrive at 7pm the evening before, scheduled on this Mac."
+        }
+        switch model.notificationAuthorization {
+        case .denied:
+            return "Notifications are turned off for Sajilo in System Settings › Notifications."
+        case .notDetermined:
+            return "Waiting for notification permission."
+        case .authorized:
+            return "Reminders arrive at 7pm Nepal time the evening before."
+        }
+    }
+
+    /// Explains the states a plain on/off toggle cannot: macOS may hold the
+    /// registration pending approval, or refuse it outright for an app running
+    /// outside /Applications.
+    private var launchAtLoginNote: String? {
+        if let error = model.launchAtLoginError { return error }
+        switch model.launchAtLogin {
+        case .requiresApproval:
+            return "Waiting for approval in System Settings › General › Login Items."
+        case .unavailable:
+            return "Move Sajilo to your Applications folder to enable this."
+        case .enabled, .disabled:
+            return nil
         }
     }
 

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Observation
 
@@ -37,6 +38,9 @@ final class AppModel {
         static let weatherLocation = "weatherLocation"
         static let forexCache = "forexCache"
         static let forexFavourites = "forexFavourites"
+        static let showsDockIcon = "showsDockIcon"
+        static let notifyHolidayEve = "notifyHolidayEve"
+        static let notifyFestivalEve = "notifyFestivalEve"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -93,6 +97,42 @@ final class AppModel {
     var forexError: String? { forexFeed.errorMessage }
     var isForexStale: Bool { forexFeed.isStale }
 
+    /// PRD §4.1: the Dock icon is hidden by default, and a preference may
+    /// show it. Applied immediately so the toggle is its own preview.
+    var showsDockIcon: Bool {
+        didSet {
+            guard oldValue != showsDockIcon else { return }
+            defaults.set(showsDockIcon, forKey: DefaultsKey.showsDockIcon)
+            applyActivationPolicy()
+        }
+    }
+
+    /// PRD §5.3: opt-in and individually configurable. Turning either on is
+    /// the only thing that ever triggers the system permission prompt.
+    var notificationOptions: NotificationOptions {
+        didSet {
+            guard oldValue != notificationOptions else { return }
+            defaults.set(notificationOptions.eveOfPublicHoliday, forKey: DefaultsKey.notifyHolidayEve)
+            defaults.set(notificationOptions.eveOfFestival, forKey: DefaultsKey.notifyFestivalEve)
+            Task { [weak self] in await self?.applyNotificationOptions(wasEnabled: oldValue.isAnyEnabled) }
+        }
+    }
+
+    /// Surfaced in Settings so a denied permission explains itself rather than
+    /// leaving a toggle that appears on but never fires.
+    private(set) var notificationAuthorization: NotificationAuthorization = .notDetermined
+
+    /// Read from the system on every access rather than mirrored into
+    /// `UserDefaults`: the user can change it in System Settings, and a stored
+    /// copy would drift out of agreement with what macOS actually does.
+    var launchAtLogin: LaunchAtLoginState {
+        launchAtLoginManager.state
+    }
+
+    /// Set when a registration attempt fails, so the UI can explain instead of
+    /// silently snapping the toggle back.
+    private(set) var launchAtLoginError: String?
+
     var forexFavourites: [String] {
         didSet {
             guard oldValue != forexFavourites else { return }
@@ -103,6 +143,8 @@ final class AppModel {
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let weatherProvider: any WeatherProviding
     @ObservationIgnored private let forexProvider: any ForexProviding
+    @ObservationIgnored private let launchAtLoginManager: any LaunchAtLoginManaging
+    @ObservationIgnored private let notificationScheduler: any NotificationScheduling
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
     var cards: [DashboardCard] { [weatherCard, forexCard] }
@@ -160,11 +202,15 @@ final class AppModel {
         defaults: UserDefaults = .standard,
         weatherProvider: any WeatherProviding = OpenMeteoWeatherProvider(),
         forexProvider: any ForexProviding = NRBForexProvider(),
+        launchAtLoginManager: any LaunchAtLoginManaging = SystemLaunchAtLogin(),
+        notificationScheduler: any NotificationScheduling = SystemNotificationScheduler(),
         autoLoadWeather: Bool = true
     ) {
         self.defaults = defaults
         self.weatherProvider = weatherProvider
         self.forexProvider = forexProvider
+        self.launchAtLoginManager = launchAtLoginManager
+        self.notificationScheduler = notificationScheduler
         referenceDate = now
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
@@ -178,6 +224,11 @@ final class AppModel {
         selectedWeatherLocation = location
         forexFavourites = defaults.stringArray(forKey: DefaultsKey.forexFavourites)
             ?? ForexCurrency.defaultFavourites
+        showsDockIcon = defaults.bool(forKey: DefaultsKey.showsDockIcon)
+        notificationOptions = NotificationOptions(
+            eveOfPublicHoliday: defaults.bool(forKey: DefaultsKey.notifyHolidayEve),
+            eveOfFestival: defaults.bool(forKey: DefaultsKey.notifyFestivalEve)
+        )
 
         let fallbackDate = NepaliDate(year: 2083, month: 4, day: 30)
         let resolvedToday = (try? BikramSambatCalendar.nepaliDate(from: now)) ?? fallbackDate
@@ -241,6 +292,78 @@ final class AppModel {
     func jumpToToday() {
         guard let month = try? BikramSambatCalendar.month(containing: today, today: today) else { return }
         selectedMonth = month
+    }
+
+    // MARK: - Notifications
+
+    /// Reads the current permission without prompting, so Settings can explain
+    /// a denial. Prompting happens only in `applyNotificationOptions`.
+    func refreshNotificationAuthorization() async {
+        notificationAuthorization = await notificationScheduler.authorization()
+    }
+
+    /// Recomputes the schedule from the bundled festival list. Safe to call
+    /// repeatedly — the scheduler replaces Sajilo's requests rather than
+    /// appending, and identifiers are stable per date.
+    func rescheduleNotifications() async {
+        guard notificationOptions.isAnyEnabled else {
+            await notificationScheduler.cancelAll()
+            return
+        }
+        guard notificationAuthorization == .authorized else { return }
+
+        let planned = FestivalNotificationPlanner.plan(
+            events: UpcomingEventsService.events(from: today, limit: FestivalNotificationPlanner.limit * 2),
+            options: notificationOptions,
+            now: .now
+        )
+        await notificationScheduler.replaceScheduled(with: planned)
+    }
+
+    /// PRD §9: the permission prompt appears only when the user switches a
+    /// reminder on, never at launch and never when switching one off.
+    private func applyNotificationOptions(wasEnabled: Bool) async {
+        guard notificationOptions.isAnyEnabled else {
+            await notificationScheduler.cancelAll()
+            return
+        }
+
+        if !wasEnabled || notificationAuthorization == .notDetermined {
+            notificationAuthorization = await notificationScheduler.authorization()
+            if notificationAuthorization == .notDetermined {
+                _ = await notificationScheduler.requestAuthorization()
+                notificationAuthorization = await notificationScheduler.authorization()
+            }
+        }
+        await rescheduleNotifications()
+    }
+
+    // MARK: - System integration
+
+    /// Toggling this can fail — macOS refuses to register an app running from
+    /// a temporary directory — so the result is reported rather than assumed.
+    func setLaunchAtLogin(_ enabled: Bool) {
+        do {
+            try launchAtLoginManager.setEnabled(enabled)
+            launchAtLoginError = nil
+        } catch {
+            launchAtLoginError = enabled
+                ? "Could not enable launch at login. Move Sajilo to your Applications folder and try again."
+                : "Could not disable launch at login. You can remove it in System Settings › General › Login Items."
+        }
+    }
+
+    /// PRD §4.1: menu-bar-only by default, with the Dock icon behind a
+    /// preference. `.accessory` also keeps AppKit from trying to restore a
+    /// document window this app does not have.
+    func applyActivationPolicy() {
+        #if DEBUG
+        // The debug preview window is unreachable from an accessory app, so
+        // local builds stay regular whatever the preference says.
+        NSApplication.shared.setActivationPolicy(.regular)
+        #else
+        NSApplication.shared.setActivationPolicy(showsDockIcon ? .regular : .accessory)
+        #endif
     }
 
     // MARK: - Weather
@@ -307,6 +430,7 @@ final class AppModel {
         }
         todayEvent = CalendarEventStore.events(year: today.year, month: today.month)[today.day]
         upcomingEvents = UpcomingEventsService.events(from: today)
+        Task { [weak self] in await self?.rescheduleNotifications() }
         // Rebuild the visible month so the `isToday` highlight moves even when
         // the user left the popover open on another month.
         if let month = try? BikramSambatCalendar.month(containing: selectedMonth.firstDate, today: today) {
