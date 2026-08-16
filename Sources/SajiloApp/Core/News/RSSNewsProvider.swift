@@ -34,10 +34,41 @@ struct RSSNewsProvider: NewsProviding {
         }
 
         return NewsDigest(
-            items: Self.interleave(ordered.map(\.1), limit: limit),
+            items: Self.newestFirst(Self.interleave(ordered.map(\.1), limit: limit)),
             fetchedAt: .now,
             failedSources: ordered.filter { $0.1.isEmpty }.map(\.0.displayName)
         )
+    }
+
+    /// Orders dated stories newest first without undoing the round-robin.
+    ///
+    /// Sorting the whole list by date sends every undated story to the bottom,
+    /// and one publisher — Annapurna Post — dates nothing at all. Their twenty
+    /// headlines then land past position 115 of 135, six reveals down, which
+    /// reads as the source having disappeared.
+    ///
+    /// So an undated item keeps the slot `interleave` gave it, and only the
+    /// dated slots are refilled in date order. Readers get newest-first among
+    /// everything that can be ranked, and a publisher is not punished for the
+    /// shape of its feed.
+    static func newestFirst(_ items: [NewsItem]) -> [NewsItem] {
+        var dated = items
+            .enumerated()
+            .filter { $0.element.published != nil }
+            .sorted { left, right in
+                guard let leftDate = left.element.published,
+                      let rightDate = right.element.published else { return false }
+                // Ties keep their interleaved order, so the sort stays stable
+                // and a refresh cannot shuffle equally-timed headlines.
+                return leftDate == rightDate ? left.offset < right.offset : leftDate > rightDate
+            }
+            .map(\.element)
+            .makeIterator()
+
+        return items.map { item in
+            guard item.published != nil else { return item }
+            return dated.next() ?? item
+        }
     }
 
     /// Takes one headline from each source in turn.

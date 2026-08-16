@@ -61,6 +61,54 @@ struct NewsMergeTests {
         #expect(RSSNewsProvider.interleave([[], []], limit: 8).isEmpty)
     }
 
+    @Test func showsNewestDatedHeadlinesFirstAndLeavesUndatedItemsVisible() {
+        let earlier = NewsItem(
+            title: "Earlier", link: URL(string: "https://example.com/earlier")!, sourceName: "A",
+            published: Date(timeIntervalSince1970: 100)
+        )
+        let undated = NewsItem(
+            title: "Undated", link: URL(string: "https://example.com/undated")!, sourceName: "B",
+            published: nil
+        )
+        let latest = NewsItem(
+            title: "Latest", link: URL(string: "https://example.com/latest")!, sourceName: "C",
+            published: Date(timeIntervalSince1970: 300)
+        )
+
+        let sorted = RSSNewsProvider.newestFirst([earlier, undated, latest])
+
+        // The undated story holds slot 1 — the one interleave gave it — while
+        // the two dated slots are refilled newest first. Sorting it to the end
+        // instead would bury every Annapurna Post headline, since that feed
+        // dates nothing at all.
+        #expect(sorted.map(\.title) == ["Latest", "Undated", "Earlier"])
+    }
+
+    /// The whole point: a publisher that dates nothing must still appear near
+    /// the top rather than after everyone else's back catalogue.
+    @Test func anUndatedSourceIsNotBuriedBeneathTheDatedOnes() {
+        func item(_ title: String, _ source: String, _ stamp: TimeInterval?) -> NewsItem {
+            NewsItem(
+                title: title,
+                link: URL(string: "https://example.com/\(title)")!,
+                sourceName: source,
+                published: stamp.map(Date.init(timeIntervalSince1970:))
+            )
+        }
+        // Interleaved: one undated headline in every other slot.
+        let merged = [
+            item("dated-1", "A", 100), item("undated-1", "B", nil),
+            item("dated-2", "A", 500), item("undated-2", "B", nil),
+            item("dated-3", "A", 300), item("undated-3", "B", nil),
+        ]
+
+        let sorted = RSSNewsProvider.newestFirst(merged)
+
+        #expect(sorted.map(\.title) == ["dated-2", "undated-1", "dated-3", "undated-2", "dated-1", "undated-3"])
+        let firstUndated = try? #require(sorted.firstIndex { $0.published == nil })
+        #expect(firstUndated == 1, "the undated source stays near the top")
+    }
+
     /// News must not follow the app language: that setting is about Sajilo's
     /// own chrome, and an English interface does not mean the reader wants
     /// Nepali newsrooms hidden.
