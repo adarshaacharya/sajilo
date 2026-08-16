@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "Sajilo",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "Sajilo", targets: ["SajiloApp"])
@@ -11,7 +12,11 @@ let package = Package(
         .executableTarget(
             name: "SajiloApp",
             path: "Sources/SajiloApp",
-            resources: [.copy("Resources/CalendarEvents")]
+            resources: [
+                .copy("Resources/CalendarEvents"),
+                .process("Resources/en.lproj"),
+                .process("Resources/ne.lproj")
+            ]
         ),
         .testTarget(
             name: "SajiloAppTests",

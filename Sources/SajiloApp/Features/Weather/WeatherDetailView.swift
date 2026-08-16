@@ -38,7 +38,7 @@ struct WeatherDetailView: View {
 
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
                 HStack(spacing: Theme.Space.s) {
-                    Button("Back", systemImage: "chevron.left", action: onBack)
+                    Button(L10n.back, systemImage: "chevron.left", action: onBack)
                         .labelStyle(.iconOnly)
                         .buttonStyle(GlassIconButtonStyle())
                         .accessibilityLabel("Back to dashboard")
@@ -48,7 +48,7 @@ struct WeatherDetailView: View {
 
                     Spacer(minLength: 0)
 
-                    Button("Refresh", systemImage: "arrow.clockwise") {
+                    Button(L10n.refresh, systemImage: "arrow.clockwise") {
                         Task { await model.refreshWeather() }
                     }
                     .labelStyle(.iconOnly)
@@ -105,7 +105,7 @@ struct WeatherDetailView: View {
                 if let weather {
                     if let tomorrow = weather.tomorrow {
                         VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                            Text("Tomorrow")
+                            Text(L10n.tomorrow)
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.secondary)
                             ForecastRow(forecast: tomorrow, showsWeekday: false)
@@ -146,6 +146,7 @@ struct WeatherDetailView: View {
             }
             .padding(Theme.Space.m)
         }
+        .softScroll()
     }
 }
 

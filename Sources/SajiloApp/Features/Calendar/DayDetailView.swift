@@ -22,7 +22,7 @@ struct DayDetailView: View {
                         // months; saying so beats rendering a blank card that
                         // reads as "nothing happens today".
                         Label(
-                            "No festival or tithi recorded for this day.",
+                            L10n.noEventToday,
                             systemImage: "info.circle"
                         )
                         .font(.caption)
@@ -39,7 +39,7 @@ struct DayDetailView: View {
                     }
                 } else {
                     Label(
-                        "This date is outside Sajilo’s bundled calendar range.",
+                        L10n.outOfRange,
                         systemImage: "exclamationmark.triangle"
                     )
                     .font(.callout)
@@ -59,12 +59,12 @@ struct DayDetailView: View {
 
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
-            Button("Back", systemImage: "chevron.left", action: onBack)
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
                 .accessibilityLabel("Back to calendar")
 
-            Text("Date Details")
+            Text(L10n.dateDetails)
                 .font(.headline)
 
             Spacer(minLength: 0)

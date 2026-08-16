@@ -1,5 +1,40 @@
 # Third-party notices
 
+## News headlines
+
+Headlines come from publisher RSS feeds, each verified to return
+`application/rss+xml`:
+
+| Publisher | Feed |
+|---|---|
+| OnlineKhabar | `https://www.onlinekhabar.com/feed` |
+| OnlineKhabar English | `https://english.onlinekhabar.com/feed` |
+| Annapurna Post | `https://annapurnapost.com/rss/` |
+| Ratopati | `https://www.ratopati.com/feed` |
+| Bizkhabar | `https://www.bizkhabar.com/feed` |
+
+**Only the headline, link, and publish date are read.** Several of these feeds
+carry the full article body in `content:encoded`; the parser touches three
+elements and ignores everything else. Syndicating a feed is not a licence to
+republish what it contains, and Sajilo is distributed beyond Nepal, so this
+holds whichever jurisdiction's rules apply. Every headline opens in the user's
+default browser — there is no embedded reader (PRD §11).
+
+Kantipur and Hamro Patro are deliberately absent. Neither publishes a real
+feed — both advertised endpoints return HTML — and the alternative, parsing
+their pages, is the same technique that costs the bundled festival dataset 349
+days of data. Reliability, not permission, is the reason.
+
+Headlines are merged round-robin rather than sorted by time: Annapurna Post
+publishes no `pubDate` at all, and OnlineKhabar returns 55 items where
+Bizkhabar returns 10, so a time sort would bury the smaller publishers.
+
+All sources are read regardless of the app's language setting. That setting
+governs Sajilo's own chrome and says nothing about which newsrooms a reader
+wants — someone running the interface in English is usually still a Nepali
+reader. Headlines appear in whatever language they were written in; nothing is
+translated.
+
 ## Nepal Rastra Bank exchange rates
 
 Rates come from Nepal Rastra Bank's published forex API

@@ -36,6 +36,7 @@ struct ForexDetailView: View {
                 }
                 .padding(Theme.Space.m)
             }
+            .softScroll()
         }
         .onAppear {
             selectedCode = model.headlineRate?.currencyCode ?? "USD"
@@ -48,17 +49,17 @@ struct ForexDetailView: View {
 
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
-            Button("Back", systemImage: "chevron.left", action: onBack)
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
                 .accessibilityLabel("Back to dashboard")
 
-            Text("Exchange Rates")
+            Text(L10n.exchangeRates)
                 .font(.headline)
 
             Spacer(minLength: 0)
 
-            Button("Refresh", systemImage: "arrow.clockwise") {
+            Button(L10n.refresh, systemImage: "arrow.clockwise") {
                 Task { await model.refreshForex() }
             }
             .labelStyle(.iconOnly)
@@ -90,7 +91,7 @@ struct ForexDetailView: View {
                 .labelsHidden()
                 .frame(width: 84)
 
-                Button("Swap", systemImage: "arrow.left.arrow.right") {
+                Button(L10n.swap, systemImage: "arrow.left.arrow.right") {
                     withAnimation(motion) { isReversed.toggle() }
                 }
                 .labelStyle(.iconOnly)
@@ -137,7 +138,7 @@ struct ForexDetailView: View {
         let rates = model.favouriteRates
         if !rates.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("Favourites")
+                Text(L10n.favourites)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 ForEach(rates) { RateRow(rate: $0) }
@@ -151,7 +152,7 @@ struct ForexDetailView: View {
         let others = forex.rates.filter { !model.forexFavourites.contains($0.currencyCode) }
         if !others.isEmpty {
             VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Text("All currencies")
+                Text(L10n.allCurrencies)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                 ForEach(others) { RateRow(rate: $0) }

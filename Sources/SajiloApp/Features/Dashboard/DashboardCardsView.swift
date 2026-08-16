@@ -6,6 +6,7 @@ import SwiftUI
 struct DashboardCardsView: View {
     let cards: [DashboardCard]
     let weather: WeatherSnapshot?
+    let forexTrend: [Double]?
     let isActive: Bool
     let openWeather: () -> Void
     let openForex: () -> Void
@@ -14,7 +15,7 @@ struct DashboardCardsView: View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
             HStack(spacing: Theme.Space.m) {
                 ForEach(cards) { card in
-                    DashboardCardView(card: card, weather: weather, isActive: isActive, openWeather: openWeather, openForex: openForex)
+                    DashboardCardView(card: card, weather: weather, forexTrend: forexTrend, isActive: isActive, openWeather: openWeather, openForex: openForex)
                 }
             }
 
@@ -28,11 +29,11 @@ struct DashboardCardsView: View {
                     Link("Open-Meteo", destination: URL(string: "https://open-meteo.com/")!)
                 }
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
             } else if let freshness = cards.first?.freshness {
                 Text(freshness)
                     .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
             }
         }
     }
@@ -41,6 +42,7 @@ struct DashboardCardsView: View {
 private struct DashboardCardView: View {
     let card: DashboardCard
     let weather: WeatherSnapshot?
+    let forexTrend: [Double]?
     let isActive: Bool
     let openWeather: () -> Void
     let openForex: () -> Void
@@ -97,12 +99,20 @@ private struct DashboardCardView: View {
     /// going white, so nothing here can hurt legibility.
     @ViewBuilder
     private var atmosphere: some View {
-        if card.kind == .weather, let weather {
+        if card.kind == .forex, let forexTrend {
+            SparklineView(values: forexTrend)
+                // Bottom third only, so it never runs behind the rate itself.
+                .frame(height: 22)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.horizontal, -Theme.Space.s)
+                .padding(.bottom, -Theme.Space.s)
+                .accessibilityHidden(true)
+        } else if card.kind == .weather, let weather {
             let phase = SkyPhase.current(sunrise: weather.sunrise, sunset: weather.sunset)
 
             ZStack {
                 LinearGradient(sky: phase)
-                    .opacity(0.16)
+                    .opacity(0.11)
 
                 WeatherAtmosphereView(
                     condition: weather.condition,

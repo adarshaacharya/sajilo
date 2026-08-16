@@ -17,22 +17,24 @@ final class AppModel {
         /// Renders the format against a real date. The Settings picker shows
         /// each option applied to today, so what the user previews is exactly
         /// what lands in the menu bar.
-        func title(for date: NepaliDate) -> String {
-            let day = NepaliNumerals.string(from: date.day)
-            let year = NepaliNumerals.string(from: date.year)
+        func title(for date: NepaliDate, numerals: NumeralStyle = .default) -> String {
+            let day = numerals.string(from: date.day)
+            let year = numerals.string(from: date.year)
 
             switch self {
             case .nepaliShort: return "\(day) \(date.nepaliMonthName)"
             case .nepaliLong: return "\(day) \(date.nepaliMonthName) \(year)"
             case .nepaliFlag: return "🇳🇵 \(day) \(date.nepaliMonthName)"
             case .englishShort: return "\(date.day) \(date.englishMonthName)"
-            case .numeric: return date.nepaliNumerals
+            case .numeric: return numerals.slashedDate(date)
             }
         }
     }
 
     private enum DefaultsKey {
         static let menuBarFormat = "menuBarFormat"
+        static let appLanguage = "appLanguage"
+        static let numeralStyle = "numeralStyle"
         static let weatherEnabled = "weatherEnabled"
         static let forexEnabled = "forexEnabled"
         static let weatherLocation = "weatherLocation"
@@ -41,6 +43,8 @@ final class AppModel {
         static let showsDockIcon = "showsDockIcon"
         static let notifyHolidayEve = "notifyHolidayEve"
         static let notifyFestivalEve = "notifyFestivalEve"
+        static let newsEnabled = "newsEnabled"
+        static let newsCache = "newsCache"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -53,12 +57,34 @@ final class AppModel {
         didSet { defaults.set(selectedMenuBarFormat.rawValue, forKey: DefaultsKey.menuBarFormat) }
     }
 
+    var appLanguage: AppLanguage {
+        didSet { defaults.set(appLanguage.rawValue, forKey: DefaultsKey.appLanguage) }
+    }
+
+    /// PRD §5.10 numeral preference. Not a translation setting — month and
+    /// weekday names stay Devanagari either way; this is only which digits
+    /// the dates are drawn with.
+    var numeralStyle: NumeralStyle {
+        didSet { defaults.set(numeralStyle.rawValue, forKey: DefaultsKey.numeralStyle) }
+    }
+
     var isWeatherEnabled: Bool {
         didSet { defaults.set(isWeatherEnabled, forKey: DefaultsKey.weatherEnabled) }
     }
 
     var isForexEnabled: Bool {
         didSet { defaults.set(isForexEnabled, forKey: DefaultsKey.forexEnabled) }
+    }
+
+    /// On by default, like the other modules. The popover stays calendar-first
+    /// either way — news lives in its own route, never on the dashboard.
+    var isNewsEnabled: Bool {
+        didSet {
+            guard oldValue != isNewsEnabled else { return }
+            defaults.set(isNewsEnabled, forKey: DefaultsKey.newsEnabled)
+            guard isNewsEnabled else { return }
+            Task { [weak self] in await self?.refreshNewsIfStale() }
+        }
     }
 
     var selectedWeatherLocation: WeatherLocation {
@@ -86,11 +112,16 @@ final class AppModel {
     /// `model.weather` rather than reaching through a feed.
     @ObservationIgnored private var weatherFeed: RemoteFeed<WeatherSnapshot>!
     @ObservationIgnored private var forexFeed: RemoteFeed<ForexSnapshot>!
+    @ObservationIgnored private var newsFeed: RemoteFeed<NewsDigest>!
 
     var weather: WeatherSnapshot? { weatherFeed.value }
     var isWeatherLoading: Bool { weatherFeed.isLoading }
     var weatherError: String? { weatherFeed.errorMessage }
     var isWeatherStale: Bool { weatherFeed.isStale }
+
+    var news: NewsDigest? { newsFeed.value }
+    var isNewsLoading: Bool { newsFeed.isLoading }
+    var newsError: String? { newsFeed.errorMessage }
 
     var forex: ForexSnapshot? { forexFeed.value }
     var isForexLoading: Bool { forexFeed.isLoading }
@@ -145,6 +176,7 @@ final class AppModel {
     @ObservationIgnored private let forexProvider: any ForexProviding
     @ObservationIgnored private let launchAtLoginManager: any LaunchAtLoginManaging
     @ObservationIgnored private let notificationScheduler: any NotificationScheduling
+    @ObservationIgnored private let newsProvider: any NewsProviding
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
     var cards: [DashboardCard] { [weatherCard, forexCard] }
@@ -153,6 +185,13 @@ final class AppModel {
     var headlineRate: ForexRate? {
         guard let forex else { return nil }
         return forex.rates(for: forexFavourites).first ?? forex.rate(for: "USD")
+    }
+
+    /// Trend for the currency on the card, when the window holds enough
+    /// movement to be worth drawing.
+    var headlineTrend: [Double]? {
+        guard let code = headlineRate?.currencyCode else { return nil }
+        return forex?.trend(for: code)
     }
 
     var favouriteRates: [ForexRate] {
@@ -165,7 +204,7 @@ final class AppModel {
     }
 
     var menuBarTitle: String {
-        selectedMenuBarFormat.title(for: today)
+        selectedMenuBarFormat.title(for: today, numerals: numeralStyle)
     }
 
     var visibleCards: [DashboardCard] {
@@ -189,8 +228,23 @@ final class AppModel {
         BikramSambatCalendar.provisionalNepaliYears.contains(selectedMonth.firstDate.year)
     }
 
+    /// Spoken form, used for the accessibility label where the weekday is not
+    /// already conveyed by the Nepali one beside it.
     var gregorianDate: String {
         Self.gregorianFormatter.string(from: referenceDate)
+    }
+
+    /// Shown form. The weekday is dropped because the Nepali weekday sits on
+    /// the same line — printing "आइतबार" and "Sunday" together is the same
+    /// word twice.
+    var gregorianDisplayDate: String {
+        Self.gregorianDisplayFormatter.string(from: referenceDate)
+    }
+
+    /// Weekday without the "बार" suffix, for the narrow date tile where the
+    /// full form would not fit.
+    var nepaliWeekdayShort: String {
+        Self.nepaliWeekdayShortNames[Self.nepalCalendar.component(.weekday, from: referenceDate) - 1]
     }
 
     var nepaliWeekday: String {
@@ -204,6 +258,7 @@ final class AppModel {
         forexProvider: any ForexProviding = NRBForexProvider(),
         launchAtLoginManager: any LaunchAtLoginManaging = SystemLaunchAtLogin(),
         notificationScheduler: any NotificationScheduling = SystemNotificationScheduler(),
+        newsProvider: any NewsProviding = RSSNewsProvider(),
         autoLoadWeather: Bool = true
     ) {
         self.defaults = defaults
@@ -211,14 +266,23 @@ final class AppModel {
         self.forexProvider = forexProvider
         self.launchAtLoginManager = launchAtLoginManager
         self.notificationScheduler = notificationScheduler
+        self.newsProvider = newsProvider
         referenceDate = now
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
             .flatMap(MenuBarFormat.init(rawValue:)) ?? .nepaliShort
+        appLanguage = defaults.string(forKey: DefaultsKey.appLanguage)
+            .flatMap(AppLanguage.init(rawValue:)) ?? .mixed
+        numeralStyle = defaults.string(forKey: DefaultsKey.numeralStyle)
+            .flatMap(NumeralStyle.init(rawValue:)) ?? .default
         // `object(forKey:)` distinguishes "never set" from "set to false", so a
         // user who disables a card keeps it disabled across relaunches.
         isWeatherEnabled = defaults.object(forKey: DefaultsKey.weatherEnabled) as? Bool ?? true
         isForexEnabled = defaults.object(forKey: DefaultsKey.forexEnabled) as? Bool ?? true
+        // `object(forKey:)`, not `bool(forKey:)`: the latter returns false for
+        // "never set", which is indistinguishable from "the user turned it
+        // off" and would silently re-enable it on every launch.
+        isNewsEnabled = defaults.object(forKey: DefaultsKey.newsEnabled) as? Bool ?? true
         let location = defaults.string(forKey: DefaultsKey.weatherLocation)
             .flatMap(WeatherLocation.init(rawValue:)) ?? .default
         selectedWeatherLocation = location
@@ -264,6 +328,23 @@ final class AppModel {
             }
         ) { [forexProvider] in
             try await forexProvider.latestRates()
+        }
+
+        newsFeed = RemoteFeed(
+            subject: "news",
+            cacheKey: DefaultsKey.newsCache,
+            // v2: sources stopped following the app language.
+            // v3: the whole feed is kept rather than the first eight, so a v2
+            // entry would leave the list stuck at eight until it aged out.
+            cacheVersion: 3,
+            staleInterval: Self.newsStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt
+        ) { [newsProvider] in
+            await newsProvider.headlines(
+                from: NewsSource.active,
+                limit: Self.newsHeadlineLimit
+            )
         }
 
         scheduleMidnightRefresh()
@@ -395,6 +476,27 @@ final class AppModel {
         await forexFeed.refresh()
     }
 
+    // MARK: - News
+
+    /// News moves faster than rates but this is a menu-bar utility, not a
+    /// reader; half an hour is plenty and keeps the feeds unbothered.
+    static let newsStaleInterval: TimeInterval = 30 * 60
+    /// Everything the five feeds carry between them — about 135 headlines.
+    ///
+    /// There is no pagination to request: RSS returns a fixed snapshot, so this
+    /// fetches the whole set once and the view reveals it progressively. The
+    /// ceiling exists to bound the cache, not to page.
+    static let newsHeadlineLimit = 150
+
+    func refreshNewsIfStale() async {
+        guard isNewsEnabled else { return }
+        await newsFeed.refreshIfStale()
+    }
+
+    func refreshNews() async {
+        await newsFeed.refresh()
+    }
+
     // MARK: - Date rollover
 
     /// The menu-bar label must change at Nepal local midnight (PRD §4.1), which
@@ -467,6 +569,10 @@ final class AppModel {
     }
     #endif
 
+    private static let nepaliWeekdayShortNames = [
+        "आइत", "सोम", "मंगल", "बुध", "बिही", "शुक्र", "शनि"
+    ]
+
     private static let nepaliWeekdayNames = [
         "आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहीबार", "शुक्रबार", "शनिबार"
     ]
@@ -474,6 +580,7 @@ final class AppModel {
     private static let nepalCalendar = NepalTime.calendar
 
     private static let gregorianFormatter = NepalTime.displayFormatter("EEEE, MMMM d, yyyy")
+    private static let gregorianDisplayFormatter = NepalTime.displayFormatter("d MMMM yyyy")
 
     private var weatherCard: DashboardCard {
         if let weather {

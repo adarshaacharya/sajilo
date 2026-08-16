@@ -63,7 +63,7 @@ struct DateSummaryPanel: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             if isHoliday {
-                Label("Public holiday", systemImage: "circle.fill")
+                Label(L10n.publicHoliday, systemImage: "circle.fill")
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(Theme.Palette.holiday)
                     .imageScale(.small)
@@ -81,7 +81,7 @@ struct CopyFormatsPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
-            Text("Copy as")
+            Text(L10n.copyAs)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
 

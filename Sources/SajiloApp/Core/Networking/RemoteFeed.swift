@@ -48,12 +48,20 @@ final class RemoteFeed<Value: Codable & Equatable & Sendable> {
     /// Maps domain errors to copy. Returning nil falls through to the shared
     /// network wording.
     @ObservationIgnored private let describeError: (any Error) -> String?
-    @ObservationIgnored private var cacheKey: String
+    /// Bumped whenever the *meaning* of a cached value changes, not just its
+    /// shape. A decodable-but-wrong payload is the dangerous case: news cached
+    /// under an earlier source list decoded perfectly and kept serving a single
+    /// publisher long after that logic was removed, because the entry was still
+    /// inside its staleness window and no refresh was ever attempted.
+    @ObservationIgnored private let cacheVersion: Int
+    @ObservationIgnored private var baseCacheKey: String
+    private var cacheKey: String { "\(baseCacheKey).v\(cacheVersion)" }
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
 
     init(
         subject: String,
         cacheKey: String,
+        cacheVersion: Int = 1,
         staleInterval: TimeInterval,
         defaults: UserDefaults,
         fetchedAt: @escaping @Sendable (Value) -> Date,
@@ -61,13 +69,24 @@ final class RemoteFeed<Value: Codable & Equatable & Sendable> {
         load: @escaping @MainActor () async throws -> Value
     ) {
         self.subject = subject
-        self.cacheKey = cacheKey
+        self.baseCacheKey = cacheKey
+        self.cacheVersion = cacheVersion
         self.staleInterval = staleInterval
         self.defaults = defaults
         self.fetchedAt = fetchedAt
         self.describeError = describeError
         self.load = load
-        value = Self.readCache(from: defaults, key: cacheKey)
+        Self.discardOlderVersions(of: cacheKey, upTo: cacheVersion, in: defaults)
+        value = Self.readCache(from: defaults, key: self.cacheKey)
+    }
+
+    /// Superseded entries would otherwise sit in `UserDefaults` forever.
+    private static func discardOlderVersions(of key: String, upTo version: Int, in defaults: UserDefaults) {
+        // The pre-versioning key, plus every earlier version.
+        defaults.removeObject(forKey: key)
+        for older in 1..<max(version, 1) {
+            defaults.removeObject(forKey: "\(key).v\(older)")
+        }
     }
 
     deinit { refreshTask?.cancel() }
@@ -122,9 +141,10 @@ final class RemoteFeed<Value: Codable & Equatable & Sendable> {
     /// there. Weather uses this when the city changes, so one city's reading is
     /// never relabelled as another's.
     func rebind(cacheKey newKey: String) {
-        guard newKey != cacheKey else { return }
-        cacheKey = newKey
-        value = Self.readCache(from: defaults, key: newKey)
+        guard newKey != baseCacheKey else { return }
+        baseCacheKey = newKey
+        Self.discardOlderVersions(of: newKey, upTo: cacheVersion, in: defaults)
+        value = Self.readCache(from: defaults, key: cacheKey)
         errorMessage = nil
     }
 

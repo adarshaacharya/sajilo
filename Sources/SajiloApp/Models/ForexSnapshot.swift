@@ -49,6 +49,13 @@ struct ForexRate: Codable, Equatable, Sendable, Identifiable {
 
 struct ForexSnapshot: Codable, Equatable, Sendable {
     let rates: [ForexRate]
+    /// Buy rate per currency across the requested window, oldest first.
+    ///
+    /// The provider already asks NRB for a date range so a non-publishing day
+    /// falls back to rates still in force; this keeps the rest of that response
+    /// instead of discarding it, which is enough for a trend line at no extra
+    /// request cost.
+    var history: [String: [Double]] = [:]
     /// The date the rates apply to.
     let date: Date
     /// NRB's own publish and revise timestamps. PRD §5.5 requires showing the
@@ -63,6 +70,16 @@ struct ForexSnapshot: Codable, Equatable, Sendable {
 
     func rates(for codes: [String]) -> [ForexRate] {
         codes.compactMap { rate(for: $0) }
+    }
+
+    /// A trend needs at least two points and some movement; a flat or
+    /// single-point series would draw a meaningless straight line.
+    func trend(for currencyCode: String) -> [Double]? {
+        guard let series = history[currencyCode], series.count >= 3,
+              let low = series.min(), let high = series.max(), high > low else {
+            return nil
+        }
+        return series
     }
 
     /// The most recent timestamp the source gives.

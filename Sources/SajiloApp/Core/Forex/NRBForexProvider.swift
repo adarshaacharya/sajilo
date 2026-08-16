@@ -68,8 +68,18 @@ struct NRBForexProvider: ForexProviding {
         }
         guard !rates.isEmpty else { throw ForexProviderError.noRatesPublished }
 
+        // Every day in the window, oldest first, keyed by currency.
+        var history: [String: [Double]] = [:]
+        for (day, _) in entries.sorted(by: { $0.1 < $1.1 }) {
+            for rate in day.rates {
+                guard let buy = Double(rate.buy) else { continue }
+                history[rate.currency.iso3, default: []].append(buy)
+            }
+        }
+
         return ForexSnapshot(
             rates: rates,
+            history: history,
             date: date,
             publishedOn: entry.publishedOn.flatMap(timestampFormatter.date(from:)),
             modifiedOn: entry.modifiedOn.flatMap(timestampFormatter.date(from:)),

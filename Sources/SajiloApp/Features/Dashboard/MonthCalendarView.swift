@@ -7,8 +7,12 @@ struct MonthCalendarView: View {
     let model: AppModel
     let onSelectDate: (NepaliDate) -> Void
 
+    @Environment(\.numeralStyle) private var numerals
     @State private var isMovingForward = true
     @FocusState private var isFocused: Bool
+    /// Latches on the first arrow key, so the focus ring is shown to keyboard
+    /// users and never to someone who only clicked.
+    @State private var hasUsedKeyboard = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let weekdaySymbols = ["आ", "सो", "मं", "बु", "बि", "शु", "श"]
@@ -44,7 +48,7 @@ struct MonthCalendarView: View {
             .clipped()
 
             if model.isShowingProvisionalYear {
-                Label("Provisional — not yet officially published", systemImage: "exclamationmark.circle")
+                Label(L10n.provisional, systemImage: "exclamationmark.circle")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -58,27 +62,41 @@ struct MonthCalendarView: View {
         // rendering fault. The ring is replaced below with one that follows the
         // card — keyboard users still get an indicator, it just fits.
         .focusEffectDisabled()
+        // Shown only once the keyboard has actually been used. The calendar
+        // takes focus the moment the popover opens, so an always-on ring
+        // appears for every mouse user and reads as a selection or an error.
         .overlay {
             RoundedRectangle(cornerRadius: Theme.Radius.card)
-                .strokeBorder(Theme.Palette.brand, lineWidth: 1.5)
+                .strokeBorder(Theme.Palette.brand, lineWidth: 1)
                 .padding(-Theme.Space.m)
-                .opacity(isFocused ? 0.55 : 0)
+                .opacity(isFocused && hasUsedKeyboard ? 0.4 : 0)
         }
         .animation(.easeOut(duration: 0.12), value: isFocused)
+        .animation(.easeOut(duration: 0.12), value: hasUsedKeyboard)
         .onKeyPress(.leftArrow) {
+            hasUsedKeyboard = true
             move(by: -1)
             return .handled
         }
         .onKeyPress(.rightArrow) {
+            hasUsedKeyboard = true
             move(by: 1)
             return .handled
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Month calendar for \(model.selectedMonth.title)")
+        .accessibilityLabel("Month calendar for \(monthTitle)")
     }
 
     /// Slides the outgoing month out the way the user is travelling and brings
     /// the new one in behind it, so the direction of navigation is legible.
+    /// Built here rather than read from `CalendarMonth.title`: that string is
+    /// composed in the calendar engine, which has no view environment and so
+    /// always renders Devanagari digits.
+    private var monthTitle: String {
+        let date = model.selectedMonth.firstDate
+        return "\(date.nepaliMonthName) \(numerals.string(from: date.year))"
+    }
+
     private var pushTransition: AnyTransition {
         guard !reduceMotion else { return .opacity }
         return .asymmetric(
@@ -103,14 +121,14 @@ struct MonthCalendarView: View {
 
     private var header: some View {
         HStack(spacing: Theme.Space.xs) {
-            Button("Previous month", systemImage: "chevron.left") {
+            Button(L10n.previousMonth, systemImage: "chevron.left") {
                 move(by: -1)
             }
             .labelStyle(.iconOnly)
 
             Spacer(minLength: 0)
 
-            Text(model.selectedMonth.title)
+            Text(monthTitle)
                 .font(.nepali(15, weight: .semibold))
                 .id(model.selectedMonth.firstDate)
                 .transition(.opacity)
@@ -119,14 +137,14 @@ struct MonthCalendarView: View {
 
             // Kept in the layout while disabled so the month title does not
             // shift as the user navigates away from the current month.
-            Button("Jump to today", systemImage: "smallcircle.filled.circle") {
+            Button(L10n.jumpToToday, systemImage: "smallcircle.filled.circle") {
                 jumpToToday()
             }
             .labelStyle(.iconOnly)
             .disabled(model.isShowingCurrentMonth)
             .opacity(model.isShowingCurrentMonth ? 0 : 1)
 
-            Button("Next month", systemImage: "chevron.right") {
+            Button(L10n.nextMonth, systemImage: "chevron.right") {
                 move(by: 1)
             }
             .labelStyle(.iconOnly)
@@ -137,6 +155,8 @@ struct MonthCalendarView: View {
 
 private struct CalendarDayView: View {
     let day: CalendarDay
+
+    @Environment(\.numeralStyle) private var numerals
     let onSelect: (NepaliDate) -> Void
 
     @State private var isHovering = false
@@ -147,7 +167,7 @@ private struct CalendarDayView: View {
                 onSelect(date)
             } label: {
                 VStack(spacing: 0) {
-                    Text(NepaliNumerals.string(from: date.day))
+                    Text(numerals.string(from: date.day))
                         .font(.nepali(14, weight: day.isToday ? .semibold : .regular))
                     if let adDay = day.adDay {
                         Text(verbatim: "\(adDay)")
@@ -195,7 +215,7 @@ private struct CalendarDayView: View {
 
     private var foreground: AnyShapeStyle {
         if day.isToday {
-            AnyShapeStyle(Theme.Palette.onBrand)
+            AnyShapeStyle(Theme.Palette.onBrandFill)
         } else if day.isHoliday {
             AnyShapeStyle(Theme.Palette.holiday)
         } else {
@@ -205,7 +225,7 @@ private struct CalendarDayView: View {
 
     private var background: Color {
         if day.isToday {
-            Theme.Palette.brand
+            Theme.Palette.brandFill
         } else if isHovering {
             Theme.Palette.hover
         } else {

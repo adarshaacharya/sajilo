@@ -17,9 +17,17 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Space.m) {
-                    SettingsSection("General") {
+                    SettingsSection(L10n.language) {
+                        Picker(L10n.language, selection: $model.appLanguage) {
+                            ForEach(AppLanguage.allCases) { language in
+                                Text(language.title).tag(language)
+                            }
+                        }
+                    }
+
+                    SettingsSection(L10n.general) {
                         Toggle(
-                            "Launch at login",
+                            L10n.launchAtLogin,
                             isOn: Binding(
                                 get: { model.launchAtLogin.isEnabled },
                                 set: { model.setLaunchAtLogin($0) }
@@ -27,33 +35,50 @@ struct SettingsView: View {
                         )
                         .disabled(model.launchAtLogin == .unavailable)
 
-                        if let note = launchAtLoginNote {
+                        if let error = model.launchAtLoginError {
+                            Text(verbatim: error)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else if let note = launchAtLoginNote {
                             Text(note)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
-                        Toggle("Show Dock icon", isOn: $model.showsDockIcon)
+                        Toggle(L10n.showDockIcon, isOn: $model.showsDockIcon)
                     }
 
-                    SettingsSection("Menu bar") {
+                    SettingsSection(L10n.numerals) {
+                        Picker(L10n.numerals, selection: $model.numeralStyle) {
+                            ForEach(NumeralStyle.allCases) { style in
+                                // Each option shows itself, so the difference
+                                // between ३१ and 31 is visible before choosing.
+                                Text(verbatim: "\(String(localized: style.displayName)) · \(style.sample)")
+                                    .tag(style)
+                            }
+                        }
+                    }
+
+                    SettingsSection(L10n.menuBar) {
                         // Each option renders against today's date, so the
                         // picker previews exactly what appears in the menu bar.
-                        Picker("Display", selection: $model.selectedMenuBarFormat) {
+                        Picker(L10n.display, selection: $model.selectedMenuBarFormat) {
                             ForEach(AppModel.MenuBarFormat.allCases) { format in
                                 Text(verbatim: format.title(for: model.today)).tag(format)
                             }
                         }
                     }
 
-                    SettingsSection("Modules") {
-                        Toggle("Weather", isOn: $model.isWeatherEnabled)
-                        Toggle("Forex", isOn: $model.isForexEnabled)
+                    SettingsSection(L10n.modules) {
+                        Toggle(L10n.weather, isOn: $model.isWeatherEnabled)
+                        Toggle(L10n.forex, isOn: $model.isForexEnabled)
+                        Toggle(L10n.news, isOn: $model.isNewsEnabled)
                     }
 
-                    SettingsSection("Weather location") {
-                        Picker("City", selection: $model.selectedWeatherLocation) {
+                    SettingsSection(L10n.weatherLocation) {
+                        Picker(L10n.city, selection: $model.selectedWeatherLocation) {
                             ForEach(WeatherLocation.allCases) { location in
                                 Text(verbatim: "\(location.displayName) · \(location.nepaliName)")
                                     .tag(location)
@@ -61,16 +86,16 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsSection("Reminders") {
+                    SettingsSection(L10n.reminders) {
                         Toggle(
-                            "Public holiday tomorrow",
+                            L10n.holidayTomorrow,
                             isOn: Binding(
                                 get: { model.notificationOptions.eveOfPublicHoliday },
                                 set: { model.notificationOptions.eveOfPublicHoliday = $0 }
                             )
                         )
                         Toggle(
-                            "Festival tomorrow",
+                            L10n.festivalTomorrow,
                             isOn: Binding(
                                 get: { model.notificationOptions.eveOfFestival },
                                 set: { model.notificationOptions.eveOfFestival = $0 }
@@ -85,7 +110,7 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsSection("Forex favourites") {
+                    SettingsSection(L10n.forexFavourites) {
                         ForEach(ForexCurrency.selectable, id: \.self) { code in
                             Toggle(
                                 "\(code) · \(ForexCurrency.name(for: code))",
@@ -94,27 +119,28 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsSection("Data") {
+                    SettingsSection(L10n.data) {
                         SettingsRow(
-                            "Calendar",
+                            L10n.calendarRange,
                             value: "BS \(BikramSambatCalendar.supportedNepaliYears.lowerBound)–\(BikramSambatCalendar.supportedNepaliYears.upperBound)"
                         )
                         SettingsRow(
-                            "Festivals",
+                            L10n.festivalsRange,
                             value: "BS \(CalendarEventStore.supportedYears.lowerBound)–\(CalendarEventStore.supportedYears.upperBound)"
                         )
-                        SettingsRow("Weather source", value: "Open-Meteo")
-                        SettingsRow("Rates source", value: "Nepal Rastra Bank")
-                        SettingsRow("Festival source", value: "nepalicalendar.rat32.com")
+                        SettingsRow(L10n.weatherSource, value: "Open-Meteo")
+                        SettingsRow(L10n.ratesSource, value: "Nepal Rastra Bank")
+                        SettingsRow(L10n.festivalSource, value: "nepalicalendar.rat32.com")
                     }
 
-                    Text("Calendar conversion and festivals are bundled and work offline. Weather comes from Open-Meteo and is cached, so the last reading stays visible when the network is unavailable.")
+                    Text(L10n.offlineDataNote)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(Theme.Space.m)
             }
+            .softScroll()
         }
         // Reads the current permission; it never prompts, so opening Settings
         // cannot trigger a system dialog.
@@ -123,30 +149,29 @@ struct SettingsView: View {
 
     /// A reminder switched on but denied at the system level would otherwise
     /// look enabled and never fire.
-    private var notificationNote: String? {
+    private var notificationNote: LocalizedStringResource? {
         guard model.notificationOptions.isAnyEnabled else {
-            return "Reminders arrive at 7pm the evening before, scheduled on this Mac."
+            return L10n.reminderOffNote
         }
         switch model.notificationAuthorization {
         case .denied:
-            return "Notifications are turned off for Sajilo in System Settings › Notifications."
+            return L10n.reminderDeniedNote
         case .notDetermined:
-            return "Waiting for notification permission."
+            return L10n.reminderPermissionNote
         case .authorized:
-            return "Reminders arrive at 7pm Nepal time the evening before."
+            return L10n.reminderEnabledNote
         }
     }
 
     /// Explains the states a plain on/off toggle cannot: macOS may hold the
     /// registration pending approval, or refuse it outright for an app running
     /// outside /Applications.
-    private var launchAtLoginNote: String? {
-        if let error = model.launchAtLoginError { return error }
+    private var launchAtLoginNote: LocalizedStringResource? {
         switch model.launchAtLogin {
         case .requiresApproval:
-            return "Waiting for approval in System Settings › General › Login Items."
+            return L10n.launchApprovalNote
         case .unavailable:
-            return "Move Sajilo to your Applications folder to enable this."
+            return L10n.launchUnavailableNote
         case .enabled, .disabled:
             return nil
         }
@@ -172,12 +197,12 @@ struct SettingsView: View {
 
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
-            Button("Back", systemImage: "chevron.left", action: onBack)
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("Back to dashboard")
+                .accessibilityLabel(L10n.backToDashboard)
 
-            Text("Settings")
+            Text(L10n.settings)
                 .font(.headline)
 
             Spacer(minLength: 0)
@@ -189,10 +214,10 @@ struct SettingsView: View {
 /// A titled group of controls in the popover's card language, rather than
 /// `Form`, whose grouped style is built for a full-width settings window.
 private struct SettingsSection<Content: View>: View {
-    let title: String
+    let title: LocalizedStringResource
     @ViewBuilder let content: Content
 
-    init(_ title: String, @ViewBuilder content: () -> Content) {
+    init(_ title: LocalizedStringResource, @ViewBuilder content: () -> Content) {
         self.title = title
         self.content = content()
     }
@@ -212,10 +237,10 @@ private struct SettingsSection<Content: View>: View {
 }
 
 private struct SettingsRow: View {
-    let label: String
+    let label: LocalizedStringResource
     let value: String
 
-    init(_ label: String, value: String) {
+    init(_ label: LocalizedStringResource, value: String) {
         self.label = label
         self.value = value
     }
@@ -230,7 +255,7 @@ private struct SettingsRow: View {
         }
         .font(.callout)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(label): \(value)")
+        .accessibilityLabel("\(String(localized: label)): \(value)")
     }
 }
 

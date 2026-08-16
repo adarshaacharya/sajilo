@@ -84,6 +84,6 @@ private func skinnedDashboard(_ skin: Theme.Skin) -> some View {
 }
 
 #Preview("Skin — Mac Native") {
-    skinnedDashboard(.macNative)
+    skinnedDashboard(.patro)
 }
 #endif

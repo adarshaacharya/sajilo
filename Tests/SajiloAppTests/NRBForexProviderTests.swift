@@ -128,3 +128,44 @@ struct NRBForexProviderTests {
         #expect(rate.buyPerUnit == 10.00)
     }
 }
+
+/// The provider already requests a week so a non-publishing day falls back to
+/// rates still in force. These pin that the rest of that response is kept for
+/// the card's trend line rather than thrown away.
+extension NRBForexProviderTests {
+    @Test func keepsTheBuyRateHistoryAcrossTheWindow() throws {
+        let snapshot = try NRBForexProvider.decode(Self.payload, fetchedAt: .now)
+
+        // 15 Aug then 16 Aug, oldest first.
+        #expect(snapshot.history["USD"] == [152.20, 152.39])
+    }
+
+    @Test func withholdsATrendWithTooFewPoints() throws {
+        let snapshot = try NRBForexProvider.decode(Self.payload, fetchedAt: .now)
+
+        // Two points is a straight line, and INR/JPY appear on one day only.
+        #expect(snapshot.trend(for: "USD") == nil)
+        #expect(snapshot.trend(for: "INR") == nil)
+    }
+
+    @Test func withholdsATrendWhenTheRateNeverMoves() {
+        let flat = ForexSnapshot(
+            rates: [ForexRate(currencyCode: "USD", currencyName: "U.S. Dollar", unit: 1, buy: 152.0, sell: 152.5)],
+            history: ["USD": [152.0, 152.0, 152.0, 152.0]],
+            date: .now, publishedOn: nil, modifiedOn: nil, fetchedAt: .now
+        )
+
+        #expect(flat.trend(for: "USD") == nil, "a flat series would draw a meaningless straight line")
+    }
+
+    @Test func providesATrendOnceTheRateMoves() {
+        let moving = ForexSnapshot(
+            rates: [ForexRate(currencyCode: "USD", currencyName: "U.S. Dollar", unit: 1, buy: 152.4, sell: 153.0)],
+            history: ["USD": [151.8, 152.1, 152.0, 152.4]],
+            date: .now, publishedOn: nil, modifiedOn: nil, fetchedAt: .now
+        )
+
+        #expect(moving.trend(for: "USD")?.count == 4)
+        #expect(moving.trend(for: "EUR") == nil)
+    }
+}

@@ -11,6 +11,7 @@ struct SajiloApp: App {
         // is what lets the menu bar track the observed date and format.
         MenuBarExtra {
             DashboardView(model: appModel)
+                .environment(\.locale, appModel.appLanguage.locale)
         } label: {
             Text(verbatim: appModel.menuBarTitle)
         }
@@ -23,6 +24,7 @@ struct SajiloApp: App {
         // directly. Release builds stay menu-bar-only.
         Window("Sajilo Preview", id: "dashboard-preview") {
             DashboardView(model: appModel)
+                .environment(\.locale, appModel.appLanguage.locale)
         }
         .windowResizability(.contentSize)
         #endif

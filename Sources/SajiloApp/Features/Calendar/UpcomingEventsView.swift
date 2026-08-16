@@ -14,7 +14,7 @@ struct UpcomingEventsView: View {
                 VStack {
                     Spacer()
                     Label(
-                        "No festivals recorded ahead of today.",
+                        L10n.noUpcoming,
                         systemImage: "calendar.badge.exclamationmark"
                     )
                     .font(.callout)
@@ -31,18 +31,19 @@ struct UpcomingEventsView: View {
                     }
                     .padding(Theme.Space.m)
                 }
+                .softScroll()
             }
         }
     }
 
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
-            Button("Back", systemImage: "chevron.left", action: onBack)
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("Back to dashboard")
+                .accessibilityLabel(L10n.backToDashboard)
 
-            Text("Upcoming")
+            Text(L10n.upcoming)
                 .font(.headline)
 
             Spacer(minLength: 0)
@@ -55,13 +56,15 @@ private struct UpcomingEventRow: View {
     let event: UpcomingEvent
     let action: () -> Void
 
+    @Environment(\.numeralStyle) private var numerals
+
     @State private var isHovering = false
 
     var body: some View {
         Button(action: action) {
             HStack(alignment: .top, spacing: Theme.Space.s) {
                 VStack(spacing: 0) {
-                    Text(NepaliNumerals.string(from: event.date.day))
+                    Text(numerals.string(from: event.date.day))
                         .font(.nepali(16, weight: .semibold))
                     Text(event.date.nepaliMonthName)
                         .font(.nepali(10))
@@ -80,7 +83,7 @@ private struct UpcomingEventRow: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         if event.isPublicHoliday {
-                            Text("Public holiday")
+                            Text(L10n.publicHoliday)
                                 .font(.caption2.weight(.medium))
                                 .foregroundStyle(Theme.Palette.holiday)
                         }

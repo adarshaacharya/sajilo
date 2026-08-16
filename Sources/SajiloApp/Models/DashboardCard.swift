@@ -10,7 +10,9 @@ struct DashboardCard: Identifiable, Equatable, Sendable {
         var tint: Color {
             switch self {
             case .weather: .orange
-            case .forex: .green
+            // A quoted rate is neutral information. Green and red are kept
+            // for actual movement in the sparkline instead.
+            case .forex: .secondary
             }
         }
     }

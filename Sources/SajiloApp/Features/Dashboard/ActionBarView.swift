@@ -6,12 +6,18 @@ import SwiftUI
 struct ActionBarView: View {
     let openUpcoming: () -> Void
     let openConverter: () -> Void
+    /// Absent unless the module is enabled — a button that is present but
+    /// inert is worse than one that is not there.
+    var openNews: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 0) {
-            Button("Festivals", systemImage: "sparkles", action: openUpcoming)
-            Button("Convert", systemImage: "arrow.left.arrow.right", action: openConverter)
-            Button("Quit", systemImage: "power") {
+            Button(L10n.festivals, systemImage: "sparkles", action: openUpcoming)
+            Button(L10n.convert, systemImage: "arrow.left.arrow.right", action: openConverter)
+            if let openNews {
+                Button(L10n.news, systemImage: "newspaper", action: openNews)
+            }
+            Button(L10n.quit, systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }
         }

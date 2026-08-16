@@ -68,6 +68,25 @@ extension View {
     func routeHeader() -> some View { modifier(RouteHeader()) }
 }
 
+/// The popover's scrolling behaviour, applied to every scrolling route.
+///
+/// The system overlay scroller is sized for a document window and reads as a
+/// hard edge in a 380 pt panel. Hiding it is safe here because every scrolling
+/// route is short and already signals its own overflow — the news list counts
+/// what is left, the others simply end.
+struct SoftScroll: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .scrollIndicators(.hidden)
+            // Keeps momentum scrolling from stopping dead at the ends.
+            .scrollBounceBehavior(.basedOnSize)
+    }
+}
+
+extension View {
+    func softScroll() -> some View { modifier(SoftScroll()) }
+}
+
 // MARK: - Buttons
 
 /// The single prominent action per surface, in the app's accent.
@@ -77,9 +96,9 @@ struct BrandButtonStyle: ButtonStyle {
             .font(.callout.weight(.medium))
             .padding(.horizontal, Theme.Space.m)
             .padding(.vertical, Theme.Space.s)
-            .foregroundStyle(Theme.Palette.onBrand)
+            .foregroundStyle(Theme.Palette.onBrandFill)
             .background(
-                Theme.Palette.brand.opacity(configuration.isPressed ? 0.72 : 1),
+                Theme.Palette.brandFill.opacity(configuration.isPressed ? 0.72 : 1),
                 in: .rect(cornerRadius: Theme.Radius.day)
             )
     }

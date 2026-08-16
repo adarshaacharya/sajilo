@@ -52,7 +52,14 @@ struct DashboardView: View {
 
             ForexDetailView(model: model, onBack: { navigate(to: .dashboard) })
                 .modifier(RouteLayer(isActive: route == .forex, edge: 1, reduceMotion: reduceMotion))
+
+            // Mounted only when switched on, so a disabled module costs nothing.
+            if model.isNewsEnabled {
+                NewsView(model: model, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .news, edge: 1, reduceMotion: reduceMotion))
+            }
         }
+        .environment(\.numeralStyle, model.numeralStyle)
         .frame(width: Theme.Metric.popoverWidth)
         .background {
             Rectangle()
@@ -85,6 +92,7 @@ struct DashboardView: View {
                 DashboardCardsView(
                     cards: model.visibleCards,
                     weather: model.weather,
+                    forexTrend: model.headlineTrend,
                     // Paused unless the dashboard itself is showing, so the
                     // card stops animating behind the other routes.
                     isActive: route == .dashboard,
@@ -97,7 +105,8 @@ struct DashboardView: View {
 
             ActionBarView(
                 openUpcoming: { navigate(to: .upcoming) },
-                openConverter: { navigate(to: .converter) }
+                openConverter: { navigate(to: .converter) },
+                openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil
             )
         }
         .accessibilityLabel("Sajilo dashboard")
@@ -121,6 +130,7 @@ private enum DashboardRoute: Equatable {
     case settings
     case weather
     case forex
+    case news
 }
 
 /// Presents one route of the popover. The inactive layer stays mounted so the

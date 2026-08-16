@@ -59,12 +59,12 @@ struct DateConverterView: View {
                 Spacer(minLength: 0)
 
                 HStack(spacing: Theme.Space.s) {
-                    Button("Today") { withAnimation(motion) { store.setToday() } }
-                    Button("Swap", systemImage: "arrow.left.arrow.right") {
+                    Button(L10n.today) { withAnimation(motion) { store.setToday() } }
+                    Button(L10n.swap, systemImage: "arrow.left.arrow.right") {
                         withAnimation(motion) { store.swap() }
                     }
                     Spacer(minLength: 0)
-                    Button("Convert") { convert() }
+                    Button(L10n.convert) { convert() }
                         .buttonStyle(BrandButtonStyle())
                 }
             }
@@ -78,12 +78,12 @@ struct DateConverterView: View {
 
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
-            Button("Back", systemImage: "chevron.left", action: onBack)
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("Back to dashboard")
+                .accessibilityLabel(L10n.backToDashboard)
 
-            Text("Date Converter")
+            Text(L10n.dateConverter)
                 .font(.headline)
 
             Spacer(minLength: 0)
