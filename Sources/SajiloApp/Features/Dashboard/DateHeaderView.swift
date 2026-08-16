@@ -84,9 +84,10 @@ struct DateHeaderView: View {
     /// Tithi rides alongside it because both come from the same bundled record.
     private func eventChip(_ event: TodayEvent) -> some View {
         HStack(spacing: Theme.Space.xs) {
-            Image(systemName: "sparkle")
-                .font(.system(size: 9))
-                .foregroundStyle(Theme.Palette.brand)
+            Circle()
+                .fill(Theme.Palette.brand)
+                .frame(width: 5, height: 5)
+                .accessibilityHidden(true)
 
             Text(event.headline)
                 .font(.nepali(12, weight: .medium))

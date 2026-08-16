@@ -108,9 +108,11 @@ private struct UpcomingEventRow: View {
     }
 }
 
-/// The one-line teaser on the dashboard.
-struct NextEventRow: View {
-    let event: UpcomingEvent
+/// The one-line dashboard agenda. Plans lead over festivals, but a festival
+/// today stays visible as a secondary mark and becomes the main item whenever
+/// the day has no remaining timed plan.
+struct UpNextRow: View {
+    let summary: DashboardUpNext
     let action: () -> Void
 
     @State private var isHovering = false
@@ -118,21 +120,28 @@ struct NextEventRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: Theme.Space.s) {
-                Image(systemName: "sparkles")
+                Image(systemName: icon)
                     .font(.caption)
-                    .foregroundStyle(Theme.Palette.brand)
+                    .foregroundStyle(accent)
 
-                Text(event.name)
-                    .font(.nepali(12))
+                Text(title)
+                    .font(titleUsesNepaliFont ? .nepali(12) : .callout)
                     .lineLimit(1)
                     .truncationMode(.tail)
 
                 Spacer(minLength: Theme.Space.xs)
 
-                Text(event.relativeText)
+                Text(trailingText)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .layoutPriority(1)
+
+                if hasTodayFestivalAlongsidePlan {
+                    Image(systemName: "calendar")
+                        .font(.caption2)
+                        .foregroundStyle(Theme.Palette.brand)
+                        .accessibilityHidden(true)
+                }
 
                 Image(systemName: "chevron.right")
                     .font(.caption2)
@@ -148,7 +157,58 @@ struct NextEventRow: View {
         .buttonStyle(.plain)
         .onHover { isHovering = $0 }
         .animation(.easeOut(duration: 0.12), value: isHovering)
-        .accessibilityLabel("Next: \(event.name), \(event.relativeText)")
-        .accessibilityHint("Show all upcoming festivals")
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityHint(accessibilityHint)
+    }
+
+    private var icon: String {
+        if case .plan = summary.kind { return "clock" }
+        return "calendar"
+    }
+
+    private var accent: Color {
+        if case .plan = summary.kind { return Theme.Palette.brand }
+        return Theme.Palette.brand
+    }
+
+    private var title: String {
+        switch summary.kind {
+        case let .plan(plan): plan.title
+        case let .festival(event): event.name
+        }
+    }
+
+    private var titleUsesNepaliFont: Bool {
+        if case .festival = summary.kind { return true }
+        return false
+    }
+
+    private var trailingText: String {
+        switch summary.kind {
+        case let .plan(plan):
+            guard let time = plan.time else { return String(localized: L10n.today) }
+            return String(format: "%02d:%02d", time.hour, time.minute)
+        case let .festival(event): return event.relativeText
+        }
+    }
+
+    private var hasTodayFestivalAlongsidePlan: Bool {
+        if case .plan = summary.kind { return summary.todayFestival != nil }
+        return false
+    }
+
+    private var accessibilityLabel: String {
+        switch summary.kind {
+        case let .plan(plan):
+            var parts = [String(localized: L10n.upNext), plan.title]
+            if let time = plan.time { parts.append(String(format: "%02d:%02d", time.hour, time.minute)) }
+            if let festival = summary.todayFestival { parts.append("Festival today: \(festival.name)") }
+            return parts.joined(separator: ", ")
+        case let .festival(event): return "\(String(localized: L10n.upNext)): \(event.name), \(event.relativeText)"
+        }
+    }
+
+    private var accessibilityHint: String {
+        summary.destination == .today ? "Open today" : "Show all upcoming festivals"
     }
 }

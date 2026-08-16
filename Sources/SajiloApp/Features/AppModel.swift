@@ -208,6 +208,17 @@ final class AppModel {
         upcomingEvents.first
     }
 
+    /// The dashboard's actionable first item. Uses Nepal local time because a
+    /// 9am plan should not be considered future just because the Mac happens
+    /// to be in another time zone.
+    var upNext: DashboardUpNext? {
+        DashboardUpNext.make(
+            plans: plans(on: today),
+            events: upcomingEvents,
+            now: .now
+        )
+    }
+
     var menuBarTitle: String {
         selectedMenuBarFormat.title(for: today, numerals: numeralStyle)
     }

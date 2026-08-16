@@ -60,6 +60,7 @@
 "planner.time" = "Time";
 "planner.title" = "Day plan";
 "planner.title-field" = "What do you need to do?";
+"planner.up-next" = "Up next";
 "reminder.festival-tomorrow" = "Festival tomorrow";
 "reminder.holiday-tomorrow" = "Public holiday tomorrow";
 "screen.date-converter" = "Date Converter";

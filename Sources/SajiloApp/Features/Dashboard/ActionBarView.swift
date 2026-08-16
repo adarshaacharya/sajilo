@@ -13,7 +13,7 @@ struct ActionBarView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Button(L10n.festivals, systemImage: "sparkles", action: openUpcoming)
+            Button(L10n.festivals, systemImage: "calendar", action: openUpcoming)
             Button(L10n.convert, systemImage: "arrow.left.arrow.right", action: openConverter)
             if let openNews {
                 Button(L10n.news, systemImage: "newspaper", action: openNews)

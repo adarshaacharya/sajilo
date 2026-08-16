@@ -89,8 +89,13 @@ struct DashboardView: View {
                 .padding(.horizontal, Theme.Space.m)
                 .padding(.top, Theme.Space.m)
             VStack(spacing: Theme.Space.s) {
-                if let nextEvent = model.nextEvent {
-                    NextEventRow(event: nextEvent) { navigate(to: .upcoming) }
+                if let upNext = model.upNext {
+                    UpNextRow(summary: upNext) {
+                        switch upNext.destination {
+                        case .today: select(model.today)
+                        case .festivals: navigate(to: .upcoming)
+                        }
+                    }
                 }
                 DashboardCardsView(
                     cards: model.visibleCards,

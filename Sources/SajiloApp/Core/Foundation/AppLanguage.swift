@@ -143,4 +143,5 @@ enum L10n {
     static let reminderFifteenMinutes = LocalizedStringResource("planner.reminder.fifteen-minutes", bundle: .sajiloResources)
     static let reminderThirtyMinutes = LocalizedStringResource("planner.reminder.thirty-minutes", bundle: .sajiloResources)
     static let reminderOneHour = LocalizedStringResource("planner.reminder.one-hour", bundle: .sajiloResources)
+    static let upNext = LocalizedStringResource("planner.up-next", bundle: .sajiloResources)
 }
