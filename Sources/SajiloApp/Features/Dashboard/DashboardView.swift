@@ -69,6 +69,11 @@ struct DashboardView: View {
                     .modifier(RouteLayer(isActive: route == .rashifal, edge: 1, reduceMotion: reduceMotion))
             }
 
+            if model.isRadioEnabled {
+                RadioView(model: model, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .radio, edge: 1, reduceMotion: reduceMotion))
+            }
+
             ToolsView(onBack: { navigate(to: .dashboard) })
                 .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
         }
@@ -127,6 +132,7 @@ struct DashboardView: View {
                 openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
                 openBazar: model.isBazarEnabled ? { navigate(to: .bazar) } : nil,
                 openRashifal: model.isRashifalEnabled ? { navigate(to: .rashifal) } : nil,
+                openRadio: model.isRadioEnabled ? { navigate(to: .radio) } : nil,
                 openTools: { navigate(to: .tools) }
             )
         }
@@ -154,6 +160,7 @@ private enum DashboardRoute: Equatable {
     case news
     case bazar
     case rashifal
+    case radio
     case tools
 }
 

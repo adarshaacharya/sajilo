@@ -89,6 +89,7 @@
 "screen.exchange-rates" = "Exchange Rates";
 "screen.news" = "News";
 "screen.rashifal" = "Rashifal";
+"screen.radio" = "Radio";
 "screen.settings" = "Settings";
 "screen.upcoming" = "Upcoming";
 "settings.bazar" = "Gold, silver and fuel";
@@ -112,6 +113,7 @@
 "settings.modules" = "Modules";
 "settings.numerals" = "Numerals";
 "settings.rashifal" = "Rashifal";
+"settings.radio" = "Radio";
 "settings.rates-source" = "Rates source";
 "settings.reminder-denied-note" = "Notifications are turned off for Sajilo in System Settings › Notifications.";
 "settings.reminder-enabled-note" = "Reminders arrive at 7pm Nepal time the evening before.";
@@ -122,6 +124,9 @@
 "settings.updates" = "Updates";
 "settings.weather-location" = "Weather location";
 "settings.weather-source" = "Weather source";
+"radio.search" = "Search stations";
+"radio.no-stations" = "No stations match that search.";
+"radio.source" = "Stations and streams supplied by Ratopati.";
 "tools.amount" = "Amount";
 "tools.area" = "Area";
 "tools.base-amount" = "Before VAT";

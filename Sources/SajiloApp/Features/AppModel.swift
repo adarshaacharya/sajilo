@@ -56,6 +56,8 @@ final class AppModel {
         static let vegetableFavourites = "vegetableFavourites"
         static let rashifalEnabled = "rashifalEnabled"
         static let rashifalCache = "rashifalCache"
+        static let radioEnabled = "radioEnabled"
+        static let radioCache = "radioCache"
         static let selectedRashi = "selectedRashi"
 
         /// Cached per location, so switching cities never shows one city's
@@ -130,6 +132,18 @@ final class AppModel {
         }
     }
 
+    var isRadioEnabled: Bool {
+        didSet {
+            guard oldValue != isRadioEnabled else { return }
+            defaults.set(isRadioEnabled, forKey: DefaultsKey.radioEnabled)
+            guard isRadioEnabled else {
+                radioPlayer.stop()
+                return
+            }
+            Task { [weak self] in await self?.refreshRadioIfStale() }
+        }
+    }
+
     /// Unset until the reader picks. Nepali rashi is normally the moon sign
     /// from a birth chart rather than the birth month, so it cannot be derived
     /// from a date — guessing would hand most people the wrong reading.
@@ -170,6 +184,7 @@ final class AppModel {
     @ObservationIgnored private var fuelFeed: RemoteFeed<FuelPriceSnapshot>!
     @ObservationIgnored private var vegetableFeed: RemoteFeed<VegetableMarketSnapshot>!
     @ObservationIgnored private var rashifalFeed: RemoteFeed<RashifalSnapshot>!
+    @ObservationIgnored private var radioFeed: RemoteFeed<RadioDirectory>!
 
     var weather: WeatherSnapshot? { weatherFeed.value }
     var isWeatherLoading: Bool { weatherFeed.isLoading }
@@ -191,6 +206,11 @@ final class AppModel {
     var rashifal: RashifalSnapshot? { rashifalFeed.value }
     var isRashifalLoading: Bool { rashifalFeed.isLoading }
     var rashifalError: String? { rashifalFeed.errorMessage }
+
+    var radio: RadioDirectory? { radioFeed.value }
+    var isRadioLoading: Bool { radioFeed.isLoading }
+    var radioError: String? { radioFeed.errorMessage }
+    let radioPlayer: RadioPlayer
 
     /// The reader's own reading, once they have picked a sign.
     var myRashifal: Rashifal? {
@@ -297,6 +317,8 @@ final class AppModel {
     @ObservationIgnored private let fuelProvider: any FuelPriceProviding
     @ObservationIgnored private let vegetableProvider: any VegetableMarketProviding
     @ObservationIgnored private let rashifalProvider: any RashifalProviding
+    @ObservationIgnored private let articleDates: ArticleDateStore
+    @ObservationIgnored private let radioProvider: any RadioProviding
     @ObservationIgnored private let dayPlanStore: DayPlanStore
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
@@ -413,6 +435,8 @@ final class AppModel {
         fuelProvider: any FuelPriceProviding = NOCFuelProvider(),
         vegetableProvider: any VegetableMarketProviding = KalimatiMarketProvider(),
         rashifalProvider: any RashifalProviding = HamroPatroRashifalProvider(),
+        articleDateResolver: (any ArticleDateResolving)? = nil,
+        radioProvider: any RadioProviding = RatopatiRadioProvider(),
         dayPlanStore: DayPlanStore? = nil,
         autoLoadWeather: Bool = true
     ) {
@@ -427,6 +451,12 @@ final class AppModel {
         self.fuelProvider = fuelProvider
         self.vegetableProvider = vegetableProvider
         self.rashifalProvider = rashifalProvider
+        articleDates = ArticleDateStore(
+            defaults: defaults,
+            resolver: articleDateResolver ?? AnnapurnaArticleDateResolver()
+        )
+        self.radioProvider = radioProvider
+        radioPlayer = RadioPlayer(provider: radioProvider, defaults: defaults)
         self.dayPlanStore = resolvedDayPlanStore
         dayPlans = resolvedDayPlanStore.load()
         referenceDate = now
@@ -455,6 +485,7 @@ final class AppModel {
             ?? ForexCurrency.defaultFavourites
         vegetableFavourites = defaults.stringArray(forKey: DefaultsKey.vegetableFavourites) ?? []
         isRashifalEnabled = defaults.object(forKey: DefaultsKey.rashifalEnabled) as? Bool ?? true
+        isRadioEnabled = defaults.object(forKey: DefaultsKey.radioEnabled) as? Bool ?? true
         selectedRashi = defaults.string(forKey: DefaultsKey.selectedRashi)
             .flatMap(RashiSign.init(rawValue:))
         showsDockIcon = defaults.bool(forKey: DefaultsKey.showsDockIcon)
@@ -513,11 +544,17 @@ final class AppModel {
             staleInterval: Self.newsStaleInterval,
             defaults: defaults,
             fetchedAt: \.fetchedAt
-        ) { [newsProvider] in
-            await newsProvider.headlines(
+        ) { [weak self, newsProvider] in
+            let digest = await newsProvider.headlines(
                 from: NewsSource.active,
                 limit: Self.newsHeadlineLimit
             )
+            // Annapurna Post's feed carries no dates. Recovering them is a
+            // second, heavier network step against article pages, so it runs
+            // after the digest is assembled and is bounded and cached — a
+            // headline never waits on it, and a story is fetched once ever.
+            guard let self else { return digest }
+            return await self.articleDates.resolvingDates(in: digest)
         }
 
         metalsFeed = RemoteFeed(
@@ -579,6 +616,16 @@ final class AppModel {
             }
         ) { [rashifalProvider] in
             try await rashifalProvider.todaysRashifal()
+        }
+
+        radioFeed = RemoteFeed(
+            subject: "radio stations",
+            cacheKey: DefaultsKey.radioCache,
+            staleInterval: Self.radioStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt
+        ) { [radioProvider] in
+            try await radioProvider.stations()
         }
 
         scheduleMidnightRefresh()
@@ -800,6 +847,21 @@ final class AppModel {
     }
 
     // MARK: - News
+
+    // MARK: - Radio
+
+    /// Ratopati's catalogue changes slowly; a daily cache keeps the radio
+    /// screen instant without treating its directory as a polling API.
+    static let radioStaleInterval: TimeInterval = 24 * 60 * 60
+
+    func refreshRadioIfStale() async {
+        guard isRadioEnabled else { return }
+        await radioFeed.refreshIfStale()
+    }
+
+    func refreshRadio() async {
+        await radioFeed.refresh()
+    }
 
     /// News moves faster than rates but this is a menu-bar utility, not a
     /// reader; half an hour is plenty and keeps the feeds unbothered.

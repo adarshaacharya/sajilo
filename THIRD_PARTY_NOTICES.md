@@ -25,9 +25,43 @@ feed — both advertised endpoints return HTML — and the alternative, parsing
 their pages, is the same technique that costs the bundled festival dataset 349
 days of data. Reliability, not permission, is the reason.
 
-Headlines are merged round-robin rather than sorted by time: Annapurna Post
-publishes no `pubDate` at all, and OnlineKhabar returns 55 items where
-Bizkhabar returns 10, so a time sort would bury the smaller publishers.
+Headlines are merged round-robin rather than sorted by time: OnlineKhabar
+returns 55 items where Bizkhabar returns 10, so a straight time sort would bury
+the smaller publishers. Dated stories are then ordered newest-first *within the
+slots they already hold*, and an undated story keeps its slot rather than
+sinking to the bottom.
+
+### Annapurna Post publishes no dates, so Sajilo recovers them
+
+Annapurna Post's feed carries only `title`, `link`, `description`, and `guid` —
+no `pubDate`, no `dc:date`, no Atom `published`. The date is not missing from
+their newsroom, only from the feed: every story page prints it, in Bikram
+Sambat with Devanagari numerals.
+
+    साउन ३१, २०८३ आइतबार २१:२१:५
+
+RSS `pubDate` must be RFC-822 — English month names, Gregorian — so a Bikram
+Sambat newsroom would have to convert in order to publish one. Sajilo converts
+in the other direction instead, which it can already do.
+
+**This fetches article pages rather than a feed, which is a heavier thing to ask
+of a publisher than reading their syndication**, so it is deliberately bounded:
+
+- A publish date never changes, so a story page is fetched **once, ever**. The
+  result is cached by link and survives relaunch.
+- A page that turns out to carry no date is *also* remembered, so it is not
+  re-fetched on every refresh.
+- At most 8 pages are fetched per refresh, 3 at a time. The twenty undated items
+  resolve over about three refreshes and are then free forever; steady state is
+  the number of genuinely new stories.
+- Only the date is read. Nothing else from the page is stored or shown — the
+  headline still comes from the feed, and the article still opens in the
+  browser.
+
+The site header prints today's date in a different word order and without a
+clock (`३१ साउन २०८३, आइतबार`). Requiring a time is what separates the article's
+own stamp from that furniture; matching the header would silently stamp every
+story with the day it was fetched.
 
 All sources are read regardless of the app's language setting. That setting
 governs Sajilo's own chrome and says nothing about which newsrooms a reader

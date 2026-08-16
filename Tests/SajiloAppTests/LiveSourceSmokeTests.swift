@@ -38,6 +38,20 @@ struct LiveSourceSmokeTests {
         #expect(Set(snapshot.readings.map(\.prediction)).count == 12)
     }
 
+    /// Annapurna Post's feed has no dates; they are recovered from the story
+    /// page, whose Bikram Sambat stamp is the thing most likely to change shape.
+    @Test func annapurnaStoryPagesStillCarryAReadableDate() async throws {
+        let digest = await RSSNewsProvider().headlines(from: NewsSource.active, limit: 150)
+        let undated = try #require(digest.items.first { $0.sourceName == "Annapurna Post" })
+        #expect(undated.published == nil, "the feed itself still ships no pubDate")
+
+        let resolved = await AnnapurnaArticleDateResolver().publishedDate(for: undated.link)
+        let date = try #require(resolved, "the story page stamp moved or changed shape")
+        // A publish time in the last month and not in the future.
+        #expect(date < Date().addingTimeInterval(3600))
+        #expect(date > Date().addingTimeInterval(-60 * 24 * 3600))
+    }
+
     @Test func nocStillPublishesTheRetailTable() async throws {
         let snapshot = try await NOCFuelProvider().latestPrices()
         #expect(snapshot.price(for: .petrol) != nil)

@@ -89,6 +89,7 @@
 "screen.exchange-rates" = "विनिमय दर";
 "screen.news" = "समाचार";
 "screen.rashifal" = "राशिफल";
+"screen.radio" = "रेडियो";
 "screen.settings" = "सेटिङ";
 "screen.upcoming" = "आगामी";
 "settings.bazar" = "सुन, चाँदी र इन्धन";
@@ -112,6 +113,7 @@
 "settings.modules" = "मोड्युलहरू";
 "settings.numerals" = "अङ्कहरू";
 "settings.rashifal" = "राशिफल";
+"settings.radio" = "रेडियो";
 "settings.rates-source" = "दर स्रोत";
 "settings.reminder-denied-note" = "Sajilo का सूचनाहरू System Settings › Notifications मा बन्द छन्।";
 "settings.reminder-enabled-note" = "स्मरणहरू नेपाल समयअनुसार अघिल्लो साँझ ७ बजे आउँछन्।";
@@ -122,6 +124,9 @@
 "settings.updates" = "अपडेटहरू";
 "settings.weather-location" = "मौसम स्थान";
 "settings.weather-source" = "मौसम स्रोत";
+"radio.search" = "स्टेशन खोज्नुहोस्";
+"radio.no-stations" = "खोजसँग मिल्ने स्टेशन छैन।";
+"radio.source" = "स्टेशन र स्ट्रिम रातोपाटीबाट उपलब्ध छन्।";
 "tools.amount" = "रकम";
 "tools.area" = "क्षेत्रफल";
 "tools.base-amount" = "भ्याट अगाडि";

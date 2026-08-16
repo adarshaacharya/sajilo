@@ -11,6 +11,7 @@ struct ActionBarView: View {
     var openNews: (() -> Void)?
     var openBazar: (() -> Void)?
     var openRashifal: (() -> Void)?
+    var openRadio: (() -> Void)?
     let openTools: () -> Void
 
     var body: some View {
@@ -25,6 +26,9 @@ struct ActionBarView: View {
             }
             if let openRashifal {
                 Button(L10n.rashifal, systemImage: "moon.stars.fill", action: openRashifal)
+            }
+            if let openRadio {
+                Button(L10n.radio, systemImage: "dot.radiowaves.left.and.right", action: openRadio)
             }
             Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
             // Quit moved up beside the settings gear in the header. It is used
