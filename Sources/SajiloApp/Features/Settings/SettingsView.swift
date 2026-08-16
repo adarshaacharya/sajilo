@@ -11,6 +11,10 @@ struct SettingsView: View {
     @Environment(\.appUpdater) private var appUpdater
     @Bindable var model: AppModel
     let onBack: () -> Void
+    @State private var backupDocument: SajiloBackupDocument?
+    @State private var isExportingBackup = false
+    @State private var isImportingBackup = false
+    @State private var backupMessage: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -55,6 +59,26 @@ struct SettingsView: View {
                             appUpdater?.checkForUpdates()
                         }
                         .disabled(appUpdater == nil)
+                    }
+
+                    SettingsSection(L10n.backup) {
+                        Button(L10n.exportData, systemImage: "square.and.arrow.up") {
+                            do {
+                                backupDocument = SajiloBackupDocument(data: try model.exportBackup())
+                                isExportingBackup = true
+                            } catch {
+                                backupMessage = error.localizedDescription
+                            }
+                        }
+
+                        Button(L10n.importData, systemImage: "square.and.arrow.down") {
+                            isImportingBackup = true
+                        }
+
+                        Text(L10n.backupNote)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     SettingsSection(L10n.numerals) {
@@ -146,6 +170,41 @@ struct SettingsView: View {
         // Reads the current permission; it never prompts, so opening Settings
         // cannot trigger a system dialog.
         .task { await model.refreshNotificationAuthorization() }
+        .fileExporter(
+            isPresented: $isExportingBackup,
+            document: backupDocument,
+            contentType: .json,
+            defaultFilename: "Sajilo-backup"
+        ) { result in
+            if case let .failure(error) = result {
+                backupMessage = error.localizedDescription
+            }
+        }
+        .fileImporter(
+            isPresented: $isImportingBackup,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            do {
+                let url = try result.get().first ?? { throw CocoaError(.fileReadNoSuchFile) }()
+                guard url.startAccessingSecurityScopedResource() else {
+                    throw CocoaError(.fileReadNoPermission)
+                }
+                defer { url.stopAccessingSecurityScopedResource() }
+                try model.importBackup(Data(contentsOf: url))
+                backupMessage = String(localized: L10n.backupImported)
+            } catch {
+                backupMessage = error.localizedDescription
+            }
+        }
+        .alert(L10n.backup, isPresented: Binding(
+            get: { backupMessage != nil },
+            set: { if !$0 { backupMessage = nil } }
+        )) {
+            Button(L10n.ok) { backupMessage = nil }
+        } message: {
+            Text(verbatim: backupMessage ?? "")
+        }
     }
 
     /// A reminder switched on but denied at the system level would otherwise

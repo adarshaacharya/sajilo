@@ -99,6 +99,11 @@
 "screen.settings" = "Settings";
 "screen.upcoming" = "Upcoming events";
 "settings.bazar" = "Gold, silver and fuel";
+"settings.backup" = "Backup";
+"settings.backup-imported" = "Sajilo data imported.";
+"settings.backup-note" = "Backs up your personal dates and Sajilo settings. Live prices and news are fetched again.";
+"settings.export-data" = "Export Sajilo data…";
+"settings.import-data" = "Import Sajilo data…";
 "settings.bazar-source" = "Rates source";
 "settings.calendar-range" = "Calendar";
 "settings.city" = "City";

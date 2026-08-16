@@ -76,6 +76,15 @@ struct DashboardView: View {
                     .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
             }
 
+            if let station = model.radioPlayer.currentStation, model.radioPlayer.isPlaying {
+                RadioMiniPlayer(
+                    station: station,
+                    isResolving: model.radioPlayer.isResolving,
+                    openRadio: { navigate(to: .radio) },
+                    togglePlayback: { Task { await model.radioPlayer.toggle(station) } }
+                )
+            }
+
             actionBar
         }
         .environment(\.numeralStyle, model.numeralStyle)

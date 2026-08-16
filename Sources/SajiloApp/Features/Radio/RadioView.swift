@@ -157,6 +157,50 @@ private struct NowPlayingCard: View {
     }
 }
 
+/// Remains visible above Sajilo's navigation while a station is playing, so
+/// leaving the Radio screen never makes audio feel detached from the app.
+struct RadioMiniPlayer: View {
+    let station: RadioStation
+    let isResolving: Bool
+    let openRadio: () -> Void
+    let togglePlayback: () -> Void
+
+    var body: some View {
+        HStack(spacing: Theme.Space.s) {
+            EqualizerView(isPlaying: true)
+
+            Button(action: openRadio) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(L10n.radio)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(verbatim: station.name)
+                        .font(.caption.weight(.semibold))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Now playing \(station.name)")
+            .accessibilityHint("Opens radio")
+
+            Button(action: togglePlayback) {
+                Image(systemName: isResolving ? "arrow.clockwise" : "pause.fill")
+            }
+            .buttonStyle(IconButtonStyle())
+            .disabled(isResolving)
+            .accessibilityLabel("Pause radio")
+        }
+        .padding(.horizontal, Theme.Space.m)
+        .padding(.vertical, Theme.Space.xs)
+        .background(Theme.Palette.brand.opacity(0.10))
+        .overlay(alignment: .top) {
+            Divider().opacity(0.45)
+        }
+    }
+}
+
 private struct StationRow: View {
     let station: RadioStation
     let isCurrent: Bool

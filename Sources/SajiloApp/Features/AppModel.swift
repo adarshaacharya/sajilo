@@ -707,6 +707,68 @@ final class AppModel {
         Task { [weak self] in await self?.rescheduleNotifications() }
     }
 
+    // MARK: - Backup
+
+    func exportBackup() throws -> Data {
+        try SajiloBackup(
+            preferences: .init(
+                menuBarFormat: selectedMenuBarFormat.rawValue,
+                customMenuBarShowsFlag: customMenuBarShowsFlag,
+                customMenuBarShowsYear: customMenuBarShowsYear,
+                appLanguage: appLanguage.rawValue,
+                numeralStyle: numeralStyle.rawValue,
+                weatherEnabled: isWeatherEnabled,
+                forexEnabled: isForexEnabled,
+                newsEnabled: isNewsEnabled,
+                bazarEnabled: isBazarEnabled,
+                rashifalEnabled: isRashifalEnabled,
+                radioEnabled: isRadioEnabled,
+                weatherLocation: selectedWeatherLocation.rawValue,
+                forexFavourites: forexFavourites,
+                vegetableFavourites: vegetableFavourites,
+                selectedRashi: selectedRashi?.rawValue,
+                showsDockIcon: showsDockIcon,
+                notifyHolidayEve: notificationOptions.eveOfPublicHoliday,
+                notifyFestivalEve: notificationOptions.eveOfFestival
+            ),
+            dayPlans: dayPlans
+        ).encoded()
+    }
+
+    /// Imports preferences and adds plans that are not already present. An
+    /// import never deletes local plans or overwrites one with the same ID.
+    func importBackup(_ data: Data) throws {
+        let backup = try SajiloBackup.decode(data)
+        let preferences = backup.preferences
+
+        selectedMenuBarFormat = MenuBarFormat(rawValue: preferences.menuBarFormat) ?? selectedMenuBarFormat
+        customMenuBarShowsFlag = preferences.customMenuBarShowsFlag
+        customMenuBarShowsYear = preferences.customMenuBarShowsYear
+        appLanguage = AppLanguage(rawValue: preferences.appLanguage) ?? appLanguage
+        numeralStyle = NumeralStyle(rawValue: preferences.numeralStyle) ?? numeralStyle
+        isWeatherEnabled = preferences.weatherEnabled
+        isForexEnabled = preferences.forexEnabled
+        isNewsEnabled = preferences.newsEnabled
+        isBazarEnabled = preferences.bazarEnabled
+        isRashifalEnabled = preferences.rashifalEnabled
+        isRadioEnabled = preferences.radioEnabled
+        selectedWeatherLocation = WeatherLocation(rawValue: preferences.weatherLocation) ?? selectedWeatherLocation
+        forexFavourites = preferences.forexFavourites
+        vegetableFavourites = preferences.vegetableFavourites
+        selectedRashi = preferences.selectedRashi.flatMap(RashiSign.init(rawValue:))
+        showsDockIcon = preferences.showsDockIcon
+        notificationOptions = .init(
+            eveOfPublicHoliday: preferences.notifyHolidayEve,
+            eveOfFestival: preferences.notifyFestivalEve
+        )
+
+        let existingIDs = Set(dayPlans.map(\.id))
+        dayPlans.append(contentsOf: backup.dayPlans.filter { !existingIDs.contains($0.id) })
+        dayPlanStore.save(dayPlans)
+        applyActivationPolicy()
+        Task { [weak self] in await self?.rescheduleNotifications() }
+    }
+
     // MARK: - Notifications
 
     /// Reads the current permission without prompting, so Settings can explain

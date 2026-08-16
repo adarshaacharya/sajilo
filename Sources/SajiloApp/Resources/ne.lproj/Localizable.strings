@@ -99,6 +99,11 @@
 "screen.settings" = "सेटिङ";
 "screen.upcoming" = "आगामी कार्यक्रमहरू";
 "settings.bazar" = "सुन, चाँदी र इन्धन";
+"settings.backup" = "ब्याकअप";
+"settings.backup-imported" = "Sajilo डेटा आयात भयो।";
+"settings.backup-note" = "तपाईंका व्यक्तिगत मिति र Sajilo सेटिङको ब्याकअप हुन्छ। मूल्य र समाचार फेरि ल्याइन्छ।";
+"settings.export-data" = "Sajilo डेटा निर्यात गर्नुहोस्…";
+"settings.import-data" = "Sajilo डेटा आयात गर्नुहोस्…";
 "settings.bazar-source" = "दरको स्रोत";
 "settings.calendar-range" = "पात्रो";
 "settings.city" = "सहर";
