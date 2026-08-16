@@ -1,10 +1,11 @@
 import SwiftUI
 
-/// PRD §5.6 and §5.7: today's gold and silver rate, and NOC's retail fuel price.
+/// What things cost today: gold and silver (PRD §5.6), NOC's retail fuel price
+/// (§5.7), and the Kalimati board's daily produce rates.
 ///
-/// The two live behind one route because they answer the same question — what
-/// things cost today — and because the dashboard stays calendar-first. Neither
-/// gets a card on the main screen.
+/// All three live behind one route because they answer the same question, and
+/// because the dashboard stays calendar-first. None of them gets a card on the
+/// main screen.
 struct BazarView: View {
     let model: AppModel
     let onBack: () -> Void
@@ -13,13 +14,14 @@ struct BazarView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     enum Section: String, CaseIterable, Identifiable {
-        case metals, fuel
+        case metals, fuel, vegetables
         var id: String { rawValue }
 
         var title: LocalizedStringResource {
             switch self {
             case .metals: L10n.bazarMetals
             case .fuel: L10n.bazarFuel
+            case .vegetables: L10n.bazarVegetables
             }
         }
     }
@@ -39,6 +41,7 @@ struct BazarView: View {
                     switch section {
                     case .metals: MetalsSection(model: model)
                     case .fuel: FuelSection(model: model)
+                    case .vegetables: VegetablesSection(model: model)
                     }
 
                     Spacer(minLength: 0)
@@ -52,7 +55,11 @@ struct BazarView: View {
     }
 
     private var isLoading: Bool {
-        section == .metals ? model.isMetalsLoading : model.isFuelLoading
+        switch section {
+        case .metals: model.isMetalsLoading
+        case .fuel: model.isFuelLoading
+        case .vegetables: model.isVegetablesLoading
+        }
     }
 
     private var header: some View {
@@ -327,6 +334,149 @@ private struct FuelRow: View {
     }
 }
 
+// MARK: - Vegetables
+
+/// Kalimati's daily table is around a hundred rows, which is far more than a
+/// 380pt popover can usefully show. Search narrows it, and pinning lifts the
+/// handful someone actually buys to the top — the list is browsed maybe once
+/// and then only ever consulted for the same five things.
+private struct VegetablesSection: View {
+    let model: AppModel
+
+    @State private var query = ""
+
+    var body: some View {
+        if model.vegetables != nil {
+            let groups = model.vegetables(matching: query)
+
+            VStack(alignment: .leading, spacing: Theme.Space.m) {
+                TextField(String(localized: L10n.bazarSearchProduce), text: $query)
+                    .textFieldStyle(.roundedBorder)
+                    .labelsHidden()
+
+                if groups.pinned.isEmpty && groups.others.isEmpty {
+                    Text(L10n.bazarNoMatch)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .cardSection()
+                }
+
+                if !groups.pinned.isEmpty {
+                    produceList(L10n.bazarPinned, groups.pinned)
+                }
+                if !groups.others.isEmpty {
+                    produceList(
+                        groups.pinned.isEmpty ? nil : L10n.bazarAllProduce,
+                        groups.others
+                    )
+                }
+
+                // Said plainly rather than in a footnote: these are wholesale
+                // rates, and someone comparing them with what they paid at a
+                // stall should know why the numbers differ.
+                Text(L10n.bazarWholesaleNote)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                sourceNote
+            }
+        } else {
+            UnavailableNote(
+                message: model.vegetablesError ?? "No prices cached yet.",
+                isLoading: model.isVegetablesLoading
+            )
+        }
+    }
+
+    private func produceList(_ title: LocalizedStringResource?, _ prices: [VegetablePrice]) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Space.xs) {
+            if let title {
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            ForEach(prices) { price in
+                ProduceRow(
+                    price: price,
+                    isPinned: model.vegetableFavourites.contains(price.name),
+                    togglePin: { model.toggleVegetableFavourite(price.name) }
+                )
+            }
+        }
+        .cardSection()
+    }
+
+    @ViewBuilder
+    private var sourceNote: some View {
+        if let published = model.vegetables?.publishedOn {
+            // The board's own Bikram Sambat date, not the fetch time: it does
+            // not publish on every holiday, so today's screen sometimes carries
+            // the last trading day's rates and should say which day.
+            SourceNote(
+                label: L10n.bazarPublished,
+                nepaliDate: published,
+                name: "Kalimati Fruits and Vegetable Market Development Board",
+                url: URL(string: "https://kalimatimarket.gov.np/price")!
+            )
+        }
+    }
+}
+
+private struct ProduceRow: View {
+    let price: VegetablePrice
+    let isPinned: Bool
+    let togglePin: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        HStack(spacing: Theme.Space.s) {
+            Button(action: togglePin) {
+                Image(systemName: isPinned ? "pin.fill" : "pin")
+                    .font(.caption2)
+                    .foregroundStyle(isPinned ? AnyShapeStyle(Theme.Palette.brand) : AnyShapeStyle(.tertiary))
+                    .frame(width: 14)
+            }
+            .buttonStyle(.plain)
+            // Revealed on hover so ninety unpinned rows are not ninety pins,
+            // but always present once pinned.
+            .opacity(isPinned || isHovering ? 1 : 0)
+            .accessibilityLabel(L10n.bazarPin)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text(verbatim: price.name)
+                    .font(.callout)
+                    .lineLimit(1)
+                if let english = price.englishName {
+                    Text(verbatim: english)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+
+            Spacer(minLength: Theme.Space.s)
+
+            VStack(alignment: .trailing, spacing: 0) {
+                Text(verbatim: "\(price.averageText) \(price.unit.displayName)")
+                    .font(.callout.weight(.medium))
+                    .monospacedDigit()
+                Text(verbatim: price.rangeText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+        }
+        .contentShape(.rect)
+        .onHover { isHovering = $0 }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(
+            "\(price.englishName ?? price.name), \(price.averageText) \(price.unit.displayName)"
+        )
+    }
+}
+
 // MARK: - Shared
 
 /// A rise reads in the accent and a fall in the holiday red — the two colours
@@ -356,13 +506,30 @@ private struct ChangeBadge: View {
 
 private struct SourceNote: View {
     let label: LocalizedStringResource
-    let date: Date
+    let stamp: String
     let name: String
     let url: URL
 
+    init(label: LocalizedStringResource, date: Date, name: String, url: URL) {
+        self.label = label
+        self.stamp = Self.formatter.string(from: date)
+        self.name = name
+        self.url = url
+    }
+
+    /// Kalimati dates its table in Bikram Sambat, so that is what is shown —
+    /// converting it to a Gregorian date would print something the source
+    /// never said.
+    init(label: LocalizedStringResource, nepaliDate: NepaliDate, name: String, url: URL) {
+        self.label = label
+        self.stamp = "\(nepaliDate.day) \(nepaliDate.nepaliMonthName) \(nepaliDate.year)"
+        self.name = name
+        self.url = url
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xxs) {
-            Text("\(String(localized: label)) \(Self.formatter.string(from: date))")
+            Text("\(String(localized: label)) \(stamp)")
             Link(name, destination: url)
         }
         .font(.caption2)

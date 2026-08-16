@@ -15,6 +15,17 @@ struct LiveSourceSmokeTests {
         #expect(snapshot.rate(for: .fineGold, unit: .tola)!.price > 50_000)
     }
 
+    @Test func kalimatiStillPublishesTheDailyTable() async throws {
+        let snapshot = try await KalimatiMarketProvider().latestPrices()
+
+        // The board lists around a hundred items every trading day; a handful
+        // would mean the table shape changed under us.
+        #expect(snapshot.prices.count > 50)
+        #expect(snapshot.publishedOn != nil, "the BS date heading moved or changed shape")
+        #expect(snapshot.prices.allSatisfy { $0.average > 0 })
+        #expect(snapshot.prices.contains { $0.englishName == "Potato" })
+    }
+
     @Test func nocStillPublishesTheRetailTable() async throws {
         let snapshot = try await NOCFuelProvider().latestPrices()
         #expect(snapshot.price(for: .petrol) != nil)

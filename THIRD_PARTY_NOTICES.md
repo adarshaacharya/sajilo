@@ -108,6 +108,41 @@ most recent revision is the current price and the one below it supplies the
 change figure; a single published revision reads as unchanged rather than as a
 fall from zero.
 
+## Kalimati produce prices
+
+Daily wholesale rates come from the **Kalimati Fruits and Vegetable Market
+Development Board** (`https://kalimatimarket.gov.np/price`), the government body
+that runs Nepal's largest wholesale produce market and publishes the rates the
+morning papers quote.
+
+Like Nepal Oil Corporation, the board offers no API, only a server-rendered
+table, so both read through the same `HTMLTable`. Three properties of the page
+shape the parser, and each is pinned by a test:
+
+- **The unit for kilogram is spelled four different ways in a single day's
+  table** — `के.जी.`, `के.जी`, `के जी`, `केजी` — because rows are typed by hand.
+  Matching on the bare letters rather than the punctuation absorbs all four, and
+  any fifth spelling that appears later. Bananas are sold by `दर्जन` and
+  pineapple by `प्रति गोटा`.
+- **Prices are printed in Devanagari numerals** with a currency prefix and
+  thousands separators: `रू १,०००.००`. They are transliterated before anything
+  reads them as a number.
+- **The table dates itself in Bikram Sambat** in a heading above it rather than
+  in any cell — `वि.सं. साउन ३१, २०८३`. Sajilo keeps that as a `NepaliDate` and
+  shows it unchanged. The board does not publish on every holiday, so what is on
+  screen is sometimes the previous trading day's table, and it should say which
+  day rather than implying today.
+
+These are **wholesale** rates, not shop prices, and the UI says so rather than
+leaving someone to wonder why the number differs from what they paid.
+
+English names are shown for the items where one is unambiguous, and omitted for
+the rest rather than guessed at — a wrong label on a price list makes someone
+buy the wrong thing. The lookup matches longest-first because the names nest:
+`भेडे खुर्सानी` is capsicum while `खुर्सानी` is chilli. The board's own table
+carries the chilli name with and without a stray halant on the same day, so both
+spellings are listed verbatim.
+
 ## Open-Meteo weather data
 
 The weather card is served by the [Open-Meteo](https://open-meteo.com) forecast

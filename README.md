@@ -14,7 +14,7 @@ Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
 - Bikram Sambat ↔ AD date converter
 - Kathmandu weather and air quality
 - Nepal Rastra Bank exchange rates
-- Gold and silver rates, and Nepal Oil Corporation fuel prices
+- Gold and silver rates, Nepal Oil Corporation fuel prices, and Kalimati produce prices
 - Nepali news headlines
 - Quick tools for land, weight, VAT, and simple interest
 - English, नेपाली, and mixed-language display options

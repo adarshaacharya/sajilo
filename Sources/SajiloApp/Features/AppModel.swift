@@ -52,6 +52,8 @@ final class AppModel {
         static let bazarEnabled = "bazarEnabled"
         static let metalsCache = "metalsCache"
         static let fuelCache = "fuelCache"
+        static let vegetableCache = "vegetableCache"
+        static let vegetableFavourites = "vegetableFavourites"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -144,6 +146,7 @@ final class AppModel {
     @ObservationIgnored private var newsFeed: RemoteFeed<NewsDigest>!
     @ObservationIgnored private var metalsFeed: RemoteFeed<MetalRateSnapshot>!
     @ObservationIgnored private var fuelFeed: RemoteFeed<FuelPriceSnapshot>!
+    @ObservationIgnored private var vegetableFeed: RemoteFeed<VegetableMarketSnapshot>!
 
     var weather: WeatherSnapshot? { weatherFeed.value }
     var isWeatherLoading: Bool { weatherFeed.isLoading }
@@ -161,6 +164,39 @@ final class AppModel {
     var fuel: FuelPriceSnapshot? { fuelFeed.value }
     var isFuelLoading: Bool { fuelFeed.isLoading }
     var fuelError: String? { fuelFeed.errorMessage }
+
+    var vegetables: VegetableMarketSnapshot? { vegetableFeed.value }
+    var isVegetablesLoading: Bool { vegetableFeed.isLoading }
+    var vegetablesError: String? { vegetableFeed.errorMessage }
+
+    /// The handful of items someone actually buys, pinned above the other
+    /// ninety. Stored by the board's own name, which is the only stable key it
+    /// publishes.
+    var vegetableFavourites: [String] {
+        didSet {
+            guard oldValue != vegetableFavourites else { return }
+            defaults.set(vegetableFavourites, forKey: DefaultsKey.vegetableFavourites)
+        }
+    }
+
+    func toggleVegetableFavourite(_ name: String) {
+        if let index = vegetableFavourites.firstIndex(of: name) {
+            vegetableFavourites.remove(at: index)
+        } else {
+            vegetableFavourites.append(name)
+        }
+    }
+
+    /// Favourites first, in the order they were pinned, then everything else in
+    /// the board's own order.
+    func vegetables(matching query: String) -> (pinned: [VegetablePrice], others: [VegetablePrice]) {
+        let matches = vegetables?.matching(query) ?? []
+        let pinned = vegetableFavourites.compactMap { name in
+            matches.first { $0.name == name }
+        }
+        let others = matches.filter { !vegetableFavourites.contains($0.name) }
+        return (pinned, others)
+    }
 
     var forex: ForexSnapshot? { forexFeed.value }
     var isForexLoading: Bool { forexFeed.isLoading }
@@ -218,6 +254,7 @@ final class AppModel {
     @ObservationIgnored private let newsProvider: any NewsProviding
     @ObservationIgnored private let metalProvider: any MetalRateProviding
     @ObservationIgnored private let fuelProvider: any FuelPriceProviding
+    @ObservationIgnored private let vegetableProvider: any VegetableMarketProviding
     @ObservationIgnored private let dayPlanStore: DayPlanStore
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
@@ -332,6 +369,7 @@ final class AppModel {
         newsProvider: any NewsProviding = RSSNewsProvider(),
         metalProvider: any MetalRateProviding = FenegosidaMetalProvider(),
         fuelProvider: any FuelPriceProviding = NOCFuelProvider(),
+        vegetableProvider: any VegetableMarketProviding = KalimatiMarketProvider(),
         dayPlanStore: DayPlanStore? = nil,
         autoLoadWeather: Bool = true
     ) {
@@ -344,6 +382,7 @@ final class AppModel {
         self.newsProvider = newsProvider
         self.metalProvider = metalProvider
         self.fuelProvider = fuelProvider
+        self.vegetableProvider = vegetableProvider
         self.dayPlanStore = resolvedDayPlanStore
         dayPlans = resolvedDayPlanStore.load()
         referenceDate = now
@@ -370,6 +409,7 @@ final class AppModel {
         selectedWeatherLocation = location
         forexFavourites = defaults.stringArray(forKey: DefaultsKey.forexFavourites)
             ?? ForexCurrency.defaultFavourites
+        vegetableFavourites = defaults.stringArray(forKey: DefaultsKey.vegetableFavourites) ?? []
         showsDockIcon = defaults.bool(forKey: DefaultsKey.showsDockIcon)
         notificationOptions = NotificationOptions(
             eveOfPublicHoliday: defaults.bool(forKey: DefaultsKey.notifyHolidayEve),
@@ -461,6 +501,21 @@ final class AppModel {
             }
         ) { [fuelProvider] in
             try await fuelProvider.latestPrices()
+        }
+
+        vegetableFeed = RemoteFeed(
+            subject: "vegetable prices",
+            cacheKey: DefaultsKey.vegetableCache,
+            staleInterval: Self.vegetableStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                (error as? MarketProviderError) == .tableNotFound
+                    ? "The Kalimati board has not posted today's rates yet"
+                    : nil
+            }
+        ) { [vegetableProvider] in
+            try await vegetableProvider.latestPrices()
         }
 
         scheduleMidnightRefresh()
@@ -646,6 +701,8 @@ final class AppModel {
     /// NOC revises roughly twice a month, so this only needs to notice the day
     /// a revision lands.
     static let fuelStaleInterval: TimeInterval = 12 * 60 * 60
+    /// Kalimati posts one table per trading day, in the morning.
+    static let vegetableStaleInterval: TimeInterval = 6 * 60 * 60
 
     /// Both refresh together: they share one route, so a user who opens it
     /// expects both halves to be current.
@@ -653,13 +710,15 @@ final class AppModel {
         guard isBazarEnabled else { return }
         async let rates: Void = metalsFeed.refreshIfStale()
         async let prices: Void = fuelFeed.refreshIfStale()
-        _ = await (rates, prices)
+        async let produce: Void = vegetableFeed.refreshIfStale()
+        _ = await (rates, prices, produce)
     }
 
     func refreshBazar() async {
         async let rates: Void = metalsFeed.refresh()
         async let prices: Void = fuelFeed.refresh()
-        _ = await (rates, prices)
+        async let produce: Void = vegetableFeed.refresh()
+        _ = await (rates, prices, produce)
     }
 
     // MARK: - News
