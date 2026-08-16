@@ -19,63 +19,67 @@ struct DashboardView: View {
         // `if`. The popover then takes the height of the taller one and holds
         // it, instead of snapping to a new size mid-transition — which is what
         // makes a menu-bar panel feel unstable.
-        ZStack(alignment: .top) {
-            dashboard
-                .modifier(RouteLayer(isActive: route == .dashboard, edge: -1, reduceMotion: reduceMotion))
+        VStack(spacing: 0) {
+            ZStack(alignment: .top) {
+                dashboard
+                    .modifier(RouteLayer(isActive: route == .dashboard, edge: -1, reduceMotion: reduceMotion))
 
-            DateConverterView(onBack: { navigate(to: .dashboard) })
-                .modifier(RouteLayer(isActive: route == .converter, edge: 1, reduceMotion: reduceMotion))
+                DateConverterView(onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .converter, edge: 1, reduceMotion: reduceMotion))
 
             // Mounted only once a day has been picked, so the popover does not
             // pay for a detail view nobody has opened yet.
-            if let selectedDate {
-                DayDetailView(model: model, date: selectedDate, onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: isShowingDayDetail, edge: 1, reduceMotion: reduceMotion))
+                if let selectedDate {
+                    DayDetailView(model: model, date: selectedDate, onBack: { navigate(to: .dashboard) })
+                        .modifier(RouteLayer(isActive: isShowingDayDetail, edge: 1, reduceMotion: reduceMotion))
+                }
+
+                UpcomingEventsView(
+                    events: model.upcomingEvents,
+                    onBack: { navigate(to: .dashboard) },
+                    onSelectDate: select(_:)
+                )
+                .modifier(RouteLayer(isActive: route == .upcoming, edge: 1, reduceMotion: reduceMotion))
+
+                SettingsView(model: model, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .settings, edge: 1, reduceMotion: reduceMotion))
+
+                WeatherDetailView(
+                    model: model,
+                    isActive: route == .weather,
+                    onBack: { navigate(to: .dashboard) }
+                )
+                .modifier(RouteLayer(isActive: route == .weather, edge: 1, reduceMotion: reduceMotion))
+
+                ForexDetailView(model: model, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .forex, edge: 1, reduceMotion: reduceMotion))
+
+                // Mounted only when switched on, so a disabled module costs nothing.
+                if model.isNewsEnabled {
+                    NewsView(model: model, onBack: { navigate(to: .dashboard) })
+                        .modifier(RouteLayer(isActive: route == .news, edge: 1, reduceMotion: reduceMotion))
+                }
+
+                if model.isBazarEnabled {
+                    BazarView(model: model, onBack: { navigate(to: .dashboard) })
+                        .modifier(RouteLayer(isActive: route == .bazar, edge: 1, reduceMotion: reduceMotion))
+                }
+
+                if model.isRashifalEnabled {
+                    RashifalView(model: model, onBack: { navigate(to: .dashboard) })
+                        .modifier(RouteLayer(isActive: route == .rashifal, edge: 1, reduceMotion: reduceMotion))
+                }
+
+                if model.isRadioEnabled {
+                    RadioView(model: model, onBack: { navigate(to: .dashboard) })
+                        .modifier(RouteLayer(isActive: route == .radio, edge: 1, reduceMotion: reduceMotion))
+                }
+
+                ToolsView(onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
             }
 
-            UpcomingEventsView(
-                events: model.upcomingEvents,
-                onBack: { navigate(to: .dashboard) },
-                onSelectDate: select(_:)
-            )
-            .modifier(RouteLayer(isActive: route == .upcoming, edge: 1, reduceMotion: reduceMotion))
-
-            SettingsView(model: model, onBack: { navigate(to: .dashboard) })
-                .modifier(RouteLayer(isActive: route == .settings, edge: 1, reduceMotion: reduceMotion))
-
-            WeatherDetailView(
-                model: model,
-                isActive: route == .weather,
-                onBack: { navigate(to: .dashboard) }
-            )
-            .modifier(RouteLayer(isActive: route == .weather, edge: 1, reduceMotion: reduceMotion))
-
-            ForexDetailView(model: model, onBack: { navigate(to: .dashboard) })
-                .modifier(RouteLayer(isActive: route == .forex, edge: 1, reduceMotion: reduceMotion))
-
-            // Mounted only when switched on, so a disabled module costs nothing.
-            if model.isNewsEnabled {
-                NewsView(model: model, onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: route == .news, edge: 1, reduceMotion: reduceMotion))
-            }
-
-            if model.isBazarEnabled {
-                BazarView(model: model, onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: route == .bazar, edge: 1, reduceMotion: reduceMotion))
-            }
-
-            if model.isRashifalEnabled {
-                RashifalView(model: model, onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: route == .rashifal, edge: 1, reduceMotion: reduceMotion))
-            }
-
-            if model.isRadioEnabled {
-                RadioView(model: model, onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: route == .radio, edge: 1, reduceMotion: reduceMotion))
-            }
-
-            ToolsView(onBack: { navigate(to: .dashboard) })
-                .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
+            actionBar
         }
         .environment(\.numeralStyle, model.numeralStyle)
         .frame(width: Theme.Metric.popoverWidth)
@@ -126,17 +130,21 @@ struct DashboardView: View {
             .padding(.horizontal, Theme.Space.m)
             .padding(.vertical, Theme.Space.m)
 
-            ActionBarView(
-                openUpcoming: { navigate(to: .upcoming) },
-                openConverter: { navigate(to: .converter) },
-                openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
-                openBazar: model.isBazarEnabled ? { navigate(to: .bazar) } : nil,
-                openRashifal: model.isRashifalEnabled ? { navigate(to: .rashifal) } : nil,
-                openRadio: model.isRadioEnabled ? { navigate(to: .radio) } : nil,
-                openTools: { navigate(to: .tools) }
-            )
         }
         .accessibilityLabel("Sajilo dashboard")
+    }
+
+    private var actionBar: some View {
+        ActionBarView(
+            active: route.actionDestination,
+            openUpcoming: { navigate(to: .upcoming) },
+            openConverter: { navigate(to: .converter) },
+            openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
+            openBazar: model.isBazarEnabled ? { navigate(to: .bazar) } : nil,
+            openRashifal: model.isRashifalEnabled ? { navigate(to: .rashifal) } : nil,
+            openRadio: model.isRadioEnabled ? { navigate(to: .radio) } : nil,
+            openTools: { navigate(to: .tools) }
+        )
     }
 
     private func navigate(to destination: DashboardRoute) {
@@ -149,7 +157,7 @@ struct DashboardView: View {
     }
 }
 
-private enum DashboardRoute: Equatable {
+enum DashboardRoute: Equatable {
     case dashboard
     case converter
     case dayDetail(NepaliDate)
@@ -162,6 +170,19 @@ private enum DashboardRoute: Equatable {
     case rashifal
     case radio
     case tools
+
+    var actionDestination: ActionBarDestination? {
+        switch self {
+        case .upcoming, .dayDetail: .festivals
+        case .converter: .converter
+        case .news: .news
+        case .bazar: .bazar
+        case .rashifal: .rashifal
+        case .radio: .radio
+        case .tools: .tools
+        case .dashboard, .settings, .weather, .forex: nil
+        }
+    }
 }
 
 /// Presents one route of the popover. The inactive layer stays mounted so the

@@ -136,12 +136,15 @@ struct IconButtonStyle: ButtonStyle {
 /// A compact labelled action for the popover's bottom bar. Icon above text
 /// keeps three actions inside 380 pt without truncating.
 struct ToolbarActionStyle: ButtonStyle {
+    var isActive = false
+
     func makeBody(configuration: Configuration) -> some View {
-        ToolbarActionBody(configuration: configuration)
+        ToolbarActionBody(configuration: configuration, isActive: isActive)
     }
 
     private struct ToolbarActionBody: View {
         let configuration: Configuration
+        let isActive: Bool
         @State private var isHovering = false
 
         var body: some View {
@@ -149,9 +152,15 @@ struct ToolbarActionStyle: ButtonStyle {
                 .labelStyle(StackedLabelStyle())
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Theme.Space.s)
-                .foregroundStyle(isHovering ? AnyShapeStyle(Theme.Palette.brand) : AnyShapeStyle(.secondary))
+                .foregroundStyle(
+                    isActive || isHovering
+                        ? AnyShapeStyle(Theme.Palette.brand)
+                        : AnyShapeStyle(.secondary)
+                )
                 .background(
-                    isHovering ? Theme.Palette.hover : .clear,
+                    isActive
+                        ? Theme.Palette.brand.opacity(0.12)
+                        : (isHovering ? Theme.Palette.hover : .clear),
                     in: .rect(cornerRadius: Theme.Radius.day)
                 )
                 .opacity(configuration.isPressed ? 0.6 : 1)

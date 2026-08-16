@@ -4,6 +4,7 @@ import SwiftUI
 // MARK: - Actions
 
 struct ActionBarView: View {
+    let active: ActionBarDestination?
     let openUpcoming: () -> Void
     let openConverter: () -> Void
     /// Absent unless the module is enabled — a button that is present but
@@ -16,30 +17,44 @@ struct ActionBarView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            Button(L10n.festivals, systemImage: "calendar", action: openUpcoming)
-            Button(L10n.convert, systemImage: "arrow.left.arrow.right", action: openConverter)
+            action(L10n.festivals, icon: "calendar", destination: .festivals, action: openUpcoming)
+            action(L10n.convert, icon: "arrow.left.arrow.right", destination: .converter, action: openConverter)
             if let openNews {
-                Button(L10n.news, systemImage: "newspaper", action: openNews)
+                action(L10n.news, icon: "newspaper", destination: .news, action: openNews)
             }
             if let openBazar {
-                Button(L10n.bazar, systemImage: "storefront", action: openBazar)
+                action(L10n.bazar, icon: "storefront", destination: .bazar, action: openBazar)
             }
             if let openRashifal {
-                Button(L10n.rashifal, systemImage: "moon.stars.fill", action: openRashifal)
+                action(L10n.rashifal, icon: "moon.stars.fill", destination: .rashifal, action: openRashifal)
             }
             if let openRadio {
-                Button(L10n.radio, systemImage: "dot.radiowaves.left.and.right", action: openRadio)
+                action(L10n.radio, icon: "dot.radiowaves.left.and.right", destination: .radio, action: openRadio)
             }
-            Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
+            action(L10n.tools, icon: "wrench.and.screwdriver", destination: .tools, action: openTools)
             // Quit moved up beside the settings gear in the header. It is used
             // once a session at most, and a row of six destinations reads
             // better than five plus an exit.
         }
-        .buttonStyle(ToolbarActionStyle())
         .padding(.horizontal, Theme.Space.s)
         .padding(.vertical, Theme.Space.xs)
         .background(.bar)
     }
+
+    private func action(
+        _ title: LocalizedStringResource,
+        icon: String,
+        destination: ActionBarDestination,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(title, systemImage: icon, action: action)
+            .buttonStyle(ToolbarActionStyle(isActive: active == destination))
+            .accessibilityAddTraits(active == destination ? .isSelected : [])
+    }
+}
+
+enum ActionBarDestination: Equatable {
+    case festivals, converter, news, bazar, rashifal, radio, tools
 }
 
 // MARK: - Previews
