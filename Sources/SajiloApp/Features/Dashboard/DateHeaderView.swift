@@ -42,12 +42,27 @@ struct DateHeaderView: View {
         .accessibilityLabel(accessibilityDescription)
         .routeHeader()
         .overlay(alignment: .topTrailing) {
-            Button(action: openSettings) {
-                Image(systemName: "gearshape")
+            // Settings and Quit sit together here rather than in the action
+            // bar. Both are chrome — everything in the bar below navigates
+            // somewhere, and mixing an exit into that row costs a slot that a
+            // daily destination uses better.
+            HStack(spacing: Theme.Space.xxs) {
+                Button(action: openSettings) {
+                    Image(systemName: "gearshape")
+                }
+                .buttonStyle(IconButtonStyle())
+                .accessibilityLabel(L10n.openSettings)
+
+                Button {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Image(systemName: "power")
+                }
+                .buttonStyle(IconButtonStyle())
+                .accessibilityLabel(L10n.quit)
+                .help(Text(L10n.quit))
             }
-            .buttonStyle(IconButtonStyle())
             .padding(Theme.Space.s)
-            .accessibilityLabel(L10n.openSettings)
         }
     }
 

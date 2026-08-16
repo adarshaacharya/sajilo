@@ -26,6 +26,18 @@ struct LiveSourceSmokeTests {
         #expect(snapshot.prices.contains { $0.englishName == "Potato" })
     }
 
+    @Test func hamroPatroStillPublishesAllTwelveReadings() async throws {
+        let snapshot = try await HamroPatroRashifalProvider().todaysRashifal()
+
+        #expect(snapshot.readings.count == 12)
+        #expect(snapshot.publishedOn != nil, "the date in the page title moved or changed shape")
+        // Each reading is a real paragraph, not a stray label picked up near
+        // the heading.
+        #expect(snapshot.readings.allSatisfy { $0.prediction.count > 60 })
+        // Twelve distinct readings, not the same text attached to every sign.
+        #expect(Set(snapshot.readings.map(\.prediction)).count == 12)
+    }
+
     @Test func nocStillPublishesTheRetailTable() async throws {
         let snapshot = try await NOCFuelProvider().latestPrices()
         #expect(snapshot.price(for: .petrol) != nil)

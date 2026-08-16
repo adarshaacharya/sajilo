@@ -93,6 +93,7 @@ struct SettingsView: View {
                         Toggle(L10n.forex, isOn: $model.isForexEnabled)
                         Toggle(L10n.news, isOn: $model.isNewsEnabled)
                         Toggle(L10n.settingsBazar, isOn: $model.isBazarEnabled)
+                        Toggle(L10n.settingsRashifal, isOn: $model.isRashifalEnabled)
                     }
 
                     SettingsSection(L10n.weatherLocation) {

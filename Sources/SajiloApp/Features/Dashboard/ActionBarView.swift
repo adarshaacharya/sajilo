@@ -10,6 +10,7 @@ struct ActionBarView: View {
     /// inert is worse than one that is not there.
     var openNews: (() -> Void)?
     var openBazar: (() -> Void)?
+    var openRashifal: (() -> Void)?
     let openTools: () -> Void
 
     var body: some View {
@@ -22,10 +23,13 @@ struct ActionBarView: View {
             if let openBazar {
                 Button(L10n.bazar, systemImage: "storefront", action: openBazar)
             }
-            Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
-            Button(L10n.quit, systemImage: "power") {
-                NSApplication.shared.terminate(nil)
+            if let openRashifal {
+                Button(L10n.rashifal, systemImage: "sparkles", action: openRashifal)
             }
+            Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
+            // Quit moved up beside the settings gear in the header. It is used
+            // once a session at most, and a row of six destinations reads
+            // better than five plus an exit.
         }
         .buttonStyle(ToolbarActionStyle())
         .padding(.horizontal, Theme.Space.s)

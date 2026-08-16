@@ -35,6 +35,41 @@ wants — someone running the interface in English is usually still a Nepali
 reader. Headlines appear in whatever language they were written in; nothing is
 translated.
 
+## Hamro Patro rashifal — used with permission
+
+The daily rashifal is written and published by **Hamro Patro**
+(`https://www.hamropatro.com/rashifal`) and is shown in Sajilo **with their
+permission**.
+
+This is the only source in Sajilo that carries somebody's *writing* rather than
+their numbers, and the distinction is the reason this section exists. A fuel
+price or a gold rate is a fact: it belongs to nobody, and reproducing it raises
+no question. These twelve paragraphs are composed each morning by Hamro Patro's
+astrologer, and reproducing them is reproducing an original work. Every other
+programmatic "Nepali rashifal API" on the internet is an unattributed scrape of
+this same page; Sajilo is not one of them.
+
+What that means in practice:
+
+- The readings are shown **verbatim** — never trimmed, summarised, reflowed, or
+  paraphrased.
+- Hamro Patro is **credited on the same screen as the words**, with a link back
+  to the source page, rather than in a settings pane the reader never opens.
+- There is **no offline fallback**. If the arrangement ends, removing the
+  provider removes the feature; nothing keeps serving the text.
+- The parser takes **all twelve readings or none**. A partial page means the
+  markup moved, and showing four signs while silently dropping eight would
+  misrepresent the source.
+
+The `/en/rashifal` path serves the same Nepali prose with only the surrounding
+chrome translated, so there is no English edition to prefer. The reading stays
+in Nepali whatever Sajilo's language is set to — the same decision made for news
+headlines, and for the same reason: the language setting governs Sajilo's own
+chrome, not what a Nepali reader wants to read.
+
+`RashifalProviding` exists so the source can be replaced without touching the
+UI, as with every other provider.
+
 ## Nepal Rastra Bank exchange rates
 
 Rates come from Nepal Rastra Bank's published forex API

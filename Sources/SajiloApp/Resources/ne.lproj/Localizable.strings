@@ -75,6 +75,12 @@
 "planner.title" = "दिनको योजना";
 "planner.title-field" = "के गर्नु छ?";
 "planner.up-next" = "अबको योजना";
+"rashifal.change-sign" = "बदल्नुहोस्";
+"rashifal.credit" = "हाम्रो पात्रोद्वारा लिखित र प्रकाशित, उहाँहरूको अनुमतिमा यहाँ राखिएको।";
+"rashifal.other-signs" = "अन्य राशि";
+"rashifal.pick-hint" = "राशि प्रायः जन्मकुण्डलीको चन्द्र राशि हो, जन्म महिना होइन — त्यसैले आफूलाई दिइएको राशि छान्नुहोस्।";
+"rashifal.pick-sign" = "आफ्नो राशि छान्नुहोस्";
+"rashifal.stale" = "यो राशिफल अघिल्लो दिनको हो।";
 "reminder.festival-tomorrow" = "भोलि पर्व";
 "reminder.holiday-tomorrow" = "भोलि सार्वजनिक बिदा";
 "screen.bazar" = "बजार";
@@ -82,6 +88,7 @@
 "screen.date-details" = "मिति विवरण";
 "screen.exchange-rates" = "विनिमय दर";
 "screen.news" = "समाचार";
+"screen.rashifal" = "राशिफल";
 "screen.settings" = "सेटिङ";
 "screen.upcoming" = "आगामी";
 "settings.bazar" = "सुन, चाँदी र इन्धन";
@@ -104,6 +111,7 @@
 "settings.menu-bar-show-year" = "वि.सं. वर्ष देखाउनुहोस्";
 "settings.modules" = "मोड्युलहरू";
 "settings.numerals" = "अङ्कहरू";
+"settings.rashifal" = "राशिफल";
 "settings.rates-source" = "दर स्रोत";
 "settings.reminder-denied-note" = "Sajilo का सूचनाहरू System Settings › Notifications मा बन्द छन्।";
 "settings.reminder-enabled-note" = "स्मरणहरू नेपाल समयअनुसार अघिल्लो साँझ ७ बजे आउँछन्।";

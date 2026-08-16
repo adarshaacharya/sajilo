@@ -54,6 +54,9 @@ final class AppModel {
         static let fuelCache = "fuelCache"
         static let vegetableCache = "vegetableCache"
         static let vegetableFavourites = "vegetableFavourites"
+        static let rashifalEnabled = "rashifalEnabled"
+        static let rashifalCache = "rashifalCache"
+        static let selectedRashi = "selectedRashi"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -118,6 +121,25 @@ final class AppModel {
         }
     }
 
+    var isRashifalEnabled: Bool {
+        didSet {
+            guard oldValue != isRashifalEnabled else { return }
+            defaults.set(isRashifalEnabled, forKey: DefaultsKey.rashifalEnabled)
+            guard isRashifalEnabled else { return }
+            Task { [weak self] in await self?.refreshRashifalIfStale() }
+        }
+    }
+
+    /// Unset until the reader picks. Nepali rashi is normally the moon sign
+    /// from a birth chart rather than the birth month, so it cannot be derived
+    /// from a date — guessing would hand most people the wrong reading.
+    var selectedRashi: RashiSign? {
+        didSet {
+            guard oldValue != selectedRashi else { return }
+            defaults.set(selectedRashi?.rawValue, forKey: DefaultsKey.selectedRashi)
+        }
+    }
+
     var selectedWeatherLocation: WeatherLocation {
         didSet {
             guard oldValue != selectedWeatherLocation else { return }
@@ -147,6 +169,7 @@ final class AppModel {
     @ObservationIgnored private var metalsFeed: RemoteFeed<MetalRateSnapshot>!
     @ObservationIgnored private var fuelFeed: RemoteFeed<FuelPriceSnapshot>!
     @ObservationIgnored private var vegetableFeed: RemoteFeed<VegetableMarketSnapshot>!
+    @ObservationIgnored private var rashifalFeed: RemoteFeed<RashifalSnapshot>!
 
     var weather: WeatherSnapshot? { weatherFeed.value }
     var isWeatherLoading: Bool { weatherFeed.isLoading }
@@ -164,6 +187,24 @@ final class AppModel {
     var fuel: FuelPriceSnapshot? { fuelFeed.value }
     var isFuelLoading: Bool { fuelFeed.isLoading }
     var fuelError: String? { fuelFeed.errorMessage }
+
+    var rashifal: RashifalSnapshot? { rashifalFeed.value }
+    var isRashifalLoading: Bool { rashifalFeed.isLoading }
+    var rashifalError: String? { rashifalFeed.errorMessage }
+
+    /// The reader's own reading, once they have picked a sign.
+    var myRashifal: Rashifal? {
+        guard let selectedRashi else { return nil }
+        return rashifal?.reading(for: selectedRashi)
+    }
+
+    /// Whether what is cached was written for the day it is being read on. The
+    /// source publishes each morning, so a reading fetched yesterday is still
+    /// on screen after midnight until the next refresh lands.
+    var isRashifalFromToday: Bool {
+        guard let published = rashifal?.publishedOn else { return true }
+        return published == today
+    }
 
     var vegetables: VegetableMarketSnapshot? { vegetableFeed.value }
     var isVegetablesLoading: Bool { vegetableFeed.isLoading }
@@ -255,6 +296,7 @@ final class AppModel {
     @ObservationIgnored private let metalProvider: any MetalRateProviding
     @ObservationIgnored private let fuelProvider: any FuelPriceProviding
     @ObservationIgnored private let vegetableProvider: any VegetableMarketProviding
+    @ObservationIgnored private let rashifalProvider: any RashifalProviding
     @ObservationIgnored private let dayPlanStore: DayPlanStore
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
@@ -370,6 +412,7 @@ final class AppModel {
         metalProvider: any MetalRateProviding = FenegosidaMetalProvider(),
         fuelProvider: any FuelPriceProviding = NOCFuelProvider(),
         vegetableProvider: any VegetableMarketProviding = KalimatiMarketProvider(),
+        rashifalProvider: any RashifalProviding = HamroPatroRashifalProvider(),
         dayPlanStore: DayPlanStore? = nil,
         autoLoadWeather: Bool = true
     ) {
@@ -383,6 +426,7 @@ final class AppModel {
         self.metalProvider = metalProvider
         self.fuelProvider = fuelProvider
         self.vegetableProvider = vegetableProvider
+        self.rashifalProvider = rashifalProvider
         self.dayPlanStore = resolvedDayPlanStore
         dayPlans = resolvedDayPlanStore.load()
         referenceDate = now
@@ -410,6 +454,9 @@ final class AppModel {
         forexFavourites = defaults.stringArray(forKey: DefaultsKey.forexFavourites)
             ?? ForexCurrency.defaultFavourites
         vegetableFavourites = defaults.stringArray(forKey: DefaultsKey.vegetableFavourites) ?? []
+        isRashifalEnabled = defaults.object(forKey: DefaultsKey.rashifalEnabled) as? Bool ?? true
+        selectedRashi = defaults.string(forKey: DefaultsKey.selectedRashi)
+            .flatMap(RashiSign.init(rawValue:))
         showsDockIcon = defaults.bool(forKey: DefaultsKey.showsDockIcon)
         notificationOptions = NotificationOptions(
             eveOfPublicHoliday: defaults.bool(forKey: DefaultsKey.notifyHolidayEve),
@@ -516,6 +563,22 @@ final class AppModel {
             }
         ) { [vegetableProvider] in
             try await vegetableProvider.latestPrices()
+        }
+
+        rashifalFeed = RemoteFeed(
+            subject: "rashifal",
+            cacheKey: DefaultsKey.rashifalCache,
+            staleInterval: Self.rashifalStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                if case .incompleteReading = error as? RashifalProviderError {
+                    return "Today's rashifal could not be read from Hamro Patro"
+                }
+                return nil
+            }
+        ) { [rashifalProvider] in
+            try await rashifalProvider.todaysRashifal()
         }
 
         scheduleMidnightRefresh()
@@ -721,6 +784,21 @@ final class AppModel {
         _ = await (rates, prices, produce)
     }
 
+    // MARK: - Rashifal
+
+    /// Published once each morning, so this only needs to notice the new day's
+    /// posting rather than poll.
+    static let rashifalStaleInterval: TimeInterval = 6 * 60 * 60
+
+    func refreshRashifalIfStale() async {
+        guard isRashifalEnabled else { return }
+        await rashifalFeed.refreshIfStale()
+    }
+
+    func refreshRashifal() async {
+        await rashifalFeed.refresh()
+    }
+
     // MARK: - News
 
     /// News moves faster than rates but this is a menu-bar utility, not a
@@ -777,7 +855,14 @@ final class AppModel {
         }
         todayEvent = CalendarEventStore.events(year: today.year, month: today.month)[today.day]
         upcomingEvents = UpcomingEventsService.events(from: today)
-        Task { [weak self] in await self?.rescheduleNotifications() }
+        Task { [weak self] in
+            await self?.rescheduleNotifications()
+            // Yesterday's reading is still cached at this point and would keep
+            // showing until something asked for a new one. Nothing else here
+            // is day-scoped in that way — prices stand until the source
+            // revises them, but a rashifal expires at midnight by definition.
+            await self?.refreshRashifal()
+        }
         // Rebuild the visible month so the `isToday` highlight moves even when
         // the user left the popover open on another month.
         if let month = try? BikramSambatCalendar.month(containing: selectedMonth.firstDate, today: today) {

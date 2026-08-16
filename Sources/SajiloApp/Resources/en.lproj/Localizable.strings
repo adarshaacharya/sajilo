@@ -75,6 +75,12 @@
 "planner.title" = "Day plan";
 "planner.title-field" = "What do you need to do?";
 "planner.up-next" = "Up next";
+"rashifal.change-sign" = "Change";
+"rashifal.credit" = "Written and published by Hamro Patro, shown here with their permission.";
+"rashifal.other-signs" = "Other signs";
+"rashifal.pick-hint" = "Your rashi is usually the moon sign from your birth chart, not your birth month — so pick the one you were given.";
+"rashifal.pick-sign" = "Choose your rashi";
+"rashifal.stale" = "This reading was published for an earlier day.";
 "reminder.festival-tomorrow" = "Festival tomorrow";
 "reminder.holiday-tomorrow" = "Public holiday tomorrow";
 "screen.bazar" = "Bazar";
@@ -82,6 +88,7 @@
 "screen.date-details" = "Date Details";
 "screen.exchange-rates" = "Exchange Rates";
 "screen.news" = "News";
+"screen.rashifal" = "Rashifal";
 "screen.settings" = "Settings";
 "screen.upcoming" = "Upcoming";
 "settings.bazar" = "Gold, silver and fuel";
@@ -104,6 +111,7 @@
 "settings.menu-bar-show-year" = "Show BS year";
 "settings.modules" = "Modules";
 "settings.numerals" = "Numerals";
+"settings.rashifal" = "Rashifal";
 "settings.rates-source" = "Rates source";
 "settings.reminder-denied-note" = "Notifications are turned off for Sajilo in System Settings › Notifications.";
 "settings.reminder-enabled-note" = "Reminders arrive at 7pm Nepal time the evening before.";
