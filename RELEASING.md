@@ -20,7 +20,7 @@ git push origin v0.1.0-beta.1
 
 GitHub Actions will test the app, create the DMG and ZIP, then publish a GitHub prerelease. For a stable release, use the matching tag without `-beta.1`, for example `v0.1.0`.
 
-The latest stable release is available at:
+After you publish a stable release, this permanent link will download it:
 
 `https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg`
 
