@@ -75,10 +75,11 @@
 "planner.title" = "Day plan";
 "planner.title-field" = "What do you need to do?";
 "planner.up-next" = "Up next";
+"rashifal.all-signs" = "All signs";
+"rashifal.back-to-mine" = "My rashi";
 "rashifal.change-sign" = "Change";
 "rashifal.credit" = "Written and published by Hamro Patro, shown here with their permission.";
-"rashifal.other-signs" = "Other signs";
-"rashifal.pick-hint" = "Your rashi is usually the moon sign from your birth chart, not your birth month — so pick the one you were given.";
+"rashifal.pick-hint" = "Find the syllable your name begins with. Your rashi comes from your name or birth chart, not your birth month.";
 "rashifal.pick-sign" = "Choose your rashi";
 "rashifal.stale" = "This reading was published for an earlier day.";
 "reminder.festival-tomorrow" = "Festival tomorrow";

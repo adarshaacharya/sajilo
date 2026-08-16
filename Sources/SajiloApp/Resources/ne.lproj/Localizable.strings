@@ -75,10 +75,11 @@
 "planner.title" = "दिनको योजना";
 "planner.title-field" = "के गर्नु छ?";
 "planner.up-next" = "अबको योजना";
+"rashifal.all-signs" = "सबै राशि";
+"rashifal.back-to-mine" = "मेरो राशि";
 "rashifal.change-sign" = "बदल्नुहोस्";
 "rashifal.credit" = "हाम्रो पात्रोद्वारा लिखित र प्रकाशित, उहाँहरूको अनुमतिमा यहाँ राखिएको।";
-"rashifal.other-signs" = "अन्य राशि";
-"rashifal.pick-hint" = "राशि प्रायः जन्मकुण्डलीको चन्द्र राशि हो, जन्म महिना होइन — त्यसैले आफूलाई दिइएको राशि छान्नुहोस्।";
+"rashifal.pick-hint" = "आफ्नो नाम सुरु हुने अक्षर खोज्नुहोस्। राशि नाम वा जन्मकुण्डलीबाट आउँछ, जन्म महिनाबाट होइन।";
 "rashifal.pick-sign" = "आफ्नो राशि छान्नुहोस्";
 "rashifal.stale" = "यो राशिफल अघिल्लो दिनको हो।";
 "reminder.festival-tomorrow" = "भोलि पर्व";

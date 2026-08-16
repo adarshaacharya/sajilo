@@ -344,6 +344,7 @@ private struct VegetablesSection: View {
     let model: AppModel
 
     @State private var query = ""
+    @Environment(\.numeralStyle) private var numerals
 
     var body: some View {
         if model.vegetables != nil {
@@ -417,6 +418,7 @@ private struct VegetablesSection: View {
             SourceNote(
                 label: L10n.bazarPublished,
                 nepaliDate: published,
+                numerals: numerals,
                 name: "Kalimati Fruits and Vegetable Market Development Board",
                 url: URL(string: "https://kalimatimarket.gov.np/price")!
             )
@@ -520,9 +522,15 @@ private struct SourceNote: View {
     /// Kalimati dates its table in Bikram Sambat, so that is what is shown —
     /// converting it to a Gregorian date would print something the source
     /// never said.
-    init(label: LocalizedStringResource, nepaliDate: NepaliDate, name: String, url: URL) {
+    init(
+        label: LocalizedStringResource,
+        nepaliDate: NepaliDate,
+        numerals: NumeralStyle,
+        name: String,
+        url: URL
+    ) {
         self.label = label
-        self.stamp = "\(nepaliDate.day) \(nepaliDate.nepaliMonthName) \(nepaliDate.year)"
+        self.stamp = "\(numerals.string(from: nepaliDate.day)) \(nepaliDate.nepaliMonthName) \(numerals.string(from: nepaliDate.year))"
         self.name = name
         self.url = url
     }

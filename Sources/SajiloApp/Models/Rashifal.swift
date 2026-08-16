@@ -83,20 +83,50 @@ enum RashiSign: String, Codable, Equatable, Sendable, CaseIterable, Identifiable
         }
     }
 
-    var symbolName: String {
+    /// The zodiac sign as a character rather than an image. SF Symbols has no
+    /// zodiac glyphs at all, and the plain code points (U+2648…) default to
+    /// *emoji* presentation — coloured tiles that ignore `foregroundStyle` and
+    /// fight the palette. The trailing U+FE0E forces text presentation, so the
+    /// glyph takes the brass like any other type.
+    var glyph: String {
+        let scalar: Unicode.Scalar = switch self {
+        case .mesh: "\u{2648}"
+        case .vrish: "\u{2649}"
+        case .mithun: "\u{264A}"
+        case .karkat: "\u{264B}"
+        case .simha: "\u{264C}"
+        case .kanya: "\u{264D}"
+        case .tula: "\u{264E}"
+        case .vrishchik: "\u{264F}"
+        case .dhanu: "\u{2650}"
+        case .makar: "\u{2651}"
+        case .kumbha: "\u{2652}"
+        case .meen: "\u{2653}"
+        }
+        return "\(scalar)\u{FE0E}"
+    }
+
+    /// The नामाक्षर — the syllables a name beginning with places you in this
+    /// rashi. This is how most Nepalis actually know their sign, so it is what
+    /// the picker is built around.
+    ///
+    /// Bundled rather than fetched: these are traditional and identical across
+    /// every jyotish source, so they never go stale, and the picker works
+    /// before any network call has returned.
+    var namingSyllables: [String] {
         switch self {
-        case .mesh: "aries"
-        case .vrish: "taurus"
-        case .mithun: "gemini"
-        case .karkat: "cancer"
-        case .simha: "leo"
-        case .kanya: "virgo"
-        case .tula: "libra"
-        case .vrishchik: "scorpio"
-        case .dhanu: "sagittarius"
-        case .makar: "capricorn"
-        case .kumbha: "aquarius"
-        case .meen: "pisces"
+        case .mesh: ["चु", "चे", "चो", "ला", "लि", "लु", "ले", "लो", "अ"]
+        case .vrish: ["इ", "उ", "ए", "ओ", "वा", "वि", "वु", "वे", "वो"]
+        case .mithun: ["का", "कि", "कु", "घ", "ङ", "छ", "के", "को", "हा"]
+        case .karkat: ["हि", "हु", "हे", "हो", "डा", "डि", "डु", "डे", "डो"]
+        case .simha: ["मा", "मि", "मु", "मे", "मो", "टा", "टि", "टु", "टे"]
+        case .kanya: ["टो", "पा", "पि", "पु", "ष", "ण", "ठ", "पे", "पो"]
+        case .tula: ["रा", "रि", "रु", "रे", "रो", "ता", "ति", "तु", "ते"]
+        case .vrishchik: ["तो", "ना", "नि", "नु", "ने", "नो", "या", "यि", "यु"]
+        case .dhanu: ["ये", "यो", "भा", "भि", "भु", "धा", "फा", "ढा", "भे"]
+        case .makar: ["भो", "जा", "जि", "जु", "जे", "जो", "ख", "खि", "खु", "खे", "खो", "गा", "गि"]
+        case .kumbha: ["गु", "गे", "गो", "सा", "सि", "सु", "से", "सो", "दा"]
+        case .meen: ["दि", "दु", "थ", "झ", "ञ", "दे", "दो", "चा", "चि"]
         }
     }
 }

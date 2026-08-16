@@ -112,7 +112,8 @@ struct RashiSignTests {
             #expect(!sign.nepaliName.isEmpty)
             #expect(!sign.romanName.isEmpty)
             #expect(!sign.westernName.isEmpty)
-            #expect(!sign.symbolName.isEmpty)
+            #expect(!sign.glyph.isEmpty)
+            #expect(!sign.namingSyllables.isEmpty)
         }
         #expect(Set(RashiSign.allCases.map(\.nepaliName)).count == 12, "no duplicate Nepali names")
         #expect(Set(RashiSign.allCases.map(\.westernName)).count == 12)

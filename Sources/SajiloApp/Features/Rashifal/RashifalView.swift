@@ -1,16 +1,11 @@
 import SwiftUI
 
 /// Today's rashifal, from Hamro Patro and used with their permission.
-///
-/// The reader's own sign leads and the other eleven follow, because the reason
-/// anyone opens this is to read one of the twelve. Until a sign is picked the
-/// route asks for one rather than guessing: Nepali rashi is normally the moon
-/// sign from a birth chart, not the birth month, so there is nothing to infer
-/// it from.
 struct RashifalView: View {
     let model: AppModel
     let onBack: () -> Void
 
+    @State private var viewing: RashiSign?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -18,31 +13,12 @@ struct RashifalView: View {
             header
 
             ScrollView {
-                VStack(alignment: .leading, spacing: Theme.Space.m) {
-                    if model.rashifal != nil {
-                        if let mine = model.myRashifal {
-                            MyReading(reading: mine, isFromToday: model.isRashifalFromToday) {
-                                model.selectedRashi = nil
-                            }
-                        } else {
-                            SignPicker(selected: model.selectedRashi) { model.selectedRashi = $0 }
-                        }
-
-                        otherSigns
-                        credit
-                    } else {
-                        UnavailableReading(
-                            message: model.rashifalError ?? "No reading cached yet.",
-                            isLoading: model.isRashifalLoading
-                        )
-                    }
-
-                    Spacer(minLength: 0)
-                }
-                .padding(Theme.Space.m)
+                RashifalContent(model: model, viewing: $viewing)
+                    .padding(Theme.Space.m)
             }
             .softScroll()
         }
+        .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: viewing)
         .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: model.selectedRashi)
         .task { await model.refreshRashifalIfStale() }
     }
@@ -69,30 +45,66 @@ struct RashifalView: View {
         }
         .routeHeader()
     }
+}
 
-    @ViewBuilder
-    private var otherSigns: some View {
-        let others = model.rashifal?.readings.filter { $0.sign != model.selectedRashi } ?? []
-        if !others.isEmpty {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                if model.selectedRashi != nil {
-                    Text(L10n.rashifalOtherSigns)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+/// The route's body, outside the `ScrollView` so it can be rendered on its own.
+/// `ImageRenderer` does not draw scrolled content, and this screen is worth
+/// being able to look at without a running app.
+struct RashifalContent: View {
+    let model: AppModel
+    @Binding var viewing: RashiSign?
+
+    @Environment(\.numeralStyle) private var numerals
+
+    /// Whichever sign is on screen: the one being browsed, else the reader's.
+    private var shown: RashiSign? { viewing ?? model.selectedRashi }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
+            if model.rashifal == nil {
+                UnavailableReading(
+                    message: model.rashifalError ?? "No reading cached yet.",
+                    isLoading: model.isRashifalLoading
+                )
+            } else if model.selectedRashi == nil {
+                SignFinder { model.selectedRashi = $0 }
+            } else {
+                if let sign = shown, let reading = model.rashifal?.reading(for: sign) {
+                    ReadingCard(
+                        reading: reading,
+                        isMine: sign == model.selectedRashi,
+                        isFromToday: model.isRashifalFromToday,
+                        backToMine: { viewing = nil },
+                        changeSign: {
+                            viewing = nil
+                            model.selectedRashi = nil
+                        }
+                    )
                 }
-                ForEach(others) { SignReading(reading: $0) }
+
+                SignStrip(
+                    signs: RashiSign.allCases,
+                    shown: shown,
+                    mine: model.selectedRashi,
+                    select: { viewing = $0 }
+                )
             }
-            .cardSection()
+
+            credit
         }
     }
 
-    /// Credited on the same screen as the words, not tucked away in Settings.
-    /// These twelve paragraphs are Hamro Patro's writing, carried here by
-    /// their permission, so the attribution travels with them.
+    /// Credited beside the words, not tucked into Settings. These paragraphs
+    /// are Hamro Patro's writing, carried here by their permission, so the
+    /// attribution travels with them.
     private var credit: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xxs) {
             if let published = model.rashifal?.publishedOn {
-                Text("\(String(localized: L10n.bazarPublished)) \(published.day) \(published.nepaliMonthName) \(published.year)")
+                // `Text("…\(someInt)")` runs through localized-key
+                // interpolation, which number-formats integers — so a year
+                // renders as "2,083". Built as a string first, and through the
+                // numeral preference so it matches every other date on screen.
+                Text(verbatim: publishedText(published))
             }
             Text(L10n.rashifalCredit)
             Link("Hamro Patro", destination: URL(string: "https://www.hamropatro.com/rashifal")!)
@@ -100,26 +112,32 @@ struct RashifalView: View {
         .font(.caption2)
         .foregroundStyle(.tertiary)
         .fixedSize(horizontal: false, vertical: true)
+        .padding(.top, Theme.Space.xs)
+    }
+
+    private func publishedText(_ date: NepaliDate) -> String {
+        let label = String(localized: L10n.bazarPublished)
+        return "\(label) \(numerals.string(from: date.day)) \(date.nepaliMonthName) \(numerals.string(from: date.year))"
     }
 }
 
-// MARK: - Reader's own sign
+// MARK: - The reading
 
-private struct MyReading: View {
+private struct ReadingCard: View {
     let reading: Rashifal
+    let isMine: Bool
     let isFromToday: Bool
+    let backToMine: () -> Void
     let changeSign: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
-            HStack(spacing: Theme.Space.s) {
-                Image(systemName: reading.sign.symbolName)
-                    .font(.title3)
-                    .foregroundStyle(Theme.Palette.brand)
+            HStack(alignment: .top, spacing: Theme.Space.s) {
+                SignPlate(sign: reading.sign, size: 46, isProminent: true)
 
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 1) {
                     Text(verbatim: reading.sign.nepaliName)
-                        .font(.nepali(17, weight: .semibold))
+                        .font(.nepali(20, weight: .semibold))
                     Text(verbatim: "\(reading.sign.romanName) · \(reading.sign.westernName)")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
@@ -127,21 +145,28 @@ private struct MyReading: View {
 
                 Spacer(minLength: 0)
 
-                Button(L10n.rashifalChangeSign, action: changeSign)
-                    .buttonStyle(.link)
-                    .font(.caption2)
+                // One action, whichever is meaningful: leave someone else's
+                // sign, or change the one that is yours.
+                Button(isMine ? L10n.rashifalChangeSign : L10n.rashifalBackToMine) {
+                    isMine ? changeSign() : backToMine()
+                }
+                .buttonStyle(.link)
+                .font(.caption2)
             }
 
-            // Reproduced exactly as published — never trimmed to fit.
+            SyllableRow(syllables: reading.sign.namingSyllables)
+
+            Divider().opacity(0.5)
+
+            // Reproduced exactly as published, and given room to breathe —
+            // this is the one thing on the screen anyone came to read.
             Text(verbatim: reading.prediction)
                 .font(.callout)
+                .lineSpacing(5)
                 .fixedSize(horizontal: false, vertical: true)
-                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if !isFromToday {
-                // The source publishes each morning. If the cached reading was
-                // written for a different day, say so rather than letting it
-                // pass as today's.
                 Label(L10n.rashifalStale, systemImage: "clock.arrow.circlepath")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -152,36 +177,66 @@ private struct MyReading: View {
     }
 }
 
-/// Shown until a sign is chosen. Twelve tiles rather than a dropdown: picking
-/// happens once, and the names are what people recognise.
-private struct SignPicker: View {
-    let selected: RashiSign?
+/// The नामाक्षर, laid out as chips. Small, quiet, and the thing that lets
+/// someone confirm the sign is theirs.
+private struct SyllableRow: View {
+    let syllables: [String]
+
+    var body: some View {
+        Text(verbatim: syllables.joined(separator: "  ·  "))
+            .font(.nepali(11, weight: .medium))
+            .foregroundStyle(.secondary)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+// MARK: - Choosing a sign
+
+/// Shown until a sign is picked.
+///
+/// Built around the नामाक्षर rather than a bare list of names, because that is
+/// how the question is actually answered in Nepal — you know your rashi from
+/// the syllable your name starts with, not from your birth month. Asking people
+/// to already know the answer was the weak part of the first version.
+private struct SignFinder: View {
     let choose: (RashiSign) -> Void
 
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: Theme.Space.xs), count: 4)
+    private let columns = [
+        GridItem(.flexible(), spacing: Theme.Space.xs),
+        GridItem(.flexible(), spacing: Theme.Space.xs),
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.s) {
-            Text(L10n.rashifalPickSign)
-                .font(.callout.weight(.medium))
-            Text(L10n.rashifalPickHint)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(L10n.rashifalPickSign)
+                    .font(.callout.weight(.semibold))
+                Text(L10n.rashifalPickHint)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             LazyVGrid(columns: columns, spacing: Theme.Space.xs) {
                 ForEach(RashiSign.allCases) { sign in
                     Button { choose(sign) } label: {
-                        VStack(spacing: Theme.Space.xxs) {
-                            Image(systemName: sign.symbolName)
-                                .font(.callout)
-                            Text(verbatim: sign.nepaliName)
-                                .font(.nepali(11, weight: .medium))
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
+                        HStack(alignment: .top, spacing: Theme.Space.xs) {
+                            SignPlate(sign: sign, size: 30, isProminent: false)
+
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(verbatim: sign.nepaliName)
+                                    .font(.nepali(13, weight: .semibold))
+                                Text(verbatim: sign.namingSyllables.prefix(5).joined(separator: " "))
+                                    .font(.nepali(10))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                            }
+                            Spacer(minLength: 0)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, Theme.Space.s)
+                        .padding(Theme.Space.xs)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.day))
                     }
                     .buttonStyle(.plain)
@@ -194,53 +249,87 @@ private struct SignPicker: View {
     }
 }
 
-/// One of the other eleven — collapsed to its name until opened, so the route
-/// is a list rather than twelve paragraphs deep.
-private struct SignReading: View {
-    let reading: Rashifal
+/// All twelve as a compact strip under the reading.
+///
+/// Replaces the eleven stacked disclosure rows of the first version: those were
+/// a wall of identical chevrons, and expanding them stacked paragraphs on top
+/// of each other. One panel above, one grid below — a single mechanism.
+private struct SignStrip: View {
+    let signs: [RashiSign]
+    let shown: RashiSign?
+    let mine: RashiSign?
+    let select: (RashiSign) -> Void
 
-    @State private var isExpanded = false
+    private let columns = Array(
+        repeating: GridItem(.flexible(), spacing: Theme.Space.xs),
+        count: 4
+    )
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
-            Button {
-                withAnimation(.snappy(duration: 0.22)) { isExpanded.toggle() }
-            } label: {
-                HStack(spacing: Theme.Space.s) {
-                    Image(systemName: reading.sign.symbolName)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 18)
+            Text(L10n.rashifalAllSigns)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
 
-                    Text(verbatim: reading.sign.nepaliName)
-                        .font(.nepali(14, weight: .medium))
-
-                    Text(verbatim: reading.sign.westernName)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-
-                    Spacer(minLength: 0)
-
-                    Image(systemName: "chevron.down")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+            LazyVGrid(columns: columns, spacing: Theme.Space.xs) {
+                ForEach(signs) { sign in
+                    Button { select(sign) } label: {
+                        VStack(spacing: 1) {
+                            Text(verbatim: sign.glyph)
+                                .font(.system(size: 15))
+                            Text(verbatim: sign.nepaliName)
+                                .font(.nepali(11, weight: .medium))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.75)
+                        }
+                        .foregroundStyle(sign == shown ? AnyShapeStyle(Theme.Palette.brand) : AnyShapeStyle(.secondary))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, Theme.Space.xs)
+                        .background(
+                            sign == shown ? Theme.Palette.brand.opacity(0.12) : Color.clear,
+                            in: .rect(cornerRadius: Theme.Radius.day)
+                        )
+                        .overlay(
+                            // A quiet ring marks the reader's own sign, so it
+                            // stays findable while browsing someone else's.
+                            RoundedRectangle(cornerRadius: Theme.Radius.day)
+                                .strokeBorder(
+                                    sign == mine ? Theme.Palette.brand.opacity(0.45) : .clear,
+                                    lineWidth: 1
+                                )
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(
+                        sign == mine ? "\(sign.romanName), your rashi" : sign.romanName
+                    )
                 }
-                .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
-
-            if isExpanded {
-                Text(verbatim: reading.prediction)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .textSelection(.enabled)
-                    .padding(.leading, 18 + Theme.Space.s)
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel(reading.sign.romanName)
+        .cardSection()
+    }
+}
+
+// MARK: - Shared
+
+/// The sign's glyph on a rounded plate — the same language as the date tile on
+/// the dashboard, so the two screens read as one app.
+private struct SignPlate: View {
+    let sign: RashiSign
+    let size: CGFloat
+    let isProminent: Bool
+
+    var body: some View {
+        Text(verbatim: sign.glyph)
+            .font(.system(size: size * 0.5))
+            .foregroundStyle(Theme.Palette.brand)
+            .frame(width: size, height: size)
+            .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.card))
+            .overlay(
+                RoundedRectangle(cornerRadius: Theme.Radius.card)
+                    .strokeBorder(Theme.Palette.brand.opacity(isProminent ? 0.35 : 0), lineWidth: 1)
+            )
+            .accessibilityHidden(true)
     }
 }
 
