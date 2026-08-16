@@ -19,6 +19,7 @@ Package.resolved
 # Local tooling and generated artifacts
 build/
 documents/
+scripts/AppIcon.iconset/
 
 # Local configuration and secrets
 .env

@@ -31,6 +31,11 @@ mkdir -p "$APP_PATH/Contents/Frameworks"
 mkdir -p "$APP_PATH/Contents/Resources"
 cp "$PROJECT_ROOT/scripts/AppBundleInfo.plist" "$APP_PATH/Contents/Info.plist"
 
+# The icon. Without it macOS falls back to its generic blank app placeholder,
+# which is what ships if this line is ever dropped. Regenerate with
+# `swift scripts/make-app-icon.swift` after changing the palette.
+cp "$PROJECT_ROOT/scripts/AppIcon.icns" "$APP_PATH/Contents/Resources/AppIcon.icns"
+
 # SwiftPM builds an executable, not an application bundle. Assemble the bundle
 # exactly as the local launcher does, then ad-hoc sign it for direct download.
 cp "$EXECUTABLE_PATH" "$APP_PATH/Contents/MacOS/Sajilo"

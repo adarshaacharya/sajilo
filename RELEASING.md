@@ -9,6 +9,19 @@ GitHub Actions builds and publishes the Mac download for you.
 3. Change `CFBundleVersion` to a higher number each release.
 4. Commit and push your changes to GitHub.
 
+## Changing the app icon
+
+The icon is generated, not a checked-in drawing. Edit `scripts/make-app-icon.swift`
+and run:
+
+```bash
+swift scripts/make-app-icon.swift
+```
+
+That rewrites `scripts/AppIcon.icns`, which both bundle scripts copy into
+`Contents/Resources`. Commit the `.icns`; the `AppIcon.iconset` folder beside it
+is an intermediate and is ignored.
+
 ## Publish a beta
 
 For the first beta of version `0.1.0`, create and push this tag:
