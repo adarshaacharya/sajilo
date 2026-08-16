@@ -40,21 +40,23 @@ struct RSSNewsProvider: NewsProviding {
         )
     }
 
-    /// Orders dated stories newest first without undoing the round-robin.
+    /// Orders precisely-timed stories newest first without undoing the
+    /// round-robin.
     ///
-    /// Sorting the whole list by date sends every undated story to the bottom,
-    /// and one publisher — Annapurna Post — dates nothing at all. Their twenty
-    /// headlines then land past position 115 of 135, six reveals down, which
-    /// reads as the source having disappeared.
+    /// Only an exact timestamp takes part. Sorting on anything less sends whole
+    /// publishers to the bottom, twice over: Annapurna Post dates nothing at
+    /// all, and The Kathmandu Post dates only to the day — its stories carry
+    /// midnight, so every one of them loses to every story filed today with a
+    /// real clock. Both papers vanished below the fold that way.
     ///
-    /// So an undated item keeps the slot `interleave` gave it, and only the
-    /// dated slots are refilled in date order. Readers get newest-first among
-    /// everything that can be ranked, and a publisher is not punished for the
-    /// shape of its feed.
+    /// So an item Sajilo cannot place on the clock keeps the slot `interleave`
+    /// gave it, and only the exactly-timed slots are refilled in date order.
+    /// Readers get newest-first across everything that can honestly be ranked,
+    /// and a publisher is not punished for the shape of its feed.
     static func newestFirst(_ items: [NewsItem]) -> [NewsItem] {
         var dated = items
             .enumerated()
-            .filter { $0.element.published != nil }
+            .filter { $0.element.published != nil && $0.element.precision == .exact }
             .sorted { left, right in
                 guard let leftDate = left.element.published,
                       let rightDate = right.element.published else { return false }
@@ -66,7 +68,7 @@ struct RSSNewsProvider: NewsProviding {
             .makeIterator()
 
         return items.map { item in
-            guard item.published != nil else { return item }
+            guard item.published != nil, item.precision == .exact else { return item }
             return dated.next() ?? item
         }
     }

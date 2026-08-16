@@ -16,7 +16,7 @@ Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
 - Nepal Rastra Bank exchange rates
 - Gold and silver rates, Nepal Oil Corporation fuel prices, and Kalimati produce prices
 - Daily rashifal for all twelve signs, from Hamro Patro
-- Nepali news headlines
+- Nepali and English news headlines from nine Nepali newsrooms
 - Quick tools for land, weight, VAT, and simple interest
 - English, नेपाली, and mixed-language display options
 

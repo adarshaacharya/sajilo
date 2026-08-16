@@ -10,6 +10,30 @@ import Foundation
 enum RSSParser {
     /// `limit` is a safety ceiling, not a page size: RSS has no pagination, so
     /// a feed returns everything it is going to return in one response.
+    /// Some feeds ship no `pubDate` but spell the date out in the article URL —
+    /// `/national/2026/08/16/landslides-…`. Reading it there costs nothing and
+    /// is exactly as precise as the paper's own "Published at" line, so it is
+    /// preferred over leaving the story undated.
+    static func dateFromLinkPath(_ link: URL) -> Date? {
+        let path = link.path
+        guard let match = linkDatePattern.firstMatch(
+            in: path,
+            range: NSRange(path.startIndex..., in: path)
+        ) else { return nil }
+
+        func number(_ index: Int) -> Int? {
+            Range(match.range(at: index), in: path).flatMap { Int(path[$0]) }
+        }
+        guard let year = number(1), let month = number(2), let day = number(3),
+              year > 1900, 1...12 ~= month, 1...31 ~= day else { return nil }
+
+        return NepalTime.calendar.date(from: DateComponents(year: year, month: month, day: day))
+    }
+
+    private static let linkDatePattern = try! NSRegularExpression(
+        pattern: "/(\\d{4})/(\\d{2})/(\\d{2})/"
+    )
+
     static func parse(_ data: Data, sourceName: String, limit: Int = 100) -> [NewsItem] {
         let delegate = Delegate(sourceName: sourceName, limit: limit)
         let parser = XMLParser(data: data)
@@ -118,12 +142,19 @@ enum RSSParser {
                 return
             }
 
+            // A real `pubDate` always wins; the URL is only consulted when the
+            // feed gave nothing, and is day-precise, which the item records so
+            // the UI never renders it as an hour-accurate time.
+            let feedDate = RSSParser.date(from: pubDate)
+            let linkDate = feedDate == nil ? RSSParser.dateFromLinkPath(url) : nil
+
             items.append(
                 NewsItem(
                     title: cleanTitle,
                     link: url,
                     sourceName: sourceName,
-                    published: RSSParser.date(from: pubDate)
+                    published: feedDate ?? linkDate,
+                    precision: linkDate == nil ? .exact : .day
                 )
             )
         }

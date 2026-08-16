@@ -112,11 +112,31 @@ struct NewsView: View {
     }
 }
 
-private struct HeadlineRow: View {
+struct HeadlineRow: View {
     let item: NewsItem
     let action: () -> Void
 
     @State private var isHovering = false
+
+    /// The Kathmandu Post dates a story only to the day, so a relative time
+    /// would report a story filed this afternoon as "22 hours ago" — precise,
+    /// confident, and wrong. A day-precise date says which day instead.
+    static func age(of date: Date, precision: DatePrecision, now: Date = .now) -> String {
+        switch precision {
+        case .exact:
+            return relative.localizedString(for: date, relativeTo: now)
+        case .day:
+            let calendar = NepalTime.calendar
+            if calendar.isDate(date, inSameDayAs: now) { return "Today" }
+            if let yesterday = calendar.date(byAdding: .day, value: -1, to: now),
+               calendar.isDate(date, inSameDayAs: yesterday) {
+                return "Yesterday"
+            }
+            return dayOnly.string(from: date)
+        }
+    }
+
+    private static let dayOnly = NepalTime.displayFormatter("d MMM")
 
     var body: some View {
         Button(action: action) {
@@ -135,7 +155,7 @@ private struct HeadlineRow: View {
                     if let published = item.published {
                         Text(verbatim: "·")
                             .foregroundStyle(.tertiary)
-                        Text(Self.relative.localizedString(for: published, relativeTo: .now))
+                        Text(verbatim: HeadlineRow.age(of: published, precision: item.precision))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }

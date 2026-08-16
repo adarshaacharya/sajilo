@@ -5,13 +5,41 @@
 Headlines come from publisher RSS feeds, each verified to return
 `application/rss+xml`:
 
-| Publisher | Feed |
+| Publisher | Feed | Language |
+|---|---|---|
+| OnlineKhabar | `https://www.onlinekhabar.com/feed` | Nepali |
+| Annapurna Post | `https://annapurnapost.com/rss/` | Nepali |
+| Ratopati | `https://www.ratopati.com/feed` | Nepali |
+| Bizkhabar | `https://www.bizkhabar.com/feed` | Nepali |
+| OnlineKhabar English | `https://english.onlinekhabar.com/feed` | English |
+| The Kathmandu Post | `https://kathmandupost.com/rss` | English |
+| Khabarhub | `https://english.khabarhub.com/feed` | English |
+| The Rising Nepal | `https://risingnepaldaily.com/rss` | English |
+| Ratopati English | `https://english.ratopati.com/feed` | English |
+
+Several well-known English mastheads are absent because they publish no usable
+feed, not by choice:
+
+| Publisher | Why |
 |---|---|
-| OnlineKhabar | `https://www.onlinekhabar.com/feed` |
-| OnlineKhabar English | `https://english.onlinekhabar.com/feed` |
-| Annapurna Post | `https://annapurnapost.com/rss/` |
-| Ratopati | `https://www.ratopati.com/feed` |
-| Bizkhabar | `https://www.bizkhabar.com/feed` |
+| The Himalayan Times | No RSS anywhere. Eight standard paths tried; the site declares only a sitemap. |
+| Nepali Times | No RSS; every standard path returns 404. |
+| MyRepublica | Returns HTTP 403 to Sajilo. |
+| The Annapurna Express | Valid feed, but dates nothing at all and is low volume. |
+| Nepal Minute | Feed is valid but abandoned — newest item was seven months old. |
+
+The Kathmandu Post's feed carries **no `pubDate`**, but every article link spells
+the date out — `/national/2026/08/16/landslides-…` — so it is read from the URL
+rather than fetched. That costs nothing and is exactly as precise as the paper's
+own byline, which reads "Published at : August 16, 2026" with no clock. Those
+items are marked day-precise, and the row then says "Today" rather than
+computing a relative time; a story filed this afternoon would otherwise be
+reported as "22 hours ago" — a specific, confident, wrong number.
+
+Day-precise items are also excluded from the newest-first sort. Ranking a
+midnight timestamp against real clock times loses every Kathmandu Post story to
+anything filed the same day, which is how Annapurna Post disappeared before it.
+An item Sajilo cannot honestly place on the clock keeps its round-robin slot.
 
 **Only the headline, link, and publish date are read.** Several of these feeds
 carry the full article body in `content:encoded`; the parser touches three

@@ -84,6 +84,29 @@ struct NewsMergeTests {
         #expect(sorted.map(\.title) == ["Latest", "Undated", "Earlier"])
     }
 
+    /// A day-precise date is not a time, so it must not compete on the time
+    /// axis. The Kathmandu Post's stories all carry midnight; ranking them
+    /// there loses every one of them to anything filed today with a clock.
+    @Test func dayPreciseItemsKeepTheirSlotInsteadOfSinkingToMidnight() {
+        func item(_ title: String, _ stamp: TimeInterval?, _ precision: DatePrecision) -> NewsItem {
+            NewsItem(
+                title: title,
+                link: URL(string: "https://example.com/\(title)")!,
+                sourceName: "S",
+                published: stamp.map(Date.init(timeIntervalSince1970:)),
+                precision: precision
+            )
+        }
+        // The day-precise item is stamped earliest, but holds slot 1 regardless.
+        let merged = [
+            item("exact-old", 100, .exact),
+            item("day", 1, .day),
+            item("exact-new", 900, .exact),
+        ]
+
+        #expect(RSSNewsProvider.newestFirst(merged).map(\.title) == ["exact-new", "day", "exact-old"])
+    }
+
     /// The whole point: a publisher that dates nothing must still appear near
     /// the top rather than after everyone else's back catalogue.
     @Test func anUndatedSourceIsNotBuriedBeneathTheDatedOnes() {

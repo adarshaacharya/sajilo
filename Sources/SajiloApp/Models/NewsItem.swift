@@ -14,8 +14,21 @@ struct NewsItem: Codable, Equatable, Sendable, Identifiable {
     /// Absent in some feeds — Annapurna Post publishes no `pubDate` at all —
     /// so nothing may depend on it being there.
     let published: Date?
+    /// How precisely `published` is known.
+    ///
+    /// The Kathmandu Post dates a story only to the day, in its URL and on its
+    /// own page ("Published at : August 16, 2026"). Rendering that as a
+    /// relative time would tell a reader a story from this afternoon is "22
+    /// hours old" — a specific, confident, wrong number. Carrying the precision
+    /// lets the row say "Today" instead of inventing an hour.
+    var precision: DatePrecision = .exact
 
     var id: String { link.absoluteString }
+}
+
+enum DatePrecision: String, Codable, Equatable, Sendable {
+    case exact
+    case day
 }
 
 struct NewsDigest: Codable, Equatable, Sendable {
@@ -39,6 +52,10 @@ enum NewsSource: String, CaseIterable, Identifiable, Sendable {
     case annapurnaPost
     case ratopati
     case bizkhabar
+    case kathmanduPost
+    case khabarhub
+    case risingNepal
+    case ratopatiEnglish
 
     var id: String { rawValue }
 
@@ -49,6 +66,10 @@ enum NewsSource: String, CaseIterable, Identifiable, Sendable {
         case .annapurnaPost: "Annapurna Post"
         case .ratopati: "Ratopati"
         case .bizkhabar: "Bizkhabar"
+        case .kathmanduPost: "The Kathmandu Post"
+        case .khabarhub: "Khabarhub"
+        case .risingNepal: "The Rising Nepal"
+        case .ratopatiEnglish: "Ratopati English"
         }
     }
 
@@ -59,10 +80,25 @@ enum NewsSource: String, CaseIterable, Identifiable, Sendable {
         case .annapurnaPost: URL(string: "https://annapurnapost.com/rss/")!
         case .ratopati: URL(string: "https://www.ratopati.com/feed")!
         case .bizkhabar: URL(string: "https://www.bizkhabar.com/feed")!
+        case .kathmanduPost: URL(string: "https://kathmandupost.com/rss")!
+        case .khabarhub: URL(string: "https://english.khabarhub.com/feed")!
+        case .risingNepal: URL(string: "https://risingnepaldaily.com/rss")!
+        case .ratopatiEnglish: URL(string: "https://english.ratopati.com/feed")!
         }
     }
 
-    var isEnglish: Bool { self == .onlineKhabarEnglish }
+    var isEnglish: Bool {
+        switch self {
+        case .onlineKhabarEnglish, .kathmanduPost, .khabarhub, .risingNepal, .ratopatiEnglish: true
+        case .onlineKhabar, .annapurnaPost, .ratopati, .bizkhabar: false
+        }
+    }
+
+    /// The Kathmandu Post ships no `pubDate`, but every one of its links spells
+    /// the date out — `/national/2026/08/16/landslides-…`. That is the same
+    /// precision the paper itself reports, so it is read from the URL rather
+    /// than fetched: no extra request, and nothing invented.
+    var datesFromLinkPath: Bool { self == .kathmanduPost }
 
     /// Every source, always.
     ///

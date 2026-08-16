@@ -52,6 +52,27 @@ struct LiveSourceSmokeTests {
         #expect(date > Date().addingTimeInterval(-60 * 24 * 3600))
     }
 
+    /// Every feed still parses. A publisher that quietly moves or breaks its
+    /// feed shows up here rather than as an empty section in the app.
+    @Test func everyNewsSourceStillReturnsHeadlines() async throws {
+        for source in NewsSource.allCases {
+            let digest = await RSSNewsProvider().headlines(from: [source], limit: 50)
+            #expect(!digest.items.isEmpty, "\(source.displayName) returned nothing")
+            #expect(digest.failedSources.isEmpty, "\(source.displayName) failed")
+        }
+    }
+
+    /// The Kathmandu Post ships no pubDate; its dates come out of the link path.
+    @Test func kathmanduPostHeadlinesAreDatedFromTheirLinks() async throws {
+        let digest = await RSSNewsProvider().headlines(from: [.kathmanduPost], limit: 50)
+        let dated = digest.items.filter { $0.published != nil }
+
+        #expect(dated.count == digest.items.count, "every link should carry /YYYY/MM/DD/")
+        #expect(dated.allSatisfy { $0.precision == .day })
+        let newest = try #require(dated.map(\.published!).max())
+        #expect(newest > Date().addingTimeInterval(-7 * 24 * 3600), "the feed looks stale")
+    }
+
     @Test func nocStillPublishesTheRetailTable() async throws {
         let snapshot = try await NOCFuelProvider().latestPrices()
         #expect(snapshot.price(for: .petrol) != nil)

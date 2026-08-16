@@ -540,7 +540,9 @@ final class AppModel {
             // v2: sources stopped following the app language.
             // v3: the whole feed is kept rather than the first eight, so a v2
             // entry would leave the list stuck at eight until it aged out.
-            cacheVersion: 3,
+            // v4: four English papers joined, and items carry date precision. A
+            // v3 entry would show neither until it aged out.
+            cacheVersion: 4,
             staleInterval: Self.newsStaleInterval,
             defaults: defaults,
             fetchedAt: \.fetchedAt
