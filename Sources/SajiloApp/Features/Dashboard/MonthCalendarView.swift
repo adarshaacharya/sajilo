@@ -37,7 +37,11 @@ struct MonthCalendarView: View {
 
             LazyVGrid(columns: Self.columns, spacing: Theme.Space.xs) {
                 ForEach(model.selectedMonth.days) { day in
-                    CalendarDayView(day: day, onSelect: onSelectDate)
+                    CalendarDayView(
+                        day: day,
+                        hasPlan: day.date.map(model.hasDayPlan(on:)) ?? false,
+                        onSelect: onSelectDate
+                    )
                 }
             }
             .frame(height: Self.gridHeight, alignment: .top)
@@ -135,12 +139,15 @@ struct MonthCalendarView: View {
 
             Spacer(minLength: 0)
 
-            // Kept in the layout while disabled so the month title does not
-            // shift as the user navigates away from the current month.
-            Button(L10n.jumpToToday, systemImage: "smallcircle.filled.circle") {
+            // If the user has browsed away, show a proper labelled return
+            // affordance rather than a cryptic tiny circle. The selected month
+            // cannot show today's cell when it is a different month, so this
+            // is the clear route back to the highlighted day.
+            Button(L10n.today, systemImage: "smallcircle.filled.circle") {
                 jumpToToday()
             }
-            .labelStyle(.iconOnly)
+            .controlSize(.small)
+            .buttonStyle(.bordered)
             .disabled(model.isShowingCurrentMonth)
             .opacity(model.isShowingCurrentMonth ? 0 : 1)
 
@@ -155,6 +162,7 @@ struct MonthCalendarView: View {
 
 private struct CalendarDayView: View {
     let day: CalendarDay
+    let hasPlan: Bool
 
     @Environment(\.numeralStyle) private var numerals
     let onSelect: (NepaliDate) -> Void
@@ -174,13 +182,13 @@ private struct CalendarDayView: View {
                             .font(.system(size: 9))
                             .opacity(0.75)
                     }
-                    if day.eventName != nil {
+                    if day.eventName != nil || hasPlan {
                         // Roughly a third of days carry a festival, so an
                         // accent dot on each would repaint the whole grid and
                         // undo the point of demoting the accent. The marker
                         // inherits the cell's own colour instead.
                         Circle()
-                            .fill(.secondary)
+                            .fill(hasPlan ? Theme.Palette.brand : .secondary)
                             .frame(width: 3, height: 3)
                             .opacity(day.isToday ? 0.9 : 0.55)
                             .accessibilityHidden(true)
@@ -189,6 +197,16 @@ private struct CalendarDayView: View {
                 .foregroundStyle(foreground)
                 .frame(maxWidth: .infinity, minHeight: Theme.Metric.dayCell)
                 .background(background, in: .rect(cornerRadius: Theme.Radius.day))
+                // A filled cell carries the immediate "today" state, while
+                // the brass keyline keeps it distinct from a normal selected
+                // or hovered day on both light and dark materials.
+                .overlay {
+                    if day.isToday {
+                        RoundedRectangle(cornerRadius: Theme.Radius.day)
+                            .strokeBorder(Theme.Palette.brand, lineWidth: 1.5)
+                            .accessibilityHidden(true)
+                    }
+                }
             }
             .buttonStyle(.plain)
             .onHover { isHovering = $0 }
@@ -209,6 +227,7 @@ private struct CalendarDayView: View {
         var parts: [String] = ["\(date.day) \(date.englishMonthName)"]
         if let tithi = day.tithi { parts.append(tithi) }
         if let eventName = day.eventName { parts.append(eventName) }
+        if hasPlan { parts.append(String(localized: L10n.hasPlan)) }
         if day.isHoliday { parts.append("public holiday") }
         return parts.joined(separator: ", ")
     }

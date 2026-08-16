@@ -15,7 +15,7 @@ enum CalendarEventStore {
 
     static func events(year: Int, month: Int) -> [Int: CalendarEvent] {
         guard supportedYears.contains(year), (1...12).contains(month),
-              let url = Bundle.module.url(forResource: "\(month)", withExtension: "json", subdirectory: "CalendarEvents/\(year)"),
+              let url = Bundle.sajiloResources.url(forResource: "\(month)", withExtension: "json", subdirectory: "CalendarEvents/\(year)"),
               let data = try? Data(contentsOf: url),
               let payload = try? JSONDecoder().decode(MonthPayload.self, from: data) else {
             return [:]

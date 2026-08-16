@@ -17,6 +17,9 @@ struct WeatherSnapshot: Codable, Equatable, Sendable {
     let sunset: Date?
     /// Today first, then the following days (PRD §5.4).
     let daily: [DailyForecast]
+    /// Optional by design: air quality comes from a separate endpoint, and a
+    /// forecast is still worth showing when only that one is unreachable.
+    var airQuality: AirQuality?
     /// When the reading was taken at source.
     let observedAt: Date
     /// When Sajilo retrieved it. Drives the refresh schedule; `observedAt`

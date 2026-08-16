@@ -103,6 +103,12 @@ struct WeatherDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Space.m) {
                 if let weather {
+                    // Above the forecast: on a bad-air day this is the thing
+                    // people opened the panel for.
+                    if let airQuality = weather.airQuality {
+                        AirQualityPanel(airQuality: airQuality)
+                    }
+
                     if let tomorrow = weather.tomorrow {
                         VStack(alignment: .leading, spacing: Theme.Space.xs) {
                             Text(L10n.tomorrow)

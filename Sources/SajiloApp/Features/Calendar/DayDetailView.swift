@@ -3,6 +3,7 @@ import SwiftUI
 /// PRD CAL-04: a selected date's BS and AD forms, weekday, tithi, events,
 /// holiday status, and copy formats.
 struct DayDetailView: View {
+    let model: AppModel
     let date: NepaliDate
     let onBack: () -> Void
 
@@ -13,7 +14,8 @@ struct DayDetailView: View {
         VStack(spacing: 0) {
             header
 
-            VStack(alignment: .leading, spacing: Theme.Space.m) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: Theme.Space.m) {
                 if let outcome = ConversionOutcome.make(for: date) {
                     DateSummaryPanel(outcome: outcome, leadsWithNepali: true)
 
@@ -37,6 +39,13 @@ struct DayDetailView: View {
                             animation: motion
                         )
                     }
+
+                    DayPlanSection(
+                        date: date,
+                        plans: model.plans(on: date),
+                        onSave: model.saveDayPlan,
+                        onDelete: model.deleteDayPlan
+                    )
                 } else {
                     Label(
                         L10n.outOfRange,
@@ -47,9 +56,11 @@ struct DayDetailView: View {
                     .cardSection()
                 }
 
-                Spacer(minLength: 0)
+                    Spacer(minLength: 0)
+                }
+                .padding(Theme.Space.m)
             }
-            .padding(Theme.Space.m)
+            .softScroll()
         }
     }
 
@@ -62,7 +73,7 @@ struct DayDetailView: View {
             Button(L10n.back, systemImage: "chevron.left", action: onBack)
                 .labelStyle(.iconOnly)
                 .buttonStyle(IconButtonStyle())
-                .accessibilityLabel("Back to calendar")
+                .accessibilityLabel(L10n.backToDashboard)
 
             Text(L10n.dateDetails)
                 .font(.headline)

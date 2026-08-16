@@ -9,6 +9,7 @@ struct ActionBarView: View {
     /// Absent unless the module is enabled — a button that is present but
     /// inert is worse than one that is not there.
     var openNews: (() -> Void)?
+    let openTools: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -17,6 +18,7 @@ struct ActionBarView: View {
             if let openNews {
                 Button(L10n.news, systemImage: "newspaper", action: openNews)
             }
+            Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
             Button(L10n.quit, systemImage: "power") {
                 NSApplication.shared.terminate(nil)
             }

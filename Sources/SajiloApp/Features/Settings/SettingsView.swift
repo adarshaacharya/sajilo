@@ -8,6 +8,7 @@ import SwiftUI
 /// it. Everything here is a preference, not a workflow, so nothing is deep
 /// enough to need a window of its own.
 struct SettingsView: View {
+    @Environment(\.appUpdater) private var appUpdater
     @Bindable var model: AppModel
     let onBack: () -> Void
 
@@ -48,6 +49,13 @@ struct SettingsView: View {
                         }
 
                         Toggle(L10n.showDockIcon, isOn: $model.showsDockIcon)
+                    }
+
+                    SettingsSection(L10n.updates) {
+                        Button(L10n.checkForUpdates) {
+                            appUpdater?.checkForUpdates()
+                        }
+                        .disabled(appUpdater == nil)
                     }
 
                     SettingsSection(L10n.numerals) {

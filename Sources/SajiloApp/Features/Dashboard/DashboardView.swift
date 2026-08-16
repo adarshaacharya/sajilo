@@ -29,7 +29,7 @@ struct DashboardView: View {
             // Mounted only once a day has been picked, so the popover does not
             // pay for a detail view nobody has opened yet.
             if let selectedDate {
-                DayDetailView(date: selectedDate, onBack: { navigate(to: .dashboard) })
+                DayDetailView(model: model, date: selectedDate, onBack: { navigate(to: .dashboard) })
                     .modifier(RouteLayer(isActive: isShowingDayDetail, edge: 1, reduceMotion: reduceMotion))
             }
 
@@ -58,6 +58,9 @@ struct DashboardView: View {
                 NewsView(model: model, onBack: { navigate(to: .dashboard) })
                     .modifier(RouteLayer(isActive: route == .news, edge: 1, reduceMotion: reduceMotion))
             }
+
+            ToolsView(onBack: { navigate(to: .dashboard) })
+                .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
         }
         .environment(\.numeralStyle, model.numeralStyle)
         .frame(width: Theme.Metric.popoverWidth)
@@ -106,7 +109,8 @@ struct DashboardView: View {
             ActionBarView(
                 openUpcoming: { navigate(to: .upcoming) },
                 openConverter: { navigate(to: .converter) },
-                openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil
+                openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
+                openTools: { navigate(to: .tools) }
             )
         }
         .accessibilityLabel("Sajilo dashboard")
@@ -131,6 +135,7 @@ private enum DashboardRoute: Equatable {
     case weather
     case forex
     case news
+    case tools
 }
 
 /// Presents one route of the popover. The inactive layer stays mounted so the

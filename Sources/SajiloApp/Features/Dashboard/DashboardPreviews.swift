@@ -42,7 +42,7 @@ private func previewDate(year: Int, month: Int, day: Int) -> Date {
 
 /// A day carrying a festival, tithi, and holiday flag from the bundled data.
 #Preview("Day detail") {
-    DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 1), onBack: {})
+    DayDetailView(model: .preview(), date: NepaliDate(year: 2083, month: 4, day: 1), onBack: {})
         .frame(width: Theme.Metric.popoverWidth)
         .background {
             Rectangle()
@@ -53,7 +53,7 @@ private func previewDate(year: Int, month: Int, day: Int) -> Date {
 
 /// A day the source grid truncated, so it has no event at all.
 #Preview("Day detail — no event") {
-    DayDetailView(date: NepaliDate(year: 2083, month: 4, day: 31), onBack: {})
+    DayDetailView(model: .preview(), date: NepaliDate(year: 2083, month: 4, day: 31), onBack: {})
         .frame(width: Theme.Metric.popoverWidth)
         .background {
             Rectangle()

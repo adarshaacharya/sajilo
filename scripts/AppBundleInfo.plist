@@ -22,5 +22,15 @@
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/adarshaacharya/sajilo/main/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>pc7YC1Sy2+CstBQ84OWlfxKM4CwZhkJRpIVSh4TJMeo=</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
+    <key>SUAllowsAutomaticUpdates</key>
+    <true/>
+    <key>SUScheduledCheckInterval</key>
+    <integer>86400</integer>
 </dict>
 </plist>

@@ -29,11 +29,67 @@ struct OpenMeteoWeatherProvider: WeatherProviding {
             URLQueryItem(name: "timezone", value: "Asia/Kathmandu")
         ]
 
+        // Air quality is a different host, so it is fetched alongside rather
+        // than in sequence — and its failure must not cost the forecast.
+        async let airQuality = fetchAirQuality(at: location)
+
         let (data, response) = try await session.data(from: components.url!)
         guard let response = response as? HTTPURLResponse, 200..<300 ~= response.statusCode else {
             throw WeatherProviderError.invalidResponse
         }
-        return try Self.decode(data, location: location, fetchedAt: .now)
+        var snapshot = try Self.decode(data, location: location, fetchedAt: .now)
+        snapshot.airQuality = await airQuality
+        return snapshot
+    }
+
+    /// Never throws. A missing AQI leaves the section out; it does not take the
+    /// weather down with it.
+    private func fetchAirQuality(at location: WeatherLocation) async -> AirQuality? {
+        var components = URLComponents(string: "https://air-quality-api.open-meteo.com/v1/air-quality")!
+        components.queryItems = [
+            URLQueryItem(name: "latitude", value: String(location.latitude)),
+            URLQueryItem(name: "longitude", value: String(location.longitude)),
+            URLQueryItem(name: "current", value: "us_aqi,pm2_5,pm10"),
+            URLQueryItem(name: "timezone", value: "Asia/Kathmandu")
+        ]
+
+        guard let (data, response) = try? await session.data(from: components.url!),
+              let http = response as? HTTPURLResponse,
+              200..<300 ~= http.statusCode else {
+            return nil
+        }
+        return Self.decodeAirQuality(data)
+    }
+
+    static func decodeAirQuality(_ data: Data) -> AirQuality? {
+        guard let response = try? JSONDecoder().decode(AirQualityResponse.self, from: data),
+              let index = response.current.usAQI else {
+            return nil
+        }
+        return AirQuality(
+            usAQI: Int(index.rounded()),
+            pm25: response.current.pm25 ?? 0,
+            pm10: response.current.pm10 ?? 0,
+            observedAt: timeFormatter.date(from: response.current.time) ?? .now
+        )
+    }
+
+    private struct AirQualityResponse: Decodable {
+        let current: Current
+
+        struct Current: Decodable {
+            let time: String
+            let usAQI: Double?
+            let pm25: Double?
+            let pm10: Double?
+
+            enum CodingKeys: String, CodingKey {
+                case time
+                case usAQI = "us_aqi"
+                case pm25 = "pm2_5"
+                case pm10 = "pm10"
+            }
+        }
     }
 
     static func decode(_ data: Data, location: WeatherLocation, fetchedAt: Date) throws -> WeatherSnapshot {

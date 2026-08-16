@@ -54,8 +54,17 @@ rather than showing nothing.
 ## Open-Meteo weather data
 
 The weather card is served by the [Open-Meteo](https://open-meteo.com) forecast
-API. No API key, no sign-up, and no user location is transmitted — the request
-carries fixed Kathmandu coordinates.
+API, and air quality by the same project's
+[Air Quality API](https://open-meteo.com/en/docs/air-quality-api). No API key,
+no sign-up, and no user location is transmitted — requests carry the fixed
+coordinates of the city chosen in Settings.
+
+Air quality is reported on the **US EPA index** rather than Open-Meteo's
+European one, because Nepal's Department of Environment and local reporting use
+the EPA scale; showing a different number under the same name would be
+misleading. The two endpoints are fetched concurrently and air quality is
+optional — the forecast still shows when only the air-quality host is
+unreachable.
 
 Weather data is licensed **[CC BY 4.0](https://open-meteo.com/en/license)**,
 which requires giving appropriate credit, linking the licence, and indicating

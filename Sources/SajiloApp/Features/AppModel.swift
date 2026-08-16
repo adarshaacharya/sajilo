@@ -177,7 +177,12 @@ final class AppModel {
     @ObservationIgnored private let launchAtLoginManager: any LaunchAtLoginManaging
     @ObservationIgnored private let notificationScheduler: any NotificationScheduling
     @ObservationIgnored private let newsProvider: any NewsProviding
+    @ObservationIgnored private let dayPlanStore: DayPlanStore
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
+
+    /// Personal, local-only plans. The model owns the observable snapshot;
+    /// `DayPlanStore` only serializes it to JSON for the next launch.
+    private(set) var dayPlans: [DayPlan]
 
     var cards: [DashboardCard] { [weatherCard, forexCard] }
 
@@ -259,14 +264,18 @@ final class AppModel {
         launchAtLoginManager: any LaunchAtLoginManaging = SystemLaunchAtLogin(),
         notificationScheduler: any NotificationScheduling = SystemNotificationScheduler(),
         newsProvider: any NewsProviding = RSSNewsProvider(),
+        dayPlanStore: DayPlanStore? = nil,
         autoLoadWeather: Bool = true
     ) {
+        let resolvedDayPlanStore = dayPlanStore ?? DayPlanStore(defaults: defaults)
         self.defaults = defaults
         self.weatherProvider = weatherProvider
         self.forexProvider = forexProvider
         self.launchAtLoginManager = launchAtLoginManager
         self.notificationScheduler = notificationScheduler
         self.newsProvider = newsProvider
+        self.dayPlanStore = resolvedDayPlanStore
+        dayPlans = resolvedDayPlanStore.load()
         referenceDate = now
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
@@ -305,6 +314,10 @@ final class AppModel {
         weatherFeed = RemoteFeed(
             subject: "weather",
             cacheKey: DefaultsKey.weatherCache(for: location),
+            // v2: snapshots now carry air quality. A v1 entry decodes fine with
+            // `airQuality` nil, so the section would stay missing until the
+            // cache aged out rather than appearing on next open.
+            cacheVersion: 2,
             staleInterval: Self.weatherStaleInterval,
             defaults: defaults,
             fetchedAt: \.fetchedAt
@@ -375,37 +388,75 @@ final class AppModel {
         selectedMonth = month
     }
 
+    // MARK: - Day plans
+
+    func plans(on date: NepaliDate) -> [DayPlan] {
+        DayPlan.ordered(dayPlans.filter { $0.date == date })
+    }
+
+    func hasDayPlan(on date: NepaliDate) -> Bool {
+        dayPlans.contains { $0.date == date }
+    }
+
+    /// Saves a short calendar-attached plan locally. A reminder is optional;
+    /// only adding one may request macOS notification permission.
+    func saveDayPlan(_ plan: DayPlan) {
+        if let index = dayPlans.firstIndex(where: { $0.id == plan.id }) {
+            dayPlans[index] = plan
+        } else {
+            dayPlans.append(plan)
+        }
+        dayPlanStore.save(dayPlans)
+
+        Task { [weak self] in
+            guard let self else { return }
+            await self.requestPlannerPermissionIfNeeded(for: plan)
+            await self.rescheduleNotifications()
+        }
+    }
+
+    func deleteDayPlan(id: DayPlan.ID) {
+        dayPlans.removeAll { $0.id == id }
+        dayPlanStore.save(dayPlans)
+        Task { [weak self] in await self?.rescheduleNotifications() }
+    }
+
     // MARK: - Notifications
 
     /// Reads the current permission without prompting, so Settings can explain
     /// a denial. Prompting happens only in `applyNotificationOptions`.
     func refreshNotificationAuthorization() async {
         notificationAuthorization = await notificationScheduler.authorization()
+        await rescheduleNotifications()
     }
 
     /// Recomputes the schedule from the bundled festival list. Safe to call
     /// repeatedly — the scheduler replaces Sajilo's requests rather than
     /// appending, and identifiers are stable per date.
     func rescheduleNotifications() async {
-        guard notificationOptions.isAnyEnabled else {
+        let festivalReminders = notificationOptions.isAnyEnabled
+            ? FestivalNotificationPlanner.plan(
+                events: UpcomingEventsService.events(from: today, limit: FestivalNotificationPlanner.limit * 2),
+                options: notificationOptions,
+                now: .now
+            )
+            : []
+        let planReminders = DayPlanReminderPlanner.plan(entries: dayPlans, now: .now)
+        let notifications = festivalReminders + planReminders
+
+        guard !notifications.isEmpty else {
             await notificationScheduler.cancelAll()
             return
         }
         guard notificationAuthorization == .authorized else { return }
-
-        let planned = FestivalNotificationPlanner.plan(
-            events: UpcomingEventsService.events(from: today, limit: FestivalNotificationPlanner.limit * 2),
-            options: notificationOptions,
-            now: .now
-        )
-        await notificationScheduler.replaceScheduled(with: planned)
+        await notificationScheduler.replaceScheduled(with: notifications)
     }
 
     /// PRD §9: the permission prompt appears only when the user switches a
     /// reminder on, never at launch and never when switching one off.
     private func applyNotificationOptions(wasEnabled: Bool) async {
         guard notificationOptions.isAnyEnabled else {
-            await notificationScheduler.cancelAll()
+            await rescheduleNotifications()
             return
         }
 
@@ -417,6 +468,14 @@ final class AppModel {
             }
         }
         await rescheduleNotifications()
+    }
+
+    private func requestPlannerPermissionIfNeeded(for plan: DayPlan) async {
+        guard plan.time != nil, plan.reminder != nil else { return }
+        notificationAuthorization = await notificationScheduler.authorization()
+        guard notificationAuthorization == .notDetermined else { return }
+        _ = await notificationScheduler.requestAuthorization()
+        notificationAuthorization = await notificationScheduler.authorization()
     }
 
     // MARK: - System integration

@@ -5,6 +5,7 @@ import SwiftUI
 struct SajiloApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var appModel = AppModel.prototype
+    private let appUpdater = AppUpdater()
 
     var body: some Scene {
         // The label closure — rather than the `String` title initializer —
@@ -12,6 +13,7 @@ struct SajiloApp: App {
         MenuBarExtra {
             DashboardView(model: appModel)
                 .environment(\.locale, appModel.appLanguage.locale)
+                .environment(\.appUpdater, appUpdater)
         } label: {
             Text(verbatim: appModel.menuBarTitle)
         }
@@ -25,6 +27,7 @@ struct SajiloApp: App {
         Window("Sajilo Preview", id: "dashboard-preview") {
             DashboardView(model: appModel)
                 .environment(\.locale, appModel.appLanguage.locale)
+                .environment(\.appUpdater, appUpdater)
         }
         .windowResizability(.contentSize)
         #endif

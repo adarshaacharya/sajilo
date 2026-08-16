@@ -1,6 +1,6 @@
 import Foundation
 
-struct NepaliDate: Equatable, Hashable, Comparable, Sendable {
+struct NepaliDate: Codable, Equatable, Hashable, Comparable, Sendable {
     let year: Int
     let month: Int
     let day: Int

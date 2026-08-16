@@ -8,9 +8,15 @@ let package = Package(
     products: [
         .executable(name: "Sajilo", targets: ["SajiloApp"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.9.5")
+    ],
     targets: [
         .executableTarget(
             name: "SajiloApp",
+            dependencies: [
+                .product(name: "Sparkle", package: "Sparkle")
+            ],
             path: "Sources/SajiloApp",
             resources: [
                 .copy("Resources/CalendarEvents"),
