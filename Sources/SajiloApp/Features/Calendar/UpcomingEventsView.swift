@@ -6,11 +6,18 @@ struct UpcomingEventsView: View {
     let onBack: () -> Void
     let onSelectDate: (NepaliDate) -> Void
 
+    @State private var selectedFilter: UpcomingEventFilter = .current
+
+    private var filteredEvents: [UpcomingEvent] {
+        events.filter(selectedFilter.includes)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
+            filterPicker
 
-            if events.isEmpty {
+            if filteredEvents.isEmpty {
                 VStack {
                     Spacer()
                     Label(
@@ -25,7 +32,7 @@ struct UpcomingEventsView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: Theme.Space.xs) {
-                        ForEach(events) { event in
+                        ForEach(filteredEvents) { event in
                             UpcomingEventRow(event: event) { onSelectDate(event.date) }
                         }
                     }
@@ -34,6 +41,20 @@ struct UpcomingEventsView: View {
                 .softScroll()
             }
         }
+    }
+
+    private var filterPicker: some View {
+        Picker(L10n.eventsFilter, selection: $selectedFilter) {
+            ForEach(UpcomingEventFilter.allCases) { filter in
+                Text(filter.title).tag(filter)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .accessibilityLabel(L10n.eventsFilter)
+        .padding(.horizontal, Theme.Space.m)
+        .padding(.vertical, Theme.Space.s)
+        .animation(.easeOut(duration: 0.15), value: selectedFilter)
     }
 
     private var header: some View {
@@ -49,6 +70,16 @@ struct UpcomingEventsView: View {
             Spacer(minLength: 0)
         }
         .routeHeader()
+    }
+}
+
+private extension UpcomingEventFilter {
+    var title: LocalizedStringResource {
+        switch self {
+        case .current: L10n.eventsCurrent
+        case .festivals: L10n.eventsFestivals
+        case .publicHolidays: L10n.eventsPublicHolidays
+        }
     }
 }
 
@@ -209,6 +240,6 @@ struct UpNextRow: View {
     }
 
     private var accessibilityHint: String {
-        summary.destination == .today ? "Open today" : "Show all upcoming festivals"
+        summary.destination == .today ? "Open today" : "Show all upcoming events"
     }
 }

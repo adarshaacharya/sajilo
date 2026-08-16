@@ -1,21 +1,44 @@
 import AppKit
 import SwiftUI
 
-/// The converter is a route inside the popover, not a sheet. A modal sheet over
-/// a menu-bar popover reads as a second window and breaks the illusion of one
-/// surface, so this presents as a push with its own back affordance.
+/// A standalone wrapper retained for previews. The dashboard reaches the same
+/// converter through Tools, where `DateConverterContent` is reused directly.
 struct DateConverterView: View {
     let onBack: () -> Void
-
-    @State private var store = DateConverterStore()
-    @State private var copiedFormat: ConversionOutcome.CopyFormat?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(spacing: 0) {
             header
 
-            VStack(alignment: .leading, spacing: Theme.Space.m) {
+            DateConverterContent()
+                .padding(Theme.Space.m)
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: Theme.Space.s) {
+            Button(L10n.back, systemImage: "chevron.left", action: onBack)
+                .labelStyle(.iconOnly)
+                .buttonStyle(IconButtonStyle())
+                .accessibilityLabel(L10n.backToDashboard)
+
+            Text(L10n.dateConverter)
+                .font(.headline)
+
+            Spacer(minLength: 0)
+        }
+        .routeHeader()
+    }
+}
+
+/// The actual converter, shared by the Tools route and the standalone preview.
+struct DateConverterContent: View {
+    @State private var store = DateConverterStore()
+    @State private var copiedFormat: ConversionOutcome.CopyFormat?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
                 Picker("Conversion", selection: $store.mode) {
                     ForEach(ConverterMode.allCases) { mode in
                         Text(mode.label).tag(mode)
@@ -67,33 +90,12 @@ struct DateConverterView: View {
                     Button(L10n.convert) { convert() }
                         .buttonStyle(BrandButtonStyle())
                 }
-            }
-            .padding(Theme.Space.m)
         }
     }
 
     private var motion: Animation? {
         reduceMotion ? nil : .snappy(duration: 0.25)
     }
-
-    private var header: some View {
-        HStack(spacing: Theme.Space.s) {
-            Button(L10n.back, systemImage: "chevron.left", action: onBack)
-                .labelStyle(.iconOnly)
-                .buttonStyle(IconButtonStyle())
-                .accessibilityLabel(L10n.backToDashboard)
-
-            Text(L10n.dateConverter)
-                .font(.headline)
-
-            Spacer(minLength: 0)
-        }
-        .routeHeader()
-    }
-
-
-
-
 
     private func convert() {
         withAnimation(motion) { store.convert() }

@@ -24,9 +24,6 @@ struct DashboardView: View {
                 dashboard
                     .modifier(RouteLayer(isActive: route == .dashboard, edge: -1, reduceMotion: reduceMotion))
 
-                DateConverterView(onBack: { navigate(to: .dashboard) })
-                    .modifier(RouteLayer(isActive: route == .converter, edge: 1, reduceMotion: reduceMotion))
-
             // Mounted only once a day has been picked, so the popover does not
             // pay for a detail view nobody has opened yet.
                 if let selectedDate {
@@ -138,7 +135,6 @@ struct DashboardView: View {
         ActionBarView(
             active: route.actionDestination,
             openUpcoming: { navigate(to: .upcoming) },
-            openConverter: { navigate(to: .converter) },
             openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
             openBazar: model.isBazarEnabled ? { navigate(to: .bazar) } : nil,
             openRashifal: model.isRashifalEnabled ? { navigate(to: .rashifal) } : nil,
@@ -159,7 +155,6 @@ struct DashboardView: View {
 
 enum DashboardRoute: Equatable {
     case dashboard
-    case converter
     case dayDetail(NepaliDate)
     case upcoming
     case settings
@@ -174,7 +169,6 @@ enum DashboardRoute: Equatable {
     var actionDestination: ActionBarDestination? {
         switch self {
         case .upcoming, .dayDetail: .festivals
-        case .converter: .converter
         case .news: .news
         case .bazar: .bazar
         case .rashifal: .rashifal

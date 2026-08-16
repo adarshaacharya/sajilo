@@ -19,6 +19,30 @@ struct UpcomingEvent: Identifiable, Equatable, Sendable {
     }
 }
 
+/// Presentation filters for the Events route. The service still supplies one
+/// complete ordered list; these only decide which part of that list is shown.
+enum UpcomingEventFilter: CaseIterable, Identifiable {
+    case current
+    case festivals
+    case publicHolidays
+
+    var id: Self { self }
+
+    func includes(_ event: UpcomingEvent) -> Bool {
+        switch self {
+        case .current:
+            // Today plus the next six days keeps this a useful near-term view.
+            event.daysAway < 7
+        case .festivals:
+            // Every item has a named cultural, religious, or civic event.
+            // A festival that is also a public holiday belongs here too.
+            true
+        case .publicHolidays:
+            event.isPublicHoliday
+        }
+    }
+}
+
 /// PRD §5.3: named festivals and public holidays ahead of today, with the
 /// number of days remaining.
 enum UpcomingEventsService {

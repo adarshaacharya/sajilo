@@ -9,8 +9,7 @@ import SwiftUI
 /// reasons: the header was otherwise a flat block of type with half its width
 /// unused; the plate repeats the rounded-square language of the today-cell in
 /// the grid below, so the popover reads as one design rather than two; and it
-/// gives today's festival somewhere to sit as real content instead of a grey
-/// line trailing off the bottom.
+/// gives the date a stable anchor above the calendar grid.
 struct DateHeaderView: View {
     let model: AppModel
     let openSettings: () -> Void
@@ -30,10 +29,6 @@ struct DateHeaderView: View {
                     .tracking(0.3)
                     .foregroundStyle(.secondary)
 
-                if let event = todayEvent {
-                    eventChip(event)
-                        .padding(.top, Theme.Space.xxs)
-                }
             }
 
             Spacer(minLength: 0)
@@ -95,57 +90,11 @@ struct DateHeaderView: View {
         .accessibilityHidden(true)
     }
 
-    /// Today's festival, promoted from a trailing grey line to a marked chip.
-    /// Tithi rides alongside it because both come from the same bundled record.
-    private func eventChip(_ event: TodayEvent) -> some View {
-        HStack(spacing: Theme.Space.xs) {
-            Circle()
-                .fill(Theme.Palette.brand)
-                .frame(width: 5, height: 5)
-                .accessibilityHidden(true)
-
-            Text(event.headline)
-                .font(.nepali(12, weight: .medium))
-                .lineLimit(1)
-                .truncationMode(.tail)
-
-            if let tithi = event.tithi {
-                Text(verbatim: "·")
-                    .foregroundStyle(.tertiary)
-                Text(tithi)
-                    .font(.nepali(11))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-        }
-        .padding(.horizontal, Theme.Space.s)
-        .padding(.vertical, Theme.Space.xs)
-        .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.day))
-    }
-
-    /// A day carrying only a tithi still deserves the chip; a day carrying
-    /// neither gets nothing rather than an empty container.
-    private var todayEvent: TodayEvent? {
-        let name = model.todayEvent?.name
-        let tithi = model.todayEvent?.tithi
-        guard let headline = name ?? tithi else { return nil }
-        return TodayEvent(headline: headline, tithi: name == nil ? nil : tithi)
-    }
-
     private var accessibilityDescription: String {
-        var parts = [
+        [
             "Today: \(model.nepaliWeekday), \(model.today.day) \(model.today.englishMonthName) \(model.today.year)",
             model.gregorianDate
         ]
-        if let event = todayEvent {
-            parts.append(event.headline)
-            if let tithi = event.tithi { parts.append(tithi) }
-        }
-        return parts.joined(separator: ". ") + "."
-    }
-
-    struct TodayEvent {
-        let headline: String
-        let tithi: String?
+        .joined(separator: ". ") + "."
     }
 }

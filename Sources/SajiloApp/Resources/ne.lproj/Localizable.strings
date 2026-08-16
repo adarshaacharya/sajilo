@@ -5,7 +5,7 @@
 "action.check-for-updates" = "अपडेट जाँच गर्नुहोस्…";
 "action.convert" = "रूपान्तरण";
 "action.copy-as" = "यसरी प्रतिलिपि गर्नुहोस्";
-"action.festivals" = "पर्वहरू";
+"action.festivals" = "कार्यक्रम";
 "action.quit" = "बन्द गर्नुहोस्";
 "action.refresh" = "ताजा गर्नुहोस्";
 "action.swap" = "साट्नुहोस्";
@@ -46,6 +46,10 @@
 "calendar.previous-month" = "अघिल्लो महिना";
 "calendar.provisional" = "अस्थायी — आधिकारिक रूपमा प्रकाशित भइसकेको छैन";
 "calendar.public-holiday" = "सार्वजनिक बिदा";
+"events.current" = "हालका";
+"events.festivals" = "पर्वहरू";
+"events.filter" = "कार्यक्रम छनोट";
+"events.public-holidays" = "सार्वजनिक बिदा";
 "feature.forex" = "विदेशी मुद्रा";
 "feature.weather" = "मौसम";
 "forex.all-currencies" = "सबै मुद्राहरू";
@@ -91,7 +95,7 @@
 "screen.rashifal" = "राशिफल";
 "screen.radio" = "रेडियो";
 "screen.settings" = "सेटिङ";
-"screen.upcoming" = "आगामी";
+"screen.upcoming" = "आगामी कार्यक्रमहरू";
 "settings.bazar" = "सुन, चाँदी र इन्धन";
 "settings.bazar-source" = "दरको स्रोत";
 "settings.calendar-range" = "पात्रो";
@@ -126,10 +130,10 @@
 "settings.weather-source" = "मौसम स्रोत";
 "radio.search" = "स्टेशन खोज्नुहोस्";
 "radio.no-stations" = "खोजसँग मिल्ने स्टेशन छैन।";
-"radio.source" = "स्टेशन र स्ट्रिम रातोपाटीबाट उपलब्ध छन्।";
 "tools.amount" = "रकम";
 "tools.area" = "क्षेत्रफल";
 "tools.base-amount" = "भ्याट अगाडि";
+"tools.date" = "मिति";
 "tools.hill-system" = "पहाडी प्रणाली";
 "tools.interest" = "ब्याज";
 "tools.interest-amount" = "ब्याज";
@@ -145,5 +149,5 @@
 "tools.vat-amount" = "भ्याट";
 "tools.weight" = "तौल";
 "tools.years" = "वर्ष";
-"upcoming.empty" = "आजपछिका कुनै पर्व अभिलेख छैन।";
+"upcoming.empty" = "आजपछिका कुनै कार्यक्रम अभिलेख छैन।";
 "weather.tomorrow" = "भोलि";

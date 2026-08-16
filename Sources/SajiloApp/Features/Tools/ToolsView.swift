@@ -9,14 +9,15 @@ import SwiftUI
 struct ToolsView: View {
     let onBack: () -> Void
 
-    @State private var tool: Tool = .land
+    @State private var tool: Tool = .date
 
     enum Tool: String, CaseIterable, Identifiable {
-        case land, weight, vat, interest
+        case date, land, weight, vat, interest
         var id: String { rawValue }
 
         var title: LocalizedStringResource {
             switch self {
+            case .date: L10n.toolDate
             case .land: L10n.toolLand
             case .weight: L10n.toolWeight
             case .vat: L10n.toolVAT
@@ -38,6 +39,7 @@ struct ToolsView: View {
                     .labelsHidden()
 
                     switch tool {
+                    case .date: DateConverterContent()
                     case .land: LandToolView()
                     case .weight: WeightToolView()
                     case .vat: VATToolView()

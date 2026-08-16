@@ -71,10 +71,6 @@ struct RadioView: View {
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-
-                        Text(L10n.radioSource)
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
                     }
                     .padding(Theme.Space.m)
                 }

@@ -89,4 +89,17 @@ struct UpcomingEventsServiceTests {
         #expect(events.first?.daysAway == 1)
         #expect(events.first?.relativeText == "Tomorrow")
     }
+
+    @Test func filtersCurrentFestivalsAndPublicHolidaysIndependently() {
+        let events = UpcomingEventsService.events(from: today, limit: 12)
+
+        let current = events.filter(UpcomingEventFilter.current.includes)
+        let festivals = events.filter(UpcomingEventFilter.festivals.includes)
+        let holidays = events.filter(UpcomingEventFilter.publicHolidays.includes)
+
+        #expect(current.allSatisfy { $0.daysAway < 7 })
+        #expect(festivals == events)
+        #expect(holidays.allSatisfy { $0.isPublicHoliday })
+        #expect(!holidays.isEmpty)
+    }
 }

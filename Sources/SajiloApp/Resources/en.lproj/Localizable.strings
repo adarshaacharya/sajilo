@@ -5,7 +5,7 @@
 "action.check-for-updates" = "Check for Updates…";
 "action.convert" = "Convert";
 "action.copy-as" = "Copy as";
-"action.festivals" = "Festivals";
+"action.festivals" = "Events";
 "action.quit" = "Quit";
 "action.refresh" = "Refresh";
 "action.swap" = "Swap";
@@ -46,6 +46,10 @@
 "calendar.previous-month" = "Previous month";
 "calendar.provisional" = "Provisional — not yet officially published";
 "calendar.public-holiday" = "Public holiday";
+"events.current" = "Current";
+"events.festivals" = "Festivals";
+"events.filter" = "Event filter";
+"events.public-holidays" = "Public holidays";
 "feature.forex" = "Forex";
 "feature.weather" = "Weather";
 "forex.all-currencies" = "All currencies";
@@ -91,7 +95,7 @@
 "screen.rashifal" = "Rashifal";
 "screen.radio" = "Radio";
 "screen.settings" = "Settings";
-"screen.upcoming" = "Upcoming";
+"screen.upcoming" = "Upcoming events";
 "settings.bazar" = "Gold, silver and fuel";
 "settings.bazar-source" = "Rates source";
 "settings.calendar-range" = "Calendar";
@@ -126,10 +130,10 @@
 "settings.weather-source" = "Weather source";
 "radio.search" = "Search stations";
 "radio.no-stations" = "No stations match that search.";
-"radio.source" = "Stations and streams supplied by Ratopati.";
 "tools.amount" = "Amount";
 "tools.area" = "Area";
 "tools.base-amount" = "Before VAT";
+"tools.date" = "Dates";
 "tools.hill-system" = "Hill system";
 "tools.interest" = "Interest";
 "tools.interest-amount" = "Interest";
@@ -145,5 +149,5 @@
 "tools.vat-amount" = "VAT";
 "tools.weight" = "Weight";
 "tools.years" = "Years";
-"upcoming.empty" = "No festivals recorded ahead of today.";
+"upcoming.empty" = "No upcoming events recorded.";
 "weather.tomorrow" = "Tomorrow";

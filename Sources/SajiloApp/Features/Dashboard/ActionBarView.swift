@@ -6,7 +6,6 @@ import SwiftUI
 struct ActionBarView: View {
     let active: ActionBarDestination?
     let openUpcoming: () -> Void
-    let openConverter: () -> Void
     /// Absent unless the module is enabled — a button that is present but
     /// inert is worse than one that is not there.
     var openNews: (() -> Void)?
@@ -18,7 +17,6 @@ struct ActionBarView: View {
     var body: some View {
         HStack(spacing: 0) {
             action(L10n.festivals, icon: "calendar", destination: .festivals, action: openUpcoming)
-            action(L10n.convert, icon: "arrow.left.arrow.right", destination: .converter, action: openConverter)
             if let openNews {
                 action(L10n.news, icon: "newspaper", destination: .news, action: openNews)
             }
@@ -54,7 +52,7 @@ struct ActionBarView: View {
 }
 
 enum ActionBarDestination: Equatable {
-    case festivals, converter, news, bazar, rashifal, radio, tools
+    case festivals, news, bazar, rashifal, radio, tools
 }
 
 // MARK: - Previews

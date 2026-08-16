@@ -131,13 +131,9 @@ struct WeatherDetailView: View {
                         .cardSection()
                     }
 
-                    HStack(spacing: Theme.Space.xs) {
-                        Text(AppModel.freshnessText(for: weather.observedAt))
-                        Text("·")
-                        Text("Open-Meteo")
-                    }
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    Text(AppModel.freshnessText(for: weather.observedAt))
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 } else {
                     Label(
                         "No cached reading yet. Sajilo keeps the last successful one and shows it offline.",

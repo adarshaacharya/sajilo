@@ -5,6 +5,12 @@ import Observation
 @MainActor
 @Observable
 final class AppModel {
+    /// The Events route is a full forward-looking list, rather than the small
+    /// dashboard preview. The horizon keeps its work bounded when calendar
+    /// coverage is extended in a later data update.
+    private static let upcomingEventLimit = 100
+    private static let upcomingEventHorizonDays = 400
+
     enum MenuBarFormat: String, CaseIterable, Identifiable {
         case nepaliShort
         case nepaliLong
@@ -500,7 +506,11 @@ final class AppModel {
         selectedMonth = (try? BikramSambatCalendar.month(containing: resolvedToday, today: resolvedToday))
             ?? CalendarMonth(firstDate: fallbackDate, title: "साउन २०८३", days: [])
         todayEvent = CalendarEventStore.events(year: resolvedToday.year, month: resolvedToday.month)[resolvedToday.day]
-        upcomingEvents = UpcomingEventsService.events(from: resolvedToday)
+        upcomingEvents = UpcomingEventsService.events(
+            from: resolvedToday,
+            limit: Self.upcomingEventLimit,
+            horizonDays: Self.upcomingEventHorizonDays
+        )
 
         weatherFeed = RemoteFeed(
             subject: "weather",
@@ -918,7 +928,11 @@ final class AppModel {
             today = resolved
         }
         todayEvent = CalendarEventStore.events(year: today.year, month: today.month)[today.day]
-        upcomingEvents = UpcomingEventsService.events(from: today)
+        upcomingEvents = UpcomingEventsService.events(
+            from: today,
+            limit: Self.upcomingEventLimit,
+            horizonDays: Self.upcomingEventHorizonDays
+        )
         Task { [weak self] in
             await self?.rescheduleNotifications()
             // Yesterday's reading is still cached at this point and would keep
