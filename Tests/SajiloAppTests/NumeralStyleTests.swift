@@ -64,6 +64,30 @@ struct NumeralStyleTests {
         #expect(model.menuBarTitle == NumeralStyle.devanagari.slashedDate(model.today))
     }
 
+    @Test func flagFormatIncludesTheBikramSambatYear() {
+        let model = makeModel()
+        model.selectedMenuBarFormat = .nepaliFlag
+
+        #expect(model.menuBarTitle.hasPrefix("🇳🇵 "))
+        #expect(model.menuBarTitle.contains("२०८३"))
+    }
+
+    @Test func customMenuBarFormatPersistsItsFlagAndYearChoices() {
+        let defaults = makeDefaults()
+        let model = makeModel(defaults: defaults)
+        model.selectedMenuBarFormat = .custom
+        model.customMenuBarShowsFlag = false
+        model.customMenuBarShowsYear = true
+
+        #expect(model.menuBarTitle.contains("🇳🇵") == false)
+        #expect(model.menuBarTitle.contains("२०८३"))
+
+        let restored = makeModel(defaults: defaults)
+        #expect(restored.selectedMenuBarFormat == .custom)
+        #expect(restored.customMenuBarShowsFlag == false)
+        #expect(restored.customMenuBarShowsYear)
+    }
+
     /// `englishShort` was already Latin by definition; the preference must not
     /// turn its month name into digits or otherwise disturb it.
     @Test func englishShortFormatIsUnaffected() {

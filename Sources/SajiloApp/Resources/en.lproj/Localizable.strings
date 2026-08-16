@@ -92,6 +92,9 @@
 "settings.launch-at-login" = "Launch at login";
 "settings.launch-unavailable-note" = "Move Sajilo to your Applications folder to enable this.";
 "settings.menu-bar" = "Menu bar";
+"settings.menu-bar-custom" = "Custom…";
+"settings.menu-bar-show-flag" = "Show Nepal flag";
+"settings.menu-bar-show-year" = "Show BS year";
 "settings.modules" = "Modules";
 "settings.numerals" = "Numerals";
 "settings.rates-source" = "Rates source";

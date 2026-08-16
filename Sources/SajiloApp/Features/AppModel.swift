@@ -11,6 +11,7 @@ final class AppModel {
         case nepaliFlag
         case englishShort
         case numeric
+        case custom
 
         var id: String { rawValue }
 
@@ -24,15 +25,18 @@ final class AppModel {
             switch self {
             case .nepaliShort: return "\(day) \(date.nepaliMonthName)"
             case .nepaliLong: return "\(day) \(date.nepaliMonthName) \(year)"
-            case .nepaliFlag: return "🇳🇵 \(day) \(date.nepaliMonthName)"
+            case .nepaliFlag: return "🇳🇵 \(day) \(date.nepaliMonthName) \(year)"
             case .englishShort: return "\(date.day) \(date.englishMonthName)"
             case .numeric: return numerals.slashedDate(date)
+            case .custom: return "\(day) \(date.nepaliMonthName) \(year)"
             }
         }
     }
 
     private enum DefaultsKey {
         static let menuBarFormat = "menuBarFormat"
+        static let customMenuBarShowsFlag = "customMenuBarShowsFlag"
+        static let customMenuBarShowsYear = "customMenuBarShowsYear"
         static let appLanguage = "appLanguage"
         static let numeralStyle = "numeralStyle"
         static let weatherEnabled = "weatherEnabled"
@@ -58,6 +62,16 @@ final class AppModel {
 
     var selectedMenuBarFormat: MenuBarFormat {
         didSet { defaults.set(selectedMenuBarFormat.rawValue, forKey: DefaultsKey.menuBarFormat) }
+    }
+
+    /// The Custom menu-bar option starts with the full Nepali date, then lets
+    /// people keep or remove the two pieces that matter most at a glance.
+    var customMenuBarShowsFlag: Bool {
+        didSet { defaults.set(customMenuBarShowsFlag, forKey: DefaultsKey.customMenuBarShowsFlag) }
+    }
+
+    var customMenuBarShowsYear: Bool {
+        didSet { defaults.set(customMenuBarShowsYear, forKey: DefaultsKey.customMenuBarShowsYear) }
     }
 
     var appLanguage: AppLanguage {
@@ -247,7 +261,21 @@ final class AppModel {
     }
 
     var menuBarTitle: String {
-        selectedMenuBarFormat.title(for: today, numerals: numeralStyle)
+        menuBarTitle(for: selectedMenuBarFormat)
+    }
+
+    func menuBarTitle(for format: MenuBarFormat) -> String {
+        guard format == .custom else {
+            return format.title(for: today, numerals: numeralStyle)
+        }
+
+        let day = numeralStyle.string(from: today.day)
+        let year = numeralStyle.string(from: today.year)
+        var parts: [String] = []
+        if customMenuBarShowsFlag { parts.append("🇳🇵") }
+        parts.append("\(day) \(today.nepaliMonthName)")
+        if customMenuBarShowsYear { parts.append(year) }
+        return parts.joined(separator: " ")
     }
 
     var visibleCards: [DashboardCard] {
@@ -322,6 +350,8 @@ final class AppModel {
 
         selectedMenuBarFormat = defaults.string(forKey: DefaultsKey.menuBarFormat)
             .flatMap(MenuBarFormat.init(rawValue:)) ?? .nepaliShort
+        customMenuBarShowsFlag = defaults.object(forKey: DefaultsKey.customMenuBarShowsFlag) as? Bool ?? true
+        customMenuBarShowsYear = defaults.object(forKey: DefaultsKey.customMenuBarShowsYear) as? Bool ?? true
         appLanguage = defaults.string(forKey: DefaultsKey.appLanguage)
             .flatMap(AppLanguage.init(rawValue:)) ?? .mixed
         numeralStyle = defaults.string(forKey: DefaultsKey.numeralStyle)

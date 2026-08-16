@@ -92,6 +92,9 @@
 "settings.launch-at-login" = "लगइनमा सुरु गर्नुहोस्";
 "settings.launch-unavailable-note" = "यो सुविधा चलाउन Sajilo लाई तपाईंको Applications फोल्डरमा सार्नुहोस्।";
 "settings.menu-bar" = "मेनु बार";
+"settings.menu-bar-custom" = "अनुकूलन…";
+"settings.menu-bar-show-flag" = "नेपालको झण्डा देखाउनुहोस्";
+"settings.menu-bar-show-year" = "वि.सं. वर्ष देखाउनुहोस्";
 "settings.modules" = "मोड्युलहरू";
 "settings.numerals" = "अङ्कहरू";
 "settings.rates-source" = "दर स्रोत";

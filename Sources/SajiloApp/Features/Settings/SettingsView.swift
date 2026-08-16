@@ -74,8 +74,17 @@ struct SettingsView: View {
                         // picker previews exactly what appears in the menu bar.
                         Picker(L10n.display, selection: $model.selectedMenuBarFormat) {
                             ForEach(AppModel.MenuBarFormat.allCases) { format in
-                                Text(verbatim: format.title(for: model.today)).tag(format)
+                                if format == .custom {
+                                    Text(L10n.menuBarCustom).tag(format)
+                                } else {
+                                    Text(verbatim: model.menuBarTitle(for: format)).tag(format)
+                                }
                             }
+                        }
+
+                        if model.selectedMenuBarFormat == .custom {
+                            Toggle(L10n.menuBarShowFlag, isOn: $model.customMenuBarShowsFlag)
+                            Toggle(L10n.menuBarShowYear, isOn: $model.customMenuBarShowsYear)
                         }
                     }
 
