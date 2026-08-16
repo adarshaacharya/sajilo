@@ -27,6 +27,51 @@ struct DayPlanStoreTests {
 
         #expect(DayPlanStore(defaults: defaults, key: "day-plans-test").load().isEmpty)
     }
+
+    @Test func readsExistingPlansAsOneTimeWhenTheirJSONPredatesRecurrence() throws {
+        let defaults = makeDefaults()
+        let key = "day-plans-test"
+        let legacy = LegacyDayPlan(
+            id: UUID(),
+            date: NepaliDate(year: 2083, month: 4, day: 30),
+            title: "Old plan",
+            time: nil,
+            reminder: nil,
+            note: "",
+            createdAt: Date(timeIntervalSince1970: 1_786_838_400)
+        )
+        defaults.set(try JSONEncoder().encode([legacy]), forKey: key)
+
+        let plan = try #require(DayPlanStore(defaults: defaults, key: key).load().first)
+        #expect(plan.recurrence == .none)
+        #expect(plan.title == "Old plan")
+    }
+}
+
+struct DayPlanRecurrenceTests {
+    @Test func repeatsOnTheSameBikramSambatMonthAndDay() throws {
+        let plan = DayPlan(
+            date: NepaliDate(year: 2083, month: 4, day: 30),
+            title: "Mum's birthday",
+            recurrence: .yearlyBikramSambat
+        )
+
+        let nextYear = try #require(plan.occurrence(in: 2084))
+        #expect(nextYear == NepaliDate(year: 2084, month: 4, day: 30))
+        #expect(plan.occurs(on: nextYear))
+        #expect(plan.occurs(on: NepaliDate(year: 2083, month: 4, day: 30)))
+    }
+
+    @Test func usesTheLastValidDayWhenTheSameMonthIsShorter() throws {
+        let plan = DayPlan(
+            date: NepaliDate(year: 2081, month: 2, day: 32),
+            title: "Family date",
+            recurrence: .yearlyBikramSambat
+        )
+
+        let occurrence = try #require(plan.occurrence(in: 2082))
+        #expect(occurrence == NepaliDate(year: 2082, month: 2, day: 31))
+    }
 }
 
 struct DayPlanReminderPlannerTests {
@@ -55,6 +100,24 @@ struct DayPlanReminderPlannerTests {
         )
 
         #expect(planned.isEmpty)
+    }
+
+    @Test func movesAYearlyReminderToTheNextBikramSambatYearAfterItPasses() throws {
+        let entry = DayPlan(
+            date: NepaliDate(year: 2083, month: 4, day: 30),
+            title: "Mum's birthday",
+            time: .init(hour: 9, minute: 0),
+            reminder: .atTime,
+            recurrence: .yearlyBikramSambat
+        )
+        let thisYear = try eventDate(for: entry)
+        let now = try #require(NepalTime.calendar.date(byAdding: .minute, value: 1, to: thisYear))
+
+        let reminder = try #require(DayPlanReminderPlanner.plan(entries: [entry], now: now).first)
+        let components = NepalTime.calendar.dateComponents([.year, .month, .day], from: reminder.fireDate)
+
+        #expect(components.year == 2027)
+        #expect(reminder.id == "sajilo.plan.\(entry.id.uuidString).2084")
     }
 
     @Test func ordersByFireDateAndHonoursTheLimit() throws {
@@ -93,6 +156,16 @@ struct DayPlanReminderPlannerTests {
             of: day
         ))
     }
+}
+
+private struct LegacyDayPlan: Encodable {
+    let id: UUID
+    let date: NepaliDate
+    let title: String
+    let time: DayPlan.Time?
+    let reminder: DayPlan.Reminder?
+    let note: String
+    let createdAt: Date
 }
 
 private func makeDefaults() -> UserDefaults {

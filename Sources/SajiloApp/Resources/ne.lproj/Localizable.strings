@@ -67,6 +67,8 @@
 "planner.include-time" = "समय थप्नुहोस्";
 "planner.no-reminder" = "स्मरण छैन";
 "planner.note-field" = "छोटो नोट (वैकल्पिक)";
+"planner.repeat-yearly" = "हरेक वि.सं. वर्ष दोहोर्याउनुहोस्";
+"planner.repeats-yearly" = "हरेक वर्ष दोहोरिन्छ";
 "planner.reminder" = "स्मरण";
 "planner.reminder.at-time" = "समयमै";
 "planner.reminder.fifteen-minutes" = "१५ मिनेटअघि";

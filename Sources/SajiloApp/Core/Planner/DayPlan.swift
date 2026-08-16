@@ -6,6 +6,11 @@ import Foundation
 /// rich text, attachments, or recurrence. It answers one question well — what
 /// do I need to remember on this date?
 struct DayPlan: Codable, Equatable, Hashable, Identifiable, Sendable {
+    enum Recurrence: String, Codable, CaseIterable, Sendable {
+        case none
+        case yearlyBikramSambat
+    }
+
     struct Time: Codable, Equatable, Hashable, Sendable, Comparable {
         let hour: Int
         let minute: Int
@@ -32,6 +37,9 @@ struct DayPlan: Codable, Equatable, Hashable, Identifiable, Sendable {
     var time: Time?
     var reminder: Reminder?
     var note: String
+    /// A yearly important date keeps its Bikram Sambat month and day. It is
+    /// resolved again for each year rather than pre-creating duplicate plans.
+    var recurrence: Recurrence
     let createdAt: Date
 
     init(
@@ -41,6 +49,7 @@ struct DayPlan: Codable, Equatable, Hashable, Identifiable, Sendable {
         time: Time? = nil,
         reminder: Reminder? = nil,
         note: String = "",
+        recurrence: Recurrence = .none,
         createdAt: Date = .now
     ) {
         self.id = id
@@ -49,7 +58,44 @@ struct DayPlan: Codable, Equatable, Hashable, Identifiable, Sendable {
         self.time = time
         self.reminder = time == nil ? nil : reminder
         self.note = note
+        self.recurrence = recurrence
         self.createdAt = createdAt
+    }
+
+    /// Old local JSON has no recurrence field. Decoding it as `.none` makes
+    /// the feature an additive update: every existing plan stays one-time.
+    private enum CodingKeys: String, CodingKey {
+        case id, date, title, time, reminder, note, recurrence, createdAt
+    }
+
+    init(from decoder: any Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        id = try values.decode(UUID.self, forKey: .id)
+        date = try values.decode(NepaliDate.self, forKey: .date)
+        title = try values.decode(String.self, forKey: .title)
+        time = try values.decodeIfPresent(Time.self, forKey: .time)
+        reminder = try values.decodeIfPresent(Reminder.self, forKey: .reminder)
+        note = try values.decode(String.self, forKey: .note)
+        recurrence = try values.decodeIfPresent(Recurrence.self, forKey: .recurrence) ?? .none
+        createdAt = try values.decode(Date.self, forKey: .createdAt)
+    }
+
+    func occurrence(in year: Int) -> NepaliDate? {
+        guard recurrence == .yearlyBikramSambat,
+              year >= date.year,
+              let monthLength = BikramSambatCalendar.daysInMonth(year: year, month: date.month) else {
+            return nil
+        }
+        return NepaliDate(year: year, month: date.month, day: min(date.day, monthLength))
+    }
+
+    func occurs(on candidate: NepaliDate) -> Bool {
+        switch recurrence {
+        case .none:
+            date == candidate
+        case .yearlyBikramSambat:
+            occurrence(in: candidate.year) == candidate
+        }
     }
 }
 

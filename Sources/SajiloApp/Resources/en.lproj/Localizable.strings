@@ -67,6 +67,8 @@
 "planner.include-time" = "Add a time";
 "planner.no-reminder" = "No reminder";
 "planner.note-field" = "Short note (optional)";
+"planner.repeat-yearly" = "Repeat every BS year";
+"planner.repeats-yearly" = "Repeats yearly";
 "planner.reminder" = "Reminder";
 "planner.reminder.at-time" = "At time";
 "planner.reminder.fifteen-minutes" = "15 min before";

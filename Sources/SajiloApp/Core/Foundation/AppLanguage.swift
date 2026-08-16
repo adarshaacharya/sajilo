@@ -170,6 +170,8 @@ enum L10n {
     static let planTitle = LocalizedStringResource("planner.title-field", bundle: .sajiloResources)
     static let planNote = LocalizedStringResource("planner.note-field", bundle: .sajiloResources)
     static let includeTime = LocalizedStringResource("planner.include-time", bundle: .sajiloResources)
+    static let repeatYearly = LocalizedStringResource("planner.repeat-yearly", bundle: .sajiloResources)
+    static let repeatsYearly = LocalizedStringResource("planner.repeats-yearly", bundle: .sajiloResources)
     static let time = LocalizedStringResource("planner.time", bundle: .sajiloResources)
     static let reminder = LocalizedStringResource("planner.reminder", bundle: .sajiloResources)
     static let noReminder = LocalizedStringResource("planner.no-reminder", bundle: .sajiloResources)

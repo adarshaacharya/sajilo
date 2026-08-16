@@ -671,11 +671,11 @@ final class AppModel {
     // MARK: - Day plans
 
     func plans(on date: NepaliDate) -> [DayPlan] {
-        DayPlan.ordered(dayPlans.filter { $0.date == date })
+        DayPlan.ordered(dayPlans.filter { $0.occurs(on: date) })
     }
 
     func hasDayPlan(on date: NepaliDate) -> Bool {
-        dayPlans.contains { $0.date == date }
+        dayPlans.contains { $0.occurs(on: date) }
     }
 
     /// Saves a short calendar-attached plan locally. A reminder is optional;

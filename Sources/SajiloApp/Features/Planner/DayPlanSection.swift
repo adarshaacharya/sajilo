@@ -82,6 +82,11 @@ private struct DayPlanRow: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                     }
+                    if plan.recurrence == .yearlyBikramSambat {
+                        Text(L10n.repeatsYearly)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -128,6 +133,8 @@ private struct DayPlanEditor: View {
                 .focused($isTitleFocused)
 
             Toggle(L10n.includeTime, isOn: $draft.hasTime)
+
+            Toggle(L10n.repeatYearly, isOn: $draft.repeatsYearly)
 
             if draft.hasTime {
                 HStack(spacing: Theme.Space.s) {
@@ -177,6 +184,7 @@ private struct DayPlanDraft {
     var hasTime: Bool
     var timeDate: Date
     var reminder: DayPlan.Reminder?
+    var repeatsYearly: Bool
 
     init(date: NepaliDate) {
         id = UUID()
@@ -187,6 +195,7 @@ private struct DayPlanDraft {
         hasTime = false
         timeDate = Self.defaultTime
         reminder = nil
+        repeatsYearly = false
     }
 
     init(plan: DayPlan) {
@@ -198,6 +207,7 @@ private struct DayPlanDraft {
         hasTime = plan.time != nil
         timeDate = Self.date(for: plan.time ?? DayPlan.Time(hour: 9, minute: 0))
         reminder = plan.reminder
+        repeatsYearly = plan.recurrence == .yearlyBikramSambat
     }
 
     var plan: DayPlan {
@@ -212,6 +222,7 @@ private struct DayPlanDraft {
             time: time,
             reminder: time == nil ? nil : reminder,
             note: note.trimmingCharacters(in: .whitespacesAndNewlines),
+            recurrence: repeatsYearly ? .yearlyBikramSambat : .none,
             createdAt: createdAt
         )
     }
