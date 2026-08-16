@@ -17,11 +17,8 @@ Package.resolved
 *.dmg
 
 # Local tooling and generated artifacts
-.agents/
-.claude/
 build/
 documents/
-skills-lock.json
 
 # Local configuration and secrets
 .env
