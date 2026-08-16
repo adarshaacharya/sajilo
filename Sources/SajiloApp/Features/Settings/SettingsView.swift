@@ -83,6 +83,7 @@ struct SettingsView: View {
                         Toggle(L10n.weather, isOn: $model.isWeatherEnabled)
                         Toggle(L10n.forex, isOn: $model.isForexEnabled)
                         Toggle(L10n.news, isOn: $model.isNewsEnabled)
+                        Toggle(L10n.settingsBazar, isOn: $model.isBazarEnabled)
                     }
 
                     SettingsSection(L10n.weatherLocation) {
@@ -139,12 +140,8 @@ struct SettingsView: View {
                         SettingsRow(L10n.weatherSource, value: "Open-Meteo")
                         SettingsRow(L10n.ratesSource, value: "Nepal Rastra Bank")
                         SettingsRow(L10n.festivalSource, value: "nepalicalendar.rat32.com")
+                        SettingsRow(L10n.bazarSource, value: "FENEGOSIDA · Nepal Oil Corporation")
                     }
-
-                    Text(L10n.offlineDataNote)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(Theme.Space.m)
             }

@@ -25,6 +25,13 @@
 "aqi.title" = "Air quality";
 "aqi.unhealthy" = "Unhealthy";
 "aqi.very-unhealthy" = "Very unhealthy";
+"bazar.effective-from" = "Effective from";
+"bazar.fuel" = "Fuel";
+"bazar.metals" = "Gold & Silver";
+"bazar.per-gram" = "per gram";
+"bazar.published" = "Published";
+"bazar.quantity" = "Quantity";
+"bazar.worth" = "Worth";
 "calendar.jump-to-today" = "Jump to today";
 "calendar.next-month" = "Next month";
 "calendar.no-event" = "No festival or tithi recorded for this day.";
@@ -63,12 +70,15 @@
 "planner.up-next" = "Up next";
 "reminder.festival-tomorrow" = "Festival tomorrow";
 "reminder.holiday-tomorrow" = "Public holiday tomorrow";
+"screen.bazar" = "Bazar";
 "screen.date-converter" = "Date Converter";
 "screen.date-details" = "Date Details";
 "screen.exchange-rates" = "Exchange Rates";
 "screen.news" = "News";
 "screen.settings" = "Settings";
 "screen.upcoming" = "Upcoming";
+"settings.bazar" = "Gold, silver and fuel";
+"settings.bazar-source" = "Rates source";
 "settings.calendar-range" = "Calendar";
 "settings.city" = "City";
 "settings.data" = "Data";
@@ -84,7 +94,6 @@
 "settings.menu-bar" = "Menu bar";
 "settings.modules" = "Modules";
 "settings.numerals" = "Numerals";
-"settings.offline-data-note" = "Calendar conversion and festivals are bundled and work offline. Weather comes from Open-Meteo and is cached, so the last reading stays visible when the network is unavailable.";
 "settings.rates-source" = "Rates source";
 "settings.reminder-denied-note" = "Notifications are turned off for Sajilo in System Settings › Notifications.";
 "settings.reminder-enabled-note" = "Reminders arrive at 7pm Nepal time the evening before.";

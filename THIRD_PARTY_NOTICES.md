@@ -51,6 +51,63 @@ Sajilo requests a seven-day window and takes the most recent published day, so a
 date on which the bank does not publish falls back to the rates still in force
 rather than showing nothing.
 
+## Gold and silver rates
+
+Rates come from the **Federation of Nepal Gold and Silver Dealers' Association
+(FENEGOSIDA)**, the body that sets the daily rate Nepali jewellers quote —
+PRD §5.6's preferred source rather than an aggregator that re-publishes it.
+
+`fenegosida.org` is a JavaScript application: a plain HTML request returns an
+864-byte shell with no rates in it. The numbers are served by a public,
+unauthenticated JSON API on a separate host, which is what Sajilo reads:
+
+| Endpoint | Purpose |
+|---|---|
+| `https://api.fenegosida.org/api/website/v1/Dashboard/today` | Today's rate and the previous one |
+| `https://api.fenegosida.org/api/website/v1/Dashboard/WeeklyChartRate?weekmonthyear=7` | Gold per tola over the last week, for the trend line |
+
+No API key, no sign-up, no user data. Two properties of that payload are worth
+recording because getting either wrong is silent rather than loud, and both are
+pinned by tests:
+
+- The field is named **`todayBaseRatePerGram` but holds the price for the unit
+  named in `rateType`** — 305,200 is one *tola* of fine gold, not one gram.
+  Reading it as per-gram is wrong by more than an order of magnitude. Sajilo
+  derives its per-gram figure by dividing.
+- The previous-day field is spelled **`yestarday…`** upstream. The decoder
+  matches that spelling rather than correcting it, or the change figure would
+  silently decode as zero.
+
+`rateType` is free Nepali text (`छापावाल सुन (१ तोला)`), so the metal and unit
+are read out of it by substring rather than by position, and an unrecognised row
+is skipped rather than guessed at. `MetalRateProviding` exists so the source can
+be replaced without touching the UI.
+
+## Nepal Oil Corporation fuel prices
+
+Retail fuel prices come from **Nepal Oil Corporation**
+(`https://noc.org.np/retailprice`) — the state importer that sets every retail
+fuel price in the country, so this is the primary source rather than a mirror of
+one.
+
+NOC publishes no API, only a server-rendered price history table, which Sajilo
+reads directly. Two deliberate choices keep that robust:
+
+- **Columns are located by heading, never by position.** NOC inserting a column
+  would otherwise shift diesel's number into the kerosene row — a change that
+  produces plausible wrong numbers rather than an error.
+- **The effective-date cell has been typed four different ways** over the years
+  (`2083.04.17(2026.08.02)`, `2083-03-01 (2026.06.15)`, `2083-02-17(2026.05.31)`,
+  `2083.03.16 (2026.06.30)`). The Gregorian date inside the brackets is the part
+  that parses unambiguously, so that is what is read, with any of `.`, `-`, or
+  `/` accepted as the separator.
+
+Only petrol, diesel, kerosene, and the domestic LPG cylinder are shown. The two
+aviation-fuel columns sit beside them in the same table and are ignored. The
+most recent revision is the current price and the one below it supplies the
+change figure; a single published revision reads as unchanged rather than as a
+fall from zero.
+
 ## Open-Meteo weather data
 
 The weather card is served by the [Open-Meteo](https://open-meteo.com) forecast

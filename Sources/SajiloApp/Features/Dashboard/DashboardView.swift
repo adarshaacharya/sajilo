@@ -59,6 +59,11 @@ struct DashboardView: View {
                     .modifier(RouteLayer(isActive: route == .news, edge: 1, reduceMotion: reduceMotion))
             }
 
+            if model.isBazarEnabled {
+                BazarView(model: model, onBack: { navigate(to: .dashboard) })
+                    .modifier(RouteLayer(isActive: route == .bazar, edge: 1, reduceMotion: reduceMotion))
+            }
+
             ToolsView(onBack: { navigate(to: .dashboard) })
                 .modifier(RouteLayer(isActive: route == .tools, edge: 1, reduceMotion: reduceMotion))
         }
@@ -115,6 +120,7 @@ struct DashboardView: View {
                 openUpcoming: { navigate(to: .upcoming) },
                 openConverter: { navigate(to: .converter) },
                 openNews: model.isNewsEnabled ? { navigate(to: .news) } : nil,
+                openBazar: model.isBazarEnabled ? { navigate(to: .bazar) } : nil,
                 openTools: { navigate(to: .tools) }
             )
         }
@@ -140,6 +146,7 @@ private enum DashboardRoute: Equatable {
     case weather
     case forex
     case news
+    case bazar
     case tools
 }
 

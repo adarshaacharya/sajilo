@@ -22,88 +22,56 @@ struct LocalizationTests {
     }
 
     /// A missing key resolves to the key itself, which is how a gap would ship
-    /// unnoticed. This asserts every declared key has real text in both.
-    @Test func noKeyFallsBackToItsOwnName() {
-        for locale in ["en", "ne"] {
-            for (name, resource) in L10nMirror.all {
-                var localized = resource
-                localized.locale = Locale(identifier: locale)
-                let text = String(localized: localized)
-                #expect(text != localized.key, "\(name) has no \(locale) translation")
-                #expect(!text.isEmpty)
+    /// unnoticed. Both tables are read from the bundle rather than from a
+    /// hand-kept list of names — a list only covers the keys someone remembered
+    /// to add to it, which is exactly the mistake being tested for.
+    @Test func everyKeyIsTranslatedInBothLanguages() throws {
+        let english = try Self.table(for: "en")
+        let nepali = try Self.table(for: "ne")
+
+        #expect(!english.isEmpty)
+        #expect(Set(english.keys) == Set(nepali.keys), """
+            missing in ne: \(Set(english.keys).subtracting(nepali.keys).sorted()); \
+            missing in en: \(Set(nepali.keys).subtracting(english.keys).sorted())
+            """)
+
+        for (locale, table) in [("en", english), ("ne", nepali)] {
+            for (key, value) in table {
+                #expect(!value.isEmpty, "\(key) is empty in \(locale)")
+                #expect(value != key, "\(key) is untranslated in \(locale)")
             }
         }
+    }
+
+    /// Nepali is a real translation, not a copy of the English table with a few
+    /// words changed.
+    @Test func nepaliIsActuallyTranslated() throws {
+        let english = try Self.table(for: "en")
+        let nepali = try Self.table(for: "ne")
+
+        let identical = english.filter { nepali[$0.key] == $0.value }
+        // Some values legitimately match — "%", proper nouns, symbols — so this
+        // bounds the overlap rather than forbidding it.
+        #expect(identical.count * 4 < english.count, "too many Nepali strings are still English: \(identical.keys.sorted())")
+    }
+
+    private static func table(for localization: String) throws -> [String: String] {
+        let url = try #require(
+            Bundle.sajiloResources.url(
+                forResource: "Localizable",
+                withExtension: "strings",
+                subdirectory: nil,
+                localization: localization
+            ),
+            "no \(localization) strings file in the bundle"
+        )
+        let contents = try Data(contentsOf: url)
+        let table = try PropertyListSerialization.propertyList(from: contents, format: nil)
+        return try #require(table as? [String: String])
     }
 
     /// The static resources capture `Locale.current` when first touched.
     @Test func staticResourcesCarryALocale() {
         #expect(L10n.settings.locale != nil)
     }
-}
-
-private enum L10nMirror {
-    /// Every key L10n declares. Regenerate this list when adding one — the
-    /// coverage test is only as complete as this array.
-    static let all: [(String, LocalizedStringResource)] = [
-        ("language", L10n.language),
-        ("languageMixed", L10n.languageMixed),
-        ("languageEnglish", L10n.languageEnglish),
-        ("languageNepali", L10n.languageNepali),
-        ("settings", L10n.settings),
-        ("back", L10n.back),
-        ("festivals", L10n.festivals),
-        ("convert", L10n.convert),
-        ("quit", L10n.quit),
-        ("weather", L10n.weather),
-        ("forex", L10n.forex),
-        ("display", L10n.display),
-        ("numerals", L10n.numerals),
-        ("city", L10n.city),
-        ("reminders", L10n.reminders),
-        ("data", L10n.data),
-        ("openSettings", L10n.openSettings),
-        ("backToDashboard", L10n.backToDashboard),
-        ("publicHoliday", L10n.publicHoliday),
-        ("upcoming", L10n.upcoming),
-        ("dateConverter", L10n.dateConverter),
-        ("dateDetails", L10n.dateDetails),
-        ("refresh", L10n.refresh),
-        ("exchangeRates", L10n.exchangeRates),
-        ("general", L10n.general),
-        ("launchAtLogin", L10n.launchAtLogin),
-        ("showDockIcon", L10n.showDockIcon),
-        ("menuBar", L10n.menuBar),
-        ("modules", L10n.modules),
-        ("weatherLocation", L10n.weatherLocation),
-        ("forexFavourites", L10n.forexFavourites),
-        ("weatherSource", L10n.weatherSource),
-        ("ratesSource", L10n.ratesSource),
-        ("festivalSource", L10n.festivalSource),
-        ("calendarRange", L10n.calendarRange),
-        ("festivalsRange", L10n.festivalsRange),
-        ("holidayTomorrow", L10n.holidayTomorrow),
-        ("festivalTomorrow", L10n.festivalTomorrow),
-        ("today", L10n.today),
-        ("swap", L10n.swap),
-        ("copyAs", L10n.copyAs),
-        ("previousMonth", L10n.previousMonth),
-        ("nextMonth", L10n.nextMonth),
-        ("jumpToToday", L10n.jumpToToday),
-        ("provisional", L10n.provisional),
-        ("noEventToday", L10n.noEventToday),
-        ("outOfRange", L10n.outOfRange),
-        ("noUpcoming", L10n.noUpcoming),
-        ("allCurrencies", L10n.allCurrencies),
-        ("favourites", L10n.favourites),
-        ("tomorrow", L10n.tomorrow),
-        ("numeralsDevanagari", L10n.numeralsDevanagari),
-        ("numeralsLatin", L10n.numeralsLatin),
-        ("offlineDataNote", L10n.offlineDataNote),
-        ("reminderOffNote", L10n.reminderOffNote),
-        ("reminderDeniedNote", L10n.reminderDeniedNote),
-        ("reminderPermissionNote", L10n.reminderPermissionNote),
-        ("reminderEnabledNote", L10n.reminderEnabledNote),
-        ("launchApprovalNote", L10n.launchApprovalNote),
-        ("launchUnavailableNote", L10n.launchUnavailableNote)
-    ]
 }

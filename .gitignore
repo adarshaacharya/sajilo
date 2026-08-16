@@ -13,6 +13,8 @@ Package.resolved
 *.dSYM
 *.ipa
 *.xcarchive
+*.zip
+*.dmg
 
 # Local tooling and generated artifacts
 .agents/

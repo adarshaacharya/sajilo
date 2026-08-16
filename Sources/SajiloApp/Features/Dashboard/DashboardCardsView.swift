@@ -23,13 +23,9 @@ struct DashboardCardsView: View {
                 if case .weather = card.kind { return true }
                 return false
             }) {
-                HStack(spacing: Theme.Space.xs) {
-                    Text(weatherCard.freshness)
-                    Spacer(minLength: 0)
-                    Link("Open-Meteo", destination: URL(string: "https://open-meteo.com/")!)
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+                Text(weatherCard.freshness)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             } else if let freshness = cards.first?.freshness {
                 Text(freshness)
                     .font(.caption2)

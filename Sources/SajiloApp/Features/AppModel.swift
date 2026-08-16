@@ -45,6 +45,9 @@ final class AppModel {
         static let notifyFestivalEve = "notifyFestivalEve"
         static let newsEnabled = "newsEnabled"
         static let newsCache = "newsCache"
+        static let bazarEnabled = "bazarEnabled"
+        static let metalsCache = "metalsCache"
+        static let fuelCache = "fuelCache"
 
         /// Cached per location, so switching cities never shows one city's
         /// reading under another's name, and switching back keeps the old one.
@@ -87,6 +90,18 @@ final class AppModel {
         }
     }
 
+    /// Gold, silver, and fuel share one switch and one route: they are the
+    /// same errand — what things cost today — and splitting them would put two
+    /// more entries in a toolbar that is already full.
+    var isBazarEnabled: Bool {
+        didSet {
+            guard oldValue != isBazarEnabled else { return }
+            defaults.set(isBazarEnabled, forKey: DefaultsKey.bazarEnabled)
+            guard isBazarEnabled else { return }
+            Task { [weak self] in await self?.refreshBazarIfStale() }
+        }
+    }
+
     var selectedWeatherLocation: WeatherLocation {
         didSet {
             guard oldValue != selectedWeatherLocation else { return }
@@ -113,6 +128,8 @@ final class AppModel {
     @ObservationIgnored private var weatherFeed: RemoteFeed<WeatherSnapshot>!
     @ObservationIgnored private var forexFeed: RemoteFeed<ForexSnapshot>!
     @ObservationIgnored private var newsFeed: RemoteFeed<NewsDigest>!
+    @ObservationIgnored private var metalsFeed: RemoteFeed<MetalRateSnapshot>!
+    @ObservationIgnored private var fuelFeed: RemoteFeed<FuelPriceSnapshot>!
 
     var weather: WeatherSnapshot? { weatherFeed.value }
     var isWeatherLoading: Bool { weatherFeed.isLoading }
@@ -122,6 +139,14 @@ final class AppModel {
     var news: NewsDigest? { newsFeed.value }
     var isNewsLoading: Bool { newsFeed.isLoading }
     var newsError: String? { newsFeed.errorMessage }
+
+    var metals: MetalRateSnapshot? { metalsFeed.value }
+    var isMetalsLoading: Bool { metalsFeed.isLoading }
+    var metalsError: String? { metalsFeed.errorMessage }
+
+    var fuel: FuelPriceSnapshot? { fuelFeed.value }
+    var isFuelLoading: Bool { fuelFeed.isLoading }
+    var fuelError: String? { fuelFeed.errorMessage }
 
     var forex: ForexSnapshot? { forexFeed.value }
     var isForexLoading: Bool { forexFeed.isLoading }
@@ -177,6 +202,8 @@ final class AppModel {
     @ObservationIgnored private let launchAtLoginManager: any LaunchAtLoginManaging
     @ObservationIgnored private let notificationScheduler: any NotificationScheduling
     @ObservationIgnored private let newsProvider: any NewsProviding
+    @ObservationIgnored private let metalProvider: any MetalRateProviding
+    @ObservationIgnored private let fuelProvider: any FuelPriceProviding
     @ObservationIgnored private let dayPlanStore: DayPlanStore
     @ObservationIgnored private var midnightTask: Task<Void, Never>?
 
@@ -275,6 +302,8 @@ final class AppModel {
         launchAtLoginManager: any LaunchAtLoginManaging = SystemLaunchAtLogin(),
         notificationScheduler: any NotificationScheduling = SystemNotificationScheduler(),
         newsProvider: any NewsProviding = RSSNewsProvider(),
+        metalProvider: any MetalRateProviding = FenegosidaMetalProvider(),
+        fuelProvider: any FuelPriceProviding = NOCFuelProvider(),
         dayPlanStore: DayPlanStore? = nil,
         autoLoadWeather: Bool = true
     ) {
@@ -285,6 +314,8 @@ final class AppModel {
         self.launchAtLoginManager = launchAtLoginManager
         self.notificationScheduler = notificationScheduler
         self.newsProvider = newsProvider
+        self.metalProvider = metalProvider
+        self.fuelProvider = fuelProvider
         self.dayPlanStore = resolvedDayPlanStore
         dayPlans = resolvedDayPlanStore.load()
         referenceDate = now
@@ -303,6 +334,7 @@ final class AppModel {
         // "never set", which is indistinguishable from "the user turned it
         // off" and would silently re-enable it on every launch.
         isNewsEnabled = defaults.object(forKey: DefaultsKey.newsEnabled) as? Bool ?? true
+        isBazarEnabled = defaults.object(forKey: DefaultsKey.bazarEnabled) as? Bool ?? true
         let location = defaults.string(forKey: DefaultsKey.weatherLocation)
             .flatMap(WeatherLocation.init(rawValue:)) ?? .default
         selectedWeatherLocation = location
@@ -369,6 +401,36 @@ final class AppModel {
                 from: NewsSource.active,
                 limit: Self.newsHeadlineLimit
             )
+        }
+
+        metalsFeed = RemoteFeed(
+            subject: "gold and silver rates",
+            cacheKey: DefaultsKey.metalsCache,
+            staleInterval: Self.metalsStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                (error as? MetalProviderError) == .noRatesPublished
+                    ? "The Federation has not published today's rate yet"
+                    : nil
+            }
+        ) { [metalProvider] in
+            try await metalProvider.latestRates()
+        }
+
+        fuelFeed = RemoteFeed(
+            subject: "fuel prices",
+            cacheKey: DefaultsKey.fuelCache,
+            staleInterval: Self.fuelStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                (error as? FuelProviderError) == .tableNotFound
+                    ? "Nepal Oil Corporation's price table could not be read"
+                    : nil
+            }
+        ) { [fuelProvider] in
+            try await fuelProvider.latestPrices()
         }
 
         scheduleMidnightRefresh()
@@ -544,6 +606,30 @@ final class AppModel {
 
     func refreshForex() async {
         await forexFeed.refresh()
+    }
+
+    // MARK: - Bazar
+
+    /// The Federation posts once a day, usually mid-morning. Checking a few
+    /// times a day catches it without hammering a source that rarely moves.
+    static let metalsStaleInterval: TimeInterval = 4 * 60 * 60
+    /// NOC revises roughly twice a month, so this only needs to notice the day
+    /// a revision lands.
+    static let fuelStaleInterval: TimeInterval = 12 * 60 * 60
+
+    /// Both refresh together: they share one route, so a user who opens it
+    /// expects both halves to be current.
+    func refreshBazarIfStale() async {
+        guard isBazarEnabled else { return }
+        async let rates: Void = metalsFeed.refreshIfStale()
+        async let prices: Void = fuelFeed.refreshIfStale()
+        _ = await (rates, prices)
+    }
+
+    func refreshBazar() async {
+        async let rates: Void = metalsFeed.refresh()
+        async let prices: Void = fuelFeed.refresh()
+        _ = await (rates, prices)
     }
 
     // MARK: - News

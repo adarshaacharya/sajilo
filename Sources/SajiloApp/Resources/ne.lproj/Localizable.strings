@@ -25,6 +25,13 @@
 "aqi.title" = "वायु गुणस्तर";
 "aqi.unhealthy" = "अस्वस्थ";
 "aqi.very-unhealthy" = "धेरै अस्वस्थ";
+"bazar.effective-from" = "लागू मिति";
+"bazar.fuel" = "इन्धन";
+"bazar.metals" = "सुनचाँदी";
+"bazar.per-gram" = "प्रति ग्राम";
+"bazar.published" = "प्रकाशित";
+"bazar.quantity" = "परिमाण";
+"bazar.worth" = "मूल्य";
 "calendar.jump-to-today" = "आजमा जानुहोस्";
 "calendar.next-month" = "अर्को महिना";
 "calendar.no-event" = "यस दिनको कुनै पर्व वा तिथि अभिलेख छैन।";
@@ -63,12 +70,15 @@
 "planner.up-next" = "अबको योजना";
 "reminder.festival-tomorrow" = "भोलि पर्व";
 "reminder.holiday-tomorrow" = "भोलि सार्वजनिक बिदा";
+"screen.bazar" = "बजार";
 "screen.date-converter" = "मिति रूपान्तरण";
 "screen.date-details" = "मिति विवरण";
 "screen.exchange-rates" = "विनिमय दर";
 "screen.news" = "समाचार";
 "screen.settings" = "सेटिङ";
 "screen.upcoming" = "आगामी";
+"settings.bazar" = "सुन, चाँदी र इन्धन";
+"settings.bazar-source" = "दरको स्रोत";
 "settings.calendar-range" = "पात्रो";
 "settings.city" = "सहर";
 "settings.data" = "डेटा";
@@ -84,7 +94,6 @@
 "settings.menu-bar" = "मेनु बार";
 "settings.modules" = "मोड्युलहरू";
 "settings.numerals" = "अङ्कहरू";
-"settings.offline-data-note" = "क्यालेन्डर रूपान्तरण र पर्वहरू एपमै उपलब्ध छन् र इन्टरनेटबिना पनि चल्छन्। मौसम Open-Meteo बाट आउँछ र पछिल्लो विवरण सुरक्षित रहन्छ।";
 "settings.rates-source" = "दर स्रोत";
 "settings.reminder-denied-note" = "Sajilo का सूचनाहरू System Settings › Notifications मा बन्द छन्।";
 "settings.reminder-enabled-note" = "स्मरणहरू नेपाल समयअनुसार अघिल्लो साँझ ७ बजे आउँछन्।";

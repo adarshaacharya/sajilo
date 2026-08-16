@@ -9,6 +9,7 @@ struct ActionBarView: View {
     /// Absent unless the module is enabled — a button that is present but
     /// inert is worse than one that is not there.
     var openNews: (() -> Void)?
+    var openBazar: (() -> Void)?
     let openTools: () -> Void
 
     var body: some View {
@@ -17,6 +18,9 @@ struct ActionBarView: View {
             Button(L10n.convert, systemImage: "arrow.left.arrow.right", action: openConverter)
             if let openNews {
                 Button(L10n.news, systemImage: "newspaper", action: openNews)
+            }
+            if let openBazar {
+                Button(L10n.bazar, systemImage: "storefront", action: openBazar)
             }
             Button(L10n.tools, systemImage: "wrench.and.screwdriver", action: openTools)
             Button(L10n.quit, systemImage: "power") {
