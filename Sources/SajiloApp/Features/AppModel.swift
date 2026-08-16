@@ -340,6 +340,21 @@ final class AppModel {
 
     var cards: [DashboardCard] { [weatherCard, forexCard] }
 
+    /// Whether anything beyond the calendar is switched on, so Settings can say
+    /// plainly that the popover will show the calendar alone.
+    var isAnyModuleEnabled: Bool {
+        isWeatherEnabled || isForexEnabled || isNewsEnabled
+            || isBazarEnabled || isRashifalEnabled || isRadioEnabled
+    }
+
+    /// Shown beside Check for Updates, so a bug report can name a version.
+    var appVersionText: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String
+        return build.map { "\(short) (\($0))" } ?? short
+    }
+
     /// Whichever favourite leads the list; the card has room for one.
     var headlineRate: ForexRate? {
         guard let forex else { return nil }

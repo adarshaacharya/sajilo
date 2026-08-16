@@ -161,13 +161,15 @@ private struct NowPlayingCard: View {
 /// leaving the Radio screen never makes audio feel detached from the app.
 struct RadioMiniPlayer: View {
     let station: RadioStation
+    let isPlaying: Bool
     let isResolving: Bool
     let openRadio: () -> Void
     let togglePlayback: () -> Void
+    let stop: () -> Void
 
     var body: some View {
         HStack(spacing: Theme.Space.s) {
-            EqualizerView(isPlaying: true)
+            EqualizerView(isPlaying: isPlaying)
 
             Button(action: openRadio) {
                 VStack(alignment: .leading, spacing: 1) {
@@ -186,11 +188,17 @@ struct RadioMiniPlayer: View {
             .accessibilityHint("Opens radio")
 
             Button(action: togglePlayback) {
-                Image(systemName: isResolving ? "arrow.clockwise" : "pause.fill")
+                Image(systemName: isResolving ? "arrow.clockwise" : (isPlaying ? "pause.fill" : "play.fill"))
             }
             .buttonStyle(IconButtonStyle())
             .disabled(isResolving)
-            .accessibilityLabel("Pause radio")
+            .accessibilityLabel(isPlaying ? "Pause radio" : "Play radio")
+
+            Button(action: stop) {
+                Image(systemName: "stop.fill")
+            }
+            .buttonStyle(IconButtonStyle())
+            .accessibilityLabel("Stop radio")
         }
         .padding(.horizontal, Theme.Space.m)
         .padding(.vertical, Theme.Space.xs)

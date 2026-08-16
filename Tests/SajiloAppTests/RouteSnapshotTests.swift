@@ -16,33 +16,51 @@ import Testing
 @MainActor
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["SAJILO_RENDER"] == "1"))
 struct RouteSnapshotTests {
-    @Test func reading() async throws { try await shot(pickSign: true, suffix: "reading") }
-    @Test func finder() async throws { try await shot(pickSign: false, suffix: "finder") }
+    @Test(arguments: SettingsView.Tab.allCases)
+    func settings(tab: SettingsView.Tab) throws {
+        let model = AppModel(
+            defaults: UserDefaults(suiteName: "com.sajilo.render.\(UUID().uuidString)")!,
+            autoLoadWeather: false
+        )
+        try shoot(
+            SettingsContent(
+                model: model,
+                tab: .constant(tab),
+                appUpdater: nil,
+                backupDocument: .constant(nil),
+                isExportingBackup: .constant(false),
+                isImportingBackup: .constant(false),
+                backupMessage: .constant(nil)
+            ),
+            named: "settings-\(tab.rawValue)"
+        )
+    }
 
-    private func shot(pickSign: Bool, suffix: String) async throws {
+    @Test func rashifal() async throws {
         let model = AppModel(
             defaults: UserDefaults(suiteName: "com.sajilo.render.\(UUID().uuidString)")!,
             rashifalProvider: RenderStub(),
             autoLoadWeather: false
         )
         await model.refreshRashifalIfStale()
-        if pickSign { model.selectedRashi = .vrish }
+        model.selectedRashi = .vrish
+        try shoot(RashifalContent(model: model, viewing: .constant(nil)), named: "rashifal")
+    }
 
-        let view = VStack(spacing: 0) {
-            RashifalContent(model: model, viewing: .constant(nil))
-                .padding(Theme.Space.m)
-        }
-        .frame(width: Theme.Metric.popoverWidth)
-        .background(Color(nsColor: .windowBackgroundColor))
+    private func shoot(_ view: some View, named name: String) throws {
+        let wrapped = view
+            .padding(Theme.Space.m)
+            .frame(width: Theme.Metric.popoverWidth)
+            .background(Color(nsColor: .windowBackgroundColor))
 
-        let renderer = ImageRenderer(content: view)
+        let renderer = ImageRenderer(content: wrapped)
         renderer.scale = 2
         let image = try #require(renderer.nsImage)
         let tiff = try #require(image.tiffRepresentation)
         let rep = try #require(NSBitmapImageRep(data: tiff))
         let png = try #require(rep.representation(using: .png, properties: [:]))
-        let dir = ProcessInfo.processInfo.environment["SAJILO_RENDER_OUT"]!
-        try png.write(to: URL(fileURLWithPath: "\(dir)/rashifal-\(suffix).png"))
+        let directory = ProcessInfo.processInfo.environment["SAJILO_RENDER_OUT"] ?? NSTemporaryDirectory()
+        try png.write(to: URL(fileURLWithPath: "\(directory)/\(name).png"))
     }
 }
 
@@ -50,7 +68,7 @@ private struct RenderStub: RashifalProviding {
     func todaysRashifal() async throws -> RashifalSnapshot {
         RashifalSnapshot(
             readings: RashiSign.allCases.map {
-                Rashifal(sign: $0, prediction: "आकस्मिक धनलाभका योग छन्। व्यापार व्यवसायमा आफन्तको विश्वास गर्नाले नुकसान हुनसक्छ। स्वास्थ्यको लागि पौष्टिक आहारको सेवन गर्नुहोस्। विद्यार्थीहरूको सामाजिक चेतनाको विकास हुनेछ। आजको शुभ रंग गुलाबी हो भने शुभ अंक ३ रहेको छ।")
+                Rashifal(sign: $0, prediction: "आकस्मिक धनलाभका योग छन्। व्यापार व्यवसायमा आफन्तको विश्वास गर्नाले नुकसान हुनसक्छ। स्वास्थ्यको लागि पौष्टिक आहारको सेवन गर्नुहोस्।")
             },
             publishedOn: NepaliDate(year: 2083, month: 4, day: 31),
             fetchedAt: .now
