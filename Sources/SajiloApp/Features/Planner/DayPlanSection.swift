@@ -6,6 +6,7 @@ import SwiftUI
 struct DayPlanSection: View {
     let date: NepaliDate
     let plans: [DayPlan]
+    let startAddingPlan: Bool
     let onSave: (DayPlan) -> Void
     let onDelete: (DayPlan.ID) -> Void
 
@@ -53,6 +54,11 @@ struct DayPlanSection: View {
             }
         }
         .cardSection()
+        .onAppear {
+            if startAddingPlan, draft == nil {
+                draft = DayPlanDraft(date: date)
+            }
+        }
     }
 }
 

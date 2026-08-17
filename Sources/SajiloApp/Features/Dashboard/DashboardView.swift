@@ -14,6 +14,13 @@ struct DashboardView: View {
         return false
     }
 
+    private var startsAddingPlan: Bool {
+        if case let .dayDetail(_, startAddingPlan) = route {
+            return startAddingPlan
+        }
+        return false
+    }
+
     var body: some View {
         // Both routes stay in the hierarchy rather than being swapped by an
         // `if`. The popover then takes the height of the taller one and holds
@@ -27,7 +34,12 @@ struct DashboardView: View {
             // Mounted only once a day has been picked, so the popover does not
             // pay for a detail view nobody has opened yet.
                 if let selectedDate {
-                    DayDetailView(model: model, date: selectedDate, onBack: { navigate(to: .dashboard) })
+                    DayDetailView(
+                        model: model,
+                        date: selectedDate,
+                        onBack: { navigate(to: .dashboard) },
+                        startAddingPlan: startsAddingPlan
+                    )
                         .modifier(RouteLayer(isActive: isShowingDayDetail, edge: 1, reduceMotion: reduceMotion))
                 }
 
@@ -111,7 +123,11 @@ struct DashboardView: View {
     private var dashboard: some View {
         VStack(spacing: 0) {
             DateHeaderView(model: model, openSettings: { navigate(to: .settings) })
-            MonthCalendarView(model: model, onSelectDate: select(_:))
+                MonthCalendarView(
+                    model: model,
+                    onSelectDate: select(_:),
+                    onAddPlan: startPlan(for:)
+                )
                 .cardSection()
                 .padding(.horizontal, Theme.Space.m)
                 .padding(.top, Theme.Space.m)
@@ -160,13 +176,18 @@ struct DashboardView: View {
 
     private func select(_ date: NepaliDate) {
         selectedDate = date
-        navigate(to: .dayDetail(date))
+        navigate(to: .dayDetail(date, startAddingPlan: false))
+    }
+
+    private func startPlan(for date: NepaliDate) {
+        selectedDate = date
+        navigate(to: .dayDetail(date, startAddingPlan: true))
     }
 }
 
 enum DashboardRoute: Equatable {
     case dashboard
-    case dayDetail(NepaliDate)
+    case dayDetail(NepaliDate, startAddingPlan: Bool)
     case upcoming
     case settings
     case weather

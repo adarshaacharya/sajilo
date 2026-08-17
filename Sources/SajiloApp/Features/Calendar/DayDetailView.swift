@@ -6,6 +6,7 @@ struct DayDetailView: View {
     let model: AppModel
     let date: NepaliDate
     let onBack: () -> Void
+    let startAddingPlan: Bool
 
     @State private var copiedFormat: ConversionOutcome.CopyFormat?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -48,6 +49,7 @@ struct DayDetailView: View {
                     DayPlanSection(
                         date: date,
                         plans: model.plans(on: date),
+                        startAddingPlan: startAddingPlan,
                         onSave: model.saveDayPlan,
                         onDelete: model.deleteDayPlan
                     )

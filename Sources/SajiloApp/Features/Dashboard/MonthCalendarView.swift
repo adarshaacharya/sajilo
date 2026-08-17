@@ -6,6 +6,7 @@ import SwiftUI
 struct MonthCalendarView: View {
     let model: AppModel
     let onSelectDate: (NepaliDate) -> Void
+    let onAddPlan: (NepaliDate) -> Void
 
     @Environment(\.numeralStyle) private var numerals
     @State private var isMovingForward = true
@@ -40,7 +41,8 @@ struct MonthCalendarView: View {
                     CalendarDayView(
                         day: day,
                         hasPlan: day.date.map(model.hasDayPlan(on:)) ?? false,
-                        onSelect: onSelectDate
+                        onSelect: onSelectDate,
+                        onAddPlan: onAddPlan
                     )
                 }
             }
@@ -163,9 +165,9 @@ struct MonthCalendarView: View {
 private struct CalendarDayView: View {
     let day: CalendarDay
     let hasPlan: Bool
-
     @Environment(\.numeralStyle) private var numerals
     let onSelect: (NepaliDate) -> Void
+    let onAddPlan: (NepaliDate) -> Void
 
     @State private var isHovering = false
 
@@ -211,8 +213,13 @@ private struct CalendarDayView: View {
             .buttonStyle(.plain)
             .onHover { isHovering = $0 }
             .animation(.easeOut(duration: 0.12), value: isHovering)
+            .contextMenu {
+                Button(L10n.addPlan, systemImage: "calendar.badge.plus") {
+                    onAddPlan(date)
+                }
+            }
             .accessibilityLabel(accessibilityDescription(for: date))
-            .accessibilityHint("Open date details")
+            .accessibilityHint("Open date details. Use the context menu to add a plan.")
             .accessibilityAddTraits(day.isToday ? .isSelected : [])
         } else {
             Color.clear
