@@ -60,6 +60,8 @@ final class AppModel {
         static let fuelCache = "fuelCache"
         static let vegetableCache = "vegetableCache"
         static let vegetableFavourites = "vegetableFavourites"
+        static let stocksCache = "stocksCache"
+        static let stockWatchlist = "stockWatchlist"
         static let rashifalEnabled = "rashifalEnabled"
         static let rashifalCache = "rashifalCache"
         static let radioEnabled = "radioEnabled"
@@ -189,6 +191,7 @@ final class AppModel {
     @ObservationIgnored private var metalsFeed: RemoteFeed<MetalRateSnapshot>!
     @ObservationIgnored private var fuelFeed: RemoteFeed<FuelPriceSnapshot>!
     @ObservationIgnored private var vegetableFeed: RemoteFeed<VegetableMarketSnapshot>!
+    @ObservationIgnored private var stocksFeed: RemoteFeed<StockMarketSnapshot>!
     @ObservationIgnored private var rashifalFeed: RemoteFeed<RashifalSnapshot>!
     @ObservationIgnored private var radioFeed: RemoteFeed<RadioDirectory>!
 
@@ -235,6 +238,50 @@ final class AppModel {
     var vegetables: VegetableMarketSnapshot? { vegetableFeed.value }
     var isVegetablesLoading: Bool { vegetableFeed.isLoading }
     var vegetablesError: String? { vegetableFeed.errorMessage }
+
+    var stocks: StockMarketSnapshot? { stocksFeed.value }
+    var isStocksLoading: Bool { stocksFeed.isLoading }
+    var stocksError: String? { stocksFeed.errorMessage }
+
+    /// Tickers are user-owned, local-only data. Normalising at the boundary
+    /// makes a pasted `nabil` and a typed `NABIL` one stable watch entry.
+    var stockWatchlist: [String] {
+        didSet {
+            guard oldValue != stockWatchlist else { return }
+            defaults.set(stockWatchlist, forKey: DefaultsKey.stockWatchlist)
+        }
+    }
+
+    func addStockToWatchlist(_ rawSymbol: String) {
+        let symbol = rawSymbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !symbol.isEmpty, symbol.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "-" }),
+              !stockWatchlist.contains(symbol), stockWatchlist.count < 12 else { return }
+        stockWatchlist.append(symbol)
+    }
+
+    func removeStockFromWatchlist(_ symbol: String) {
+        stockWatchlist.removeAll { $0.caseInsensitiveCompare(symbol) == .orderedSame }
+    }
+
+    /// Following is now a star on any row rather than a separate add field, so
+    /// one call has to serve both directions.
+    func toggleStockWatchlist(_ rawSymbol: String) {
+        let symbol = rawSymbol.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !symbol.isEmpty else { return }
+        if stockWatchlist.contains(where: { $0.caseInsensitiveCompare(symbol) == .orderedSame }) {
+            removeStockFromWatchlist(symbol)
+        } else {
+            addStockToWatchlist(symbol)
+        }
+    }
+
+    var isStockWatchlistFull: Bool { stockWatchlist.count >= Self.stockWatchlistLimit }
+
+    static let stockWatchlistLimit = 12
+
+    var watchedStocks: [StockQuote] {
+        stockWatchlist.compactMap { stocks?.quote(symbol: $0) }
+    }
 
     /// The handful of items someone actually buys, pinned above the other
     /// ninety. Stored by the board's own name, which is the only stable key it
@@ -328,6 +375,7 @@ final class AppModel {
     @ObservationIgnored private let metalProvider: any MetalRateProviding
     @ObservationIgnored private let fuelProvider: any FuelPriceProviding
     @ObservationIgnored private let vegetableProvider: any VegetableMarketProviding
+    @ObservationIgnored private let stockProvider: any StockMarketProviding
     @ObservationIgnored private let rashifalProvider: any RashifalProviding
     @ObservationIgnored private let articleDates: ArticleDateStore
     @ObservationIgnored private let radioProvider: any RadioProviding
@@ -461,6 +509,7 @@ final class AppModel {
         metalProvider: any MetalRateProviding = FenegosidaMetalProvider(),
         fuelProvider: any FuelPriceProviding = NOCFuelProvider(),
         vegetableProvider: any VegetableMarketProviding = KalimatiMarketProvider(),
+        stockProvider: any StockMarketProviding = ShareSansarStockProvider(),
         rashifalProvider: any RashifalProviding = HamroPatroRashifalProvider(),
         articleDateResolver: (any ArticleDateResolving)? = nil,
         radioProvider: any RadioProviding = RatopatiRadioProvider(),
@@ -477,6 +526,7 @@ final class AppModel {
         self.metalProvider = metalProvider
         self.fuelProvider = fuelProvider
         self.vegetableProvider = vegetableProvider
+        self.stockProvider = stockProvider
         self.rashifalProvider = rashifalProvider
         articleDates = ArticleDateStore(
             defaults: defaults,
@@ -511,6 +561,7 @@ final class AppModel {
         forexFavourites = defaults.stringArray(forKey: DefaultsKey.forexFavourites)
             ?? ForexCurrency.defaultFavourites
         vegetableFavourites = defaults.stringArray(forKey: DefaultsKey.vegetableFavourites) ?? []
+        stockWatchlist = defaults.stringArray(forKey: DefaultsKey.stockWatchlist) ?? []
         isRashifalEnabled = defaults.object(forKey: DefaultsKey.rashifalEnabled) as? Bool ?? true
         isRadioEnabled = defaults.object(forKey: DefaultsKey.radioEnabled) as? Bool ?? true
         selectedRashi = defaults.string(forKey: DefaultsKey.selectedRashi)
@@ -635,6 +686,25 @@ final class AppModel {
             try await vegetableProvider.latestPrices()
         }
 
+        stocksFeed = RemoteFeed(
+            subject: "NEPSE market",
+            cacheKey: DefaultsKey.stocksCache,
+            // v2: the snapshot now carries sector indices, the leaderboards,
+            // and every column of the price table, none of which a v1 entry
+            // knows — it would show an empty overview until it aged out.
+            cacheVersion: 2,
+            staleInterval: Self.stocksStaleInterval,
+            defaults: defaults,
+            fetchedAt: \.fetchedAt,
+            describeError: { error in
+                (error as? StockMarketProviderError) == .tableNotFound
+                    ? "Market table could not be read"
+                    : nil
+            }
+        ) { [stockProvider] in
+            try await stockProvider.latestMarket()
+        }
+
         rashifalFeed = RemoteFeed(
             subject: "rashifal",
             cacheKey: DefaultsKey.rashifalCache,
@@ -741,6 +811,7 @@ final class AppModel {
                 weatherLocation: selectedWeatherLocation.rawValue,
                 forexFavourites: forexFavourites,
                 vegetableFavourites: vegetableFavourites,
+                stockWatchlist: stockWatchlist,
                 selectedRashi: selectedRashi?.rawValue,
                 showsDockIcon: showsDockIcon,
                 notifyHolidayEve: notificationOptions.eveOfPublicHoliday,
@@ -770,6 +841,7 @@ final class AppModel {
         selectedWeatherLocation = WeatherLocation(rawValue: preferences.weatherLocation) ?? selectedWeatherLocation
         forexFavourites = preferences.forexFavourites
         vegetableFavourites = preferences.vegetableFavourites
+        stockWatchlist = preferences.stockWatchlist ?? []
         selectedRashi = preferences.selectedRashi.flatMap(RashiSign.init(rawValue:))
         showsDockIcon = preferences.showsDockIcon
         notificationOptions = .init(
@@ -908,6 +980,9 @@ final class AppModel {
     static let fuelStaleInterval: TimeInterval = 12 * 60 * 60
     /// Kalimati posts one table per trading day, in the morning.
     static let vegetableStaleInterval: TimeInterval = 6 * 60 * 60
+    /// The source is a market-session snapshot, so five minutes is responsive
+    /// enough for a menu-bar companion without polling on every open.
+    static let stocksStaleInterval: TimeInterval = 5 * 60
 
     /// Both refresh together: they share one route, so a user who opens it
     /// expects both halves to be current.
@@ -916,14 +991,16 @@ final class AppModel {
         async let rates: Void = metalsFeed.refreshIfStale()
         async let prices: Void = fuelFeed.refreshIfStale()
         async let produce: Void = vegetableFeed.refreshIfStale()
-        _ = await (rates, prices, produce)
+        async let stockMarket: Void = stocksFeed.refreshIfStale()
+        _ = await (rates, prices, produce, stockMarket)
     }
 
     func refreshBazar() async {
         async let rates: Void = metalsFeed.refresh()
         async let prices: Void = fuelFeed.refresh()
         async let produce: Void = vegetableFeed.refresh()
-        _ = await (rates, prices, produce)
+        async let stockMarket: Void = stocksFeed.refresh()
+        _ = await (rates, prices, produce, stockMarket)
     }
 
     // MARK: - Rashifal
@@ -1031,6 +1108,14 @@ final class AppModel {
         }
         scheduleMidnightRefresh()
     }
+
+    #if DEBUG
+    /// Seeds a market snapshot so the stocks screen can be rendered or
+    /// previewed without the network.
+    func seedStocksForPreview(_ snapshot: StockMarketSnapshot) {
+        stocksFeed.seed(snapshot)
+    }
+    #endif
 
     static let prototype = AppModel()
 

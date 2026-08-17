@@ -99,6 +99,7 @@ struct LinkPathDateTests {
     }
 }
 
+@MainActor
 struct HeadlineAgeTests {
     private static let now = Date(timeIntervalSince1970: 1_786_838_400)
 

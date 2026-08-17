@@ -21,6 +21,9 @@ struct SajiloBackup: Codable, Equatable, Sendable {
         var weatherLocation: String
         var forexFavourites: [String]
         var vegetableFavourites: [String]
+        /// Optional so v1 exports made before the watchlist existed still
+        /// import cleanly.
+        var stockWatchlist: [String]? = nil
         var selectedRashi: String?
         var showsDockIcon: Bool
         var notifyHolidayEve: Bool

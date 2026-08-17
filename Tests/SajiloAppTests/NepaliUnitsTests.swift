@@ -97,6 +97,12 @@ struct NepaliNumberFormatterTests {
         #expect(NepaliNumberFormatter.grouped(-1_00_000) == "-1,00,000")
     }
 
+    @Test func preservesPublishedMarketDecimals() {
+        #expect(NepaliNumberFormatter.grouped(722.90, fractionDigits: 2) == "722.90")
+        #expect(NepaliNumberFormatter.grouped(4_275_675_402.84, fractionDigits: 2) == "4,27,56,75,402.84")
+        #expect(NepaliNumberFormatter.grouped(-20.70, fractionDigits: 2) == "-20.70")
+    }
+
     @Test func describesTheScaleAsItIsSpoken() {
         #expect(NepaliNumberFormatter.scaleDescription(12_500_000) == "1 crore 25 lakh")
         #expect(NepaliNumberFormatter.scaleDescription(500_000) == "5 lakh")

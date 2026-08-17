@@ -113,6 +113,17 @@ enum NepaliNumberFormatter {
         return (negative ? "-" : "") + (groups + [tail]).joined(separator: ",")
     }
 
+    /// Market feeds publish prices to two decimal places. Keep that precision:
+    /// a quoted LTP of 722.90 must never become the materially different 723.
+    static func grouped(_ value: Double, fractionDigits: Int) -> String {
+        let formatted = String(format: "%.*f", locale: Locale(identifier: "en_US_POSIX"), fractionDigits, value)
+        let pieces = formatted.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+        guard let whole = Int(pieces[0]) else { return formatted }
+        let integer = grouped(whole)
+        guard fractionDigits > 0, pieces.count == 2 else { return integer }
+        return "\(integer).\(pieces[1])"
+    }
+
     /// "1 crore 25 lakh" — how the figure is actually said aloud.
     static func scaleDescription(_ value: Int) -> String? {
         let magnitude = abs(value)

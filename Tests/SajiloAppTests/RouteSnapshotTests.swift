@@ -36,6 +36,17 @@ struct RouteSnapshotTests {
         )
     }
 
+    @Test func stocks() throws {
+        let model = AppModel(
+            defaults: UserDefaults(suiteName: "com.sajilo.render.\(UUID().uuidString)")!,
+            autoLoadWeather: false
+        )
+        model.seedStocksForPreview(StockRenderFixture.snapshot)
+        model.toggleStockWatchlist("NABIL")
+        try shoot(StocksSection(model: model), named: "stocks")
+        try shoot(StocksSection(model: model, opened: "GBLBS"), named: "stocks-company")
+    }
+
     @Test func rashifal() async throws {
         let model = AppModel(
             defaults: UserDefaults(suiteName: "com.sajilo.render.\(UUID().uuidString)")!,
@@ -72,6 +83,42 @@ private struct RenderStub: RashifalProviding {
             },
             publishedOn: NepaliDate(year: 2083, month: 4, day: 31),
             fetchedAt: .now
+        )
+    }
+}
+
+
+enum StockRenderFixture {
+    static var snapshot: StockMarketSnapshot {
+        func quote(_ symbol: String, _ name: String, _ ltp: Double, _ prev: Double) -> StockQuote {
+            StockQuote(
+                symbol: symbol, companyName: name, ltp: ltp, previousClose: prev,
+                change: ltp - prev, changePercent: (ltp - prev) / prev * 100,
+                open: max(ltp, prev) - 1, high: max(ltp, prev) + 6, low: min(ltp, prev) - 8, close: ltp,
+                vwap: (ltp + prev) / 2, volume: 7_026, turnover: 5_054_000, transactions: 123,
+                week52High: ltp * 1.21, week52Low: ltp * 0.96,
+                average120Day: ltp * 1.06, average180Day: ltp * 1.07
+            )
+        }
+        return StockMarketSnapshot(
+            nepse: MarketIndex(name: "NEPSE Index", value: 2_643.83, change: -7.37, changePercent: -0.27, turnover: 4_275_675_402),
+            subIndices: [
+                MarketIndex(name: "Banking SubIndex", value: 1_198, change: -1.7, changePercent: -0.14, turnover: 0),
+                MarketIndex(name: "Hydropower Index", value: 2_940, change: 40, changePercent: 1.38, turnover: 0),
+                MarketIndex(name: "Microfinance Index", value: 4_120, change: -12, changePercent: -0.29, turnover: 0),
+                MarketIndex(name: "Life Insurance", value: 9_880, change: 22, changePercent: 0.22, turnover: 0),
+            ],
+            movers: [
+                MarketMover(board: .gainers, symbol: "MEPDL", ltp: 253, metric: 15.0),
+                MarketMover(board: .gainers, symbol: "SAPIL", ltp: 611, metric: 14.99),
+                MarketMover(board: .losers, symbol: "SKHL", ltp: 408, metric: -12.83),
+            ],
+            quotes: [
+                quote("NABIL", "Nabil Bank Limited", 512.4, 505.0),
+                quote("GBLBS", "Grameen Bikas Laghubitta Bittiya Sanstha Limited", 722.9, 744.0),
+            ],
+            publishedOn: Date(timeIntervalSince1970: 1_786_838_400),
+            fetchedAt: Date(timeIntervalSince1970: 1_786_838_400)
         )
     }
 }

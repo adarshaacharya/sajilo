@@ -8,10 +8,18 @@ import Foundation
 /// prices — so both read through this rather than each growing its own parser.
 enum HTMLTable {
     static func firstTableRows(in html: String) -> [[String]] {
-        guard let table = slice(of: html, tag: "table").first else { return [] }
-        return slice(of: table, tag: "tr")
-            .map(cells(in:))
-            .filter { !$0.isEmpty }
+        allTableRows(in: html).first ?? []
+    }
+
+    /// Every table, preserving document order. Sources such as ShareSansar put
+    /// multiple independent datasets on one page, so callers select by their
+    /// explicit header rather than relying on a fragile table position.
+    static func allTableRows(in html: String) -> [[[String]]] {
+        slice(of: html, tag: "table").map { table in
+            slice(of: table, tag: "tr")
+                .map(cells(in:))
+                .filter { !$0.isEmpty }
+        }
     }
 
     /// Cells in document order, so a heading row mixing `th` and `td` keeps its

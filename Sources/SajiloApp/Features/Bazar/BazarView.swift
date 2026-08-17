@@ -10,15 +10,16 @@ struct BazarView: View {
     let model: AppModel
     let onBack: () -> Void
 
-    @State private var section: Section = .metals
+    @State private var section: Section = .stocks
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     enum Section: String, CaseIterable, Identifiable {
-        case metals, fuel, vegetables
+        case stocks, metals, fuel, vegetables
         var id: String { rawValue }
 
         var title: LocalizedStringResource {
             switch self {
+            case .stocks: L10n.bazarStocks
             case .metals: L10n.bazarMetals
             case .fuel: L10n.bazarFuel
             case .vegetables: L10n.bazarVegetables
@@ -39,6 +40,7 @@ struct BazarView: View {
                     .labelsHidden()
 
                     switch section {
+                    case .stocks: StocksSection(model: model)
                     case .metals: MetalsSection(model: model)
                     case .fuel: FuelSection(model: model)
                     case .vegetables: VegetablesSection(model: model)
@@ -56,6 +58,7 @@ struct BazarView: View {
 
     private var isLoading: Bool {
         switch section {
+        case .stocks: model.isStocksLoading
         case .metals: model.isMetalsLoading
         case .fuel: model.isFuelLoading
         case .vegetables: model.isVegetablesLoading
@@ -484,7 +487,7 @@ private struct ProduceRow: View {
 /// A rise reads in the accent and a fall in the holiday red — the two colours
 /// the palette already carries. No movement gets neither, because a badge that
 /// is always coloured stops meaning anything.
-private struct ChangeBadge: View {
+struct ChangeBadge: View {
     let text: String
     let isUp: Bool
     let isFlat: Bool
@@ -506,7 +509,7 @@ private struct ChangeBadge: View {
     }
 }
 
-private struct SourceNote: View {
+struct SourceNote: View {
     let label: LocalizedStringResource
     let stamp: String
     let name: String
@@ -547,7 +550,7 @@ private struct SourceNote: View {
     private static let formatter = NepalTime.displayFormatter("d MMM yyyy")
 }
 
-private struct UnavailableNote: View {
+struct UnavailableNote: View {
     let message: String
     let isLoading: Bool
 
