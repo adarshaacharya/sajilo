@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { CONTROL, CONTROL_LABEL } from "./control";
 
 /**
@@ -18,9 +19,11 @@ export function Select<T extends string>({
   onChange: (value: T) => void;
   options: readonly { id: T; label: string }[];
 }) {
+  const id = useId();
   const select = (
     <div className="relative">
       <select
+        id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
         className={`${CONTROL} w-full cursor-pointer appearance-none pr-7 hover:bg-surface-hover`}
@@ -48,7 +51,7 @@ export function Select<T extends string>({
 
   if (!label) return select;
   return (
-    <label className="block">
+    <label className="block" htmlFor={id}>
       <span className={CONTROL_LABEL}>{label}</span>
       {select}
     </label>
