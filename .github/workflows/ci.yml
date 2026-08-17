@@ -42,6 +42,19 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Test
         run: cargo test --workspace
+      - name: TypeScript bindings are current
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          # Regenerating must be a no-op; a stale api.ts would let a renamed
+          # Rust field reach the frontend without breaking the build.
+          cargo test -p sajilo-api --features typescript
+          if ! git diff --quiet -- apps/desktop/src/types; then
+            echo "Generated bindings are stale. Run:" >&2
+            echo "  cargo test -p sajilo-api --features typescript" >&2
+            git diff --stat -- apps/desktop/src/types >&2
+            exit 1
+          fi
       - name: sajilo-core stays I/O-free
         shell: bash
         run: |

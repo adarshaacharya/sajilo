@@ -85,7 +85,7 @@ product. Diff it against the Swift source line by line, do not retype it.
 
 ---
 
-## M2 — Providers and DTOs (`sajilo-providers`, `sajilo-api`) ☐
+## M2 — Providers and DTOs (`sajilo-providers`, `sajilo-api`) ◐
 
 **Goal** All nine sources fetched and parsed in Rust, with recorded fixtures and a
 shared DTO contract.
@@ -93,17 +93,21 @@ shared DTO contract.
 
 ### Tasks
 
-- [ ] `sajilo-api`: `LoadState<T>` + every DTO ported from `Models/`, all deriving
-      `Serialize`, `Deserialize`, `TS`
-- [ ] ts-rs generation wired: `cargo test --features typescript` writes
-      `apps/desktop/src/types/api.ts`; CI fails if the committed file is stale
-- [ ] `http.rs`: shared client, timeouts, identifying `User-Agent` with contact URL
-- [ ] `html.rs`: table-scraping helper ported from `HTMLTable.swift`
-- [ ] Record a fixture per source into `fixtures/`, then port each parser:
-      NRB forex · NOC fuel · Kalimati vegetables · FENEGOSIDA metals ·
-      Open-Meteo weather + AQI · HamroPatro rashifal · Ratopati stations
+- [x] `sajilo-api`: `LoadState<T>` + every DTO ported from `Models/`, all deriving
+      `Serialize`, `Deserialize`, `TS` (via the shared `dto!` / `dto_enum!` macros)
+- [x] ts-rs generation wired: `cargo test -p sajilo-api --features typescript` writes
+      `apps/desktop/src/types/api/*.ts` (one file per type, not one `api.ts`);
+      CI fails if the committed output is stale
+- [x] `http.rs`: shared client, timeouts, identifying `User-Agent` with contact URL
+- [x] `html.rs`: table scraping — rewritten on `scraper` rather than ported, since
+      Rust has a real HTML parser and `HTMLTable.swift` only hand-scanned tag pairs
+      because Swift does not
+- [x] Fixtures recorded live for all nine sources into `fixtures/`
+- [x] Parsers ported: NRB forex · FENEGOSIDA metals · Open-Meteo weather + AQI
+- [ ] Parsers remaining: NOC fuel · Kalimati vegetables · HamroPatro rashifal ·
+      Ratopati stations
 - [ ] `rss/`: parser, article-date resolution, 9-source merge and dedupe
-- [ ] One test per provider reading only from `fixtures/`
+- [ ] One test per provider reading only from `fixtures/` (done for the three above)
 
 ### Acceptance
 

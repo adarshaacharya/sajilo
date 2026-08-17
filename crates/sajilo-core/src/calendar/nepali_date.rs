@@ -3,6 +3,11 @@ use serde::{Deserialize, Serialize};
 /// A Bikram Sambat calendar date. Ordering is lexicographic on
 /// (year, month, day), matching `NepaliDate: Comparable` in Swift.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
+#[cfg_attr(
+    feature = "typescript",
+    derive(ts_rs::TS),
+    ts(export, export_to = "api/")
+)]
 pub struct NepaliDate {
     pub year: i32,
     pub month: u32,

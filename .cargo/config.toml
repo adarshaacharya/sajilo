@@ -1,0 +1,5 @@
+[env]
+# ts-rs resolves each type's `export_to` against this. `relative = true` anchors
+# it to the workspace root, so the bindings land in the frontend regardless of
+# which crate directory cargo was invoked from.
+TS_RS_EXPORT_DIR = { value = "apps/desktop/src/types", relative = true }
