@@ -47,5 +47,18 @@
                        type="application/octet-stream"
                        sparkle:edSignature="qsqjZZJ+39kNBBRtBs/QwSNuL0Oepig0U3PJ/OaTuhboWZ9bF+utOuEC9wnn6lg3XIIcKPYgV54c0tizlJ7KCA==" length="2925183" />
         </item>
+        <item>
+            <title>Sajilo 0.1.0 beta 4</title>
+            <link>https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.4</link>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>0.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 17 Aug 2026 04:09:13 +0000</pubDate>
+            <description><![CDATA[<p>Release notes: <a href="https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.4">Sajilo 0.1.0 beta 4</a></p>]]></description>
+            <enclosure url="https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.4/Sajilo-macos-arm64.zip"
+                       sparkle:os="macos"
+                       type="application/octet-stream"
+                       sparkle:edSignature="x0jdIFgOllfmwAbVtAJokMLJvhn2dzdMYmgjyZJp1dFMTq03E6IIasldE9LmEyaZH2bGBIRWU5Z/dH2sxqA5Cw==" length="3131681" />
+        </item>
     </channel>
 </rss>
