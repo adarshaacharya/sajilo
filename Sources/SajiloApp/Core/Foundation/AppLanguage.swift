@@ -211,6 +211,7 @@ enum L10n {
     static let launchUnavailableNote = LocalizedStringResource("settings.launch-unavailable-note", bundle: .sajiloResources)
     static let updates = LocalizedStringResource("settings.updates", bundle: .sajiloResources)
     static let checkForUpdates = LocalizedStringResource("action.check-for-updates", bundle: .sajiloResources)
+    static let installUpdate = LocalizedStringResource("action.install-update", bundle: .sajiloResources)
     static let cancel = LocalizedStringResource("action.cancel", bundle: .sajiloResources)
     static let dayPlan = LocalizedStringResource("planner.title", bundle: .sajiloResources)
     static let addPlan = LocalizedStringResource("planner.add", bundle: .sajiloResources)

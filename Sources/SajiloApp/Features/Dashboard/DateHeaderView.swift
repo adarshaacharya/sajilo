@@ -15,6 +15,7 @@ struct DateHeaderView: View {
     let openSettings: () -> Void
 
     @Environment(\.numeralStyle) private var numerals
+    @Environment(\.appUpdater) private var appUpdater
 
     var body: some View {
         HStack(alignment: .top, spacing: Theme.Space.m) {
@@ -42,6 +43,18 @@ struct DateHeaderView: View {
             // somewhere, and mixing an exit into that row costs a slot that a
             // daily destination uses better.
             HStack(spacing: Theme.Space.xxs) {
+                if appUpdater?.isUpdateAvailable == true {
+                    Button {
+                        appUpdater?.checkForUpdates()
+                    } label: {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .foregroundStyle(Theme.Palette.brand)
+                    }
+                    .buttonStyle(IconButtonStyle())
+                    .accessibilityLabel(L10n.installUpdate)
+                    .help(Text(L10n.installUpdate))
+                }
+
                 Button(action: openSettings) {
                     Image(systemName: "gearshape")
                 }

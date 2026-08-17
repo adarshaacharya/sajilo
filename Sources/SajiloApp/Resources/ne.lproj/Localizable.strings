@@ -3,6 +3,7 @@
 "action.back" = "फर्कनुहोस्";
 "action.cancel" = "रद्द गर्नुहोस्";
 "action.check-for-updates" = "अपडेट जाँच गर्नुहोस्…";
+"action.install-update" = "अपडेट स्थापना गर्नुहोस्";
 "action.convert" = "रूपान्तरण";
 "action.copy-as" = "यसरी प्रतिलिपि गर्नुहोस्";
 "action.festivals" = "कार्यक्रम";

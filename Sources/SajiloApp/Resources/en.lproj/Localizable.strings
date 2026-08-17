@@ -3,6 +3,7 @@
 "action.back" = "Back";
 "action.cancel" = "Cancel";
 "action.check-for-updates" = "Check for Updates…";
+"action.install-update" = "Install update";
 "action.convert" = "Convert";
 "action.copy-as" = "Copy as";
 "action.festivals" = "Events";
