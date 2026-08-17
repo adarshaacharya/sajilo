@@ -80,4 +80,21 @@ if pgrep -f "/Applications/Sajilo.app/Contents/MacOS/Sajilo" >/dev/null 2>&1; th
   echo "      Quit it with: osascript -e 'quit app \"Sajilo\"'"
 fi
 
+# `open -n` immediately after `pkill` sometimes does nothing: macOS drops the
+# relaunch when it lands too close behind the kill, and `open` still exits 0. A
+# script that reports success while the app never came up is worse than a slow
+# one, so wait for the process and say plainly if it did not start.
+pkill -f "$APP_PATH/Contents/MacOS/Sajilo" 2>/dev/null && sleep 1
+
 open -n "$APP_PATH"
+
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  if pgrep -f "$APP_PATH/Contents/MacOS/Sajilo" >/dev/null 2>&1; then
+    echo "Sajilo (dev) is running. Look for the menu bar item marked with a leading dot."
+    exit 0
+  fi
+  sleep 0.5
+done
+
+echo "error: the local build did not start. Try: open -n \"$APP_PATH\"" >&2
+exit 1

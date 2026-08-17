@@ -29,6 +29,7 @@ enum BikramSambatCalendar {
 
     private static let gregorian = NepalTime.calendar
 
+
     // 1992-01-01 BS = 1935-04-13 AD. Cross-checked against an independent
     // published reference (2000-01-01 BS = 1943-04-14 AD) that the table was
     // not fitted to. See THIRD_PARTY_NOTICES.md for the dataset provenance.

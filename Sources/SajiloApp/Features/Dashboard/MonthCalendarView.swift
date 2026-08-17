@@ -103,6 +103,41 @@ struct MonthCalendarView: View {
         return "\(date.nepaliMonthName) \(numerals.string(from: date.year))"
     }
 
+    /// "Aug/Sep 2026" — which English months this Bikram Sambat month covers.
+    ///
+    /// The exact boundary days ("17 Aug – 16 Sep") were more precision than the
+    /// question needs: the reader wants to know which English month they are
+    /// looking at, not when it starts. A single month when the BS month happens
+    /// not to cross one, and both years when it crosses a new year.
+    private var gregorianSpan: String? {
+        let days = model.selectedMonth.days.compactMap(\.date)
+        guard let first = days.first, let last = days.last,
+              let start = try? BikramSambatCalendar.gregorianDate(from: first),
+              let end = try? BikramSambatCalendar.gregorianDate(from: last) else {
+            return nil
+        }
+
+        let calendar = NepalTime.calendar
+        let startYear = calendar.component(.year, from: start)
+        let endYear = calendar.component(.year, from: end)
+
+        if calendar.isDate(start, equalTo: end, toGranularity: .month) {
+            return Self.monthYear.string(from: start)
+        }
+        if startYear == endYear {
+            return "\(Self.month.string(from: start))/\(Self.month.string(from: end)) \(startYear)"
+        }
+        // Poush crosses into a new Gregorian year. Spelling both out in full —
+        // "Dec 2026 / Jan 2027" — is wide enough to run under the Today button,
+        // so the years are abbreviated into a range. Same shape as every other
+        // month, just carrying two years.
+        let endYearShort = String(format: "%02d", endYear % 100)
+        return "\(Self.month.string(from: start))/\(Self.month.string(from: end)) \(startYear)–\(endYearShort)"
+    }
+
+    private static let month = NepalTime.displayFormatter("MMM")
+    private static let monthYear = NepalTime.displayFormatter("MMM yyyy")
+
     private var pushTransition: AnyTransition {
         guard !reduceMotion else { return .opacity }
         return .asymmetric(
@@ -125,19 +160,21 @@ struct MonthCalendarView: View {
         }
     }
 
+    /// Month navigation.
+    ///
+    /// The title is laid over the row rather than placed between the buttons.
+    /// In an `HStack` the leading side holds one chevron while the trailing
+    /// side holds Today *and* a chevron, and Today is hidden with `opacity`,
+    /// which keeps its layout space. The two spacers then centred the title in
+    /// what was left over, sitting it visibly left of the card's real centre —
+    /// and it shifted again whenever Today appeared. An overlay centres on the
+    /// row itself, so the title holds still whatever the buttons are doing.
     private var header: some View {
         HStack(spacing: Theme.Space.xs) {
             Button(L10n.previousMonth, systemImage: "chevron.left") {
                 move(by: -1)
             }
             .labelStyle(.iconOnly)
-
-            Spacer(minLength: 0)
-
-            Text(monthTitle)
-                .font(.nepali(15, weight: .semibold))
-                .id(model.selectedMonth.firstDate)
-                .transition(.opacity)
 
             Spacer(minLength: 0)
 
@@ -159,6 +196,36 @@ struct MonthCalendarView: View {
             .labelStyle(.iconOnly)
         }
         .buttonStyle(IconButtonStyle())
+        .overlay {
+            // Navigation, not a page title. The popover header above already
+            // reads "भदौ २०८३ / 17 August 2026"; set at the same weight, the
+            // same month name appeared twice in bold a few points apart, in two
+            // different English formats. Demoted to one quiet unit it says
+            // which month is being browsed without competing with the heading.
+            //
+            // Each script keeps its own face: Kohinoor is a Devanagari family
+            // and its Latin does not match the SF used elsewhere. The Latin is
+            // a point smaller because at equal nominal size it reads larger
+            // beside Devanagari.
+            HStack(alignment: .firstTextBaseline, spacing: Theme.Space.xs) {
+                Text(monthTitle)
+                    .font(.nepali(13, weight: .medium))
+                if let span = gregorianSpan {
+                    Text(verbatim: "·")
+                    Text(verbatim: span)
+                        .font(.system(size: 12, weight: .medium))
+                }
+            }
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            // An overlay reserves no space, so nothing stops it running under
+            // the Today button. This keeps it clear of both ends whatever the
+            // month is called.
+            .padding(.horizontal, 86)
+            .id(model.selectedMonth.firstDate)
+            .transition(.opacity)
+        }
     }
 }
 

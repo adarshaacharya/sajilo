@@ -133,3 +133,57 @@ struct BikramSambatCalendarTests {
         Self.nepalCalendar.date(from: DateComponents(year: year, month: month, day: day))!
     }
 }
+
+@Suite("English month span in the header")
+struct GregorianSpanTests {
+    /// The header names which English months a Bikram Sambat month covers.
+    /// Computed the same way the view does, so the format is pinned here
+    /// rather than only being visible on screen.
+    private func span(year: Int, month: Int) throws -> String {
+        let today = NepaliDate(year: year, month: month, day: 1)
+        let grid = try BikramSambatCalendar.month(containing: today, today: today)
+        let days = grid.days.compactMap(\.date)
+        let start = try BikramSambatCalendar.gregorianDate(from: try #require(days.first))
+        let end = try BikramSambatCalendar.gregorianDate(from: try #require(days.last))
+
+        let calendar = NepalTime.calendar
+        let monthOnly = NepalTime.displayFormatter("MMM")
+        let monthYear = NepalTime.displayFormatter("MMM yyyy")
+
+        if calendar.isDate(start, equalTo: end, toGranularity: .month) {
+            return monthYear.string(from: start)
+        }
+        let startYear = calendar.component(.year, from: start)
+        if startYear == calendar.component(.year, from: end) {
+            return "\(monthOnly.string(from: start))/\(monthOnly.string(from: end)) \(startYear)"
+        }
+        let endYearShort = String(format: "%02d", calendar.component(.year, from: end) % 100)
+        return "\(monthOnly.string(from: start))/\(monthOnly.string(from: end)) \(startYear)–\(endYearShort)"
+    }
+
+    @Test func namesBothEnglishMonthsTheBikramMonthCovers() throws {
+        #expect(try span(year: 2083, month: 5) == "Aug/Sep 2026", "Bhadra 2083")
+        #expect(try span(year: 2083, month: 4) == "Jul/Aug 2026", "Saun 2083")
+    }
+
+    /// Poush crosses into a new Gregorian year, so both years must appear —
+    /// a bare "Dec/Jan 2026" would be wrong twice over. Written as a range
+    /// rather than two full years, because "Dec 2026 / Jan 2027" is wide enough
+    /// to run under the Today button in the header.
+    @Test func carriesBothYearsWhenTheMonthCrossesNewYear() throws {
+        let poush = try span(year: 2083, month: 9)
+
+        #expect(poush == "Dec/Jan 2026–27", "\(poush)")
+        // Narrow enough to sit beside the navigation controls.
+        #expect(poush.count <= 16, "\(poush) is too wide for the header")
+    }
+
+    /// Every month must produce something readable, and never an empty string.
+    @Test func everyMonthOfTheYearHasASpan() throws {
+        for month in 1...12 {
+            let text = try span(year: 2083, month: month)
+            #expect(!text.isEmpty)
+            #expect(text.contains("20"), "month \(month) lost its year: \(text)")
+        }
+    }
+}
