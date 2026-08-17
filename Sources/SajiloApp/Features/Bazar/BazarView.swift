@@ -505,7 +505,7 @@ struct ChangeBadge: View {
 
     private var tint: Color {
         if isFlat { return .secondary }
-        return isUp ? Theme.Palette.brand : Theme.Palette.holiday
+        return isUp ? Theme.Palette.positive : Theme.Palette.holiday
     }
 }
 

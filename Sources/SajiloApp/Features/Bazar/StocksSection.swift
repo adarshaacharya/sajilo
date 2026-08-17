@@ -265,7 +265,7 @@ private struct MoversCard: View {
 
     private func tint(for mover: MarketMover) -> Color {
         switch mover.board {
-        case .gainers: Theme.Palette.brand
+        case .gainers: Theme.Palette.positive
         case .losers: Theme.Palette.holiday
         case .turnover, .volume: .secondary
         }
@@ -313,7 +313,7 @@ private struct SectorsCard: View {
                                 .monospacedDigit()
                                 .foregroundStyle(
                                     index.isFlat ? AnyShapeStyle(.secondary)
-                                        : AnyShapeStyle(index.isUp ? Theme.Palette.brand : Theme.Palette.holiday)
+                                        : AnyShapeStyle(index.isUp ? Theme.Palette.positive : Theme.Palette.holiday)
                                 )
                         }
                         // Each sector sits on its own plate. Bare rows in
@@ -526,7 +526,7 @@ private struct QuoteRow: View {
                             .monospacedDigit()
                             .foregroundStyle(
                                 quote.isFlat ? AnyShapeStyle(.secondary)
-                                    : AnyShapeStyle(quote.isUp ? Theme.Palette.brand : Theme.Palette.holiday)
+                                    : AnyShapeStyle(quote.isUp ? Theme.Palette.positive : Theme.Palette.holiday)
                             )
                     }
                 }

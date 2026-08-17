@@ -195,6 +195,32 @@ extension Theme {
             }
         }
 
+        /// A rise, wherever something can also fall.
+        ///
+        /// The accent used to serve here, on the argument that a third colour
+        /// was worth avoiding. That was wrong once `holiday` red appears as the
+        /// opposite: against red the eye reads green, and brass reads as
+        /// "highlighted" rather than "up" — so a gain and a loss looked like
+        /// two different kinds of emphasis instead of two directions. Every
+        /// market surface in Nepal, ShareSansar included, uses green up and red
+        /// down.
+        ///
+        /// Each value is tuned to the same contrast as that skin's own red,
+        /// within 0.02:1, so a gain and a loss carry identical weight — a
+        /// brighter green would make every rise shout over every fall. Warm
+        /// enough to sit beside the vermilion rather than fight it, and never a
+        /// pure terminal green.
+        static var positive: Color {
+            switch skin {
+            case .himalayanDusk:
+                Color.dynamic(light: RGBA(0.059, 0.452, 0.257), dark: RGBA(0.349, 0.697, 0.453))
+            case .inkAndPaper:
+                Color.dynamic(light: RGBA(0.048, 0.368, 0.210), dark: RGBA(0.364, 0.727, 0.473))
+            case .patro:
+                Color.dynamic(light: RGBA(0.059, 0.450, 0.256), dark: RGBA(0.349, 0.698, 0.454))
+            }
+        }
+
         /// Saturdays and public holidays. Text only — never a fill, so the
         /// grid does not turn into a wall of colour.
         static var holiday: Color {

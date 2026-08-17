@@ -33,11 +33,12 @@ struct SparklineView: View {
         .accessibilityHidden(true)
     }
 
-    /// Rising rates are shown in the accent, falling in the holiday red — the
-    /// two colours the palette already uses, rather than introducing a third.
+    /// Green rising, red falling — the same pairing as every figure beside it.
+    /// A line that climbs while its percentage reads green in a different
+    /// colour would look like two unrelated signals.
     private var tint: Color {
         guard let first = values.first, let last = values.last else { return Theme.Palette.brand }
-        return last >= first ? Theme.Palette.brand : Theme.Palette.holiday
+        return last >= first ? Theme.Palette.positive : Theme.Palette.holiday
     }
 
     private func points(in size: CGSize) -> [CGPoint] {

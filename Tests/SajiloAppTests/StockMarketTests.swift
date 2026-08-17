@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 @testable import SajiloApp
@@ -237,5 +238,97 @@ struct StockWatchlistTests {
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
         return defaults
+    }
+}
+
+@MainActor
+struct ChangeColourTests {
+    /// A gain and a loss must carry the same visual weight, or every rise
+    /// shouts over every fall. Each skin's positive is tuned to that skin's own
+    /// red, so this pins the pairing rather than the exact hue.
+    @Test func gainAndLossAreEquallyWeightedInEverySkin() throws {
+        for skin in Theme.Skin.allCases {
+            Theme.skin = skin
+            for appearance in [NSAppearance(named: .aqua), NSAppearance(named: .darkAqua)] {
+                let appearance = try #require(appearance)
+                let background = try #require(NSColor.textBackgroundColor.resolved(for: appearance))
+                let up = try #require(NSColor(Theme.Palette.positive).resolved(for: appearance))
+                let down = try #require(NSColor(Theme.Palette.holiday).resolved(for: appearance))
+
+                let upRatio = contrast(up, background)
+                let downRatio = contrast(down, background)
+                #expect(upRatio > 3, "\(skin) positive is too faint to read")
+                #expect(abs(upRatio - downRatio) < 1.4, "\(skin): gain \(upRatio) vs loss \(downRatio)")
+            }
+        }
+        Theme.skin = .patro
+    }
+
+    /// Matching each green to its red's contrast necessarily gives the two
+    /// *equal luminance* — so in greyscale, or to a reader with red-green
+    /// colour blindness, they are the same shade. They differ only in hue.
+    @Test func aRiseAndAFallDifferOnlyInHue() throws {
+        for skin in Theme.Skin.allCases {
+            Theme.skin = skin
+            let appearance = try #require(NSAppearance(named: .darkAqua))
+            let up = try #require(NSColor(Theme.Palette.positive).resolved(for: appearance))
+            let down = try #require(NSColor(Theme.Palette.holiday).resolved(for: appearance))
+
+            #expect(up.greenComponent > up.redComponent, "\(skin) positive is not green")
+            #expect(down.redComponent > down.greenComponent, "\(skin) holiday is not red")
+            // Equal weight is the point; see the test above.
+            #expect(abs(luminance(up) - luminance(down)) < 0.05)
+        }
+        Theme.skin = .patro
+    }
+
+    /// Because the two carry the same luminance, colour must never be the only
+    /// thing separating a gain from a loss. Every figure that is coloured is
+    /// also signed, which is what actually makes the direction readable.
+    @Test func directionIsCarriedBySignNotOnlyByColour() {
+        func quote(change: Double) -> StockQuote {
+            StockQuote(
+                symbol: "X", companyName: nil, ltp: 100 + change, previousClose: 100,
+                change: change, changePercent: change, open: nil, high: nil, low: nil,
+                close: nil, vwap: nil, volume: nil, turnover: 0, transactions: nil,
+                week52High: nil, week52Low: nil, average120Day: nil, average180Day: nil
+            )
+        }
+        #expect(quote(change: 1.47).percentText.hasPrefix("+"))
+        #expect(quote(change: -2.84).percentText.hasPrefix("-"))
+
+        let up = MarketIndex(name: "I", value: 1, change: 2, changePercent: 2, turnover: 0)
+        let down = MarketIndex(name: "I", value: 1, change: -2, changePercent: -2, turnover: 0)
+        #expect(up.percentText.hasPrefix("+"))
+        #expect(down.percentText.hasPrefix("-"))
+
+        #expect(MarketMover(board: .gainers, symbol: "A", ltp: 1, metric: 15).metricText.hasPrefix("+"))
+        #expect(MarketMover(board: .losers, symbol: "A", ltp: 1, metric: -12).metricText.hasPrefix("-"))
+    }
+
+    private func contrast(_ a: NSColor, _ b: NSColor) -> Double {
+        let lumaA = luminance(a), lumaB = luminance(b)
+        let (high, low) = lumaA > lumaB ? (lumaA, lumaB) : (lumaB, lumaA)
+        return (high + 0.05) / (low + 0.05)
+    }
+
+    private func luminance(_ color: NSColor) -> Double {
+        func channel(_ value: CGFloat) -> Double {
+            let value = Double(value)
+            return value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(color.redComponent)
+            + 0.7152 * channel(color.greenComponent)
+            + 0.0722 * channel(color.blueComponent)
+    }
+}
+
+private extension NSColor {
+    func resolved(for appearance: NSAppearance) -> NSColor? {
+        var resolved: NSColor?
+        appearance.performAsCurrentDrawingAppearance {
+            resolved = usingColorSpace(.sRGB)
+        }
+        return resolved
     }
 }
