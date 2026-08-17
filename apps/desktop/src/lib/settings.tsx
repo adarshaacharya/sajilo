@@ -1,6 +1,7 @@
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import type { Language } from "./i18n";
 import { translate } from "./i18n";
+import { api } from "./ipc";
 import type { NumeralStyle } from "./numerals";
 
 interface Settings {
@@ -49,6 +50,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     import("@tauri-apps/plugin-store")
       .then(({ load }) => load("sajilo.json", { autoSave: true }))
       .then((store) => store.set(key, value))
+      // The tray reads this store but is never told when it changes, so the
+      // menu-bar label has to be asked to redraw.
+      .then(() => api.refreshTray())
       .catch(() => {});
   };
 

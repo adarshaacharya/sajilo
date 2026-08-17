@@ -11,7 +11,11 @@ use crate::error::{ConversionError, Result};
 use crate::numerals::devanagari;
 
 /// One cell of the grid. Leading cells before the 1st carry no date.
+///
+/// camelCase over the wire: the webview reads these fields directly, and a
+/// snake_case key there is a silently-undefined field, not a type error.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CalendarDay {
     pub id: String,
     pub date: Option<NepaliDate>,
@@ -23,6 +27,7 @@ pub struct CalendarDay {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CalendarMonth {
     pub first_date: NepaliDate,
     pub title: String,

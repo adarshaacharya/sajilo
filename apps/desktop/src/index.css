@@ -1,6 +1,6 @@
 @import "tailwindcss";
-/* Bundled locally — the app never reaches a font CDN at runtime. */
-@import "/fonts/noto-devanagari.css";
+/* The Devanagari face is loaded from index.html — it lives in public/ and is
+   served verbatim, so the CSS bundler cannot resolve it from here. */
 
 /*
  * Sajilo is a dark, compact, card-based popover. The tokens live here so every
@@ -19,7 +19,24 @@
   --color-positive: #3fbf7f;
   --color-negative: #f2555a;
 
-  --radius-card: 12px;
+  --radius-card: 8px;
+}
+
+/*
+ * The popover follows the OS appearance. Only the surface/text/border tokens
+ * move; accent, holiday, positive and negative stay put so the same colour
+ * always means the same thing in either appearance.
+ */
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-surface: #f7f8fa;
+    --color-surface-raised: #ffffff;
+    --color-surface-hover: #eceef2;
+    --color-border: #dde0e6;
+    --color-text: #14171c;
+    --color-text-secondary: #566072;
+    --color-text-muted: #838c9c;
+  }
 }
 
 html,
@@ -27,6 +44,12 @@ body,
 #root {
   height: 100%;
   margin: 0;
+}
+
+/* Lets scrollbars, form controls and text selection pick up the OS appearance
+   too, so the chrome we do not draw ourselves still matches. */
+html {
+  color-scheme: light dark;
 }
 
 body {
@@ -42,7 +65,7 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     "Noto Sans Devanagari", sans-serif;
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
   border-radius: 12px;
   user-select: none;

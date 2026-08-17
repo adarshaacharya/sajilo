@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { Card } from "../components/Card";
+import { CONTROL } from "../components/control";
 import { api, type CalendarEvent, type Conversion, type DayPlan } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
@@ -99,13 +100,13 @@ export function DayDetail() {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addPlan()}
             placeholder={t("planner.title-field")}
-            className="min-w-0 flex-1 rounded-md border border-border bg-surface px-2 py-1 outline-none focus:border-accent"
+            className={`${CONTROL} min-w-0 flex-1`}
           />
           <button
             type="button"
             onClick={addPlan}
             disabled={!draft.trim()}
-            className="shrink-0 rounded-md border border-border px-2.5 text-text-secondary hover:bg-surface-hover hover:text-text disabled:opacity-40"
+            className={`${CONTROL} shrink-0 px-2.5 text-text-secondary hover:bg-surface-hover hover:text-text disabled:opacity-40`}
           >
             +
           </button>

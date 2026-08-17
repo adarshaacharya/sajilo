@@ -53,11 +53,11 @@ fn position_at_tray(window: &WebviewWindow) {
 
 /// Dismiss on blur, the way a menu-bar popover is expected to behave.
 ///
-/// Skipped in debug builds: with devtools open the window loses focus the
-/// instant you click into the inspector, which makes the app impossible to
-/// debug.
+/// Set `SAJILO_NO_BLUR_HIDE=1` to keep the window up when it loses focus: with
+/// devtools open, clicking into the inspector blurs the popover and would
+/// otherwise dismiss the thing being inspected.
 pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
-    if focused || cfg!(debug_assertions) {
+    if focused || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
         return;
     }
     let _ = window.hide();

@@ -1,3 +1,5 @@
+import { CONTROL, CONTROL_LABEL } from "./control";
+
 /** A labelled numeric input. Numbers only — every tool here takes a quantity. */
 export function Field({
   label,
@@ -14,9 +16,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[10px] uppercase tracking-wide text-text-muted">
-        {label}
-      </span>
+      <span className={CONTROL_LABEL}>{label}</span>
       <input
         type="number"
         inputMode="decimal"
@@ -24,7 +24,7 @@ export function Field({
         step={step}
         min={min}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full rounded-md border border-border bg-surface px-2 py-1 text-text outline-none focus:border-accent"
+        className={`${CONTROL} w-full`}
       />
     </label>
   );

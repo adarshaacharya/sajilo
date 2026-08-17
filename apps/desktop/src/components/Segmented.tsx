@@ -19,7 +19,9 @@ export function Segmented<T extends string>({
           role="tab"
           aria-selected={value === option.id}
           onClick={() => onChange(option.id)}
-          className={`flex-1 rounded-md border px-2 py-1 text-[11px] transition-colors ${
+          // Same height as an input or select, so a tab strip above a form does
+          // not sit on a different rhythm from the controls under it.
+          className={`h-8 flex-1 rounded-md border px-2 text-[11px] transition-colors ${
             value === option.id
               ? "border-accent bg-accent/10 text-accent"
               : "border-border text-text-secondary hover:bg-surface-hover"

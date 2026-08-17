@@ -75,11 +75,11 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <Card>
         <div className="flex items-baseline justify-between">
           <div>
-            <p className="text-xl font-semibold leading-tight">
+            <p className="text-[17px] font-semibold leading-tight">
               {today.nepaliMonthName} {digits(today.nepali.day, numerals)}
             </p>
             <p className="text-text-secondary">{digits(today.nepali.year, numerals)}</p>

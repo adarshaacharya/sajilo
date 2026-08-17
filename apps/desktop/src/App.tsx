@@ -70,7 +70,7 @@ function Shell() {
             element={
               <>
                 <Header title={route.title} />
-                <main className="flex-1 overflow-y-auto p-3">
+                <main className="flex-1 overflow-y-auto p-2.5">
                   {"element" in route ? route.element : <Placeholder title={route.title} />}
                 </main>
               </>

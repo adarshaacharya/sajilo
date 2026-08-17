@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "../../components/Card";
 import { Field, ResultRow } from "../../components/Field";
+import { Select } from "../../components/Select";
 import { api, type WeightUnit } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -33,22 +34,12 @@ export function WeightTab() {
       <Card>
         <div className="grid grid-cols-2 gap-2">
           <Field label={t("tools.weight")} value={value} onChange={setValue} />
-          <label className="block">
-            <span className="mb-1 block text-[10px] uppercase tracking-wide text-text-muted">
-              {t("tools.unit")}
-            </span>
-            <select
-              value={unit}
-              onChange={(event) => setUnit(event.target.value as WeightUnit)}
-              className="w-full rounded-md border border-border bg-surface px-2 py-1 text-text outline-none focus:border-accent"
-            >
-              {UNITS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Select
+            label={t("tools.unit")}
+            value={unit}
+            onChange={(next) => setUnit(next as WeightUnit)}
+            options={UNITS}
+          />
         </div>
       </Card>
 

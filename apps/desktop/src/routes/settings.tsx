@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "../components/Card";
 import { Segmented } from "../components/Segmented";
+import { Select } from "../components/Select";
 import { Toggle } from "../components/Toggle";
 import type { Language } from "../lib/i18n";
 import {
@@ -15,6 +16,15 @@ import { useSettings } from "../lib/settings";
 type Tab = "display" | "modules" | "system";
 
 const MENU_BAR_FORMATS = ["nepaliLong", "numeric", "nepaliFlag", "englishShort"] as const;
+
+/** Each label previews the shape it produces, since the option ids say nothing
+ * about what lands in the menu bar. */
+const MENU_BAR_FORMAT_LABELS: Record<(typeof MENU_BAR_FORMATS)[number], string> = {
+  nepaliLong: "Full — साउन ३१, २०८३",
+  numeric: "Numeric — २०८३/०४/३१",
+  nepaliFlag: "With flag — 🇳🇵 साउन ३१",
+  englishShort: "Gregorian — Aug 16",
+};
 
 export function Settings() {
   const { t, language, setLanguage, numerals, setNumerals } = useSettings();
@@ -69,6 +79,20 @@ function DisplayTab({
       .catch(() => {});
   }, []);
 
+  // The tray reads this from the store at launch, so the picker has to read it
+  // back too — otherwise it always claims the default no matter what is saved.
+  useEffect(() => {
+    import("@tauri-apps/plugin-store")
+      .then(({ load }) => load("sajilo.json", { autoSave: true }))
+      .then((store) => store.get<string>("menuBarFormat"))
+      .then((saved) => {
+        if (saved) setFormat(saved);
+      })
+      .catch(() => {
+        /* Not running under Tauri; the default stands. */
+      });
+  }, []);
+
   return (
     <>
       <Card title={t("settings.language")}>
@@ -102,26 +126,21 @@ function DisplayTab({
       </Card>
 
       <Card title={t("settings.menu-bar")}>
-        <select
+        <Select
           value={format}
-          onChange={(event) => {
-            setFormat(event.target.value);
+          onChange={(next) => {
+            setFormat(next);
             import("@tauri-apps/plugin-store")
               .then(({ load }) => load("sajilo.json", { autoSave: true }))
-              .then((store) => store.set("menuBarFormat", event.target.value))
+              .then((store) => store.set("menuBarFormat", next))
+              // The tray reads the store and is not watching it, so it has to
+              // be told the format changed.
+              .then(() => api.refreshTray())
               .catch(() => {});
           }}
-          className="w-full rounded-md border border-border bg-surface px-2 py-1 outline-none focus:border-accent"
-        >
-          {MENU_BAR_FORMATS.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <p className="mt-1.5 text-[11px] text-text-muted">
-          {t("settings.format")} — restart to apply everywhere.
-        </p>
+          options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
+        />
+        <p className="mt-1.5 text-[11px] text-text-muted">{t("settings.format")}</p>
       </Card>
 
       {range && (

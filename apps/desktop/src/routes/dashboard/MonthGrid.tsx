@@ -38,30 +38,33 @@ export function MonthGrid({
               key={day.id}
               onClick={() => onSelect(day)}
               title={day.eventName ?? day.tithi ?? undefined}
-              className={`relative flex h-9 flex-col items-center justify-center rounded-md transition-colors hover:bg-surface-hover ${
-                day.isToday ? "bg-accent text-white hover:bg-accent" : ""
-              } ${day.isHoliday && !day.isToday ? "text-holiday" : ""}`}
+              // Today wins the cell outright. A holiday keeps a tinted cell
+              // rather than only red digits, so Saturdays and festival days
+              // read as a block at a glance instead of one glyph at a time.
+              className={`relative flex h-7 flex-col items-center justify-center rounded-md transition-colors ${
+                day.isToday
+                  ? "bg-accent text-white hover:bg-accent"
+                  : day.isHoliday
+                    ? "bg-holiday/10 font-medium text-holiday hover:bg-holiday/20"
+                    : "hover:bg-surface-hover"
+              }`}
             >
-              <span className="text-[13px] leading-none">{digits(day.date.day, numerals)}</span>
+              <span className="text-[12px] leading-none">{digits(day.date.day, numerals)}</span>
               <span
                 className={`text-[9px] leading-none ${
-                  day.isToday ? "text-white/70" : "text-text-muted"
+                  day.isToday
+                    ? "text-white/70"
+                    : day.isHoliday
+                      ? "text-holiday/60"
+                      : "text-text-muted"
                 }`}
               >
                 {day.adDay}
               </span>
-              {day.eventName && (
-                <span
-                  aria-hidden
-                  className={`absolute bottom-0.5 h-1 w-1 rounded-full ${
-                    day.isToday ? "bg-white/80" : "bg-accent"
-                  }`}
-                />
-              )}
             </button>
           ) : (
             // Leading padding so the 1st lands on its real weekday column.
-            <div key={day.id} className="h-9" />
+            <div key={day.id} className="h-7" />
           ),
         )}
       </div>

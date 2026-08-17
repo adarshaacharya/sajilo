@@ -13,7 +13,7 @@ export function Header({ title }: { title: string }) {
   return (
     <header
       data-tauri-drag-region
-      className="flex h-11 shrink-0 items-center gap-2 border-b border-border px-3"
+      className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3"
     >
       {canGoBack && (
         <button

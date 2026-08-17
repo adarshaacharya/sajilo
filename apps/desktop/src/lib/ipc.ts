@@ -26,7 +26,7 @@ export interface CalendarDay {
 }
 
 export interface CalendarMonth {
-  first_date: NepaliDate;
+  firstDate: NepaliDate;
   title: string;
   days: CalendarDay[];
 }
@@ -182,4 +182,7 @@ export const api = {
   isAutostartEnabled: () => invoke<boolean>("is_autostart_enabled"),
   setAutostart: (enabled: boolean) => invoke<boolean>("set_autostart", { enabled }),
   setDockIconVisible: (visible: boolean) => invoke<void>("set_dock_icon_visible", { visible }),
+
+  /** Redraws the menu-bar label after a preference it reads has changed. */
+  refreshTray: () => invoke<void>("refresh_tray"),
 };

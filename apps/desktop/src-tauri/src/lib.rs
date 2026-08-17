@@ -91,6 +91,7 @@ pub fn run() {
             system::autostart::is_autostart_enabled,
             system::autostart::set_autostart,
             system::autostart::set_dock_icon_visible,
+            commands::tray::refresh_tray,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");

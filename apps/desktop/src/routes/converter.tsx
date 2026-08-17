@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "../components/Card";
+import { CONTROL, CONTROL_LABEL } from "../components/control";
 import { api, type Conversion, type SupportedRange } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
@@ -69,7 +70,7 @@ export function Converter() {
         <div className="grid grid-cols-3 gap-2">
           {(["year", "month", "day"] as const).map((field) => (
             <label key={field} className="block">
-              <span className="mb-1 block text-[10px] uppercase text-text-muted">{field}</span>
+              <span className={CONTROL_LABEL}>{field}</span>
               <input
                 type="number"
                 value={fields[field]}
@@ -78,7 +79,7 @@ export function Converter() {
                 onChange={(event) =>
                   setFields((current) => ({ ...current, [field]: Number(event.target.value) }))
                 }
-                className="w-full rounded-md border border-border bg-surface px-2 py-1 text-text outline-none focus:border-accent"
+                className={`${CONTROL} w-full`}
               />
             </label>
           ))}
