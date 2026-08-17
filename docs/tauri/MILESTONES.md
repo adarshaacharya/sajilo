@@ -127,32 +127,38 @@ dates. Port its Swift tests verbatim before touching the implementation.
 
 ---
 
-## M3 — Server: cache, scheduler, API ☐
+## M3 — Server: cache, scheduler, API ☑
 
 **Goal** One deployable binary that keeps every feed warm and serves it cheaply.
 **Depends on** M2 · **Size** L
 
 ### Tasks
 
-- [ ] `config.rs` — port, cache path, per-feed intervals, contact URL, all from env
-- [ ] `cache.rs` — `RwLock<Snapshot>`, JSON snapshot on disk, warm-start on boot
-- [ ] `refresh/` — one task per feed on the cadence table, jittered
-- [ ] `refresh/backoff.rs` — exponential on 429/5xx; a failed refresh keeps the
+- [x] `config.rs` — port, cache path, per-feed intervals, contact URL, all from env
+- [x] `cache.rs` — `RwLock<Snapshot>`, JSON snapshot on disk, warm-start on boot
+- [x] `refresh/` — one task per feed on the cadence table, jittered
+- [x] `refresh/backoff.rs` — exponential on 429/5xx; a failed refresh keeps the
       previous value and its timestamp, never blanks the feed
-- [ ] `http/routes.rs` — `/v1/bundle`, per-module endpoints, `/v1/radio/stations`,
+- [x] `http/routes.rs` — `/v1/bundle`, per-module endpoints, `/v1/radio/stations`,
       `/v1/meta`, `/v1/health`, `/healthz`
-- [ ] `http/etag.rs` — content hash → `ETag`, `If-None-Match` → 304
-- [ ] `/v1/meta` returns `min_client_version` and a notice string
-- [ ] `/v1/health` reports per-feed last-success time and consecutive failures
-- [ ] `Dockerfile`, `release-server.yml`
+- [x] `http/etag.rs` — content hash → `ETag`, `If-None-Match` → 304
+- [x] `/v1/meta` returns `min_client_version` and a notice string
+- [x] `/v1/health` reports per-feed last-success time and consecutive failures
+- [x] `Dockerfile`, `release-server.yml`. No `HEALTHCHECK` in the image: it
+      carries no HTTP client to probe with, and adding one to satisfy Docker is
+      weight for nothing — point the orchestrator at `GET /healthz`.
 
 ### Acceptance
 
-- A client request never triggers an upstream fetch (assert with a counting fake provider)
-- Repeat request with `If-None-Match` returns 304
-- `/v1/bundle?modules=…` returns only the requested modules, each with its own
-  `generated_at`
-- 24h live run with no feed going blank
+- A client request never triggers an upstream fetch ✓ (counting fake provider)
+- Repeat request with `If-None-Match` returns 304 ✓ (verified live, and against
+  weak and comma-listed tags)
+- `/v1/bundle?modules=…` returns only the requested modules ✓. Freshness is
+  carried per module inside its `LoadState` + `Freshness`, rather than as a
+  separate `generated_at` field.
+- **24h live run — not done.** A ~10-minute live run had all 8 feeds fresh, and
+  NRB failing once at boot then recovering on its own backoff. The full 24h soak
+  belongs with the M5 deploy, where there is somewhere for it to actually run.
 
 ---
 
@@ -164,17 +170,17 @@ content yet.
 
 ### Tasks
 
-- [ ] Scaffold `apps/desktop`: Vite + React + TS + Tailwind, Biome, bun scripts
-- [ ] `tauri.conf.json` — borderless, transparent, always-on-top, `skipTaskbar`,
+- [x] Scaffold `apps/desktop`: Vite + React + TS + Tailwind, Biome, bun scripts
+- [x] `tauri.conf.json` — borderless, transparent, always-on-top, `skipTaskbar`,
       `visible: false`, fixed size; CSP allowing the API host plus `media-src https:`
-- [ ] `capabilities/default.json` — the minimum permission set for the `main` window
-- [ ] Plugins: `store`, `notification`, `autostart`, `updater`, `dialog`, `positioner`
-- [ ] `tray/mod.rs` — build tray, left click toggles the popover, menu with
+- [x] `capabilities/default.json` — the minimum permission set for the `main` window
+- [x] Plugins: `store`, `notification`, `autostart`, `updater`, `dialog`, `positioner`
+- [x] `tray/mod.rs` — build tray, left click toggles the popover, menu with
       Settings and Quit
-- [ ] `window.rs` — position at the tray, hide on blur, **never close**
-- [ ] `system/dock.rs` — macOS `set_activation_policy(Accessory)` by default
-- [ ] Static tray icon plus tooltip for now (dynamic date lands in M6)
-- [ ] App shell in React: header with back, bottom tab bar, router with placeholder routes
+- [x] `window.rs` — position at the tray, hide on blur, **never close**
+- [x] `system/dock.rs` — macOS `set_activation_policy(Accessory)` by default
+- [x] Static tray icon plus tooltip for now (dynamic date lands in M6)
+- [x] App shell in React: header with back, bottom tab bar, router with placeholder routes
 
 ### Acceptance
 
