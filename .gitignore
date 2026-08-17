@@ -30,3 +30,6 @@ scripts/AppIcon.iconset/
 
 # macOS
 .DS_Store
+
+# Rust
+target/

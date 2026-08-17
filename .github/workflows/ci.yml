@@ -23,3 +23,33 @@ jobs:
           swift --version
       - name: Test package
         run: swift test
+
+  rust:
+    name: Rust ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --workspace
+      - name: sajilo-core stays I/O-free
+        shell: bash
+        run: |
+          # The crate must compile into the server, the desktop binary and a
+          # plain cargo test, so it may not pull in a runtime or an HTTP client.
+          for crate in tokio reqwest tauri hyper; do
+            if cargo tree -p sajilo-core --prefix none | grep -qw "$crate"; then
+              echo "sajilo-core must not depend on $crate" >&2
+              exit 1
+            fi
+          done
