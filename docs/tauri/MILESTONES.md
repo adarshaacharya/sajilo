@@ -85,7 +85,7 @@ product. Diff it against the Swift source line by line, do not retype it.
 
 ---
 
-## M2 — Providers and DTOs (`sajilo-providers`, `sajilo-api`) ◐
+## M2 — Providers and DTOs (`sajilo-providers`, `sajilo-api`) ☑
 
 **Goal** All nine sources fetched and parsed in Rust, with recorded fixtures and a
 shared DTO contract.
@@ -103,17 +103,22 @@ shared DTO contract.
       Rust has a real HTML parser and `HTMLTable.swift` only hand-scanned tag pairs
       because Swift does not
 - [x] Fixtures recorded live for all nine sources into `fixtures/`
-- [x] Parsers ported: NRB forex · FENEGOSIDA metals · Open-Meteo weather + AQI
-- [ ] Parsers remaining: NOC fuel · Kalimati vegetables · HamroPatro rashifal ·
+- [x] Parsers ported: NRB forex · NOC fuel · Kalimati vegetables ·
+      FENEGOSIDA metals · Open-Meteo weather + AQI · HamroPatro rashifal ·
       Ratopati stations
-- [ ] `rss/`: parser, article-date resolution, 9-source merge and dedupe
-- [ ] One test per provider reading only from `fixtures/` (done for the three above)
+- [x] `rss/`: parser, article-date resolution, 9-source merge and dedupe.
+      The Annapurna Post article-page date resolver is **not** ported — it fetches
+      article pages rather than feeds, and on the server that cost is paid once
+      for every client rather than per install. Revisit under M3's scheduler,
+      where the rate limit belongs.
+- [x] One test per provider reading only from `fixtures/`
 
 ### Acceptance
 
-- Every provider decodes its fixture into the expected model
-- A manual live run against all nine sources succeeds
-- No provider test performs network I/O
+- Every provider decodes its fixture into the expected model ✓
+- A manual live run against all nine sources succeeds ✓ (every fixture was
+  recorded live on 2026-08-17)
+- No provider test performs network I/O ✓
 
 ### Risks
 

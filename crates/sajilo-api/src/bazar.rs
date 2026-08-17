@@ -64,6 +64,8 @@ dto! {
 }
 
 impl Metal {
+    pub const ALL: [Self; 3] = [Self::FineGold, Self::TejabiGold, Self::Silver];
+
     pub fn display_name(self) -> &'static str {
         match self {
             Self::FineGold => "Fine gold",
@@ -157,6 +159,8 @@ dto! {
 }
 
 impl Fuel {
+    pub const ALL: [Self; 4] = [Self::Petrol, Self::Diesel, Self::Kerosene, Self::Lpg];
+
     pub fn display_name(self) -> &'static str {
         match self {
             Self::Petrol => "Petrol",

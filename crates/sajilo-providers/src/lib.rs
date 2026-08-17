@@ -7,6 +7,7 @@
 
 pub mod error;
 pub mod fenegosida;
+pub mod hamropatro;
 pub mod html;
 pub mod http;
 pub mod kalimati;
