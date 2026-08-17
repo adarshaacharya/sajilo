@@ -33,3 +33,9 @@ scripts/AppIcon.iconset/
 
 # Rust
 target/
+node_modules/
+dist/
+# Desktop app
+node_modules/
+apps/desktop/dist/
+apps/desktop/src-tauri/gen/

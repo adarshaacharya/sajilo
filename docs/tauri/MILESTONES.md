@@ -162,7 +162,7 @@ dates. Port its Swift tests verbatim before touching the implementation.
 
 ---
 
-## M4 — Desktop shell ☐
+## M4 — Desktop shell ◐
 
 **Goal** A tray app that opens and dismisses a popover on all three OSes. No product
 content yet.
@@ -174,19 +174,36 @@ content yet.
 - [x] `tauri.conf.json` — borderless, transparent, always-on-top, `skipTaskbar`,
       `visible: false`, fixed size; CSP allowing the API host plus `media-src https:`
 - [x] `capabilities/default.json` — the minimum permission set for the `main` window
-- [x] Plugins: `store`, `notification`, `autostart`, `updater`, `dialog`, `positioner`
+- [x] Plugins: `store`, `notification`, `autostart`, `dialog`, `opener`, `positioner`.
+      **`updater` is declared as a dependency but not registered**: it refuses to
+      initialise without a `plugins.updater` block carrying a real public key, and
+      that keypair is generated in M9. A placeholder key would only fake a
+      readiness the app does not have.
 - [x] `tray/mod.rs` — build tray, left click toggles the popover, menu with
       Settings and Quit
 - [x] `window.rs` — position at the tray, hide on blur, **never close**
 - [x] `system/dock.rs` — macOS `set_activation_policy(Accessory)` by default
-- [x] Static tray icon plus tooltip for now (dynamic date lands in M6)
+- [x] Static tray icon plus tooltip for now (dynamic date lands in M6). Generated
+      from the existing `docs/icon.png`; it is a colour icon flagged
+      `iconAsTemplate`, so macOS draws it as a silhouette. A purpose-drawn
+      monochrome tray asset is worth doing when the dynamic date lands.
 - [x] App shell in React: header with back, bottom tab bar, router with placeholder routes
 
 ### Acceptance
 
-Tray click opens and dismisses the popover on macOS, Windows, and Linux; no Dock or
-taskbar entry appears; closing the popover does not destroy the webview (verify with
-a counter that survives a hide/show cycle).
+**Not yet signed off — needs a human at a screen.**
+
+Verified on macOS by running the release binary: the process starts clean, registers
+as background-only (the `Accessory` activation policy), and takes no Dock tile.
+`osascript` cannot enumerate the menu bar without assistive access, so the tray icon's
+appearance and its click behaviour have not been machine-checked.
+
+Outstanding:
+- Tray click opens and dismisses the popover on macOS, Windows and Linux
+- The webview survives a hide/show cycle. The placeholder screen shows a
+  webview age in seconds for exactly this: it must keep climbing across a
+  dismiss and reopen. A reset to zero means the window was destroyed, not hidden.
+- Windows and Linux have not been run at all — only cross-compiled in CI.
 
 ### Risks
 
