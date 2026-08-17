@@ -55,6 +55,17 @@ struct DashboardUpNextTests {
         #expect(summary?.destination == .today)
     }
 
+    @Test func usesAnUntimedPlanBeforeAFestivalToday() {
+        let plan = DayPlan(date: NepaliDate(year: 2083, month: 4, day: 31), title: "Call home")
+        let festival = event(name: "नाग पञ्चमी", daysAway: 0)
+
+        let summary = DashboardUpNext.make(plans: [plan], events: [festival], now: now)
+
+        #expect(summary?.kind == .plan(plan))
+        #expect(summary?.todayFestival == festival)
+        #expect(summary?.destination == .today)
+    }
+
     private func event(name: String, daysAway: Int) -> UpcomingEvent {
         UpcomingEvent(
             date: NepaliDate(year: 2083, month: 4, day: 31),

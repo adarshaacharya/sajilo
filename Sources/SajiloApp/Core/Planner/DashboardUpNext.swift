@@ -38,12 +38,12 @@ struct DashboardUpNext: Equatable, Sendable {
             return Self(kind: .plan(upcomingPlan), todayFestival: todayFestival, destination: .today)
         }
 
-        if let todayFestival {
-            return Self(kind: .festival(todayFestival), todayFestival: todayFestival, destination: .today)
+        if let untimedPlan = DayPlan.ordered(plans).first(where: { $0.time == nil }) {
+            return Self(kind: .plan(untimedPlan), todayFestival: todayFestival, destination: .today)
         }
 
-        if let untimedPlan = DayPlan.ordered(plans).first(where: { $0.time == nil }) {
-            return Self(kind: .plan(untimedPlan), todayFestival: nil, destination: .today)
+        if let todayFestival {
+            return Self(kind: .festival(todayFestival), todayFestival: todayFestival, destination: .today)
         }
 
         if let nextFestival {
