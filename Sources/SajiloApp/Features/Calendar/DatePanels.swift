@@ -6,11 +6,25 @@ import SwiftUI
 
 // MARK: - Summary
 
-struct DateSummaryPanel: View {
+struct DateSummaryPanel<Footer: View>: View {
     let outcome: ConversionOutcome
     /// The day detail leads with the Nepali date; the converter leads with the
     /// Gregorian one, because that is the answer the user asked for.
     var leadsWithNepali = false
+    /// Extra content inside the same card. The day detail puts its copy
+    /// actions here rather than in a card of their own, which previously
+    /// restated every date already printed above it.
+    @ViewBuilder var footer: Footer
+
+    init(
+        outcome: ConversionOutcome,
+        leadsWithNepali: Bool = false,
+        @ViewBuilder footer: () -> Footer = { EmptyView() }
+    ) {
+        self.outcome = outcome
+        self.leadsWithNepali = leadsWithNepali
+        self.footer = footer()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
@@ -34,6 +48,11 @@ struct DateSummaryPanel: View {
                 Divider().padding(.vertical, Theme.Space.xxs)
                 detail
             }
+
+            if !(footer is EmptyView) {
+                Divider().padding(.vertical, Theme.Space.xxs)
+                footer
+            }
         }
         .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
         .cardSection()
@@ -52,15 +71,28 @@ struct DateSummaryPanel: View {
     @ViewBuilder
     private var detail: some View {
         VStack(alignment: .leading, spacing: Theme.Space.xxs) {
-            if let tithi = outcome.event?.tithi {
-                Text(tithi)
-                    .font(.nepali(13))
-                    .foregroundStyle(.secondary)
-            }
             if let name = outcome.event?.name {
-                Text(name)
-                    .font(.nepali(13))
-                    .fixedSize(horizontal: false, vertical: true)
+                // The festival is the reason most people opened this day, so it
+                // leads the detail rather than trailing the tithi.
+                Label {
+                    Text(name)
+                        .font(.nepali(14, weight: .medium))
+                        .fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(Theme.Palette.brand)
+                }
+                .font(.caption)
+            }
+            if let tithi = outcome.event?.tithi {
+                HStack(spacing: Theme.Space.xs) {
+                    Text(L10n.tithi)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                    Text(tithi)
+                        .font(.nepali(13))
+                        .foregroundStyle(.secondary)
+                }
             }
             if isHoliday {
                 Label(L10n.publicHoliday, systemImage: "circle.fill")
@@ -157,5 +189,50 @@ func copyToPasteboard(
         try? await Task.sleep(for: .seconds(1.4))
         guard copied.wrappedValue == format else { return }
         withAnimation(animation) { copied.wrappedValue = nil }
+    }
+}
+
+
+// MARK: - Compact copy
+
+/// The three copy formats as one row of chips.
+///
+/// They used to be a card of full-width rows, each printing its value — which
+/// meant the long date appeared twice on the same screen and the Nepali date
+/// three times. The formats are named instead; the values are already above.
+struct CompactCopyRow: View {
+    let outcome: ConversionOutcome
+    let copiedFormat: ConversionOutcome.CopyFormat?
+    let onCopy: (ConversionOutcome.CopyFormat) -> Void
+
+    var body: some View {
+        HStack(spacing: Theme.Space.xs) {
+            Text(L10n.copyAs)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+
+            ForEach(ConversionOutcome.CopyFormat.allCases) { format in
+                let isCopied = copiedFormat == format
+                Button { onCopy(format) } label: {
+                    HStack(spacing: 3) {
+                        Image(systemName: isCopied ? "checkmark" : "doc.on.doc")
+                            .font(.system(size: 9))
+                            .contentTransition(.symbolEffect(.replace))
+                        Text(verbatim: format.shortLabel)
+                            .font(.caption2.weight(.medium))
+                    }
+                    .padding(.horizontal, Theme.Space.xs)
+                    .padding(.vertical, 3)
+                    .foregroundStyle(isCopied ? AnyShapeStyle(Theme.Palette.brand) : AnyShapeStyle(.secondary))
+                    .background(Theme.Palette.surface, in: .rect(cornerRadius: Theme.Radius.day))
+                }
+                .buttonStyle(.plain)
+                .help(Text(verbatim: outcome.text(for: format)))
+                .accessibilityLabel("\(format.label): \(outcome.text(for: format))")
+                .accessibilityHint(isCopied ? "Copied" : "Copy to clipboard")
+            }
+
+            Spacer(minLength: 0)
+        }
     }
 }

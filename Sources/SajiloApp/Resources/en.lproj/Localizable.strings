@@ -3,10 +3,10 @@
 "action.back" = "Back";
 "action.cancel" = "Cancel";
 "action.check-for-updates" = "Check for Updates…";
-"action.install-update" = "Install update";
 "action.convert" = "Convert";
 "action.copy-as" = "Copy as";
 "action.festivals" = "Events";
+"action.install-update" = "Install update";
 "action.quit" = "Quit";
 "action.refresh" = "Refresh";
 "action.swap" = "Swap";
@@ -53,6 +53,7 @@
 "calendar.previous-month" = "Previous month";
 "calendar.provisional" = "Provisional — not yet officially published";
 "calendar.public-holiday" = "Public holiday";
+"calendar.tithi" = "Tithi";
 "events.current" = "Current";
 "events.festivals" = "Festivals";
 "events.filter" = "Event filter";
@@ -66,6 +67,13 @@
 "language.nepali" = "नेपाली";
 "numerals.devanagari" = "Devanagari";
 "numerals.latin" = "Latin";
+"panchanga.computed" = "Times computed for Kathmandu.";
+"panchanga.daylight" = "Daylight";
+"panchanga.rahu-kaal" = "Rahu Kaal";
+"panchanga.rahu-note" = "Traditionally avoided for starting something new.";
+"panchanga.sunrise" = "Sunrise";
+"panchanga.sunset" = "Sunset";
+"panchanga.title" = "Sun and time";
 "planner.add" = "Add plan";
 "planner.delete" = "Delete plan";
 "planner.edit" = "Edit plan";

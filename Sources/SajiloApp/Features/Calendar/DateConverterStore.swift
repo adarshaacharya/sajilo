@@ -39,6 +39,15 @@ struct ConversionOutcome: Equatable, Sendable {
             case .longDate: "Long date"
             }
         }
+
+        /// For the chip row, where the card already says "Copy as".
+        var shortLabel: String {
+            switch self {
+            case .nepaliNumerals: "\u{0968}\u{0966}\u{096A}\u{096F}"
+            case .englishNumerals: "2049"
+            case .longDate: "Long"
+            }
+        }
     }
 
     /// Resolves a Bikram Sambat date into a full outcome, so the day-detail

@@ -7,6 +7,15 @@ import Testing
 /// checking whether a source has changed shape under us.
 @Suite(.enabled(if: ProcessInfo.processInfo.environment["SAJILO_LIVE"] == "1"))
 struct LiveSourceSmokeTests {
+    private struct SunPayload: Decodable {
+        struct Daily: Decodable {
+            let time: [String]
+            let sunrise: [String]
+            let sunset: [String]
+        }
+        let daily: Daily
+    }
+
     @Test func federationStillPublishesGoldAndSilver() async throws {
         let snapshot = try await FenegosidaMetalProvider().latestRates()
         #expect(snapshot.rate(for: .fineGold, unit: .tola) != nil)
@@ -71,6 +80,40 @@ struct LiveSourceSmokeTests {
         #expect(dated.allSatisfy { $0.precision == .day })
         let newest = try #require(dated.map(\.published!).max())
         #expect(newest > Date().addingTimeInterval(-7 * 24 * 3600), "the feed looks stale")
+    }
+
+    /// The computed almanac is checked against Open-Meteo's own sunrise and
+    /// sunset for the week. Sajilo computes them so every date has them offline,
+    /// but drifting away from the real sky would be silent otherwise.
+    @Test func computedSunTimesAgreeWithOpenMeteo() async throws {
+        var components = URLComponents(string: "https://api.open-meteo.com/v1/forecast")!
+        components.queryItems = [
+            .init(name: "latitude", value: "27.7172"),
+            .init(name: "longitude", value: "85.3240"),
+            .init(name: "daily", value: "sunrise,sunset"),
+            .init(name: "timezone", value: "Asia/Kathmandu"),
+            .init(name: "forecast_days", value: "7"),
+        ]
+        let (data, _) = try await URLSession.sajilo().data(from: components.url!)
+        let payload = try JSONDecoder().decode(SunPayload.self, from: data)
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = NepalTime.timeZone
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm"
+
+        for index in payload.daily.time.indices {
+            let reported = try #require(formatter.date(from: payload.daily.sunrise[index]))
+            let computed = try #require(SolarTimes.times(
+                on: reported, latitude: Panchanga.kathmandu.latitude, longitude: Panchanga.kathmandu.longitude
+            ))
+            let sunsetReported = try #require(formatter.date(from: payload.daily.sunset[index]))
+
+            #expect(abs(computed.sunrise.timeIntervalSince(reported)) < 300,
+                    "sunrise on \(payload.daily.time[index]) drifted")
+            #expect(abs(computed.sunset.timeIntervalSince(sunsetReported)) < 300,
+                    "sunset on \(payload.daily.time[index]) drifted")
+        }
     }
 
     @Test func nocStillPublishesTheRetailTable() async throws {

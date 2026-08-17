@@ -21,6 +21,21 @@ mkdir -p "$APP_PATH/Contents/Frameworks"
 mkdir -p "$APP_PATH/Contents/Resources"
 cp "$PROJECT_ROOT/scripts/AppBundleInfo.plist" "$APP_PATH/Contents/Info.plist"
 
+# The local build takes its own identity.
+#
+# `UserDefaults.standard` is keyed by bundle identifier, so sharing one with the
+# installed app meant every local run read and wrote the real settings, cache
+# and watchlist — and with both running, whichever wrote last won. A separate
+# identifier gives the dev build its own defaults domain for free.
+#
+# Sparkle is switched off here too: a development build has no business
+# offering to replace itself with a release.
+DEV_BUNDLE_ID="com.sajilo.desktop.dev"
+/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $DEV_BUNDLE_ID" "$APP_PATH/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleName Sajilo (dev)" "$APP_PATH/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :SUEnableAutomaticChecks false" "$APP_PATH/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :SUAllowsAutomaticUpdates false" "$APP_PATH/Contents/Info.plist"
+
 # The icon. Without it macOS falls back to its generic blank app placeholder,
 # which is what ships if this line is ever dropped. Regenerate with
 # `swift scripts/make-app-icon.swift` after changing the palette.
@@ -56,4 +71,13 @@ codesign --verify --deep --strict "$APP_PATH"
 # A previous background-only build will not refresh its activation policy on its
 # own. Restart only this app's local build before opening the visual debug app.
 pkill -f "$APP_PATH/Contents/MacOS/Sajilo" 2>/dev/null || true
+
+# The installed copy is a different app now, so it survives the line above and
+# sits in the menu bar beside this one showing the same date. Say so rather
+# than leaving two identical items to be puzzled over.
+if pgrep -f "/Applications/Sajilo.app/Contents/MacOS/Sajilo" >/dev/null 2>&1; then
+  echo "Note: the installed Sajilo is also running. The local build is marked with a leading dot."
+  echo "      Quit it with: osascript -e 'quit app \"Sajilo\"'"
+fi
+
 open -n "$APP_PATH"

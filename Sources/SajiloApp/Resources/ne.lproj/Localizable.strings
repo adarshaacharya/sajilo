@@ -3,10 +3,10 @@
 "action.back" = "फर्कनुहोस्";
 "action.cancel" = "रद्द गर्नुहोस्";
 "action.check-for-updates" = "अपडेट जाँच गर्नुहोस्…";
-"action.install-update" = "अपडेट स्थापना गर्नुहोस्";
 "action.convert" = "रूपान्तरण";
 "action.copy-as" = "यसरी प्रतिलिपि गर्नुहोस्";
 "action.festivals" = "कार्यक्रम";
+"action.install-update" = "अपडेट स्थापना गर्नुहोस्";
 "action.quit" = "बन्द गर्नुहोस्";
 "action.refresh" = "ताजा गर्नुहोस्";
 "action.swap" = "साट्नुहोस्";
@@ -53,6 +53,7 @@
 "calendar.previous-month" = "अघिल्लो महिना";
 "calendar.provisional" = "अस्थायी — आधिकारिक रूपमा प्रकाशित भइसकेको छैन";
 "calendar.public-holiday" = "सार्वजनिक बिदा";
+"calendar.tithi" = "तिथि";
 "events.current" = "हालका";
 "events.festivals" = "पर्वहरू";
 "events.filter" = "कार्यक्रम छनोट";
@@ -66,6 +67,13 @@
 "language.nepali" = "नेपाली";
 "numerals.devanagari" = "देवनागरी";
 "numerals.latin" = "ल्याटिन";
+"panchanga.computed" = "काठमाडौंको लागि गणना गरिएको।";
+"panchanga.daylight" = "दिनको अवधि";
+"panchanga.rahu-kaal" = "राहु काल";
+"panchanga.rahu-note" = "नयाँ काम सुरु गर्न परम्परागत रूपमा टारिन्छ।";
+"panchanga.sunrise" = "सूर्योदय";
+"panchanga.sunset" = "सूर्यास्त";
+"panchanga.title" = "सूर्य र समय";
 "planner.add" = "योजना थप्नुहोस्";
 "planner.delete" = "योजना मेटाउनुहोस्";
 "planner.edit" = "योजना सम्पादन गर्नुहोस्";

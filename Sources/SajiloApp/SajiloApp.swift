@@ -15,7 +15,15 @@ struct SajiloApp: App {
                 .environment(\.locale, appModel.appLanguage.locale)
                 .environment(\.appUpdater, appUpdater)
         } label: {
+            // A local build and an installed one look identical in the menu
+            // bar, and both run at once during development — two Nepali dates
+            // side by side. The marker belongs here rather than in the model:
+            // `menuBarTitle` describes the date, not which build is drawing it.
+            #if DEBUG
+            Text(verbatim: "\u{2022} " + appModel.menuBarTitle)
+            #else
             Text(verbatim: appModel.menuBarTitle)
+            #endif
         }
         .menuBarExtraStyle(.window)
 

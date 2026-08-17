@@ -47,6 +47,19 @@ struct RouteSnapshotTests {
         try shoot(StocksSection(model: model, opened: "GBLBS"), named: "stocks-company")
     }
 
+    @Test func dayDetail() throws {
+        let outcome = try #require(ConversionOutcome.make(for: NepaliDate(year: 2083, month: 5, day: 1)))
+        try shoot(
+            VStack(alignment: .leading, spacing: Theme.Space.m) {
+                DateSummaryPanel(outcome: outcome, leadsWithNepali: true) {
+                    CompactCopyRow(outcome: outcome, copiedFormat: nil) { _ in }
+                }
+                PanchangaRenderProbe(date: outcome.gregorian)
+            },
+            named: "day-detail"
+        )
+    }
+
     @Test func rashifal() async throws {
         let model = AppModel(
             defaults: UserDefaults(suiteName: "com.sajilo.render.\(UUID().uuidString)")!,
@@ -120,5 +133,57 @@ enum StockRenderFixture {
             publishedOn: Date(timeIntervalSince1970: 1_786_838_400),
             fetchedAt: Date(timeIntervalSince1970: 1_786_838_400)
         )
+    }
+}
+
+
+/// Mirrors the panchanga card so it can be rendered; the real one is private
+/// to the day-detail route.
+struct PanchangaRenderProbe: View {
+    let date: Date
+
+    var body: some View {
+        if let panchanga = Panchanga.forDate(date, tithi: nil) {
+            VStack(alignment: .leading, spacing: Theme.Space.xs) {
+                Text(verbatim: "Sun and time")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                HStack(spacing: Theme.Space.s) {
+                    ForEach([
+                        ("sunrise", "Sunrise", clock(panchanga.sunrise)),
+                        ("sunset", "Sunset", clock(panchanga.sunset)),
+                        ("clock", "Daylight", panchanga.daylightText),
+                    ], id: \.1) { item in
+                        VStack(alignment: .leading, spacing: 1) {
+                            Label(item.1, systemImage: item.0)
+                                .font(.caption2).foregroundStyle(.tertiary)
+                            Text(verbatim: item.2).font(.callout.weight(.medium)).monospacedDigit()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                if let rahu = panchanga.rahuKaal {
+                    Divider().opacity(0.5)
+                    HStack(alignment: .top, spacing: Theme.Space.s) {
+                        Image(systemName: "exclamationmark.circle")
+                            .font(.caption).foregroundStyle(Theme.Palette.holiday).frame(width: 16)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: "Rahu Kaal  \(clock(rahu.start))–\(clock(rahu.end))")
+                                .font(.callout.weight(.medium)).monospacedDigit()
+                            Text(verbatim: "Traditionally avoided for starting something new.")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                Text(verbatim: "Times computed for Kathmandu.")
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .cardSection()
+        }
+    }
+
+    private func clock(_ date: Date) -> String {
+        NepalTime.displayFormatter("HH:mm").string(from: date)
     }
 }
