@@ -9,10 +9,7 @@ use sajilo_core::planner::{DayPlan, plans_on};
 use tauri::{AppHandle, Wry};
 use tauri_plugin_store::StoreExt;
 
-/// The same key the Swift app used, so an imported backup lands where the app
-/// already looks.
-const STORE_FILE: &str = "sajilo.json";
-const PLANS_KEY: &str = "dayPlans.v1";
+use crate::prefs::{PLANS_KEY, STORE_FILE};
 
 type Result<T> = std::result::Result<T, String>;
 

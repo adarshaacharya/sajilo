@@ -111,6 +111,21 @@ export interface InterestResult {
   total: number;
 }
 
+export type PermissionState = "granted" | "denied" | "unknown";
+
+export interface NotificationOptions {
+  eveOfPublicHoliday: boolean;
+  eveOfFestival: boolean;
+  hour: number;
+}
+
+export interface PlannedNotification {
+  id: string;
+  title: string;
+  body: string;
+  fireAt: string;
+}
+
 /*
  * Every calendar computation is a command. The frontend owns no copy of the
  * year-length table, so there is nothing here that can drift from the engine.
@@ -150,4 +165,21 @@ export const api = {
     invoke<VatBreakdown>("compute_vat", { amount, inclusive }),
   computeInterest: (principal: number, annualRatePercent: number, years: number) =>
     invoke<InterestResult>("compute_interest", { principal, annualRatePercent, years }),
+
+  exportBackup: () => invoke<string>("export_backup"),
+  importBackup: (contents: string) =>
+    invoke<{ dayPlans: number; exportedAt: string }>("import_backup", { contents }),
+  isFirstRun: () => invoke<boolean>("is_first_run"),
+  markLaunched: () => invoke<void>("mark_launched"),
+
+  notificationPermission: () => invoke<PermissionState>("notification_permission"),
+  requestNotificationPermission: () => invoke<PermissionState>("request_notification_permission"),
+  getNotificationOptions: () => invoke<NotificationOptions>("get_notification_options"),
+  setNotificationOptions: (options: NotificationOptions) =>
+    invoke<PlannedNotification[]>("set_notification_options", { options }),
+  pendingNotifications: () => invoke<PlannedNotification[]>("pending_notifications"),
+
+  isAutostartEnabled: () => invoke<boolean>("is_autostart_enabled"),
+  setAutostart: (enabled: boolean) => invoke<boolean>("set_autostart", { enabled }),
+  setDockIconVisible: (visible: boolean) => invoke<void>("set_dock_icon_visible", { visible }),
 };

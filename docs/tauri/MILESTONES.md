@@ -351,32 +351,47 @@ playback into Rust with `rodio` — not before.
 
 ---
 
-## M9 — Notifications, autostart, updater, Settings, backup ☐
+## M9 — Notifications, autostart, updater, Settings, backup ◐
 
 **Goal** Everything that makes it a resident app rather than a viewer.
 **Depends on** M6 · **Size** L
 
 ### Tasks
 
-- [ ] `notify/planner.rs` — next festival eve, holiday eve, day-plan reminder
-- [ ] `notify/scheduler.rs` — sleep-until-next, recompute on preference change
-- [ ] Persist `last_fired: {kind, date}` so a restart cannot re-fire a reminder
-- [ ] Late fire on startup within a 6h window, silent skip beyond it
-- [ ] Notification permission request flow per platform
-- [ ] `system/autostart.rs` — launch at login; Dock-icon toggle on macOS
-- [ ] `commands/backup.rs` — `SajiloBackup` **format version 1**, encode + decode
-- [ ] First-run offer: "Import from Sajilo backup"
-- [ ] `routes/settings` — parity with `SettingsView.swift`: menu-bar format, language,
+- [x] `notify/planner.rs` — next festival eve, holiday eve, day-plan reminder
+- [x] `notify/scheduler.rs` — sleep-until-next, recompute on preference change
+- [x] Persist `last_fired: {kind, date}` so a restart cannot re-fire a reminder
+- [x] Late fire on startup within a 6h window, silent skip beyond it
+- [x] Notification permission requested at the moment a reminder is switched on —
+      never at launch, and never for a feature nobody asked for. **The flow itself is
+      unexercised**: granting it needs a real user at a real dialog.
+- [x] `system/autostart.rs` — launch at login; Dock-icon toggle on macOS
+- [x] `commands/backup.rs` — `SajiloBackup` **format version 1**, encode + decode
+- [x] First-run offer: "Import from Sajilo backup"
+- [x] `routes/settings` — parity with `SettingsView.swift`: menu-bar format, language,
       numerals, module toggles, weather city, forex favourites, reminders, dock icon,
       update check, export/import
-- [ ] Updater keypair generated, private key into CI secrets, `latest.json` published
-      on tag by `release-desktop.yml`
+- [ ] **Updater keypair — not generated, deliberately.** The private key is what
+      proves an update came from you: if it leaks anyone can ship a signed update to
+      every install, and if it is lost no existing install can ever be updated again.
+      That is yours to hold, not mine to create and leave in a scratch directory.
+      `scripts/generate-updater-key.sh` does it and refuses to overwrite an existing
+      key; `release-desktop.yml` reads the secrets and currently bundles unsigned.
+      The updater plugin stays unregistered until `plugins.updater.pubkey` is set.
 
 ### Acceptance
 
-- A backup exported from the Swift app restores every preference and every day plan
-- Restarting the app five times on a reminder day produces exactly one notification
-- A fresh install autostarts, and an update is offered and applied end to end
+- A backup exported from the Swift app restores every preference and every day plan ✓
+  — tested against a fixture written in the exact shape `SajiloBackup.swift` encodes
+  (ISO-8601 dates, UUID string id, reminder as its raw integer), so the test fails if
+  the Rust side drifts from the contract.
+- Restarting five times on a reminder day produces exactly one notification ✓ at the
+  logic level: `LastFired` is persisted and `should_fire_late` is tested across five
+  repeat calls. **Not verified with the real notification centre.**
+- A fresh install autostarts, and an update is offered and applied end to end —
+  **not verified.** Autostart is wired and reads its state back from the OS rather
+  than assuming success, but registering a login item and applying a signed update
+  both need a real install, and the update half needs the keypair above.
 
 ---
 

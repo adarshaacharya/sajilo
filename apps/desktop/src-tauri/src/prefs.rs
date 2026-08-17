@@ -12,6 +12,9 @@ use crate::tray::title::MenuBarFormat;
 pub const STORE_FILE: &str = "sajilo.json";
 pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
 pub const NUMERAL_STYLE: &str = "numeralStyle";
+/// The same key the Swift app used, so an imported backup lands where the app
+/// already looks.
+pub const PLANS_KEY: &str = "dayPlans.v1";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.

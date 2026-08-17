@@ -17,6 +17,7 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_positioner::init());
 
@@ -40,6 +41,9 @@ pub fn run() {
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
+            // Delivers anything missed while the app was closed, then sleeps
+            // until the next reminder rather than polling.
+            commands::notify::spawn_scheduler(app.handle().clone());
             Ok(())
         })
         .on_window_event(|window, event| match event {
@@ -75,6 +79,18 @@ pub fn run() {
             commands::tools::compute_vat,
             commands::tools::compute_interest,
             commands::tools::group_number,
+            commands::backup::export_backup,
+            commands::backup::import_backup,
+            commands::backup::is_first_run,
+            commands::backup::mark_launched,
+            commands::notify::notification_permission,
+            commands::notify::request_notification_permission,
+            commands::notify::pending_notifications,
+            commands::notify::get_notification_options,
+            commands::notify::set_notification_options,
+            system::autostart::is_autostart_enabled,
+            system::autostart::set_autostart,
+            system::autostart::set_dock_icon_visible,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");

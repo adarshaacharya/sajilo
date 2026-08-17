@@ -9,6 +9,7 @@ import { DayDetail } from "./routes/day";
 import { Events } from "./routes/events";
 import { Placeholder } from "./routes/Placeholder";
 import { Radio } from "./routes/radio";
+import { Settings } from "./routes/settings";
 import { Tools } from "./routes/tools";
 
 /**
@@ -31,7 +32,7 @@ const ROUTES = [
   { path: "/rashifal", title: "Rashifal" },
   { path: "/radio", title: "Radio", element: <Radio /> },
   { path: "/tools", title: "Tools", element: <Tools /> },
-  { path: "/settings", title: "Settings" },
+  { path: "/settings", title: "Settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; title: string; element?: ReactNode }[];
 
 /** The tray's Settings item navigates by event, since the routes live here. */

@@ -4,9 +4,11 @@
 //! Tauri type, so it compiles unchanged into the server, the desktop binary and
 //! a plain `cargo test`.
 
+pub mod backup;
 pub mod calendar;
 pub mod error;
 pub mod nepal_time;
+pub mod notify;
 pub mod numerals;
 pub mod planner;
 pub mod tools;
