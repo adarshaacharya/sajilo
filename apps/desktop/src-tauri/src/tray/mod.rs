@@ -1,5 +1,8 @@
 //! The tray icon: Sajilo's only permanent presence on screen.
 
+pub mod icon;
+pub mod title;
+
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager};
@@ -46,7 +49,60 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         })
         .build(app)?;
 
+    refresh_title(app);
+    spawn_midnight_rollover(app.clone());
     Ok(())
+}
+
+/// Redraws the tray label from the current date and preferences.
+pub fn refresh_title(app: &AppHandle) {
+    let Some(tray) = app.tray_by_id("main") else {
+        return;
+    };
+    let Some(date) = title::today() else {
+        return;
+    };
+
+    let (format, numerals) = crate::prefs::tray_preferences(app);
+    let label = title::title(date, format, numerals);
+
+    // Only macOS renders text beside a tray icon.
+    #[cfg(target_os = "macos")]
+    let _ = tray.set_title(Some(&label));
+
+    // Elsewhere the day number is drawn into the icon itself, since the icon is
+    // all the tray gives us. A failed render keeps the static icon: a tray with
+    // no date beats a tray with no icon.
+    #[cfg(not(target_os = "macos"))]
+    if let Some(pixels) = icon::day_icon(date.day, numerals) {
+        let image = tauri::image::Image::new_owned(pixels, icon::size(), icon::size());
+        let _ = tray.set_icon(Some(image));
+        // The day number alone has no month or year, so the full label stays
+        // reachable on hover.
+        let _ = tray.set_icon_as_template(false);
+    }
+
+    let _ = tray.set_tooltip(Some(&label));
+}
+
+/// Redraws at Kathmandu midnight, not the machine's.
+///
+/// Sleeps until the next rollover rather than polling, and recomputes the wait
+/// each time so it self-corrects after a laptop wakes from sleep having missed
+/// the tick entirely.
+fn spawn_midnight_rollover(app: AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        loop {
+            let wait = title::seconds_until_nepal_midnight(sajilo_core::nepal_time::now());
+            // Tauri's own runtime, so the app does not carry a second one.
+            tauri::async_runtime::spawn_blocking(move || {
+                std::thread::sleep(std::time::Duration::from_secs(wait as u64));
+            })
+            .await
+            .ok();
+            refresh_title(&app);
+        }
+    });
 }
 
 /// Opens the popover and asks the frontend to route to Settings. The route lives

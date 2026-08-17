@@ -3,6 +3,8 @@
 //! M4 is deliberately only a shell: a tray icon, a popover that opens and
 //! dismisses, and nothing product-specific. The screens arrive in M6.
 
+pub mod commands;
+pub mod prefs;
 pub mod system;
 pub mod tray;
 pub mod window;
@@ -54,6 +56,26 @@ pub fn run() {
             }
             _ => {}
         })
+        .invoke_handler(tauri::generate_handler![
+            commands::calendar::today,
+            commands::calendar::month_grid,
+            commands::calendar::shift_month,
+            commands::calendar::bs_to_ad,
+            commands::calendar::ad_to_bs,
+            commands::calendar::events_for,
+            commands::calendar::upcoming_events,
+            commands::calendar::supported_range,
+            commands::plans::list_plans,
+            commands::plans::plans_for_day,
+            commands::plans::save_plan,
+            commands::plans::delete_plan,
+            commands::tools::convert_land,
+            commands::tools::land_breakdown,
+            commands::tools::convert_weight,
+            commands::tools::compute_vat,
+            commands::tools::compute_interest,
+            commands::tools::group_number,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");
 }

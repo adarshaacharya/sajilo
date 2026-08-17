@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Bundled locally — the app never reaches a font CDN at runtime. */
+@import "/fonts/noto-devanagari.css";
 
 /*
  * Sajilo is a dark, compact, card-based popover. The tokens live here so every
@@ -31,8 +33,15 @@ body {
   /* Rounded because the window itself is transparent and undecorated. */
   background: var(--color-surface);
   color: var(--color-text);
+  /*
+   * Devanagari first, so month names, tithi and festival text render from the
+   * bundled face on every OS rather than from whatever the system happens to
+   * ship. Latin text falls through to the platform UI font, which is what makes
+   * the chrome look native.
+   */
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", system-ui, sans-serif;
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    "Noto Sans Devanagari", sans-serif;
   font-size: 13px;
   overflow: hidden;
   border-radius: 12px;

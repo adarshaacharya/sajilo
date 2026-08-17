@@ -235,34 +235,49 @@ any user sees it.
 
 ---
 
-## M6 — Offline screens: Dashboard, Converter, Day details, Events ☐
+## M6 — Offline screens: Dashboard, Converter, Day details, Events ◐
 
 **Goal** The half of the product that needs no server, complete.
 **Depends on** M1 + M4 · **Size** L
 
 ### Tasks
 
-- [ ] `commands/calendar.rs` — `today`, `month`, `convert`, `events_for`, `upcoming`
-- [ ] `commands/plans.rs` + `store.rs` — day plans (`dayPlans.v1`), add / delete / list
-- [ ] Theme tokens, `Card`, `Segmented`, `TabBar`, `Header`, `CopyRow`, `Empty`
-- [ ] Bundle `Noto Sans Devanagari` (woff2 for the UI, TTF for the tray renderer)
-- [ ] `routes/dashboard` — date header, month grid, glance cards (placeholders for
+- [x] `commands/calendar.rs` — `today`, `month`, `convert`, `events_for`, `upcoming`
+- [x] `commands/plans.rs` + `store.rs` — day plans (`dayPlans.v1`), add / delete / list
+- [x] Theme tokens, `Card`, `Segmented`, `TabBar`, `Header`, `CopyRow`, `Empty`
+- [x] Bundle `Noto Sans Devanagari` — 6 woff2 subsets (138 KB) for the UI, rewritten
+      to local paths so nothing reaches a font CDN at runtime, plus the variable TTF
+      embedded in the tray renderer. OFL 1.1 shipped alongside.
+- [x] `routes/dashboard` — date header, month grid, glance cards (placeholders for
       remote modules), up-next, action bar
-- [ ] `routes/converter` — BS→AD and AD→BS, swap, today, three copy formats
-- [ ] `routes/day` — festival/tithi, three copy formats, day plan add/delete
-- [ ] `routes/events` — forward list, limit 100, horizon 400 days
-- [ ] `i18n/{en,ne}.json` ported from `.lproj`; numeral style toggle wired
-- [ ] **Dynamic tray date**: `tray/title.rs` on macOS; `tray/icon.rs` renders the day
-      number with cosmic-text + tiny-skia on Windows/Linux, cached and re-rendered
-      once per day at NPT midnight
+- [x] `routes/converter` — BS→AD and AD→BS, swap, today, three copy formats
+- [x] `routes/day` — festival/tithi, three copy formats, day plan add/delete
+- [x] `routes/events` — forward list, limit 100, horizon 400 days
+- [x] `i18n/{en,ne}.json` ported from `.lproj`; numeral style toggle wired
+- [x] **Dynamic tray date**: `tray/title.rs`, with all four menu-bar formats and a
+      rollover that recomputes the wait each time so it self-corrects after sleep.
+- [x] `tray/icon.rs` — the day number rendered into the icon with cosmic-text +
+      tiny-skia for Windows and Linux, cached per (day, numeral style). Two-pass:
+      the first measures real ink, the second blits it centred, because the line box
+      spans the font's full ascent-to-descent and centring on it leaves the digits
+      against the top edge.
 
 ### Acceptance
 
-- Every screen above works with networking disabled
-- Tray shows the correct Nepali date and rolls over at midnight NPT (test by moving
-  the clock, not by waiting)
-- Switching language and numeral style updates the tray and every screen
-- Devanagari renders identically on all three OSes
+**Partly signed off.**
+
+- Every screen above works with networking disabled ✓ by construction — the four
+  offline screens call only `sajilo-core` commands and no HTTP client is linked
+  into the desktop binary at all.
+- Tray rollover at NPT midnight ✓ tested by moving the clock, not by waiting.
+- Switching language and numeral style ✓ for the tray label (unit-tested across all
+  four formats); **not yet verified on screen** — that needs a human at the popover.
+- Devanagari rendering on all three OSes — the font is now bundled rather than
+  borrowed from the system, and the tray renderer's output was checked by eye and
+  is pinned by a centring test. Windows and Linux still have not been *run*.
+
+The screens themselves have not been seen rendering: `osascript` cannot reach the
+popover without assistive access. The commands behind them are tested directly.
 
 ---
 
@@ -294,24 +309,40 @@ any user sees it.
 
 ---
 
-## M8 — Radio and Tools ☐
+## M8 — Radio and Tools ◐
 
 **Goal** Audio that survives dismissal, and the four calculators.
 **Depends on** M6 · **Size** M
 
 ### Tasks
 
-- [ ] `lib/audio.ts` — one `<audio>` element owned above the router, direct stream
-- [ ] `routes/radio` — station list from `/v1/radio/stations`, search, play/pause/stop,
-      now-playing row pinned at the top
-- [ ] `commands/tools.rs` → `routes/tools` — land (Hill/Terai), weight, VAT, interest
-- [ ] Verify hidden-window playback on WebView2 and WKWebView
-- [ ] Verify playback always starts from a user gesture (no autoplay policy path)
+- [x] `lib/audio.ts` — one `<audio>` element created against `document`, never
+      unmounted, so playback survives both navigation and dismissal. `stop()` clears
+      `src` rather than only pausing: a paused live stream keeps its socket open and
+      goes on consuming data nobody is hearing.
+- [ ] `routes/radio` — the now-playing row, play/pause/stop and the pinned layout are
+      done. **The station list is not**: it comes from `/v1/radio/stations`, and the
+      API client is an M7 task. The screen currently renders `unavailable` for the
+      directory rather than an empty list that would read as "Nepal has no stations".
+      Search lands with the list.
+- [x] `commands/tools.rs` → `routes/tools` — land (Hill/Terai), weight, VAT, interest.
+      All four delegate to `sajilo-core`; the screen computes nothing itself, including
+      the lakh/crore grouping, which no `Intl` locale produces.
+- [ ] Verify hidden-window playback on WebView2 and WKWebView — **not done**, and it
+      is the risk this milestone exists to retire. Needs a real station playing, so it
+      is blocked on the station list above.
+- [x] Playback always starts from a user gesture: there is no autoplay path in the
+      code at all — `play()` is only ever reached from a click handler.
 
 ### Acceptance
 
-A station plays continuously across popover dismiss and reopen on all three OSes, and
-converter output matches the Rust tests from M1.
+- Converter output matches the Rust tests from M1 ✓ — the Tools screen renders command
+  output directly, and those commands are tested against the same expectations
+  (15 tests in `commands.rs`).
+- **A station playing across dismiss and reopen — not verified.** No station list yet,
+  so nothing has actually been played. The design is in place (a document-owned audio
+  element plus a window that hides rather than closes) but the claim is untested on
+  all three platforms.
 
 ### Notes
 

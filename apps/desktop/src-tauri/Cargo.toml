@@ -24,6 +24,10 @@ tauri-plugin-notification = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+# Windows and Linux cannot show text beside a tray icon, so the day number is
+# drawn into the icon itself.
+tiny-skia = "0.11"
+cosmic-text = "0.14"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-autostart = "2"
