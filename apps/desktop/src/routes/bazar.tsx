@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "../components/Card";
-import { ICONS, Icon } from "../components/Icon";
+import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api, type Bazar as BazarFeeds } from "../lib/ipc";
@@ -8,12 +8,14 @@ import { useSettings } from "../lib/settings";
 
 type Translate = ReturnType<typeof useSettings>["t"];
 
+import { Stocks } from "./bazar/Stocks";
 import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
+import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
 
-type Tab = "metals" | "fuel" | "vegetables";
+type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 
 /** Nepali grouping is the Indian lakh/crore one, which `en-IN` already knows. */
 const money = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
@@ -58,7 +60,7 @@ function Row({
   const change = price - previous;
   const flat = Math.abs(change) < 0.005;
   return (
-    <div className="flex items-baseline justify-between gap-2 border-b border-border/60 py-1.5 last:border-0">
+    <div className="row-line flex items-baseline justify-between gap-2 py-1.5">
       <div className="min-w-0">
         <p className="truncate">{name}</p>
         <p className="text-[11px] text-text-muted">{unit}</p>
@@ -149,7 +151,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
     <div>
       <div className="relative mb-1.5">
         <Icon
-          path={ICONS.search}
+          name="search"
           className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
         />
         <input
@@ -157,7 +159,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("bazar.search-produce")}
-          className="h-8 w-full rounded-md border border-border bg-surface pl-7 pr-2 text-[12px]"
+          className="h-8 w-full rounded-xl border border-border bg-surface pl-7 pr-2 text-[12px]"
         />
       </div>
       <p className="mb-1 text-[11px] text-text-muted">{t("bazar.wholesale-note")}</p>
@@ -165,7 +167,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
       {matches.map((price) => (
         <div
           key={price.name}
-          className="flex items-baseline justify-between gap-2 border-b border-border/60 py-1.5 last:border-0"
+          className="row-line flex items-baseline justify-between gap-2 py-1.5"
         >
           <div className="min-w-0">
             <p className="truncate">{price.englishName ?? price.name}</p>
@@ -188,11 +190,13 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
 
 export function Bazar() {
   const { t } = useSettings();
-  const [tab, setTab] = useState<Tab>("metals");
+  const [tab, setTab] = useState<Tab>("stocks");
   const [feeds, setFeeds] = useState<BazarFeeds>();
+  const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
 
   const load = useCallback((refresh = false) => {
     setFeeds(undefined);
+    setStocks(undefined);
     api
       .getBazar(refresh)
       .then(setFeeds)
@@ -200,6 +204,10 @@ export function Bazar() {
         const failed = { status: "failed", value: String(error) } as const;
         setFeeds({ metals: failed, fuel: failed, vegetables: failed });
       });
+    api
+      .getStocks(refresh)
+      .then(setStocks)
+      .catch((error: unknown) => setStocks({ status: "failed", value: String(error) }));
   }, []);
 
   // Rust caches the payload, so re-entering the screen costs no upstream fetch.
@@ -216,11 +224,14 @@ export function Bazar() {
         value={tab}
         onChange={setTab}
         options={[
-          { id: "metals", label: t("bazar.metals"), icon: ICONS.gold },
-          { id: "fuel", label: t("bazar.fuel"), icon: ICONS.fuel },
-          { id: "vegetables", label: t("bazar.vegetables"), icon: ICONS.vegetables },
+          { id: "stocks", label: t("bazar.stocks"), icon: "interest" as const },
+          { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
+          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
+          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
         ]}
       />
+
+      {tab === "stocks" && <Stocks state={stocks} onRetry={() => load(true)} />}
 
       {tab === "metals" && (
         <Card title={t("bazar.metals")}>

@@ -14,36 +14,57 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum MenuBarFormat {
+    /// `साउन ३१`
+    NepaliShort,
     /// `साउन ३१, २०८३`
     #[default]
     NepaliLong,
-    /// `२०८३/०४/३१`
-    Numeric,
     /// `🇳🇵 साउन ३१`
     NepaliFlag,
     /// `Aug 16` — already Latin by definition, and unaffected by the numeral
     /// setting.
     EnglishShort,
+    /// `२०८३/०४/३१`
+    Numeric,
+    /// Built from the custom flag/year toggles.
+    Custom,
+}
+
+/// The two switches under the Custom format — same keys as the Swift app.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CustomMenuBar {
+    pub show_flag: bool,
+    pub show_year: bool,
+}
+
+impl Default for CustomMenuBar {
+    fn default() -> Self {
+        Self {
+            show_flag: true,
+            show_year: true,
+        }
+    }
 }
 
 /// Renders the tray label for a given date.
 ///
 /// Pure, and takes the date rather than reading the clock, so the midnight
 /// rollover can be tested by moving the date instead of waiting for it.
-pub fn title(date: NepaliDate, format: MenuBarFormat, numerals: NumeralStyle) -> String {
+pub fn title(
+    date: NepaliDate,
+    format: MenuBarFormat,
+    numerals: NumeralStyle,
+    custom: CustomMenuBar,
+) -> String {
+    let day = numerals.format(i64::from(date.day), None);
+    let year = numerals.format(date.year, None);
+    let month = date.nepali_month_name();
+
     match format {
-        MenuBarFormat::NepaliLong => format!(
-            "{} {}, {}",
-            date.nepali_month_name(),
-            numerals.format(i64::from(date.day), None),
-            numerals.format(date.year, None)
-        ),
+        MenuBarFormat::NepaliShort => format!("{month} {day}"),
+        MenuBarFormat::NepaliLong => format!("{month} {day}, {year}"),
         MenuBarFormat::Numeric => numerals.slashed_date(date),
-        MenuBarFormat::NepaliFlag => format!(
-            "🇳🇵 {} {}",
-            date.nepali_month_name(),
-            numerals.format(i64::from(date.day), None)
-        ),
+        MenuBarFormat::NepaliFlag => format!("🇳🇵 {month} {day}"),
         // Deliberately ignores `numerals`: this format is Latin by definition,
         // and turning its month name into digits would be nonsense.
         MenuBarFormat::EnglishShort => {
@@ -53,6 +74,17 @@ pub fn title(date: NepaliDate, format: MenuBarFormat, numerals: NumeralStyle) ->
                 // so fall back to something true rather than empty.
                 Err(_) => date.english_month_name().to_owned(),
             }
+        }
+        MenuBarFormat::Custom => {
+            let mut parts: Vec<String> = Vec::new();
+            if custom.show_flag {
+                parts.push("🇳🇵".to_owned());
+            }
+            parts.push(format!("{day} {month}"));
+            if custom.show_year {
+                parts.push(year);
+            }
+            parts.join(" ")
         }
     }
 }

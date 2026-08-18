@@ -1,9 +1,13 @@
 pub mod backup;
 pub mod bazar;
 pub mod calendar;
+pub mod forex;
+pub mod news;
 pub mod notify;
 pub mod plans;
 pub mod radio;
 pub mod rashifal;
+pub mod stocks;
 pub mod tools;
 pub mod tray;
+pub mod weather;

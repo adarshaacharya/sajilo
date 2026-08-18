@@ -1,18 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../components/Card";
+import { Icon } from "../../components/Icon";
+import { FadeUp, Stagger } from "../../components/motion";
 import {
   api,
   type CalendarMonth,
+  type DayPlan,
   type NepaliDate,
   type Today,
   type UpcomingEvent,
 } from "../../lib/ipc";
 import { digits } from "../../lib/numerals";
 import { useSettings } from "../../lib/settings";
+import { DateHeader } from "./DateHeader";
+import { GlanceCards } from "./GlanceCards";
 import { MonthGrid } from "./MonthGrid";
 
-/** "Today" / "Tomorrow" / "in N days", with the count in the chosen digits. */
+const PROVISIONAL_YEARS = new Set([2085, 2086, 2087, 2088, 2089, 2090]);
+const GREG_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 function relativeText(
   daysAway: number,
   t: (key: "relative.today" | "relative.tomorrow" | "relative.in-days") => string,
@@ -23,6 +30,21 @@ function relativeText(
   return t("relative.in-days").replace("{n}", digits(daysAway, numerals));
 }
 
+function planKey(date: NepaliDate): string {
+  return `${date.year}-${date.month}-${date.day}`;
+}
+
+function gregorianSpan(first: string, last: string): string {
+  const [y1, m1] = first.split("-").map(Number);
+  const [y2, m2] = last.split("-").map(Number);
+  if (!y1 || !m1 || !y2 || !m2) return "";
+  const a = GREG_MONTHS[m1 - 1];
+  const b = GREG_MONTHS[m2 - 1];
+  if (y1 === y2 && m1 === m2) return `${a} ${y1}`;
+  if (y1 === y2) return `${a}/${b} ${y1}`;
+  return `${a} ${y1}/${b} ${y2}`;
+}
+
 export function Dashboard() {
   const { numerals, t } = useSettings();
   const navigate = useNavigate();
@@ -30,8 +52,16 @@ export function Dashboard() {
   const [today, setToday] = useState<Today | null>(null);
   const [cursor, setCursor] = useState<NepaliDate | null>(null);
   const [month, setMonth] = useState<CalendarMonth | null>(null);
+  const [monthSpan, setMonthSpan] = useState("");
   const [upcoming, setUpcoming] = useState<UpcomingEvent[]>([]);
+  const [plans, setPlans] = useState<DayPlan[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const planDays = useMemo(() => {
+    const keys = new Set<string>();
+    for (const plan of plans) keys.add(planKey(plan.date));
+    return keys;
+  }, [plans]);
 
   useEffect(() => {
     api
@@ -42,16 +72,34 @@ export function Dashboard() {
       })
       .catch((cause) => setError(String(cause)));
     api
-      .upcomingEvents(5)
+      .upcomingEvents(1)
       .then(setUpcoming)
       .catch(() => setUpcoming([]));
+    api
+      .listPlans()
+      .then(setPlans)
+      .catch(() => setPlans([]));
   }, []);
 
   useEffect(() => {
     if (!cursor) return;
     api
       .monthGrid(cursor.year, cursor.month)
-      .then(setMonth)
+      .then(async (grid) => {
+        setMonth(grid);
+        const days = grid.days.filter((day) => day.date);
+        const first = days[0]?.date;
+        const last = days[days.length - 1]?.date;
+        if (!first || !last) {
+          setMonthSpan("");
+          return;
+        }
+        const [a, b] = await Promise.all([
+          api.bsToAd(first.year, first.month, first.day),
+          api.bsToAd(last.year, last.month, last.day),
+        ]);
+        setMonthSpan(gregorianSpan(a.gregorian, b.gregorian));
+      })
       .catch((cause) => setError(String(cause)));
   }, [cursor]);
 
@@ -74,76 +122,74 @@ export function Dashboard() {
     return <p className="text-text-muted">…</p>;
   }
 
+  const provisional = cursor && PROVISIONAL_YEARS.has(cursor.year);
+  const upNext = upcoming[0];
+
   return (
-    <div className="space-y-2">
-      <Card>
-        <div className="flex items-baseline justify-between">
-          <div>
-            <p className="text-[17px] font-semibold leading-tight">
-              {today.nepaliMonthName} {digits(today.nepali.day, numerals)}
-            </p>
-            <p className="text-text-secondary">{digits(today.nepali.year, numerals)}</p>
+    <Stagger className="space-y-2.5">
+      <FadeUp>
+        <DateHeader today={today} />
+      </FadeUp>
+
+      <FadeUp>
+        <Card>
+          <div className="mb-2 flex items-center justify-between">
+            <button
+              type="button"
+              aria-label={t("calendar.previous-month")}
+              onClick={() => step(-1)}
+              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+            >
+              ‹
+            </button>
+            <span className="text-[12px] font-medium">
+              {month.title}
+              {monthSpan ? ` · ${monthSpan}` : ""}
+            </span>
+            <button
+              type="button"
+              aria-label={t("calendar.next-month")}
+              onClick={() => step(1)}
+              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+            >
+              ›
+            </button>
           </div>
-          <p className="text-right text-text-muted">{today.gregorian}</p>
-        </div>
-      </Card>
+          <MonthGrid
+            month={month}
+            planDays={planDays}
+            onSelect={(day) =>
+              day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
+            }
+          />
+          {provisional && (
+            <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
+          )}
+        </Card>
+      </FadeUp>
 
-      <Card>
-        <div className="mb-2 flex items-center justify-between">
+      {upNext && (
+        <FadeUp>
           <button
             type="button"
-            aria-label="Previous month"
-            onClick={() => step(-1)}
-            className="rounded px-2 text-text-secondary hover:bg-surface-hover"
+            onClick={() => navigate("/events")}
+            className="surface-card glance-card glance-event flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
           >
-            ‹
-          </button>
-          <span className="text-[12px] font-medium">{month.title}</span>
-          <button
-            type="button"
-            aria-label="Next month"
-            onClick={() => step(1)}
-            className="rounded px-2 text-text-secondary hover:bg-surface-hover"
-          >
-            ›
-          </button>
-        </div>
-        <MonthGrid
-          month={month}
-          onSelect={(day) =>
-            day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
-          }
-        />
-      </Card>
+              <Icon
+                name="festival"
+                className="relative z-[1] size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
+              />
+              <span className="relative z-[1] min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
+              <span className="relative z-[1] shrink-0 text-[11px] text-text-muted">
+                {relativeText(upNext.days_away, t, numerals)} ›
+              </span>
+            </button>
+        </FadeUp>
+      )}
 
-      <Card title={t("planner.up-next")}>
-        {upcoming.length === 0 ? (
-          <p className="text-text-muted">{t("upcoming.empty")}</p>
-        ) : (
-          <ul className="space-y-1.5">
-            {upcoming.map((event) => (
-              <li key={`${event.date.year}-${event.date.month}-${event.date.day}-${event.name}`}>
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(`/day?y=${event.date.year}&m=${event.date.month}&d=${event.date.day}`)
-                  }
-                  className="flex w-full items-baseline justify-between gap-2 text-left"
-                >
-                  <span
-                    className={`truncate ${event.is_public_holiday ? "text-holiday" : "text-text"}`}
-                  >
-                    {event.name}
-                  </span>
-                  <span className="shrink-0 text-[11px] text-text-muted">
-                    {relativeText(event.days_away, t, numerals)}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-    </div>
+      <FadeUp>
+        <GlanceCards />
+      </FadeUp>
+    </Stagger>
   );
 }

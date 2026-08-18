@@ -1,41 +1,50 @@
 @import "tailwindcss";
-/* The Devanagari face is loaded from index.html — it lives in public/ and is
-   served verbatim, so the CSS bundler cannot resolve it from here. */
 
 /*
- * Sajilo is a dark, compact, card-based popover. The tokens live here so every
- * screen draws from one palette rather than each inventing its own greys.
+ * Patro skin — warm glass over macOS vibrancy.
+ * Brass gilt for today / marks; holiday red for Saturdays only (as text).
  */
 @theme {
-  --color-surface: #16181d;
-  --color-surface-raised: #1e2128;
-  --color-surface-hover: #252932;
-  --color-border: #2c313b;
-  --color-text: #eef1f6;
-  --color-text-secondary: #99a1b0;
-  --color-text-muted: #6b7382;
-  --color-accent: #dc143c; /* Nepali crimson */
-  --color-holiday: #f2555a;
-  --color-positive: #3fbf7f;
-  --color-negative: #f2555a;
+  --color-surface: transparent;
+  --color-surface-raised: color-mix(in srgb, #fff 9%, transparent);
+  --color-surface-hover: color-mix(in srgb, #fff 13%, transparent);
+  /* Hairline — label-derived, never a bright white stroke. */
+  --color-border: color-mix(in srgb, var(--color-text) 9%, transparent);
+  --color-divider: color-mix(in srgb, var(--color-text) 5.5%, transparent);
+  --color-text: #f4f6fa;
+  --color-text-secondary: #b4bac6;
+  --color-text-muted: #7d8594;
+  --color-accent: #8a6a2f;
+  --color-accent-mark: #d4a84a;
+  --color-holiday: #ff6b6f;
+  --color-positive: #4ecf8a;
+  --color-negative: #ff6b6f;
+  --color-weather-tint: #5b9fd4;
+  --color-forex-tint: #6bc49a;
 
-  --radius-card: 8px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-card: 14px;
 }
 
-/*
- * The popover follows the OS appearance. Only the surface/text/border tokens
- * move; accent, holiday, positive and negative stay put so the same colour
- * always means the same thing in either appearance.
- */
 @media (prefers-color-scheme: light) {
   :root {
-    --color-surface: #f7f8fa;
-    --color-surface-raised: #ffffff;
-    --color-surface-hover: #eceef2;
-    --color-border: #dde0e6;
-    --color-text: #14171c;
-    --color-text-secondary: #566072;
-    --color-text-muted: #838c9c;
+    --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
+    --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
+    --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
+    --color-divider: color-mix(in srgb, var(--color-text) 7%, transparent);
+    --color-text: #1a1712;
+    --color-text-secondary: #5c564c;
+    --color-text-muted: #8a8378;
+    --color-accent: #6b5219;
+    --color-accent-mark: #8a6a2f;
+    --color-weather-tint: #3d7ab5;
+    --color-forex-tint: #3d9a6e;
   }
 }
 
@@ -44,42 +53,365 @@ body,
 #root {
   height: 100%;
   margin: 0;
+  overflow: hidden;
+  background: transparent !important;
 }
 
-/* Lets scrollbars, form controls and text selection pick up the OS appearance
-   too, so the chrome we do not draw ourselves still matches. */
 html {
   color-scheme: light dark;
 }
 
-body {
-  /* Rounded because the window itself is transparent and undecorated. */
-  background: var(--color-surface);
+/* Glass shell — vibrancy underneath, warm ambient wash on top. */
+.app-window {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  clip-path: inset(0 round 14px);
+  border: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-text);
-  /*
-   * Devanagari first, so month names, tithi and festival text render from the
-   * bundled face on every OS rather than from whatever the system happens to
-   * ship. Latin text falls through to the platform UI font, which is what makes
-   * the chrome look native.
-   */
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     "Noto Sans Devanagari", sans-serif;
   font-size: 12px;
-  overflow: hidden;
-  border-radius: 12px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
 
-/* A popover is not a document; a visible scrollbar reads as chrome. */
+/* Ambient canvas — breaks up the flat grey slab. */
+.app-window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 22%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 14%, transparent), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, color-mix(in srgb, #fff 3%, transparent), transparent 70%),
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, #1c1a24 68%, transparent) 0%,
+      color-mix(in srgb, #12141c 74%, transparent) 55%,
+      color-mix(in srgb, #0e1016 78%, transparent) 100%
+    );
+}
+
+@media (prefers-color-scheme: light) {
+  .app-window::before {
+    background:
+      radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
+      radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
+      linear-gradient(
+        168deg,
+        color-mix(in srgb, #faf6ee 82%, transparent) 0%,
+        color-mix(in srgb, #f0ebe2 86%, transparent) 100%
+      );
+  }
+}
+
+.app-window > * {
+  position: relative;
+  z-index: 1;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Raised glass card — depth without a chalk-white rim. */
+.surface-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface-raised) 100%, transparent);
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, #000 16%, transparent),
+    0 6px 20px color-mix(in srgb, #000 18%, transparent);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.surface-card:hover {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 18%, var(--color-border));
+  box-shadow:
+    0 2px 4px color-mix(in srgb, #000 14%, transparent),
+    0 10px 28px color-mix(in srgb, #000 22%, transparent);
+}
+
+/* Route header — whisper separator, not a white rule. */
+.header-bar {
+  border-bottom: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Inset list dividers — macOS Settings-style, not edge-to-edge white lines. */
+.list-rows > li {
+  position: relative;
+}
+
+.list-rows > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: var(--color-divider);
+  pointer-events: none;
+}
+
+.list-rows > li > button,
+.list-rows > li > a {
+  width: 100%;
+}
+
+/* Compact rows inside cards (stocks, forex, bazar). */
+.row-line {
+  position: relative;
+}
+
+.row-line + .row-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: var(--color-divider);
+  pointer-events: none;
+}
+
+.section-divider {
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Compact icon-only header / toolbar buttons. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 6px;
+  color: var(--color-text-muted);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Today date plate — gilt glow. */
+.date-plate {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 28%, var(--color-border));
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--color-accent-mark) 18%, transparent),
+    color-mix(in srgb, var(--color-surface-raised) 100%, transparent) 55%
+  );
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+}
+
+/* Glance widgets — tinted glass instead of identical grey boxes. */
+.glance-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glance-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  border-radius: inherit;
+}
+
+.glance-weather::before {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-weather-tint) 22%, transparent) 0%,
+    transparent 65%
+  );
+}
+
+.glance-forex::before {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-forex-tint) 20%, transparent) 0%,
+    transparent 65%
+  );
+}
+
+.glance-event::before {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent-mark) 14%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Calendar today cell — gilt gradient, not flat fill. */
+.cal-today {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-accent-mark) 95%, #fff 5%),
+    color-mix(in srgb, var(--color-accent) 90%, #000 10%)
+  );
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--color-accent-mark) 35%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent);
+}
+
+.weather-hero {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-accent-mark) 14%, transparent),
+    transparent 70%
+  );
+}
+
+/* Tab bar — frosted dock. */
+.tab-bar {
+  border-top: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-surface-raised) 55%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.tab-link {
+  position: relative;
+}
+
+.tab-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent-mark) 12%, var(--color-surface-hover));
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 16%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent-mark) 8%, transparent);
+}
+
+/* Equalizer */
+.eq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.eq-bar {
+  width: 2.5px;
+  height: 15px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
+  transform-origin: center;
+  transform: scaleY(0.28);
+}
+
+.eq-playing .eq-bar {
+  animation: eq-bounce 0.55s ease-in-out infinite alternate;
+}
+
+.eq-playing .eq-bar:nth-child(1) {
+  animation-delay: 0ms;
+}
+.eq-playing .eq-bar:nth-child(2) {
+  animation-delay: 120ms;
+}
+.eq-playing .eq-bar:nth-child(3) {
+  animation-delay: 40ms;
+}
+.eq-playing .eq-bar:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+@keyframes eq-bounce {
+  from {
+    transform: scaleY(0.32);
+  }
+  to {
+    transform: scaleY(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eq-playing .eq-bar {
+    animation: none;
+    transform: scaleY(0.7);
+  }
+
+  .surface-card {
+    transition: none;
+  }
+}
+
+/* macOS NSSegmentedControl — inset track + sliding glass thumb. */
+.seg-track {
+  background: color-mix(in srgb, var(--color-text) 7%, transparent);
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, #000 22%, transparent),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.seg-track--scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  mask-image: linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent);
+}
+
+.seg-track--scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.seg-thumb {
+  background: color-mix(in srgb, var(--color-surface-raised) 90%, #fff 10%);
+  box-shadow:
+    0 0.5px 1px color-mix(in srgb, #000 24%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  .seg-track {
+    background: color-mix(in srgb, var(--color-text) 5%, transparent);
+    box-shadow:
+      inset 0 1px 2px color-mix(in srgb, #000 8%, transparent),
+      inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 5%, transparent);
+  }
+
+  .seg-thumb {
+    background: color-mix(in srgb, #fff 92%, transparent);
+    box-shadow:
+      0 0.5px 1px color-mix(in srgb, #000 10%, transparent),
+      0 0 0 0.5px color-mix(in srgb, #000 5%, transparent);
+  }
 }

@@ -18,6 +18,7 @@ pub mod nrb;
 pub mod open_meteo;
 pub mod ratopati;
 pub mod rss;
+pub mod sharesansar;
 
 pub use error::{ProviderError, Result};
 pub use http::HttpClient;

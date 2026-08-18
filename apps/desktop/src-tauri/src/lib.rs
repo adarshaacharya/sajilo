@@ -41,10 +41,21 @@ pub fn run() {
         .setup(|app| {
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
+            app.manage(commands::stocks::StocksCache::default());
             app.manage(commands::rashifal::RashifalCache::default());
             app.manage(commands::radio::RadioCache::default());
+            app.manage(commands::weather::WeatherCache::default());
+            app.manage(commands::forex::ForexCache::default());
+            app.manage(commands::news::NewsCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
+            // Clear chrome + popover vibrancy so the web UI sits on frosted glass
+            // (Swift Patro) and CSS border-radius isn't painted on a square plate.
+            if let Some(main) = app.get_webview_window(window::MAIN) {
+                let _ = main.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
+                #[cfg(target_os = "macos")]
+                window::polish_macos_chrome(&main);
+            }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());
@@ -66,9 +77,13 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
+            commands::stocks::get_stocks,
             commands::rashifal::get_rashifal,
             commands::radio::get_stations,
             commands::radio::station_stream,
+            commands::weather::get_weather,
+            commands::forex::get_forex,
+            commands::news::get_news,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,
@@ -100,6 +115,7 @@ pub fn run() {
             system::autostart::set_autostart,
             system::autostart::set_dock_icon_visible,
             commands::tray::refresh_tray,
+            commands::tray::quit_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");

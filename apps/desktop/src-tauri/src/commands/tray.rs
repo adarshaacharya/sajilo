@@ -10,3 +10,8 @@ use tauri::{AppHandle, Wry};
 pub fn refresh_tray(app: AppHandle<Wry>) {
     crate::tray::refresh_title(&app);
 }
+
+#[tauri::command]
+pub fn quit_app(app: AppHandle<Wry>) {
+    app.exit(0);
+}

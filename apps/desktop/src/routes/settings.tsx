@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Card } from "../components/Card";
-import { ICONS } from "../components/Icon";
+import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Select } from "../components/Select";
 import { Toggle } from "../components/Toggle";
@@ -9,22 +9,30 @@ import {
   api,
   type NotificationOptions,
   type PermissionState,
-  type SupportedRange,
 } from "../lib/ipc";
 import { digits, type NumeralStyle } from "../lib/numerals";
-import { useSettings } from "../lib/settings";
+import { FOREX_OPTIONS, useSettings } from "../lib/settings";
 
 type Tab = "display" | "modules" | "system";
 
-const MENU_BAR_FORMATS = ["nepaliLong", "numeric", "nepaliFlag", "englishShort"] as const;
+const MENU_BAR_FORMATS = [
+  "nepaliShort",
+  "nepaliLong",
+  "nepaliFlag",
+  "englishShort",
+  "numeric",
+  "custom",
+] as const;
 
 /** Each label previews the shape it produces, since the option ids say nothing
  * about what lands in the menu bar. */
 const MENU_BAR_FORMAT_LABELS: Record<(typeof MENU_BAR_FORMATS)[number], string> = {
+  nepaliShort: "Short — साउन ३१",
   nepaliLong: "Full — साउन ३१, २०८३",
-  numeric: "Numeric — २०८३/०४/३१",
   nepaliFlag: "With flag — 🇳🇵 साउन ३१",
   englishShort: "Gregorian — Aug 16",
+  numeric: "Numeric — २०८३/०४/३१",
+  custom: "Custom…",
 };
 
 export function Settings() {
@@ -38,9 +46,9 @@ export function Settings() {
         value={tab}
         onChange={setTab}
         options={[
-          { id: "display" as const, label: t("settings.tab-display"), icon: ICONS.display },
-          { id: "modules" as const, label: t("settings.tab-modules"), icon: ICONS.modules },
-          { id: "system" as const, label: t("settings.tab-system"), icon: ICONS.system },
+          { id: "display" as const, label: t("settings.tab-display"), icon: "display" as const },
+          { id: "modules" as const, label: t("settings.tab-modules"), icon: "modules" as const },
+          { id: "system" as const, label: t("settings.tab-system"), icon: "system" as const },
         ]}
       />
 
@@ -58,6 +66,16 @@ export function Settings() {
   );
 }
 
+/** Label + control on one row — closer to Swift SettingsSection pickers. */
+function SettingsRow({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+      <span className="w-[88px] shrink-0 text-[12px] text-text-secondary">{label}</span>
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  );
+}
+
 function DisplayTab({
   language,
   setLanguage,
@@ -70,131 +88,193 @@ function DisplayTab({
   setNumerals: (value: NumeralStyle) => void;
 }) {
   const { t } = useSettings();
-  const [range, setRange] = useState<SupportedRange | null>(null);
   const [format, setFormat] = useState<string>("nepaliLong");
+  const [showFlag, setShowFlag] = useState(true);
+  const [showYear, setShowYear] = useState(true);
 
-  useEffect(() => {
-    api
-      .supportedRange()
-      .then(setRange)
-      .catch(() => {});
-  }, []);
-
-  // The tray reads this from the store at launch, so the picker has to read it
-  // back too — otherwise it always claims the default no matter what is saved.
   useEffect(() => {
     import("@tauri-apps/plugin-store")
       .then(({ load }) => load("sajilo.json", { autoSave: true }))
-      .then((store) => store.get<string>("menuBarFormat"))
-      .then((saved) => {
+      .then(async (store) => {
+        const saved = await store.get<string>("menuBarFormat");
         if (saved) setFormat(saved);
+        const flag = await store.get<boolean>("customMenuBarShowsFlag");
+        if (flag !== undefined) setShowFlag(flag);
+        const year = await store.get<boolean>("customMenuBarShowsYear");
+        if (year !== undefined) setShowYear(year);
       })
-      .catch(() => {
-        /* Not running under Tauri; the default stands. */
-      });
+      .catch(() => {});
   }, []);
+
+  const persistFormat = (next: string) => {
+    setFormat(next);
+    import("@tauri-apps/plugin-store")
+      .then(({ load }) => load("sajilo.json", { autoSave: true }))
+      .then((store) => store.set("menuBarFormat", next))
+      .then(() => api.refreshTray())
+      .catch(() => {});
+  };
+
+  const persistCustom = (key: "customMenuBarShowsFlag" | "customMenuBarShowsYear", value: boolean) => {
+    import("@tauri-apps/plugin-store")
+      .then(({ load }) => load("sajilo.json", { autoSave: true }))
+      .then((store) => store.set(key, value))
+      .then(() => api.refreshTray())
+      .catch(() => {});
+  };
 
   return (
     <>
-      <Card title={t("settings.language")}>
-        <Segmented
-          label={t("settings.language")}
-          value={language}
-          onChange={setLanguage}
-          options={[
-            { id: "ne" as const, label: t("language.nepali") },
-            { id: "en" as const, label: t("language.english") },
-          ]}
-        />
-      </Card>
-
-      <Card title={t("settings.numerals")}>
-        <Segmented
-          label={t("settings.numerals")}
-          value={numerals}
-          onChange={setNumerals}
-          options={[
-            // Each option previews itself in its own digits, so the picker
-            // shows what it does.
-            { id: "devanagari" as const, label: digits(2083, "devanagari") },
-            { id: "latin" as const, label: digits(2083, "latin") },
-          ]}
-        />
-        <p className="mt-1.5 text-[11px] text-text-muted">
-          {/* Not a translation setting: month names stay Devanagari either way. */}
-          {t("numerals.devanagari")} / {t("numerals.latin")}
-        </p>
+      <Card title={t("settings.appearance")}>
+        <SettingsRow label={t("settings.language")}>
+          <Select
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { id: "ne", label: t("language.nepali") },
+              { id: "en", label: t("language.english") },
+            ]}
+          />
+        </SettingsRow>
+        <div className="border-t border-border/50" />
+        <SettingsRow label={t("settings.numerals")}>
+          <Select
+            value={numerals}
+            onChange={setNumerals}
+            options={[
+              {
+                id: "devanagari",
+                label: `${t("numerals.devanagari")} · ${digits(2083, "devanagari")}`,
+              },
+              { id: "latin", label: `${t("numerals.latin")} · ${digits(2083, "latin")}` },
+            ]}
+          />
+        </SettingsRow>
       </Card>
 
       <Card title={t("settings.menu-bar")}>
-        <Select
-          value={format}
-          onChange={(next) => {
-            setFormat(next);
-            import("@tauri-apps/plugin-store")
-              .then(({ load }) => load("sajilo.json", { autoSave: true }))
-              .then((store) => store.set("menuBarFormat", next))
-              // The tray reads the store and is not watching it, so it has to
-              // be told the format changed.
-              .then(() => api.refreshTray())
-              .catch(() => {});
-          }}
-          options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
-        />
-        <p className="mt-1.5 text-[11px] text-text-muted">{t("settings.format")}</p>
+        <SettingsRow label={t("settings.format")}>
+          <Select
+            value={format}
+            onChange={persistFormat}
+            options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
+          />
+        </SettingsRow>
+        {format === "custom" && (
+          <>
+            <div className="border-t border-border/50" />
+            <Toggle
+              label={t("settings.menu-bar-show-flag")}
+              checked={showFlag}
+              onChange={(value) => {
+                setShowFlag(value);
+                persistCustom("customMenuBarShowsFlag", value);
+              }}
+            />
+            <Toggle
+              label={t("settings.menu-bar-show-year")}
+              checked={showYear}
+              onChange={(value) => {
+                setShowYear(value);
+                persistCustom("customMenuBarShowsYear", value);
+              }}
+            />
+          </>
+        )}
       </Card>
-
-      {range && (
-        <Card title={t("settings.calendar-range")}>
-          <p className="text-text-secondary">
-            {t("settings.calendar-range")}: {range.firstYear}–{range.lastYear}
-          </p>
-          <p className="mt-0.5 text-text-secondary">
-            {t("settings.festivals-range")}: {range.firstEventYear}–{range.lastEventYear}
-          </p>
-          <p className="mt-1.5 text-[11px] text-text-muted">{t("calendar.provisional")}</p>
-        </Card>
-      )}
     </>
   );
 }
 
-/**
- * Module switches. These are stored but have nothing to gate yet — the remote
- * screens land in M7 — so the note says so rather than implying they do nothing.
- */
 function ModulesTab() {
-  const { t } = useSettings();
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    weather: true,
-    forex: true,
-    news: true,
-    bazar: true,
-    rashifal: true,
-    radio: true,
-  });
+  const { t, modules, setModules } = useSettings();
 
-  const modules = [
-    { id: "weather", label: t("feature.weather"), note: t("settings.module-weather-note") },
-    { id: "forex", label: t("feature.forex"), note: t("settings.module-forex-note") },
-    { id: "news", label: t("screen.news"), note: t("settings.module-news-note") },
-    { id: "bazar", label: t("screen.bazar"), note: t("settings.module-bazar-note") },
-    { id: "rashifal", label: t("screen.rashifal"), note: t("settings.module-rashifal-note") },
-    { id: "radio", label: t("screen.radio"), note: t("settings.module-radio-note") },
+  const rows = [
+    {
+      key: "weatherEnabled" as const,
+      label: t("feature.weather"),
+      note: t("settings.module-weather-note"),
+      extra: (
+        <Select
+          label={t("settings.weather-location")}
+          value={modules.weatherLocation}
+          onChange={(next) =>
+            setModules((current) => ({
+              ...current,
+              weatherLocation: next as typeof modules.weatherLocation,
+            }))
+          }
+          options={[
+            { id: "kathmandu", label: "Kathmandu · काठमाडौं" },
+            { id: "pokhara", label: "Pokhara · पोखरा" },
+            { id: "lalitpur", label: "Lalitpur · ललितपुर" },
+          ]}
+        />
+      ),
+    },
+    {
+      key: "forexEnabled" as const,
+      label: t("feature.forex"),
+      note: t("settings.module-forex-note"),
+      extra: (
+        <div className="flex flex-wrap gap-1 pt-1">
+          {FOREX_OPTIONS.map((code) => {
+            const on = modules.forexFavourites.includes(code);
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() =>
+                  setModules((current) => ({
+                    ...current,
+                    forexFavourites: on
+                      ? current.forexFavourites.filter((item) => item !== code)
+                      : [...current.forexFavourites, code],
+                  }))
+                }
+                className={`rounded-md border px-1.5 py-0.5 text-[10px] ${
+                  on
+                    ? "border-accent text-accent"
+                    : "border-border text-text-muted hover:bg-surface-hover"
+                }`}
+              >
+                {code}
+              </button>
+            );
+          })}
+        </div>
+      ),
+    },
+    { key: "newsEnabled" as const, label: t("screen.news"), note: t("settings.module-news-note") },
+    { key: "bazarEnabled" as const, label: t("screen.bazar"), note: t("settings.module-bazar-note") },
+    {
+      key: "rashifalEnabled" as const,
+      label: t("screen.rashifal"),
+      note: t("settings.module-rashifal-note"),
+    },
+    { key: "radioEnabled" as const, label: t("screen.radio"), note: t("settings.module-radio-note") },
   ];
 
-  const noneOn = Object.values(enabled).every((value) => !value);
+  const noneOn =
+    !modules.weatherEnabled &&
+    !modules.forexEnabled &&
+    !modules.newsEnabled &&
+    !modules.bazarEnabled &&
+    !modules.rashifalEnabled &&
+    !modules.radioEnabled;
 
   return (
     <Card title={t("settings.modules")}>
-      {modules.map((module) => (
-        <Toggle
-          key={module.id}
-          label={module.label}
-          note={module.note}
-          checked={enabled[module.id] ?? true}
-          onChange={(value) => setEnabled((current) => ({ ...current, [module.id]: value }))}
-        />
+      {rows.map((row) => (
+        <div key={row.key} className="row-line py-2 first:pt-0">
+          <Toggle
+            label={row.label}
+            note={row.note}
+            checked={modules[row.key]}
+            onChange={(value) => setModules((current) => ({ ...current, [row.key]: value }))}
+          />
+          {modules[row.key] && row.extra}
+        </div>
       ))}
       {noneOn && (
         <p className="mt-1 text-[11px] text-text-muted">{t("settings.nothing-enabled")}</p>
@@ -230,10 +310,6 @@ function SystemTab() {
       .catch(() => {});
   }, []);
 
-  /**
-   * Permission is requested here, at the moment a reminder is switched on —
-   * never at launch, and never for a feature nobody asked for.
-   */
   const updateOptions = async (next: NotificationOptions) => {
     if ((next.eveOfFestival || next.eveOfPublicHoliday) && permission !== "granted") {
       setPermission(await api.requestNotificationPermission().catch(() => "denied" as const));
@@ -294,9 +370,6 @@ function SystemTab() {
           label={t("settings.launch-at-login")}
           checked={autostart}
           onChange={async (value) => {
-            // The result is what the OS reports back, not what was asked for:
-            // on macOS the login item can fail to register silently, and the
-            // toggle must not lie.
             setAutostart(await api.setAutostart(value).catch(() => autostart));
           }}
         />
@@ -315,16 +388,18 @@ function SystemTab() {
           <button
             type="button"
             onClick={() => exportData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
           >
-            {t("settings.export-data")}
+            <Icon name="export" className="size-3.5 shrink-0" />
+            <span className="truncate">{t("settings.export-data")}</span>
           </button>
           <button
             type="button"
             onClick={() => importData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
           >
-            {t("settings.import-data")}
+            <Icon name="import" className="size-3.5 shrink-0" />
+            <span className="truncate">{t("settings.import-data")}</span>
           </button>
         </div>
         <p className="mt-1.5 text-[11px] text-text-muted">{t("settings.backup-note")}</p>

@@ -20,6 +20,9 @@ use sajilo_api::meta::{FeedHealth, Health, Meta};
 use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
 use sajilo_api::radio::{RadioDirectory, RadioStation};
 use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalSnapshot};
+use sajilo_api::stocks::{
+    MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote,
+};
 use sajilo_api::weather::{
     AirQuality, AqiCategory, DailyForecast, WeatherCondition, WeatherLocation, WeatherSnapshot,
 };
@@ -65,6 +68,12 @@ fn exports_every_dto() {
 
     RadioStation::export_all().unwrap();
     RadioDirectory::export_all().unwrap();
+
+    MoverBoard::export_all().unwrap();
+    StockQuote::export_all().unwrap();
+    MarketIndex::export_all().unwrap();
+    MarketMover::export_all().unwrap();
+    StockMarketSnapshot::export_all().unwrap();
 
     Meta::export_all().unwrap();
     FeedHealth::export_all().unwrap();

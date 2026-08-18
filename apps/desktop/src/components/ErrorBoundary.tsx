@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
         <button
           type="button"
           onClick={() => this.setState({ error: null })}
-          className="rounded-md border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
+          className="rounded-xl border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
         >
           Try again
         </button>

@@ -27,6 +27,10 @@ pub fn toggle(app: &AppHandle) {
 
 pub fn show(window: &WebviewWindow) {
     position_at_tray(window);
+    // Re-assert clear + vibrancy each open — some macOS builds repaint opaque after hide.
+    let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
+    #[cfg(target_os = "macos")]
+    polish_macos_chrome(window);
     let _ = window.show();
     let _ = window.set_focus();
 }
@@ -61,4 +65,51 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
         return;
     }
     let _ = window.hide();
+}
+
+/// Clear NSWindow fill + apply popover vibrancy (Swift Patro / `.regularMaterial`).
+///
+/// CSS alone cannot frost the desk behind a WKWebView; that needs an
+/// `NSVisualEffectView` behind the web content. Call this from setup and again
+/// on each show — hide/show can leave an opaque plate on some macOS builds.
+#[cfg(target_os = "macos")]
+pub fn polish_macos_chrome(window: &WebviewWindow) {
+    clear_macos_background(window);
+    apply_macos_vibrancy(window);
+}
+
+/// Make the native window layers fully clear so a CSS-rounded shell can clip.
+///
+/// Tauri's `transparent: true` alone leaves the `NSWindow` opaque on macOS;
+/// without this, `border-radius` paints against a square black/white plate.
+#[cfg(target_os = "macos")]
+fn clear_macos_background(window: &WebviewWindow) {
+    use objc2_app_kit::{NSColor, NSWindow};
+
+    let Ok(ptr) = window.ns_window() else {
+        return;
+    };
+    // SAFETY: Tauri owns the NSWindow for the lifetime of the WebviewWindow.
+    let ns_window = unsafe { &*(ptr as *const NSWindow) };
+    ns_window.setOpaque(false);
+    ns_window.setBackgroundColor(Some(&NSColor::clearColor()));
+}
+
+/// Menu-bar popover material with matching corner radius.
+///
+/// `apply_vibrancy` always inserts a new effect view, so clear first to avoid
+/// stacking on repeated show().
+#[cfg(target_os = "macos")]
+fn apply_macos_vibrancy(window: &WebviewWindow) {
+    use window_vibrancy::{
+        apply_vibrancy, clear_vibrancy, NSVisualEffectMaterial, NSVisualEffectState,
+    };
+
+    let _ = clear_vibrancy(window);
+    let _ = apply_vibrancy(
+        window,
+        NSVisualEffectMaterial::Popover,
+        Some(NSVisualEffectState::Active),
+        Some(14.0),
+    );
 }
