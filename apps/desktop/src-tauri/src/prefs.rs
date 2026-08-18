@@ -8,11 +8,13 @@ use sajilo_core::numerals::NumeralStyle;
 use tauri::{AppHandle, Wry};
 use tauri_plugin_store::StoreExt;
 
-use crate::tray::title::MenuBarFormat;
+use crate::tray::title::{CustomMenuBar, MenuBarFormat};
 
 pub const STORE_FILE: &str = "sajilo.json";
 pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
 pub const NUMERAL_STYLE: &str = "numeralStyle";
+pub const CUSTOM_MENU_BAR_SHOWS_FLAG: &str = "customMenuBarShowsFlag";
+pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
 /// The same key the Swift app used, so an imported backup lands where the app
 /// already looks.
 pub const PLANS_KEY: &str = "dayPlans.v1";
@@ -30,6 +32,7 @@ pub const CACHE_FILE: &str = "cache.json";
 pub const BAZAR_METALS_KEY: &str = "bazar.metals.v1";
 pub const BAZAR_FUEL_KEY: &str = "bazar.fuel.v1";
 pub const BAZAR_VEGETABLES_KEY: &str = "bazar.vegetables.v1";
+pub const STOCKS_KEY: &str = "stocks.v1";
 pub const RASHIFAL_KEY: &str = "rashifal.v1";
 pub const RADIO_KEY: &str = "radio.v1";
 pub const WEATHER_KATHMANDU_KEY: &str = "weather.kathmandu.v1";
@@ -49,9 +52,13 @@ pub const FOREX_FAVOURITES: &str = "forexFavourites";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.
-pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle) {
+pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle, CustomMenuBar) {
     let Ok(store) = app.store(STORE_FILE) else {
-        return (MenuBarFormat::default(), NumeralStyle::default());
+        return (
+            MenuBarFormat::default(),
+            NumeralStyle::default(),
+            CustomMenuBar::default(),
+        );
     };
     fn read<T: serde::de::DeserializeOwned + Default>(
         store: &tauri_plugin_store::Store<Wry>,
@@ -62,7 +69,20 @@ pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle) {
             .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default()
     }
-    (read(&store, MENU_BAR_FORMAT), read(&store, NUMERAL_STYLE))
+    fn read_bool(store: &tauri_plugin_store::Store<Wry>, key: &str, default: bool) -> bool {
+        store
+            .get(key)
+            .and_then(|value| value.as_bool())
+            .unwrap_or(default)
+    }
+    (
+        read(&store, MENU_BAR_FORMAT),
+        read(&store, NUMERAL_STYLE),
+        CustomMenuBar {
+            show_flag: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_FLAG, true),
+            show_year: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_YEAR, true),
+        },
+    )
 }
 
 /// Which city the weather module fetches for. Matches the Swift backup key.

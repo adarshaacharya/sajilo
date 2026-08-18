@@ -8,12 +8,14 @@ import { useSettings } from "../lib/settings";
 
 type Translate = ReturnType<typeof useSettings>["t"];
 
+import { Stocks } from "./bazar/Stocks";
 import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
+import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
 
-type Tab = "metals" | "fuel" | "vegetables";
+type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 
 /** Nepali grouping is the Indian lakh/crore one, which `en-IN` already knows. */
 const money = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
@@ -188,11 +190,13 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
 
 export function Bazar() {
   const { t } = useSettings();
-  const [tab, setTab] = useState<Tab>("metals");
+  const [tab, setTab] = useState<Tab>("stocks");
   const [feeds, setFeeds] = useState<BazarFeeds>();
+  const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
 
   const load = useCallback((refresh = false) => {
     setFeeds(undefined);
+    setStocks(undefined);
     api
       .getBazar(refresh)
       .then(setFeeds)
@@ -200,6 +204,10 @@ export function Bazar() {
         const failed = { status: "failed", value: String(error) } as const;
         setFeeds({ metals: failed, fuel: failed, vegetables: failed });
       });
+    api
+      .getStocks(refresh)
+      .then(setStocks)
+      .catch((error: unknown) => setStocks({ status: "failed", value: String(error) }));
   }, []);
 
   // Rust caches the payload, so re-entering the screen costs no upstream fetch.
@@ -216,11 +224,14 @@ export function Bazar() {
         value={tab}
         onChange={setTab}
         options={[
+          { id: "stocks", label: t("bazar.stocks") },
           { id: "metals", label: t("bazar.metals"), icon: ICONS.gold },
           { id: "fuel", label: t("bazar.fuel"), icon: ICONS.fuel },
           { id: "vegetables", label: t("bazar.vegetables"), icon: ICONS.vegetables },
         ]}
       />
+
+      {tab === "stocks" && <Stocks state={stocks} onRetry={() => load(true)} />}
 
       {tab === "metals" && (
         <Card title={t("bazar.metals")}>

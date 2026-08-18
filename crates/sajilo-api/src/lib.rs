@@ -54,6 +54,7 @@ pub mod meta;
 pub mod news;
 pub mod radio;
 pub mod rashifal;
+pub mod stocks;
 pub mod weather;
 
 pub use bundle::{BundleRequest, BundleResponse, ModuleKey};

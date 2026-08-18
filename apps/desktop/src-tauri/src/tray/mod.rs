@@ -73,8 +73,8 @@ pub fn refresh_title(app: &AppHandle) {
         return;
     };
 
-    let (format, numerals) = crate::prefs::tray_preferences(app);
-    let label = title::title(date, format, numerals);
+    let (format, numerals, custom) = crate::prefs::tray_preferences(app);
+    let label = title::title(date, format, numerals, custom);
 
     // Only macOS renders text beside a tray icon.
     #[cfg(target_os = "macos")]

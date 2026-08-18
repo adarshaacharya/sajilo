@@ -1,6 +1,9 @@
 import { Icon } from "./Icon";
 
-/** A row of mutually exclusive choices — the tab strip pattern used throughout. */
+/**
+ * macOS-style segmented control — one recessed track, raised pill on the
+ * selected segment. Used for Settings / Bazar / Stocks movers.
+ */
 export function Segmented<T extends string>({
   options,
   value,
@@ -14,26 +17,36 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1">
-      {options.map((option) => (
-        <button
-          key={option.id}
-          type="button"
-          role="tab"
-          aria-selected={value === option.id}
-          onClick={() => onChange(option.id)}
-          // Same height as an input or select, so a tab strip above a form does
-          // not sit on a different rhythm from the controls under it.
-          className={`flex h-8 flex-1 items-center justify-center gap-1 rounded-md border px-2 text-[11px] transition-colors ${
-            value === option.id
-              ? "border-accent bg-accent/10 text-accent"
-              : "border-border text-text-secondary hover:bg-surface-hover"
-          }`}
-        >
-          {option.icon && <Icon path={option.icon} className="size-3.5 shrink-0" />}
-          <span className="truncate">{option.label}</span>
-        </button>
-      ))}
+    <div
+      role="tablist"
+      aria-label={label}
+      className="seg-track flex h-8 rounded-[9px] p-0.5"
+    >
+      {options.map((option) => {
+        const selected = option.id === value;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => onChange(option.id)}
+            className={`flex h-full min-w-0 flex-1 items-center justify-center gap-1 rounded-[7px] px-1.5 text-[11px] font-medium transition-[background-color,color,box-shadow] duration-150 ${
+              selected
+                ? "seg-thumb text-text"
+                : "text-text-secondary hover:text-text"
+            }`}
+          >
+            {option.icon && (
+              <Icon
+                path={option.icon}
+                className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
+              />
+            )}
+            <span className="truncate">{option.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

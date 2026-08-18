@@ -158,3 +158,31 @@ html {
     transform: scaleY(0.7);
   }
 }
+
+/* macOS segmented control — recessed track + raised selected thumb. */
+.seg-track {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  box-shadow: inset 0 1px 1px color-mix(in srgb, #000 28%, transparent);
+}
+
+.seg-thumb {
+  background: var(--color-surface-raised);
+  box-shadow:
+    0 0.5px 1px color-mix(in srgb, #000 40%, transparent),
+    0 0 0 0.5px color-mix(in srgb, var(--color-text) 8%, transparent),
+    inset 0 0.5px 0 color-mix(in srgb, #fff 10%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  .seg-track {
+    background: color-mix(in srgb, var(--color-text) 6%, transparent);
+    box-shadow: inset 0 1px 1px color-mix(in srgb, #000 10%, transparent);
+  }
+
+  .seg-thumb {
+    background: #fff;
+    box-shadow:
+      0 0.5px 1.5px color-mix(in srgb, #000 18%, transparent),
+      0 0 0 0.5px color-mix(in srgb, #000 6%, transparent);
+  }
+}

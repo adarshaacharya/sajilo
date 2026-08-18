@@ -8,6 +8,7 @@ import type { ForexSnapshot } from "../types/api/ForexSnapshot";
 import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
 import type { WeatherLocation } from "../types/api/WeatherLocation";
 import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
+import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
 
 /** Mirrors `commands::bazar::Bazar`. */
@@ -202,6 +203,9 @@ export const api = {
 
   /** All three bazar feeds. Cached in Rust; `refresh` forces a refetch. */
   getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),
+
+  getStocks: (refresh = false) =>
+    invoke<LoadState<StockMarketSnapshot>>("get_stocks", { refresh }),
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),

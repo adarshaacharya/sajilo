@@ -3,26 +3,57 @@
 use chrono::{FixedOffset, TimeZone};
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
-use sajilo_desktop_lib::tray::title::{MenuBarFormat, seconds_until_nepal_midnight, title};
+use sajilo_desktop_lib::tray::title::{
+    CustomMenuBar, MenuBarFormat, seconds_until_nepal_midnight, title,
+};
 
 fn date() -> NepaliDate {
     NepaliDate::new(2083, 4, 31)
 }
 
+fn render(format: MenuBarFormat, numerals: NumeralStyle) -> String {
+    title(date(), format, numerals, CustomMenuBar::default())
+}
+
 #[test]
 fn renders_every_menu_bar_format() {
     let devanagari = NumeralStyle::Devanagari;
+    assert_eq!(render(MenuBarFormat::NepaliShort, devanagari), "साउन ३१");
     assert_eq!(
-        title(date(), MenuBarFormat::NepaliLong, devanagari),
+        render(MenuBarFormat::NepaliLong, devanagari),
         "साउन ३१, २०८३"
     );
     assert_eq!(
-        title(date(), MenuBarFormat::Numeric, devanagari),
+        render(MenuBarFormat::Numeric, devanagari),
         "२०८३/०४/३१"
     );
     assert_eq!(
-        title(date(), MenuBarFormat::NepaliFlag, devanagari),
+        render(MenuBarFormat::NepaliFlag, devanagari),
         "🇳🇵 साउन ३१"
+    );
+    assert_eq!(
+        title(
+            date(),
+            MenuBarFormat::Custom,
+            devanagari,
+            CustomMenuBar {
+                show_flag: true,
+                show_year: true,
+            },
+        ),
+        "🇳🇵 ३१ साउन २०८३"
+    );
+    assert_eq!(
+        title(
+            date(),
+            MenuBarFormat::Custom,
+            NumeralStyle::Latin,
+            CustomMenuBar {
+                show_flag: false,
+                show_year: false,
+            },
+        ),
+        "31 साउन"
     );
 }
 
@@ -30,8 +61,8 @@ fn renders_every_menu_bar_format() {
 /// a numeral preference, not a translation.
 #[test]
 fn the_numeral_style_changes_digits_but_not_names() {
-    let latin = title(date(), MenuBarFormat::NepaliLong, NumeralStyle::Latin);
-    let devanagari = title(date(), MenuBarFormat::NepaliLong, NumeralStyle::Devanagari);
+    let latin = render(MenuBarFormat::NepaliLong, NumeralStyle::Latin);
+    let devanagari = render(MenuBarFormat::NepaliLong, NumeralStyle::Devanagari);
 
     assert_ne!(latin, devanagari);
     assert!(latin.contains("2083"));
@@ -39,7 +70,7 @@ fn the_numeral_style_changes_digits_but_not_names() {
     assert!(latin.contains("साउन"), "the month name stays Devanagari");
 
     assert_eq!(
-        title(date(), MenuBarFormat::Numeric, NumeralStyle::Latin),
+        render(MenuBarFormat::Numeric, NumeralStyle::Latin),
         "2083/04/31"
     );
 }
@@ -48,12 +79,8 @@ fn the_numeral_style_changes_digits_but_not_names() {
 /// touch it.
 #[test]
 fn the_english_format_ignores_the_numeral_setting() {
-    let a = title(
-        date(),
-        MenuBarFormat::EnglishShort,
-        NumeralStyle::Devanagari,
-    );
-    let b = title(date(), MenuBarFormat::EnglishShort, NumeralStyle::Latin);
+    let a = render(MenuBarFormat::EnglishShort, NumeralStyle::Devanagari);
+    let b = render(MenuBarFormat::EnglishShort, NumeralStyle::Latin);
     assert_eq!(a, b);
     // BS 2083-04-31 is 16 August 2026.
     assert_eq!(a, "Aug 16");
@@ -64,7 +91,12 @@ fn the_english_format_ignores_the_numeral_setting() {
 #[test]
 fn an_unconvertible_date_still_renders_something() {
     let outside = NepaliDate::new(3000, 1, 1);
-    let label = title(outside, MenuBarFormat::EnglishShort, NumeralStyle::Latin);
+    let label = title(
+        outside,
+        MenuBarFormat::EnglishShort,
+        NumeralStyle::Latin,
+        CustomMenuBar::default(),
+    );
     assert!(!label.is_empty());
     assert_eq!(label, "Baishakh");
 }
@@ -101,8 +133,18 @@ fn the_label_advances_by_one_day_at_midnight() {
     let before = date();
     let next = nepali_date_from(gregorian_date_from(before).unwrap().succ_opt().unwrap()).unwrap();
 
-    let a = title(before, MenuBarFormat::NepaliLong, NumeralStyle::Latin);
-    let b = title(next, MenuBarFormat::NepaliLong, NumeralStyle::Latin);
+    let a = title(
+        before,
+        MenuBarFormat::NepaliLong,
+        NumeralStyle::Latin,
+        CustomMenuBar::default(),
+    );
+    let b = title(
+        next,
+        MenuBarFormat::NepaliLong,
+        NumeralStyle::Latin,
+        CustomMenuBar::default(),
+    );
     assert_ne!(a, b);
     assert!(b.contains("2083"));
 }
