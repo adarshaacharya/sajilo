@@ -1,0 +1,17 @@
+[package]
+name = "sajilo-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# Codegen only: derives the TypeScript binding for NepaliDate, which crosses
+# into sajilo-api's DTOs. Adds no runtime, no I/O.
+ts-rs = { version = "10", optional = true }
+
+[features]
+typescript = ["dep:ts-rs"]

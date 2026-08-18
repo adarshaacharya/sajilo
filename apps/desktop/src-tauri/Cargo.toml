@@ -1,0 +1,37 @@
+[package]
+name = "sajilo-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+# Tauri wants the app as a library so the mobile entry points can share it.
+name = "sajilo_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+sajilo-api.workspace = true
+sajilo-core.workspace = true
+sajilo-providers.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
+tauri-plugin-store = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+# Windows and Linux cannot show text beside a tray icon, so the day number is
+# drawn into the icon itself.
+tokio = { version = "1", features = ["macros"] }
+tiny-skia = "0.11"
+cosmic-text = "0.14"
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"

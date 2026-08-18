@@ -1,0 +1,18 @@
+[package]
+name = "sajilo-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+sajilo-core.workspace = true
+chrono.workspace = true
+serde.workspace = true
+ts-rs = { version = "10", features = ["chrono-impl"], optional = true }
+
+[features]
+# Regenerates apps/desktop/src/types/api.ts via `cargo test --features typescript`.
+typescript = ["dep:ts-rs", "sajilo-core/typescript"]
+
+[dev-dependencies]
+serde_json.workspace = true

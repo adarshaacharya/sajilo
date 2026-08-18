@@ -1,0 +1,24 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:sajilo}",
+      "name": "Debug Sajilo",
+      "target": "Sajilo",
+      "configuration": "debug",
+      "preLaunchTask": "swift: Build Debug Sajilo"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:sajilo}",
+      "name": "Release Sajilo",
+      "target": "Sajilo",
+      "configuration": "release",
+      "preLaunchTask": "swift: Build Release Sajilo"
+    }
+  ]
+}

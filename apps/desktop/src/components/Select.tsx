@@ -1,0 +1,59 @@
+import { useId } from "react";
+import { CONTROL, CONTROL_LABEL } from "./control";
+
+/**
+ * A labelled dropdown, matching `Field` in height and label treatment.
+ *
+ * Still a native `<select>`: it keeps keyboard and screen-reader behaviour for
+ * free. Only the closed state is restyled — the popup is the OS's and should
+ * look like it.
+ */
+export function Select<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label?: string;
+  value: T;
+  onChange: (value: T) => void;
+  options: readonly { id: T; label: string }[];
+}) {
+  const id = useId();
+  const select = (
+    <div className="relative">
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className={`${CONTROL} w-full cursor-pointer appearance-none pr-7 hover:bg-surface-hover`}
+      >
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <svg
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 right-2 size-3 -translate-y-1/2 text-text-muted"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="m4.5 6.5 3.5-3 3.5 3M4.5 9.5l3.5 3 3.5-3" />
+      </svg>
+    </div>
+  );
+
+  if (!label) return select;
+  return (
+    <label className="block" htmlFor={id}>
+      <span className={CONTROL_LABEL}>{label}</span>
+      {select}
+    </label>
+  );
+}
