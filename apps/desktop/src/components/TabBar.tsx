@@ -1,9 +1,11 @@
 import { NavLink } from "react-router";
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { useSettings } from "../lib/settings";
 import * as player from "../lib/audio";
 import { Equalizer } from "./Equalizer";
 import { type IconName, Icon } from "./Icon";
+import { spring } from "../lib/motion";
 
 type LabelKey = Parameters<ReturnType<typeof useSettings>["t"]>[0];
 
@@ -38,30 +40,43 @@ export function TabBar() {
   const visible = TABS.filter((tab) => !tab.module || modules[tab.module]);
 
   return (
-    <nav className="flex shrink-0 gap-0.5 border-t border-border bg-surface px-1 py-1">
+    <nav className="tab-bar flex shrink-0 gap-0.5 px-1 py-1">
       {visible.map((tab) => (
         <NavLink
           key={tab.to}
           to={tab.to}
           end={tab.to === "/"}
-          className={({ isActive }) =>
-            `flex flex-1 flex-col items-center gap-0.5 rounded-md py-1 transition-colors ${
-              isActive
-                ? "bg-surface-hover text-accent"
-                : radioActive && tab.to === "/radio"
-                  ? "text-[color:var(--color-accent-mark)]"
-                  : "text-text-muted hover:bg-surface-hover/60 hover:text-text-secondary"
-            }`
-          }
+          className="tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1"
         >
-          {radioActive && tab.to === "/radio" ? (
-            <Equalizer isPlaying={radioPlaying} />
-          ) : (
-            <Icon name={tab.icon} />
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <motion.span
+                  layoutId="tab-pill"
+                  className="tab-indicator"
+                  transition={spring.tab}
+                />
+              )}
+              <span
+                className={`relative z-[1] flex flex-col items-center gap-0.5 transition-colors duration-200 ${
+                  isActive
+                    ? "text-[color:var(--color-accent-mark)]"
+                    : radioActive && tab.to === "/radio"
+                      ? "text-[color:var(--color-accent-mark)]"
+                      : "text-text-muted hover:text-text-secondary"
+                }`}
+              >
+                {radioActive && tab.to === "/radio" ? (
+                  <Equalizer isPlaying={radioPlaying} />
+                ) : (
+                  <Icon name={tab.icon} />
+                )}
+                <span className="w-full truncate px-0.5 text-center text-[10px] leading-none font-medium">
+                  {t(tab.labelKey)}
+                </span>
+              </span>
+            </>
           )}
-          <span className="w-full truncate px-0.5 text-center text-[10px] leading-none font-medium">
-            {t(tab.labelKey)}
-          </span>
         </NavLink>
       ))}
     </nav>

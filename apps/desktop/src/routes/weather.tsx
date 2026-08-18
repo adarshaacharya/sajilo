@@ -109,7 +109,7 @@ export function Weather() {
 
       {snapshot && snapshot.daily.length > 1 && (
         <Card title="Forecast">
-          <ul className="divide-y divide-border">
+          <ul className="list-rows">
             {snapshot.daily.slice(1).map((day) => (
               <li key={day.date} className="flex items-center justify-between gap-2 py-1.5">
                 <span className="text-text-secondary">

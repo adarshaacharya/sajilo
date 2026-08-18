@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Card } from "../components/Card";
+import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Select } from "../components/Select";
 import { Toggle } from "../components/Toggle";
@@ -265,7 +266,7 @@ function ModulesTab() {
   return (
     <Card title={t("settings.modules")}>
       {rows.map((row) => (
-        <div key={row.key} className="border-b border-border/50 py-2 last:border-0 last:pb-0 first:pt-0">
+        <div key={row.key} className="row-line py-2 first:pt-0">
           <Toggle
             label={row.label}
             note={row.note}
@@ -387,16 +388,18 @@ function SystemTab() {
           <button
             type="button"
             onClick={() => exportData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
           >
-            {t("settings.export-data")}
+            <Icon name="export" className="size-3.5 shrink-0" />
+            <span className="truncate">{t("settings.export-data")}</span>
           </button>
           <button
             type="button"
             onClick={() => importData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
           >
-            {t("settings.import-data")}
+            <Icon name="import" className="size-3.5 shrink-0" />
+            <span className="truncate">{t("settings.import-data")}</span>
           </button>
         </div>
         <p className="mt-1.5 text-[11px] text-text-muted">{t("settings.backup-note")}</p>

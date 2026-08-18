@@ -26,7 +26,7 @@ function sellPerUnit(rate: ForexRate): number {
 
 function RateRow({ rate }: { rate: ForexRate }) {
   return (
-    <div className="flex items-baseline justify-between gap-2 border-b border-border/60 py-1.5 last:border-0">
+    <div className="row-line flex items-baseline justify-between gap-2 py-1.5">
       <div>
         <p className="font-medium">{rate.currencyCode}</p>
         <p className="text-[11px] text-text-muted">{rate.currencyName}</p>

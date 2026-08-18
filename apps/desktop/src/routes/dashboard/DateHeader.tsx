@@ -40,7 +40,7 @@ export function DateHeader({ today }: { today: Today }) {
         onClick={() =>
           navigate(`/day?y=${today.nepali.year}&m=${today.nepali.month}&d=${today.nepali.day}`)
         }
-        className="surface-card flex w-[54px] shrink-0 flex-col items-center py-1.5"
+        className="surface-card date-plate flex w-[54px] shrink-0 flex-col items-center py-1.5"
       >
         <span className="text-[30px] font-bold leading-none text-[color:var(--color-accent-mark)]">
           {digits(today.nepali.day, numerals)}

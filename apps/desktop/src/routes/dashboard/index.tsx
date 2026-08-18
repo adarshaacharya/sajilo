@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../components/Card";
 import { Icon } from "../../components/Icon";
+import { FadeUp, Stagger } from "../../components/motion";
 import {
   api,
   type CalendarMonth,
@@ -33,7 +34,6 @@ function planKey(date: NepaliDate): string {
   return `${date.year}-${date.month}-${date.day}`;
 }
 
-/** "Aug/Sep 2026" from the BS month's first and last Gregorian dates. */
 function gregorianSpan(first: string, last: string): string {
   const [y1, m1] = first.split("-").map(Number);
   const [y2, m2] = last.split("-").map(Number);
@@ -71,7 +71,6 @@ export function Dashboard() {
         setCursor(value.nepali);
       })
       .catch((cause) => setError(String(cause)));
-    // One headline for the banner — full list lives on Events.
     api
       .upcomingEvents(1)
       .then(setUpcoming)
@@ -127,62 +126,70 @@ export function Dashboard() {
   const upNext = upcoming[0];
 
   return (
-    <div className="space-y-2.5">
-      <DateHeader today={today} />
+    <Stagger className="space-y-2.5">
+      <FadeUp>
+        <DateHeader today={today} />
+      </FadeUp>
 
-      <Card>
-        <div className="mb-2 flex items-center justify-between">
-          <button
-            type="button"
-            aria-label={t("calendar.previous-month")}
-            onClick={() => step(-1)}
-            className="rounded px-2 py-0.5 text-text-secondary hover:bg-surface-hover"
-          >
-            ‹
-          </button>
-          <span className="text-[12px] font-medium">
-            {month.title}
-            {monthSpan ? ` · ${monthSpan}` : ""}
-          </span>
-          <button
-            type="button"
-            aria-label={t("calendar.next-month")}
-            onClick={() => step(1)}
-            className="rounded px-2 py-0.5 text-text-secondary hover:bg-surface-hover"
-          >
-            ›
-          </button>
-        </div>
-        <MonthGrid
-          month={month}
-          planDays={planDays}
-          onSelect={(day) =>
-            day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
-          }
-        />
-        {provisional && (
-          <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
-        )}
-      </Card>
+      <FadeUp>
+        <Card>
+          <div className="mb-2 flex items-center justify-between">
+            <button
+              type="button"
+              aria-label={t("calendar.previous-month")}
+              onClick={() => step(-1)}
+              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+            >
+              ‹
+            </button>
+            <span className="text-[12px] font-medium">
+              {month.title}
+              {monthSpan ? ` · ${monthSpan}` : ""}
+            </span>
+            <button
+              type="button"
+              aria-label={t("calendar.next-month")}
+              onClick={() => step(1)}
+              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+            >
+              ›
+            </button>
+          </div>
+          <MonthGrid
+            month={month}
+            planDays={planDays}
+            onSelect={(day) =>
+              day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
+            }
+          />
+          {provisional && (
+            <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
+          )}
+        </Card>
+      </FadeUp>
 
       {upNext && (
-        <button
-          type="button"
-          onClick={() => navigate("/events")}
-          className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left hover:bg-surface-hover"
-        >
-          <Icon
-            name="festival"
-            className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
-          />
-          <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
-          <span className="shrink-0 text-[11px] text-text-muted">
-            {relativeText(upNext.days_away, t, numerals)} ›
-          </span>
-        </button>
+        <FadeUp>
+          <button
+            type="button"
+            onClick={() => navigate("/events")}
+            className="surface-card glance-card glance-event flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
+          >
+              <Icon
+                name="festival"
+                className="relative z-[1] size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
+              />
+              <span className="relative z-[1] min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
+              <span className="relative z-[1] shrink-0 text-[11px] text-text-muted">
+                {relativeText(upNext.days_away, t, numerals)} ›
+              </span>
+            </button>
+        </FadeUp>
       )}
 
-      <GlanceCards />
-    </div>
+      <FadeUp>
+        <GlanceCards />
+      </FadeUp>
+    </Stagger>
   );
 }

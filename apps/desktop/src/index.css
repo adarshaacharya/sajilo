@@ -1,31 +1,27 @@
 @import "tailwindcss";
 
 /*
- * Patro skin — matches Swift Theme.Skin.patro.
+ * Patro skin — warm glass over macOS vibrancy.
  * Brass gilt for today / marks; holiday red for Saturdays only (as text).
  */
 @theme {
-  /*
-   * Patro over system material: shell stays clear so NSVisualEffectView shows
-   * through; raised fills mirror Swift Color.primary.opacity(0.055 / 0.08).
-   */
   --color-surface: transparent;
-  --color-surface-raised: color-mix(in srgb, #fff 5.5%, transparent);
-  --color-surface-hover: color-mix(in srgb, #fff 8%, transparent);
-  /* Soft hairline — macOS-style, not a hard square edge. */
-  --color-border: color-mix(in srgb, #9aa1ae 18%, transparent);
-  --color-text: #eef1f6;
-  --color-text-secondary: #9aa1ae;
-  --color-text-muted: #6d7482;
-  /* Dark gilt fill — carries white text (Swift brandFill dark #8A6A2F). */
+  --color-surface-raised: color-mix(in srgb, #fff 9%, transparent);
+  --color-surface-hover: color-mix(in srgb, #fff 13%, transparent);
+  /* Hairline — label-derived, never a bright white stroke. */
+  --color-border: color-mix(in srgb, var(--color-text) 9%, transparent);
+  --color-divider: color-mix(in srgb, var(--color-text) 5.5%, transparent);
+  --color-text: #f4f6fa;
+  --color-text-secondary: #b4bac6;
+  --color-text-muted: #7d8594;
   --color-accent: #8a6a2f;
-  /* Brighter gilt for small glyphs (Swift brand dark #C39A4A). */
-  --color-accent-mark: #c39a4a;
-  --color-holiday: #f2555a;
-  --color-positive: #3fbf7f;
-  --color-negative: #f2555a;
+  --color-accent-mark: #d4a84a;
+  --color-holiday: #ff6b6f;
+  --color-positive: #4ecf8a;
+  --color-negative: #ff6b6f;
+  --color-weather-tint: #5b9fd4;
+  --color-forex-tint: #6bc49a;
 
-  /* Cards stay soft; interactive chips stay modest (not pills). */
   --radius-xs: 4px;
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -38,15 +34,17 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --color-surface: transparent;
-    --color-surface-raised: color-mix(in srgb, #000 5.5%, transparent);
-    --color-surface-hover: color-mix(in srgb, #000 8%, transparent);
-    --color-border: color-mix(in srgb, #5c564c 16%, transparent);
+    --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
+    --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
+    --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
+    --color-divider: color-mix(in srgb, var(--color-text) 7%, transparent);
     --color-text: #1a1712;
     --color-text-secondary: #5c564c;
     --color-text-muted: #8a8378;
     --color-accent: #6b5219;
-    --color-accent-mark: #6b5219;
+    --color-accent-mark: #8a6a2f;
+    --color-weather-tint: #3d7ab5;
+    --color-forex-tint: #3d9a6e;
   }
 }
 
@@ -56,7 +54,6 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
-  /* Corners must stay clear so border-radius on .app-window can show the desk. */
   background: transparent !important;
 }
 
@@ -64,13 +61,14 @@ html {
   color-scheme: light dark;
 }
 
-/* Clear rounded shell — fill comes from native popover vibrancy underneath. */
+/* Glass shell — vibrancy underneath, warm ambient wash on top. */
 .app-window {
   box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
   height: 100%;
   overflow: hidden;
   border-radius: 14px;
-  /* Hard clip — WKWebView sometimes ignores overflow+radius alone. */
   clip-path: inset(0 round 14px);
   border: 1px solid var(--color-border);
   background: transparent;
@@ -81,6 +79,44 @@ html {
   font-size: 12px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient canvas — breaks up the flat grey slab. */
+.app-window::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 22%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 14%, transparent), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, color-mix(in srgb, #fff 3%, transparent), transparent 70%),
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, #1c1a24 68%, transparent) 0%,
+      color-mix(in srgb, #12141c 74%, transparent) 55%,
+      color-mix(in srgb, #0e1016 78%, transparent) 100%
+    );
+}
+
+@media (prefers-color-scheme: light) {
+  .app-window::before {
+    background:
+      radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
+      radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
+      linear-gradient(
+        168deg,
+        color-mix(in srgb, #faf6ee 82%, transparent) 0%,
+        color-mix(in srgb, #f0ebe2 86%, transparent) 100%
+      );
+  }
+}
+
+.app-window > * {
+  position: relative;
+  z-index: 1;
 }
 
 ::-webkit-scrollbar {
@@ -94,12 +130,139 @@ html {
   background: transparent;
 }
 
-/* Soft raised surface — prefers gentle depth over a hard box border. */
+/* Raised glass card — depth without a chalk-white rim. */
 .surface-card {
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
-  background: var(--color-surface-raised);
-  box-shadow: 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+  background: color-mix(in srgb, var(--color-surface-raised) 100%, transparent);
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  box-shadow:
+    0 1px 2px color-mix(in srgb, #000 16%, transparent),
+    0 6px 20px color-mix(in srgb, #000 18%, transparent);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.surface-card:hover {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 18%, var(--color-border));
+  box-shadow:
+    0 2px 4px color-mix(in srgb, #000 14%, transparent),
+    0 10px 28px color-mix(in srgb, #000 22%, transparent);
+}
+
+/* Route header — whisper separator, not a white rule. */
+.header-bar {
+  border-bottom: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Inset list dividers — macOS Settings-style, not edge-to-edge white lines. */
+.list-rows > li {
+  position: relative;
+}
+
+.list-rows > li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: var(--color-divider);
+  pointer-events: none;
+}
+
+.list-rows > li > button,
+.list-rows > li > a {
+  width: 100%;
+}
+
+/* Compact rows inside cards (stocks, forex, bazar). */
+.row-line {
+  position: relative;
+}
+
+.row-line + .row-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: var(--color-divider);
+  pointer-events: none;
+}
+
+.section-divider {
+  border-top: 1px solid var(--color-divider);
+}
+
+/* Today date plate — gilt glow. */
+.date-plate {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 28%, var(--color-border));
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--color-accent-mark) 18%, transparent),
+    color-mix(in srgb, var(--color-surface-raised) 100%, transparent) 55%
+  );
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+}
+
+/* Glance widgets — tinted glass instead of identical grey boxes. */
+.glance-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.glance-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.9;
+  border-radius: inherit;
+}
+
+.glance-weather::before {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-weather-tint) 22%, transparent) 0%,
+    transparent 65%
+  );
+}
+
+.glance-forex::before {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-forex-tint) 20%, transparent) 0%,
+    transparent 65%
+  );
+}
+
+.glance-event::before {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-accent-mark) 14%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Calendar today cell — gilt gradient, not flat fill. */
+.cal-today {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--color-accent-mark) 95%, #fff 5%),
+    color-mix(in srgb, var(--color-accent) 90%, #000 10%)
+  );
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--color-accent-mark) 35%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent);
 }
 
 .weather-hero {
@@ -110,7 +273,28 @@ html {
   );
 }
 
-/* Swift EqualizerView — four brass bars that bounce while audio plays. */
+/* Tab bar — frosted dock. */
+.tab-bar {
+  border-top: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-surface-raised) 55%, transparent);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.tab-link {
+  position: relative;
+}
+
+.tab-indicator {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent-mark) 12%, var(--color-surface-hover));
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 16%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent-mark) 8%, transparent);
+}
+
+/* Equalizer */
 .eq {
   display: inline-flex;
   align-items: center;
@@ -161,21 +345,21 @@ html {
     animation: none;
     transform: scaleY(0.7);
   }
+
+  .surface-card {
+    transition: none;
+  }
 }
 
-/* macOS segmented control — recessed track + raised selected thumb. */
+/* Segmented control */
 .seg-track {
   background: color-mix(in srgb, var(--color-text) 8%, transparent);
   box-shadow: inset 0 1px 1px color-mix(in srgb, #000 28%, transparent);
 }
 
 .seg-thumb {
-  /* Slightly denser than cards so the thumb still reads raised on glass. */
   background: color-mix(in srgb, #fff 12%, transparent);
-  box-shadow:
-    0 0.5px 1px color-mix(in srgb, #000 40%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-text) 8%, transparent),
-    inset 0 0.5px 0 color-mix(in srgb, #fff 10%, transparent);
+  box-shadow: 0 0.5px 1px color-mix(in srgb, #000 28%, transparent);
 }
 
 @media (prefers-color-scheme: light) {
@@ -185,9 +369,7 @@ html {
   }
 
   .seg-thumb {
-    background: color-mix(in srgb, #fff 78%, transparent);
-    box-shadow:
-      0 0.5px 1.5px color-mix(in srgb, #000 18%, transparent),
-      0 0 0 0.5px color-mix(in srgb, #000 6%, transparent);
+    background: color-mix(in srgb, #fff 82%, transparent);
+    box-shadow: 0 0.5px 1px color-mix(in srgb, #000 12%, transparent);
   }
 }

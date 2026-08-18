@@ -40,11 +40,11 @@ export function MonthGrid({
               key={day.id}
               onClick={() => onSelect(day)}
               title={day.eventName ?? day.tithi ?? undefined}
-              className={`relative flex h-[34px] flex-col items-center justify-center rounded-md transition-colors ${
+              className={`relative flex h-[34px] flex-col items-center justify-center rounded-md transition-all duration-200 ${
                 day.isToday
-                  ? "bg-accent text-white hover:bg-accent"
+                  ? "cal-today text-white"
                   : day.isHoliday
-                    ? "font-medium text-holiday hover:bg-holiday/10"
+                    ? "font-medium text-holiday hover:bg-holiday/12"
                     : "hover:bg-surface-hover"
               }`}
             >

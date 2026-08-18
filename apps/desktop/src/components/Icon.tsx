@@ -22,6 +22,8 @@ import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
 import { SFPercent } from "sf-symbols-lib/monochrome/SFPercent";
 import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
+import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
+import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
 import { SFSparkles } from "sf-symbols-lib/monochrome/SFSparkles";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
 import { SFStar } from "sf-symbols-lib/monochrome/SFStar";
@@ -69,6 +71,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   stop: SFStopFill,
   star: SFStar,
   starFill: SFStarFill,
+  export: SFSquareAndArrowUp,
+  import: SFSquareAndArrowDown,
 };
 
 export type IconName =
@@ -101,7 +105,9 @@ export type IconName =
   | "pause"
   | "stop"
   | "star"
-  | "starFill";
+  | "starFill"
+  | "export"
+  | "import";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

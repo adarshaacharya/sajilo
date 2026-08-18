@@ -52,7 +52,7 @@ export function Events() {
         {shown.length === 0 ? (
           <p className="text-text-muted">{t("upcoming.empty")}</p>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="list-rows">
             {shown.map((event) => (
               <li key={`${event.date.year}-${event.date.month}-${event.date.day}-${event.name}`}>
                 <button

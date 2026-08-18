@@ -60,7 +60,7 @@ function Row({
   const change = price - previous;
   const flat = Math.abs(change) < 0.005;
   return (
-    <div className="flex items-baseline justify-between gap-2 border-b border-border/60 py-1.5 last:border-0">
+    <div className="row-line flex items-baseline justify-between gap-2 py-1.5">
       <div className="min-w-0">
         <p className="truncate">{name}</p>
         <p className="text-[11px] text-text-muted">{unit}</p>
@@ -167,7 +167,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
       {matches.map((price) => (
         <div
           key={price.name}
-          className="flex items-baseline justify-between gap-2 border-b border-border/60 py-1.5 last:border-0"
+          className="row-line flex items-baseline justify-between gap-2 py-1.5"
         >
           <div className="min-w-0">
             <p className="truncate">{price.englishName ?? price.name}</p>

@@ -75,7 +75,7 @@ export function News() {
           {items.length === 0 ? (
             <p className="text-text-muted">{t("state.not-yet")}</p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="list-rows">
               {items.map((item) => (
                 <li key={`${item.source}-${item.link}`}>
                   <button

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../components/Icon";
+import { Pressable } from "../../components/motion";
 import { Sparkline } from "../../components/Sparkline";
 import { api } from "../../lib/ipc";
 import { loadedValue } from "../../lib/loadState";
@@ -16,8 +17,6 @@ const CITY: Record<WeatherLocation, { en: string; ne: string }> = {
   pokhara: { en: "Pokhara", ne: "पोखरा" },
   lalitpur: { en: "Lalitpur", ne: "ललितपुर" },
 };
-
-const WEATHER_ICON = "weather" as const;
 
 function relativeFreshness(iso: string | undefined): string | null {
   if (!iso) return null;
@@ -59,54 +58,56 @@ export function GlanceCards() {
     <div className="space-y-1.5">
       <div className="flex gap-2">
         {modules.weatherEnabled && (
-          <button
-            type="button"
-            onClick={() => navigate("/weather")}
-            className="surface-card relative flex min-h-[72px] flex-1 flex-col overflow-hidden p-2.5 text-left hover:bg-surface-hover"
-          >
-            <div className="flex items-center gap-1 text-text-muted">
-              <Icon name={WEATHER_ICON} className="size-3 text-[color:var(--color-accent-mark)]" />
-              <span className="text-[10px]">
+          <Pressable className="min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={() => navigate("/weather")}
+              className="surface-card glance-card glance-weather relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
+            >
+              <div className="relative z-[1] flex items-center gap-1 text-text-muted">
+                <Icon name="weather" className="size-3 text-[color:var(--color-weather-tint)]" />
+                <span className="text-[10px]">
+                  {weatherSnap
+                    ? CITY[weatherSnap.location][language]
+                    : CITY[modules.weatherLocation][language]}
+                </span>
+              </div>
+              <p className="relative z-[1] mt-0.5 text-[20px] font-semibold leading-none">
+                {weatherSnap ? formatCelsius(weatherSnap.temperatureCelsius) : "…"}
+              </p>
+              <p className="relative z-[1] mt-1 truncate text-[10px] text-text-muted">
                 {weatherSnap
-                  ? CITY[weatherSnap.location][language]
-                  : CITY[modules.weatherLocation][language]}
-              </span>
-            </div>
-            <p className="mt-0.5 text-[20px] font-semibold leading-none">
-              {weatherSnap ? formatCelsius(weatherSnap.temperatureCelsius) : "…"}
-            </p>
-            <p className="mt-1 truncate text-[10px] text-text-muted">
-              {weatherSnap
-                ? `${conditionTitle(weatherSnap.condition)} · H ${formatCelsius(weatherSnap.highCelsius)} L ${formatCelsius(weatherSnap.lowCelsius)}`
-                : "—"}
-            </p>
-          </button>
+                  ? `${conditionTitle(weatherSnap.condition)} · H ${formatCelsius(weatherSnap.highCelsius)} L ${formatCelsius(weatherSnap.lowCelsius)}`
+                  : "—"}
+              </p>
+            </button>
+          </Pressable>
         )}
 
         {modules.forexEnabled && (
-          <button
-            type="button"
-            onClick={() => navigate("/forex")}
-            className="surface-card relative flex min-h-[72px] flex-1 flex-col overflow-hidden p-2.5 text-left hover:bg-surface-hover"
-          >
-            <div className="flex items-center gap-1 text-text-muted">
-              <Icon name="gold" className="size-3" />
-              <span className="text-[10px]">{headlineCode} / NPR</span>
-            </div>
-            <p className="mt-0.5 text-[20px] font-semibold leading-none">
-              {headline ? headline.buy.toFixed(2) : "…"}
-            </p>
-            <p className="mt-1 truncate text-[10px] text-text-muted">
-              {headline
-                ? `Buy · Sell ${headline.sell.toFixed(2)}`
-                : "—"}
-            </p>
-            {forexSnap?.history[headlineCode] && (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 px-1 pb-0.5">
-                <Sparkline values={forexSnap.history[headlineCode] ?? []} />
+          <Pressable className="min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={() => navigate("/forex")}
+              className="surface-card glance-card glance-forex relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
+            >
+              <div className="relative z-[1] flex items-center gap-1 text-text-muted">
+                <Icon name="forex" className="size-3 text-[color:var(--color-forex-tint)]" />
+                <span className="text-[10px]">{headlineCode} / NPR</span>
               </div>
-            )}
-          </button>
+              <p className="relative z-[1] mt-0.5 text-[20px] font-semibold leading-none">
+                {headline ? headline.buy.toFixed(2) : "…"}
+              </p>
+              <p className="relative z-[1] mt-1 truncate text-[10px] text-text-muted">
+                {headline ? `Buy · Sell ${headline.sell.toFixed(2)}` : "—"}
+              </p>
+              {forexSnap?.history[headlineCode] && (
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] px-1 pb-0.5">
+                  <Sparkline values={forexSnap.history[headlineCode] ?? []} />
+                </div>
+              )}
+            </button>
+          </Pressable>
         )}
       </div>
       {freshness && <p className="px-0.5 text-[10px] text-text-muted">{freshness}</p>}

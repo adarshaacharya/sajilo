@@ -168,7 +168,7 @@ function QuoteRow({
   onToggle: () => void;
 }) {
   return (
-    <div className="flex items-center gap-2 border-b border-border/50 py-1.5 last:border-0">
+    <div className="row-line flex items-center gap-2 py-1.5">
       <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-2 text-left">
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-semibold">{quote.symbol}</span>
@@ -288,7 +288,7 @@ export function Stocks({
                       return (
                         <div
                           key={symbol}
-                          className="flex items-center gap-2 border-b border-border/50 py-1.5 last:border-0"
+                          className="row-line flex items-center gap-2 py-1.5"
                         >
                           <span className="font-semibold">{symbol}</span>
                           <span className="flex-1 text-[10px] text-text-muted">
@@ -402,7 +402,7 @@ function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => void })
     <button
       type="button"
       onClick={onOpen}
-      className="flex w-full items-center gap-2 border-b border-border/50 py-1.5 text-left last:border-0"
+      className="row-line flex w-full items-center gap-2 py-1.5 text-left"
     >
       <span className="w-[68px] shrink-0 text-[11px] font-semibold">{mover.symbol}</span>
       <span className="text-[11px] text-text-muted tabular-nums">{money.format(mover.ltp)}</span>
@@ -498,7 +498,7 @@ function CompanyDetail({
         )}
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border/50 pt-2">
+      <div className="section-divider mt-3 grid grid-cols-3 gap-2 pt-2">
         {stats.map((stat) => (
           <div key={stat.label}>
             <p className="truncate text-[10px] text-text-muted">{stat.label}</p>

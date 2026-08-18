@@ -19,7 +19,7 @@ export function Header({ title }: { title: string }) {
   const canGoBack = pathname !== "/";
 
   return (
-    <header className="flex h-10 shrink-0 items-center gap-2 border-b border-border px-3">
+    <header className="header-bar flex h-10 shrink-0 items-center gap-2 px-3">
       {canGoBack && (
         <button
           type="button"
