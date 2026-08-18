@@ -8,9 +8,11 @@
 pub mod error;
 pub mod fenegosida;
 pub mod hamropatro;
+pub mod hamropatro_metals;
 pub mod html;
 pub mod http;
 pub mod kalimati;
+pub mod nepalipatro;
 pub mod noc;
 pub mod nrb;
 pub mod open_meteo;

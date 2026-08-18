@@ -17,13 +17,23 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         &[&settings, &PredefinedMenuItem::separator(app)?, &quit],
     )?;
 
-    TrayIconBuilder::with_id("main")
-        .icon(app.default_window_icon().cloned().ok_or_else(|| {
-            tauri::Error::AssetNotFound("no default window icon to use for the tray".into())
-        })?)
-        // A template icon is recoloured by macOS to match the menu bar, so it
-        // stays legible in both light and dark.
-        .icon_as_template(true)
+    #[cfg_attr(target_os = "macos", allow(unused_mut))]
+    let mut builder = TrayIconBuilder::with_id("main");
+
+    // ponytail: macOS carries the date as the tray *title*, like the Swift app
+    // did, so it needs no glyph — the app icon is a filled square and a template
+    // render of it is an unreadable blob. Every other platform draws the day
+    // number into the icon (see `refresh_title`), so it starts from the app icon.
+    #[cfg(not(target_os = "macos"))]
+    {
+        builder = builder
+            .icon(app.default_window_icon().cloned().ok_or_else(|| {
+                tauri::Error::AssetNotFound("no default window icon to use for the tray".into())
+            })?)
+            .icon_as_template(true);
+    }
+
+    builder
         .tooltip("Sajilo")
         // Left click toggles the popover; the menu is the right-click affordance.
         .show_menu_on_left_click(false)

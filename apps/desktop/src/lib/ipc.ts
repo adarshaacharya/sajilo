@@ -1,4 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
+import type { LoadState } from "../types/api/LoadState";
+import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
+import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
+
+/** Mirrors `commands::bazar::Bazar`. */
+export interface Bazar {
+  metals: LoadState<MetalRateSnapshot>;
+  fuel: LoadState<FuelPriceSnapshot>;
+  vegetables: LoadState<VegetableMarketSnapshot>;
+}
 
 /** Mirrors `sajilo_core::NepaliDate`. */
 export interface NepaliDate {
@@ -182,6 +193,9 @@ export const api = {
   isAutostartEnabled: () => invoke<boolean>("is_autostart_enabled"),
   setAutostart: (enabled: boolean) => invoke<boolean>("set_autostart", { enabled }),
   setDockIconVisible: (visible: boolean) => invoke<void>("set_dock_icon_visible", { visible }),
+
+  /** All three bazar feeds. Cached in Rust; `refresh` forces a refetch. */
+  getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),
 
   /** Redraws the menu-bar label after a preference it reads has changed. */
   refreshTray: () => invoke<void>("refresh_tray"),

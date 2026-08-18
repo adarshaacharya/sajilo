@@ -1,12 +1,11 @@
 import { NavLink } from "react-router";
+import { Icon } from "./Icon";
 
 /**
  * The five destinations that earn permanent space. Everything else is reached
  * from the dashboard.
  *
- * Icons are inline 16px stroke paths rather than an icon dependency — five
- * glyphs do not justify a package, and inline paths inherit `currentColor`,
- * which is what makes the active state a single class change.
+ * Icons are inline stroke paths — see `Icon`.
  */
 const TABS = [
   { to: "/", label: "Today", path: "M3 8.5 8 3.5l5 5M4.5 7.5V13h7V7.5" },
@@ -38,18 +37,7 @@ export function TabBar() {
             }`
           }
         >
-          <svg
-            viewBox="0 0 16 16"
-            aria-hidden="true"
-            className="size-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d={tab.path} />
-          </svg>
+          <Icon path={tab.path} />
           <span className="text-[10px] leading-none font-medium">{tab.label}</span>
         </NavLink>
       ))}

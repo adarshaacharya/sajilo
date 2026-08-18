@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
 import { Header } from "./components/Header";
 import { TabBar } from "./components/TabBar";
 import { SettingsProvider } from "./lib/settings";
+import { Bazar } from "./routes/bazar";
 import { Converter } from "./routes/converter";
 import { Dashboard } from "./routes/dashboard";
 import { DayDetail } from "./routes/day";
@@ -28,7 +29,7 @@ const ROUTES = [
   { path: "/weather", title: "Weather" },
   { path: "/forex", title: "Exchange Rates" },
   { path: "/news", title: "News" },
-  { path: "/bazar", title: "Bazar" },
+  { path: "/bazar", title: "Bazar", element: <Bazar /> },
   { path: "/rashifal", title: "Rashifal" },
   { path: "/radio", title: "Radio", element: <Radio /> },
   { path: "/tools", title: "Tools", element: <Tools /> },

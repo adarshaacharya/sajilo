@@ -16,6 +16,10 @@ pub const NUMERAL_STYLE: &str = "numeralStyle";
 /// already looks.
 pub const PLANS_KEY: &str = "dayPlans.v1";
 
+/// Last good bazar payload. Cached on disk so a cold start against a dead
+/// upstream still has yesterday's prices to label as stale.
+pub const BAZAR_KEY: &str = "bazar.v1";
+
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.
 pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle) {

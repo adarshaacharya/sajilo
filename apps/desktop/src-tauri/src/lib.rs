@@ -39,6 +39,7 @@ pub fn run() {
     builder
         .setup(|app| {
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
+            app.manage(commands::bazar::BazarCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Delivers anything missed while the app was closed, then sleeps
@@ -61,6 +62,7 @@ pub fn run() {
             _ => {}
         })
         .invoke_handler(tauri::generate_handler![
+            commands::bazar::get_bazar,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,
