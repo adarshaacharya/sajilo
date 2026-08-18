@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../components/Card";
-import { ICONS } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { api, type UpcomingEvent } from "../lib/ipc";
 import { digits } from "../lib/numerals";
@@ -40,9 +39,9 @@ export function Events() {
 
   const shown = events.filter((event) => includes(filter, event));
   const filters = [
-    { id: "current" as const, label: t("events.current"), icon: ICONS.upcoming },
-    { id: "festivals" as const, label: t("events.festivals"), icon: ICONS.festival },
-    { id: "publicHolidays" as const, label: t("events.public-holidays"), icon: ICONS.holiday },
+    { id: "current" as const, label: t("events.current"), icon: "upcoming" as const },
+    { id: "festivals" as const, label: t("events.festivals"), icon: "festival" as const },
+    { id: "publicHolidays" as const, label: t("events.public-holidays"), icon: "holiday" as const },
   ];
 
   return (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Equalizer } from "../components/Equalizer";
-import { ICONS, Icon } from "../components/Icon";
+import { Icon } from "../components/Icon";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import * as player from "../lib/audio";
 import { api } from "../lib/ipc";
@@ -42,30 +42,6 @@ function ControlButton({
     >
       {children}
     </button>
-  );
-}
-
-function PlayGlyph() {
-  return (
-    <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-      <path d="M5 3.2v9.6l8-4.8z" />
-    </svg>
-  );
-}
-
-function PauseGlyph() {
-  return (
-    <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-      <path d="M4 3h3v10H4zm5 0h3v10H9z" />
-    </svg>
-  );
-}
-
-function StopGlyph() {
-  return (
-    <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-      <path d="M4 4h8v8H4z" />
-    </svg>
   );
 }
 
@@ -143,7 +119,7 @@ export function Radio() {
       {current && (
         <section className="flex items-center gap-2 rounded-[14px] bg-accent/10 px-2.5 py-2">
           <Icon
-            path={ICONS.radio}
+            name="radio"
             className="size-4 shrink-0 text-[color:var(--color-accent-mark)]"
           />
           <Equalizer isPlaying={state.isPlaying} />
@@ -159,18 +135,15 @@ export function Radio() {
             onClick={() => player.togglePlayback()}
           >
             {state.isLoading || resolving === current.slug ? (
-              <Icon
-                path="M13 3.5v4h-4M13 7.5A5 5 0 1 1 11 4"
-                className="size-3.5 animate-spin"
-              />
+              <Icon name="refresh" className="size-3.5 animate-spin" />
             ) : state.isPlaying ? (
-              <PauseGlyph />
+              <Icon name="pause" className="size-3.5" />
             ) : (
-              <PlayGlyph />
+              <Icon name="play" className="size-3.5" />
             )}
           </ControlButton>
           <ControlButton label={t("radio.stop")} onClick={() => player.stop()}>
-            <StopGlyph />
+            <Icon name="stop" className="size-3.5" />
           </ControlButton>
         </section>
       )}
@@ -180,7 +153,7 @@ export function Radio() {
       <StateBanner state={banner(directory)} onRetry={() => load(true)}>
         <div className="relative mb-2">
           <Icon
-            path={ICONS.search}
+            name="search"
             className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
           />
           <input
@@ -215,7 +188,7 @@ export function Radio() {
                     <Equalizer isPlaying={isPlaying} />
                   ) : (
                     <span className="flex size-[18px] shrink-0 items-center justify-center text-text-muted">
-                      <PlayGlyph />
+                      <Icon name="play" className="size-3.5" />
                     </span>
                   )}
                   <span className="min-w-0 flex-1">
@@ -233,7 +206,7 @@ export function Radio() {
                   </span>
                   {resolving === station.slug && (
                     <Icon
-                      path="M13 3.5v4h-4M13 7.5A5 5 0 1 1 11 4"
+                      name="refresh"
                       className="size-3.5 shrink-0 animate-spin text-text-muted"
                     />
                   )}

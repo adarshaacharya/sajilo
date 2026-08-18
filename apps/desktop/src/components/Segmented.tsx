@@ -1,4 +1,4 @@
-import { Icon } from "./Icon";
+import { type IconName, Icon } from "./Icon";
 
 /**
  * macOS-style segmented control — one recessed track, raised pill on the
@@ -10,8 +10,8 @@ export function Segmented<T extends string>({
   onChange,
   label,
 }: {
-  /** `icon` is an optional 16px path; a strip either labels every tab with one or none. */
-  options: readonly { id: T; label: string; icon?: string }[];
+  /** Optional SF Symbol name; a strip either labels every tab with one or none. */
+  options: readonly { id: T; label: string; icon?: IconName }[];
   value: T;
   onChange: (id: T) => void;
   label: string;
@@ -39,7 +39,7 @@ export function Segmented<T extends string>({
           >
             {option.icon && (
               <Icon
-                path={option.icon}
+                name={option.icon}
                 className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
               />
             )}

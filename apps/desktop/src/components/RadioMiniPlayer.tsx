@@ -38,15 +38,11 @@ export function RadioMiniPlayer() {
         className="rounded-md p-1.5 text-text-secondary hover:bg-surface-hover hover:text-text disabled:opacity-50"
       >
         {state.isLoading ? (
-          <Icon path="M13 3.5v4h-4M13 7.5A5 5 0 1 1 11 4" className="size-3.5 animate-spin" />
+          <Icon name="refresh" className="size-3.5 animate-spin" />
         ) : state.isPlaying ? (
-          <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-            <path d="M4 3h3v10H4zm5 0h3v10H9z" />
-          </svg>
+          <Icon name="pause" className="size-3.5" />
         ) : (
-          <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-            <path d="M5 3.2v9.6l8-4.8z" />
-          </svg>
+          <Icon name="play" className="size-3.5" />
         )}
       </button>
       <button
@@ -55,9 +51,7 @@ export function RadioMiniPlayer() {
         aria-label={t("radio.stop")}
         className="rounded-md p-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
       >
-        <svg viewBox="0 0 16 16" className="size-3.5" aria-hidden fill="currentColor">
-          <path d="M4 4h8v8H4z" />
-        </svg>
+        <Icon name="stop" className="size-3.5" />
       </button>
     </div>
   );

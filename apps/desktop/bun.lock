@@ -16,6 +16,7 @@
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-router": "^7.9.0",
+        "sf-symbols-lib": "^2.0.1",
       },
       "devDependencies": {
         "@biomejs/biome": "^2.3.0",
@@ -384,6 +385,8 @@
     "semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "set-cookie-parser": ["set-cookie-parser@2.7.2", "", {}, "sha512-oeM1lpU/UvhTxw+g3cIfxXHyJRc/uidd3yK1P242gzHds0udQBYzs3y8j4gCCW+ZJ7ad0yctld8RYO+bdurlvw=="],
+
+    "sf-symbols-lib": ["sf-symbols-lib@2.0.1", "", { "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-1xL41UlJADRCSpOST9PzZY4sHcBDD2o1GmyRv4tq23Sd4hwNy5SP2fRH0XZJflyReoDln2BYtYuMvcJEfA1AmA=="],
 
     "source-map-js": ["source-map-js@1.2.1", "", {}, "sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA=="],
 

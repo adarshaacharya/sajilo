@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { ICONS, Icon } from "../../components/Icon";
+import { Icon } from "../../components/Icon";
 import { digits } from "../../lib/numerals";
 import { useSettings } from "../../lib/settings";
 import type { Today } from "../../lib/ipc";
@@ -64,7 +64,7 @@ export function DateHeader({ today }: { today: Today }) {
           aria-label={t("screen.settings")}
           className="rounded-lg p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
         >
-          <Icon path={ICONS.settings} />
+          <Icon name="settings" />
         </button>
         <button
           type="button"
@@ -72,7 +72,7 @@ export function DateHeader({ today }: { today: Today }) {
           aria-label={t("action.quit")}
           className="rounded-lg p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
         >
-          <Icon path="M8 2.5v6M4.5 5.5a5 5 0 1 0 7 0" />
+          <Icon name="power" />
         </button>
       </div>
     </div>

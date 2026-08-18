@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../components/Card";
-import { ICONS, Icon } from "../../components/Icon";
+import { Icon } from "../../components/Icon";
 import {
   api,
   type CalendarMonth,
@@ -172,7 +172,7 @@ export function Dashboard() {
           className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left hover:bg-surface-hover"
         >
           <Icon
-            path={ICONS.festival}
+            name="festival"
             className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
           />
           <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>

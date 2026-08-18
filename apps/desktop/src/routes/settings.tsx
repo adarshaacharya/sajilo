@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Card } from "../components/Card";
-import { ICONS } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Select } from "../components/Select";
 import { Toggle } from "../components/Toggle";
@@ -46,9 +45,9 @@ export function Settings() {
         value={tab}
         onChange={setTab}
         options={[
-          { id: "display" as const, label: t("settings.tab-display"), icon: ICONS.display },
-          { id: "modules" as const, label: t("settings.tab-modules"), icon: ICONS.modules },
-          { id: "system" as const, label: t("settings.tab-system"), icon: ICONS.system },
+          { id: "display" as const, label: t("settings.tab-display"), icon: "display" as const },
+          { id: "modules" as const, label: t("settings.tab-modules"), icon: "modules" as const },
+          { id: "system" as const, label: t("settings.tab-system"), icon: "system" as const },
         ]}
       />
 

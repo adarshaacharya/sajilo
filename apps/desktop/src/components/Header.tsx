@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../lib/settings";
-import { ICONS, Icon } from "./Icon";
+import { Icon } from "./Icon";
 
 /**
  * The popover has no title bar of its own — the window is undecorated — and it
@@ -38,7 +38,7 @@ export function Header({ title }: { title: string }) {
           aria-label={t("screen.settings")}
           className="shrink-0 rounded-lg p-1 text-text-muted hover:bg-surface-hover hover:text-text"
         >
-          <Icon path={ICONS.settings} />
+          <Icon name="settings" />
         </button>
       )}
     </header>

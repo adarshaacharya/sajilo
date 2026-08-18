@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "../../components/Card";
-import { ICONS, Icon } from "../../components/Icon";
+import { Icon } from "../../components/Icon";
 import { Segmented } from "../../components/Segmented";
 import { type LoadStatus, StateBanner } from "../../components/StateBanner";
 import type { translate } from "../../lib/i18n";
@@ -121,7 +121,7 @@ function FollowButton({ followed, onToggle }: { followed: boolean; onToggle: () 
       className={`shrink-0 p-1 ${followed ? "text-[color:var(--color-accent-mark)]" : "text-text-muted"}`}
       aria-label={followed ? "Unfollow" : "Follow"}
     >
-      {followed ? "★" : "☆"}
+      {followed ? <Icon name="starFill" className="size-3.5" /> : <Icon name="star" className="size-3.5" />}
     </button>
   );
 }
@@ -232,7 +232,7 @@ export function Stocks({
         <div className="space-y-2.5">
           <div className="relative">
             <Icon
-              path={ICONS.search}
+              name="search"
               className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
             />
             <input

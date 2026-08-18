@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "../components/Card";
-import { ICONS, Icon } from "../components/Icon";
+import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api, type Bazar as BazarFeeds } from "../lib/ipc";
@@ -151,7 +151,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
     <div>
       <div className="relative mb-1.5">
         <Icon
-          path={ICONS.search}
+          name="search"
           className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
         />
         <input
@@ -225,9 +225,9 @@ export function Bazar() {
         onChange={setTab}
         options={[
           { id: "stocks", label: t("bazar.stocks") },
-          { id: "metals", label: t("bazar.metals"), icon: ICONS.gold },
-          { id: "fuel", label: t("bazar.fuel"), icon: ICONS.fuel },
-          { id: "vegetables", label: t("bazar.vegetables"), icon: ICONS.vegetables },
+          { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
+          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
+          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
         ]}
       />
 

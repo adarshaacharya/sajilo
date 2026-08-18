@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { ICONS, Icon } from "../../components/Icon";
+import { Icon } from "../../components/Icon";
 import { Sparkline } from "../../components/Sparkline";
 import { api } from "../../lib/ipc";
 import { loadedValue } from "../../lib/loadState";
@@ -17,8 +17,7 @@ const CITY: Record<WeatherLocation, { en: string; ne: string }> = {
   lalitpur: { en: "Lalitpur", ne: "ललितपुर" },
 };
 
-const WEATHER_ICON =
-  "M5 10.5a3 3 0 0 1 .4-6 4 4 0 0 1 7.5 1.2A2.5 2.5 0 0 1 12.5 11.5H5.5M6 13v1.5M8.5 13v1.5M11 13v1.5";
+const WEATHER_ICON = "weather" as const;
 
 function relativeFreshness(iso: string | undefined): string | null {
   if (!iso) return null;
@@ -66,7 +65,7 @@ export function GlanceCards() {
             className="surface-card relative flex min-h-[72px] flex-1 flex-col overflow-hidden p-2.5 text-left hover:bg-surface-hover"
           >
             <div className="flex items-center gap-1 text-text-muted">
-              <Icon path={WEATHER_ICON} className="size-3 text-[color:var(--color-accent-mark)]" />
+              <Icon name={WEATHER_ICON} className="size-3 text-[color:var(--color-accent-mark)]" />
               <span className="text-[10px]">
                 {weatherSnap
                   ? CITY[weatherSnap.location][language]
@@ -91,7 +90,7 @@ export function GlanceCards() {
             className="surface-card relative flex min-h-[72px] flex-1 flex-col overflow-hidden p-2.5 text-left hover:bg-surface-hover"
           >
             <div className="flex items-center gap-1 text-text-muted">
-              <Icon path={ICONS.gold} className="size-3" />
+              <Icon name="gold" className="size-3" />
               <span className="text-[10px]">{headlineCode} / NPR</span>
             </div>
             <p className="mt-0.5 text-[20px] font-semibold leading-none">
