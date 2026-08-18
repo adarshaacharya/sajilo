@@ -1,41 +1,48 @@
 @import "tailwindcss";
-/* The Devanagari face is loaded from index.html — it lives in public/ and is
-   served verbatim, so the CSS bundler cannot resolve it from here. */
 
 /*
- * Sajilo is a dark, compact, card-based popover. The tokens live here so every
- * screen draws from one palette rather than each inventing its own greys.
+ * Patro skin — matches Swift Theme.Skin.patro.
+ * Brass gilt for today / marks; holiday red for Saturdays only (as text).
  */
 @theme {
-  --color-surface: #16181d;
-  --color-surface-raised: #1e2128;
-  --color-surface-hover: #252932;
-  --color-border: #2c313b;
+  --color-surface: #12141a;
+  --color-surface-raised: #1a1d24;
+  --color-surface-hover: #242830;
+  /* Soft hairline — macOS-style, not a hard square edge. */
+  --color-border: color-mix(in srgb, #9aa1ae 18%, transparent);
   --color-text: #eef1f6;
-  --color-text-secondary: #99a1b0;
-  --color-text-muted: #6b7382;
-  --color-accent: #dc143c; /* Nepali crimson */
+  --color-text-secondary: #9aa1ae;
+  --color-text-muted: #6d7482;
+  /* Dark gilt fill — carries white text (Swift brandFill dark #8A6A2F). */
+  --color-accent: #8a6a2f;
+  /* Brighter gilt for small glyphs (Swift brand dark #C39A4A). */
+  --color-accent-mark: #c39a4a;
   --color-holiday: #f2555a;
   --color-positive: #3fbf7f;
   --color-negative: #f2555a;
 
-  --radius-card: 8px;
+  /* Cards stay soft; interactive chips stay modest (not pills). */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-card: 14px;
 }
 
-/*
- * The popover follows the OS appearance. Only the surface/text/border tokens
- * move; accent, holiday, positive and negative stay put so the same colour
- * always means the same thing in either appearance.
- */
 @media (prefers-color-scheme: light) {
   :root {
-    --color-surface: #f7f8fa;
+    --color-surface: #f4f1ea;
     --color-surface-raised: #ffffff;
-    --color-surface-hover: #eceef2;
-    --color-border: #dde0e6;
-    --color-text: #14171c;
-    --color-text-secondary: #566072;
-    --color-text-muted: #838c9c;
+    --color-surface-hover: #ebe6dc;
+    --color-border: color-mix(in srgb, #5c564c 16%, transparent);
+    --color-text: #1a1712;
+    --color-text-secondary: #5c564c;
+    --color-text-muted: #8a8378;
+    --color-accent: #6b5219;
+    --color-accent-mark: #6b5219;
   }
 }
 
@@ -44,42 +51,57 @@ body,
 #root {
   height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
-/* Lets scrollbars, form controls and text selection pick up the OS appearance
-   too, so the chrome we do not draw ourselves still matches. */
 html {
   color-scheme: light dark;
+  background: transparent;
 }
 
 body {
-  /* Rounded because the window itself is transparent and undecorated. */
   background: var(--color-surface);
   color: var(--color-text);
-  /*
-   * Devanagari first, so month names, tithi and festival text render from the
-   * bundled face on every OS rather than from whatever the system happens to
-   * ship. Latin text falls through to the platform UI font, which is what makes
-   * the chrome look native.
-   */
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     "Noto Sans Devanagari", sans-serif;
   font-size: 12px;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
 
-/* A popover is not a document; a visible scrollbar reads as chrome. */
+#root {
+  height: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-text-muted) 45%, transparent);
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* Soft raised surface — prefers gentle depth over a hard box border. */
+.surface-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 4%, transparent);
+}
+
+.weather-hero {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-accent-mark) 14%, transparent),
+    transparent 70%
+  );
 }

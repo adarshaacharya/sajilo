@@ -1,42 +1,101 @@
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import type { Language } from "./i18n";
 import { translate } from "./i18n";
 import { api } from "./ipc";
 import type { NumeralStyle } from "./numerals";
+import type { WeatherLocation } from "../types/api/WeatherLocation";
+
+export interface ModulePrefs {
+  weatherEnabled: boolean;
+  forexEnabled: boolean;
+  newsEnabled: boolean;
+  bazarEnabled: boolean;
+  rashifalEnabled: boolean;
+  radioEnabled: boolean;
+  weatherLocation: WeatherLocation;
+  forexFavourites: string[];
+}
+
+const DEFAULT_MODULES: ModulePrefs = {
+  weatherEnabled: true,
+  forexEnabled: true,
+  newsEnabled: true,
+  bazarEnabled: true,
+  rashifalEnabled: true,
+  radioEnabled: true,
+  weatherLocation: "kathmandu",
+  forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
+};
+
+const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "QAR", "SGD"];
 
 interface Settings {
   language: Language;
   numerals: NumeralStyle;
+  modules: ModulePrefs;
   setLanguage: (value: Language) => void;
   setNumerals: (value: NumeralStyle) => void;
+  setModules: (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => void;
   t: (key: Parameters<typeof translate>[0]) => string;
 }
 
 const SettingsContext = createContext<Settings | null>(null);
 
+async function loadStore() {
+  const { load } = await import("@tauri-apps/plugin-store");
+  return load("sajilo.json", { autoSave: true });
+}
+
 /**
  * Injected once at the popover root rather than threaded through every screen,
  * since almost every surface renders a date.
- *
- * Written through to the Tauri store because the tray is built before any
- * webview exists and reads these same keys to draw its label.
  */
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("ne");
   const [numerals, setNumerals] = useState<NumeralStyle>("devanagari");
+  const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
 
   useEffect(() => {
     let cancelled = false;
-    import("@tauri-apps/plugin-store")
-      .then(({ load }) => load("sajilo.json", { autoSave: true }))
+    loadStore()
       .then(async (store) => {
-        const [storedLanguage, storedNumerals] = await Promise.all([
+        const [
+          storedLanguage,
+          storedNumerals,
+          weatherEnabled,
+          forexEnabled,
+          newsEnabled,
+          bazarEnabled,
+          rashifalEnabled,
+          radioEnabled,
+          weatherLocation,
+          forexFavourites,
+        ] = await Promise.all([
           store.get<Language>("language"),
           store.get<NumeralStyle>("numeralStyle"),
+          store.get<boolean>("weatherEnabled"),
+          store.get<boolean>("forexEnabled"),
+          store.get<boolean>("newsEnabled"),
+          store.get<boolean>("bazarEnabled"),
+          store.get<boolean>("rashifalEnabled"),
+          store.get<boolean>("radioEnabled"),
+          store.get<WeatherLocation>("weatherLocation"),
+          store.get<string[]>("forexFavourites"),
         ]);
         if (cancelled) return;
         if (storedLanguage) setLanguage(storedLanguage);
         if (storedNumerals) setNumerals(storedNumerals);
+        setModulesState((current) => ({
+          ...current,
+          ...(weatherEnabled !== undefined && { weatherEnabled }),
+          ...(forexEnabled !== undefined && { forexEnabled }),
+          ...(newsEnabled !== undefined && { newsEnabled }),
+          ...(bazarEnabled !== undefined && { bazarEnabled }),
+          ...(rashifalEnabled !== undefined && { rashifalEnabled }),
+          ...(radioEnabled !== undefined && { radioEnabled }),
+          ...(weatherLocation && { weatherLocation }),
+          ...(forexFavourites && { forexFavourites }),
+        }));
       })
       .catch(() => {
         /* Not under Tauri: the defaults above stand. */
@@ -46,19 +105,35 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const persist = (key: string, value: string) => {
-    import("@tauri-apps/plugin-store")
-      .then(({ load }) => load("sajilo.json", { autoSave: true }))
+  const persist = useCallback((key: string, value: unknown) => {
+    loadStore()
       .then((store) => store.set(key, value))
-      // The tray reads this store but is never told when it changes, so the
-      // menu-bar label has to be asked to redraw.
       .then(() => api.refreshTray())
       .catch(() => {});
-  };
+  }, []);
+
+  const setModules = useCallback(
+    (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => {
+      setModulesState((current) => {
+        const next = typeof value === "function" ? value(current) : value;
+        persist("weatherEnabled", next.weatherEnabled);
+        persist("forexEnabled", next.forexEnabled);
+        persist("newsEnabled", next.newsEnabled);
+        persist("bazarEnabled", next.bazarEnabled);
+        persist("rashifalEnabled", next.rashifalEnabled);
+        persist("radioEnabled", next.radioEnabled);
+        persist("weatherLocation", next.weatherLocation);
+        persist("forexFavourites", next.forexFavourites);
+        return next;
+      });
+    },
+    [persist],
+  );
 
   const value: Settings = {
     language,
     numerals,
+    modules,
     setLanguage: (next) => {
       setLanguage(next);
       persist("language", next);
@@ -67,6 +142,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setNumerals(next);
       persist("numeralStyle", next);
     },
+    setModules,
     t: (key) => translate(key, language),
   };
 
@@ -78,3 +154,5 @@ export function useSettings(): Settings {
   if (!value) throw new Error("useSettings must be used inside SettingsProvider");
   return value;
 }
+
+export { FOREX_OPTIONS };

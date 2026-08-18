@@ -87,7 +87,7 @@ export function Radio() {
               <button
                 type="button"
                 onClick={() => (player.isPaused() ? player.resume() : player.pause())}
-                className="rounded-md border border-border px-2 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+                className="rounded-xl border border-border px-2 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
               >
                 {player.isPaused() ? "▶" : "❚❚"}
               </button>
@@ -95,7 +95,7 @@ export function Radio() {
                 type="button"
                 onClick={player.stop}
                 aria-label={t("radio.stop")}
-                className="rounded-md border border-border px-2 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+                className="rounded-xl border border-border px-2 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
               >
                 ■
               </button>
@@ -118,7 +118,7 @@ export function Radio() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder={t("radio.search")}
-              className="h-8 w-full rounded-md border border-border bg-surface pl-7 pr-2 text-[12px]"
+              className="h-8 w-full rounded-xl border border-border bg-surface pl-7 pr-2 text-[12px]"
             />
           </div>
 

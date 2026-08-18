@@ -43,6 +43,9 @@ pub fn run() {
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::rashifal::RashifalCache::default());
             app.manage(commands::radio::RadioCache::default());
+            app.manage(commands::weather::WeatherCache::default());
+            app.manage(commands::forex::ForexCache::default());
+            app.manage(commands::news::NewsCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Delivers anything missed while the app was closed, then sleeps
@@ -69,6 +72,9 @@ pub fn run() {
             commands::rashifal::get_rashifal,
             commands::radio::get_stations,
             commands::radio::station_stream,
+            commands::weather::get_weather,
+            commands::forex::get_forex,
+            commands::news::get_news,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,
@@ -100,6 +106,7 @@ pub fn run() {
             system::autostart::set_autostart,
             system::autostart::set_dock_icon_visible,
             commands::tray::refresh_tray,
+            commands::tray::quit_app,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");

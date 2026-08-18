@@ -25,7 +25,7 @@ export function Header({ title }: { title: string }) {
           type="button"
           onClick={() => navigate(-1)}
           aria-label={t("action.back")}
-          className="rounded-md px-1.5 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+          className="rounded-lg px-1.5 py-0.5 text-text-secondary hover:bg-surface-hover hover:text-text"
         >
           ‹
         </button>
@@ -36,7 +36,7 @@ export function Header({ title }: { title: string }) {
           type="button"
           onClick={() => navigate("/settings")}
           aria-label={t("screen.settings")}
-          className="shrink-0 rounded-md p-1 text-text-muted hover:bg-surface-hover hover:text-text"
+          className="shrink-0 rounded-lg p-1 text-text-muted hover:bg-surface-hover hover:text-text"
         >
           <Icon path={ICONS.settings} />
         </button>

@@ -3,6 +3,10 @@ import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
 import type { RadioDirectory } from "../types/api/RadioDirectory";
+import type { NewsDigest } from "../types/api/NewsDigest";
+import type { ForexSnapshot } from "../types/api/ForexSnapshot";
+import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
+import type { WeatherLocation } from "../types/api/WeatherLocation";
 import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
 
@@ -201,6 +205,13 @@ export const api = {
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),
+
+  getWeather: (refresh = false, location?: WeatherLocation) =>
+    invoke<LoadState<WeatherSnapshot>>("get_weather", { refresh, location }),
+
+  getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
+
+  getNews: (refresh = false) => invoke<LoadState<NewsDigest>>("get_news", { refresh }),
 
   getStations: (refresh = false) => invoke<LoadState<RadioDirectory>>("get_stations", { refresh }),
   /** Resolved per station, on play — the directory lists around 270 of them. */

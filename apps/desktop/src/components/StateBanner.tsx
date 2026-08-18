@@ -38,7 +38,7 @@ export function StateBanner({
   if (state.status === "stale") {
     return (
       <>
-        <p className="mb-2 rounded-md border border-border bg-surface px-2 py-1 text-[11px] text-text-muted">
+        <p className="mb-2 rounded-xl border border-border bg-surface px-2 py-1 text-[11px] text-text-muted">
           {state.since ? `${t("state.stale-since")} ${state.since}` : t("state.stale")}
         </p>
         {children}
@@ -55,7 +55,7 @@ export function StateBanner({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-2 rounded-md border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
+          className="mt-2 rounded-xl border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
         >
           {t("action.retry")}
         </button>

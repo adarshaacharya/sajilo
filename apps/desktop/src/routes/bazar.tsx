@@ -157,7 +157,7 @@ function Vegetables({ snapshot, t }: { snapshot: VegetableMarketSnapshot; t: Tra
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("bazar.search-produce")}
-          className="h-8 w-full rounded-md border border-border bg-surface pl-7 pr-2 text-[12px]"
+          className="h-8 w-full rounded-xl border border-border bg-surface pl-7 pr-2 text-[12px]"
         />
       </div>
       <p className="mb-1 text-[11px] text-text-muted">{t("bazar.wholesale-note")}</p>

@@ -12,7 +12,7 @@ import {
   type SupportedRange,
 } from "../lib/ipc";
 import { digits, type NumeralStyle } from "../lib/numerals";
-import { useSettings } from "../lib/settings";
+import { FOREX_OPTIONS, useSettings } from "../lib/settings";
 
 type Tab = "display" | "modules" | "system";
 
@@ -160,41 +160,97 @@ function DisplayTab({
 }
 
 /**
- * Module switches. These are stored but have nothing to gate yet — the remote
- * screens land in M7 — so the note says so rather than implying they do nothing.
+ * Module switches persist to the store and gate navigation + glance cards.
  */
 function ModulesTab() {
-  const { t } = useSettings();
-  const [enabled, setEnabled] = useState<Record<string, boolean>>({
-    weather: true,
-    forex: true,
-    news: true,
-    bazar: true,
-    rashifal: true,
-    radio: true,
-  });
+  const { t, modules, setModules } = useSettings();
 
-  const modules = [
-    { id: "weather", label: t("feature.weather"), note: t("settings.module-weather-note") },
-    { id: "forex", label: t("feature.forex"), note: t("settings.module-forex-note") },
-    { id: "news", label: t("screen.news"), note: t("settings.module-news-note") },
-    { id: "bazar", label: t("screen.bazar"), note: t("settings.module-bazar-note") },
-    { id: "rashifal", label: t("screen.rashifal"), note: t("settings.module-rashifal-note") },
-    { id: "radio", label: t("screen.radio"), note: t("settings.module-radio-note") },
+  const rows = [
+    {
+      key: "weatherEnabled" as const,
+      label: t("feature.weather"),
+      note: t("settings.module-weather-note"),
+      extra: (
+        <Select
+          label={t("settings.weather-location")}
+          value={modules.weatherLocation}
+          onChange={(next) =>
+            setModules((current) => ({
+              ...current,
+              weatherLocation: next as typeof modules.weatherLocation,
+            }))
+          }
+          options={[
+            { id: "kathmandu", label: "Kathmandu · काठमाडौं" },
+            { id: "pokhara", label: "Pokhara · पोखरा" },
+            { id: "lalitpur", label: "Lalitpur · ललितपुर" },
+          ]}
+        />
+      ),
+    },
+    {
+      key: "forexEnabled" as const,
+      label: t("feature.forex"),
+      note: t("settings.module-forex-note"),
+      extra: (
+        <div className="flex flex-wrap gap-1 pt-1">
+          {FOREX_OPTIONS.map((code) => {
+            const on = modules.forexFavourites.includes(code);
+            return (
+              <button
+                key={code}
+                type="button"
+                onClick={() =>
+                  setModules((current) => ({
+                    ...current,
+                    forexFavourites: on
+                      ? current.forexFavourites.filter((item) => item !== code)
+                      : [...current.forexFavourites, code],
+                  }))
+                }
+                className={`rounded border px-1.5 py-0.5 text-[10px] ${
+                  on
+                    ? "border-accent text-accent"
+                    : "border-border text-text-muted hover:bg-surface-hover"
+                }`}
+              >
+                {code}
+              </button>
+            );
+          })}
+        </div>
+      ),
+    },
+    { key: "newsEnabled" as const, label: t("screen.news"), note: t("settings.module-news-note") },
+    { key: "bazarEnabled" as const, label: t("screen.bazar"), note: t("settings.module-bazar-note") },
+    {
+      key: "rashifalEnabled" as const,
+      label: t("screen.rashifal"),
+      note: t("settings.module-rashifal-note"),
+    },
+    { key: "radioEnabled" as const, label: t("screen.radio"), note: t("settings.module-radio-note") },
   ];
 
-  const noneOn = Object.values(enabled).every((value) => !value);
+  const noneOn =
+    !modules.weatherEnabled &&
+    !modules.forexEnabled &&
+    !modules.newsEnabled &&
+    !modules.bazarEnabled &&
+    !modules.rashifalEnabled &&
+    !modules.radioEnabled;
 
   return (
     <Card title={t("settings.modules")}>
-      {modules.map((module) => (
-        <Toggle
-          key={module.id}
-          label={module.label}
-          note={module.note}
-          checked={enabled[module.id] ?? true}
-          onChange={(value) => setEnabled((current) => ({ ...current, [module.id]: value }))}
-        />
+      {rows.map((row) => (
+        <div key={row.key} className="border-b border-border/60 py-2 last:border-0">
+          <Toggle
+            label={row.label}
+            note={row.note}
+            checked={modules[row.key]}
+            onChange={(value) => setModules((current) => ({ ...current, [row.key]: value }))}
+          />
+          {modules[row.key] && row.extra}
+        </div>
       ))}
       {noneOn && (
         <p className="mt-1 text-[11px] text-text-muted">{t("settings.nothing-enabled")}</p>
@@ -315,14 +371,14 @@ function SystemTab() {
           <button
             type="button"
             onClick={() => exportData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex-1 rounded-xl border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
           >
             {t("settings.export-data")}
           </button>
           <button
             type="button"
             onClick={() => importData().catch((error) => setMessage(String(error)))}
-            className="flex-1 rounded-md border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="flex-1 rounded-xl border border-border py-1 text-text-secondary hover:bg-surface-hover hover:text-text"
           >
             {t("settings.import-data")}
           </button>

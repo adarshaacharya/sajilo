@@ -15,8 +15,8 @@
       {
         "label": "main",
         "title": "Sajilo",
-        "width": 340,
-        "height": 540,
+        "width": 380,
+        "height": 560,
         "resizable": false,
         "decorations": false,
         "transparent": true,

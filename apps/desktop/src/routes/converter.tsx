@@ -87,7 +87,7 @@ export function Converter() {
         <button
           type="button"
           onClick={swap}
-          className="mt-3 w-full rounded-md border border-border py-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+          className="mt-3 w-full rounded-xl border border-border py-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
         >
           ⇅ {t("action.swap")}
         </button>
@@ -111,7 +111,7 @@ export function Converter() {
                 <button
                   type="button"
                   onClick={() => navigator.clipboard.writeText(text)}
-                  className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1 text-left hover:bg-surface-hover"
+                  className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left hover:bg-surface-hover"
                 >
                   <span className="truncate">{text}</span>
                   <span className="shrink-0 text-[10px] text-text-muted">⧉</span>
