@@ -92,6 +92,8 @@ export function searchTimezones(query: string): ClockCity[] {
   ).slice(0, RESULT_LIMIT);
 }
 
+const NEPAL_TIME_ZONE = "Asia/Kathmandu";
+
 function formatTime(timeZone: string): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -101,19 +103,61 @@ function formatTime(timeZone: string): string {
   }).format(new Date());
 }
 
+/** `YYYY-MM-DD` in the given timezone, so two zones' calendar dates can be
+ * compared without a DST-sensitive time-of-day component in the way. */
+function dateKey(timeZone: string, at: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone }).format(at);
+}
+
+/** Full weekday + date, for the tooltip — shown on hover, not by default. */
+export function fullDateFor(timeZone: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+}
+
+/** Whole days this timezone's calendar date is ahead of (+) or behind (-)
+ * Nepal's, right now. Zero for same-day, which is the common case. */
+function dayOffsetFromNepal(timeZone: string, at: Date): number {
+  const here = new Date(`${dateKey(timeZone, at)}T00:00:00Z`);
+  const nepal = new Date(`${dateKey(NEPAL_TIME_ZONE, at)}T00:00:00Z`);
+  return Math.round((here.getTime() - nepal.getTime()) / 86_400_000);
+}
+
+export interface WorldClockReading {
+  time: string;
+  /** +1 "tomorrow there", -1 "yesterday there", 0 same day as Nepal. */
+  dayOffset: number;
+}
+
 /**
- * `HH:MM` for every requested timezone, off one shared interval — not one
- * `setInterval` per clock, however many are selected.
+ * `+1d` / `-1d`, never a bare `-1` — a signed number alone reads as a UTC
+ * offset (that *is* the actual convention for that notation), not a day
+ * difference. The `d` is what disambiguates it.
  */
-export function useWorldClocks(timeZones: string[]): Record<string, string> {
+export function formatDayOffset(offset: number): string {
+  return offset > 0 ? `+${offset}d` : `${offset}d`;
+}
+
+/**
+ * `HH:MM` and day offset for every requested timezone, off one shared
+ * interval — not one `setInterval` per clock, however many are selected.
+ */
+export function useWorldClocks(timeZones: string[]): Record<string, WorldClockReading> {
   const key = timeZones.join(",");
-  const [times, setTimes] = useState<Record<string, string>>({});
+  const [times, setTimes] = useState<Record<string, WorldClockReading>>({});
 
   useEffect(() => {
     const zones = key ? key.split(",") : [];
     const tick = () => {
-      const next: Record<string, string> = {};
-      for (const tz of zones) next[tz] = formatTime(tz);
+      const now = new Date();
+      const next: Record<string, WorldClockReading> = {};
+      for (const tz of zones) {
+        next[tz] = { time: formatTime(tz), dayOffset: dayOffsetFromNepal(tz, now) };
+      }
       setTimes(next);
     };
     tick();

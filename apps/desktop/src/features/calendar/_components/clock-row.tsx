@@ -1,5 +1,11 @@
 import { useSettings } from "../../../shared/context/settings-context";
-import { cityFor, flagFor, useWorldClocks } from "../../../shared/lib/world-clock";
+import {
+  cityFor,
+  flagFor,
+  formatDayOffset,
+  fullDateFor,
+  useWorldClocks,
+} from "../../../shared/lib/world-clock";
 
 const PREVIEW_LIMIT = 4;
 
@@ -21,14 +27,21 @@ export function ClockRow({ timeZones }: { timeZones: string[] }) {
     <div className="flex gap-1.5 overflow-x-auto pt-2 pb-0.5">
       {preview.map((tz) => {
         const city = cityFor(tz);
+        const reading = times[tz];
         return (
           <div
             key={tz}
+            title={fullDateFor(tz)}
             className="surface-card group relative flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-[11px]"
           >
             <span>{flagFor(tz)}</span>
             <span className="text-text-secondary">{city.city}</span>
-            <span className="tabular-nums font-semibold">{times[tz] ?? "--:--"}</span>
+            <span className="tabular-nums font-semibold">{reading?.time ?? "--:--"}</span>
+            {reading && reading.dayOffset !== 0 && (
+              <span className="tabular-nums text-[9px] font-semibold text-[color:var(--color-accent-mark)]">
+                {formatDayOffset(reading.dayOffset)}
+              </span>
+            )}
             <button
               type="button"
               onClick={() => remove(tz)}

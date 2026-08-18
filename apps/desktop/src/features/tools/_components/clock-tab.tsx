@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { useSettings } from "../../../shared/context/settings-context";
-import { cityFor, flagFor, searchTimezones, useWorldClocks } from "../../../shared/lib/world-clock";
+import {
+  cityFor,
+  flagFor,
+  formatDayOffset,
+  fullDateFor,
+  searchTimezones,
+  useWorldClocks,
+} from "../../../shared/lib/world-clock";
 
 export function ClockTab() {
   const { t, modules, setModules } = useSettings();
@@ -23,18 +30,26 @@ export function ClockTab() {
         <div className="surface-card divide-y divide-border/40 p-1">
           {modules.clocks.map((tz) => {
             const city = cityFor(tz);
+            const reading = times[tz];
             return (
-              <div key={tz} className="flex items-center gap-2 px-1.5 py-2">
+              <div key={tz} title={fullDateFor(tz)} className="flex items-center gap-2 px-1.5 py-2">
                 <span className="text-[15px]">{flagFor(tz)}</span>
                 <span className="min-w-0 flex-1 truncate text-[12px]">
                   {city.city}
                   <span className="ml-1 text-text-muted">· {city.region}</span>
                 </span>
-                <span className="tabular-nums text-[13px] font-medium">{times[tz] ?? "--:--"}</span>
+                <span className="tabular-nums text-[13px] font-medium">
+                  {reading?.time ?? "--:--"}
+                </span>
+                {reading && reading.dayOffset !== 0 && (
+                  <span className="tabular-nums text-[10px] font-semibold text-[color:var(--color-accent-mark)]">
+                    {formatDayOffset(reading.dayOffset)}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => toggle(tz)}
-                  aria-label={t("action.retry")}
+                  aria-label={t("action.remove")}
                   className="ml-1 shrink-0 rounded px-1.5 py-0.5 text-[10px] text-text-muted transition-colors hover:bg-surface-hover hover:text-text"
                 >
                   ✕
