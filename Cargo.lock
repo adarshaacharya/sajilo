@@ -3831,6 +3831,7 @@ dependencies = [
  "tauri-plugin-updater",
  "tiny-skia",
  "tokio",
+ "window-vibrancy",
 ]
 
 [[package]]

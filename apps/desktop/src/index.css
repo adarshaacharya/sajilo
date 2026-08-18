@@ -5,9 +5,13 @@
  * Brass gilt for today / marks; holiday red for Saturdays only (as text).
  */
 @theme {
-  --color-surface: #12141a;
-  --color-surface-raised: #1a1d24;
-  --color-surface-hover: #242830;
+  /*
+   * Patro over system material: shell stays clear so NSVisualEffectView shows
+   * through; raised fills mirror Swift Color.primary.opacity(0.055 / 0.08).
+   */
+  --color-surface: transparent;
+  --color-surface-raised: color-mix(in srgb, #fff 5.5%, transparent);
+  --color-surface-hover: color-mix(in srgb, #fff 8%, transparent);
   /* Soft hairline — macOS-style, not a hard square edge. */
   --color-border: color-mix(in srgb, #9aa1ae 18%, transparent);
   --color-text: #eef1f6;
@@ -34,9 +38,9 @@
 
 @media (prefers-color-scheme: light) {
   :root {
-    --color-surface: #f4f1ea;
-    --color-surface-raised: #ffffff;
-    --color-surface-hover: #ebe6dc;
+    --color-surface: transparent;
+    --color-surface-raised: color-mix(in srgb, #000 5.5%, transparent);
+    --color-surface-hover: color-mix(in srgb, #000 8%, transparent);
     --color-border: color-mix(in srgb, #5c564c 16%, transparent);
     --color-text: #1a1712;
     --color-text-secondary: #5c564c;
@@ -60,7 +64,7 @@ html {
   color-scheme: light dark;
 }
 
-/* Opaque rounded chrome — the only layer that paints the surface fill. */
+/* Clear rounded shell — fill comes from native popover vibrancy underneath. */
 .app-window {
   box-sizing: border-box;
   height: 100%;
@@ -69,7 +73,7 @@ html {
   /* Hard clip — WKWebView sometimes ignores overflow+radius alone. */
   clip-path: inset(0 round 14px);
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: transparent;
   color: var(--color-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
@@ -166,7 +170,8 @@ html {
 }
 
 .seg-thumb {
-  background: var(--color-surface-raised);
+  /* Slightly denser than cards so the thumb still reads raised on glass. */
+  background: color-mix(in srgb, #fff 12%, transparent);
   box-shadow:
     0 0.5px 1px color-mix(in srgb, #000 40%, transparent),
     0 0 0 0.5px color-mix(in srgb, var(--color-text) 8%, transparent),
@@ -180,7 +185,7 @@ html {
   }
 
   .seg-thumb {
-    background: #fff;
+    background: color-mix(in srgb, #fff 78%, transparent);
     box-shadow:
       0 0.5px 1.5px color-mix(in srgb, #000 18%, transparent),
       0 0 0 0.5px color-mix(in srgb, #000 6%, transparent);
