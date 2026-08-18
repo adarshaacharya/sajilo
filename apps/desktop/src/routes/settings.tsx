@@ -1,8 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { Card } from "../components/Card";
+import { useEffect, useState } from "react";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { Select } from "../components/Select";
+import { CurrencyPicker } from "../components/settings/CurrencyPicker";
+import { ModuleRow } from "../components/settings/ModuleRow";
+import { SettingsSection } from "../components/settings/SettingsSection";
 import { Toggle } from "../components/Toggle";
 import type { Language } from "../lib/i18n";
 import {
@@ -11,7 +13,7 @@ import {
   type PermissionState,
 } from "../lib/ipc";
 import { digits, type NumeralStyle } from "../lib/numerals";
-import { FOREX_OPTIONS, useSettings } from "../lib/settings";
+import { useSettings } from "../lib/settings";
 
 type Tab = "display" | "modules" | "system";
 
@@ -24,8 +26,6 @@ const MENU_BAR_FORMATS = [
   "custom",
 ] as const;
 
-/** Each label previews the shape it produces, since the option ids say nothing
- * about what lands in the menu bar. */
 const MENU_BAR_FORMAT_LABELS: Record<(typeof MENU_BAR_FORMATS)[number], string> = {
   nepaliShort: "Short — साउन ३१",
   nepaliLong: "Full — साउन ३१, २०८३",
@@ -40,7 +40,7 @@ export function Settings() {
   const [tab, setTab] = useState<Tab>("display");
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Segmented
         label={t("settings.general")}
         value={tab}
@@ -62,16 +62,6 @@ export function Settings() {
       )}
       {tab === "modules" && <ModulesTab />}
       {tab === "system" && <SystemTab />}
-    </div>
-  );
-}
-
-/** Label + control on one row — closer to Swift SettingsSection pickers. */
-function SettingsRow({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
-      <span className="w-[88px] shrink-0 text-[12px] text-text-secondary">{label}</span>
-      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }
@@ -124,45 +114,40 @@ function DisplayTab({
   };
 
   return (
-    <>
-      <Card title={t("settings.appearance")}>
-        <SettingsRow label={t("settings.language")}>
-          <Select
-            value={language}
-            onChange={setLanguage}
-            options={[
-              { id: "ne", label: t("language.nepali") },
-              { id: "en", label: t("language.english") },
-            ]}
-          />
-        </SettingsRow>
-        <div className="border-t border-border/50" />
-        <SettingsRow label={t("settings.numerals")}>
-          <Select
-            value={numerals}
-            onChange={setNumerals}
-            options={[
-              {
-                id: "devanagari",
-                label: `${t("numerals.devanagari")} · ${digits(2083, "devanagari")}`,
-              },
-              { id: "latin", label: `${t("numerals.latin")} · ${digits(2083, "latin")}` },
-            ]}
-          />
-        </SettingsRow>
-      </Card>
+    <div className="space-y-2.5">
+      <SettingsSection title={t("settings.appearance")}>
+        <Select
+          label={t("settings.language")}
+          value={language}
+          onChange={setLanguage}
+          options={[
+            { id: "ne", label: t("language.nepali") },
+            { id: "en", label: t("language.english") },
+          ]}
+        />
+        <Select
+          label={t("settings.numerals")}
+          value={numerals}
+          onChange={setNumerals}
+          options={[
+            {
+              id: "devanagari",
+              label: `${t("numerals.devanagari")} · ${digits(2083, "devanagari")}`,
+            },
+            { id: "latin", label: `${t("numerals.latin")} · ${digits(2083, "latin")}` },
+          ]}
+        />
+      </SettingsSection>
 
-      <Card title={t("settings.menu-bar")}>
-        <SettingsRow label={t("settings.format")}>
-          <Select
-            value={format}
-            onChange={persistFormat}
-            options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
-          />
-        </SettingsRow>
+      <SettingsSection title={t("settings.menu-bar")}>
+        <Select
+          label={t("settings.format")}
+          value={format}
+          onChange={persistFormat}
+          options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
+        />
         {format === "custom" && (
           <>
-            <div className="border-t border-border/50" />
             <Toggle
               label={t("settings.menu-bar-show-flag")}
               checked={showFlag}
@@ -181,22 +166,42 @@ function DisplayTab({
             />
           </>
         )}
-      </Card>
-    </>
+      </SettingsSection>
+    </div>
   );
 }
 
 function ModulesTab() {
   const { t, modules, setModules } = useSettings();
 
-  const rows = [
-    {
-      key: "weatherEnabled" as const,
-      label: t("feature.weather"),
-      note: t("settings.module-weather-note"),
-      extra: (
+  const toggleForex = (code: string) => {
+    setModules((current) => ({
+      ...current,
+      forexFavourites: current.forexFavourites.includes(code)
+        ? current.forexFavourites.filter((item) => item !== code)
+        : [...current.forexFavourites, code],
+    }));
+  };
+
+  const noneOn =
+    !modules.weatherEnabled &&
+    !modules.forexEnabled &&
+    !modules.newsEnabled &&
+    !modules.bazarEnabled &&
+    !modules.rashifalEnabled &&
+    !modules.radioEnabled;
+
+  return (
+    <div className="space-y-1.5">
+      <ModuleRow
+        title={t("feature.weather")}
+        note={t("settings.module-weather-note")}
+        icon="weather"
+        checked={modules.weatherEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, weatherEnabled: value }))}
+      >
         <Select
-          label={t("settings.weather-location")}
+          label={t("settings.city")}
           value={modules.weatherLocation}
           onChange={(next) =>
             setModules((current) => ({
@@ -210,76 +215,59 @@ function ModulesTab() {
             { id: "lalitpur", label: "Lalitpur · ललितपुर" },
           ]}
         />
-      ),
-    },
-    {
-      key: "forexEnabled" as const,
-      label: t("feature.forex"),
-      note: t("settings.module-forex-note"),
-      extra: (
-        <div className="flex flex-wrap gap-1 pt-1">
-          {FOREX_OPTIONS.map((code) => {
-            const on = modules.forexFavourites.includes(code);
-            return (
-              <button
-                key={code}
-                type="button"
-                onClick={() =>
-                  setModules((current) => ({
-                    ...current,
-                    forexFavourites: on
-                      ? current.forexFavourites.filter((item) => item !== code)
-                      : [...current.forexFavourites, code],
-                  }))
-                }
-                className={`rounded-md border px-1.5 py-0.5 text-[10px] ${
-                  on
-                    ? "border-accent text-accent"
-                    : "border-border text-text-muted hover:bg-surface-hover"
-                }`}
-              >
-                {code}
-              </button>
-            );
-          })}
-        </div>
-      ),
-    },
-    { key: "newsEnabled" as const, label: t("screen.news"), note: t("settings.module-news-note") },
-    { key: "bazarEnabled" as const, label: t("screen.bazar"), note: t("settings.module-bazar-note") },
-    {
-      key: "rashifalEnabled" as const,
-      label: t("screen.rashifal"),
-      note: t("settings.module-rashifal-note"),
-    },
-    { key: "radioEnabled" as const, label: t("screen.radio"), note: t("settings.module-radio-note") },
-  ];
+      </ModuleRow>
 
-  const noneOn =
-    !modules.weatherEnabled &&
-    !modules.forexEnabled &&
-    !modules.newsEnabled &&
-    !modules.bazarEnabled &&
-    !modules.rashifalEnabled &&
-    !modules.radioEnabled;
+      <ModuleRow
+        title={t("feature.forex")}
+        note={t("settings.module-forex-note")}
+        icon="forex"
+        checked={modules.forexEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, forexEnabled: value }))}
+      >
+        <CurrencyPicker
+          title={t("settings.currencies")}
+          hint={t("settings.currencies-hint")}
+          selected={modules.forexFavourites}
+          onToggle={toggleForex}
+        />
+      </ModuleRow>
 
-  return (
-    <Card title={t("settings.modules")}>
-      {rows.map((row) => (
-        <div key={row.key} className="row-line py-2 first:pt-0">
-          <Toggle
-            label={row.label}
-            note={row.note}
-            checked={modules[row.key]}
-            onChange={(value) => setModules((current) => ({ ...current, [row.key]: value }))}
-          />
-          {modules[row.key] && row.extra}
-        </div>
-      ))}
+      <ModuleRow
+        title={t("screen.news")}
+        note={t("settings.module-news-note")}
+        icon="news"
+        checked={modules.newsEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, newsEnabled: value }))}
+      />
+
+      <ModuleRow
+        title={t("screen.bazar")}
+        note={t("settings.module-bazar-note")}
+        icon="bazar"
+        checked={modules.bazarEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, bazarEnabled: value }))}
+      />
+
+      <ModuleRow
+        title={t("screen.rashifal")}
+        note={t("settings.module-rashifal-note")}
+        icon="rashifal"
+        checked={modules.rashifalEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, rashifalEnabled: value }))}
+      />
+
+      <ModuleRow
+        title={t("screen.radio")}
+        note={t("settings.module-radio-note")}
+        icon="radio"
+        checked={modules.radioEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, radioEnabled: value }))}
+      />
+
       {noneOn && (
-        <p className="mt-1 text-[11px] text-text-muted">{t("settings.nothing-enabled")}</p>
+        <p className="px-0.5 text-[10px] text-text-muted">{t("settings.nothing-enabled")}</p>
       )}
-    </Card>
+    </div>
   );
 }
 
@@ -296,18 +284,9 @@ function SystemTab() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .isAutostartEnabled()
-      .then(setAutostart)
-      .catch(() => {});
-    api
-      .getNotificationOptions()
-      .then(setOptions)
-      .catch(() => {});
-    api
-      .notificationPermission()
-      .then(setPermission)
-      .catch(() => {});
+    api.isAutostartEnabled().then(setAutostart).catch(() => {});
+    api.getNotificationOptions().then(setOptions).catch(() => {});
+    api.notificationPermission().then(setPermission).catch(() => {});
   }, []);
 
   const updateOptions = async (next: NotificationOptions) => {
@@ -317,6 +296,13 @@ function SystemTab() {
     setOptions(next);
     await api.setNotificationOptions(next).catch(() => {});
   };
+
+  const reminderNote =
+    permission === "denied"
+      ? t("settings.reminder-denied-note")
+      : options.eveOfFestival || options.eveOfPublicHoliday
+        ? t("settings.reminder-enabled-note")
+        : t("settings.reminder-off-note");
 
   const exportData = async () => {
     const contents = await api.exportBackup();
@@ -344,28 +330,8 @@ function SystemTab() {
   };
 
   return (
-    <>
-      <Card title={t("settings.reminders")}>
-        <Toggle
-          label={t("reminder.festival-tomorrow")}
-          checked={options.eveOfFestival}
-          onChange={(value) => updateOptions({ ...options, eveOfFestival: value })}
-        />
-        <Toggle
-          label={t("reminder.holiday-tomorrow")}
-          checked={options.eveOfPublicHoliday}
-          onChange={(value) => updateOptions({ ...options, eveOfPublicHoliday: value })}
-        />
-        <p className="mt-1 text-[11px] text-text-muted">
-          {permission === "denied"
-            ? t("settings.reminder-denied-note")
-            : options.eveOfFestival || options.eveOfPublicHoliday
-              ? t("settings.reminder-enabled-note")
-              : t("settings.reminder-off-note")}
-        </p>
-      </Card>
-
-      <Card title={t("settings.startup")}>
+    <div className="space-y-2.5">
+      <SettingsSection title={t("settings.startup")}>
         <Toggle
           label={t("settings.launch-at-login")}
           checked={autostart}
@@ -381,30 +347,42 @@ function SystemTab() {
             api.setDockIconVisible(value).catch(() => {});
           }}
         />
-      </Card>
+      </SettingsSection>
 
-      <Card title={t("settings.backup")}>
-        <div className="flex gap-1.5">
+      <SettingsSection title={t("settings.reminders")} footnote={reminderNote}>
+        <Toggle
+          label={t("reminder.holiday-tomorrow")}
+          checked={options.eveOfPublicHoliday}
+          onChange={(value) => updateOptions({ ...options, eveOfPublicHoliday: value })}
+        />
+        <Toggle
+          label={t("reminder.festival-tomorrow")}
+          checked={options.eveOfFestival}
+          onChange={(value) => updateOptions({ ...options, eveOfFestival: value })}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t("settings.backup")} footnote={t("settings.backup-note")}>
+        <div className="flex flex-wrap gap-1.5">
           <button
             type="button"
             onClick={() => exportData().catch((error) => setMessage(String(error)))}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="settings-btn"
           >
-            <Icon name="export" className="size-3.5 shrink-0" />
-            <span className="truncate">{t("settings.export-data")}</span>
+            <Icon name="export" className="size-3 shrink-0" />
+            {t("settings.export-data")}
           </button>
           <button
             type="button"
             onClick={() => importData().catch((error) => setMessage(String(error)))}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-border/60 py-1.5 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="settings-btn"
           >
-            <Icon name="import" className="size-3.5 shrink-0" />
-            <span className="truncate">{t("settings.import-data")}</span>
+            <Icon name="import" className="size-3 shrink-0" />
+            {t("settings.import-data")}
           </button>
         </div>
-        <p className="mt-1.5 text-[11px] text-text-muted">{t("settings.backup-note")}</p>
-        {message && <p className="mt-1 text-[11px] text-positive">{message}</p>}
-      </Card>
-    </>
+        {message && <p className="text-[10px] text-positive">{message}</p>}
+      </SettingsSection>
+    </div>
   );
 }

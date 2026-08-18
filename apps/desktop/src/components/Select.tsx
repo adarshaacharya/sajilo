@@ -26,7 +26,7 @@ export function Select<T extends string>({
         id={id}
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className={`${CONTROL} w-full cursor-pointer appearance-none pr-7 hover:bg-surface-hover`}
+        className={`${CONTROL} w-full cursor-pointer appearance-none pr-6 hover:bg-surface-hover`}
       >
         {options.map((option) => (
           <option key={option.id} value={option.id}>
@@ -37,7 +37,7 @@ export function Select<T extends string>({
       <svg
         viewBox="0 0 16 16"
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 right-2 size-3 -translate-y-1/2 text-text-muted"
+        className="pointer-events-none absolute top-1/2 right-1.5 size-2.5 -translate-y-1/2 text-text-muted"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"

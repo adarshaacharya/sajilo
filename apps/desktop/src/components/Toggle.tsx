@@ -1,4 +1,6 @@
-/** A labelled switch, with room for the note that explains what it does. */
+import { Switch } from "./Switch";
+
+/** A labelled macOS-style switch, with room for the note that explains what it does. */
 export function Toggle({
   label,
   note,
@@ -13,18 +15,12 @@ export function Toggle({
   disabled?: boolean;
 }) {
   return (
-    <label className={`block py-1.5 ${disabled ? "opacity-50" : ""}`}>
-      <span className="flex items-center justify-between gap-2">
-        <span>{label}</span>
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={disabled}
-          onChange={(event) => onChange(event.target.checked)}
-          className="shrink-0 accent-accent"
-        />
-      </span>
-      {note && <span className="mt-0.5 block text-[11px] text-text-muted">{note}</span>}
-    </label>
+    <div className={disabled ? "opacity-50" : ""}>
+      <div className="flex items-center justify-between gap-3">
+        <span className="min-w-0 text-[12px] text-text">{label}</span>
+        <Switch checked={checked} onChange={onChange} disabled={disabled} />
+      </div>
+      {note && <p className="mt-0.5 text-[10px] leading-snug text-text-muted">{note}</p>}
+    </div>
   );
 }

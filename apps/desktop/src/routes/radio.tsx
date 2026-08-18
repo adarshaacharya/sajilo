@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { BazarSearch } from "../components/bazar/BazarSearch";
 import { Equalizer } from "../components/Equalizer";
 import { Icon } from "../components/Icon";
+import { useHeaderSlot } from "../components/HeaderSlot";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import * as player from "../lib/audio";
 import { api } from "../lib/ipc";
@@ -21,27 +23,27 @@ function banner(state: LoadState<RadioDirectory> | undefined): LoadStatus {
   }
 }
 
-function ControlButton({
-  label,
-  onClick,
-  disabled,
-  children,
+function StationArt({
+  station,
+  isPlaying,
 }: {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  children: ReactNode;
+  station: Pick<RadioStation, "logoUrl" | "name">;
+  isPlaying: boolean;
 }) {
+  if (station.logoUrl) {
+    return (
+      <img
+        src={station.logoUrl}
+        alt=""
+        className="size-[30px] shrink-0 rounded-[6px] bg-surface-raised object-cover"
+      />
+    );
+  }
+
   return (
-    <button
-      type="button"
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-      className="rounded-md p-1.5 text-text-secondary hover:bg-surface-hover hover:text-text disabled:opacity-40"
-    >
-      {children}
-    </button>
+    <span className="flex size-[30px] shrink-0 items-center justify-center rounded-[6px] bg-[color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] text-[color:var(--color-accent-mark)]">
+      {isPlaying ? <Equalizer isPlaying /> : <Icon name="radio" className="size-3.5" />}
+    </span>
   );
 }
 
@@ -55,6 +57,8 @@ export function Radio() {
 
   useEffect(() => player.subscribe(setState), []);
 
+  const loading = !directory || directory.status === "loading";
+
   const load = useCallback((refresh = false) => {
     setDirectory(undefined);
     api
@@ -64,6 +68,23 @@ export function Radio() {
   }, []);
 
   useEffect(() => load(), [load]);
+
+  const refreshButton = useMemo(
+    () => (
+      <button
+        type="button"
+        onClick={() => load(true)}
+        disabled={loading}
+        aria-label={t("action.refresh")}
+        className="icon-btn shrink-0"
+      >
+        <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+      </button>
+    ),
+    [load, loading, t],
+  );
+
+  useHeaderSlot(refreshButton);
 
   const toggleStation = async (station: RadioStation) => {
     const current = state.nowPlaying?.slug === station.slug;
@@ -117,104 +138,94 @@ export function Radio() {
   return (
     <div className="space-y-2.5">
       {current && (
-        <section className="flex items-center gap-2 rounded-[14px] bg-accent/10 px-2.5 py-2">
-          <Icon
-            name="radio"
-            className="size-4 shrink-0 text-[color:var(--color-accent-mark)]"
-          />
-          <Equalizer isPlaying={state.isPlaying} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold leading-tight">{current.name}</p>
-            {current.frequency && (
-              <p className="text-[11px] text-text-muted">{current.frequency}</p>
-            )}
+        <section className="surface-card radio-now-playing p-2.5">
+          <div className="relative z-[1] flex items-center gap-2.5">
+            <StationArt station={current} isPlaying={state.isPlaying} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-text-muted">
+                {t("radio.now-playing")}
+              </p>
+              <p className="truncate text-[14px] font-semibold leading-tight">{current.name}</p>
+              {current.frequency && (
+                <p className="text-[11px] text-text-muted">{current.frequency}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              aria-label={state.isPlaying ? "Pause" : "Play"}
+              disabled={state.isLoading || resolving === current.slug}
+              onClick={() => player.togglePlayback()}
+              className="icon-btn shrink-0"
+            >
+              {state.isLoading || resolving === current.slug ? (
+                <Icon name="refresh" className="size-3.5 animate-spin" />
+              ) : state.isPlaying ? (
+                <Icon name="pause" className="size-3.5" />
+              ) : (
+                <Icon name="play" className="size-3.5" />
+              )}
+            </button>
+            <button
+              type="button"
+              aria-label={t("radio.stop")}
+              onClick={() => player.stop()}
+              className="icon-btn shrink-0"
+            >
+              <Icon name="stop" className="size-3.5" />
+            </button>
           </div>
-          <ControlButton
-            label={state.isPlaying ? "Pause" : "Play"}
-            disabled={state.isLoading || resolving === current.slug}
-            onClick={() => player.togglePlayback()}
-          >
-            {state.isLoading || resolving === current.slug ? (
-              <Icon name="refresh" className="size-3.5 animate-spin" />
-            ) : state.isPlaying ? (
-              <Icon name="pause" className="size-3.5" />
-            ) : (
-              <Icon name="play" className="size-3.5" />
-            )}
-          </ControlButton>
-          <ControlButton label={t("radio.stop")} onClick={() => player.stop()}>
-            <Icon name="stop" className="size-3.5" />
-          </ControlButton>
         </section>
       )}
 
-      {state.error && <p className="text-[11px] text-text-muted">{state.error}</p>}
+      {state.error && <p className="px-0.5 text-[11px] text-holiday">{state.error}</p>}
 
       <StateBanner state={banner(directory)} onRetry={() => load(true)}>
-        <div className="relative mb-2">
-          <Icon
-            name="search"
-            className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
-          />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("radio.search")}
-            className="h-8 w-full rounded-md border border-border bg-surface pl-7 pr-2 text-[12px]"
-          />
-        </div>
+        <BazarSearch value={query} onChange={setQuery} placeholder={t("radio.search")} />
 
-        {matches.length === 0 && (
-          <p className="py-6 text-center text-text-secondary">{t("radio.no-stations")}</p>
-        )}
-
-        <ul className="space-y-1">
-          {matches.map((station) => {
-            const isCurrent = state.nowPlaying?.slug === station.slug;
-            const isPlaying = isCurrent && state.isPlaying;
-            return (
-              <li key={station.slug}>
-                <button
-                  type="button"
-                  onClick={() => toggleStation(station)}
-                  className={`flex w-full items-center gap-2 rounded-[14px] px-2 py-2 text-left transition-colors ${
-                    isCurrent
-                      ? "bg-accent/10"
-                      : "bg-surface-raised hover:bg-surface-hover"
-                  }`}
-                >
-                  {isCurrent ? (
-                    <Equalizer isPlaying={isPlaying} />
-                  ) : (
-                    <span className="flex size-[18px] shrink-0 items-center justify-center text-text-muted">
-                      <Icon name="play" className="size-3.5" />
-                    </span>
-                  )}
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className={`block truncate text-[13px] ${isCurrent ? "font-semibold" : ""}`}
+        {matches.length === 0 ? (
+          <p className="py-6 text-center text-[12px] text-text-secondary">{t("radio.no-stations")}</p>
+        ) : (
+          <section className="surface-card mt-2 p-1">
+            <p className="px-1.5 pt-1 text-[10px] font-semibold text-text-muted">{t("radio.stations")}</p>
+            <ul>
+              {matches.map((station) => {
+                const isCurrent = state.nowPlaying?.slug === station.slug;
+                const isPlaying = isCurrent && state.isPlaying;
+                return (
+                  <li key={station.slug}>
+                    <button
+                      type="button"
+                      onClick={() => toggleStation(station)}
+                      className={`row-line flex w-full items-center gap-2.5 px-1.5 py-2 text-left transition-colors hover:bg-surface-hover ${
+                        isCurrent ? "bg-[color-mix(in_srgb,var(--color-accent-mark)_8%,transparent)]" : ""
+                      }`}
                     >
-                      {station.name}
-                    </span>
-                    {station.frequency && (
-                      <span className="block text-[11px] text-text-muted">{station.frequency}</span>
-                    )}
-                    {unplayable === station.slug && (
-                      <span className="block text-[11px] text-holiday">{t("radio.unplayable")}</span>
-                    )}
-                  </span>
-                  {resolving === station.slug && (
-                    <Icon
-                      name="refresh"
-                      className="size-3.5 shrink-0 animate-spin text-text-muted"
-                    />
-                  )}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                      <StationArt station={station} isPlaying={isPlaying} />
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={`block truncate text-[12px] ${isCurrent ? "font-semibold" : ""}`}
+                        >
+                          {station.name}
+                        </span>
+                        {station.frequency && (
+                          <span className="block text-[10px] text-text-muted">{station.frequency}</span>
+                        )}
+                        {unplayable === station.slug && (
+                          <span className="block text-[10px] text-holiday">{t("radio.unplayable")}</span>
+                        )}
+                      </span>
+                      {isCurrent ? (
+                        <Equalizer isPlaying={isPlaying} />
+                      ) : resolving === station.slug ? (
+                        <Icon name="refresh" className="size-3 shrink-0 animate-spin text-text-muted" />
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
       </StateBanner>
     </div>
   );

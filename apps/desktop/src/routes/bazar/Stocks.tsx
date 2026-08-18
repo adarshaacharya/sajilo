@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "../../components/Card";
+import { BazarSearch } from "../../components/bazar/BazarSearch";
+import { ChangeBadge } from "../../components/bazar/ChangeBadge";
 import { Icon } from "../../components/Icon";
 import { Segmented } from "../../components/Segmented";
 import { type LoadStatus, StateBanner } from "../../components/StateBanner";
+import { money, money0 } from "../../lib/bazar";
 import type { translate } from "../../lib/i18n";
 import { loadedValue } from "../../lib/loadState";
 import { useSettings } from "../../lib/settings";
@@ -18,8 +20,6 @@ import type {
 type TranslationKey = Parameters<typeof translate>[0];
 type TFn = (key: TranslationKey) => string;
 
-const money = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
-const money0 = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 const WATCHLIST_KEY = "stockWatchlist";
 const WATCHLIST_LIMIT = 12;
 
@@ -230,22 +230,14 @@ export function Stocks({
     <StateBanner state={banner(state)} onRetry={onRetry}>
       {snapshot && (
         <div className="space-y-2.5">
-          <div className="relative">
-            <Icon
-              name="search"
-              className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={(event) => {
-                setQuery(event.target.value);
-                setOpened(null);
-              }}
-              placeholder={t("stocks.search")}
-              className="h-8 w-full rounded-md border border-border bg-surface pl-7 pr-2 text-[12px]"
-            />
-          </div>
+          <BazarSearch
+            value={query}
+            onChange={(value) => {
+              setQuery(value);
+              setOpened(null);
+            }}
+            placeholder={t("stocks.search")}
+          />
 
           {openQuote ? (
             <CompanyDetail
@@ -256,7 +248,7 @@ export function Stocks({
               t={t}
             />
           ) : query.trim() ? (
-            <Card>
+            <section className="surface-card p-2.5">
               {results.length === 0 ? (
                 <p className="text-text-secondary">{t("stocks.no-match")}</p>
               ) : (
@@ -273,12 +265,15 @@ export function Stocks({
               {results.length > 25 && (
                 <p className="pt-1 text-[10px] text-text-muted">+{results.length - 25}</p>
               )}
-            </Card>
+            </section>
           ) : (
             <>
               {snapshot.nepse && <IndexHeadline index={snapshot.nepse} t={t} />}
 
-              <Card title={t("stocks.watchlist")}>
+              <section className="surface-card p-2.5">
+                <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                  {t("stocks.watchlist")}
+                </p>
                 {watchlist.length === 0 ? (
                   <p className="text-[11px] text-text-secondary">{t("stocks.empty-watchlist")}</p>
                 ) : (
@@ -309,10 +304,10 @@ export function Stocks({
                     );
                   })
                 )}
-              </Card>
+              </section>
 
               {snapshot.movers.length > 0 && (
-                <Card>
+                <section className="surface-card p-2.5">
                   <Segmented
                     label={t("stocks.movers")}
                     value={board}
@@ -332,11 +327,14 @@ export function Stocks({
                       <p className="text-[11px] text-text-muted">{t("stocks.no-match")}</p>
                     )}
                   </div>
-                </Card>
+                </section>
               )}
 
               {snapshot.subIndices.length > 0 && (
-                <Card title={t("stocks.sectors")}>
+                <section className="surface-card p-2.5">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+                    {t("stocks.sectors")}
+                  </p>
                   <div className="grid grid-cols-2 gap-1">
                     {snapshot.subIndices.map((index) => (
                       <div
@@ -354,7 +352,7 @@ export function Stocks({
                       </div>
                     ))}
                   </div>
-                </Card>
+                </section>
               )}
             </>
           )}
@@ -366,37 +364,32 @@ export function Stocks({
 
 function IndexHeadline({ index, t }: { index: MarketIndex; t: TFn }) {
   return (
-    <Card>
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="text-[11px] font-medium text-text-secondary">{index.name}</p>
-        <p className={`text-[11px] font-medium tabular-nums ${changeTone(index.change)}`}>
-          {changeText(index.change, index.changePercent)}
+    <section className="surface-card bazar-headline p-2.5">
+      <div className="relative z-[1]">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-[11px] font-semibold text-text-secondary">{index.name}</p>
+          <ChangeBadge change={index.change} previous={index.value - index.change} percentOnly />
+        </div>
+        <p className="mt-1 text-[28px] font-semibold leading-none tabular-nums">
+          {money.format(index.value)}
+        </p>
+        <p className="mt-1.5 text-[11px] text-text-muted tabular-nums">
+          {t("bazar.market-turnover")} · Rs {money0.format(index.turnover)}
         </p>
       </div>
-      <p className="mt-1 text-[28px] font-semibold leading-none tabular-nums">
-        {money.format(index.value)}
-      </p>
-      <p className="mt-1.5 text-[11px] text-text-muted tabular-nums">
-        {t("bazar.market-turnover")} · Rs {money0.format(index.turnover)}
-      </p>
-    </Card>
+    </section>
   );
 }
 
 function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => void }) {
-  const metric =
-    mover.board === "gainers" || mover.board === "losers"
-      ? `${mover.metric > 0 ? "+" : ""}${mover.metric.toFixed(2)}%`
-      : mover.board === "turnover"
-        ? `Rs ${money0.format(mover.metric)}`
-        : money0.format(mover.metric);
-
-  const tone =
-    mover.board === "gainers"
+  const isPercent = mover.board === "gainers" || mover.board === "losers";
+  const up = mover.metric > 0;
+  const flat = Math.abs(mover.metric) < 0.005;
+  const tone = flat
+    ? "text-text-muted"
+    : up
       ? "text-[color:var(--color-accent-mark)]"
-      : mover.board === "losers"
-        ? "text-holiday"
-        : "text-text-secondary";
+      : "text-holiday";
 
   return (
     <button
@@ -405,8 +398,14 @@ function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => void })
       className="row-line flex w-full items-center gap-2 py-1.5 text-left"
     >
       <span className="w-[68px] shrink-0 text-[11px] font-semibold">{mover.symbol}</span>
-      <span className="text-[11px] text-text-muted tabular-nums">{money.format(mover.ltp)}</span>
-      <span className={`ml-auto text-[11px] font-medium tabular-nums ${tone}`}>{metric}</span>
+      <span className="text-[11px] text-text-muted tabular-nums">Rs {money.format(mover.ltp)}</span>
+      <span className={`ml-auto text-[11px] font-medium tabular-nums ${isPercent ? tone : "text-text-secondary"}`}>
+        {isPercent
+          ? `${up && !flat ? "+" : ""}${mover.metric.toFixed(2)}%`
+          : mover.board === "turnover"
+            ? `Rs ${money0.format(mover.metric)}`
+            : money0.format(mover.metric)}
+      </span>
     </button>
   );
 }
@@ -454,14 +453,15 @@ function CompanyDetail({
   ];
 
   return (
-    <Card>
+    <section className="surface-card p-2.5">
       <div className="flex items-start gap-2">
         <button
           type="button"
           onClick={onBack}
-          className="rounded-md px-1 py-0.5 text-text-secondary hover:bg-surface-hover"
+          aria-label={t("action.back")}
+          className="icon-btn shrink-0"
         >
-          ‹
+          <Icon name="chevronLeft" className="size-3.5" />
         </button>
         <div className="min-w-0 flex-1">
           <p className="text-[16px] font-semibold leading-tight">{quote.symbol}</p>
@@ -514,6 +514,6 @@ function CompanyDetail({
       >
         {t("stocks.open-sharesansar")}
       </button>
-    </Card>
+    </section>
   );
 }

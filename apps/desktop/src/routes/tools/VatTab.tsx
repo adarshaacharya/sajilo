@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card } from "../../components/Card";
-import { Field, ResultRow } from "../../components/Field";
+import { ResultCard } from "../../components/tools/ResultCard";
+import { ToolNumberField } from "../../components/tools/ToolField";
+import { ToolSection } from "../../components/tools/QuantityRow";
+import { Toggle } from "../../components/Toggle";
 import { api, type VatBreakdown } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -17,7 +19,6 @@ export function VatTab() {
       .computeVat(amount, inclusive)
       .then(async (value) => {
         setResult(value);
-        // Grouped in Rust: lakh and crore are not something `Intl` can do.
         const [base, vat, total] = await Promise.all([
           api.groupNumber(value.base, 2),
           api.groupNumber(value.vat, 2),
@@ -29,38 +30,29 @@ export function VatTab() {
   }, [amount, inclusive]);
 
   return (
-    <div className="space-y-3">
-      <Card>
-        <Field label={t("tools.amount")} value={amount} onChange={setAmount} />
-        <label className="mt-2 flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={inclusive}
-            onChange={(event) => setInclusive(event.target.checked)}
-            className="accent-accent"
-          />
-          <span className="text-text-secondary">{t("tools.price-includes-vat")}</span>
-        </label>
-      </Card>
+    <ToolSection>
+      <ToolNumberField label={t("tools.amount")} value={amount} onChange={setAmount} />
+      <Toggle
+        label={t("tools.price-includes-vat")}
+        checked={inclusive}
+        onChange={setInclusive}
+      />
 
       {result && (
-        <Card>
-          <ResultRow label={t("tools.base-amount")} value={`Rs ${grouped.base ?? ""}`} />
-          <ResultRow label={t("tools.vat-amount")} value={`Rs ${grouped.vat ?? ""}`} />
-          <div className="mt-1 border-t border-border pt-1">
-            <ResultRow label={t("tools.total")} value={`Rs ${grouped.total ?? ""}`} />
-          </div>
-          <p className="mt-2 text-[11px] text-text-muted">
-            {/*
-             * Spelled out because taking 13% of the *total* is the common
-             * mistake, and it overstates the tax.
-             */}
-            {inclusive
-              ? "VAT is the total less total ÷ 1.13 — not 13% of the total."
-              : "13% of the amount before VAT."}
-          </p>
-        </Card>
+        <>
+          <ResultCard title={t("tools.base-amount")} value={`Rs ${grouped.base ?? ""}`} />
+          <ResultCard title={t("tools.vat-amount")} value={`Rs ${grouped.vat ?? ""}`} caption="13%" />
+          <ResultCard
+            title={t("tools.total")}
+            value={`Rs ${grouped.total ?? ""}`}
+            caption={
+              inclusive
+                ? "VAT is the total less total ÷ 1.13 — not 13% of the total."
+                : "13% of the amount before VAT."
+            }
+          />
+        </>
       )}
-    </div>
+    </ToolSection>
   );
 }

@@ -226,6 +226,82 @@ html {
   pointer-events: none;
 }
 
+.btn-ghost {
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface-raised) 75%, transparent);
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.settings-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+/* macOS NSSwitch — used in Settings, planner, VAT tool. */
+.mac-switch {
+  position: relative;
+  display: inline-flex;
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 20%, transparent);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 12%, transparent);
+  transition: background 0.2s ease;
+}
+
+.mac-switch--on {
+  background: color-mix(in srgb, var(--color-accent-mark) 88%, #2d6b3a 12%);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--color-accent-mark) 40%, transparent);
+}
+
+.mac-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0.5px 1px rgba(0, 0, 0, 0.28),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mac-switch--on .mac-switch-knob {
+  transform: translateX(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mac-switch,
+  .mac-switch-knob {
+    transition: none;
+  }
+}
+
 /* Today date plate — gilt glow. */
 .date-plate {
   border-color: color-mix(in srgb, var(--color-accent-mark) 28%, var(--color-border));
@@ -260,6 +336,57 @@ html {
   );
 }
 
+.bazar-headline {
+  position: relative;
+  overflow: hidden;
+}
+
+.bazar-headline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 70% at 0% 0%,
+    color-mix(in srgb, var(--color-accent-mark) 18%, transparent),
+    transparent 58%
+  );
+  pointer-events: none;
+}
+
+.radio-now-playing {
+  position: relative;
+  overflow: hidden;
+}
+
+.radio-now-playing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent-mark) 14%, transparent) 0%,
+    transparent 62%
+  );
+  pointer-events: none;
+}
+
+.forex-converter {
+  position: relative;
+  overflow: hidden;
+}
+
+.forex-converter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 90% 70% at 0% 0%,
+    color-mix(in srgb, var(--color-forex-tint) 16%, transparent),
+    transparent 58%
+  );
+  pointer-events: none;
+}
+
 .glance-forex::before {
   background: linear-gradient(
     145deg,
@@ -288,12 +415,26 @@ html {
     inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent);
 }
 
-.weather-hero {
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--color-accent-mark) 14%, transparent),
-    transparent 70%
-  );
+.weather-glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: color-mix(in srgb, #fff 16%, transparent);
+  border: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  transition: background 0.12s ease;
+}
+
+.weather-glass-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #fff 28%, transparent);
+}
+
+.weather-glass-btn:disabled {
+  opacity: 0.6;
 }
 
 /* Tab bar — frosted dock. */

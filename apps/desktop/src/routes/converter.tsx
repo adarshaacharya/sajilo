@@ -1,62 +1,101 @@
 import { useEffect, useState } from "react";
-import { Card } from "../components/Card";
-import { CONTROL, CONTROL_LABEL } from "../components/control";
+import { Icon } from "../components/Icon";
+import { Segmented } from "../components/Segmented";
+import { ResultCard } from "../components/tools/ResultCard";
+import { ToolSection } from "../components/tools/QuantityRow";
+import { ToolTextField } from "../components/tools/ToolField";
 import { api, type Conversion, type SupportedRange } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
 
 type Direction = "bsToAd" | "adToBs";
 
+function longGregorian(iso: string): string {
+  const date = new Date(`${iso}T12:00:00`);
+  return date.toLocaleDateString(undefined, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export function Converter() {
   const { numerals, t } = useSettings();
   const [direction, setDirection] = useState<Direction>("bsToAd");
   const [range, setRange] = useState<SupportedRange | null>(null);
-  const [fields, setFields] = useState({ year: 2083, month: 1, day: 1 });
+  const [fields, setFields] = useState({ year: "2083", month: "1", day: "1" });
   const [result, setResult] = useState<Conversion | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .supportedRange()
-      .then(setRange)
-      .catch(() => {});
-    // Seed with today so the screen opens on something real.
+    api.supportedRange().then(setRange).catch(() => {});
     api
       .today()
-      .then(({ nepali }) => setFields({ year: nepali.year, month: nepali.month, day: nepali.day }))
+      .then(({ nepali }) =>
+        setFields({
+          year: String(nepali.year),
+          month: String(nepali.month),
+          day: String(nepali.day),
+        }),
+      )
       .catch(() => {});
   }, []);
 
   useEffect(() => {
+    const year = Number(fields.year);
+    const month = Number(fields.month);
+    const day = Number(fields.day);
+    if (![year, month, day].every(Number.isFinite)) return;
+
     const convert = direction === "bsToAd" ? api.bsToAd : api.adToBs;
-    convert(fields.year, fields.month, fields.day)
+    convert(year, month, day)
       .then((value) => {
         setResult(value);
         setError(null);
       })
       .catch((cause) => {
-        // A date outside the bundled table is a real answer, not a crash.
         setResult(null);
         setError(String(cause));
       });
   }, [direction, fields]);
 
   const swap = () => {
-    // Carry the converted date across, so swapping continues the same thought
-    // rather than resetting the form.
     if (result) {
       if (direction === "bsToAd") {
         const [year, month, day] = result.gregorian.split("-").map(Number);
-        if (year && month && day) setFields({ year, month, day });
+        if (year && month && day) {
+          setFields({ year: String(year), month: String(month), day: String(day) });
+        }
       } else {
         setFields({
-          year: result.nepali.year,
-          month: result.nepali.month,
-          day: result.nepali.day,
+          year: String(result.nepali.year),
+          month: String(result.nepali.month),
+          day: String(result.nepali.day),
         });
       }
     }
     setDirection((current) => (current === "bsToAd" ? "adToBs" : "bsToAd"));
+  };
+
+  const setToday = () => {
+    api
+      .today()
+      .then(({ nepali, gregorian }) => {
+        if (direction === "bsToAd") {
+          setFields({
+            year: String(nepali.year),
+            month: String(nepali.month),
+            day: String(nepali.day),
+          });
+        } else {
+          const [year, month, day] = gregorian.split("-").map(Number);
+          if (year && month && day) {
+            setFields({ year: String(year), month: String(month), day: String(day) });
+          }
+        }
+      })
+      .catch(() => {});
   };
 
   const bounds =
@@ -64,63 +103,97 @@ export function Converter() {
       ? { min: range?.firstYear ?? 1992, max: range?.lastYear ?? 2090 }
       : { min: 1935, max: 2034 };
 
+  const nepaliLong = result
+    ? `${result.nepaliMonthName} ${digits(result.nepali.day, numerals)}, ${digits(result.nepali.year, numerals)}`
+    : "";
+
+  const copyFormats = result
+    ? [
+        {
+          title: "Nepali numerals",
+          value: `${digits(result.nepali.year, numerals)}/${digits(result.nepali.month, numerals)}/${digits(result.nepali.day, numerals)}`,
+        },
+        {
+          title: "English numerals",
+          value: `${result.nepali.year}/${String(result.nepali.month).padStart(2, "0")}/${String(result.nepali.day).padStart(2, "0")}`,
+        },
+        {
+          title: "Long date",
+          value: longGregorian(result.gregorian),
+        },
+      ]
+    : [];
+
   return (
-    <div className="space-y-3">
-      <Card title={direction === "bsToAd" ? "बि.सं. → A.D." : "A.D. → बि.सं."}>
-        <div className="grid grid-cols-3 gap-2">
-          {(["year", "month", "day"] as const).map((field) => (
-            <label key={field} className="block">
-              <span className={CONTROL_LABEL}>{field}</span>
-              <input
-                type="number"
-                value={fields[field]}
-                min={field === "year" ? bounds.min : 1}
-                max={field === "year" ? bounds.max : field === "month" ? 12 : 32}
-                onChange={(event) =>
-                  setFields((current) => ({ ...current, [field]: Number(event.target.value) }))
-                }
-                className={`${CONTROL} w-full`}
-              />
-            </label>
-          ))}
-        </div>
-        <button
-          type="button"
-          onClick={swap}
-          className="mt-3 w-full rounded-xl border border-border py-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
-        >
-          ⇅ {t("action.swap")}
-        </button>
-      </Card>
+    <ToolSection>
+      <Segmented
+        label="Conversion direction"
+        value={direction}
+        onChange={setDirection}
+        options={[
+          { id: "bsToAd", label: "BS → AD" },
+          { id: "adToBs", label: "AD → BS" },
+        ]}
+      />
+
+      <div className="flex items-end gap-2">
+        <ToolTextField
+          label="Year"
+          value={fields.year}
+          onChange={(value) => setFields((current) => ({ ...current, year: value }))}
+          min={bounds.min}
+          max={bounds.max}
+          className="min-w-0 flex-1"
+        />
+        <ToolTextField
+          label="Month"
+          value={fields.month}
+          onChange={(value) => setFields((current) => ({ ...current, month: value }))}
+          className="min-w-0 flex-1"
+        />
+        <ToolTextField
+          label="Day"
+          value={fields.day}
+          onChange={(value) => setFields((current) => ({ ...current, day: value }))}
+          className="min-w-0 flex-1"
+        />
+      </div>
 
       {error && (
-        <Card title={t("state.unavailable")}>
-          <p className="text-text-secondary">{error}</p>
-        </Card>
+        <p className="rounded-[8px] border border-holiday/30 bg-holiday/10 px-2 py-1.5 text-[11px] text-holiday">
+          {error}
+        </p>
       )}
 
       {result && (
-        <Card title={t("action.copy-as")}>
-          <ul className="space-y-1.5">
-            {[
-              `${result.nepali.year}/${String(result.nepali.month).padStart(2, "0")}/${String(result.nepali.day).padStart(2, "0")}`,
-              `${result.nepaliMonthName} ${digits(result.nepali.day, numerals)}, ${digits(result.nepali.year, numerals)}`,
-              result.gregorian,
-            ].map((text) => (
-              <li key={text}>
-                <button
-                  type="button"
-                  onClick={() => navigator.clipboard.writeText(text)}
-                  className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1 text-left hover:bg-surface-hover"
-                >
-                  <span className="truncate">{text}</span>
-                  <span className="shrink-0 text-[10px] text-text-muted">⧉</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Card>
+        <section className="surface-card p-2.5">
+          <p className="text-[15px] font-semibold leading-snug">{longGregorian(result.gregorian)}</p>
+          <p className="mt-0.5 text-[12px] text-text-secondary">{nepaliLong}</p>
+        </section>
       )}
-    </div>
+
+      {copyFormats.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="px-0.5 text-[10px] font-semibold text-text-muted">{t("action.copy-as")}</p>
+          {copyFormats.map((format) => (
+            <ResultCard key={format.title} title={format.title} value={format.value} />
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center gap-1.5 pt-0.5">
+        <button type="button" onClick={setToday} className="btn-ghost text-[11px]">
+          {t("action.today")}
+        </button>
+        <button
+          type="button"
+          onClick={swap}
+          aria-label={t("action.swap")}
+          className="icon-btn"
+        >
+          <Icon name="swap" className="size-3.5" />
+        </button>
+      </div>
+    </ToolSection>
   );
 }

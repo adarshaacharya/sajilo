@@ -1,6 +1,6 @@
-import { CONTROL, CONTROL_LABEL } from "./control";
+import { ToolNumberField } from "./tools/ToolField";
 
-/** A labelled numeric input. Numbers only — every tool here takes a quantity. */
+/** A labelled numeric input — prefer `ToolNumberField` in new code. */
 export function Field({
   label,
   value,
@@ -15,27 +15,16 @@ export function Field({
   min?: number;
 }) {
   return (
-    <label className="block">
-      <span className={CONTROL_LABEL}>{label}</span>
-      <input
-        type="number"
-        inputMode="decimal"
-        value={Number.isFinite(value) ? value : ""}
-        step={step}
-        min={min}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className={`${CONTROL} w-full`}
-      />
-    </label>
+    <ToolNumberField label={label} value={value} onChange={onChange} step={step} min={min} />
   );
 }
 
-/** A label/value row, right-aligned so figures line up down the card. */
+/** @deprecated Use `ResultCard` in tools routes. */
 export function ResultRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2 py-0.5">
-      <span className="text-text-secondary">{label}</span>
-      <span className="font-medium tabular-nums">{value}</span>
+      <span className="text-[11px] text-text-secondary">{label}</span>
+      <span className="text-[11px] font-medium tabular-nums">{value}</span>
     </div>
   );
 }

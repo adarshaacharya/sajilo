@@ -14,7 +14,7 @@ export function Tools() {
   const [tab, setTab] = useState<Tab>("date");
 
   const tabs = [
-    { id: "date" as const, label: t("screen.date-converter"), icon: "upcoming" as const },
+    { id: "date" as const, label: t("tools.date"), icon: "upcoming" as const },
     { id: "land" as const, label: t("tools.land"), icon: "land" as const },
     { id: "weight" as const, label: t("tools.weight"), icon: "weight" as const },
     { id: "vat" as const, label: t("tools.vat"), icon: "percent" as const },
@@ -22,7 +22,7 @@ export function Tools() {
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Segmented options={tabs} value={tab} onChange={setTab} label={t("tools.title")} />
       {tab === "date" && <Converter />}
       {tab === "land" && <LandTab />}

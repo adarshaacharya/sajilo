@@ -1,11 +1,21 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { Card } from "../components/Card";
-import { StateBanner } from "../components/StateBanner";
+import { Icon } from "../components/Icon";
+import { AirQualityPanel } from "../components/weather/AirQualityPanel";
+import { ForecastRow } from "../components/weather/ForecastRow";
+import { WeatherAtmosphere } from "../components/weather/WeatherAtmosphere";
+import { WeatherIcon } from "../components/weather/WeatherIcon";
 import { api } from "../lib/ipc";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
+import { currentSkyPhase, skyGradient } from "../lib/skyPhase";
 import { useSettings } from "../lib/settings";
-import { conditionTitle, aqiCategory, formatCelsius, formatPercent } from "../lib/weather";
+import {
+  aqiCategory,
+  conditionTitle,
+  forecastWeekday,
+  formatCelsius,
+  formatPercent,
+} from "../lib/weather";
 import type { LoadState } from "../types/api/LoadState";
 import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
 
@@ -41,6 +51,8 @@ export function Weather() {
   const navigate = useNavigate();
   const [state, setState] = useState<LoadState<WeatherSnapshot>>();
 
+  const loading = !state || state.status === "loading";
+
   const load = useCallback(
     (refresh = false) => {
       setState(undefined);
@@ -56,82 +68,130 @@ export function Weather() {
 
   const snapshot = loadedValue(state);
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
+  const phase = currentSkyPhase(snapshot?.sunrise ?? null, snapshot?.sunset ?? null);
+  const tomorrow = snapshot && snapshot.daily.length > 1 ? snapshot.daily[1] : null;
+
+  const heroToolbar = useMemo(
+    () => (
+      <div className="relative z-[2] flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          aria-label={t("action.back")}
+          className="weather-glass-btn"
+        >
+          <Icon name="chevronLeft" className="size-3.5" />
+        </button>
+        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-white">
+          {snapshot ? locationLabel(snapshot.location, language) : t("feature.weather")}
+        </span>
+        <button
+          type="button"
+          onClick={() => load(true)}
+          disabled={loading}
+          aria-label={t("action.refresh")}
+          className="weather-glass-btn"
+        >
+          <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+        </button>
+      </div>
+    ),
+    [snapshot, language, t, navigate, load, loading],
+  );
 
   return (
-    <div className="space-y-3">
-      <Card>
-        <div className="weather-hero rounded-2xl p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-semibold">
-              {snapshot ? locationLabel(snapshot.location, language) : t("feature.weather")}
-            </p>
-            <button
-              type="button"
-              onClick={() => load(true)}
-              className="rounded px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface-hover"
-            >
-              {t("action.refresh")}
-            </button>
-          </div>
-          <StateBanner state={banner} onRetry={() => load(true)}>
-            {snapshot && (
+    <div className="flex min-h-full flex-col">
+      <section
+        className="relative h-[210px] shrink-0 overflow-hidden text-white"
+        style={{ background: skyGradient(phase) }}
+      >
+        {snapshot && <WeatherAtmosphere condition={snapshot.condition} />}
+        <div className="relative z-[2] flex h-full flex-col p-2.5">
+          {heroToolbar}
+          <div className="mt-2 flex flex-1 flex-col justify-end">
+            {snapshot ? (
               <>
-                <p className="text-4xl font-semibold leading-none">
+                {banner.status === "stale" && (
+                  <p className="mb-1 text-[10px] opacity-80">
+                    {banner.since ? `${t("state.stale-since")} ${banner.since}` : t("state.stale")}
+                  </p>
+                )}
+                <p className="text-[54px] font-semibold leading-none tracking-tight">
                   {formatCelsius(snapshot.temperatureCelsius)}
                 </p>
-                <p className="mt-1 text-text-secondary">{conditionTitle(snapshot.condition)}</p>
-                <p className="mt-0.5 text-[11px] text-text-muted">
-                  Feels like {formatCelsius(snapshot.apparentTemperatureCelsius)} ·{" "}
-                  {formatCelsius(snapshot.lowCelsius)} / {formatCelsius(snapshot.highCelsius)} ·{" "}
-                  {formatPercent(snapshot.precipitationChance)} rain
+                <div className="mt-1 flex items-center gap-1.5 text-[13px] font-medium">
+                  <WeatherIcon condition={snapshot.condition} className="size-4 opacity-90" />
+                  {conditionTitle(snapshot.condition)}
+                </div>
+                <p className="mt-0.5 text-[11px] opacity-85">
+                  Feels like {formatCelsius(snapshot.apparentTemperatureCelsius)} · H{" "}
+                  {formatCelsius(snapshot.highCelsius)} L {formatCelsius(snapshot.lowCelsius)} · Rain{" "}
+                  {formatPercent(snapshot.precipitationChance)}
                 </p>
               </>
+            ) : loading ? (
+              <p className="text-[34px] font-semibold leading-none">Loading…</p>
+            ) : (
+              <>
+                <p className="text-[34px] font-semibold leading-none">Unavailable</p>
+                <p className="mt-1 text-[11px] opacity-85">
+                  {banner.status === "failed" ? banner.message : t("state.not-yet")}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => load(true)}
+                  className="weather-glass-btn mt-2 w-auto px-2 text-[11px]"
+                >
+                  {t("action.retry")}
+                </button>
+              </>
             )}
-          </StateBanner>
+          </div>
         </div>
-      </Card>
+      </section>
 
-      {snapshot?.airQuality && (() => {
-        const category = aqiCategory(snapshot.airQuality.usAqi);
-        return (
-        <Card title={t("aqi.title")}>
-          <p className="font-semibold">
-            {t(AQI_KEYS[category])} · {snapshot.airQuality.usAqi}
-          </p>
-          <p className="mt-1 text-[11px] text-text-muted">
-            {t("aqi.pm25")} {snapshot.airQuality.pm25.toFixed(1)} · {t("aqi.pm10")}{" "}
-            {snapshot.airQuality.pm10.toFixed(1)}
-          </p>
-          <p className="mt-1.5 text-text-secondary">{t(AQI_ADVICE[category])}</p>
-        </Card>
-        );
-      })()}
+      <div className="flex-1 space-y-2.5 p-2.5">
+        {snapshot?.airQuality && (
+          <AirQualityPanel
+            airQuality={snapshot.airQuality}
+            title={t("aqi.title")}
+            categoryLabel={t(AQI_KEYS[aqiCategory(snapshot.airQuality.usAqi)])}
+            advice={t(AQI_ADVICE[aqiCategory(snapshot.airQuality.usAqi)])}
+            pm25Label={t("aqi.pm25")}
+            pm10Label={t("aqi.pm10")}
+          />
+        )}
 
-      {snapshot && snapshot.daily.length > 1 && (
-        <Card title="Forecast">
-          <ul className="list-rows">
-            {snapshot.daily.slice(1).map((day) => (
-              <li key={day.date} className="flex items-center justify-between gap-2 py-1.5">
-                <span className="text-text-secondary">
-                  {day.date === snapshot.daily[1]?.date ? t("weather.tomorrow") : day.date}
-                </span>
-                <span className="text-[11px] text-text-muted">{conditionTitle(day.condition)}</span>
-                <span className="shrink-0 font-medium">
-                  {formatCelsius(day.highCelsius)} / {formatCelsius(day.lowCelsius)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
+        {tomorrow && (
+          <section className="surface-card p-2.5">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+              {t("weather.tomorrow")}
+            </p>
+            <ForecastRow forecast={tomorrow} dayLabel="" />
+          </section>
+        )}
 
-      <button
-        type="button"
-        onClick={() => navigate("/")}
-        className="w-full rounded-xl border border-border py-1.5 text-text-secondary hover:bg-surface-hover"
-      >
-        {t("action.back")}
-      </button>
+        {snapshot && snapshot.daily.length > 0 && (
+          <section className="surface-card p-2.5">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+              Next {snapshot.daily.length} days
+            </p>
+            <div>
+              {snapshot.daily.map((day) => (
+                <ForecastRow
+                  key={day.date}
+                  forecast={day}
+                  dayLabel={forecastWeekday(day.date)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {snapshot && (
+          <p className="text-[10px] text-text-muted">{fetchedAtLabel(snapshot.freshness)}</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Card } from "../../components/Card";
-import { Field, ResultRow } from "../../components/Field";
-import { Select } from "../../components/Select";
+import { QuantityRow, ToolSection } from "../../components/tools/QuantityRow";
+import { ResultCard } from "../../components/tools/ResultCard";
 import { api, type WeightUnit } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -12,6 +11,13 @@ const UNITS: readonly { id: WeightUnit; label: string }[] = [
   { id: "ounce", label: "Troy ounce" },
 ];
 
+const NEPALI: Partial<Record<WeightUnit, string>> = {
+  tola: "तोला",
+  gram: "ग्राम",
+  tenGram: "१० ग्राम",
+  ounce: "औंस",
+};
+
 export function WeightTab() {
   const { t } = useSettings();
   const [value, setValue] = useState(1);
@@ -20,8 +26,6 @@ export function WeightTab() {
 
   useEffect(() => {
     if (!Number.isFinite(value)) return;
-    // Every unit at once: at a jeweller's counter the useful thing is the whole
-    // row, not one conversion at a time.
     Promise.all(UNITS.map((target) => api.convertWeight(value, unit, target.id)))
       .then((converted) =>
         setResults(Object.fromEntries(UNITS.map((u, i) => [u.id, converted[i]]))),
@@ -30,28 +34,25 @@ export function WeightTab() {
   }, [value, unit]);
 
   return (
-    <div className="space-y-3">
-      <Card>
-        <div className="grid grid-cols-2 gap-2">
-          <Field label={t("tools.weight")} value={value} onChange={setValue} />
-          <Select
-            label={t("tools.unit")}
-            value={unit}
-            onChange={(next) => setUnit(next as WeightUnit)}
-            options={UNITS}
-          />
-        </div>
-      </Card>
+    <ToolSection>
+      <QuantityRow
+        amountLabel={t("tools.amount")}
+        amount={value}
+        onAmountChange={setValue}
+        unitLabel={t("tools.unit")}
+        unit={unit}
+        onUnitChange={(next) => setUnit(next as WeightUnit)}
+        options={UNITS}
+      />
 
-      <Card>
-        {UNITS.filter((target) => target.id !== unit).map((target) => (
-          <ResultRow
-            key={target.id}
-            label={target.label}
-            value={(results[target.id] ?? 0).toFixed(4)}
-          />
-        ))}
-      </Card>
-    </div>
+      {UNITS.filter((target) => target.id !== unit).map((target) => (
+        <ResultCard
+          key={target.id}
+          title={target.label}
+          value={(results[target.id] ?? 0).toFixed(4)}
+          caption={NEPALI[target.id]}
+        />
+      ))}
+    </ToolSection>
   );
 }

@@ -52,7 +52,7 @@ export function RadioMiniPlayer() {
             disabled={state.isLoading}
             onClick={() => player.togglePlayback()}
             aria-label={state.isPlaying ? "Pause" : "Play"}
-            className="rounded-md p-1.5 text-text-secondary hover:bg-surface-hover hover:text-text disabled:opacity-50"
+            className="icon-btn shrink-0"
           >
             {state.isLoading ? (
               <Icon name="refresh" className="size-3.5 animate-spin" />
@@ -66,7 +66,7 @@ export function RadioMiniPlayer() {
             type="button"
             onClick={() => player.stop()}
             aria-label={t("radio.stop")}
-            className="rounded-md p-1.5 text-text-secondary hover:bg-surface-hover hover:text-text"
+            className="icon-btn shrink-0"
           >
             <Icon name="stop" className="size-3.5" />
           </button>

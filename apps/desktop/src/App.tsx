@@ -72,9 +72,13 @@ function Shell() {
               path={route.path}
               element={
                 <PageTransition className="flex min-h-0 flex-1 flex-col">
-                  {route.path !== "/" && <Header title={t(route.titleKey)} />}
+                  {route.path !== "/" && route.path !== "/weather" && (
+                    <Header title={t(route.titleKey)} />
+                  )}
                   <main
-                    className={`flex-1 overflow-y-auto ${route.path === "/" ? "p-3" : "p-2.5"}`}
+                    className={`flex-1 overflow-y-auto ${
+                      route.path === "/" ? "p-3" : route.path === "/weather" ? "" : "p-2.5"
+                    }`}
                   >
                     <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
                   </main>

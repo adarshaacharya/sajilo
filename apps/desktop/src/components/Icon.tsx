@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 import { SFArrowClockwise } from "sf-symbols-lib/monochrome/SFArrowClockwise";
+import { SFArrowLeftArrowRight } from "sf-symbols-lib/monochrome/SFArrowLeftArrowRight";
 import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
+import { SFCheckmark } from "sf-symbols-lib/monochrome/SFCheckmark";
 import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
@@ -20,12 +22,15 @@ import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
 import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
 import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
 import { SFNewspaper } from "sf-symbols-lib/monochrome/SFNewspaper";
-import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
+import { SFPin } from "sf-symbols-lib/monochrome/SFPin";
+import { SFPinFill } from "sf-symbols-lib/monochrome/SFPinFill";
 import { SFPercent } from "sf-symbols-lib/monochrome/SFPercent";
 import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
+import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
 import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
 import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
+import { SFSquareOnSquare } from "sf-symbols-lib/monochrome/SFSquareOnSquare";
 import { SFSparkles } from "sf-symbols-lib/monochrome/SFSparkles";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
 import { SFStar } from "sf-symbols-lib/monochrome/SFStar";
@@ -68,10 +73,15 @@ const GLYPHS: Record<IconName, SFComp> = {
   weather: SFCloudSun,
   forex: SFBanknote,
   refresh: SFArrowClockwise,
+  swap: SFArrowLeftArrowRight,
   chevronLeft: SFChevronLeft,
+  copy: SFSquareOnSquare,
+  checkmark: SFCheckmark,
   openExternal: SFArrowUpForward,
   play: SFPlayFill,
   pause: SFPauseFill,
+  pin: SFPin,
+  pinFill: SFPinFill,
   stop: SFStopFill,
   star: SFStar,
   starFill: SFStarFill,
@@ -105,10 +115,15 @@ export type IconName =
   | "weather"
   | "forex"
   | "refresh"
+  | "swap"
   | "chevronLeft"
+  | "copy"
+  | "checkmark"
   | "openExternal"
   | "play"
   | "pause"
+  | "pin"
+  | "pinFill"
   | "stop"
   | "star"
   | "starFill"
