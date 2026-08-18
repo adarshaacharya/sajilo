@@ -193,7 +193,13 @@ export function Bazar() {
 
   const load = useCallback((refresh = false) => {
     setFeeds(undefined);
-    api.getBazar(refresh).then(setFeeds);
+    api
+      .getBazar(refresh)
+      .then(setFeeds)
+      .catch((error: unknown) => {
+        const failed = { status: "failed", value: String(error) } as const;
+        setFeeds({ metals: failed, fuel: failed, vegetables: failed });
+      });
   }, []);
 
   // Rust caches the payload, so re-entering the screen costs no upstream fetch.

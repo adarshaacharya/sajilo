@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useSettings } from "../lib/settings";
 
 /**
  * Renders the honest states a remote module can be in.
@@ -24,6 +25,8 @@ export function StateBanner({
   onRetry?: () => void;
   children?: ReactNode;
 }) {
+  const { t } = useSettings();
+
   if (state.status === "fresh") return <>{children}</>;
 
   if (state.status === "loading") {
@@ -36,7 +39,7 @@ export function StateBanner({
     return (
       <>
         <p className="mb-2 rounded-md border border-border bg-surface px-2 py-1 text-[11px] text-text-muted">
-          Showing older data{state.since ? ` from ${state.since}` : ""}
+          {state.since ? `${t("state.stale-since")} ${state.since}` : t("state.stale")}
         </p>
         {children}
       </>
@@ -46,7 +49,7 @@ export function StateBanner({
   return (
     <div className="py-2">
       <p className="text-text-secondary">
-        {state.status === "unavailable" ? "Not available yet" : state.message}
+        {state.status === "unavailable" ? t("state.not-yet") : state.message}
       </p>
       {onRetry && (
         <button
@@ -54,7 +57,7 @@ export function StateBanner({
           onClick={onRetry}
           className="mt-2 rounded-md border border-border px-2 py-1 text-[11px] text-text-secondary hover:bg-surface-hover hover:text-text"
         >
-          Retry
+          {t("action.retry")}
         </button>
       )}
     </div>

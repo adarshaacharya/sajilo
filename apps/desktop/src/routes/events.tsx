@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../components/Card";
+import { ICONS } from "../components/Icon";
+import { Segmented } from "../components/Segmented";
 import { api, type UpcomingEvent } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
@@ -37,32 +39,15 @@ export function Events() {
   }, []);
 
   const shown = events.filter((event) => includes(filter, event));
-  const filters: { id: Filter; label: string }[] = [
-    { id: "current", label: t("events.current") },
-    { id: "festivals", label: t("events.festivals") },
-    { id: "publicHolidays", label: t("events.public-holidays") },
+  const filters = [
+    { id: "current" as const, label: t("events.current"), icon: ICONS.upcoming },
+    { id: "festivals" as const, label: t("events.festivals"), icon: ICONS.festival },
+    { id: "publicHolidays" as const, label: t("events.public-holidays"), icon: ICONS.holiday },
   ];
 
   return (
     <div className="space-y-3">
-      <div role="tablist" aria-label={t("events.filter")} className="flex gap-1">
-        {filters.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            role="tab"
-            aria-selected={filter === option.id}
-            onClick={() => setFilter(option.id)}
-            className={`flex-1 rounded-md border px-2 py-1 text-[11px] transition-colors ${
-              filter === option.id
-                ? "border-accent bg-accent/10 text-accent"
-                : "border-border text-text-secondary hover:bg-surface-hover"
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <Segmented label={t("events.filter")} value={filter} onChange={setFilter} options={filters} />
 
       <Card>
         {shown.length === 0 ? (

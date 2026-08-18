@@ -1,8 +1,10 @@
 import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Header } from "./components/Header";
 import { TabBar } from "./components/TabBar";
-import { SettingsProvider } from "./lib/settings";
+import type { translate } from "./lib/i18n";
+import { SettingsProvider, useSettings } from "./lib/settings";
 import { Bazar } from "./routes/bazar";
 import { Converter } from "./routes/converter";
 import { Dashboard } from "./routes/dashboard";
@@ -10,8 +12,11 @@ import { DayDetail } from "./routes/day";
 import { Events } from "./routes/events";
 import { Placeholder } from "./routes/Placeholder";
 import { Radio } from "./routes/radio";
+import { Rashifal } from "./routes/rashifal";
 import { Settings } from "./routes/settings";
 import { Tools } from "./routes/tools";
+
+type TranslationKey = Parameters<typeof translate>[0];
 
 /**
  * The routes M6 through M9 fill in. Listed here from the start so the shell's
@@ -22,19 +27,19 @@ import { Tools } from "./routes/tools";
  * are listed here from the start so the shell's navigation is complete.
  */
 const ROUTES = [
-  { path: "/", title: "Today", element: <Dashboard /> },
-  { path: "/converter", title: "Date Converter", element: <Converter /> },
-  { path: "/day", title: "Date Details", element: <DayDetail /> },
-  { path: "/events", title: "Upcoming events", element: <Events /> },
-  { path: "/weather", title: "Weather" },
-  { path: "/forex", title: "Exchange Rates" },
-  { path: "/news", title: "News" },
-  { path: "/bazar", title: "Bazar", element: <Bazar /> },
-  { path: "/rashifal", title: "Rashifal" },
-  { path: "/radio", title: "Radio", element: <Radio /> },
-  { path: "/tools", title: "Tools", element: <Tools /> },
-  { path: "/settings", title: "Settings", element: <Settings /> },
-] as const satisfies readonly { path: string; title: string; element?: ReactNode }[];
+  { path: "/", titleKey: "screen.today", element: <Dashboard /> },
+  { path: "/converter", titleKey: "screen.date-converter", element: <Converter /> },
+  { path: "/day", titleKey: "screen.date-details", element: <DayDetail /> },
+  { path: "/events", titleKey: "screen.upcoming", element: <Events /> },
+  { path: "/weather", titleKey: "screen.weather" },
+  { path: "/forex", titleKey: "screen.exchange-rates" },
+  { path: "/news", titleKey: "screen.news" },
+  { path: "/bazar", titleKey: "screen.bazar", element: <Bazar /> },
+  { path: "/rashifal", titleKey: "screen.rashifal", element: <Rashifal /> },
+  { path: "/radio", titleKey: "screen.radio", element: <Radio /> },
+  { path: "/tools", titleKey: "screen.tools", element: <Tools /> },
+  { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
+] as const satisfies readonly { path: string; titleKey: TranslationKey; element?: ReactNode }[];
 
 /** The tray's Settings item navigates by event, since the routes live here. */
 function TrayNavigation() {
@@ -60,6 +65,8 @@ function TrayNavigation() {
 }
 
 function Shell() {
+  const { t } = useSettings();
+
   return (
     <div className="flex h-full flex-col">
       <TrayNavigation />
@@ -70,9 +77,14 @@ function Shell() {
             path={route.path}
             element={
               <>
-                <Header title={route.title} />
+                <Header title={t(route.titleKey)} />
                 <main className="flex-1 overflow-y-auto p-2.5">
-                  {"element" in route ? route.element : <Placeholder title={route.title} />}
+                  {/* Per route, and keyed by path: a screen that throws must
+                      leave the header and tab bar standing, and navigating away
+                      must clear the error rather than stick on it. */}
+                  <ErrorBoundary key={route.path}>
+                    {"element" in route ? route.element : <Placeholder title={t(route.titleKey)} />}
+                  </ErrorBoundary>
                 </main>
               </>
             }
@@ -89,9 +101,14 @@ export function App() {
   // real URL would survive a reload in a way the user never asked for.
   return (
     <MemoryRouter>
-      <SettingsProvider>
-        <Shell />
-      </SettingsProvider>
+      {/* A second boundary above the routes: a fault in the header, the tab bar
+          or the settings provider would otherwise unmount everything and leave
+          a blank window with nothing to act on. */}
+      <ErrorBoundary>
+        <SettingsProvider>
+          <Shell />
+        </SettingsProvider>
+      </ErrorBoundary>
     </MemoryRouter>
   );
 }

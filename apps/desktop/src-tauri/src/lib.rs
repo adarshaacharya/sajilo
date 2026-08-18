@@ -4,6 +4,7 @@
 //! dismisses, and nothing product-specific. The screens arrive in M6.
 
 pub mod commands;
+pub mod feed;
 pub mod prefs;
 pub mod system;
 pub mod tray;
@@ -40,6 +41,8 @@ pub fn run() {
         .setup(|app| {
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
+            app.manage(commands::rashifal::RashifalCache::default());
+            app.manage(commands::radio::RadioCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Delivers anything missed while the app was closed, then sleeps
@@ -63,6 +66,9 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
+            commands::rashifal::get_rashifal,
+            commands::radio::get_stations,
+            commands::radio::station_stream,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,

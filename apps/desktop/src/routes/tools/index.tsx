@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ICONS } from "../../components/Icon";
 import { Segmented } from "../../components/Segmented";
 import { useSettings } from "../../lib/settings";
 import { InterestTab } from "./InterestTab";
@@ -13,10 +14,10 @@ export function Tools() {
   const [tab, setTab] = useState<Tab>("land");
 
   const tabs = [
-    { id: "land" as const, label: t("tools.land") },
-    { id: "weight" as const, label: t("tools.weight") },
-    { id: "vat" as const, label: t("tools.vat") },
-    { id: "interest" as const, label: t("tools.interest") },
+    { id: "land" as const, label: t("tools.land"), icon: ICONS.land },
+    { id: "weight" as const, label: t("tools.weight"), icon: ICONS.weight },
+    { id: "vat" as const, label: t("tools.vat"), icon: ICONS.percent },
+    { id: "interest" as const, label: t("tools.interest"), icon: ICONS.interest },
   ];
 
   return (

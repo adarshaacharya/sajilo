@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
+import type { RadioDirectory } from "../types/api/RadioDirectory";
+import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
 
 /** Mirrors `commands::bazar::Bazar`. */
@@ -196,6 +198,13 @@ export const api = {
 
   /** All three bazar feeds. Cached in Rust; `refresh` forces a refetch. */
   getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),
+
+  getRashifal: (refresh = false) =>
+    invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),
+
+  getStations: (refresh = false) => invoke<LoadState<RadioDirectory>>("get_stations", { refresh }),
+  /** Resolved per station, on play — the directory lists around 270 of them. */
+  stationStream: (slug: string) => invoke<string>("station_stream", { slug }),
 
   /** Redraws the menu-bar label after a preference it reads has changed. */
   refreshTray: () => invoke<void>("refresh_tray"),

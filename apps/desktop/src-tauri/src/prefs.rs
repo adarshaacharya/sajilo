@@ -16,9 +16,21 @@ pub const NUMERAL_STYLE: &str = "numeralStyle";
 /// already looks.
 pub const PLANS_KEY: &str = "dayPlans.v1";
 
-/// Last good bazar payload. Cached on disk so a cold start against a dead
-/// upstream still has yesterday's prices to label as stale.
-pub const BAZAR_KEY: &str = "bazar.v1";
+/// Remote-module caches live in their own file, never in `sajilo.json`.
+///
+/// The frontend opens the settings store with `autoSave`, which writes its
+/// whole in-memory map back — so a cache key written from Rust between a JS
+/// read and a JS write would be dropped. Separate files, separate owners.
+pub const CACHE_FILE: &str = "cache.json";
+
+// Last good payload per remote module. Cached on disk so a cold start against
+// a dead upstream still has yesterday's value to label as stale, and kept one
+// key per feed so a single unreadable entry cannot take the others down.
+pub const BAZAR_METALS_KEY: &str = "bazar.metals.v1";
+pub const BAZAR_FUEL_KEY: &str = "bazar.fuel.v1";
+pub const BAZAR_VEGETABLES_KEY: &str = "bazar.vegetables.v1";
+pub const RASHIFAL_KEY: &str = "rashifal.v1";
+pub const RADIO_KEY: &str = "radio.v1";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.
