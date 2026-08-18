@@ -49,23 +49,6 @@ const FLAGS: Record<string, string> = {
 
 const DEFAULT_FLAG = "🌐";
 
-/** Shown before a search is typed — the same cities that used to be the whole
- * list, now just the head start. */
-export const POPULAR_TIMEZONES = [
-  "Asia/Kathmandu",
-  "Asia/Qatar",
-  "Asia/Dubai",
-  "Asia/Riyadh",
-  "Asia/Kuwait",
-  "Europe/London",
-  "America/New_York",
-  "America/Los_Angeles",
-  "Australia/Sydney",
-  "Asia/Tokyo",
-  "Asia/Kuala_Lumpur",
-  "Asia/Kolkata",
-];
-
 function parseTimeZone(timeZone: string): ClockCity {
   const parts = timeZone.split("/");
   const region = (parts[0] ?? timeZone).replace(/_/g, " ");
@@ -95,10 +78,15 @@ export function flagFor(timeZone: string): string {
 
 const RESULT_LIMIT = 40;
 
-/** Case-insensitive substring match over city and region name. */
+/**
+ * Case-insensitive substring match over city and region name. Empty on an
+ * empty query rather than falling back to a "popular" subset — a short list
+ * that isn't the whole list reads as the whole list, which is confusing the
+ * moment a search reveals there was far more underneath it.
+ */
 export function searchTimezones(query: string): ClockCity[] {
   const needle = query.trim().toLowerCase();
-  if (!needle) return POPULAR_TIMEZONES.map(cityFor);
+  if (!needle) return [];
   return ALL_TIMEZONES.filter(
     (c) => c.city.toLowerCase().includes(needle) || c.region.toLowerCase().includes(needle),
   ).slice(0, RESULT_LIMIT);

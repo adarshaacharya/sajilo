@@ -53,31 +53,36 @@ export function ClockTab() {
           placeholder={t("tools.clock-search")}
           className="w-full rounded-[8px] border border-border/55 bg-[color-mix(in_srgb,var(--color-surface-raised)_88%,#000_12%)] px-2.5 py-1.5 text-[12px] text-text outline-none focus-visible:border-[color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]"
         />
-        <div className="surface-card mt-1.5 max-h-[220px] divide-y divide-border/40 overflow-y-auto p-1">
-          {results.length === 0 && (
-            <p className="px-1.5 py-2 text-[11px] text-text-muted">{t("bazar.no-match")}</p>
-          )}
-          {results.map((city) => {
-            const on = modules.clocks.includes(city.timeZone);
-            return (
-              <button
-                key={city.timeZone}
-                type="button"
-                onClick={() => toggle(city.timeZone)}
-                className={`flex w-full items-center gap-2 px-1.5 py-2 text-left transition-colors ${
-                  on ? "text-[color:var(--color-accent-mark)]" : "hover:bg-surface-hover"
-                }`}
-              >
-                <span className="text-[14px]">{flagFor(city.timeZone)}</span>
-                <span className="min-w-0 flex-1 truncate text-[12px]">
-                  {city.city}
-                  <span className="ml-1 text-text-muted">· {city.region}</span>
-                </span>
-                {on && <span className="shrink-0 text-[11px]">✓</span>}
-              </button>
-            );
-          })}
-        </div>
+        {(query.trim() || results.length > 0) && (
+          <div className="surface-card mt-1.5 max-h-[220px] divide-y divide-border/40 overflow-y-auto p-1">
+            {results.length === 0 && (
+              <p className="px-1.5 py-2 text-[11px] text-text-muted">{t("bazar.no-match")}</p>
+            )}
+            {results.map((city) => {
+              const on = modules.clocks.includes(city.timeZone);
+              return (
+                <button
+                  key={city.timeZone}
+                  type="button"
+                  onClick={() => toggle(city.timeZone)}
+                  className={`flex w-full items-center gap-2 px-1.5 py-2 text-left transition-colors ${
+                    on ? "text-[color:var(--color-accent-mark)]" : "hover:bg-surface-hover"
+                  }`}
+                >
+                  <span className="text-[14px]">{flagFor(city.timeZone)}</span>
+                  <span className="min-w-0 flex-1 truncate text-[12px]">
+                    {city.city}
+                    <span className="ml-1 text-text-muted">· {city.region}</span>
+                  </span>
+                  {on && <span className="shrink-0 text-[11px]">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {!query.trim() && results.length === 0 && (
+          <p className="mt-1.5 px-0.5 text-[11px] text-text-muted">{t("tools.clock-hint")}</p>
+        )}
       </div>
     </div>
   );
