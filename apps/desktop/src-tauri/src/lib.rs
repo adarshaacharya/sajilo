@@ -3,6 +3,7 @@
 //! M4 is deliberately only a shell: a tray icon, a popover that opens and
 //! dismisses, and nothing product-specific. The screens arrive in M6.
 
+pub mod article_dates;
 pub mod commands;
 pub mod feed;
 pub mod prefs;
@@ -12,6 +13,32 @@ pub mod window;
 
 use tauri::{Manager, WindowEvent};
 
+/// Registers the updater plugin only when a real signing key was baked in at
+/// build time (`SAJILO_UPDATER_PUBKEY`, set by `release-desktop.yml` once
+/// `scripts/generate-updater-key.sh` has been run and the public half added to
+/// CI secrets). Without it the plugin is left out entirely: a dev build or an
+/// unsigned release has nothing to check with, and skipping registration is
+/// how the Settings "check for updates" row knows to hide itself rather than
+/// call a command that does not exist.
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+fn register_updater(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri::Wry> {
+    let Some(pubkey) = option_env!("SAJILO_UPDATER_PUBKEY") else {
+        return builder;
+    };
+    // The endpoint is public and lives in `tauri.conf.json` under
+    // `plugins.updater.endpoints`; only the pubkey is sensitive, and that
+    // comes from this env var rather than the committed config.
+    builder.plugin(tauri_plugin_updater::Builder::new().pubkey(pubkey).build())
+}
+
+/// Whether this build was signed with a real updater key. The Settings screen
+/// uses this to decide whether to show "check for updates" at all — calling
+/// the updater plugin's JS API when it was never registered would just error.
+#[tauri::command]
+fn updater_enabled() -> bool {
+    option_env!("SAJILO_UPDATER_PUBKEY").is_some()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
@@ -20,21 +47,18 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_positioner::init());
+        .plugin(tauri_plugin_positioner::init())
+        .plugin(tauri_plugin_process::init());
 
     // Autostart is desktop-only: a platform with no login items has nothing to
     // register.
-    //
-    // The updater is deliberately *not* registered yet. It refuses to
-    // initialise without a `plugins.updater` block carrying a real public key,
-    // and that keypair is generated in M9 — writing a placeholder key here
-    // would only fake a readiness the app does not have.
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
         builder = builder.plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ));
+        builder = register_updater(builder);
     }
 
     builder
@@ -92,6 +116,7 @@ pub fn run() {
             commands::calendar::events_for,
             commands::calendar::upcoming_events,
             commands::calendar::supported_range,
+            commands::calendar::panchanga_for,
             commands::plans::list_plans,
             commands::plans::plans_for_day,
             commands::plans::save_plan,
@@ -114,8 +139,10 @@ pub fn run() {
             system::autostart::is_autostart_enabled,
             system::autostart::set_autostart,
             system::autostart::set_dock_icon_visible,
+            system::autostart::is_dock_icon_visible,
             commands::tray::refresh_tray,
             commands::tray::quit_app,
+            updater_enabled,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sajilo");

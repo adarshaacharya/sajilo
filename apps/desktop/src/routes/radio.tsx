@@ -1,28 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BazarSearch } from "../components/bazar/BazarSearch";
 import { Equalizer } from "../components/Equalizer";
-import { Icon } from "../components/Icon";
 import { useHeaderSlot } from "../components/HeaderSlot";
+import { Icon } from "../components/Icon";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import * as player from "../lib/audio";
 import { api } from "../lib/ipc";
+import { usePersistedList } from "../lib/persisted";
 import { useSettings } from "../lib/settings";
+import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { RadioDirectory } from "../types/api/RadioDirectory";
 import type { RadioStation } from "../types/api/RadioStation";
 
 const PIN_KEY = "radioFavourites";
-
-function loadPins(): string[] {
-  try {
-    const raw = localStorage.getItem(PIN_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
 
 function banner(state: LoadState<RadioDirectory> | undefined): LoadStatus {
   if (!state) return { status: "loading" };
@@ -92,7 +83,9 @@ function StationRow({
         onClick={onTogglePin}
         aria-label={t("radio.pin")}
         className={`shrink-0 p-0.5 transition-opacity ${
-          pinned ? "text-[color:var(--color-accent-mark)]" : "text-text-muted opacity-0 group-hover:opacity-100"
+          pinned
+            ? "text-[color:var(--color-accent-mark)]"
+            : "text-text-muted opacity-0 group-hover:opacity-100"
         }`}
       >
         <Icon name={pinned ? "pinFill" : "pin"} className="size-3" />
@@ -149,7 +142,9 @@ function StationList({
   return (
     <section className="surface-card mt-2 p-1">
       {title && (
-        <p className="px-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">{title}</p>
+        <p className="px-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          {title}
+        </p>
       )}
       <ul>
         {stations.map((station) => {
@@ -179,25 +174,25 @@ function StationList({
 export function Radio() {
   const { t } = useSettings();
   const [state, setState] = useState(player.getState());
-  const [directory, setDirectory] = useState<LoadState<RadioDirectory>>();
+  const {
+    value: directory,
+    isValidating,
+    reload: load,
+  } = useCachedQuery("radio-stations", (refresh) =>
+    api
+      .getStations(refresh)
+      .catch(
+        (error: unknown): LoadState<RadioDirectory> => ({ status: "failed", value: String(error) }),
+      ),
+  );
   const [query, setQuery] = useState("");
-  const [pins, setPins] = useState(loadPins);
+  const [pins, setPins] = usePersistedList(PIN_KEY);
   const [resolving, setResolving] = useState<string | null>(null);
   const [unplayable, setUnplayable] = useState<string | null>(null);
 
   useEffect(() => player.subscribe(setState), []);
 
-  const loading = !directory || directory.status === "loading";
-
-  const load = useCallback((refresh = false) => {
-    setDirectory(undefined);
-    api
-      .getStations(refresh)
-      .then(setDirectory)
-      .catch((error: unknown) => setDirectory({ status: "failed", value: String(error) }));
-  }, []);
-
-  useEffect(() => load(), [load]);
+  const loading = isValidating;
 
   const refreshButton = useMemo(
     () => (
@@ -261,23 +256,19 @@ export function Radio() {
   const others = matches.filter((station) => !pins.includes(station.slug));
 
   const togglePin = (slug: string) => {
-    setPins((current) => {
-      const next = current.includes(slug)
-        ? current.filter((item) => item !== slug)
-        : [...current, slug];
-      localStorage.setItem(PIN_KEY, JSON.stringify(next));
-      return next;
-    });
+    setPins((current) =>
+      current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug],
+    );
   };
 
   const current = state.nowPlaying
-    ? stations.find((s) => s.slug === state.nowPlaying?.slug) ?? {
+    ? (stations.find((s) => s.slug === state.nowPlaying?.slug) ?? {
         slug: state.nowPlaying.slug,
         name: state.nowPlaying.name,
         frequency: state.nowPlaying.frequency ?? null,
         logoUrl: null,
         streamUrl: null,
-      }
+      })
     : null;
 
   return (
@@ -328,7 +319,9 @@ export function Radio() {
         <BazarSearch value={query} onChange={setQuery} placeholder={t("radio.search")} />
 
         {matches.length === 0 ? (
-          <p className="py-6 text-center text-[12px] text-text-secondary">{t("radio.no-stations")}</p>
+          <p className="py-6 text-center text-[12px] text-text-secondary">
+            {t("radio.no-stations")}
+          </p>
         ) : (
           <>
             <StationList
@@ -343,7 +336,11 @@ export function Radio() {
               t={t}
             />
             <StationList
-              title={pinned.length > 0 && others.length > 0 ? t("radio.all-stations") : t("radio.stations")}
+              title={
+                pinned.length > 0 && others.length > 0
+                  ? t("radio.all-stations")
+                  : t("radio.stations")
+              }
               stations={others}
               pins={pins}
               state={state}

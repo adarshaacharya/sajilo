@@ -4,9 +4,19 @@ import { Card } from "../components/Card";
 import { CONTROL } from "../components/control";
 import { Select } from "../components/Select";
 import { Toggle } from "../components/Toggle";
-import { api, type CalendarEvent, type Conversion, type DayPlan } from "../lib/ipc";
+import { ResultCard } from "../components/tools/ResultCard";
+import { api, type CalendarEvent, type Conversion, type DayPlan, type Panchanga } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
+
+function clockTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
+function daylightText(seconds: number): string {
+  const minutes = Math.round(seconds / 60);
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
 
 const REMINDERS = [
   { id: "", labelKey: "planner.no-reminder" as const },
@@ -24,6 +34,7 @@ export function DayDetail() {
   const [date, setDate] = useState<{ year: number; month: number; day: number } | null>(null);
   const [conversion, setConversion] = useState<Conversion | null>(null);
   const [event, setEvent] = useState<CalendarEvent | null>(null);
+  const [panchanga, setPanchanga] = useState<Panchanga | null>(null);
   const [plans, setPlans] = useState<DayPlan[]>([]);
   const [draft, setDraft] = useState("");
   const [note, setNote] = useState("");
@@ -61,6 +72,17 @@ export function DayDetail() {
       .then(setPlans)
       .catch(() => setPlans([]));
   }, [date]);
+
+  useEffect(() => {
+    if (!conversion) {
+      setPanchanga(null);
+      return;
+    }
+    api
+      .panchangaFor(conversion.gregorian)
+      .then(setPanchanga)
+      .catch(() => setPanchanga(null));
+  }, [conversion]);
 
   const addPlan = async () => {
     const title = draft.trim();
@@ -114,6 +136,50 @@ export function DayDetail() {
         )}
       </Card>
 
+      <div className="space-y-1.5">
+        <p className="px-0.5 text-[10px] font-semibold text-text-muted">{t("action.copy-as")}</p>
+        <div className="grid grid-cols-3 gap-1.5">
+          <ResultCard
+            title="Nepali numerals"
+            value={`${digits(date.year, numerals)}/${digits(date.month, numerals)}/${digits(date.day, numerals)}`}
+          />
+          <ResultCard
+            title="English numerals"
+            value={`${date.year}/${String(date.month).padStart(2, "0")}/${String(date.day).padStart(2, "0")}`}
+          />
+          <ResultCard title="ISO" value={conversion.gregorian} />
+        </div>
+      </div>
+
+      {panchanga && (
+        <Card title={t("panchanga.title")}>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <p className="text-[10px] text-text-muted">{t("panchanga.sunrise")}</p>
+              <p className="tabular-nums font-medium">{clockTime(panchanga.sunrise)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-text-muted">{t("panchanga.sunset")}</p>
+              <p className="tabular-nums font-medium">{clockTime(panchanga.sunset)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-text-muted">{t("panchanga.daylight")}</p>
+              <p className="tabular-nums font-medium">{daylightText(panchanga.daylightSeconds)}</p>
+            </div>
+          </div>
+          {panchanga.rahuKaalStart && panchanga.rahuKaalEnd && (
+            <div className="mt-2 border-t border-border pt-2">
+              <p className="text-[11px] font-medium text-holiday">
+                {t("panchanga.rahu-kaal")} {clockTime(panchanga.rahuKaalStart)}–
+                {clockTime(panchanga.rahuKaalEnd)}
+              </p>
+              <p className="mt-0.5 text-[10px] text-text-muted">{t("panchanga.rahu-note")}</p>
+            </div>
+          )}
+          <p className="mt-2 text-[10px] text-text-muted">{t("panchanga.computed")}</p>
+        </Card>
+      )}
+
       <Card title={t("planner.title")}>
         <div className="space-y-2">
           <input
@@ -133,7 +199,9 @@ export function DayDetail() {
           {hasTime && (
             <div className="grid grid-cols-2 gap-2">
               <label className="block">
-                <span className="mb-1 block text-[10px] text-text-muted">{t("planner.reminder")}</span>
+                <span className="mb-1 block text-[10px] text-text-muted">
+                  {t("planner.reminder")}
+                </span>
                 <input
                   type="time"
                   value={time}

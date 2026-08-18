@@ -3,22 +3,12 @@ import { BazarSearch } from "../../components/bazar/BazarSearch";
 import { SourceLink, SourceNote } from "../../components/bazar/SourceNote";
 import { Icon } from "../../components/Icon";
 import { formatNepaliDate, marketUnitLabel, money } from "../../lib/bazar";
+import { usePersistedList } from "../../lib/persisted";
 import { useSettings } from "../../lib/settings";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { VegetablePrice } from "../../types/api/VegetablePrice";
 
 const PIN_KEY = "vegetableFavourites";
-
-function loadPins(): string[] {
-  try {
-    const raw = localStorage.getItem(PIN_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
 
 function ProduceRow({
   price,
@@ -36,7 +26,9 @@ function ProduceRow({
         onClick={onTogglePin}
         aria-label="Pin to the top"
         className={`shrink-0 p-0.5 transition-opacity ${
-          pinned ? "text-[color:var(--color-accent-mark)]" : "text-text-muted opacity-0 group-hover:opacity-100"
+          pinned
+            ? "text-[color:var(--color-accent-mark)]"
+            : "text-text-muted opacity-0 group-hover:opacity-100"
         }`}
       >
         <Icon name={pinned ? "pinFill" : "pin"} className="size-3" />
@@ -74,7 +66,9 @@ function ProduceList({
   return (
     <section className="surface-card p-2.5">
       {title && (
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">{title}</p>
+        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          {title}
+        </p>
       )}
       {prices.map((price) => (
         <ProduceRow
@@ -91,7 +85,7 @@ function ProduceList({
 export function VegetablesTab({ snapshot }: { snapshot: VegetableMarketSnapshot }) {
   const { t } = useSettings();
   const [query, setQuery] = useState("");
-  const [pins, setPins] = useState(loadPins);
+  const [pins, setPins] = usePersistedList(PIN_KEY);
 
   const needle = query.trim().toLowerCase();
   const matches = useMemo(() => {
@@ -107,13 +101,9 @@ export function VegetablesTab({ snapshot }: { snapshot: VegetableMarketSnapshot 
   const others = matches.filter((price) => !pins.includes(price.name));
 
   const togglePin = (name: string) => {
-    setPins((current) => {
-      const next = current.includes(name)
-        ? current.filter((item) => item !== name)
-        : [...current, name];
-      localStorage.setItem(PIN_KEY, JSON.stringify(next));
-      return next;
-    });
+    setPins((current) =>
+      current.includes(name) ? current.filter((item) => item !== name) : [...current, name],
+    );
   };
 
   const published = snapshot.publishedOn ? formatNepaliDate(snapshot.publishedOn) : undefined;

@@ -18,9 +18,8 @@ use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::{NotificationExt, PermissionState};
 use tauri_plugin_store::StoreExt;
 
-use crate::prefs::{PLANS_KEY, STORE_FILE};
+use crate::prefs::{NOTIFICATION_OPTIONS as OPTIONS_KEY, PLANS_KEY, STORE_FILE};
 
-const OPTIONS_KEY: &str = "notificationOptions";
 const LAST_FIRED_KEY: &str = "lastFired.v1";
 
 type Result<T> = std::result::Result<T, String>;

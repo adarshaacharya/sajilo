@@ -7,6 +7,7 @@
 use sajilo_core::calendar::bikram_sambat as bs;
 use sajilo_core::calendar::events::{CalendarEvent, events};
 use sajilo_core::calendar::month::{CalendarMonth, month};
+use sajilo_core::calendar::panchanga::{self, Panchanga};
 use sajilo_core::calendar::upcoming::{self, UpcomingEvent};
 use sajilo_core::{NepaliDate, nepal_time};
 use serde::Serialize;
@@ -129,6 +130,17 @@ pub struct SupportedRange {
     pub last_year: i32,
     pub first_event_year: i32,
     pub last_event_year: i32,
+}
+
+/// Sunrise, sunset and Rahu Kaal for one Gregorian day — computed offline, so
+/// every date in the calendar has them regardless of whether the weather
+/// module is on or the network is reachable. `iso_date` is `YYYY-MM-DD`.
+#[tauri::command]
+pub fn panchanga_for(iso_date: String) -> Result<Panchanga> {
+    let day = chrono::NaiveDate::parse_from_str(&iso_date, "%Y-%m-%d")
+        .map_err(|_| "That is not a valid date.".to_owned())?;
+    panchanga::panchanga_for(day)
+        .ok_or_else(|| "The sun does not rise on this date at this location.".to_owned())
 }
 
 #[tauri::command]

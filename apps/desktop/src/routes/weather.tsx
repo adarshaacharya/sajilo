@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../components/Icon";
 import { AirQualityPanel } from "../components/weather/AirQualityPanel";
@@ -7,8 +7,9 @@ import { WeatherAtmosphere } from "../components/weather/WeatherAtmosphere";
 import { WeatherIcon } from "../components/weather/WeatherIcon";
 import { api } from "../lib/ipc";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
-import { currentSkyPhase, skyGradient } from "../lib/skyPhase";
 import { useSettings } from "../lib/settings";
+import { currentSkyPhase, skyGradient } from "../lib/skyPhase";
+import { useCachedQuery } from "../lib/useCachedQuery";
 import {
   aqiCategory,
   conditionTitle,
@@ -49,22 +50,22 @@ function locationLabel(location: WeatherSnapshot["location"], language: "en" | "
 export function Weather() {
   const { t, language, modules } = useSettings();
   const navigate = useNavigate();
-  const [state, setState] = useState<LoadState<WeatherSnapshot>>();
-
-  const loading = !state || state.status === "loading";
-
-  const load = useCallback(
-    (refresh = false) => {
-      setState(undefined);
-      api
-        .getWeather(refresh, modules.weatherLocation)
-        .then(setState)
-        .catch((error: unknown) => setState({ status: "failed", value: String(error) }));
-    },
-    [modules.weatherLocation],
+  const {
+    value: state,
+    isValidating,
+    reload: load,
+  } = useCachedQuery(`weather:${modules.weatherLocation}`, (refresh) =>
+    api
+      .getWeather(refresh, modules.weatherLocation)
+      .catch(
+        (error: unknown): LoadState<WeatherSnapshot> => ({
+          status: "failed",
+          value: String(error),
+        }),
+      ),
   );
 
-  useEffect(() => load(), [load]);
+  const loading = isValidating;
 
   const snapshot = loadedValue(state);
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
@@ -125,8 +126,8 @@ export function Weather() {
                 </div>
                 <p className="mt-0.5 text-[11px] opacity-85">
                   Feels like {formatCelsius(snapshot.apparentTemperatureCelsius)} · H{" "}
-                  {formatCelsius(snapshot.highCelsius)} L {formatCelsius(snapshot.lowCelsius)} · Rain{" "}
-                  {formatPercent(snapshot.precipitationChance)}
+                  {formatCelsius(snapshot.highCelsius)} L {formatCelsius(snapshot.lowCelsius)} ·
+                  Rain {formatPercent(snapshot.precipitationChance)}
                 </p>
               </>
             ) : loading ? (
@@ -178,11 +179,7 @@ export function Weather() {
             </p>
             <div>
               {snapshot.daily.map((day) => (
-                <ForecastRow
-                  key={day.date}
-                  forecast={day}
-                  dayLabel={forecastWeekday(day.date)}
-                />
+                <ForecastRow key={day.date} forecast={day} dayLabel={forecastWeekday(day.date)} />
               ))}
             </div>
           </section>

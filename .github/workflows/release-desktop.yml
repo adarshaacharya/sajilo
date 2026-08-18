@@ -49,11 +49,19 @@ jobs:
       - name: Build and bundle
         uses: tauri-apps/tauri-action@v0
         env:
-          # Absent until the keypair is generated (scripts/generate-updater-key.sh)
-          # and added to this repository's secrets. Without them the bundle is
-          # unsigned and the updater is inert, which is the current state.
+          # All three are absent until the keypair is generated
+          # (scripts/generate-updater-key.sh) and added to this repository's
+          # secrets. Without them the bundle is unsigned, `latest.json` is not
+          # produced, and `updater_enabled()` compiles to `false` — the
+          # updater plugin is left out of the binary entirely rather than
+          # registered with a fake key. This is the current state.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # The public half of the same keypair (`sajilo.key.pub`'s contents),
+          # baked into the binary at compile time so it never needs to live in
+          # tauri.conf.json. Compiling it in, rather than reading it from a
+          # runtime file, is what lets Rust build without it at all in dev.
+          SAJILO_UPDATER_PUBKEY: ${{ secrets.SAJILO_UPDATER_PUBKEY }}
         with:
           projectPath: apps/desktop
           tagName: ${{ github.ref_name }}

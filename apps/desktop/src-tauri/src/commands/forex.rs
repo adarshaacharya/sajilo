@@ -36,6 +36,8 @@ pub async fn get_forex(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadState<
 
     cache
         .feed
-        .get(&app, now, refresh.unwrap_or(false), || nrb::fetch(client, today, now))
+        .get(&app, now, refresh.unwrap_or(false), || {
+            nrb::fetch(client, today, now)
+        })
         .await
 }

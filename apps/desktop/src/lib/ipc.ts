@@ -1,15 +1,15 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { ForexSnapshot } from "../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 import type { MetalRateSnapshot } from "../types/api/MetalRateSnapshot";
-import type { RadioDirectory } from "../types/api/RadioDirectory";
 import type { NewsDigest } from "../types/api/NewsDigest";
-import type { ForexSnapshot } from "../types/api/ForexSnapshot";
-import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
-import type { WeatherLocation } from "../types/api/WeatherLocation";
+import type { RadioDirectory } from "../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
 import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../types/api/VegetableMarketSnapshot";
+import type { WeatherLocation } from "../types/api/WeatherLocation";
+import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
 
 /** Mirrors `commands::bazar::Bazar`. */
 export interface Bazar {
@@ -76,6 +76,15 @@ export interface SupportedRange {
   lastYear: number;
   firstEventYear: number;
   lastEventYear: number;
+}
+
+/** Mirrors `sajilo_core::calendar::panchanga::Panchanga`. Computed for Kathmandu. */
+export interface Panchanga {
+  sunrise: string;
+  sunset: string;
+  rahuKaalStart: string | null;
+  rahuKaalEnd: string | null;
+  daylightSeconds: number;
 }
 
 export interface PlanTime {
@@ -163,6 +172,7 @@ export const api = {
   upcomingEvents: (limit?: number, horizonDays?: number) =>
     invoke<UpcomingEvent[]>("upcoming_events", { limit, horizonDays }),
   supportedRange: () => invoke<SupportedRange>("supported_range"),
+  panchangaFor: (isoDate: string) => invoke<Panchanga>("panchanga_for", { isoDate }),
 
   listPlans: () => invoke<DayPlan[]>("list_plans"),
   plansForDay: (year: number, month: number, day: number) =>
@@ -200,12 +210,14 @@ export const api = {
   isAutostartEnabled: () => invoke<boolean>("is_autostart_enabled"),
   setAutostart: (enabled: boolean) => invoke<boolean>("set_autostart", { enabled }),
   setDockIconVisible: (visible: boolean) => invoke<void>("set_dock_icon_visible", { visible }),
+  isDockIconVisible: () => invoke<boolean>("is_dock_icon_visible"),
+  /** False in every dev build and any release built without a signing key. */
+  updaterEnabled: () => invoke<boolean>("updater_enabled"),
 
   /** All three bazar feeds. Cached in Rust; `refresh` forces a refetch. */
   getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),
 
-  getStocks: (refresh = false) =>
-    invoke<LoadState<StockMarketSnapshot>>("get_stocks", { refresh }),
+  getStocks: (refresh = false) => invoke<LoadState<StockMarketSnapshot>>("get_stocks", { refresh }),
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),

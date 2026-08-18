@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { BazarSearch } from "../../components/bazar/BazarSearch";
 import { ChangeBadge } from "../../components/bazar/ChangeBadge";
 import { Icon } from "../../components/Icon";
@@ -7,6 +7,7 @@ import { type LoadStatus, StateBanner } from "../../components/StateBanner";
 import { money, money0 } from "../../lib/bazar";
 import type { translate } from "../../lib/i18n";
 import { loadedValue } from "../../lib/loadState";
+import { usePersistedList } from "../../lib/persisted";
 import { useSettings } from "../../lib/settings";
 import type { LoadState } from "../../types/api/LoadState";
 import type {
@@ -33,21 +34,6 @@ function banner(state: LoadState<StockMarketSnapshot> | undefined): LoadStatus {
     default:
       return { status: state.status };
   }
-}
-
-function loadWatchlist(): string[] {
-  try {
-    const raw = localStorage.getItem(WATCHLIST_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveWatchlist(symbols: string[]) {
-  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(symbols));
 }
 
 function quoteOf(snapshot: StockMarketSnapshot, symbol: string): StockQuote | undefined {
@@ -97,7 +83,10 @@ function week52Position(quote: StockQuote): number | null {
   if (quote.week52High == null || quote.week52Low == null || quote.week52High <= quote.week52Low) {
     return null;
   }
-  return Math.min(1, Math.max(0, (quote.ltp - quote.week52Low) / (quote.week52High - quote.week52Low)));
+  return Math.min(
+    1,
+    Math.max(0, (quote.ltp - quote.week52Low) / (quote.week52High - quote.week52Low)),
+  );
 }
 
 async function openSharesansar(symbol: string) {
@@ -121,7 +110,11 @@ function FollowButton({ followed, onToggle }: { followed: boolean; onToggle: () 
       className={`shrink-0 p-1 ${followed ? "text-[color:var(--color-accent-mark)]" : "text-text-muted"}`}
       aria-label={followed ? "Unfollow" : "Follow"}
     >
-      {followed ? <Icon name="starFill" className="size-3.5" /> : <Icon name="star" className="size-3.5" />}
+      {followed ? (
+        <Icon name="starFill" className="size-3.5" />
+      ) : (
+        <Icon name="star" className="size-3.5" />
+      )}
     </button>
   );
 }
@@ -169,7 +162,11 @@ function QuoteRow({
 }) {
   return (
     <div className="row-line flex items-center gap-2 py-1.5">
-      <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-2 text-left">
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+      >
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-semibold">{quote.symbol}</span>
           {quote.companyName && (
@@ -177,8 +174,12 @@ function QuoteRow({
           )}
         </span>
         <span className="shrink-0 text-right">
-          <span className="block text-[13px] font-medium tabular-nums">Rs {money.format(quote.ltp)}</span>
-          <span className={`block text-[10px] font-medium tabular-nums ${changeTone(quote.change)}`}>
+          <span className="block text-[13px] font-medium tabular-nums">
+            Rs {money.format(quote.ltp)}
+          </span>
+          <span
+            className={`block text-[10px] font-medium tabular-nums ${changeTone(quote.change)}`}
+          >
             {percentText(quote.change, quote.changePercent)}
           </span>
         </span>
@@ -199,10 +200,8 @@ export function Stocks({
   const snapshot = loadedValue(state);
   const [query, setQuery] = useState("");
   const [opened, setOpened] = useState<string | null>(null);
-  const [watchlist, setWatchlist] = useState<string[]>(loadWatchlist);
+  const [watchlist, setWatchlist] = usePersistedList(WATCHLIST_KEY);
   const [board, setBoard] = useState<MoverBoard>("gainers");
-
-  useEffect(() => saveWatchlist(watchlist), [watchlist]);
 
   const toggleFollow = (symbol: string) => {
     const upper = symbol.toUpperCase();
@@ -252,15 +251,17 @@ export function Stocks({
               {results.length === 0 ? (
                 <p className="text-text-secondary">{t("stocks.no-match")}</p>
               ) : (
-                results.slice(0, 25).map((quote) => (
-                  <QuoteRow
-                    key={quote.symbol}
-                    quote={quote}
-                    followed={followed(quote.symbol)}
-                    onOpen={() => setOpened(quote.symbol)}
-                    onToggle={() => toggleFollow(quote.symbol)}
-                  />
-                ))
+                results
+                  .slice(0, 25)
+                  .map((quote) => (
+                    <QuoteRow
+                      key={quote.symbol}
+                      quote={quote}
+                      followed={followed(quote.symbol)}
+                      onOpen={() => setOpened(quote.symbol)}
+                      onToggle={() => toggleFollow(quote.symbol)}
+                    />
+                  ))
               )}
               {results.length > 25 && (
                 <p className="pt-1 text-[10px] text-text-muted">+{results.length - 25}</p>
@@ -281,10 +282,7 @@ export function Stocks({
                     const quote = quoteOf(snapshot, symbol);
                     if (!quote) {
                       return (
-                        <div
-                          key={symbol}
-                          className="row-line flex items-center gap-2 py-1.5"
-                        >
+                        <div key={symbol} className="row-line flex items-center gap-2 py-1.5">
                           <span className="font-semibold">{symbol}</span>
                           <span className="flex-1 text-[10px] text-text-muted">
                             {t("bazar.not-traded-today")}
@@ -321,7 +319,11 @@ export function Stocks({
                   />
                   <div className="mt-2">
                     {movers.map((mover) => (
-                      <MoverRow key={`${mover.board}-${mover.symbol}`} mover={mover} onOpen={() => setOpened(mover.symbol)} />
+                      <MoverRow
+                        key={`${mover.board}-${mover.symbol}`}
+                        mover={mover}
+                        onOpen={() => setOpened(mover.symbol)}
+                      />
                     ))}
                     {movers.length === 0 && (
                       <p className="text-[11px] text-text-muted">{t("stocks.no-match")}</p>
@@ -399,7 +401,9 @@ function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => void })
     >
       <span className="w-[68px] shrink-0 text-[11px] font-semibold">{mover.symbol}</span>
       <span className="text-[11px] text-text-muted tabular-nums">Rs {money.format(mover.ltp)}</span>
-      <span className={`ml-auto text-[11px] font-medium tabular-nums ${isPercent ? tone : "text-text-secondary"}`}>
+      <span
+        className={`ml-auto text-[11px] font-medium tabular-nums ${isPercent ? tone : "text-text-secondary"}`}
+      >
         {isPercent
           ? `${up && !flat ? "+" : ""}${mover.metric.toFixed(2)}%`
           : mover.board === "turnover"
@@ -465,9 +469,7 @@ function CompanyDetail({
         </button>
         <div className="min-w-0 flex-1">
           <p className="text-[16px] font-semibold leading-tight">{quote.symbol}</p>
-          {quote.companyName && (
-            <p className="text-[11px] text-text-muted">{quote.companyName}</p>
-          )}
+          {quote.companyName && <p className="text-[11px] text-text-muted">{quote.companyName}</p>}
         </div>
         <FollowButton followed={followed} onToggle={onToggle} />
       </div>

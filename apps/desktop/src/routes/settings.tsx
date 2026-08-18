@@ -7,11 +7,7 @@ import { ModuleRow } from "../components/settings/ModuleRow";
 import { SettingsSection } from "../components/settings/SettingsSection";
 import { Toggle } from "../components/Toggle";
 import type { Language } from "../lib/i18n";
-import {
-  api,
-  type NotificationOptions,
-  type PermissionState,
-} from "../lib/ipc";
+import { api, type NotificationOptions, type PermissionState } from "../lib/ipc";
 import { digits, type NumeralStyle } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
 
@@ -105,7 +101,10 @@ function DisplayTab({
       .catch(() => {});
   };
 
-  const persistCustom = (key: "customMenuBarShowsFlag" | "customMenuBarShowsYear", value: boolean) => {
+  const persistCustom = (
+    key: "customMenuBarShowsFlag" | "customMenuBarShowsYear",
+    value: boolean,
+  ) => {
     import("@tauri-apps/plugin-store")
       .then(({ load }) => load("sajilo.json", { autoSave: true }))
       .then((store) => store.set(key, value))
@@ -282,11 +281,33 @@ function SystemTab() {
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
+  const [updaterEnabled, setUpdaterEnabled] = useState(false);
+  const [updateState, setUpdateState] = useState<
+    "idle" | "checking" | "up-to-date" | "downloading" | "installed" | "failed"
+  >("idle");
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    api.isAutostartEnabled().then(setAutostart).catch(() => {});
-    api.getNotificationOptions().then(setOptions).catch(() => {});
-    api.notificationPermission().then(setPermission).catch(() => {});
+    api
+      .isAutostartEnabled()
+      .then(setAutostart)
+      .catch(() => {});
+    api
+      .isDockIconVisible()
+      .then(setDockIcon)
+      .catch(() => {});
+    api
+      .updaterEnabled()
+      .then(setUpdaterEnabled)
+      .catch(() => {});
+    api
+      .getNotificationOptions()
+      .then(setOptions)
+      .catch(() => {});
+    api
+      .notificationPermission()
+      .then(setPermission)
+      .catch(() => {});
   }, []);
 
   const updateOptions = async (next: NotificationOptions) => {
@@ -329,6 +350,40 @@ function SystemTab() {
     setMessage(`${t("settings.backup-imported")} (${summary.dayPlans})`);
   };
 
+  const checkForUpdates = async () => {
+    setUpdateState("checking");
+    try {
+      const { check } = await import("@tauri-apps/plugin-updater");
+      const update = await check();
+      if (!update) {
+        setUpdateState("up-to-date");
+        return;
+      }
+      setUpdateVersion(update.version);
+      setUpdateState("downloading");
+      await update.downloadAndInstall();
+      setUpdateState("installed");
+    } catch {
+      setUpdateState("failed");
+    }
+  };
+
+  const restartToUpdate = async () => {
+    const { relaunch } = await import("@tauri-apps/plugin-process");
+    await relaunch();
+  };
+
+  const updateNote = {
+    idle: null,
+    checking: t("settings.update-checking"),
+    "up-to-date": t("settings.update-up-to-date"),
+    downloading: updateVersion
+      ? `${t("settings.update-available")} ${updateVersion}…`
+      : t("settings.update-checking"),
+    installed: t("settings.update-installed"),
+    failed: t("settings.update-failed"),
+  }[updateState];
+
   return (
     <div className="space-y-2.5">
       <SettingsSection title={t("settings.startup")}>
@@ -348,6 +403,27 @@ function SystemTab() {
           }}
         />
       </SettingsSection>
+
+      {updaterEnabled && (
+        <SettingsSection title={t("settings.updates")} footnote={updateNote ?? undefined}>
+          {updateState === "installed" ? (
+            <button type="button" onClick={() => restartToUpdate()} className="settings-btn">
+              <Icon name="refresh" className="size-3 shrink-0" />
+              {t("settings.update-restart")}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => checkForUpdates()}
+              disabled={updateState === "checking" || updateState === "downloading"}
+              className="settings-btn"
+            >
+              <Icon name="refresh" className="size-3 shrink-0" />
+              {t("settings.check-for-updates")}
+            </button>
+          )}
+        </SettingsSection>
+      )}
 
       <SettingsSection title={t("settings.reminders")} footnote={reminderNote}>
         <Toggle

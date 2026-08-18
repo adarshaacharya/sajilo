@@ -102,7 +102,7 @@ fn clear_macos_background(window: &WebviewWindow) {
 #[cfg(target_os = "macos")]
 fn apply_macos_vibrancy(window: &WebviewWindow) {
     use window_vibrancy::{
-        apply_vibrancy, clear_vibrancy, NSVisualEffectMaterial, NSVisualEffectState,
+        NSVisualEffectMaterial, NSVisualEffectState, apply_vibrancy, clear_vibrancy,
     };
 
     let _ = clear_vibrancy(window);

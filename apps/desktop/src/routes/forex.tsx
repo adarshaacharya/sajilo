@@ -1,18 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CONTROL } from "../components/control";
-import { Icon } from "../components/Icon";
-import { useHeaderSlot } from "../components/HeaderSlot";
-import { Select } from "../components/Select";
 import { ForexRateRow } from "../components/forex/ForexRateRow";
+import { useHeaderSlot } from "../components/HeaderSlot";
+import { Icon } from "../components/Icon";
+import { Select } from "../components/Select";
 import { StateBanner } from "../components/StateBanner";
+import { conversionText, rateFootnote, sourceTimestamp } from "../lib/forex";
 import { api } from "../lib/ipc";
-import {
-  conversionText,
-  rateFootnote,
-  sourceTimestamp,
-} from "../lib/forex";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
+import { useCachedQuery } from "../lib/useCachedQuery";
 import type { ForexSnapshot } from "../types/api/ForexSnapshot";
 import type { LoadState } from "../types/api/LoadState";
 
@@ -27,22 +24,22 @@ async function openNrb() {
 
 export function Forex() {
   const { t, modules } = useSettings();
-  const [state, setState] = useState<LoadState<ForexSnapshot>>();
+  const {
+    value: state,
+    isValidating,
+    reload: load,
+  } = useCachedQuery("forex", (refresh) =>
+    api
+      .getForex(refresh)
+      .catch(
+        (error: unknown): LoadState<ForexSnapshot> => ({ status: "failed", value: String(error) }),
+      ),
+  );
   const [amount, setAmount] = useState(1);
   const [code, setCode] = useState("USD");
   const [reversed, setReversed] = useState(false);
 
-  const loading = !state || state.status === "loading";
-
-  const load = useCallback((refresh = false) => {
-    setState(undefined);
-    api
-      .getForex(refresh)
-      .then(setState)
-      .catch((error: unknown) => setState({ status: "failed", value: String(error) }));
-  }, []);
-
-  useEffect(() => load(), [load]);
+  const loading = isValidating;
 
   useEffect(() => {
     if (modules.forexFavourites[0]) setCode(modules.forexFavourites[0]);
@@ -114,7 +111,9 @@ export function Forex() {
               </div>
 
               {conversion && (
-                <p className="text-[18px] font-semibold leading-snug tracking-tight">{conversion}</p>
+                <p className="text-[18px] font-semibold leading-snug tracking-tight">
+                  {conversion}
+                </p>
               )}
               <p className="text-[11px] text-text-muted">{rateFootnote(selected, reversed)}</p>
             </div>

@@ -6,6 +6,9 @@
 
 use tauri::{AppHandle, Wry};
 use tauri_plugin_autostart::ManagerExt;
+use tauri_plugin_store::StoreExt;
+
+use crate::prefs::{SHOWS_DOCK_ICON, STORE_FILE};
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -33,4 +36,21 @@ pub fn set_autostart(app: AppHandle<Wry>, enabled: bool) -> Result<bool> {
 #[tauri::command]
 pub fn set_dock_icon_visible(app: AppHandle<Wry>, visible: bool) {
     crate::system::dock::set_hidden(&app, !visible);
+    if let Ok(store) = app.store(STORE_FILE) {
+        store.set(SHOWS_DOCK_ICON, serde_json::Value::Bool(visible));
+        let _ = store.save();
+    }
+}
+
+/// Read back on Settings mount, and on backup import, so the toggle reflects
+/// what was last chosen rather than defaulting to hidden every launch.
+#[tauri::command]
+pub fn is_dock_icon_visible(app: AppHandle<Wry>) -> bool {
+    let Ok(store) = app.store(STORE_FILE) else {
+        return false;
+    };
+    store
+        .get(SHOWS_DOCK_ICON)
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
 }

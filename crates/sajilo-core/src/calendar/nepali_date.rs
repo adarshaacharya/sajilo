@@ -76,6 +76,25 @@ const ENGLISH_NAMES: [&str; 12] = [
 ];
 
 impl NepaliMonth {
+    pub const ALL: [Self; 12] = [
+        Self::Baishakh,
+        Self::Jestha,
+        Self::Asar,
+        Self::Shrawan,
+        Self::Bhadra,
+        Self::Ashwin,
+        Self::Kartik,
+        Self::Mangsir,
+        Self::Poush,
+        Self::Magh,
+        Self::Falgun,
+        Self::Chaitra,
+    ];
+
+    pub fn all() -> [Self; 12] {
+        Self::ALL
+    }
+
     pub fn from_number(month: u32) -> Option<Self> {
         use NepaliMonth::*;
         Some(match month {
@@ -101,6 +120,13 @@ impl NepaliMonth {
 
     pub fn nepali_name(self) -> &'static str {
         NEPALI_NAMES[self.number() as usize - 1]
+    }
+
+    pub fn from_nepali_name(name: &str) -> Option<Self> {
+        NEPALI_NAMES
+            .iter()
+            .position(|&candidate| candidate == name)
+            .and_then(|index| Self::from_number(index as u32 + 1))
     }
 
     pub fn english_name(self) -> &'static str {

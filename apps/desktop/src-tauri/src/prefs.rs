@@ -40,6 +40,9 @@ pub const WEATHER_POKHARA_KEY: &str = "weather.pokhara.v1";
 pub const WEATHER_LALITPUR_KEY: &str = "weather.lalitpur.v1";
 pub const FOREX_KEY: &str = "forex.v1";
 pub const NEWS_KEY: &str = "news.v1";
+/// Same key the Swift app used, so a story resolved once there is not
+/// re-fetched here after a migration.
+pub const ARTICLE_DATES_KEY: &str = "articleDates.v1";
 
 pub const WEATHER_LOCATION: &str = "weatherLocation";
 pub const WEATHER_ENABLED: &str = "weatherEnabled";
@@ -49,6 +52,15 @@ pub const BAZAR_ENABLED: &str = "bazarEnabled";
 pub const RASHIFAL_ENABLED: &str = "rashifalEnabled";
 pub const RADIO_ENABLED: &str = "radioEnabled";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
+pub const LANGUAGE: &str = "language";
+pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";
+pub const VEGETABLE_FAVOURITES: &str = "vegetableFavourites";
+pub const STOCK_WATCHLIST: &str = "stockWatchlist";
+pub const SELECTED_RASHI: &str = "selectedRashi";
+pub const RADIO_FAVOURITES: &str = "radioFavourites";
+/// Same key `commands/notify.rs` reads/writes — kept here too since backup
+/// import/export needs it and that module's copy is private.
+pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.

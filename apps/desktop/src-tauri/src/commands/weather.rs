@@ -58,6 +58,8 @@ pub async fn get_weather(
 
     cache
         .feed(place)
-        .get(&app, now, refresh.unwrap_or(false), || open_meteo::fetch(client, place, now))
+        .get(&app, now, refresh.unwrap_or(false), || {
+            open_meteo::fetch(client, place, now)
+        })
         .await
 }

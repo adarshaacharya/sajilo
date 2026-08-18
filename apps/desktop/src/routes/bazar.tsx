@@ -1,17 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Icon } from "../components/Icon";
+import { useCallback, useMemo, useState } from "react";
 import { useHeaderSlot } from "../components/HeaderSlot";
+import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api, type Bazar as BazarFeeds } from "../lib/ipc";
 import { fetchedAtLabel, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
+import { useCachedQuery } from "../lib/useCachedQuery";
+import type { LoadState } from "../types/api/LoadState";
+import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import { FuelTab } from "./bazar/Fuel";
 import { MetalsTab } from "./bazar/Metals";
 import { Stocks } from "./bazar/Stocks";
 import { VegetablesTab } from "./bazar/Vegetables";
-import type { LoadState } from "../types/api/LoadState";
-import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 
 type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 
@@ -30,30 +31,40 @@ function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadSta
 export function Bazar() {
   const { t } = useSettings();
   const [tab, setTab] = useState<Tab>("stocks");
-  const [feeds, setFeeds] = useState<BazarFeeds>();
-  const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
-
-  const loadingFeeds = !feeds || Object.values(feeds).some((feed) => !feed || feed.status === "loading");
-  const loadingStocks = !stocks || stocks.status === "loading";
-  const loading = tab === "stocks" ? loadingStocks : loadingFeeds;
-
-  const load = useCallback((refresh = false) => {
-    setFeeds(undefined);
-    setStocks(undefined);
-    api
-      .getBazar(refresh)
-      .then(setFeeds)
-      .catch((error: unknown) => {
-        const failed = { status: "failed", value: String(error) } as const;
-        setFeeds({ metals: failed, fuel: failed, vegetables: failed });
-      });
+  const {
+    value: feeds,
+    isValidating: loadingFeeds,
+    reload: reloadFeeds,
+  } = useCachedQuery("bazar-feeds", (refresh) =>
+    api.getBazar(refresh).catch((error: unknown): BazarFeeds => {
+      const failed = { status: "failed", value: String(error) } as const;
+      return { metals: failed, fuel: failed, vegetables: failed };
+    }),
+  );
+  const {
+    value: stocks,
+    isValidating: loadingStocks,
+    reload: reloadStocks,
+  } = useCachedQuery("bazar-stocks", (refresh) =>
     api
       .getStocks(refresh)
-      .then(setStocks)
-      .catch((error: unknown) => setStocks({ status: "failed", value: String(error) }));
-  }, []);
+      .catch(
+        (error: unknown): LoadState<StockMarketSnapshot> => ({
+          status: "failed",
+          value: String(error),
+        }),
+      ),
+  );
 
-  useEffect(() => load(), [load]);
+  const loading = tab === "stocks" ? loadingStocks : loadingFeeds;
+
+  const load = useCallback(
+    (refresh = false) => {
+      reloadFeeds(refresh);
+      reloadStocks(refresh);
+    },
+    [reloadFeeds, reloadStocks],
+  );
 
   const metals = loadedValue(feeds?.metals);
   const fuel = loadedValue(feeds?.fuel);

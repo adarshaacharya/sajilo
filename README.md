@@ -1,63 +1,91 @@
-<img src="docs/icon.png" alt="" width="120" height="120">
+<p align="center">
+  <img src="docs/icon.png" alt="Sajilo" width="120" height="120">
+</p>
 
 # Sajilo
 
-Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
+A small desktop companion for Nepal: Bikram Sambat dates, festivals, day plans,
+and everyday Nepali tools. Sajilo lives in the system tray on macOS, Windows, and
+Linux.
 
+The app is being rebuilt with Tauri 2, Rust, and React. The calendar and date
+tools remain local, so they work without an internet connection. Data that comes
+from public sources is handled separately and will always show whether it is
+fresh, stale, or unavailable.
 
+## Platforms
 
-## Features
+| Platform | Desktop package | Current status |
+| --- | --- | --- |
+| macOS | `.dmg` | Tauri app under active development |
+| Windows | NSIS installer | Tauri app under active development |
+| Linux | `.deb` and AppImage | Tauri app under active development |
 
-- Bikram Sambat calendar with AD dates, tithi, festivals, and public holidays
-- Personal plans and optional reminders, saved only on your Mac
-- Upcoming festivals and daily calendar details
-- Bikram Sambat ↔ AD date converter
-- Kathmandu weather and air quality
-- Nepal Rastra Bank exchange rates
-- Gold and silver rates, Nepal Oil Corporation fuel prices, and Kalimati produce prices
-- Daily rashifal for all twelve signs, from Hamro Patro
-- Nepali and English news headlines from nine Nepali newsrooms
-- Quick tools for land, weight, VAT, and simple interest
-- English, नेपाली, and mixed-language display options
+The cross-platform installers have not been published yet. The previous
+macOS-only Swift beta is no longer the current development target.
 
-## Install
+## What Sajilo includes
 
-**[Download Sajilo beta for Mac](https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.5/Sajilo-macos-arm64.dmg)**
+- Bikram Sambat calendar, AD conversion, tithi, festivals, and public holidays
+- Personal day plans and reminders
+- Upcoming events and detailed day information
+- Land, weight, VAT, and simple-interest tools
+- Nepali and English interface options, with Devanagari or English numerals
+- Tray date display designed for each platform
 
-Open the downloaded file, then drag **Sajilo.app** into the Applications folder.
-
-### First launch
-
-This is a beta release and is not yet Apple-notarized, so macOS blocks it the first time with *"Apple could not verify Sajilo is free of malware"*. To allow it:
-
-1. Open **Sajilo.app**, then click **Done** on the warning.
-2. Go to **System Settings → Privacy & Security**.
-3. Scroll down to **Security**. A line reads *"Sajilo" was blocked to protect your Mac*.
-4. Click **Open Anyway** and authenticate.
-5. Open **Sajilo.app** again.
-
-You only do this once. Sajilo then lives in the menu bar — it has no Dock icon or window unless you turn one on in Settings.
-
-> On macOS 14 and earlier you could Control-click the app and choose **Open** instead. macOS 15 removed that shortcut, so the steps above are the only way now.
+The next part of the Tauri migration brings back the online modules: weather and
+air quality, NRB forex, Bazar rates, news, rashifal, and radio. These use a shared
+server cache rather than making every desktop install scrape public websites.
 
 ## Run from source
 
-Requires macOS 14+, Xcode 16+, and Apple Silicon.
+### Prerequisites
+
+- [Rust](https://www.rust-lang.org/tools/install) 1.97.1 (the repository pins this version)
+- [Bun](https://bun.sh/)
+- The system dependencies required by [Tauri v2](https://v2.tauri.app/start/prerequisites/) for your operating system
+
+Clone the repository and install the desktop dependencies:
 
 ```bash
 git clone https://github.com/adarshaacharya/sajilo.git
 cd sajilo
-./scripts/run-local-app.sh
+cd apps/desktop
+bun install
 ```
 
-To run the tests:
+Start the desktop app:
 
 ```bash
-swift test
+bun run tauri dev
 ```
 
+Build a release package for your current platform:
 
+```bash
+bun run tauri build
+```
+
+Run the Rust workspace tests from the repository root:
+
+```bash
+cargo test --workspace
+```
+
+## Project layout
+
+```text
+crates/              Shared Rust calendar engine, data models, and providers
+apps/desktop/        Tauri desktop app (Rust tray shell + React interface)
+apps/server/         Scheduled cache and API for public data sources
+data/calendar-events/ Bundled Bikram Sambat event data
+docs/tauri/          Migration plan and milestones
+```
+
+For the implementation status and remaining release work, see the
+[Tauri milestones](docs/tauri/MILESTONES.md).
 
 ## License
 
-Sajilo is available under the [MIT License](LICENSE). Calendar-data notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Sajilo is available under the [MIT License](LICENSE). Calendar-data notices are
+in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

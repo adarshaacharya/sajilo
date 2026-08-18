@@ -51,5 +51,12 @@
     "shortDescription": "Nepali calendar and daily essentials",
     "longDescription": "Bikram Sambat calendar, festivals, forex, weather, news and Nepali unit tools in the menu bar."
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": [
+        "https://github.com/adarshaacharya/sajilo/releases/latest/download/latest.json"
+      ]
+    }
+  }
 }

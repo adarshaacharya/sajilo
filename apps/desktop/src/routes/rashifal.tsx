@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Card } from "../components/Card";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api } from "../lib/ipc";
+import { usePersistedString } from "../lib/persisted";
 import { useSettings } from "../lib/settings";
+import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
 import type { RashiSign } from "../types/api/RashiSign";
@@ -104,10 +106,9 @@ const SIGNS: readonly {
   },
 ];
 
-const STORAGE_KEY = "sajilo.rashi";
+const STORAGE_KEY = "selectedRashi";
 
-function storedSign(): RashiSign | null {
-  const saved = localStorage.getItem(STORAGE_KEY);
+function validSign(saved: string | null): RashiSign | null {
   return SIGNS.some((sign) => sign.id === saved) ? (saved as RashiSign) : null;
 }
 
@@ -129,25 +130,24 @@ function signMeta(id: RashiSign) {
 
 export function Rashifal() {
   const { t } = useSettings();
-  const [state, setState] = useState<LoadState<RashifalSnapshot>>();
-  const [mine, setMine] = useState<RashiSign | null>(storedSign);
+  const { value: state, reload: load } = useCachedQuery("rashifal", (refresh) =>
+    api
+      .getRashifal(refresh)
+      .catch(
+        (error: unknown): LoadState<RashifalSnapshot> => ({
+          status: "failed",
+          value: String(error),
+        }),
+      ),
+  );
+  const [storedSign, setStoredSign] = usePersistedString(STORAGE_KEY);
+  const mine = validSign(storedSign);
   /** Browse another sign without changing the saved one. */
   const [viewing, setViewing] = useState<RashiSign | null>(null);
   const [picking, setPicking] = useState(false);
 
-  const load = useCallback((refresh = false) => {
-    setState(undefined);
-    api
-      .getRashifal(refresh)
-      .then(setState)
-      .catch((error: unknown) => setState({ status: "failed", value: String(error) }));
-  }, []);
-
-  useEffect(() => load(), [load]);
-
   const choose = (id: RashiSign) => {
-    localStorage.setItem(STORAGE_KEY, id);
-    setMine(id);
+    setStoredSign(id);
     setViewing(null);
     setPicking(false);
   };
@@ -155,9 +155,7 @@ export function Rashifal() {
   const snapshot = state?.status === "fresh" || state?.status === "stale" ? state.value : undefined;
   const shown = viewing ?? mine;
   const shownMeta = shown ? signMeta(shown) : null;
-  const reading = shown
-    ? snapshot?.readings.find((entry) => entry.sign === shown)
-    : undefined;
+  const reading = shown ? snapshot?.readings.find((entry) => entry.sign === shown) : undefined;
   const isMine = shown !== null && shown === mine;
 
   if (!mine || picking) {
@@ -225,7 +223,9 @@ export function Rashifal() {
               <div className="border-t border-border" />
 
               {reading ? (
-                <p className="text-[13px] leading-[1.55] whitespace-pre-line">{reading.prediction}</p>
+                <p className="text-[13px] leading-[1.55] whitespace-pre-line">
+                  {reading.prediction}
+                </p>
               ) : (
                 snapshot && <p className="text-[12px] text-text-secondary">{t("rashifal.stale")}</p>
               )}
@@ -235,7 +235,9 @@ export function Rashifal() {
       </Card>
 
       <Card>
-        <p className="mb-1.5 text-[11px] font-medium text-text-secondary">{t("rashifal.all-signs")}</p>
+        <p className="mb-1.5 text-[11px] font-medium text-text-secondary">
+          {t("rashifal.all-signs")}
+        </p>
         <div className="grid grid-cols-4 gap-1">
           {SIGNS.map((entry) => {
             const selected = entry.id === shown;

@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Icon } from "../components/Icon";
+import { useMemo, useState } from "react";
 import { useHeaderSlot } from "../components/HeaderSlot";
+import { Icon } from "../components/Icon";
 import { FadeUp, Stagger } from "../components/motion";
 import { StateBanner } from "../components/StateBanner";
 import { api } from "../lib/ipc";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
+import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { NewsDigest } from "../types/api/NewsDigest";
 import type { NewsItem } from "../types/api/NewsItem";
@@ -65,23 +66,24 @@ function HeadlineRow({ item, onOpen }: { item: NewsItem; onOpen: () => void }) {
 
 export function News() {
   const { t } = useSettings();
-  const [state, setState] = useState<LoadState<NewsDigest>>();
   const [visible, setVisible] = useState(PAGE);
-
-  const loading = !state || state.status === "loading";
-
-  const load = useCallback((refresh = false) => {
-    setState(undefined);
+  const {
+    value: state,
+    isValidating,
+    reload: load,
+  } = useCachedQuery("news", (refresh) =>
     api
       .getNews(refresh)
       .then((next) => {
-        setState(next);
         setVisible(PAGE);
+        return next;
       })
-      .catch((error: unknown) => setState({ status: "failed", value: String(error) }));
-  }, []);
+      .catch(
+        (error: unknown): LoadState<NewsDigest> => ({ status: "failed", value: String(error) }),
+      ),
+  );
 
-  useEffect(() => load(), [load]);
+  const loading = isValidating;
 
   const refreshButton = useMemo(
     () => (

@@ -56,6 +56,10 @@ pub struct Preferences {
     pub shows_dock_icon: bool,
     pub notify_holiday_eve: bool,
     pub notify_festival_eve: bool,
+    /// Tauri-only: the Swift app never had station pinning. Absent in an
+    /// export made there, and in any v1 export made before this existed.
+    #[serde(default)]
+    pub radio_favourites: Vec<String>,
 }
 
 impl Default for Preferences {
@@ -84,6 +88,7 @@ impl Default for Preferences {
             shows_dock_icon: false,
             notify_holiday_eve: false,
             notify_festival_eve: false,
+            radio_favourites: Vec::new(),
         }
     }
 }

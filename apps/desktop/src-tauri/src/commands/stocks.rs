@@ -36,6 +36,8 @@ pub async fn get_stocks(
     let now = Utc::now();
     cache
         .feed
-        .get(&app, now, refresh.unwrap_or(false), || sharesansar::fetch(client, now))
+        .get(&app, now, refresh.unwrap_or(false), || {
+            sharesansar::fetch(client, now)
+        })
         .await
 }

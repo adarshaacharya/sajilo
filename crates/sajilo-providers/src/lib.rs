@@ -5,6 +5,7 @@
 //! against a recorded fixture and no test in this crate touches the network.
 //! Live checks live in `.github/workflows/smoke.yml` and run on a schedule.
 
+pub mod annapurna_dates;
 pub mod error;
 pub mod fenegosida;
 pub mod hamropatro;

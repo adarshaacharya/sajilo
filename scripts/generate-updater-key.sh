@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Generates the Tauri updater signing keypair.
 #
-# Run this ONCE, then:
-#   * put the PRIVATE key and its password into the repository's CI secrets as
-#     TAURI_SIGNING_PRIVATE_KEY and TAURI_SIGNING_PRIVATE_KEY_PASSWORD
-#   * put the PUBLIC key into apps/desktop/src-tauri/tauri.conf.json under
-#     plugins.updater.pubkey
+# Run this ONCE, then put into the repository's CI secrets:
+#   * the PRIVATE key and its password, as TAURI_SIGNING_PRIVATE_KEY and
+#     TAURI_SIGNING_PRIVATE_KEY_PASSWORD (these sign every release artifact)
+#   * the PUBLIC key (sajilo.key.pub's contents), as SAJILO_UPDATER_PUBKEY —
+#     this is baked into the binary at compile time (see lib.rs's
+#     register_updater), never written into tauri.conf.json
 #
 # The private key is what proves an update came from you. If it leaks, anyone can
 # ship a signed update to every install; if it is lost, no existing install can
@@ -30,4 +31,4 @@ echo
 echo "Private key: $OUT/sajilo.key   (keep it; never commit it)"
 echo "Public key:  $OUT/sajilo.key.pub"
 echo
-echo "Next: copy the public key into tauri.conf.json → plugins.updater.pubkey"
+echo "Next: put $OUT/sajilo.key.pub's contents into the SAJILO_UPDATER_PUBKEY repo secret"

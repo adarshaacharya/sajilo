@@ -23,14 +23,8 @@ fn renders_every_menu_bar_format() {
         render(MenuBarFormat::NepaliLong, devanagari),
         "साउन ३१, २०८३"
     );
-    assert_eq!(
-        render(MenuBarFormat::Numeric, devanagari),
-        "२०८३/०४/३१"
-    );
-    assert_eq!(
-        render(MenuBarFormat::NepaliFlag, devanagari),
-        "🇳🇵 साउन ३१"
-    );
+    assert_eq!(render(MenuBarFormat::Numeric, devanagari), "२०८३/०४/३१");
+    assert_eq!(render(MenuBarFormat::NepaliFlag, devanagari), "🇳🇵 साउन ३१");
     assert_eq!(
         title(
             date(),

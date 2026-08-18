@@ -3813,6 +3813,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "cosmic-text",
+ "futures-util",
  "objc2-app-kit",
  "sajilo-api",
  "sajilo-core",
@@ -3827,6 +3828,7 @@ dependencies = [
  "tauri-plugin-notification",
  "tauri-plugin-opener",
  "tauri-plugin-positioner",
+ "tauri-plugin-process",
  "tauri-plugin-store",
  "tauri-plugin-updater",
  "tiny-skia",
@@ -3840,6 +3842,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "quick-xml 0.38.4",
+ "regex",
  "reqwest 0.12.28",
  "sajilo-api",
  "sajilo-core",
@@ -4852,6 +4855,16 @@ dependencies = [
  "tauri",
  "tauri-plugin",
  "thiserror 2.0.20",
+]
+
+[[package]]
+name = "tauri-plugin-process"
+version = "2.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d55511a7bf6cd70c8767b02c97bf8134fa434daf3926cfc1be0a0f94132d165a"
+dependencies = [
+ "tauri",
+ "tauri-plugin",
 ]
 
 [[package]]
