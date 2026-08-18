@@ -9,6 +9,9 @@
  *
  * This is why the window is hidden rather than closed (see `window.rs`). Hiding
  * keeps the webview, and the webview keeps this element and its socket.
+ *
+ * State is stashed on `globalThis` so Vite HMR does not wipe "now playing"
+ * while the stream is still audible.
  */
 
 export interface NowPlaying {
@@ -28,56 +31,72 @@ export interface PlayerState {
   error: string | null;
 }
 
-let element: HTMLAudioElement | null = null;
-let state: PlayerState = {
-  nowPlaying: null,
-  isLoading: false,
-  isPlaying: false,
-  error: null,
+type AudioBag = {
+  element: HTMLAudioElement | null;
+  state: PlayerState;
+  listeners: Set<Listener>;
 };
-const listeners = new Set<Listener>();
+
+const bag: AudioBag = (() => {
+  const key = "__sajiloRadio";
+  const g = globalThis as unknown as Record<string, AudioBag | undefined>;
+  if (!g[key]) {
+    g[key] = {
+      element: null,
+      state: { nowPlaying: null, isLoading: false, isPlaying: false, error: null },
+      listeners: new Set(),
+    };
+  }
+  return g[key]!;
+})();
 
 function publish(next: Partial<PlayerState>) {
-  state = { ...state, ...next };
-  for (const listener of listeners) listener(state);
+  bag.state = { ...bag.state, ...next };
+  for (const listener of bag.listeners) listener(bag.state);
 }
 
-function syncPlaying() {
-  const player = element;
-  if (!player) return;
+function syncFromElement() {
+  const el = bag.element;
+  if (!el || !el.src) {
+    publish({ isPlaying: false, isLoading: false });
+    return;
+  }
   publish({
-    isPlaying: Boolean(!player.paused && player.src),
+    isPlaying: !el.paused,
+    isLoading: !el.paused && el.readyState < 3,
   });
 }
 
 function audio(): HTMLAudioElement {
-  if (element) return element;
+  if (bag.element) return bag.element;
 
-  element = document.createElement("audio");
+  const el = document.createElement("audio");
   // Streams are live; there is nothing to seek and nothing worth buffering
   // ahead of the listener.
-  element.preload = "none";
-  element.addEventListener("playing", () =>
+  el.preload = "none";
+  el.addEventListener("playing", () =>
     publish({ isLoading: false, isPlaying: true, error: null }),
   );
-  element.addEventListener("pause", () => publish({ isPlaying: false, isLoading: false }));
-  element.addEventListener("waiting", () => publish({ isLoading: true }));
-  element.addEventListener("error", () =>
-    // A station that has gone off air is the common case, not a bug — so it is
-    // reported in place rather than thrown.
+  el.addEventListener("pause", () => publish({ isPlaying: false, isLoading: false }));
+  el.addEventListener("waiting", () => publish({ isLoading: true }));
+  el.addEventListener("error", () =>
     publish({ isLoading: false, isPlaying: false, error: "Could not play this station" }),
   );
-  return element;
+  bag.element = el;
+  return el;
 }
 
 export function subscribe(listener: Listener): () => void {
-  listeners.add(listener);
-  listener(state);
-  return () => listeners.delete(listener);
+  bag.listeners.add(listener);
+  // Re-sync from the live element in case HMR restored module code while
+  // audio was already running.
+  syncFromElement();
+  listener(bag.state);
+  return () => bag.listeners.delete(listener);
 }
 
 export function getState(): PlayerState {
-  return state;
+  return bag.state;
 }
 
 /**
@@ -85,12 +104,14 @@ export function getState(): PlayerState {
  * refuses to begin audio otherwise, and Sajilo has no autoplay path by design.
  */
 export function play(station: NowPlaying, streamUrl: string) {
-  const player = audio();
-  if (player.src !== streamUrl) {
-    player.src = streamUrl;
+  const el = audio();
+  if (el.src !== streamUrl) {
+    el.src = streamUrl;
   }
   publish({ nowPlaying: station, isLoading: true, isPlaying: false, error: null });
-  player.play().catch(() => publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }));
+  el.play().catch(() =>
+    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }),
+  );
 }
 
 export function pause() {
@@ -99,10 +120,12 @@ export function pause() {
 }
 
 export function resume() {
-  const player = audio();
-  if (!player.src) return;
+  const el = audio();
+  if (!el.src) return;
   publish({ isLoading: true });
-  player.play().catch(() => publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }));
+  el.play().catch(() =>
+    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }),
+  );
 }
 
 /**
@@ -112,20 +135,19 @@ export function resume() {
  * open and go on consuming data the listener is not hearing.
  */
 export function stop() {
-  const player = audio();
-  player.pause();
-  player.removeAttribute("src");
-  player.load();
+  const el = audio();
+  el.pause();
+  el.removeAttribute("src");
+  el.load();
   publish({ nowPlaying: null, isLoading: false, isPlaying: false, error: null });
 }
 
 export function isPaused(): boolean {
-  return element?.paused ?? true;
+  return bag.element?.paused ?? true;
 }
 
 export function togglePlayback() {
-  if (!state.nowPlaying) return;
+  if (!bag.state.nowPlaying) return;
   if (isPaused()) resume();
   else pause();
-  syncPlaying();
 }

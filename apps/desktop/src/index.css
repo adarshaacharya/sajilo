@@ -66,6 +66,8 @@ html {
   height: 100%;
   overflow: hidden;
   border-radius: 14px;
+  /* Hard clip — WKWebView sometimes ignores overflow+radius alone. */
+  clip-path: inset(0 round 14px);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);

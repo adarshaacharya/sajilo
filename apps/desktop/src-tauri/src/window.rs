@@ -27,6 +27,10 @@ pub fn toggle(app: &AppHandle) {
 
 pub fn show(window: &WebviewWindow) {
     position_at_tray(window);
+    // Re-assert clear chrome each open — some macOS builds repaint opaque after hide.
+    let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
+    #[cfg(target_os = "macos")]
+    clear_macos_background(window);
     let _ = window.show();
     let _ = window.set_focus();
 }

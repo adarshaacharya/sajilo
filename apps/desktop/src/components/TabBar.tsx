@@ -26,11 +26,13 @@ const TABS = [
 
 export function TabBar() {
   const { t, modules } = useSettings();
+  const [radioActive, setRadioActive] = useState(false);
   const [radioPlaying, setRadioPlaying] = useState(false);
 
   useEffect(
     () =>
       player.subscribe((state) => {
+        setRadioActive(Boolean(state.nowPlaying));
         setRadioPlaying(Boolean(state.nowPlaying && state.isPlaying));
       }),
     [],
@@ -49,14 +51,14 @@ export function TabBar() {
             `flex flex-1 flex-col items-center gap-0.5 rounded-md py-1 transition-colors ${
               isActive
                 ? "bg-surface-hover text-accent"
-                : radioPlaying && tab.to === "/radio"
+                : radioActive && tab.to === "/radio"
                   ? "text-[color:var(--color-accent-mark)]"
                   : "text-text-muted hover:bg-surface-hover/60 hover:text-text-secondary"
             }`
           }
         >
-          {radioPlaying && tab.to === "/radio" ? (
-            <Equalizer isPlaying />
+          {radioActive && tab.to === "/radio" ? (
+            <Equalizer isPlaying={radioPlaying} />
           ) : (
             <Icon path={tab.path} />
           )}
