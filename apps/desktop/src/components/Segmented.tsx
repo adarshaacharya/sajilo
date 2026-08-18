@@ -1,26 +1,34 @@
+import { motion } from "motion/react";
 import { type IconName, Icon } from "./Icon";
+import { spring } from "../lib/motion";
+
+type Option<T extends string> = { id: T; label: string; icon?: IconName };
 
 /**
- * macOS-style segmented control — one recessed track, raised pill on the
- * selected segment. Used for Settings / Bazar / Stocks movers.
+ * macOS NSSegmentedControl — recessed track, sliding thumb.
+ * Four or more segments scroll horizontally so labels are not truncated.
  */
 export function Segmented<T extends string>({
   options,
   value,
   onChange,
   label,
+  scrollable,
 }: {
-  /** Optional SF Symbol name; a strip either labels every tab with one or none. */
-  options: readonly { id: T; label: string; icon?: IconName }[];
+  options: readonly Option<T>[];
   value: T;
   onChange: (id: T) => void;
   label: string;
+  /** Default: scroll when there are 4+ segments. */
+  scrollable?: boolean;
 }) {
+  const scroll = scrollable ?? options.length >= 4;
+
   return (
     <div
       role="tablist"
       aria-label={label}
-      className="seg-track flex h-8 rounded-[9px] p-0.5"
+      className={`seg-track flex h-[30px] rounded-[8px] p-[3px] ${scroll ? "seg-track--scroll" : ""}`}
     >
       {options.map((option) => {
         const selected = option.id === value;
@@ -31,19 +39,26 @@ export function Segmented<T extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(option.id)}
-            className={`flex h-full min-w-0 flex-1 items-center justify-center gap-1 rounded-[7px] px-1.5 text-[11px] font-medium transition-[background-color,color,box-shadow] duration-150 ${
-              selected
-                ? "seg-thumb text-text"
-                : "text-text-secondary hover:text-text"
-            }`}
+            className={`seg-segment relative z-[1] flex h-full min-w-0 items-center justify-center gap-1 rounded-[6px] px-2.5 text-[11px] font-medium transition-colors duration-150 ${
+              scroll ? "shrink-0" : "flex-1"
+            } ${selected ? "text-text" : "text-text-secondary hover:text-text"}`}
           >
-            {option.icon && (
-              <Icon
-                name={option.icon}
-                className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
+            {selected && (
+              <motion.span
+                layoutId={`seg-thumb-${label}`}
+                className="seg-thumb absolute inset-0 rounded-[6px]"
+                transition={spring.tab}
               />
             )}
-            <span className="truncate">{option.label}</span>
+            <span className="relative z-[1] flex min-w-0 items-center gap-1">
+              {option.icon && (
+                <Icon
+                  name={option.icon}
+                  className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
+                />
+              )}
+              <span className={scroll ? "whitespace-nowrap" : "truncate"}>{option.label}</span>
+            </span>
           </button>
         );
       })}

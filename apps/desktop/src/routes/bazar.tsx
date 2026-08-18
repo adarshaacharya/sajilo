@@ -224,7 +224,7 @@ export function Bazar() {
         value={tab}
         onChange={setTab}
         options={[
-          { id: "stocks", label: t("bazar.stocks") },
+          { id: "stocks", label: t("bazar.stocks"), icon: "interest" as const },
           { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
           { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
           { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
