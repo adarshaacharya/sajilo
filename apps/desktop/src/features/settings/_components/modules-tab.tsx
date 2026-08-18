@@ -96,6 +96,14 @@ export function ModulesTab() {
         onChange={(value) => setModules((current) => ({ ...current, radioEnabled: value }))}
       />
 
+      <ModuleRow
+        title={t("tools.clock")}
+        note={t("settings.module-clocks-note")}
+        icon="clock"
+        checked={modules.clocksEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, clocksEnabled: value }))}
+      />
+
       {noneOn && (
         <p className="px-0.5 text-[10px] text-text-muted">{t("settings.nothing-enabled")}</p>
       )}

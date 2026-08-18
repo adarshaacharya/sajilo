@@ -133,7 +133,9 @@ where
             if cache.dates.contains_key(&link) {
                 continue;
             }
-            cache.dates.insert(link.clone(), date.map(|d| d.timestamp()));
+            cache
+                .dates
+                .insert(link.clone(), date.map(|d| d.timestamp()));
             cache.order.push(link);
         }
     }
@@ -214,15 +216,27 @@ mod tests {
         let resolver = counting_resolver!(calls, Some(resolved_at));
         let mut cache = Cache::default();
 
-        let dated = item("has-date", Some(DateTime::from_timestamp(5_000, 0).unwrap()));
+        let dated = item(
+            "has-date",
+            Some(DateTime::from_timestamp(5_000, 0).unwrap()),
+        );
         let undated = item("no-date", None);
         let result = augment_with(&mut cache, digest(vec![dated, undated]), resolver).await;
 
         assert_eq!(
-            result.items.iter().find(|i| i.title == "no-date").unwrap().published,
+            result
+                .items
+                .iter()
+                .find(|i| i.title == "no-date")
+                .unwrap()
+                .published,
             Some(resolved_at)
         );
-        assert_eq!(calls.get(), 1, "an item that already has a date is never fetched");
+        assert_eq!(
+            calls.get(),
+            1,
+            "an item that already has a date is never fetched"
+        );
     }
 
     /// The whole justification for fetching article pages: a publish date
@@ -261,7 +275,7 @@ mod tests {
         let mut cache = Cache::default();
         {
             let calls = Rc::new(Cell::new(0));
-        let resolver = counting_resolver!(calls, Some(resolved_at));
+            let resolver = counting_resolver!(calls, Some(resolved_at));
             let _ = augment_with(&mut cache, digest(vec![item("a", None)]), resolver).await;
         }
 
@@ -295,7 +309,12 @@ mod tests {
         let resolver = counting_resolver!(calls, None);
         let mut cache = Cache::default();
 
-        let result = augment_with(&mut cache, digest(vec![item("a", None), item("b", None)]), resolver).await;
+        let result = augment_with(
+            &mut cache,
+            digest(vec![item("a", None), item("b", None)]),
+            resolver,
+        )
+        .await;
 
         assert_eq!(result.items.len(), 2);
         assert!(result.items.iter().all(|i| i.published.is_none()));
@@ -313,7 +332,11 @@ mod tests {
         let result = augment_with(&mut cache, digest(vec![older, recovered]), resolver).await;
 
         assert_eq!(
-            result.items.iter().map(|i| i.title.as_str()).collect::<Vec<_>>(),
+            result
+                .items
+                .iter()
+                .map(|i| i.title.as_str())
+                .collect::<Vec<_>>(),
             vec!["recovered", "older"]
         );
     }

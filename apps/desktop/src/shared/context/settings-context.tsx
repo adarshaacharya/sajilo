@@ -14,6 +14,10 @@ export interface ModulePrefs {
   radioEnabled: boolean;
   weatherLocation: WeatherLocation;
   forexFavourites: string[];
+  clocksEnabled: boolean;
+  /** IANA timezones, in the order they were added — the dashboard preview
+   * shows the first few in this order. */
+  clocks: string[];
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -25,6 +29,8 @@ const DEFAULT_MODULES: ModulePrefs = {
   radioEnabled: true,
   weatherLocation: "kathmandu",
   forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
+  clocksEnabled: false,
+  clocks: [],
 };
 
 const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "QAR", "SGD"];
@@ -70,6 +76,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           radioEnabled,
           weatherLocation,
           forexFavourites,
+          clocksEnabled,
+          clocks,
         ] = await Promise.all([
           store.get<Language>("language"),
           store.get<NumeralStyle>("numeralStyle"),
@@ -81,6 +89,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           store.get<boolean>("radioEnabled"),
           store.get<WeatherLocation>("weatherLocation"),
           store.get<string[]>("forexFavourites"),
+          store.get<boolean>("clocksEnabled"),
+          store.get<string[]>("clocks"),
         ]);
         if (cancelled) return;
         if (storedLanguage) setLanguage(storedLanguage);
@@ -95,6 +105,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           ...(radioEnabled !== undefined && { radioEnabled }),
           ...(weatherLocation && { weatherLocation }),
           ...(forexFavourites && { forexFavourites }),
+          ...(clocksEnabled !== undefined && { clocksEnabled }),
+          ...(clocks && { clocks }),
         }));
       })
       .catch(() => {
@@ -124,6 +136,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("radioEnabled", next.radioEnabled);
         persist("weatherLocation", next.weatherLocation);
         persist("forexFavourites", next.forexFavourites);
+        persist("clocksEnabled", next.clocksEnabled);
+        persist("clocks", next.clocks);
         return next;
       });
     },

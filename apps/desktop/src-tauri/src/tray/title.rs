@@ -105,3 +105,25 @@ pub fn seconds_until_nepal_midnight(now: chrono::DateTime<chrono::FixedOffset>) 
 pub fn today() -> Option<NepaliDate> {
     bs::nepali_date_from(nepal_time::today()).ok()
 }
+
+/// `HH:MM` in Nepal time, in the chosen digits. Zero-padded, 24-hour — the
+/// tray has no room to spend on an AM/PM marker.
+///
+/// Kept separate from [`title`] rather than folded into `MenuBarFormat`: the
+/// "show time" preference is an on/off suffix that composes with *any* date
+/// format, not a format of its own to pick between.
+pub fn clock(now: chrono::DateTime<chrono::FixedOffset>, numerals: NumeralStyle) -> String {
+    use chrono::Timelike;
+    format!(
+        "{}:{}",
+        numerals.format(i64::from(now.hour()), Some(2)),
+        numerals.format(i64::from(now.minute()), Some(2)),
+    )
+}
+
+/// Seconds until the next minute boundary in Nepal time. Used only when the
+/// "show time" preference is on — the tray otherwise ticks once a day.
+pub fn seconds_until_next_minute(now: chrono::DateTime<chrono::FixedOffset>) -> i64 {
+    use chrono::Timelike;
+    (60 - i64::from(now.second())).max(1)
+}

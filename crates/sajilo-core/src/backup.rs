@@ -60,6 +60,10 @@ pub struct Preferences {
     /// export made there, and in any v1 export made before this existed.
     #[serde(default)]
     pub radio_favourites: Vec<String>,
+    /// Tauri-only: the Swift menu bar never showed a clock. Same absence
+    /// handling as `radio_favourites` above.
+    #[serde(default)]
+    pub show_tray_time: bool,
 }
 
 impl Default for Preferences {
@@ -89,6 +93,7 @@ impl Default for Preferences {
             notify_holiday_eve: false,
             notify_festival_eve: false,
             radio_favourites: Vec::new(),
+            show_tray_time: false,
         }
     }
 }

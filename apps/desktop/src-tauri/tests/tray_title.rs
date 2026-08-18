@@ -4,7 +4,8 @@ use chrono::{FixedOffset, TimeZone};
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
 use sajilo_desktop_lib::tray::title::{
-    CustomMenuBar, MenuBarFormat, seconds_until_nepal_midnight, title,
+    CustomMenuBar, MenuBarFormat, clock, seconds_until_nepal_midnight, seconds_until_next_minute,
+    title,
 };
 
 fn date() -> NepaliDate {
@@ -141,4 +142,33 @@ fn the_label_advances_by_one_day_at_midnight() {
     );
     assert_ne!(a, b);
     assert!(b.contains("2083"));
+}
+
+#[test]
+fn renders_the_clock_zero_padded_and_in_the_chosen_digits() {
+    let nepal = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
+    let just_after_nine = nepal.with_ymd_and_hms(2026, 8, 16, 9, 5, 0).unwrap();
+
+    assert_eq!(clock(just_after_nine, NumeralStyle::Latin), "09:05");
+    assert_eq!(clock(just_after_nine, NumeralStyle::Devanagari), "०९:०५");
+}
+
+/// The tray wakes every minute once the time is shown, not once a day.
+#[test]
+fn counts_down_to_the_next_minute() {
+    let nepal = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
+
+    let mid_minute = nepal.with_ymd_and_hms(2026, 8, 16, 9, 5, 20).unwrap();
+    assert_eq!(seconds_until_next_minute(mid_minute), 40);
+
+    let on_the_dot = nepal.with_ymd_and_hms(2026, 8, 16, 9, 5, 0).unwrap();
+    assert_eq!(seconds_until_next_minute(on_the_dot), 60);
+}
+
+/// A zero-length wait would spin the timer exactly on the minute.
+#[test]
+fn the_minute_wait_is_never_zero() {
+    let nepal = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
+    let on_the_dot = nepal.with_ymd_and_hms(2026, 8, 16, 9, 5, 0).unwrap();
+    assert!(seconds_until_next_minute(on_the_dot) > 0);
 }

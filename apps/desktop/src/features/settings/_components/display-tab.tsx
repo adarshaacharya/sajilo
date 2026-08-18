@@ -40,6 +40,7 @@ export function DisplayTab({
   const [format, setFormat] = useState<string>("nepaliLong");
   const [showFlag, setShowFlag] = useState(true);
   const [showYear, setShowYear] = useState(true);
+  const [showTime, setShowTime] = useState(false);
 
   useEffect(() => {
     import("@tauri-apps/plugin-store")
@@ -51,6 +52,8 @@ export function DisplayTab({
         if (flag !== undefined) setShowFlag(flag);
         const year = await store.get<boolean>("customMenuBarShowsYear");
         if (year !== undefined) setShowYear(year);
+        const time = await store.get<boolean>("showTrayTime");
+        if (time !== undefined) setShowTime(time);
       })
       .catch(() => {});
   }, []);
@@ -65,7 +68,7 @@ export function DisplayTab({
   };
 
   const persistCustom = (
-    key: "customMenuBarShowsFlag" | "customMenuBarShowsYear",
+    key: "customMenuBarShowsFlag" | "customMenuBarShowsYear" | "showTrayTime",
     value: boolean,
   ) => {
     import("@tauri-apps/plugin-store")
@@ -107,6 +110,14 @@ export function DisplayTab({
           value={format}
           onChange={persistFormat}
           options={MENU_BAR_FORMATS.map((id) => ({ id, label: MENU_BAR_FORMAT_LABELS[id] }))}
+        />
+        <Toggle
+          label={t("settings.menu-bar-show-time")}
+          checked={showTime}
+          onChange={(value) => {
+            setShowTime(value);
+            persistCustom("showTrayTime", value);
+          }}
         />
         {format === "custom" && (
           <>

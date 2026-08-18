@@ -13,6 +13,7 @@ import {
   type UpcomingEvent,
 } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
+import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { GlanceCards } from "./_components/glance-cards";
 import { MonthGrid } from "./_components/month-grid";
@@ -59,7 +60,7 @@ function gregorianSpan(first: string, last: string): string {
 }
 
 export function Dashboard() {
-  const { numerals, t } = useSettings();
+  const { numerals, t, modules } = useSettings();
   const navigate = useNavigate();
 
   const [today, setToday] = useState<Today | null>(null);
@@ -143,6 +144,12 @@ export function Dashboard() {
       <FadeUp>
         <DateHeader today={today} />
       </FadeUp>
+
+      {modules.clocksEnabled && modules.clocks.length > 0 && (
+        <FadeUp>
+          <ClockRow timeZones={modules.clocks} />
+        </FadeUp>
+      )}
 
       <FadeUp>
         <Card>

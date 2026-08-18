@@ -3,6 +3,7 @@ import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Today } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
+import { useNepalClock } from "../_lib/nepal-clock";
 
 const WEEKDAYS_NE = ["आइत", "सोम", "मंगल", "बुध", "बिहि", "शुक्र", "शनि"];
 const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -31,6 +32,8 @@ export function DateHeader({ today }: { today: Today }) {
   const { numerals, language, t } = useSettings();
   const navigate = useNavigate();
   const weekday = language === "en" ? WEEKDAYS_EN[today.weekday] : WEEKDAYS_NE[today.weekday];
+  const clock = useNepalClock();
+  const clockText = `${digits(clock.hour, numerals, 2)}:${digits(clock.minute, numerals, 2)}:${digits(clock.second, numerals, 2)}`;
 
   return (
     <div className="flex items-start gap-3 px-0.5 pt-0.5">
@@ -53,6 +56,9 @@ export function DateHeader({ today }: { today: Today }) {
         </p>
         <p className="mt-0.5 text-[11px] tracking-[0.3px] text-text-secondary">
           {formatGregorian(today.gregorian)}
+        </p>
+        <p className="mt-0.5 text-[11px] tabular-nums tracking-[0.3px] text-text-muted">
+          {clockText}
         </p>
       </div>
 

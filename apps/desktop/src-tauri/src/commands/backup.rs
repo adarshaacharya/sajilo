@@ -19,8 +19,9 @@ use tauri_plugin_store::{Store, StoreExt};
 use crate::prefs::{
     BAZAR_ENABLED, CUSTOM_MENU_BAR_SHOWS_FLAG, CUSTOM_MENU_BAR_SHOWS_YEAR, FOREX_ENABLED,
     FOREX_FAVOURITES, LANGUAGE, MENU_BAR_FORMAT, NEWS_ENABLED, NOTIFICATION_OPTIONS, NUMERAL_STYLE,
-    PLANS_KEY, RADIO_ENABLED, RADIO_FAVOURITES, RASHIFAL_ENABLED, SELECTED_RASHI, SHOWS_DOCK_ICON,
-    STOCK_WATCHLIST, STORE_FILE, VEGETABLE_FAVOURITES, WEATHER_ENABLED, WEATHER_LOCATION,
+    PLANS_KEY, RADIO_ENABLED, RADIO_FAVOURITES, RASHIFAL_ENABLED, SELECTED_RASHI, SHOW_TRAY_TIME,
+    SHOWS_DOCK_ICON, STOCK_WATCHLIST, STORE_FILE, VEGETABLE_FAVOURITES, WEATHER_ENABLED,
+    WEATHER_LOCATION,
 };
 
 type Result<T> = std::result::Result<T, String>;
@@ -75,6 +76,7 @@ fn preferences_from_store(store: &Store<Wry>) -> Preferences {
         notify_holiday_eve: notify.eve_of_public_holiday,
         notify_festival_eve: notify.eve_of_festival,
         radio_favourites: read_or(store, RADIO_FAVOURITES, defaults.radio_favourites),
+        show_tray_time: read_or(store, SHOW_TRAY_TIME, defaults.show_tray_time),
     }
 }
 
@@ -141,6 +143,7 @@ pub fn import_backup(app: AppHandle<Wry>, contents: String) -> Result<ImportSumm
         set(&store, SELECTED_RASHI, rashi);
     }
     set(&store, RADIO_FAVOURITES, &prefs.radio_favourites);
+    set(&store, SHOW_TRAY_TIME, prefs.show_tray_time);
     set(&store, SHOWS_DOCK_ICON, prefs.shows_dock_icon);
     crate::system::dock::set_hidden(&app, !prefs.shows_dock_icon);
 

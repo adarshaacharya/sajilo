@@ -73,8 +73,14 @@ pub fn refresh_title(app: &AppHandle) {
         return;
     };
 
-    let (format, numerals, custom) = crate::prefs::tray_preferences(app);
-    let label = title::title(date, format, numerals, custom);
+    let (format, numerals, custom, show_time) = crate::prefs::tray_preferences(app);
+    let mut label = title::title(date, format, numerals, custom);
+    if show_time {
+        label = format!(
+            "{label} · {}",
+            title::clock(sajilo_core::nepal_time::now(), numerals)
+        );
+    }
 
     // Only macOS renders text beside a tray icon.
     #[cfg(target_os = "macos")]
@@ -95,15 +101,23 @@ pub fn refresh_title(app: &AppHandle) {
     let _ = tray.set_tooltip(Some(&label));
 }
 
-/// Redraws at Kathmandu midnight, not the machine's.
+/// Redraws at Kathmandu midnight — or every minute, while the tray also shows
+/// the clock.
 ///
-/// Sleeps until the next rollover rather than polling, and recomputes the wait
+/// Sleeps until the next tick rather than polling, and recomputes the wait
 /// each time so it self-corrects after a laptop wakes from sleep having missed
-/// the tick entirely.
+/// one entirely, and so switching the clock on or off is picked up on the very
+/// next tick rather than needing a restart.
 fn spawn_midnight_rollover(app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         loop {
-            let wait = title::seconds_until_nepal_midnight(sajilo_core::nepal_time::now());
+            let now = sajilo_core::nepal_time::now();
+            let (.., show_time) = crate::prefs::tray_preferences(&app);
+            let wait = if show_time {
+                title::seconds_until_next_minute(now)
+            } else {
+                title::seconds_until_nepal_midnight(now)
+            };
             // Tauri's own runtime, so the app does not carry a second one.
             tauri::async_runtime::spawn_blocking(move || {
                 std::thread::sleep(std::time::Duration::from_secs(wait as u64));

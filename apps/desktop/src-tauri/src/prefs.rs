@@ -15,6 +15,9 @@ pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
 pub const NUMERAL_STYLE: &str = "numeralStyle";
 pub const CUSTOM_MENU_BAR_SHOWS_FLAG: &str = "customMenuBarShowsFlag";
 pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
+/// Appends `HH:MM` to whatever date format is already showing — composes with
+/// every `MenuBarFormat`, not a format of its own.
+pub const SHOW_TRAY_TIME: &str = "showTrayTime";
 /// The same key the Swift app used, so an imported backup lands where the app
 /// already looks.
 pub const PLANS_KEY: &str = "dayPlans.v1";
@@ -64,12 +67,15 @@ pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.
-pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle, CustomMenuBar) {
+pub fn tray_preferences(
+    app: &AppHandle<Wry>,
+) -> (MenuBarFormat, NumeralStyle, CustomMenuBar, bool) {
     let Ok(store) = app.store(STORE_FILE) else {
         return (
             MenuBarFormat::default(),
             NumeralStyle::default(),
             CustomMenuBar::default(),
+            false,
         );
     };
     fn read<T: serde::de::DeserializeOwned + Default>(
@@ -94,6 +100,7 @@ pub fn tray_preferences(app: &AppHandle<Wry>) -> (MenuBarFormat, NumeralStyle, C
             show_flag: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_FLAG, true),
             show_year: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_YEAR, true),
         },
+        read_bool(&store, SHOW_TRAY_TIME, false),
     )
 }
 
