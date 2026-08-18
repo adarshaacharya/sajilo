@@ -18,8 +18,8 @@ import {
   priceChange,
   pricePerGram,
   sourceStamp,
-  weightLabel,
   type WeightUnit,
+  weightLabel,
 } from "../../lib/bazar";
 import { useSettings } from "../../lib/settings";
 import type { Metal } from "../../types/api/Metal";
@@ -58,7 +58,7 @@ function MetalCalculator({ snapshot }: { snapshot: MetalRateSnapshot }) {
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
         {t("bazar.quantity")}
       </p>
-      <div className="flex items-center gap-2">
+      <div className="grid grid-cols-[minmax(0,1fr)_72px_minmax(94px,1.15fr)] gap-2">
         <input
           type="number"
           inputMode="decimal"
@@ -67,16 +67,16 @@ function MetalCalculator({ snapshot }: { snapshot: MetalRateSnapshot }) {
           value={Number.isFinite(amount) ? amount : ""}
           aria-label={t("bazar.quantity")}
           onChange={(event) => setAmount(Number(event.target.value))}
-          className={`${CONTROL} w-20 shrink-0`}
+          className={`${CONTROL} min-w-0 w-full`}
         />
-        <div className="w-20 shrink-0">
+        <div className="min-w-0">
           <Select
             value={unit}
             onChange={setUnit}
             options={WEIGHT_UNITS.map((item) => ({ id: item, label: weightLabel(item) }))}
           />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0">
           <Select
             value={metal}
             onChange={setMetal}
@@ -103,7 +103,9 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
           <div className="relative z-[1]">
             <div className="flex items-baseline justify-between gap-2">
               <div>
-                <p className="text-[11px] font-semibold text-text-secondary">{metalName(headline.metal)}</p>
+                <p className="text-[11px] font-semibold text-text-secondary">
+                  {metalName(headline.metal)}
+                </p>
                 <p className="text-[10px] text-text-muted">{metalUnitLabel(headline.unit)}</p>
               </div>
               <ChangeBadge

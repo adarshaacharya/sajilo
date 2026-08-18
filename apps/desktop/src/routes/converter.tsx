@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
-import { ResultCard } from "../components/tools/ResultCard";
 import { ToolSection } from "../components/tools/QuantityRow";
+import { ResultCard } from "../components/tools/ResultCard";
 import { ToolTextField } from "../components/tools/ToolField";
 import { api, type Conversion, type SupportedRange } from "../lib/ipc";
 import { digits } from "../lib/numerals";
@@ -29,7 +29,10 @@ export function Converter() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.supportedRange().then(setRange).catch(() => {});
+    api
+      .supportedRange()
+      .then(setRange)
+      .catch(() => {});
     api
       .today()
       .then(({ nepali }) =>
@@ -49,15 +52,22 @@ export function Converter() {
     if (![year, month, day].every(Number.isFinite)) return;
 
     const convert = direction === "bsToAd" ? api.bsToAd : api.adToBs;
+    let cancelled = false;
     convert(year, month, day)
       .then((value) => {
+        if (cancelled) return;
         setResult(value);
         setError(null);
       })
       .catch((cause) => {
+        if (cancelled) return;
         setResult(null);
         setError(String(cause));
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [direction, fields]);
 
   const swap = () => {
@@ -78,11 +88,11 @@ export function Converter() {
     setDirection((current) => (current === "bsToAd" ? "adToBs" : "bsToAd"));
   };
 
-  const setToday = () => {
+  const setToday = (targetDirection = direction) => {
     api
       .today()
       .then(({ nepali, gregorian }) => {
-        if (direction === "bsToAd") {
+        if (targetDirection === "bsToAd") {
           setFields({
             year: String(nepali.year),
             month: String(nepali.month),
@@ -96,6 +106,17 @@ export function Converter() {
         }
       })
       .catch(() => {});
+  };
+
+  // Mirrors the Swift converter: changing the segmented direction starts with
+  // a valid date in that calendar, while the swap button below keeps the
+  // already-converted instant in view.
+  const changeDirection = (targetDirection: Direction) => {
+    if (targetDirection === direction) return;
+    setResult(null);
+    setError(null);
+    setDirection(targetDirection);
+    setToday(targetDirection);
   };
 
   const bounds =
@@ -129,7 +150,7 @@ export function Converter() {
       <Segmented
         label="Conversion direction"
         value={direction}
-        onChange={setDirection}
+        onChange={changeDirection}
         options={[
           { id: "bsToAd", label: "BS → AD" },
           { id: "adToBs", label: "AD → BS" },
@@ -167,7 +188,9 @@ export function Converter() {
 
       {result && (
         <section className="surface-card p-2.5">
-          <p className="text-[15px] font-semibold leading-snug">{longGregorian(result.gregorian)}</p>
+          <p className="text-[15px] font-semibold leading-snug">
+            {longGregorian(result.gregorian)}
+          </p>
           <p className="mt-0.5 text-[12px] text-text-secondary">{nepaliLong}</p>
         </section>
       )}
@@ -182,15 +205,10 @@ export function Converter() {
       )}
 
       <div className="flex items-center gap-1.5 pt-0.5">
-        <button type="button" onClick={setToday} className="btn-ghost text-[11px]">
+        <button type="button" onClick={() => setToday()} className="btn-ghost text-[11px]">
           {t("action.today")}
         </button>
-        <button
-          type="button"
-          onClick={swap}
-          aria-label={t("action.swap")}
-          className="icon-btn"
-        >
+        <button type="button" onClick={swap} aria-label={t("action.swap")} className="icon-btn">
           <Icon name="swap" className="size-3.5" />
         </button>
       </div>

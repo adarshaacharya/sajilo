@@ -88,7 +88,7 @@ export function Bazar() {
   useHeaderSlot(refreshButton);
 
   return (
-    <div className="space-y-2.5">
+    <div className="min-w-0 space-y-2.5">
       <Segmented
         label={t("screen.bazar")}
         value={tab}
@@ -99,6 +99,7 @@ export function Bazar() {
           { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
           { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
         ]}
+        scrollable={false}
       />
 
       {tab === "stocks" && <Stocks state={stocks} onRetry={() => load(true)} />}
