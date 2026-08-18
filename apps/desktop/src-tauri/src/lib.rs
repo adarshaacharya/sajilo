@@ -48,6 +48,13 @@ pub fn run() {
             app.manage(commands::news::NewsCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
+            // Clear native NSWindow + WKWebView fill so CSS border-radius on
+            // `.app-window` can show rounded corners instead of a square frame.
+            if let Some(main) = app.get_webview_window(window::MAIN) {
+                let _ = main.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
+                #[cfg(target_os = "macos")]
+                window::clear_macos_background(&main);
+            }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());

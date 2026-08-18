@@ -1,9 +1,8 @@
 import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
-import { useLocation } from "react-router";
-import { ActionBar } from "./components/ActionBar";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Header } from "./components/Header";
+import { RadioMiniPlayer } from "./components/RadioMiniPlayer";
 import { TabBar } from "./components/TabBar";
 import type { translate } from "./lib/i18n";
 import { SettingsProvider, useSettings } from "./lib/settings";
@@ -72,7 +71,7 @@ function Shell() {
   const { t } = useSettings();
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-[14px]">
+    <div className="app-window flex flex-col">
       <TrayNavigation />
       <Routes>
         {ROUTES.map((route) => (
@@ -91,6 +90,7 @@ function Shell() {
           />
         ))}
       </Routes>
+      <RadioMiniPlayer />
       <TabBar />
     </div>
   );

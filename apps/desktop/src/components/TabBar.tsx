@@ -1,5 +1,8 @@
 import { NavLink } from "react-router";
+import { useEffect, useState } from "react";
 import { useSettings } from "../lib/settings";
+import * as player from "../lib/audio";
+import { Equalizer } from "./Equalizer";
 import { ICONS, Icon } from "./Icon";
 
 const TABS = [
@@ -23,6 +26,15 @@ const TABS = [
 
 export function TabBar() {
   const { t, modules } = useSettings();
+  const [radioPlaying, setRadioPlaying] = useState(false);
+
+  useEffect(
+    () =>
+      player.subscribe((state) => {
+        setRadioPlaying(Boolean(state.nowPlaying && state.isPlaying));
+      }),
+    [],
+  );
 
   const visible = TABS.filter((tab) => !tab.module || modules[tab.module]);
 
@@ -37,11 +49,17 @@ export function TabBar() {
             `flex flex-1 flex-col items-center gap-0.5 rounded-md py-1 transition-colors ${
               isActive
                 ? "bg-surface-hover text-accent"
-                : "text-text-muted hover:bg-surface-hover/60 hover:text-text-secondary"
+                : radioPlaying && tab.to === "/radio"
+                  ? "text-[color:var(--color-accent-mark)]"
+                  : "text-text-muted hover:bg-surface-hover/60 hover:text-text-secondary"
             }`
           }
         >
-          <Icon path={tab.path} />
+          {radioPlaying && tab.to === "/radio" ? (
+            <Equalizer isPlaying />
+          ) : (
+            <Icon path={tab.path} />
+          )}
           <span className="w-full truncate px-0.5 text-center text-[10px] leading-none font-medium">
             {t(tab.labelKey)}
           </span>

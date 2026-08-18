@@ -174,7 +174,7 @@ export function Rashifal() {
                 key={entry.id}
                 type="button"
                 onClick={() => choose(entry.id)}
-                className={`rounded-xl border border-border bg-surface px-2 py-2 text-left transition-colors hover:bg-surface-hover ${
+                className={`rounded-md border border-border bg-surface px-2 py-2 text-left transition-colors hover:bg-surface-hover ${
                   entry.id === mine ? "ring-1 ring-[color:var(--color-accent-mark)]/50" : ""
                 }`}
               >
@@ -245,7 +245,7 @@ export function Rashifal() {
                 key={entry.id}
                 type="button"
                 onClick={() => setViewing(entry.id === mine ? null : entry.id)}
-                className={`rounded-xl px-1 py-1.5 text-[11px] font-medium transition-colors ${
+                className={`rounded-md px-1 py-1.5 text-[11px] font-medium transition-colors ${
                   selected
                     ? "bg-accent/15 text-[color:var(--color-accent-mark)]"
                     : "text-text-secondary hover:bg-surface-hover hover:text-text"

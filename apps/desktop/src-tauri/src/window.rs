@@ -62,3 +62,20 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
     }
     let _ = window.hide();
 }
+
+/// Make the native window layers fully clear so a CSS-rounded shell can clip.
+///
+/// Tauri's `transparent: true` alone leaves the `NSWindow` opaque on macOS;
+/// without this, `border-radius` paints against a square black/white plate.
+#[cfg(target_os = "macos")]
+pub fn clear_macos_background(window: &WebviewWindow) {
+    use objc2_app_kit::{NSColor, NSWindow};
+
+    let Ok(ptr) = window.ns_window() else {
+        return;
+    };
+    // SAFETY: Tauri owns the NSWindow for the lifetime of the WebviewWindow.
+    let ns_window = unsafe { &*(ptr as *const NSWindow) };
+    ns_window.setOpaque(false);
+    ns_window.setBackgroundColor(Some(&NSColor::clearColor()));
+}

@@ -52,31 +52,29 @@ body,
   height: 100%;
   margin: 0;
   overflow: hidden;
+  /* Corners must stay clear so border-radius on .app-window can show the desk. */
+  background: transparent !important;
 }
 
 html {
   color-scheme: light dark;
-  background: transparent;
 }
 
-body {
+/* Opaque rounded chrome — the only layer that paints the surface fill. */
+.app-window {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     "Noto Sans Devanagari", sans-serif;
   font-size: 12px;
-  overflow: hidden;
-  border-radius: 14px;
-  border: 1px solid var(--color-border);
   user-select: none;
   -webkit-font-smoothing: antialiased;
-}
-
-#root {
-  height: 100%;
-  border-radius: 14px;
-  overflow: hidden;
 }
 
 ::-webkit-scrollbar {
@@ -104,4 +102,57 @@ body {
     color-mix(in srgb, var(--color-accent-mark) 14%, transparent),
     transparent 70%
   );
+}
+
+/* Swift EqualizerView — four brass bars that bounce while audio plays. */
+.eq {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.eq-bar {
+  width: 2.5px;
+  height: 15px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
+  transform-origin: center;
+  transform: scaleY(0.28);
+}
+
+.eq-playing .eq-bar {
+  animation: eq-bounce 0.55s ease-in-out infinite alternate;
+}
+
+.eq-playing .eq-bar:nth-child(1) {
+  animation-delay: 0ms;
+}
+.eq-playing .eq-bar:nth-child(2) {
+  animation-delay: 120ms;
+}
+.eq-playing .eq-bar:nth-child(3) {
+  animation-delay: 40ms;
+}
+.eq-playing .eq-bar:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+@keyframes eq-bounce {
+  from {
+    transform: scaleY(0.32);
+  }
+  to {
+    transform: scaleY(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eq-playing .eq-bar {
+    animation: none;
+    transform: scaleY(0.7);
+  }
 }

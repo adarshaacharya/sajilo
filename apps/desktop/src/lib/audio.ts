@@ -14,6 +14,7 @@
 export interface NowPlaying {
   slug: string;
   name: string;
+  frequency?: string | null;
 }
 
 type Listener = (state: PlayerState) => void;
@@ -22,16 +23,31 @@ export interface PlayerState {
   nowPlaying: NowPlaying | null;
   /** True between a play request and the first audio actually arriving. */
   isLoading: boolean;
+  /** True when audio is actively playing (not paused / stopped). */
+  isPlaying: boolean;
   error: string | null;
 }
 
 let element: HTMLAudioElement | null = null;
-let state: PlayerState = { nowPlaying: null, isLoading: false, error: null };
+let state: PlayerState = {
+  nowPlaying: null,
+  isLoading: false,
+  isPlaying: false,
+  error: null,
+};
 const listeners = new Set<Listener>();
 
 function publish(next: Partial<PlayerState>) {
   state = { ...state, ...next };
   for (const listener of listeners) listener(state);
+}
+
+function syncPlaying() {
+  const player = element;
+  if (!player) return;
+  publish({
+    isPlaying: Boolean(!player.paused && player.src),
+  });
 }
 
 function audio(): HTMLAudioElement {
@@ -41,12 +57,15 @@ function audio(): HTMLAudioElement {
   // Streams are live; there is nothing to seek and nothing worth buffering
   // ahead of the listener.
   element.preload = "none";
-  element.addEventListener("playing", () => publish({ isLoading: false, error: null }));
+  element.addEventListener("playing", () =>
+    publish({ isLoading: false, isPlaying: true, error: null }),
+  );
+  element.addEventListener("pause", () => publish({ isPlaying: false, isLoading: false }));
   element.addEventListener("waiting", () => publish({ isLoading: true }));
   element.addEventListener("error", () =>
     // A station that has gone off air is the common case, not a bug — so it is
     // reported in place rather than thrown.
-    publish({ isLoading: false, error: "Could not play this station" }),
+    publish({ isLoading: false, isPlaying: false, error: "Could not play this station" }),
   );
   return element;
 }
@@ -70,20 +89,20 @@ export function play(station: NowPlaying, streamUrl: string) {
   if (player.src !== streamUrl) {
     player.src = streamUrl;
   }
-  publish({ nowPlaying: station, isLoading: true, error: null });
-  player.play().catch(() => publish({ isLoading: false, error: "Playback was blocked" }));
+  publish({ nowPlaying: station, isLoading: true, isPlaying: false, error: null });
+  player.play().catch(() => publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }));
 }
 
 export function pause() {
   audio().pause();
-  publish({ isLoading: false });
+  publish({ isLoading: false, isPlaying: false });
 }
 
 export function resume() {
   const player = audio();
   if (!player.src) return;
   publish({ isLoading: true });
-  player.play().catch(() => publish({ isLoading: false, error: "Playback was blocked" }));
+  player.play().catch(() => publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }));
 }
 
 /**
@@ -97,9 +116,16 @@ export function stop() {
   player.pause();
   player.removeAttribute("src");
   player.load();
-  publish({ nowPlaying: null, isLoading: false, error: null });
+  publish({ nowPlaying: null, isLoading: false, isPlaying: false, error: null });
 }
 
 export function isPaused(): boolean {
   return element?.paused ?? true;
+}
+
+export function togglePlayback() {
+  if (!state.nowPlaying) return;
+  if (isPaused()) resume();
+  else pause();
+  syncPlaying();
 }
