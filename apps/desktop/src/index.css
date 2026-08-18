@@ -240,6 +240,37 @@ html {
   color: var(--color-text);
 }
 
+/* Date detail — compact copy chips (values already shown above). */
+.copy-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: var(--radius-sm);
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--color-surface-raised) 88%, transparent);
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.copy-chip:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.copy-chip-copied {
+  color: var(--color-accent-mark);
+}
+
+.day-plan-editor {
+  border-radius: var(--radius-md);
+  padding: 8px;
+  background: color-mix(in srgb, var(--color-surface-raised) 70%, transparent);
+}
+
 .settings-btn {
   display: inline-flex;
   align-items: center;

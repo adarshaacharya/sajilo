@@ -1,10 +1,11 @@
 import { useState } from "react";
+import useSWR from "swr";
 import { Card } from "../components/Card";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api } from "../lib/ipc";
+import { catchAsFailed } from "../lib/loadState";
 import { usePersistedString } from "../lib/persisted";
 import { useSettings } from "../lib/settings";
-import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { RashifalSnapshot } from "../types/api/RashifalSnapshot";
 import type { RashiSign } from "../types/api/RashiSign";
@@ -130,16 +131,9 @@ function signMeta(id: RashiSign) {
 
 export function Rashifal() {
   const { t } = useSettings();
-  const { value: state, reload: load } = useCachedQuery("rashifal", (refresh) =>
-    api
-      .getRashifal(refresh)
-      .catch(
-        (error: unknown): LoadState<RashifalSnapshot> => ({
-          status: "failed",
-          value: String(error),
-        }),
-      ),
-  );
+  const { data: state, mutate } = useSWR("rashifal", () => catchAsFailed(api.getRashifal(false)));
+  const load = (refresh = false) =>
+    mutate(catchAsFailed<RashifalSnapshot>(api.getRashifal(refresh)), { revalidate: false });
   const [storedSign, setStoredSign] = usePersistedString(STORAGE_KEY);
   const mine = validSign(storedSign);
   /** Browse another sign without changing the saved one. */

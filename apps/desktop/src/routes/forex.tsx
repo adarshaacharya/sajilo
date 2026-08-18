@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 import { CONTROL } from "../components/control";
 import { ForexRateRow } from "../components/forex/ForexRateRow";
 import { useHeaderSlot } from "../components/HeaderSlot";
@@ -7,11 +8,9 @@ import { Select } from "../components/Select";
 import { StateBanner } from "../components/StateBanner";
 import { conversionText, rateFootnote, sourceTimestamp } from "../lib/forex";
 import { api } from "../lib/ipc";
-import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
+import { catchAsFailed, fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
-import { useCachedQuery } from "../lib/useCachedQuery";
 import type { ForexSnapshot } from "../types/api/ForexSnapshot";
-import type { LoadState } from "../types/api/LoadState";
 
 async function openNrb() {
   try {
@@ -25,15 +24,14 @@ async function openNrb() {
 export function Forex() {
   const { t, modules } = useSettings();
   const {
-    value: state,
+    data: state,
     isValidating,
-    reload: load,
-  } = useCachedQuery("forex", (refresh) =>
-    api
-      .getForex(refresh)
-      .catch(
-        (error: unknown): LoadState<ForexSnapshot> => ({ status: "failed", value: String(error) }),
-      ),
+    mutate,
+  } = useSWR("forex", () => catchAsFailed(api.getForex(false)));
+  const load = useCallback(
+    (refresh = false) =>
+      mutate(catchAsFailed<ForexSnapshot>(api.getForex(refresh)), { revalidate: false }),
+    [mutate],
   );
   const [amount, setAmount] = useState(1);
   const [code, setCode] = useState("USD");

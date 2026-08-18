@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useState } from "react";
+import useSWR from "swr";
 import { useHeaderSlot } from "../components/HeaderSlot";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import { api, type Bazar as BazarFeeds } from "../lib/ipc";
-import { fetchedAtLabel, loadedValue } from "../lib/loadState";
+import { catchAsFailed, fetchedAtLabel, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
-import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { StockMarketSnapshot } from "../types/api/StockMarketSnapshot";
 import { FuelTab } from "./bazar/Fuel";
@@ -28,42 +28,42 @@ function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadSta
   }
 }
 
+function fetchFeeds(refresh = false): Promise<BazarFeeds> {
+  return api.getBazar(refresh).catch((error: unknown): BazarFeeds => {
+    const failed = { status: "failed", value: String(error) } as const;
+    return { metals: failed, fuel: failed, vegetables: failed };
+  });
+}
+
 export function Bazar() {
   const { t } = useSettings();
   const [tab, setTab] = useState<Tab>("stocks");
   const {
-    value: feeds,
+    data: feeds,
     isValidating: loadingFeeds,
-    reload: reloadFeeds,
-  } = useCachedQuery("bazar-feeds", (refresh) =>
-    api.getBazar(refresh).catch((error: unknown): BazarFeeds => {
-      const failed = { status: "failed", value: String(error) } as const;
-      return { metals: failed, fuel: failed, vegetables: failed };
-    }),
-  );
+    mutate: mutateFeeds,
+  } = useSWR("bazar-feeds", () => fetchFeeds(false));
   const {
-    value: stocks,
+    data: stocks,
     isValidating: loadingStocks,
-    reload: reloadStocks,
-  } = useCachedQuery("bazar-stocks", (refresh) =>
-    api
-      .getStocks(refresh)
-      .catch(
-        (error: unknown): LoadState<StockMarketSnapshot> => ({
-          status: "failed",
-          value: String(error),
-        }),
-      ),
-  );
+    mutate: mutateStocks,
+  } = useSWR("bazar-stocks", () => catchAsFailed(api.getStocks(false)));
 
   const loading = tab === "stocks" ? loadingStocks : loadingFeeds;
 
   const load = useCallback(
     (refresh = false) => {
-      reloadFeeds(refresh);
-      reloadStocks(refresh);
+      if (refresh) {
+        mutateFeeds(fetchFeeds(true), { revalidate: false });
+        mutateStocks(catchAsFailed<StockMarketSnapshot>(api.getStocks(true)), {
+          revalidate: false,
+        });
+      } else {
+        mutateFeeds();
+        mutateStocks();
+      }
     },
-    [reloadFeeds, reloadStocks],
+    [mutateFeeds, mutateStocks],
   );
 
   const metals = loadedValue(feeds?.metals);

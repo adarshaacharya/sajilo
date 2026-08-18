@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
 import { BazarSearch } from "../components/bazar/BazarSearch";
 import { Equalizer } from "../components/Equalizer";
 import { useHeaderSlot } from "../components/HeaderSlot";
@@ -6,9 +7,9 @@ import { Icon } from "../components/Icon";
 import { type LoadStatus, StateBanner } from "../components/StateBanner";
 import * as player from "../lib/audio";
 import { api } from "../lib/ipc";
+import { catchAsFailed } from "../lib/loadState";
 import { usePersistedList } from "../lib/persisted";
 import { useSettings } from "../lib/settings";
-import { useCachedQuery } from "../lib/useCachedQuery";
 import type { LoadState } from "../types/api/LoadState";
 import type { RadioDirectory } from "../types/api/RadioDirectory";
 import type { RadioStation } from "../types/api/RadioStation";
@@ -175,15 +176,14 @@ export function Radio() {
   const { t } = useSettings();
   const [state, setState] = useState(player.getState());
   const {
-    value: directory,
+    data: directory,
     isValidating,
-    reload: load,
-  } = useCachedQuery("radio-stations", (refresh) =>
-    api
-      .getStations(refresh)
-      .catch(
-        (error: unknown): LoadState<RadioDirectory> => ({ status: "failed", value: String(error) }),
-      ),
+    mutate,
+  } = useSWR("radio-stations", () => catchAsFailed(api.getStations(false)));
+  const load = useCallback(
+    (refresh = false) =>
+      mutate(catchAsFailed<RadioDirectory>(api.getStations(refresh)), { revalidate: false }),
+    [mutate],
   );
   const [query, setQuery] = useState("");
   const [pins, setPins] = usePersistedList(PIN_KEY);

@@ -1,13 +1,12 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import useSWR from "swr";
 import { useHeaderSlot } from "../components/HeaderSlot";
 import { Icon } from "../components/Icon";
 import { FadeUp, Stagger } from "../components/motion";
 import { StateBanner } from "../components/StateBanner";
 import { api } from "../lib/ipc";
-import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
+import { catchAsFailed, fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
-import { useCachedQuery } from "../lib/useCachedQuery";
-import type { LoadState } from "../types/api/LoadState";
 import type { NewsDigest } from "../types/api/NewsDigest";
 import type { NewsItem } from "../types/api/NewsItem";
 
@@ -68,19 +67,18 @@ export function News() {
   const { t } = useSettings();
   const [visible, setVisible] = useState(PAGE);
   const {
-    value: state,
+    data: state,
     isValidating,
-    reload: load,
-  } = useCachedQuery("news", (refresh) =>
-    api
-      .getNews(refresh)
-      .then((next) => {
-        setVisible(PAGE);
-        return next;
-      })
-      .catch(
-        (error: unknown): LoadState<NewsDigest> => ({ status: "failed", value: String(error) }),
+    mutate,
+  } = useSWR("news", () => catchAsFailed(api.getNews(false)), {
+    onSuccess: () => setVisible(PAGE),
+  });
+  const load = useCallback(
+    (refresh = false) =>
+      mutate(catchAsFailed<NewsDigest>(api.getNews(refresh)), { revalidate: false }).then(() =>
+        setVisible(PAGE),
       ),
+    [mutate],
   );
 
   const loading = isValidating;

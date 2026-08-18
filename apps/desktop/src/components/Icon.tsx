@@ -4,6 +4,12 @@ import { SFArrowLeftArrowRight } from "sf-symbols-lib/monochrome/SFArrowLeftArro
 import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
 import { SFCheckmark } from "sf-symbols-lib/monochrome/SFCheckmark";
 import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
+import { SFClock } from "sf-symbols-lib/monochrome/SFClock";
+import { SFExclamationmarkCircle } from "sf-symbols-lib/monochrome/SFExclamationmarkCircle";
+import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
+import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
+import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
+import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
 import { SFCalendar } from "sf-symbols-lib/monochrome/SFCalendar";
@@ -87,6 +93,12 @@ const GLYPHS: Record<IconName, SFComp> = {
   starFill: SFStarFill,
   export: SFSquareAndArrowUp,
   import: SFSquareAndArrowDown,
+  sunrise: SFSunriseFill,
+  sunset: SFSunsetFill,
+  clock: SFClock,
+  warning: SFExclamationmarkCircle,
+  plus: SFPlus,
+  trash: SFTrash,
 };
 
 export type IconName =
@@ -128,7 +140,13 @@ export type IconName =
   | "star"
   | "starFill"
   | "export"
-  | "import";
+  | "import"
+  | "sunrise"
+  | "sunset"
+  | "clock"
+  | "warning"
+  | "plus"
+  | "trash";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

@@ -1,15 +1,15 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
+import useSWR from "swr";
 import { Icon } from "../components/Icon";
 import { AirQualityPanel } from "../components/weather/AirQualityPanel";
 import { ForecastRow } from "../components/weather/ForecastRow";
 import { WeatherAtmosphere } from "../components/weather/WeatherAtmosphere";
 import { WeatherIcon } from "../components/weather/WeatherIcon";
 import { api } from "../lib/ipc";
-import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
+import { catchAsFailed, fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
 import { useSettings } from "../lib/settings";
 import { currentSkyPhase, skyGradient } from "../lib/skyPhase";
-import { useCachedQuery } from "../lib/useCachedQuery";
 import {
   aqiCategory,
   conditionTitle,
@@ -17,7 +17,6 @@ import {
   formatCelsius,
   formatPercent,
 } from "../lib/weather";
-import type { LoadState } from "../types/api/LoadState";
 import type { WeatherSnapshot } from "../types/api/WeatherSnapshot";
 
 const AQI_KEYS = {
@@ -51,18 +50,18 @@ export function Weather() {
   const { t, language, modules } = useSettings();
   const navigate = useNavigate();
   const {
-    value: state,
+    data: state,
     isValidating,
-    reload: load,
-  } = useCachedQuery(`weather:${modules.weatherLocation}`, (refresh) =>
-    api
-      .getWeather(refresh, modules.weatherLocation)
-      .catch(
-        (error: unknown): LoadState<WeatherSnapshot> => ({
-          status: "failed",
-          value: String(error),
-        }),
-      ),
+    mutate,
+  } = useSWR(`weather:${modules.weatherLocation}`, () =>
+    catchAsFailed(api.getWeather(false, modules.weatherLocation)),
+  );
+  const load = useCallback(
+    (refresh = false) =>
+      mutate(catchAsFailed<WeatherSnapshot>(api.getWeather(refresh, modules.weatherLocation)), {
+        revalidate: false,
+      }),
+    [mutate, modules.weatherLocation],
   );
 
   const loading = isValidating;

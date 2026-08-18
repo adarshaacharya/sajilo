@@ -26,3 +26,15 @@ export function fetchedAtLabel(freshness: { fetchedAt: string } | undefined): st
   if (!freshness) return undefined;
   return new Date(freshness.fetchedAt).toLocaleString();
 }
+
+/**
+ * A rejected IPC call (dropped connection, a Tauri invoke error) turns into a
+ * `failed` `LoadState` instead of an SWR `error`, so every screen keeps
+ * reading `LoadState` the same way regardless of where the failure happened —
+ * inside the Rust command or on the way to it.
+ */
+export function catchAsFailed<T>(promise: Promise<LoadState<T>>): Promise<LoadState<T>> {
+  return promise.catch(
+    (error: unknown): LoadState<T> => ({ status: "failed", value: String(error) }),
+  );
+}
