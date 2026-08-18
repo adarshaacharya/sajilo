@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { QuantityRow, ToolSection } from "../../components/tools/QuantityRow";
-import { ResultCard } from "../../components/tools/ResultCard";
+import { ToolResultRow, ToolResults } from "../../components/tools/ResultCard";
 import { api, type WeightUnit } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -45,14 +45,16 @@ export function WeightTab() {
         options={UNITS}
       />
 
-      {UNITS.filter((target) => target.id !== unit).map((target) => (
-        <ResultCard
-          key={target.id}
-          title={target.label}
-          value={(results[target.id] ?? 0).toFixed(4)}
-          caption={NEPALI[target.id]}
-        />
-      ))}
+      <ToolResults>
+        {UNITS.filter((target) => target.id !== unit).map((target) => (
+          <ToolResultRow
+            key={target.id}
+            title={target.label}
+            value={(results[target.id] ?? 0).toFixed(4)}
+            caption={NEPALI[target.id]}
+          />
+        ))}
+      </ToolResults>
     </ToolSection>
   );
 }

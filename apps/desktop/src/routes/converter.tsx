@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Icon } from "../components/Icon";
 import { Segmented } from "../components/Segmented";
 import { ToolSection } from "../components/tools/QuantityRow";
-import { ResultCard } from "../components/tools/ResultCard";
 import { ToolTextField } from "../components/tools/ToolField";
 import { api, type Conversion, type SupportedRange } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 import { useSettings } from "../lib/settings";
 
 type Direction = "bsToAd" | "adToBs";
+type CopyFormat = { title: string; value: string };
 
 function longGregorian(iso: string): string {
   const date = new Date(`${iso}T12:00:00`);
@@ -18,6 +18,44 @@ function longGregorian(iso: string): string {
     month: "long",
     year: "numeric",
   });
+}
+
+function CopyFormatRow({ title, value }: CopyFormat) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // Clipboard access may be unavailable in a webview, but the control
+      // should still acknowledge the user's action.
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1400);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="group flex w-full items-center gap-3 px-3 py-2 text-left transition-colors hover:bg-surface-hover"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-[10px] text-text-muted">{title}</span>
+        <span className="mt-0.5 block truncate text-[13px] font-semibold leading-tight tabular-nums">
+          {value}
+        </span>
+      </span>
+      <Icon
+        name={copied ? "checkmark" : "copy"}
+        className={`size-3.5 shrink-0 transition-colors ${
+          copied
+            ? "text-[color:var(--color-accent-mark)]"
+            : "text-text-muted group-hover:text-text-secondary"
+        }`}
+      />
+    </button>
+  );
 }
 
 export function Converter() {
@@ -145,6 +183,8 @@ export function Converter() {
       ]
     : [];
 
+  const convert = () => setFields((current) => ({ ...current }));
+
   return (
     <ToolSection>
       <Segmented
@@ -187,29 +227,49 @@ export function Converter() {
       )}
 
       {result && (
-        <section className="surface-card p-2.5">
+        <section className="surface-card p-3">
           <p className="text-[15px] font-semibold leading-snug">
             {longGregorian(result.gregorian)}
           </p>
-          <p className="mt-0.5 text-[12px] text-text-secondary">{nepaliLong}</p>
+          <p className="mt-1 text-[12px] font-medium text-text-secondary">{nepaliLong}</p>
         </section>
       )}
 
       {copyFormats.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="px-0.5 text-[10px] font-semibold text-text-muted">{t("action.copy-as")}</p>
-          {copyFormats.map((format) => (
-            <ResultCard key={format.title} title={format.title} value={format.value} />
-          ))}
-        </div>
+        <section className="surface-card overflow-hidden">
+          <p className="px-3 pt-2.5 text-[10px] font-semibold text-text-muted">
+            {t("action.copy-as")}
+          </p>
+          <div className="mt-1">
+            {copyFormats.map((format, index) => (
+              <div key={format.title} className={index === 0 ? "" : "border-t border-border/55"}>
+                <CopyFormatRow {...format} />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
-      <div className="flex items-center gap-1.5 pt-0.5">
-        <button type="button" onClick={() => setToday()} className="btn-ghost text-[11px]">
-          {t("action.today")}
-        </button>
-        <button type="button" onClick={swap} aria-label={t("action.swap")} className="icon-btn">
-          <Icon name="swap" className="size-3.5" />
+      <div className="flex items-center justify-between pt-0.5">
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={() => setToday()} className="btn-ghost text-[11px]">
+            {t("action.today")}
+          </button>
+          <button
+            type="button"
+            onClick={swap}
+            className="btn-ghost inline-flex items-center gap-1 text-[11px]"
+          >
+            <Icon name="swap" className="size-3.5" />
+            {t("action.swap")}
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={convert}
+          className="rounded-md bg-[color:var(--color-accent)] px-3 py-1.5 text-[11px] font-semibold text-[#fffaf0] transition-opacity hover:opacity-90 active:opacity-75"
+        >
+          {t("action.convert")}
         </button>
       </div>
     </ToolSection>

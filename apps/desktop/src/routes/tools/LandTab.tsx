@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { QuantityRow, ToolSection } from "../../components/tools/QuantityRow";
-import { ResultCard } from "../../components/tools/ResultCard";
+import { ToolResultRow, ToolResults } from "../../components/tools/ResultCard";
 import { api, type LandBreakdown, type LandUnit } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -43,22 +43,22 @@ export function LandTab() {
       />
 
       {result && (
-        <>
-          <ResultCard
+        <ToolResults>
+          <ToolResultRow
             title={t("tools.hill-system")}
             value={result.hillCompact}
             caption="रोपनी–आना–पैसा–दाम"
           />
-          <ResultCard
+          <ToolResultRow
             title={t("tools.terai-system")}
             value={result.teraiCompact}
             caption="बिघा–कठ्ठा–धुर"
           />
-          <ResultCard
+          <ToolResultRow
             title={t("tools.area")}
             value={`${result.squareFeet.toFixed(2)} sq ft · ${result.squareMetres.toFixed(2)} m²`}
           />
-        </>
+        </ToolResults>
       )}
     </ToolSection>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { ResultCard } from "../../components/tools/ResultCard";
-import { ToolNumberField } from "../../components/tools/ToolField";
 import { ToolSection } from "../../components/tools/QuantityRow";
+import { ToolResultRow, ToolResults } from "../../components/tools/ResultCard";
+import { ToolNumberField } from "../../components/tools/ToolField";
 import { api, type InterestResult } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -49,14 +49,13 @@ export function InterestTab() {
       </div>
 
       {result && (
-        <>
-          <ResultCard title={t("tools.interest-amount")} value={`Rs ${grouped.interest ?? ""}`} />
-          <ResultCard
-            title={t("tools.total")}
-            value={`Rs ${grouped.total ?? ""}`}
-            caption="Simple interest — P × R × T ÷ 100"
+        <ToolResults>
+          <ToolResultRow
+            title={t("tools.interest-amount")}
+            value={`Rs ${grouped.interest ?? ""}`}
           />
-        </>
+          <ToolResultRow title={t("tools.total")} value={`Rs ${grouped.total ?? ""}`} />
+        </ToolResults>
       )}
     </ToolSection>
   );

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ResultCard } from "../../components/tools/ResultCard";
-import { ToolNumberField } from "../../components/tools/ToolField";
-import { ToolSection } from "../../components/tools/QuantityRow";
 import { Toggle } from "../../components/Toggle";
+import { ToolSection } from "../../components/tools/QuantityRow";
+import { ToolResultRow, ToolResults } from "../../components/tools/ResultCard";
+import { ToolNumberField } from "../../components/tools/ToolField";
 import { api, type VatBreakdown } from "../../lib/ipc";
 import { useSettings } from "../../lib/settings";
 
@@ -32,26 +32,18 @@ export function VatTab() {
   return (
     <ToolSection>
       <ToolNumberField label={t("tools.amount")} value={amount} onChange={setAmount} />
-      <Toggle
-        label={t("tools.price-includes-vat")}
-        checked={inclusive}
-        onChange={setInclusive}
-      />
+      <Toggle label={t("tools.price-includes-vat")} checked={inclusive} onChange={setInclusive} />
 
       {result && (
-        <>
-          <ResultCard title={t("tools.base-amount")} value={`Rs ${grouped.base ?? ""}`} />
-          <ResultCard title={t("tools.vat-amount")} value={`Rs ${grouped.vat ?? ""}`} caption="13%" />
-          <ResultCard
-            title={t("tools.total")}
-            value={`Rs ${grouped.total ?? ""}`}
-            caption={
-              inclusive
-                ? "VAT is the total less total ÷ 1.13 — not 13% of the total."
-                : "13% of the amount before VAT."
-            }
+        <ToolResults>
+          <ToolResultRow title={t("tools.base-amount")} value={`Rs ${grouped.base ?? ""}`} />
+          <ToolResultRow
+            title={t("tools.vat-amount")}
+            value={`Rs ${grouped.vat ?? ""}`}
+            caption="13%"
           />
-        </>
+          <ToolResultRow title={t("tools.total")} value={`Rs ${grouped.total ?? ""}`} />
+        </ToolResults>
       )}
     </ToolSection>
   );

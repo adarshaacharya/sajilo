@@ -39,7 +39,7 @@ export function SourceLink({
           window.open(href, "_blank", "noopener,noreferrer");
         }
       }}
-      className="mt-0.5 text-[color:var(--color-accent-mark)] hover:underline"
+      className="mt-0.5 block w-full whitespace-normal text-left text-[color:var(--color-accent-mark)] hover:underline"
     >
       {children}
     </button>

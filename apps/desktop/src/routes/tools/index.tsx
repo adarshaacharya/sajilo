@@ -22,8 +22,14 @@ export function Tools() {
   ];
 
   return (
-    <div className="space-y-2.5">
-      <Segmented options={tabs} value={tab} onChange={setTab} label={t("tools.title")} />
+    <div className="min-w-0 space-y-2.5">
+      <Segmented
+        options={tabs}
+        value={tab}
+        onChange={setTab}
+        label={t("tools.title")}
+        scrollable={false}
+      />
       {tab === "date" && <Converter />}
       {tab === "land" && <LandTab />}
       {tab === "weight" && <WeightTab />}

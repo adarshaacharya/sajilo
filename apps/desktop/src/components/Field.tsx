@@ -19,7 +19,7 @@ export function Field({
   );
 }
 
-/** @deprecated Use `ResultCard` in tools routes. */
+/** @deprecated Use the focused tools controls and `ToolResults` in tool routes. */
 export function ResultRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2 py-0.5">
