@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { Card } from "../components/Card";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Icon } from "../components/Icon";
+import { useHeaderSlot } from "../components/HeaderSlot";
+import { FadeUp, Stagger } from "../components/motion";
 import { StateBanner } from "../components/StateBanner";
 import { api } from "../lib/ipc";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../lib/loadState";
@@ -36,10 +38,37 @@ async function openLink(url: string) {
   }
 }
 
+function HeadlineRow({ item, onOpen }: { item: NewsItem; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="surface-card group w-full p-2 text-left transition-colors hover:bg-surface-hover"
+    >
+      <p className="text-[13px] leading-snug">{item.title}</p>
+      <div className="mt-1 flex items-center gap-1 text-[10px]">
+        <span className="font-medium text-[color:var(--color-accent-mark)]">{item.sourceName}</span>
+        {item.published && (
+          <>
+            <span className="text-text-muted">·</span>
+            <span className="text-text-secondary">{age(item)}</span>
+          </>
+        )}
+        <Icon
+          name="openExternal"
+          className="ml-auto size-2.5 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      </div>
+    </button>
+  );
+}
+
 export function News() {
   const { t } = useSettings();
   const [state, setState] = useState<LoadState<NewsDigest>>();
   const [visible, setVisible] = useState(PAGE);
+
+  const loading = !state || state.status === "loading";
 
   const load = useCallback((refresh = false) => {
     setState(undefined);
@@ -54,61 +83,64 @@ export function News() {
 
   useEffect(() => load(), [load]);
 
+  const refreshButton = useMemo(
+    () => (
+      <button
+        type="button"
+        onClick={() => load(true)}
+        disabled={loading}
+        aria-label={t("action.refresh")}
+        className="icon-btn shrink-0"
+      >
+        <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+      </button>
+    ),
+    [load, loading, t],
+  );
+
+  useHeaderSlot(refreshButton);
+
   const digest = loadedValue(state);
   const items = digest?.items.slice(0, visible) ?? [];
   const banner = loadBanner(state, fetchedAtLabel(digest?.freshness));
+  const freshness = digest ? fetchedAtLabel(digest.freshness) : null;
 
   return (
-    <div className="space-y-3">
-      <div className="flex justify-end">
+    <StateBanner state={banner} onRetry={() => load(true)}>
+      {items.length === 0 && !loading ? (
+        <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+          <Icon name="news" className="size-8 text-text-muted" />
+          <p className="text-text-secondary">{t("state.not-yet")}</p>
+        </div>
+      ) : (
+        <Stagger className="space-y-1">
+          {items.map((item) => (
+            <FadeUp key={`${item.source}-${item.link}`}>
+              <HeadlineRow item={item} onOpen={() => openLink(item.link)} />
+            </FadeUp>
+          ))}
+        </Stagger>
+      )}
+
+      {digest && visible < digest.items.length && (
         <button
           type="button"
-          onClick={() => load(true)}
-          className="rounded px-2 py-0.5 text-[11px] text-text-secondary hover:bg-surface-hover"
+          onClick={() => setVisible((count) => count + PAGE)}
+          className="mt-2 w-full py-1.5 text-center text-[11px] text-text-muted hover:text-text-secondary"
         >
-          {t("action.refresh")}
+          {digest.items.length - visible} more
         </button>
-      </div>
+      )}
 
-      <Card>
-        <StateBanner state={banner} onRetry={() => load(true)}>
-          {items.length === 0 ? (
-            <p className="text-text-muted">{t("state.not-yet")}</p>
-          ) : (
-            <ul className="list-rows">
-              {items.map((item) => (
-                <li key={`${item.source}-${item.link}`}>
-                  <button
-                    type="button"
-                    onClick={() => openLink(item.link)}
-                    className="w-full py-2 text-left"
-                  >
-                    <p className="leading-snug">{item.title}</p>
-                    <p className="mt-0.5 text-[11px] text-text-muted">
-                      {item.sourceName}
-                      {item.published ? ` · ${age(item)}` : ""}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {digest && visible < digest.items.length && (
-            <button
-              type="button"
-              onClick={() => setVisible((count) => count + PAGE)}
-              className="mt-2 w-full rounded-xl border border-border py-1 text-[11px] text-text-secondary hover:bg-surface-hover"
-            >
-              {digest.items.length - visible} more
-            </button>
-          )}
-          {digest && digest.failedSources.length > 0 && (
-            <p className="mt-2 text-[11px] text-text-muted">
-              Could not reach {digest.failedSources.join(", ")}.
-            </p>
-          )}
-        </StateBanner>
-      </Card>
-    </div>
+      {digest && digest.failedSources.length > 0 && (
+        <p className="mt-2 text-[10px] text-text-muted">
+          Could not reach {digest.failedSources.join(", ")}.
+        </p>
+      )}
+
+      {freshness && items.length > 0 && (
+        <p className="mt-1 text-[10px] text-text-muted">{freshness}</p>
+      )}
+    </StateBanner>
   );
 }

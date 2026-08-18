@@ -203,6 +203,29 @@ html {
   border-top: 1px solid var(--color-divider);
 }
 
+/* Compact icon-only header / toolbar buttons. */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 6px;
+  color: var(--color-text-muted);
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.icon-btn:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* Today date plate — gilt glow. */
 .date-plate {
   border-color: color-mix(in srgb, var(--color-accent-mark) 28%, var(--color-border));

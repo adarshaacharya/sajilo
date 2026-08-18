@@ -3,6 +3,7 @@ import { AnimatePresence } from "motion/react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Header } from "./components/Header";
+import { HeaderSlotProvider } from "./components/HeaderSlot";
 import { PageTransition } from "./components/motion";
 import { RadioMiniPlayer } from "./components/RadioMiniPlayer";
 import { TabBar } from "./components/TabBar";
@@ -94,7 +95,9 @@ export function App() {
     <MemoryRouter>
       <ErrorBoundary>
         <SettingsProvider>
-          <Shell />
+          <HeaderSlotProvider>
+            <Shell />
+          </HeaderSlotProvider>
         </SettingsProvider>
       </ErrorBoundary>
     </MemoryRouter>

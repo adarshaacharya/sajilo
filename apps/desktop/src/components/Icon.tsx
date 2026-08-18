@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 import { SFArrowClockwise } from "sf-symbols-lib/monochrome/SFArrowClockwise";
+import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
+import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
 import { SFCalendar } from "sf-symbols-lib/monochrome/SFCalendar";
@@ -66,6 +68,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   weather: SFCloudSun,
   forex: SFBanknote,
   refresh: SFArrowClockwise,
+  chevronLeft: SFChevronLeft,
+  openExternal: SFArrowUpForward,
   play: SFPlayFill,
   pause: SFPauseFill,
   stop: SFStopFill,
@@ -101,6 +105,8 @@ export type IconName =
   | "weather"
   | "forex"
   | "refresh"
+  | "chevronLeft"
+  | "openExternal"
   | "play"
   | "pause"
   | "stop"
