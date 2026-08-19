@@ -130,7 +130,8 @@ mod tests {
     /// wrong, the worst combination.
     #[test]
     fn ignores_the_undated_site_header() {
-        let header_only = "<header><span>३१ साउन २०८३, आइतबार</span></header><p>no article stamp</p>";
+        let header_only =
+            "<header><span>३१ साउन २०८३, आइतबार</span></header><p>no article stamp</p>";
         assert!(published_date_in(header_only).is_none());
 
         use chrono::Timelike;
@@ -150,7 +151,11 @@ mod tests {
         ] {
             let html = format!("<div>{stamp}</div>");
             let date = published_date_in(&html).unwrap_or_else(|| panic!("no match for {stamp}"));
-            assert_eq!(date.with_timezone(&nepal_time::offset()).hour(), 21, "{stamp}");
+            assert_eq!(
+                date.with_timezone(&nepal_time::offset()).hour(),
+                21,
+                "{stamp}"
+            );
         }
     }
 

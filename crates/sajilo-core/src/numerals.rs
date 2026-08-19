@@ -24,21 +24,24 @@ pub fn ascii(value: impl Into<i64>, width: Option<usize>) -> String {
 pub fn to_ascii_digits(value: &str) -> String {
     value
         .chars()
-        .map(
-            |character| match DIGITS.iter().position(|&d| d == character) {
-                Some(digit) => char::from_digit(digit as u32, 10).expect("0..9 is a valid digit"),
-                None => character,
-            },
-        )
+        .map(|character| {
+            DIGITS
+                .iter()
+                .position(|&d| d == character)
+                .map_or(character, |digit| {
+                    char::from_digit(digit as u32, 10).expect("0..9 is a valid digit")
+                })
+        })
         .collect()
 }
 
 fn map_digits(source: &str, f: impl Fn(usize) -> char) -> String {
     source
         .chars()
-        .map(|character| match character.to_digit(10) {
-            Some(digit) => f(digit as usize),
-            None => character,
+        .map(|character| {
+            character
+                .to_digit(10)
+                .map_or(character, |digit| f(digit as usize))
         })
         .collect()
 }

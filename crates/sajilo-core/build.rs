@@ -1,6 +1,7 @@
 //! Emits `EVENT_FILES`: one `Option<&str>` of bundled JSON per (BS year, month),
 //! so festival data is compiled in and needs no filesystem at runtime.
 
+use std::fmt::Write as _;
 use std::{env, fs, path::PathBuf};
 
 const FIRST_YEAR: i32 = 2066;
@@ -19,10 +20,7 @@ fn main() {
                 // include_str! resolves relative to the generated file, so the
                 // path has to be absolute and symlink-free.
                 Ok(path) if path.is_file() => {
-                    out.push_str(&format!(
-                        "    Some(include_str!(r\"{}\")),\n",
-                        path.display()
-                    ));
+                    let _ = writeln!(out, "    Some(include_str!(r\"{}\")),", path.display());
                 }
                 _ => out.push_str("    None,\n"),
             }

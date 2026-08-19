@@ -83,7 +83,7 @@ pub fn grouped(value: i64) -> String {
 /// Market feeds publish prices to two decimal places. Keep that precision: a
 /// quoted LTP of 722.90 must never become the materially different 723.
 pub fn grouped_decimal(value: f64, fraction_digits: usize) -> String {
-    let formatted = format!("{value:.*}", fraction_digits);
+    let formatted = format!("{value:.fraction_digits$}");
     let (whole, fraction) = match formatted.split_once('.') {
         Some((whole, fraction)) => (whole, Some(fraction)),
         None => (formatted.as_str(), None),

@@ -8,9 +8,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, NaiveDate, NaiveTime, TimeZone, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::stocks::{
-    MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote,
-};
+use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
 use serde::Deserialize;
 
 use crate::error::{ProviderError, Result};
@@ -30,7 +28,11 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<StockMarke
     parse(&market, &prices, now)
 }
 
-pub fn parse(market_html: &str, prices_html: &str, now: DateTime<Utc>) -> Result<StockMarketSnapshot> {
+pub fn parse(
+    market_html: &str,
+    prices_html: &str,
+    now: DateTime<Utc>,
+) -> Result<StockMarketSnapshot> {
     let quotes = quotes(prices_html)?;
     let indices = parse_index_table(market_html, "Index");
     let nepse = indices
@@ -80,10 +82,7 @@ pub fn quotes(html: &str) -> Result<Vec<StockQuote>> {
             let turnover = html::parse_number(&row[13])?;
             let change = html::parse_number(&row[15])?;
             let change_percent = html::parse_number(&row[17])?;
-            let optional = |index: usize| {
-                row.get(index)
-                    .and_then(|cell| html::parse_number(cell))
-            };
+            let optional = |index: usize| row.get(index).and_then(|cell| html::parse_number(cell));
 
             Some(StockQuote {
                 symbol: symbol.clone(),

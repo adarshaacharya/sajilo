@@ -70,15 +70,11 @@ fn rate(metal: Metal, label: &str, runs: &[String]) -> Option<MetalRate> {
     // The word appears in the navigation and in the page's own prose long
     // before the card does, so every occurrence is tried and the first one that
     // looks like a price card wins.
-    let starts = runs
-        .iter()
+    runs.iter()
         .enumerate()
         .filter(|(_, run)| run.to_lowercase().contains(label))
-        .map(|(index, _)| index);
-
-    starts
-        .filter_map(|start| card(metal, &runs[start..runs.len().min(start + LOOKAHEAD_RUNS)]))
-        .next()
+        .map(|(index, _)| index)
+        .find_map(|start| card(metal, &runs[start..runs.len().min(start + LOOKAHEAD_RUNS)]))
 }
 
 /// One candidate window, or `None` if it is not a price card after all.

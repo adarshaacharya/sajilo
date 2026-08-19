@@ -67,14 +67,12 @@ pub fn title(
         MenuBarFormat::NepaliFlag => format!("🇳🇵 {month} {day}"),
         // Deliberately ignores `numerals`: this format is Latin by definition,
         // and turning its month name into digits would be nonsense.
-        MenuBarFormat::EnglishShort => {
-            match bs::gregorian_date_from(date) {
-                Ok(gregorian) => gregorian.format("%b %-d").to_string(),
-                // Outside the bundled range there is no Gregorian date to show,
-                // so fall back to something true rather than empty.
-                Err(_) => date.english_month_name().to_owned(),
-            }
-        }
+        // Outside the bundled range there is no Gregorian date to show, so
+        // fall back to something true rather than empty.
+        MenuBarFormat::EnglishShort => bs::gregorian_date_from(date).map_or_else(
+            |_| date.english_month_name().to_owned(),
+            |gregorian| gregorian.format("%b %-d").to_string(),
+        ),
         MenuBarFormat::Custom => {
             let mut parts: Vec<String> = Vec::new();
             if custom.show_flag {

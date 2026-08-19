@@ -65,9 +65,10 @@ impl Config {
         let default = Intervals::default();
         Self {
             port: parse_var("PORT").unwrap_or(8080),
-            cache_path: env::var("CACHE_PATH")
-                .map(PathBuf::from)
-                .unwrap_or_else(|_| PathBuf::from("/var/lib/sajilo/snapshot.json")),
+            cache_path: env::var("CACHE_PATH").map_or_else(
+                |_| PathBuf::from("/var/lib/sajilo/snapshot.json"),
+                PathBuf::from,
+            ),
             contact_url: env::var("CONTACT_URL")
                 .unwrap_or_else(|_| "https://github.com/mukezhz/sajilo".to_owned()),
             min_client_version: env::var("MIN_CLIENT_VERSION")

@@ -20,9 +20,7 @@ use sajilo_api::meta::{FeedHealth, Health, Meta};
 use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
 use sajilo_api::radio::{RadioDirectory, RadioStation};
 use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalSnapshot};
-use sajilo_api::stocks::{
-    MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote,
-};
+use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
 use sajilo_api::weather::{
     AirQuality, AqiCategory, DailyForecast, WeatherCondition, WeatherLocation, WeatherSnapshot,
 };

@@ -57,15 +57,16 @@ async fn bundle(
     Query(params): Query<BundleParams>,
     headers: HeaderMap,
 ) -> Response {
-    let requested: Vec<ModuleKey> = match params.modules.as_deref() {
-        None => ModuleKey::ALL.to_vec(),
-        Some(raw) => raw
-            .split(',')
-            .map(str::trim)
-            .filter(|key| !key.is_empty())
-            .filter_map(ModuleKey::from_key)
-            .collect(),
-    };
+    let requested: Vec<ModuleKey> = params.modules.as_deref().map_or_else(
+        || ModuleKey::ALL.to_vec(),
+        |raw| {
+            raw.split(',')
+                .map(str::trim)
+                .filter(|key| !key.is_empty())
+                .filter_map(ModuleKey::from_key)
+                .collect()
+        },
+    );
 
     // An explicit list that names nothing recognisable is a client bug worth
     // reporting, not an empty bundle that looks like every feed is down.

@@ -8,6 +8,71 @@ edition = "2024"
 license = "MIT"
 repository = "https://github.com/mukezhz/sajilo"
 
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+# Every remaining pedantic/nursery lint below was triaged by hand — each is
+# either a test-fixture pattern, a cast the calendar/numeral domain makes safe
+# by construction, or a doc requirement meant for a published library crate,
+# not an internal application crate. See the PR that added `pedantic`/
+# `nursery` for the full triage.
+#
+# Casts throughout `sajilo-core`'s calendar and numeral math are on values
+# bounded by the BS year table or a single Devanagari digit (0-9) — never
+# arbitrary user input.
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
+cast_precision_loss = "allow"
+cast_lossless = "allow"
+# `assert_eq!` against a fixed fixture value *should* be an exact float
+# compare — that is the test, not a bug. The one production instance
+# (`land.rs`'s `value.round() == value`) is an intentional whole-number check.
+float_cmp = "allow"
+# `must_use`/doc-on-errors/doc-on-panics are crates.io-publish conventions;
+# this workspace has no external consumers of these APIs.
+must_use_candidate = "allow"
+return_self_not_must_use = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+# Cosmetic; this codebase's doc comments are already prose-heavy and mostly
+# don't reference identifiers that need backticks.
+doc_markdown = "allow"
+too_long_first_doc_paragraph = "allow"
+# Concentrated in `tests/` fixtures (cloning a small struct, collecting into a
+# Vec for an assertion, a helper fn that could be const) — not a production
+# hot path, not worth the noise.
+redundant_clone = "allow"
+needless_collect = "allow"
+missing_const_for_fn = "allow"
+redundant_closure_for_method_calls = "allow"
+# One-off style preferences that don't carry their weight as CI-blocking:
+duration_suboptimal_units = "allow"
+suboptimal_flops = "allow"
+needless_raw_string_hashes = "allow"
+needless_pass_by_value = "allow"
+struct_excessive_bools = "allow"
+similar_names = "allow"
+match_same_arms = "allow"
+items_after_statements = "allow"
+ignored_unit_patterns = "allow"
+enum_glob_use = "allow"
+significant_drop_tightening = "allow"
+# The `dto!` macro derives `PartialEq` uniformly for every DTO; several carry
+# `f64` fields (rates, prices) that cannot derive `Eq`. Not worth a
+# conditional macro just to satisfy this on the structs that could.
+derive_partial_eq_without_eq = "allow"
+# `tauri::generate_context!()` expands to a large const closure; the stack
+# frame belongs to Tauri's own macro, not code this workspace controls.
+large_stack_frames = "allow"
+# `article_dates.rs`'s generic resolver helpers are deliberately not Send-
+# bound: their test double uses `Rc<Cell<u32>>` for a single-threaded call
+# counter (by design — the file documents this), while the real production
+# resolver (an `&HttpClient`-capturing closure) is Send in practice. Adding
+# the bound to satisfy this lint breaks the test's intentional simplicity for
+# no real gain.
+future_not_send = "allow"
+
 [workspace.dependencies]
 sajilo-core = { path = "crates/sajilo-core" }
 sajilo-api = { path = "crates/sajilo-api" }

@@ -38,13 +38,13 @@ impl LandUnit {
     /// One of this unit, in square feet.
     pub fn square_feet(self) -> f64 {
         match self {
-            Self::Ropani => 5476.0,  // 74 ft × 74 ft
-            Self::Aana => 342.25,    // ropani / 16
-            Self::Paisa => 85.5625,  // aana / 4
-            Self::Daam => 21.390625, // paisa / 4
-            Self::Bigha => 72_900.0, // 20 kattha
-            Self::Kattha => 3_645.0, // bigha / 20
-            Self::Dhur => 182.25,    // kattha / 20
+            Self::Ropani => 5476.0,   // 74 ft × 74 ft
+            Self::Aana => 342.25,     // ropani / 16
+            Self::Paisa => 85.5625,   // aana / 4
+            Self::Daam => 21.390_625, // paisa / 4
+            Self::Bigha => 72_900.0,  // 20 kattha
+            Self::Kattha => 3_645.0,  // bigha / 20
+            Self::Dhur => 182.25,     // kattha / 20
             Self::SquareFeet => 1.0,
             Self::SquareMetre => 10.763_910_4,
         }

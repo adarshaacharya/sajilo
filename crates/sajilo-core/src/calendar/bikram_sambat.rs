@@ -169,10 +169,7 @@ pub fn days_in_month(year: i32, month: u32) -> Option<i32> {
 }
 
 fn is_valid(date: NepaliDate) -> bool {
-    match days_in_month(date.year, date.month) {
-        Some(days) => (1..=days as u32).contains(&date.day),
-        None => false,
-    }
+    days_in_month(date.year, date.month).is_some_and(|days| (1..=days as u32).contains(&date.day))
 }
 
 /// Gregorian → Bikram Sambat.

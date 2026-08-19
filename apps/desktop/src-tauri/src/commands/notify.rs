@@ -171,10 +171,9 @@ pub fn spawn_scheduler(app: AppHandle<Wry>) {
 
         loop {
             let wait = next_wake(&pending(&app), Utc::now())
-                .map(|at| (at - Utc::now()).num_seconds().max(1) as u64)
                 // Nothing pending: check back hourly so a plan added elsewhere
                 // is picked up without a restart.
-                .unwrap_or(3_600)
+                .map_or(3_600, |at| (at - Utc::now()).num_seconds().max(1) as u64)
                 // And never sleep past an hour, so a preference change is
                 // reflected within one cycle.
                 .min(3_600);

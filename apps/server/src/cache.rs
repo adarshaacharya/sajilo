@@ -87,13 +87,15 @@ impl Cache {
         // A poisoned lock means a writer panicked mid-update. The stored value
         // is still readable and still the best answer available, so serving it
         // beats taking the whole server down.
-        self.inner.read().unwrap_or_else(|error| error.into_inner())
+        self.inner
+            .read()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     fn write(&self) -> std::sync::RwLockWriteGuard<'_, Snapshot> {
         self.inner
             .write()
-            .unwrap_or_else(|error| error.into_inner())
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
     }
 
     /// Whether anything has ever been stored. Used to avoid overwriting a good
