@@ -1,4 +1,4 @@
-import type { StockQuote } from "../../../types/api/StockMarketSnapshot";
+import type { StockQuote } from "../../../types/api/StockQuote";
 import { money } from "../_lib/format";
 import { changeTone, percentText } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";

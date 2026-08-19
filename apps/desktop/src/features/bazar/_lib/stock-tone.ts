@@ -1,4 +1,5 @@
-import type { StockMarketSnapshot, StockQuote } from "../../../types/api/StockMarketSnapshot";
+import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
+import type { StockQuote } from "../../../types/api/StockQuote";
 import { money } from "./format";
 
 export function quoteOf(snapshot: StockMarketSnapshot, symbol: string): StockQuote | undefined {

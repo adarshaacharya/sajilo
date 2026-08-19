@@ -1,5 +1,5 @@
 import type { translate } from "../../../shared/lib/i18n";
-import type { MarketIndex } from "../../../types/api/StockMarketSnapshot";
+import type { MarketIndex } from "../../../types/api/MarketIndex";
 import { money, money0 } from "../_lib/format";
 import { ChangeBadge } from "./change-badge";
 

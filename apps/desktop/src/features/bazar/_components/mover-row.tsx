@@ -1,4 +1,4 @@
-import type { MarketMover } from "../../../types/api/StockMarketSnapshot";
+import type { MarketMover } from "../../../types/api/MarketMover";
 import { money, money0 } from "../_lib/format";
 
 export function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => void }) {

@@ -1,6 +1,6 @@
 import { Icon } from "../../../shared/components/icon";
 import type { translate } from "../../../shared/lib/i18n";
-import type { StockQuote } from "../../../types/api/StockMarketSnapshot";
+import type { StockQuote } from "../../../types/api/StockQuote";
 import { money, money0 } from "../_lib/format";
 import { changeText, changeTone, week52Position } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";

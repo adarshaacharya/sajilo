@@ -5,7 +5,8 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { usePersistedList } from "../../../shared/lib/persisted";
 import type { LoadState } from "../../../types/api/LoadState";
-import type { MoverBoard, StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
+import type { MoverBoard } from "../../../types/api/MoverBoard";
+import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
 import {
   changeTone,
   percentText,
