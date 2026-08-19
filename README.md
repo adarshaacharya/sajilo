@@ -8,34 +8,29 @@ A small desktop companion for Nepal: Bikram Sambat dates, festivals, day plans,
 and everyday Nepali tools. Sajilo lives in the system tray on macOS, Windows, and
 Linux.
 
-The app is being rebuilt with Tauri 2, Rust, and React. The calendar and date
-tools remain local, so they work without an internet connection. Data that comes
-from public sources is handled separately and will always show whether it is
-fresh, stale, or unavailable.
+Built with Tauri 2, Rust, and React. The calendar and date tools work fully
+offline. Data from public sources is handled separately and always shows
+whether it is fresh, stale, or unavailable — never silently blank.
 
 ## Platforms
 
-| Platform | Desktop package | Current status |
-| --- | --- | --- |
-| macOS | `.dmg` | Tauri app under active development |
-| Windows | NSIS installer | Tauri app under active development |
-| Linux | `.deb` and AppImage | Tauri app under active development |
-
-The cross-platform installers have not been published yet. The previous
-macOS-only Swift beta is no longer the current development target.
+| Platform | Desktop package |
+| --- | --- |
+| macOS | `.dmg` |
+| Windows | NSIS installer |
+| Linux | `.deb` and AppImage |
 
 ## What Sajilo includes
 
 - Bikram Sambat calendar, AD conversion, tithi, festivals, and public holidays
 - Personal day plans and reminders
 - Upcoming events and detailed day information
+- Weather and air quality, NRB forex, Bazar (gold/silver, fuel, Kalimati
+  vegetables), stocks, news from 9 Nepali/English sources, rashifal, and radio
+- World clocks alongside Nepal time
 - Land, weight, VAT, and simple-interest tools
 - Nepali and English interface options, with Devanagari or English numerals
 - Tray date display designed for each platform
-
-The next part of the Tauri migration brings back the online modules: weather and
-air quality, NRB forex, Bazar rates, news, rashifal, and radio. These use a shared
-server cache rather than making every desktop install scrape public websites.
 
 ## Run from source
 

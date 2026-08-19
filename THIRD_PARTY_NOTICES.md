@@ -342,7 +342,7 @@ leading-cell exclusion so none of it can silently regress.
 ## Bikram Sambat month-length data
 
 The bundled BS 1992–2090 month-length table in
-`Sources/SajiloApp/Core/Calendar/BikramSambatCalendar.swift` was assembled from
+`crates/sajilo-core/src/calendar/bikram_sambat.rs` was assembled from
 five independently maintained open-source calendar tables:
 
 | Project | Language | Range | Licence |
@@ -399,14 +399,15 @@ scrape is treated as the outlier there. This is the opposite call to BS 2084,
 and deliberately so: for a past year the libraries have had decades to be
 corrected, whereas for a future year they are extrapolating and the published
 calendar is the only real evidence. These are enforced in
-`Tests/SajiloAppTests/BikramSambatCalendarTests.swift`.
+`crates/sajilo-core/tests/calendar_conversion.rs`.
 
 ### Provisional years
 
 Nepal's Panchanga Nirnayak Samiti publishes the official calendar roughly a year
 ahead, and no published calendar was available past BS 2084 at the time of
 writing. **BS 2085–2090 are therefore unverified**, exposed as
-`BikramSambatCalendar.provisionalNepaliYears`, and labelled as such in the UI.
+`sajilo_core::calendar::bikram_sambat::PROVISIONAL_YEARS`, and labelled as such
+in the UI.
 Re-verify each against the official calendar as it is published, and extend the
 supported range only with the same month-by-month check — not on library
 agreement alone.

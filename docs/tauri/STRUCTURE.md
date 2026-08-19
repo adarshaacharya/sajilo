@@ -4,7 +4,7 @@ File-level layout for the workspace. High-level rationale lives in
 [`PLAN.md`](PLAN.md); milestone-by-milestone delivery in [`MILESTONES.md`](MILESTONES.md).
 
 Nothing here is scaffolding for its own sake — every file listed maps to something
-the current Swift app already does, or to a decision recorded in `PLAN.md`.
+the current app already does, or to a decision recorded in `PLAN.md`.
 
 ## Workspace root
 
@@ -21,14 +21,13 @@ sajilo/
 │   ├── server/
 │   └── desktop/
 ├── data/
-│   └── calendar-events/            # 2066–2083, <bs-year>/<month>.json — moved from Sources/
+│   └── calendar-events/            # 2066–2083, <bs-year>/<month>.json
 ├── fixtures/                       # recorded upstream HTML/JSON for parser tests
 │   ├── nrb/  noc/  kalimati/  fenegosida/
 │   ├── open-meteo/  hamropatro/  ratopati/
 │   └── rss/
 ├── docs/tauri/{PLAN,MILESTONES,STRUCTURE}.md
-├── .github/workflows/{ci.yml, release-desktop.yml, release-server.yml, smoke.yml}
-└── Sources/, Tests/, Package.swift # Swift app — deleted at M11
+└── .github/workflows/{ci.yml, release-desktop.yml, release-server.yml, smoke.yml}
 ```
 
 ## `crates/sajilo-core` — pure logic, no I/O
@@ -40,25 +39,25 @@ crates/sajilo-core/
 │   ├── lib.rs
 │   ├── calendar/
 │   │   ├── mod.rs
-│   │   ├── bikram_sambat.rs        # ← BikramSambatCalendar.swift
-│   │   ├── nepali_date.rs          # ← NepaliDate.swift
-│   │   ├── month.rs                # ← CalendarMonth.swift
-│   │   ├── events.rs               # ← CalendarEventStore.swift (embeds data/calendar-events)
-│   │   └── upcoming.rs             # ← UpcomingEventsService.swift
-│   ├── numerals.rs                 # ← NumeralStyle.swift (Devanagari ↔ ASCII)
-│   ├── nepal_time.rs               # ← NepalTime.swift (Asia/Kathmandu, +05:45)
+│   │   ├── bikram_sambat.rs        # BS<->AD conversion, month lengths
+│   │   ├── nepali_date.rs          # date value type, month/day names
+│   │   ├── month.rs                # month grid for the UI
+│   │   ├── events.rs               # (embeds data/calendar-events)
+│   │   └── upcoming.rs             # forward window, limit 100, horizon 400 days
+│   ├── numerals.rs                 # (Devanagari ↔ ASCII)
+│   ├── nepal_time.rs               # (Asia/Kathmandu, +05:45)
 │   ├── tools/
-│   │   ├── land.rs                 # ← LandConverter.swift (Hill / Terai systems)
-│   │   ├── units.rs                # ← NepaliUnits.swift (weight)
+│   │   ├── land.rs                 # (Hill / Terai systems)
+│   │   ├── units.rs                # (weight)
 │   │   ├── vat.rs
 │   │   └── interest.rs
 │   └── error.rs
 └── tests/
-    ├── calendar_conversion.rs      # ← BikramSambatCalendarTests.swift
-    ├── calendar_events.rs          # ← CalendarEventStoreTests.swift
-    ├── upcoming_events.rs          # ← UpcomingEventsServiceTests.swift
-    ├── numerals.rs                 # ← NepaliNumeralsTests + NumeralStyleTests
-    └── tools.rs                    # ← LandConverterTests + NepaliUnitsTests
+    ├── calendar_conversion.rs      # BS<->AD conversion, edge years
+    ├── calendar_events.rs          # bundled festival data coverage
+    ├── upcoming_events.rs          # forward window, limit, horizon
+    ├── numerals.rs                 # Devanagari/ASCII, numeral style
+    └── tools.rs                    # land conversion, unit conversion
 ```
 
 This crate must stay free of `tokio`, `reqwest`, and every Tauri type. That is what
@@ -96,18 +95,18 @@ crates/sajilo-providers/
 ├── src/
 │   ├── lib.rs                      # Provider trait, shared http client + UA
 │   ├── http.rs                     # timeouts, retry policy, identifying User-Agent
-│   ├── html.rs                     # ← HTMLTable.swift (table scraping helper)
-│   ├── nrb.rs                      # forex          ← NRBForexProvider.swift
-│   ├── noc.rs                      # fuel           ← NOCFuelProvider.swift
-│   ├── kalimati.rs                 # vegetables     ← KalimatiMarketProvider.swift
-│   ├── fenegosida.rs               # gold / silver  ← FenegosidaMetalProvider.swift
-│   ├── open_meteo.rs               # weather + AQI  ← OpenMeteoWeatherProvider.swift
-│   ├── hamropatro.rs               # rashifal       ← HamroPatroRashifalProvider.swift
-│   ├── ratopati.rs                 # station list   ← RatopatiRadioProvider.swift
+│   ├── html.rs                     # (table scraping helper)
+│   ├── nrb.rs                      # forex
+│   ├── noc.rs                      # fuel
+│   ├── kalimati.rs                 # vegetables
+│   ├── fenegosida.rs               # gold / silver
+│   ├── open_meteo.rs               # weather + AQI
+│   ├── hamropatro.rs               # rashifal
+│   ├── ratopati.rs                 # station list
 │   └── rss/
-│       ├── mod.rs                  # 9 sources, merge + dedupe ← RSSNewsProvider.swift
-│       ├── parser.rs               # ← RSSParser.swift
-│       └── article_date.rs         # ← ArticleDateResolver.swift
+│       ├── mod.rs                  # 9 sources, merge + dedupe
+│       ├── parser.rs               # feed XML into NewsItem
+│       └── article_date.rs         # Annapurna Post article-page date resolver
 └── tests/                          # one test per provider, reading from fixtures/
 ```
 
@@ -171,7 +170,7 @@ apps/desktop/src-tauri/
     ├── notify/
     │   ├── mod.rs
     │   ├── scheduler.rs            # sleep-until-next, recompute on pref change
-    │   └── planner.rs              # ← FestivalNotificationPlanner + DayPlanReminderPlanner
+    │   └── planner.rs              # next festival eve, holiday eve, day-plan reminder
     ├── system/
     │   ├── dock.rs                 # macOS set_activation_policy
     │   └── autostart.rs            # launch at login
@@ -179,9 +178,9 @@ apps/desktop/src-tauri/
         ├── mod.rs
         ├── calendar.rs             # today, month, convert, events_for, upcoming
         ├── feeds.rs                # get_bundle, refresh_module
-        ├── plans.rs                # ← DayPlanStore.swift
+        ├── plans.rs                # day plans: add, delete, list
         ├── prefs.rs                # read / write preferences
-        ├── backup.rs               # ← SajiloBackup.swift, format version 1
+        ├── backup.rs               # format version 1
         └── tools.rs                # land, weight, VAT, interest (delegates to sajilo-core)
 ```
 
@@ -230,7 +229,7 @@ apps/desktop/
     ├── main.tsx
     ├── app.tsx                     # router + shell: back header, bottom tab bar
     ├── index.css                   # Tailwind + theme tokens + @font-face
-    ├── i18n/{en,ne}.json           # ← Resources/{en,ne}.lproj/Localizable.strings
+    ├── i18n/{en,ne}.json
     ├── types/api/*.ts              # GENERATED by ts-rs, one file per type — do not edit
     ├── shared/                     # cross-cutting only — used by 2+ features
     │   ├── components/             # card, icon, header, tab-bar, state-banner, …

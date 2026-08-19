@@ -28,19 +28,18 @@ product-specific in it yet.
 - [x] `Cargo.toml` workspace: `crates/*`, `apps/server`, `apps/desktop/src-tauri`
 - [x] Empty `sajilo-core`, `sajilo-api`, `sajilo-providers` crates that compile
 - [x] `rust-toolchain.toml` pinned to a stable version
-- [x] One copy of the calendar data, reachable from both stacks — `data/calendar-events`
-      is a symlink to the Swift resource directory. Inverted from the original plan:
-      SwiftPM copies a symlink verbatim into the bundle, so the real directory has to
-      stay under `Sources/`. Flip it at M11 when the Swift app is deleted.
+- [x] One copy of the calendar data, reachable from both stacks —
+      `data/calendar-events` was originally a symlink into the Swift resource
+      directory (SwiftPM copies a symlink verbatim into the bundle, so the real
+      directory had to stay under `Sources/`); materialized into a real
+      directory at M11 when the Swift app was deleted
 - [x] Create empty `fixtures/` tree, one directory per source
 - [x] `.github/workflows/ci.yml`: `cargo build`, `cargo test --workspace`,
       `cargo clippy -- -D warnings`, `cargo fmt --check` on macOS + Windows + Linux
-- [x] Keep the existing Swift CI job untouched (8 `CalendarEventStoreTests` failures
-      over truncated BS 2081–2083 source data pre-date this work and remain)
 
 ### Acceptance
 
-`cargo test --workspace` passes on all three OSes in CI, and `swift test` still passes.
+`cargo test --workspace` passes on all three OSes in CI.
 
 ### Notes
 
@@ -417,25 +416,44 @@ is provably independent of client count.
 
 ---
 
-## M11 — Retire the Swift app ☐
+## M11 — Retire the Swift app ◐
 
 **Goal** One stack on `main`.
 **Depends on** M10 plus one full beta release cycle · **Size** M
 
+**Note:** the deletion below happened on explicit instruction, ahead of its
+formal M10 gate — M10's parity checklist, notarization, Windows signing, and
+beta channel are still `[ ]`. Nothing here claims those are done; only that
+the Swift source and its docs no longer exist.
+
 ### Tasks
 
-- [ ] Final macOS Sparkle release pointing existing users at the Tauri build
-- [ ] Delete `Sources/`, `Tests/`, `Package.swift`, Sparkle, `appcast.xml`,
-      the macOS-only workflows, and `scripts/` entries that only served them
-- [ ] Rewrite `README.md`, `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`,
-      `docs/CODING-STANDARDS.md` (Rust + TS), `CONTRIBUTING.md`, `RELEASING.md`
-- [ ] Update `CLAUDE.md` and `AGENTS.md` for the new stack
-- [ ] Fold `docs/tauri/` into the main docs; keep `PLAN.md` as a historical record
+- [ ] Final macOS Sparkle release pointing existing users at the Tauri build —
+      **not applicable**: no Sparkle release channel was ever published, so
+      there was no existing install base to redirect.
+- [x] Delete `Sources/`, `Tests/`, `Package.swift`, Sparkle, `appcast.xml`,
+      the macOS-only workflows (`release.yml`, the `swift test` job in `ci.yml`),
+      and `scripts/` entries that only served them
+      (`AppBundleInfo.plist`, `AppIcon.icns`/`.iconset`, `make-app-icon.swift`,
+      `package-release.sh`, `run-local-app.sh`, `update-appcast.sh`)
+- [x] Materialize `data/calendar-events` (was a symlink into
+      `Sources/SajiloApp/Resources/CalendarEvents`) into a real directory —
+      the one thing that would have silently broken `sajilo-core`'s embedded
+      data the moment `Sources/` was gone
+- [x] Rewrite `README.md`, `CONTRIBUTING.md`, `RELEASING.md`; delete
+      `docs/ARCHITECTURE.md`, `docs/DEVELOPMENT.md`, `docs/CODING-STANDARDS.md`
+      (Swift-only; Rust/TS conventions live in `CLAUDE.md` and `docs/tauri/`)
+- [x] Update `CLAUDE.md` for the new stack (`AGENTS.md` is a symlink to it)
+- [ ] Fold `docs/tauri/` into the main docs — not done; `PLAN.md`/`MILESTONES.md`
+      still live under `docs/tauri/` as the historical record
 
 ### Acceptance
 
-`main` builds one workspace, CI ships three desktop targets plus a server image, and
-no Swift remains.
+`main` builds one workspace (verified: `cargo build --workspace`,
+`cargo test --workspace`, `bun run build` all pass after the deletion). CI still
+needs to be run for real to confirm the updated `ci.yml`/`release-desktop.yml`
+against three desktop targets plus a server image — that hasn't happened yet.
+No Swift source, tests, or Swift-specific docs remain.
 
 ---
 

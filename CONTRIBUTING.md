@@ -2,19 +2,21 @@
 
 ## Development baseline
 
-- macOS 14+
-- Swift 6.2+
-- SwiftUI and Observation
+- Rust (pinned version in `rust-toolchain.toml`)
+- Bun
+- [Tauri v2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS
 - No third-party runtime dependencies without a written reason
-- Full Xcode is required to run the app and its Swift Testing suite
 
 ## Before opening a pull request
 
 1. Keep the change scoped to one feature or concern.
-2. Follow [Coding Standards](docs/CODING-STANDARDS.md).
-3. Add or update tests for pure business logic and service behavior.
-4. Run `swift test` from a full Xcode environment.
-5. Verify the menu-bar interaction manually when changing SwiftUI UI.
+2. Follow the conventions in [CLAUDE.md](CLAUDE.md) and `docs/tauri/`.
+3. Add or update tests for pure business logic and service behavior —
+   `sajilo-core` and `sajilo-providers` tests never touch the network; provider
+   tests read from `fixtures/`.
+4. Run `cargo test --workspace` and, for frontend changes, `bun run typecheck`
+   and `bun run lint` from `apps/desktop`.
+5. Verify the menu-bar interaction manually when changing the desktop UI.
 6. Explain user-visible changes and data-source changes in the pull request.
 
 ## Commit guidance
@@ -31,4 +33,6 @@ Avoid mixing formatting-only cleanup with behavior changes.
 
 ## Data-source changes
 
-Any new remote provider must document its source, permitted use, refresh interval, cache policy, stale-data behavior, and failure state. Do not place scraping/parsing logic in a SwiftUI view.
+Any new remote provider must document its source, permitted use, refresh
+interval, cache policy, stale-data behavior, and failure state. Fetching and
+parsing live in `crates/sajilo-providers` — never in a frontend component.

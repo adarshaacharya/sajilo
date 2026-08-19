@@ -4,9 +4,9 @@
 
 ## Verification
 
-- [ ] Added/updated Swift Testing coverage where applicable
-- [ ] Ran `swift test` in full Xcode
-- [ ] Manually checked relevant menu-bar/macOS interaction
+- [ ] Added/updated tests where applicable (`cargo test --workspace`)
+- [ ] `bun run typecheck` and `bun run lint` pass, if the frontend changed
+- [ ] Manually checked relevant menu-bar/tray interaction
 - [ ] Checked offline/stale/error behavior if remote data changed
 
 ## Notes for reviewers

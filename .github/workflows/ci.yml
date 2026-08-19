@@ -9,21 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Build and test
-    runs-on: macos-15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
-      - name: Show selected toolchain
-        run: |
-          xcodebuild -version
-          swift --version
-      - name: Test package
-        run: swift test
-
   rust:
     name: Rust ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

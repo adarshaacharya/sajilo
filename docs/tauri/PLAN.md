@@ -1,12 +1,13 @@
 # Sajilo → Tauri 2 + shared backend
 
-Status: proposed. No code written yet.
+Status: complete. The Swift app has been retired; this document is kept as the
+historical rationale for the decisions below.
 
 ## Why
 
-Sajilo today is a macOS-only SwiftUI menu-bar app (`Sources/SajiloApp`, ~11.3k LOC
-plus ~4.5k LOC of Swift Testing) where every client scrapes every source directly.
-Two problems follow from that:
+Sajilo was originally a macOS-only SwiftUI menu-bar app (~11.3k LOC plus ~4.5k
+LOC of Swift Testing) where every client scraped every source directly. Two
+problems followed from that:
 
 1. Shipping on Windows and Linux means two more native rewrites.
 2. When an upstream site changes its HTML, every installed copy breaks until every
@@ -61,8 +62,7 @@ sajilo/
 │       │   └── i18n/{en,ne}.json   # ported from Resources/*.lproj/Localizable.strings
 │       └── tauri.conf.json
 ├── data/calendar-events/           # 2066–2083 JSON, embedded in both binaries
-├── docs/tauri/
-└── Sources/, Tests/, Package.swift # existing Swift app — kept until parity, then deleted
+└── docs/tauri/
 ```
 
 `sajilo-api` existing as its own crate is what stops server and client DTOs from
@@ -252,9 +252,7 @@ workflows in `.github/workflows/`.
   boundaries, invalid input), numerals, land/weight/VAT/interest, cache freshness,
   backup round-trip.
 - Provider parsers are tested against **recorded HTML/JSON fixtures**, never live
-  network — same discipline as the current Swift tests.
-- Port the existing Swift fixtures first (`Tests/SajiloAppTests/BikramSambatCalendarTests.swift`
-  and friends); they are the specification.
+  network.
 - Server API tests run against a fake provider set, asserting stale-on-failure,
   ETag/304, and bundle composition.
 - One live smoke test per source, ignored by default, run on a schedule against the
@@ -263,9 +261,10 @@ workflows in `.github/workflows/`.
 
 ## Rollout
 
-Deploy the server first and point beta desktop builds at it. Ship Tauri builds as a
-beta channel alongside the Swift release. Cut over when parity is signed off (M10),
-then delete `Sources/`, `Tests/`, `Package.swift`, and retire `appcast.xml`.
+The server deployed first, beta desktop builds pointed at it, and Tauri builds
+shipped as a beta channel alongside the Swift release. The Swift app was
+deleted once parity was signed off (M10/M11) — `Sources/`, `Tests/`,
+`Package.swift`, and `appcast.xml` are gone.
 
 Milestones, tasks, and acceptance criteria: [`MILESTONES.md`](MILESTONES.md).
 Folder structure: [`STRUCTURE.md`](STRUCTURE.md).
