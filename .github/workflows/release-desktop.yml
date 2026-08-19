@@ -49,6 +49,9 @@ jobs:
       - name: Build and bundle
         uses: tauri-apps/tauri-action@v0
         env:
+          # Used by tauri-action to create the draft release and upload every
+          # platform's bundle. `contents: write` above grants this token that scope.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # All three are absent until the keypair is generated
           # (scripts/generate-updater-key.sh) and added to this repository's
           # secrets. Without them the bundle is unsigned, `latest.json` is not
