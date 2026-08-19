@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CONTROL, CONTROL_LABEL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
 import { Select } from "../../../shared/components/select";
@@ -72,11 +72,16 @@ function PlanEditor({
   onSave: () => void;
 }) {
   const { t } = useSettings();
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    titleInputRef.current?.focus();
+  }, []);
 
   return (
     <div className="day-plan-editor space-y-2">
       <input
-        autoFocus
+        ref={titleInputRef}
         value={draft.title}
         onChange={(e) => onChange({ ...draft, title: e.target.value })}
         placeholder={t("planner.title-field")}
@@ -203,7 +208,7 @@ export function DayPlanSection({
   };
 
   const saveDraft = async () => {
-    if (!draft || !draft.title.trim()) return;
+    if (!draft?.title.trim()) return;
     const [hour, minute] = draft.time.split(":").map(Number);
     await api.savePlan({
       id: draft.id,

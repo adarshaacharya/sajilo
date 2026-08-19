@@ -2,9 +2,11 @@
 export function Sparkline({
   values,
   className = "text-positive/80",
+  label = "Trend chart",
 }: {
   values: number[];
   className?: string;
+  label?: string;
 }) {
   if (values.length < 2) return null;
 
@@ -25,9 +27,11 @@ export function Sparkline({
     <svg
       viewBox={`0 0 ${width} ${height}`}
       className={`h-[22px] w-full ${className}`}
-      aria-hidden
+      role="img"
+      aria-label={label}
       preserveAspectRatio="none"
     >
+      <title>{label}</title>
       <polyline
         fill="none"
         stroke="currentColor"

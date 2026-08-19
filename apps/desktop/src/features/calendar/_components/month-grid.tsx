@@ -5,6 +5,7 @@ import { digits } from "../../../shared/lib/numerals";
 /** Swift MonthCalendarView weekday symbols. */
 const WEEKDAYS_NE = ["आ", "सो", "मं", "बु", "बि", "शु", "श"];
 const WEEKDAYS_EN = ["S", "M", "T", "W", "T", "F", "S"];
+const WEEKDAY_IDS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 export function MonthGrid({
   month,
@@ -23,7 +24,7 @@ export function MonthGrid({
       <div className="grid grid-cols-7 gap-1 pb-1.5">
         {weekdays.map((label, index) => (
           <div
-            key={`${label}-${index}`}
+            key={WEEKDAY_IDS[index]}
             className={`text-center text-[11px] font-semibold ${
               index === 6 ? "text-holiday" : "text-text-secondary"
             }`}

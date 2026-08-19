@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { cloneElement, type ReactElement, useId } from "react";
 import { CONTROL_LABEL } from "../../../shared/components/control";
 
 export function ToolControl({
@@ -7,13 +7,17 @@ export function ToolControl({
   className = "",
 }: {
   label: string;
-  children: ReactNode;
+  children: ReactElement<{ id?: string }>;
   className?: string;
 }) {
+  const inputId = useId();
+
   return (
-    <label className={`block min-w-0 ${className}`}>
-      <span className={CONTROL_LABEL}>{label}</span>
-      {children}
-    </label>
+    <div className={`block min-w-0 ${className}`}>
+      <label htmlFor={inputId} className={CONTROL_LABEL}>
+        {label}
+      </label>
+      {cloneElement(children, { id: inputId })}
+    </div>
   );
 }

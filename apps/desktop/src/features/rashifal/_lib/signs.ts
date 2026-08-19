@@ -98,5 +98,7 @@ export function validSign(saved: string | null): RashiSign | null {
 }
 
 export function signMeta(id: RashiSign) {
-  return SIGNS.find((entry) => entry.id === id)!;
+  const sign = SIGNS.find((entry) => entry.id === id);
+  if (!sign) throw new Error(`Unknown rashi sign: ${id}`);
+  return sign;
 }

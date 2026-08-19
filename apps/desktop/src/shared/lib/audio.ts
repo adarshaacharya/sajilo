@@ -40,14 +40,16 @@ type AudioBag = {
 const bag: AudioBag = (() => {
   const key = "__sajiloRadio";
   const g = globalThis as unknown as Record<string, AudioBag | undefined>;
-  if (!g[key]) {
-    g[key] = {
-      element: null,
-      state: { nowPlaying: null, isLoading: false, isPlaying: false, error: null },
-      listeners: new Set(),
-    };
-  }
-  return g[key]!;
+  const existing = g[key];
+  if (existing) return existing;
+
+  const created: AudioBag = {
+    element: null,
+    state: { nowPlaying: null, isLoading: false, isPlaying: false, error: null },
+    listeners: new Set(),
+  };
+  g[key] = created;
+  return created;
 })();
 
 function publish(next: Partial<PlayerState>) {
@@ -57,7 +59,7 @@ function publish(next: Partial<PlayerState>) {
 
 function syncFromElement() {
   const el = bag.element;
-  if (!el || !el.src) {
+  if (!el?.src) {
     publish({ isPlaying: false, isLoading: false });
     return;
   }
