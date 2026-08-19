@@ -1,6 +1,0 @@
-interface:
-  display_name: "SwiftUI Expert"
-  short_description: "Review views for invalidations, refactor state management, and adopt Liquid Glass."
-  icon_small: "./assets/logo-small.png"
-  icon_large: "./assets/logo.png"
-  brand_color: "#006BFF"
