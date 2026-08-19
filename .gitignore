@@ -21,6 +21,15 @@ build/
 documents/
 scripts/AppIcon.iconset/
 
+# JavaScript / Vite build output and dependencies
+node_modules/
+dist/
+apps/desktop/.vite/
+
+# Rust / Tauri build output and generated schemas
+target/
+apps/desktop/src-tauri/gen/
+
 # Local configuration and secrets
 .env
 .env.*

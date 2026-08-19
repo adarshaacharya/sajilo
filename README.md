@@ -22,9 +22,14 @@ Sajilo brings the Nepali calendar and everyday essentials to your Mac menu bar.
 
 ## Install
 
-**[Download Sajilo beta for Mac](https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.5/Sajilo-macos-arm64.dmg)**
+**[Download Sajilo](https://github.com/adarshaacharya/sajilo/releases)**
 
-Open the downloaded file, then drag **Sajilo.app** into the Applications folder.
+Choose the newest release, then download the installer for your platform. Beta
+releases are marked as prereleases on that page.
+
+### macOS
+
+Open the downloaded `.dmg`, then drag **Sajilo.app** into the Applications folder.
 
 ### First launch
 
