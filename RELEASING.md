@@ -1,68 +1,46 @@
 # Releasing Sajilo
 
-GitHub Actions builds and publishes the Mac download for you.
+`.github/workflows/release-desktop.yml` builds macOS (arm64 + x64), Windows, and
+Linux on every `v*` tag and publishes a GitHub prerelease with the installers
+attached.
 
 ## Before releasing
 
-1. Open `scripts/AppBundleInfo.plist`.
-2. Change `CFBundleShortVersionString` to the new version, for example `0.1.0`.
-3. Change `CFBundleVersion` to a higher number each release.
-4. Commit and push your changes to GitHub.
-
-## Changing the app icon
-
-The icon is generated, not a checked-in drawing. Edit `scripts/make-app-icon.swift`
-and run:
-
-```bash
-swift scripts/make-app-icon.swift
-```
-
-That rewrites `scripts/AppIcon.icns`, which both bundle scripts copy into
-`Contents/Resources`. Commit the `.icns`; the `AppIcon.iconset` folder beside it
-is an intermediate and is ignored.
+1. Bump `version` in `apps/desktop/src-tauri/tauri.conf.json`.
+2. Commit and push.
 
 ## Publish a beta
-
-For the first beta of version `0.1.0`, create and push this tag:
 
 ```bash
 git tag -a v0.1.0-beta.1 -m "Sajilo 0.1.0 beta 1"
 git push origin v0.1.0-beta.1
 ```
 
-GitHub Actions will test the app, create the DMG and ZIP, then publish a GitHub prerelease. For a stable release, use the matching tag without `-beta.1`, for example `v0.1.0`.
+For a stable release, use the matching tag without `-beta.N`, e.g. `v0.1.0`.
 
-## After every release: update the appcast
+## The updater
 
-Sparkle only offers an update if it appears in `appcast.xml`. Publishing a
-release does not add it — run this once the GitHub release exists:
+Tauri's own updater plugin (`tauri-plugin-updater`) checks a `latest.json` that
+`tauri-action` generates and attaches to the GitHub release automatically — no
+separate feed file to maintain, unlike the old Sparkle `appcast.xml`.
 
-```bash
-./scripts/update-appcast.sh
-```
+It only signs artifacts, and the update-checker only activates in the built
+app, once the signing keypair exists:
 
-It rebuilds the whole file from the releases GitHub actually has, signing each
-one with your private EdDSA key. Then commit and push it:
+1. Run `scripts/generate-updater-key.sh` once. It refuses to overwrite an
+   existing key. **The private key never leaves your machine** — it is what
+   proves an update came from you.
+2. Add three repository secrets: `TAURI_SIGNING_PRIVATE_KEY`,
+   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` (both from the generated keypair), and
+   `SAJILO_UPDATER_PUBKEY` (the public key's contents, baked into the binary at
+   compile time — see `register_updater` in `apps/desktop/src-tauri/src/lib.rs`).
 
-```bash
-git add appcast.xml && git commit -m "Update the appcast" && git push
-```
+Until those secrets exist, `release-desktop.yml` still builds and publishes,
+just with unsigned artifacts and the updater compiled out of the binary
+entirely (`updater_enabled()` returns `false`, and the Settings "check for
+updates" row stays hidden) — this is deliberate rather than a broken state.
 
-Sajilo reads the feed from `main`, so it takes effect as soon as that push
-lands. Existing users get the update in place, which also skips the Gatekeeper
-warning a fresh download shows.
+## Do not commit build artifacts
 
-**This step cannot run in CI.** The signing key lives in your login Keychain and
-is the only thing proving an update came from you, since the app is not
-notarized. Do not export it into GitHub secrets.
-
-After you publish a stable release, this permanent link will download it:
-
-`https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg`
-
-The release is for Apple Silicon Macs. It is not Apple-notarized, so first-time users need to Control-click the app and choose **Open**.
-
-## Do not commit build files
-
-Do not add `.build/`, `.app`, `.dmg`, or `.zip` files to Git. They are generated automatically and are already ignored by `.gitignore`.
+`target/`, `dist/`, `node_modules/`, and platform bundle output are generated
+and already covered by `.gitignore`.

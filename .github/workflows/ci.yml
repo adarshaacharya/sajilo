@@ -9,17 +9,82 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Build and test
-    runs-on: macos-15
+  rust:
+    name: Rust ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
-      - name: Show selected toolchain
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Format
+        run: cargo fmt --all --check
+      # The desktop crate needs system webkit libraries, so it is built in the
+      # `desktop` job below rather than dragging those into every Rust check.
+      - name: Clippy
+        run: cargo clippy --workspace --exclude sajilo-desktop --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --workspace --exclude sajilo-desktop
+      - name: TypeScript bindings are current
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
         run: |
-          xcodebuild -version
-          swift --version
-      - name: Test package
-        run: swift test
+          # Regenerating must be a no-op; a stale api.ts would let a renamed
+          # Rust field reach the frontend without breaking the build.
+          cargo test -p sajilo-api --features typescript
+          if ! git diff --quiet -- apps/desktop/src/types; then
+            echo "Generated bindings are stale. Run:" >&2
+            echo "  cargo test -p sajilo-api --features typescript" >&2
+            git diff --stat -- apps/desktop/src/types >&2
+            exit 1
+          fi
+      - name: sajilo-core stays I/O-free
+        shell: bash
+        run: |
+          # The crate must compile into the server, the desktop binary and a
+          # plain cargo test, so it may not pull in a runtime or an HTTP client.
+          for crate in tokio reqwest tauri hyper; do
+            if cargo tree -p sajilo-core --prefix none | grep -qw "$crate"; then
+              echo "sajilo-core must not depend on $crate" >&2
+              exit 1
+            fi
+          done
+
+  desktop:
+    name: Desktop ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Linux webkit dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - name: Install frontend dependencies
+        working-directory: apps/desktop
+        run: bun install --frozen-lockfile
+      - name: Lint and typecheck the frontend
+        working-directory: apps/desktop
+        run: |
+          bun run lint
+          bun run typecheck
+      - name: Build the frontend
+        working-directory: apps/desktop
+        run: bun run build
+      - name: Build the shell
+        run: cargo build -p sajilo-desktop

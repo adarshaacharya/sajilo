@@ -1,0 +1,29 @@
+[package]
+name = "sajilo-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "sajilo-server"
+path = "src/main.rs"
+
+[dependencies]
+sajilo-api.workspace = true
+sajilo-core.workspace = true
+sajilo-providers.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "time", "fs"] }
+tower-http = { version = "0.6", features = ["trace", "compression-gzip"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "time", "test-util"] }
+tower = { version = "0.5", features = ["util"] }

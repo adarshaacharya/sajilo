@@ -1,0 +1,47 @@
+[package]
+name = "sajilo-desktop"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+# Tauri wants the app as a library so the mobile entry points can share it.
+name = "sajilo_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+sajilo-api.workspace = true
+sajilo-core.workspace = true
+sajilo-providers.workspace = true
+chrono.workspace = true
+futures-util = "0.3"
+serde.workspace = true
+serde_json.workspace = true
+tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
+tauri-plugin-store = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-opener = "2"
+tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+tauri-plugin-process = "2"
+# Windows and Linux cannot show text beside a tray icon, so the day number is
+# drawn into the icon itself.
+tokio = { version = "1", features = ["macros", "rt"] }
+tiny-skia = "0.11"
+cosmic-text = "0.14"
+
+[target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
+tauri-plugin-autostart = "2"
+tauri-plugin-updater = "2"
+
+[target."cfg(target_os = \"macos\")".dependencies]
+objc2-app-kit = { version = "0.3.2", features = ["NSColor", "NSWindow"] }
+# Native NSVisualEffectView — same class of material Swift uses for `.regularMaterial`.
+window-vibrancy = "0.6"
