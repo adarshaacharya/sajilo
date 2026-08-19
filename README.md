@@ -99,13 +99,10 @@ crates/              Shared Rust calendar engine, data models, and providers
 apps/desktop/        Tauri desktop app (Rust tray shell + React interface)
 apps/server/         Scheduled cache and API for public data sources
 data/calendar-events/ Bundled Bikram Sambat event data
-docs/tauri/          Migration plan and milestones
 ```
-
-For the implementation status and remaining release work, see the
-[Tauri milestones](docs/tauri/MILESTONES.md).
 
 ## License
 
-Sajilo is available under the [MIT License](LICENSE). Calendar-data notices are
-in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Sajilo is available under the [MIT License](LICENSE). Full detail on every
+data source it reads, and credit to each, is in
+[THIRD_PARTY_ATTRIBUTIONS.md](THIRD_PARTY_ATTRIBUTIONS.md).

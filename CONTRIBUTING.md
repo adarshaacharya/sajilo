@@ -10,7 +10,7 @@
 ## Before opening a pull request
 
 1. Keep the change scoped to one feature or concern.
-2. Follow the conventions in [CLAUDE.md](CLAUDE.md) and `docs/tauri/`.
+2. Follow the conventions in [CLAUDE.md](CLAUDE.md).
 3. Add or update tests for pure business logic and service behavior —
    `sajilo-core` and `sajilo-providers` tests never touch the network; provider
    tests read from `fixtures/`.

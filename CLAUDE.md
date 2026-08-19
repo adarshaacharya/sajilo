@@ -40,7 +40,6 @@ Linux.
 | `apps/desktop/src/` | The web UI — React 19 + TypeScript + Tailwind, feature-based (`features/<name>/`, `shared/` for cross-cutting). |
 | `data/calendar-events/` | Bundled BS calendar events (2066–2083), embedded into `sajilo-core` at build time. |
 | `fixtures/` | Recorded upstream HTML/JSON so provider parser tests never touch the network. |
-| `docs/tauri/` | Architecture plan, milestones, folder structure reference. |
 
 ## Commands
 
@@ -61,9 +60,6 @@ bun run lint
 ```
 
 ## Conventions
-
-Read before changing code: `docs/tauri/PLAN.md`, `docs/tauri/MILESTONES.md`,
-`docs/tauri/STRUCTURE.md`.
 
 Non-negotiables:
 
