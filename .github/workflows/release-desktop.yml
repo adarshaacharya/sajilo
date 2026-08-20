@@ -71,3 +71,39 @@ jobs:
           releaseName: Sajilo ${{ github.ref_name }}
           releaseDraft: true
           args: ${{ matrix.args }}
+      # Tauri 2.11's AppImage bundler includes libwayland from the Ubuntu build
+      # host. On rolling-release Wayland systems (including current Arch), that
+      # library can conflict with the host Mesa EGL driver and prevent WebKitGTK
+      # from creating a window. Keep Wayland client libraries system-provided.
+      # See https://github.com/tauri-apps/tauri/issues/15665.
+      - name: Repair AppImage Wayland compatibility
+        if: matrix.target == 'linux-x64'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          APPIMAGE=$(find "$GITHUB_WORKSPACE/target" -type f -name '*.AppImage' -print -quit)
+          test -n "$APPIMAGE"
+          chmod +x "$APPIMAGE"
+
+          WORK=$(mktemp -d)
+          trap 'rm -rf "$WORK"' EXIT
+          (cd "$WORK" && "$APPIMAGE" --appimage-extract >/dev/null)
+
+          if ! compgen -G "$WORK/squashfs-root/usr/lib/libwayland-*" > /dev/null; then
+            echo "No bundled Wayland libraries found; leaving AppImage unchanged."
+            exit 0
+          fi
+
+          rm -f "$WORK/squashfs-root/usr/lib/"libwayland-*
+          curl -fsSL -o "$WORK/appimagetool" \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  $WORK/appimagetool" | sha256sum -c -
+          chmod +x "$WORK/appimagetool"
+          "$WORK/appimagetool" --appimage-extract-and-run "$WORK/squashfs-root" "$APPIMAGE.repaired"
+          mv "$APPIMAGE.repaired" "$APPIMAGE"
+
+          # tauri-action has already attached the original bundle. Replace that
+          # asset so the draft release contains only the repaired AppImage.
+          gh release upload "$GITHUB_REF_NAME" "$APPIMAGE" --clobber
