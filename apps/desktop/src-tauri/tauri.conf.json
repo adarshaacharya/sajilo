@@ -49,7 +49,10 @@
     ],
     "category": "Utility",
     "shortDescription": "Nepali calendar and daily essentials",
-    "longDescription": "Bikram Sambat calendar, festivals, forex, weather, news and Nepali unit tools in the menu bar."
+    "longDescription": "Bikram Sambat calendar, festivals, forex, weather, news and Nepali unit tools in the menu bar.",
+    "macOS": {
+      "signingIdentity": "-"
+    }
   },
   "plugins": {
     "updater": {

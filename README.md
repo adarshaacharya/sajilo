@@ -43,19 +43,29 @@ releases are marked as prereleases on that page.
 
 Open the downloaded `.dmg`, then drag **Sajilo.app** into the Applications folder.
 
+- Apple Silicon Macs (M1, M2, M3, M4) need the **`aarch64`** download.
+- Intel Macs need the **`x64`** download.
+
 ### First launch
 
-This is a beta release and is not yet Apple-notarized, so macOS blocks it the first time with *"Apple could not verify Sajilo is free of malware"*. To allow it:
+Current beta builds are not yet Apple-signed or notarized. If macOS says
+**“Sajilo is damaged and can’t be opened”**, only continue if you downloaded it
+from Sajilo’s GitHub Releases page above. In Terminal, run:
 
-1. Open **Sajilo.app**, then click **Done** on the warning.
-2. Go to **System Settings → Privacy & Security**.
-3. Scroll down to **Security**. A line reads *"Sajilo" was blocked to protect your Mac*.
-4. Click **Open Anyway** and authenticate.
-5. Open **Sajilo.app** again.
+```bash
+mkdir -p ~/Applications
+ditto /Applications/Sajilo.app ~/Applications/Sajilo.app
+xattr -cr ~/Applications/Sajilo.app
+open ~/Applications/Sajilo.app
+```
 
-You only do this once. Sajilo then lives in the menu bar — it has no Dock icon or window unless you turn one on in Settings.
+This creates a user-owned copy in `~/Applications` and removes macOS’s download
+quarantine from that copy. You only need to do this once per beta build. Sajilo
+then lives in the menu bar — it has no Dock icon or window unless you turn one
+on in Settings.
 
-> On macOS 14 and earlier you could Control-click the app and choose **Open** instead. macOS 15 removed that shortcut, so the steps above are the only way now.
+> Proper Apple code signing and notarization are planned before the stable release;
+> this workaround is temporary beta-installation guidance.
 
 ## Run from source
 

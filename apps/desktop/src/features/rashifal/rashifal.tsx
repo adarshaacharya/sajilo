@@ -14,7 +14,7 @@ import {
 import { usePersistedString } from "../../shared/lib/persisted";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
-import { SourceLink, SourceNote } from "../bazar/_components/source-note";
+import { SourceNote } from "../bazar/_components/source-note";
 import { ReadingCard } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
 import { SignStrip } from "./_components/sign-strip";
@@ -75,13 +75,6 @@ export function Rashifal() {
     return (
       <div className="space-y-2.5">
         <SignFinder highlight={mine} onChoose={choose} />
-        {published && (
-          <SourceNote label={t("bazar.published")} stamp={published}>
-            <SourceLink href="https://www.hamropatro.com/rashifal">
-              {t("rashifal.source")}
-            </SourceLink>
-          </SourceNote>
-        )}
       </div>
     );
   }
@@ -103,11 +96,7 @@ export function Rashifal() {
 
       <SignStrip shown={shown} mine={mine} onSelect={(id) => setViewing(id === mine ? null : id)} />
 
-      {published && (
-        <SourceNote label={t("bazar.published")} stamp={published}>
-          <SourceLink href="https://www.hamropatro.com/rashifal">{t("rashifal.source")}</SourceLink>
-        </SourceNote>
-      )}
+      {published && <SourceNote label={t("bazar.published")} stamp={published} />}
     </div>
   );
 }
