@@ -66,7 +66,7 @@ export function ClockTab() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("tools.clock-search")}
-          className="w-full rounded-[8px] border border-border/55 bg-[color-mix(in_srgb,var(--color-surface-raised)_88%,#000_12%)] px-2.5 py-1.5 text-[12px] text-text outline-none focus-visible:border-[color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]"
+          className="control-field w-full rounded-[8px] px-2.5 py-1.5 text-[12px] text-text outline-none focus-visible:border-[color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]"
         />
         {(query.trim() || results.length > 0) && (
           <div className="surface-card mt-1.5 max-h-[220px] divide-y divide-border/40 overflow-y-auto p-1">

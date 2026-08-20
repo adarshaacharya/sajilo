@@ -152,17 +152,17 @@ export function Dashboard() {
       )}
 
       <FadeUp>
-        <Card>
-          <div className="mb-2 flex items-center justify-between">
+        <Card className="calendar-panel">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <button
               type="button"
               aria-label={t("calendar.previous-month")}
               onClick={() => step(-1)}
-              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+              className="icon-btn size-7"
             >
-              ‹
+              <span className="text-[15px] leading-none">‹</span>
             </button>
-            <span className="text-[12px] font-medium">
+            <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
               {month.title}
               {monthSpan ? ` · ${monthSpan}` : ""}
             </span>
@@ -170,9 +170,9 @@ export function Dashboard() {
               type="button"
               aria-label={t("calendar.next-month")}
               onClick={() => step(1)}
-              className="rounded px-2 py-0.5 text-text-secondary transition-colors hover:bg-surface-hover"
+              className="icon-btn size-7"
             >
-              ›
+              <span className="text-[15px] leading-none">›</span>
             </button>
           </div>
           <MonthGrid
@@ -193,7 +193,7 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => navigate("/events")}
-            className="surface-card glance-card glance-event flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
+            className="surface-card glance-card glance-event dashboard-event flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
           >
             <Icon
               name="festival"

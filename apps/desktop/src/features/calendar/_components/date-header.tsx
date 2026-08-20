@@ -42,7 +42,7 @@ export function DateHeader({ today }: { today: Today }) {
         onClick={() =>
           navigate(`/day?y=${today.nepali.year}&m=${today.nepali.month}&d=${today.nepali.day}`)
         }
-        className="surface-card date-plate flex w-[54px] shrink-0 flex-col items-center py-1.5"
+        className="surface-card date-plate flex w-[54px] shrink-0 flex-col items-center rounded-xl py-1.5"
       >
         <span className="text-[30px] font-bold leading-none text-[color:var(--color-accent-mark)]">
           {digits(today.nepali.day, numerals)}
@@ -67,7 +67,7 @@ export function DateHeader({ today }: { today: Today }) {
           type="button"
           onClick={() => navigate("/settings")}
           aria-label={t("screen.settings")}
-          className="rounded-lg p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
+          className="icon-btn"
         >
           <Icon name="settings" />
         </button>
@@ -75,7 +75,7 @@ export function DateHeader({ today }: { today: Today }) {
           type="button"
           onClick={() => quitApp()}
           aria-label={t("action.quit")}
-          className="rounded-lg p-1.5 text-text-muted hover:bg-surface-hover hover:text-text"
+          className="icon-btn"
         >
           <Icon name="power" />
         </button>

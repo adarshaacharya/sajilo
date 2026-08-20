@@ -32,7 +32,7 @@ export function ClockRow({ timeZones }: { timeZones: string[] }) {
           <div
             key={tz}
             title={fullDateFor(tz)}
-            className="surface-card group relative flex shrink-0 items-center gap-1.5 px-2.5 py-1.5 text-[11px]"
+            className="surface-card group relative flex shrink-0 items-center gap-1.5 clock-chip px-2.5 py-1.5 text-[11px]"
           >
             <span>{flagFor(tz)}</span>
             <span className="text-text-secondary">{city.city}</span>

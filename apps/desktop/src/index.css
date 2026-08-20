@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Patro skin — warm glass over macOS vibrancy.
+ * Patro skin — cool glass over macOS vibrancy (light) / warm depth (dark).
  * Brass gilt for today / marks; holiday red for Saturdays only (as text).
  */
 @theme {
@@ -21,6 +21,15 @@
   --color-negative: #ff6b6f;
   --color-weather-tint: #5b9fd4;
   --color-forex-tint: #6bc49a;
+  --color-control-bg: color-mix(in srgb, var(--color-surface-raised) 88%, #000 12%);
+  --color-control-border: color-mix(in srgb, var(--color-border) 55%, transparent);
+  --color-control-inset: inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
+  --shadow-card:
+    0 1px 2px color-mix(in srgb, #000 16%, transparent),
+    0 6px 20px color-mix(in srgb, #000 18%, transparent);
+  --shadow-card-hover:
+    0 2px 4px color-mix(in srgb, #000 14%, transparent),
+    0 10px 28px color-mix(in srgb, #000 22%, transparent);
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -34,33 +43,55 @@
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
-    --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
-    --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
-    --color-divider: color-mix(in srgb, var(--color-text) 7%, transparent);
-    --color-text: #1a1712;
-    --color-text-secondary: #5c564c;
-    --color-text-muted: #8a8378;
-    --color-accent: #6b5219;
-    --color-accent-mark: #8a6a2f;
+    --color-surface-raised: #ffffff;
+    --color-surface-hover: #ececf0;
+    --color-border: color-mix(in srgb, #3c3c43 12%, transparent);
+    --color-divider: color-mix(in srgb, #3c3c43 8%, transparent);
+    --color-text: #1d1d1f;
+    --color-text-secondary: #636366;
+    --color-text-muted: #86868b;
+    --color-accent: #7a5f28;
+    --color-accent-mark: #a67c1a;
     --color-weather-tint: #3d7ab5;
     --color-forex-tint: #3d9a6e;
+    --color-control-bg: #ffffff;
+    --color-control-border: color-mix(in srgb, #3c3c43 16%, transparent);
+    --color-control-inset:
+      inset 0 0.5px 0 color-mix(in srgb, #000 6%, transparent),
+      inset 0 1px 2px color-mix(in srgb, #000 3%, transparent);
+    --shadow-card:
+      0 0.5px 0 color-mix(in srgb, #000 3%, transparent),
+      0 1px 2px color-mix(in srgb, #000 4%, transparent);
+    --shadow-card-hover:
+      0 1px 3px color-mix(in srgb, #000 5%, transparent),
+      0 4px 12px color-mix(in srgb, #000 4%, transparent);
   }
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
-  --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
-  --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
-  --color-divider: color-mix(in srgb, var(--color-text) 7%, transparent);
-  --color-text: #1a1712;
-  --color-text-secondary: #5c564c;
-  --color-text-muted: #8a8378;
-  --color-accent: #6b5219;
-  --color-accent-mark: #8a6a2f;
+  --color-surface-raised: #ffffff;
+  --color-surface-hover: #ececf0;
+  --color-border: color-mix(in srgb, #3c3c43 12%, transparent);
+  --color-divider: color-mix(in srgb, #3c3c43 8%, transparent);
+  --color-text: #1d1d1f;
+  --color-text-secondary: #636366;
+  --color-text-muted: #86868b;
+  --color-accent: #7a5f28;
+  --color-accent-mark: #a67c1a;
   --color-weather-tint: #3d7ab5;
   --color-forex-tint: #3d9a6e;
+  --color-control-bg: #ffffff;
+  --color-control-border: color-mix(in srgb, #3c3c43 16%, transparent);
+  --color-control-inset:
+    inset 0 0.5px 0 color-mix(in srgb, #000 6%, transparent),
+    inset 0 1px 2px color-mix(in srgb, #000 3%, transparent);
+  --shadow-card:
+    0 0.5px 0 color-mix(in srgb, #000 3%, transparent),
+    0 1px 2px color-mix(in srgb, #000 4%, transparent);
+  --shadow-card-hover:
+    0 1px 3px color-mix(in srgb, #000 5%, transparent),
+    0 4px 12px color-mix(in srgb, #000 4%, transparent);
 }
 
 :root[data-theme="dark"] {
@@ -136,35 +167,45 @@ html[data-window-material="opaque"] .app-window::before {
 }
 
 @media (prefers-color-scheme: light) {
-  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window {
-    background: #f0ebe2;
+  html:not([data-theme="dark"]) .app-window {
+    background: #f2f2f7;
   }
 
   html:not([data-theme="dark"]) .app-window::before {
     background:
-      radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
-      radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
-      linear-gradient(
-        168deg,
-        color-mix(in srgb, #faf6ee 82%, transparent) 0%,
-        color-mix(in srgb, #f0ebe2 86%, transparent) 100%
-      );
+      radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 5%, transparent), transparent 52%),
+      radial-gradient(ellipse 80% 45% at 100% 110%, color-mix(in srgb, var(--color-weather-tint) 4%, transparent), transparent 48%);
   }
 }
 
-html[data-theme="light"][data-window-material="opaque"] .app-window {
-  background: #f0ebe2;
+html[data-theme="light"] .app-window {
+  background: #f2f2f7;
 }
 
 html[data-theme="light"] .app-window::before {
   background:
-    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
-    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
-    linear-gradient(
-      168deg,
-      color-mix(in srgb, #faf6ee 82%, transparent) 0%,
-      color-mix(in srgb, #f0ebe2 86%, transparent) 100%
-    );
+    radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 5%, transparent), transparent 52%),
+    radial-gradient(ellipse 80% 45% at 100% 110%, color-mix(in srgb, var(--color-weather-tint) 4%, transparent), transparent 48%);
+}
+
+html[data-theme="light"][data-window-material="opaque"] .app-window {
+  background: #f2f2f7;
+}
+
+html[data-theme="light"][data-window-material="opaque"] .app-window::before {
+  background:
+    radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 4%, transparent), transparent 52%);
+}
+
+@media (prefers-color-scheme: light) {
+  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window {
+    background: #f2f2f7;
+  }
+
+  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window::before {
+    background:
+      radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 4%, transparent), transparent 52%);
+  }
 }
 
 .app-window > * {
@@ -190,9 +231,7 @@ html[data-theme="light"] .app-window::before {
   background: color-mix(in srgb, var(--color-surface-raised) 100%, transparent);
   backdrop-filter: blur(16px) saturate(1.35);
   -webkit-backdrop-filter: blur(16px) saturate(1.35);
-  box-shadow:
-    0 1px 2px color-mix(in srgb, #000 16%, transparent),
-    0 6px 20px color-mix(in srgb, #000 18%, transparent);
+  box-shadow: var(--shadow-card);
   transition:
     background-color 0.2s ease,
     border-color 0.2s ease,
@@ -202,9 +241,14 @@ html[data-theme="light"] .app-window::before {
 
 .surface-card:hover {
   border-color: color-mix(in srgb, var(--color-accent-mark) 18%, var(--color-border));
-  box-shadow:
-    0 2px 4px color-mix(in srgb, #000 14%, transparent),
-    0 10px 28px color-mix(in srgb, #000 22%, transparent);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* macOS NSTextField-style inputs. */
+.control-field {
+  background: var(--color-control-bg);
+  border: 1px solid var(--color-control-border);
+  box-shadow: var(--color-control-inset);
 }
 
 /* Route header — whisper separator, not a white rule. */
@@ -316,6 +360,47 @@ html[data-theme="light"] .app-window::before {
 
 .copy-chip-copied {
   color: var(--color-accent-mark);
+}
+
+/* Settings — selectable option chips (forex currencies, etc.). */
+.toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.toggle-chip--off {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text-secondary);
+}
+
+.toggle-chip--off:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.toggle-chip--on {
+  background: var(--color-accent-mark);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 72%, #000 28%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
+}
+
+.toggle-chip--on:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 92%, #fff 8%);
 }
 
 .day-plan-editor {
@@ -540,6 +625,19 @@ html[data-theme="light"] .app-window::before {
     inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent);
 }
 
+/* Dashboard — compact capsules and grouped calendar. */
+.clock-chip {
+  border-radius: 999px;
+}
+
+.calendar-panel {
+  padding: 10px 12px 12px;
+}
+
+.dashboard-event::before {
+  opacity: 0.85;
+}
+
 .weather-glass-btn {
   display: inline-flex;
   align-items: center;
@@ -667,31 +765,217 @@ html[data-theme="light"] .app-window::before {
 }
 
 @media (prefers-color-scheme: light) {
-  html:not([data-theme="dark"]) .seg-track {
-    background: color-mix(in srgb, var(--color-text) 5%, transparent);
+  html:not([data-theme="dark"]) .surface-card {
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  html:not([data-theme="dark"]) .surface-card:hover {
+    border-color: color-mix(in srgb, #3c3c43 12%, transparent);
+    box-shadow: var(--shadow-card);
+  }
+
+  html:not([data-theme="dark"]) .date-plate {
+    background: #ffffff;
+    box-shadow: none;
+    border-color: color-mix(in srgb, var(--color-accent-mark) 32%, #3c3c43 8%);
+  }
+
+  html:not([data-theme="dark"]) .glance-card::before {
+    opacity: 0.42;
+  }
+
+  html:not([data-theme="dark"]) .dashboard-event::before {
+    opacity: 0.28;
+  }
+
+  html:not([data-theme="dark"]) .clock-chip {
+    background: #ffffff;
+    box-shadow: 0 0.5px 1px color-mix(in srgb, #000 5%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .cal-today {
+    border-radius: 10px;
     box-shadow:
-      inset 0 1px 2px color-mix(in srgb, #000 8%, transparent),
-      inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 5%, transparent);
+      0 1px 4px color-mix(in srgb, var(--color-accent-mark) 28%, transparent),
+      inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .header-bar {
+    background: #f2f2f7;
+    border-bottom-color: color-mix(in srgb, #3c3c43 8%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .tab-bar {
+    background: #f2f2f7;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-top-color: color-mix(in srgb, #3c3c43 8%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .tab-indicator {
+    background: #ffffff;
+    border-color: color-mix(in srgb, #3c3c43 8%, transparent);
+    box-shadow:
+      0 0.5px 1px color-mix(in srgb, #000 7%, transparent),
+      0 1px 2px color-mix(in srgb, #000 4%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .seg-track {
+    background: color-mix(in srgb, #3c3c43 7%, transparent);
+    box-shadow:
+      inset 0 1px 2px color-mix(in srgb, #000 6%, transparent),
+      inset 0 0 0 0.5px color-mix(in srgb, #3c3c43 8%, transparent);
   }
 
   html:not([data-theme="dark"]) .seg-thumb {
-    background: color-mix(in srgb, #fff 92%, transparent);
+    background: #ffffff;
     box-shadow:
-      0 0.5px 1px color-mix(in srgb, #000 10%, transparent),
-      0 0 0 0.5px color-mix(in srgb, #000 5%, transparent);
+      0 0.5px 1px color-mix(in srgb, #000 8%, transparent),
+      0 1px 2px color-mix(in srgb, #000 4%, transparent),
+      0 0 0 0.5px color-mix(in srgb, #3c3c43 6%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .mac-switch {
+    background: color-mix(in srgb, #3c3c43 18%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .copy-chip {
+    background: color-mix(in srgb, #fff 88%, #3c3c43 12%);
+    border: 1px solid color-mix(in srgb, #3c3c43 8%, transparent);
+  }
+
+  html:not([data-theme="dark"]) .toggle-chip--off {
+    background: #ffffff;
+    border-color: color-mix(in srgb, #3c3c43 14%, transparent);
+    color: var(--color-text-secondary);
+  }
+
+  html:not([data-theme="dark"]) .toggle-chip--off:hover {
+    background: #f2f2f7;
+    color: var(--color-text);
+  }
+
+  html:not([data-theme="dark"]) .toggle-chip--on {
+    background: var(--color-accent-mark);
+    border-color: color-mix(in srgb, var(--color-accent-mark) 78%, #000 22%);
+    color: #ffffff;
+    box-shadow: none;
+  }
+
+  html:not([data-theme="dark"]) .toggle-chip--on:hover {
+    background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
+  }
+
+  html:not([data-theme="dark"]) ::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, #3c3c43 22%, transparent);
   }
 }
 
-html[data-theme="light"] .seg-track {
-  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+html[data-theme="light"] .surface-card {
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+html[data-theme="light"] .surface-card:hover {
+  border-color: color-mix(in srgb, #3c3c43 12%, transparent);
+  box-shadow: var(--shadow-card);
+}
+
+html[data-theme="light"] .date-plate {
+  background: #ffffff;
+  box-shadow: none;
+  border-color: color-mix(in srgb, var(--color-accent-mark) 32%, #3c3c43 8%);
+}
+
+html[data-theme="light"] .glance-card::before {
+  opacity: 0.42;
+}
+
+html[data-theme="light"] .dashboard-event::before {
+  opacity: 0.28;
+}
+
+html[data-theme="light"] .clock-chip {
+  background: #ffffff;
+  box-shadow: 0 0.5px 1px color-mix(in srgb, #000 5%, transparent);
+}
+
+html[data-theme="light"] .cal-today {
+  border-radius: 10px;
   box-shadow:
-    inset 0 1px 2px color-mix(in srgb, #000 8%, transparent),
-    inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 5%, transparent);
+    0 1px 4px color-mix(in srgb, var(--color-accent-mark) 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent);
+}
+
+html[data-theme="light"] .header-bar {
+  background: #f2f2f7;
+  border-bottom-color: color-mix(in srgb, #3c3c43 8%, transparent);
+}
+
+html[data-theme="light"] .tab-bar {
+  background: #f2f2f7;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-top-color: color-mix(in srgb, #3c3c43 8%, transparent);
+}
+
+html[data-theme="light"] .tab-indicator {
+  background: #ffffff;
+  border-color: color-mix(in srgb, #3c3c43 8%, transparent);
+  box-shadow:
+    0 0.5px 1px color-mix(in srgb, #000 7%, transparent),
+    0 1px 2px color-mix(in srgb, #000 4%, transparent);
+}
+
+html[data-theme="light"] .mac-switch {
+  background: color-mix(in srgb, #3c3c43 18%, transparent);
+}
+
+html[data-theme="light"] .copy-chip {
+  background: color-mix(in srgb, #fff 88%, #3c3c43 12%);
+  border: 1px solid color-mix(in srgb, #3c3c43 8%, transparent);
+}
+
+html[data-theme="light"] .toggle-chip--off {
+  background: #ffffff;
+  border-color: color-mix(in srgb, #3c3c43 14%, transparent);
+  color: var(--color-text-secondary);
+}
+
+html[data-theme="light"] .toggle-chip--off:hover {
+  background: #f2f2f7;
+  color: var(--color-text);
+}
+
+html[data-theme="light"] .toggle-chip--on {
+  background: var(--color-accent-mark);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 78%, #000 22%);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+html[data-theme="light"] .toggle-chip--on:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
+}
+
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, #3c3c43 22%, transparent);
+}
+
+html[data-theme="light"] .seg-track {
+  background: color-mix(in srgb, #3c3c43 7%, transparent);
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, #000 6%, transparent),
+    inset 0 0 0 0.5px color-mix(in srgb, #3c3c43 8%, transparent);
 }
 
 html[data-theme="light"] .seg-thumb {
-  background: color-mix(in srgb, #fff 92%, transparent);
+  background: #ffffff;
   box-shadow:
-    0 0.5px 1px color-mix(in srgb, #000 10%, transparent),
-    0 0 0 0.5px color-mix(in srgb, #000 5%, transparent);
+    0 0.5px 1px color-mix(in srgb, #000 8%, transparent),
+    0 1px 2px color-mix(in srgb, #000 4%, transparent),
+    0 0 0 0.5px color-mix(in srgb, #3c3c43 6%, transparent);
 }

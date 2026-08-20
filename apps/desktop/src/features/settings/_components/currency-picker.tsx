@@ -27,7 +27,7 @@ export function CurrencyPicker({
   return (
     <div>
       <p className="mb-1.5 text-[10px] font-medium text-text-muted">{title}</p>
-      <div className="grid grid-cols-4 gap-1">
+      <div className="flex flex-wrap gap-1.5">
         {FOREX_OPTIONS.map((code) => {
           const on = selected.includes(code);
           return (
@@ -35,12 +35,9 @@ export function CurrencyPicker({
               key={code}
               type="button"
               title={NAMES[code] ?? code}
+              aria-pressed={on}
               onClick={() => onToggle(code)}
-              className={`rounded-[6px] px-1 py-1 text-[10px] font-medium tabular-nums transition-colors ${
-                on
-                  ? "bg-[color-mix(in_srgb,var(--color-accent-mark)_88%,#000_12%)] text-[#1a1408] shadow-[inset_0_1px_0_color-mix(in_srgb,#fff_25%,transparent)]"
-                  : "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-text-secondary hover:bg-surface-hover"
-              }`}
+              className={`toggle-chip ${on ? "toggle-chip--on" : "toggle-chip--off"}`}
             >
               {code}
             </button>
