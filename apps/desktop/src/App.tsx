@@ -1,6 +1,7 @@
 import { AnimatePresence } from "motion/react";
 import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router";
+import { SWRConfig } from "swr";
 import { Bazar } from "./features/bazar/bazar";
 import { Converter } from "./features/calendar/converter";
 import { Dashboard } from "./features/calendar/dashboard";
@@ -21,6 +22,7 @@ import { PageTransition } from "./shared/components/motion";
 import { TabBar } from "./shared/components/tab-bar";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
 import type { translate } from "./shared/lib/i18n";
+import { persistentCacheProvider } from "./shared/lib/swr-cache";
 
 type TranslationKey = Parameters<typeof translate>[0];
 
@@ -98,11 +100,13 @@ export function App() {
   return (
     <MemoryRouter>
       <ErrorBoundary>
-        <SettingsProvider>
-          <HeaderSlotProvider>
-            <Shell />
-          </HeaderSlotProvider>
-        </SettingsProvider>
+        <SWRConfig value={{ provider: persistentCacheProvider }}>
+          <SettingsProvider>
+            <HeaderSlotProvider>
+              <Shell />
+            </HeaderSlotProvider>
+          </SettingsProvider>
+        </SWRConfig>
       </ErrorBoundary>
     </MemoryRouter>
   );

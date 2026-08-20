@@ -201,6 +201,7 @@
   "settings.updates": "अपडेटहरू",
   "settings.weather-location": "मौसम स्थान",
   "settings.weather-source": "मौसम स्रोत",
+  "state.loading": "लोड हुँदैछ",
   "state.not-yet": "अहिले उपलब्ध छैन",
   "state.stale": "पुरानो डेटा देखाइँदै",
   "state.stale-since": "पुरानो डेटा, मिति",

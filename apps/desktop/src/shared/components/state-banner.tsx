@@ -30,7 +30,16 @@ export function StateBanner({
   if (state.status === "fresh") return <>{children}</>;
 
   if (state.status === "loading") {
-    return <p className="py-2 text-text-muted">…</p>;
+    return (
+      <div role="status" aria-busy="true" aria-label={t("state.loading")} className="space-y-1">
+        {[0, 1, 2, 3, 4].map((row) => (
+          <div key={row} className="surface-card animate-pulse space-y-1.5 p-2">
+            <div className="h-3 w-4/5 rounded bg-surface-hover" />
+            <div className="h-2 w-2/5 rounded bg-surface-hover" />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   // Stale still shows the data — a labelled old number is far more use than a

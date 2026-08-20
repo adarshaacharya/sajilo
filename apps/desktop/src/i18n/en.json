@@ -201,6 +201,7 @@
   "settings.updates": "Updates",
   "settings.weather-location": "Weather location",
   "settings.weather-source": "Weather source",
+  "state.loading": "Loading",
   "state.not-yet": "Not available yet",
   "state.stale": "Showing older data",
   "state.stale-since": "Showing older data from",
