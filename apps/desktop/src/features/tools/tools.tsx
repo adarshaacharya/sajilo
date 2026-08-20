@@ -3,12 +3,13 @@ import { Segmented } from "../../shared/components/segmented";
 import { useSettings } from "../../shared/context/settings-context";
 import { Converter } from "../calendar/converter";
 import { ClockTab } from "./_components/clock-tab";
+import { EmergencyTab } from "./_components/emergency-tab";
 import { InterestTab } from "./_components/interest-tab";
 import { LandTab } from "./_components/land-tab";
 import { VatTab } from "./_components/vat-tab";
 import { WeightTab } from "./_components/weight-tab";
 
-type Tab = "date" | "land" | "weight" | "vat" | "interest" | "clock";
+type Tab = "date" | "land" | "weight" | "vat" | "interest" | "clock" | "emergency";
 
 export function Tools() {
   const { t } = useSettings();
@@ -21,6 +22,7 @@ export function Tools() {
     { id: "vat" as const, label: t("tools.vat"), icon: "percent" as const },
     { id: "interest" as const, label: t("tools.interest"), icon: "interest" as const },
     { id: "clock" as const, label: t("tools.clock"), icon: "clock" as const },
+    { id: "emergency" as const, label: t("tools.directory"), icon: "warning" as const },
   ];
 
   return (
@@ -32,6 +34,7 @@ export function Tools() {
       {tab === "vat" && <VatTab />}
       {tab === "interest" && <InterestTab />}
       {tab === "clock" && <ClockTab />}
+      {tab === "emergency" && <EmergencyTab />}
     </div>
   );
 }

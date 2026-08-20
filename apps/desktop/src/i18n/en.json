@@ -247,6 +247,7 @@
   "tools.clock-hint": "Type a city or region to find a timezone.",
   "tools.clock-search": "Search by city or region",
   "tools.date": "Dates",
+  "tools.directory": "Directory",
   "tools.hill-system": "Hill system",
   "tools.interest": "Interest",
   "tools.interest-amount": "Interest",
@@ -261,6 +262,7 @@
   "tools.vat": "VAT",
   "tools.vat-amount": "VAT",
   "tools.weight": "Weight",
+  "emergency.source-note": "Numbers checked against official Nepal Police, Traffic Police, Ncell, NEA and Nepal Telecom listings.",
   "tools.years": "Years",
   "upcoming.empty": "No upcoming events recorded.",
   "weather.tomorrow": "Tomorrow"

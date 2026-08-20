@@ -247,6 +247,7 @@
   "tools.clock-hint": "समयक्षेत्र खोज्न सहर वा क्षेत्रको नाम टाइप गर्नुहोस्।",
   "tools.clock-search": "सहर वा क्षेत्र खोज्नुहोस्",
   "tools.date": "मिति",
+  "tools.directory": "निर्देशिका",
   "tools.hill-system": "पहाडी प्रणाली",
   "tools.interest": "ब्याज",
   "tools.interest-amount": "ब्याज",
@@ -261,6 +262,7 @@
   "tools.vat": "भ्याट",
   "tools.vat-amount": "भ्याट",
   "tools.weight": "तौल",
+  "emergency.source-note": "नम्बरहरू नेपाल प्रहरी, ट्राफिक प्रहरी, एनसेल, विद्युत् प्राधिकरण र नेपाल टेलिकमका आधिकारिक सूचीबाट जाँच गरिएका हुन्।",
   "tools.years": "वर्ष",
   "upcoming.empty": "आजपछिका कुनै कार्यक्रम अभिलेख छैन।",
   "weather.tomorrow": "भोलि"
