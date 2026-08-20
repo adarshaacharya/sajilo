@@ -25,9 +25,11 @@ fn register_updater(builder: tauri::Builder<tauri::Wry>) -> tauri::Builder<tauri
     let Some(pubkey) = option_env!("SAJILO_UPDATER_PUBKEY") else {
         return builder;
     };
-    // The endpoint is public and lives in `tauri.conf.json` under
-    // `plugins.updater.endpoints`; only the pubkey is sensitive, and that
-    // comes from this env var rather than the committed config.
+    // The pubkey itself isn't sensitive — it's also committed in
+    // `tauri.conf.json`'s `plugins.updater.pubkey`, since the CLI needs its
+    // own copy there to sign `latest.json` at build time. This env var is
+    // what actually gates registration: its *absence* is what keeps the
+    // updater plugin out of dev and unsigned builds entirely.
     builder.plugin(tauri_plugin_updater::Builder::new().pubkey(pubkey).build())
 }
 
