@@ -115,3 +115,38 @@ jobs:
           # tauri-action has already attached the original bundle. Replace that
           # asset so the draft release contains only the repaired AppImage.
           gh release upload "$GITHUB_REF_NAME" "$APPIMAGE" --clobber
+      # tauri-action names every asset after the version
+      # (Sajilo_0.1.3_x64.dmg), so a fixed download link in the README would
+      # break on the next release. Uploading a second, version-free copy of
+      # each installer gives the README a stable URL that never needs
+      # editing. Runs after the AppImage repair above, so Linux's copy is
+      # made from the repaired file, not the original.
+      - name: Upload a stable-named copy for the README's direct download link
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          upload() {
+            local stable="$1" pattern="$2"
+            local src
+            src=$(find "$GITHUB_WORKSPACE/target" -type f -iname "$pattern" -print -quit)
+            if [ -z "$src" ]; then
+              echo "No match for $pattern, skipping $stable" >&2
+              return
+            fi
+            local dest="$RUNNER_TEMP/$stable"
+            cp "$src" "$dest"
+            gh release upload "$GITHUB_REF_NAME" "$dest" --clobber
+          }
+
+          case "${{ matrix.target }}" in
+            macos-arm64)  upload Sajilo-macos-arm64.dmg      '*aarch64.dmg' ;;
+            macos-x64)    upload Sajilo-macos-x64.dmg        '*x64.dmg' ;;
+            windows-x64)  upload Sajilo-windows-x64.exe      '*setup.exe' ;;
+            linux-x64)
+              upload Sajilo-linux-amd64.deb        '*amd64.deb'
+              upload Sajilo-linux-x86_64.AppImage  '*amd64.AppImage'
+              ;;
+          esac

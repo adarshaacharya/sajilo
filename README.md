@@ -34,10 +34,17 @@ whether it is fresh, stale, or unavailable — never silently blank.
 
 ## Install
 
-**[Download Sajilo](https://github.com/adarshaacharya/sajilo/releases)**
+| Platform | Download |
+| --- | --- |
+| macOS (Apple Silicon) | [Sajilo-macos-arm64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg) |
+| macOS (Intel) | [Sajilo-macos-x64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg) |
+| Windows | [Sajilo-windows-x64.exe](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe) |
+| Linux (.deb) | [Sajilo-linux-amd64.deb](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-amd64.deb) |
+| Linux (AppImage) | [Sajilo-linux-x86_64.AppImage](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage) |
 
-Choose the newest release, then download the installer for your platform. Beta
-releases are marked as prereleases on that page.
+Each link always points at the current release — no need to visit the
+[releases page](https://github.com/adarshaacharya/sajilo/releases) unless you
+want an older version or release notes.
 
 ### macOS
 
