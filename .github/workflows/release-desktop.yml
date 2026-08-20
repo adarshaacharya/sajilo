@@ -70,9 +70,11 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: Sajilo ${{ github.ref_name }}
           releaseDraft: true
-          # Anything with a `-` after the version (v0.1.0-beta.1) publishes as a
-          # GitHub pre-release rather than a stable one.
-          releasePrerelease: ${{ contains(github.ref_name, '-') }}
+          # GitHub excludes anything flagged pre-release from
+          # /releases/latest/, which is the URL the updater polls — a
+          # pre-release beta would be invisible to it. The `beta.N` in the
+          # tag/version already says what it is; the release itself stays a
+          # normal (non-pre-release) GitHub release so updates keep working.
           args: ${{ matrix.args }}
       # Tauri 2.11's AppImage bundler includes libwayland from the Ubuntu build
       # host. On rolling-release Wayland systems (including current Arch), that
