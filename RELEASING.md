@@ -1,8 +1,16 @@
 # Releasing Sajilo
 
 `.github/workflows/release-desktop.yml` builds macOS (arm64 + x64), Windows, and
-Linux on every `v*` tag and publishes a GitHub prerelease with the installers
+Linux on every `v*` tag and publishes a GitHub release with the installers
 attached.
+
+## Verifying a build without releasing
+
+`.github/workflows/verify-build.yml` runs the same four-platform build with no
+tagging, no publishing, and no signing secrets touched — trigger it manually
+(Actions tab → Verify desktop build → Run workflow, or `gh workflow run
+verify-build.yml`) to catch a build break before spending a real version
+number and release on finding out.
 
 ## Cutting a release
 

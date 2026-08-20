@@ -1,0 +1,49 @@
+name: Verify desktop build
+
+# Runs the same four-platform build as release-desktop.yml, but never tags,
+# publishes, or touches signing secrets -- a way to catch build breakage
+# before spending a version number and a release on finding out.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            target: macos-arm64
+            args: --target aarch64-apple-darwin
+          - os: macos-15
+            target: macos-x64
+            args: --target x86_64-apple-darwin
+          - os: ubuntu-latest
+            target: linux-x64
+            args: ""
+          - os: windows-latest
+            target: windows-x64
+            args: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Linux webkit dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+      - name: Add the Rust target
+        if: matrix.os == 'macos-15'
+        run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Install frontend dependencies
+        working-directory: apps/desktop
+        run: bun install --frozen-lockfile
+      - name: Build (no publish, no signing)
+        working-directory: apps/desktop
+        run: bun run tauri build ${{ matrix.args }}
