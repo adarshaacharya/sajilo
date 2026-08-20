@@ -33,7 +33,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme="dark"]) {
     --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
     --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
     --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
@@ -46,6 +46,25 @@
     --color-weather-tint: #3d7ab5;
     --color-forex-tint: #3d9a6e;
   }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-surface-raised: color-mix(in srgb, #fff 72%, transparent);
+  --color-surface-hover: color-mix(in srgb, #fff 85%, transparent);
+  --color-border: color-mix(in srgb, var(--color-text) 10%, transparent);
+  --color-divider: color-mix(in srgb, var(--color-text) 7%, transparent);
+  --color-text: #1a1712;
+  --color-text-secondary: #5c564c;
+  --color-text-muted: #8a8378;
+  --color-accent: #6b5219;
+  --color-accent-mark: #8a6a2f;
+  --color-weather-tint: #3d7ab5;
+  --color-forex-tint: #3d9a6e;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 html,
@@ -117,11 +136,11 @@ html[data-window-material="opaque"] .app-window::before {
 }
 
 @media (prefers-color-scheme: light) {
-  html[data-window-material="opaque"] .app-window {
+  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window {
     background: #f0ebe2;
   }
 
-  .app-window::before {
+  html:not([data-theme="dark"]) .app-window::before {
     background:
       radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
       radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
@@ -131,6 +150,21 @@ html[data-window-material="opaque"] .app-window::before {
         color-mix(in srgb, #f0ebe2 86%, transparent) 100%
       );
   }
+}
+
+html[data-theme="light"][data-window-material="opaque"] .app-window {
+  background: #f0ebe2;
+}
+
+html[data-theme="light"] .app-window::before {
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 10%, transparent), transparent 52%),
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, #faf6ee 82%, transparent) 0%,
+      color-mix(in srgb, #f0ebe2 86%, transparent) 100%
+    );
 }
 
 .app-window > * {
@@ -633,17 +667,31 @@ html[data-window-material="opaque"] .app-window::before {
 }
 
 @media (prefers-color-scheme: light) {
-  .seg-track {
+  html:not([data-theme="dark"]) .seg-track {
     background: color-mix(in srgb, var(--color-text) 5%, transparent);
     box-shadow:
       inset 0 1px 2px color-mix(in srgb, #000 8%, transparent),
       inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 5%, transparent);
   }
 
-  .seg-thumb {
+  html:not([data-theme="dark"]) .seg-thumb {
     background: color-mix(in srgb, #fff 92%, transparent);
     box-shadow:
       0 0.5px 1px color-mix(in srgb, #000 10%, transparent),
       0 0 0 0.5px color-mix(in srgb, #000 5%, transparent);
   }
+}
+
+html[data-theme="light"] .seg-track {
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+  box-shadow:
+    inset 0 1px 2px color-mix(in srgb, #000 8%, transparent),
+    inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+html[data-theme="light"] .seg-thumb {
+  background: color-mix(in srgb, #fff 92%, transparent);
+  box-shadow:
+    0 0.5px 1px color-mix(in srgb, #000 10%, transparent),
+    0 0 0 0.5px color-mix(in srgb, #000 5%, transparent);
 }

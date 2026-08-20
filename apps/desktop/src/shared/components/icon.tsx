@@ -31,7 +31,6 @@ import { SFPinFill } from "sf-symbols-lib/monochrome/SFPinFill";
 import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
-import { SFSparkles } from "sf-symbols-lib/monochrome/SFSparkles";
 import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
 import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
@@ -67,7 +66,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   modules: SFSquareGrid2x2,
   system: SFCpu,
   upcoming: SFCalendar,
-  festival: SFSparkles,
+  festival: SFCalendar,
   holiday: SFCalendarBadgeCheckmark,
   gold: SFCircleHexagongridFill,
   fuel: SFFuelpump,

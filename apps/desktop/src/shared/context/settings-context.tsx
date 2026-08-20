@@ -5,6 +5,8 @@ import { translate } from "../lib/i18n";
 import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
+export type ThemeMode = "system" | "light" | "dark";
+
 export interface ModulePrefs {
   weatherEnabled: boolean;
   forexEnabled: boolean;
@@ -38,9 +40,11 @@ const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "
 interface Settings {
   language: Language;
   numerals: NumeralStyle;
+  theme: ThemeMode;
   modules: ModulePrefs;
   setLanguage: (value: Language) => void;
   setNumerals: (value: NumeralStyle) => void;
+  setTheme: (value: ThemeMode) => void;
   setModules: (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => void;
   t: (key: Parameters<typeof translate>[0]) => string;
 }
@@ -52,6 +56,11 @@ async function loadStore() {
   return load("sajilo.json", { autoSave: true });
 }
 
+function applyTheme(theme: ThemeMode) {
+  if (theme === "system") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+}
+
 /**
  * Injected once at the popover root rather than threaded through every screen,
  * since almost every surface renders a date.
@@ -59,7 +68,10 @@ async function loadStore() {
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("ne");
   const [numerals, setNumerals] = useState<NumeralStyle>("devanagari");
+  const [theme, setThemeState] = useState<ThemeMode>("system");
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
+
+  useEffect(() => applyTheme(theme), [theme]);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +80,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         const [
           storedLanguage,
           storedNumerals,
+          storedTheme,
           weatherEnabled,
           forexEnabled,
           newsEnabled,
@@ -81,6 +94,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         ] = await Promise.all([
           store.get<Language>("language"),
           store.get<NumeralStyle>("numeralStyle"),
+          store.get<ThemeMode>("theme"),
           store.get<boolean>("weatherEnabled"),
           store.get<boolean>("forexEnabled"),
           store.get<boolean>("newsEnabled"),
@@ -95,6 +109,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         if (storedLanguage) setLanguage(storedLanguage);
         if (storedNumerals) setNumerals(storedNumerals);
+        if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
+          setThemeState(storedTheme);
+        }
         setModulesState((current) => ({
           ...current,
           ...(weatherEnabled !== undefined && { weatherEnabled }),
@@ -147,6 +164,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const value: Settings = {
     language,
     numerals,
+    theme,
     modules,
     setLanguage: (next) => {
       setLanguage(next);
@@ -155,6 +173,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setNumerals: (next) => {
       setNumerals(next);
       persist("numeralStyle", next);
+    },
+    setTheme: (next) => {
+      setThemeState(next);
+      persist("theme", next);
     },
     setModules,
     t: (key) => translate(key, language),
