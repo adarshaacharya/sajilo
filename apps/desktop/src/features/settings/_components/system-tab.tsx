@@ -21,6 +21,7 @@ export function SystemTab() {
     "idle" | "checking" | "up-to-date" | "downloading" | "installed" | "failed"
   >("idle");
   const [updateVersion, setUpdateVersion] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -87,6 +88,7 @@ export function SystemTab() {
 
   const checkForUpdates = async () => {
     setUpdateState("checking");
+    setUpdateError(null);
     try {
       const { check } = await import("@tauri-apps/plugin-updater");
       const update = await check();
@@ -98,7 +100,8 @@ export function SystemTab() {
       setUpdateState("downloading");
       await update.downloadAndInstall();
       setUpdateState("installed");
-    } catch {
+    } catch (error) {
+      setUpdateError(String(error));
       setUpdateState("failed");
     }
   };
@@ -116,7 +119,9 @@ export function SystemTab() {
       ? `${t("settings.update-available")} ${updateVersion}…`
       : t("settings.update-checking"),
     installed: t("settings.update-installed"),
-    failed: t("settings.update-failed"),
+    failed: updateError
+      ? `${t("settings.update-failed")} — ${updateError}`
+      : t("settings.update-failed"),
   }[updateState];
 
   return (
