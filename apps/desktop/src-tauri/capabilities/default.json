@@ -16,6 +16,7 @@
     "notification:default",
     "dialog:default",
     "opener:allow-open-url",
+    "opener:allow-default-urls",
     "positioner:default",
     "autostart:default",
     "dialog:allow-save",

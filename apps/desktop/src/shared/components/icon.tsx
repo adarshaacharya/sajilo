@@ -15,11 +15,14 @@ import { SFCloudSun } from "sf-symbols-lib/monochrome/SFCloudSun";
 import { SFCpu } from "sf-symbols-lib/monochrome/SFCpu";
 import { SFDesktopcomputer } from "sf-symbols-lib/monochrome/SFDesktopcomputer";
 import { SFDotRadiowavesLeftAndRight } from "sf-symbols-lib/monochrome/SFDotRadiowavesLeftAndRight";
+import { SFEnvelope } from "sf-symbols-lib/monochrome/SFEnvelope";
 import { SFExclamationmarkCircle } from "sf-symbols-lib/monochrome/SFExclamationmarkCircle";
 import { SFFuelpump } from "sf-symbols-lib/monochrome/SFFuelpump";
 import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
 import { SFHouse } from "sf-symbols-lib/monochrome/SFHouse";
+import { SFInfoCircle } from "sf-symbols-lib/monochrome/SFInfoCircle";
 import { SFLeaf } from "sf-symbols-lib/monochrome/SFLeaf";
+import { SFLink } from "sf-symbols-lib/monochrome/SFLink";
 import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
 import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
 import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
@@ -98,6 +101,9 @@ const GLYPHS: Record<IconName, SFComp> = {
   warning: SFExclamationmarkCircle,
   plus: SFPlus,
   trash: SFTrash,
+  info: SFInfoCircle,
+  link: SFLink,
+  mail: SFEnvelope,
 };
 
 export type IconName =
@@ -145,7 +151,10 @@ export type IconName =
   | "clock"
   | "warning"
   | "plus"
-  | "trash";
+  | "trash"
+  | "info"
+  | "link"
+  | "mail";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;
