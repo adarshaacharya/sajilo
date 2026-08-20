@@ -6,6 +6,7 @@ import { Icon } from "../../shared/components/icon";
 import { Select } from "../../shared/components/select";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
+import { openExternalLink } from "../../shared/lib/external-link";
 import { api } from "../../shared/lib/ipc";
 import {
   catchAsFailed,
@@ -17,14 +18,7 @@ import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import { ForexRateRow } from "./_components/forex-rate-row";
 import { conversionText, rateFootnote, sourceTimestamp } from "./_lib/format";
 
-async function openNrb() {
-  try {
-    const { openUrl } = await import("@tauri-apps/plugin-opener");
-    await openUrl("https://www.nrb.org.np/");
-  } catch {
-    window.open("https://www.nrb.org.np/", "_blank", "noopener,noreferrer");
-  }
-}
+const NRB_URL = "https://www.nrb.org.np/";
 
 export function Forex() {
   const { t, modules } = useSettings();
@@ -160,7 +154,7 @@ export function Forex() {
           </p>
           <button
             type="button"
-            onClick={openNrb}
+            onClick={() => openExternalLink(NRB_URL)}
             className="mt-0.5 text-[color:var(--color-forex-tint)] hover:underline"
           >
             Nepal Rastra Bank

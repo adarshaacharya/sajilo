@@ -1,4 +1,5 @@
 import { Icon } from "../../../shared/components/icon";
+import { openExternalLink } from "../../../shared/lib/external-link";
 import type { translate } from "../../../shared/lib/i18n";
 import type { StockQuote } from "../../../types/api/StockQuote";
 import { money, money0 } from "../_lib/format";
@@ -9,14 +10,8 @@ import { RangeBar } from "./range-bar";
 type TranslationKey = Parameters<typeof translate>[0];
 type TFn = (key: TranslationKey) => string;
 
-async function openSharesansar(symbol: string) {
-  const url = `https://www.sharesansar.com/company/${symbol.toLowerCase()}`;
-  try {
-    const { openUrl } = await import("@tauri-apps/plugin-opener");
-    await openUrl(url);
-  } catch {
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+function sharesansarUrl(symbol: string) {
+  return `https://www.sharesansar.com/company/${symbol.toLowerCase()}`;
 }
 
 export function CompanyDetail({
@@ -116,7 +111,7 @@ export function CompanyDetail({
 
       <button
         type="button"
-        onClick={() => openSharesansar(quote.symbol)}
+        onClick={() => openExternalLink(sharesansarUrl(quote.symbol))}
         className="mt-2 text-[11px] text-[color:var(--color-accent-mark)] hover:opacity-80"
       >
         {t("stocks.open-sharesansar")}

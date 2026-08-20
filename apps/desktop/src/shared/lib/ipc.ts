@@ -235,4 +235,8 @@ export const api = {
 
   /** Redraws the menu-bar label after a preference it reads has changed. */
   refreshTray: () => invoke<void>("refresh_tray"),
+
+  /** The popover is alwaysOnTop, so it must dismiss itself after opening an
+   * external link or it buries the newly opened browser window. */
+  hidePopover: () => invoke<void>("hide_popover"),
 };

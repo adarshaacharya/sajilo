@@ -142,6 +142,7 @@ pub fn run() {
             system::autostart::is_dock_icon_visible,
             commands::tray::refresh_tray,
             commands::tray::quit_app,
+            commands::tray::hide_popover,
             updater_enabled,
         ])
         .run(tauri::generate_context!())

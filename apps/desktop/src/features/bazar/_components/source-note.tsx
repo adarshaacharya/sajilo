@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { openExternalLink } from "../../../shared/lib/external-link";
 
 export function SourceNote({
   label,
@@ -25,14 +26,7 @@ export function SourceLink({ href, children }: { href: string; children: ReactNo
   return (
     <button
       type="button"
-      onClick={async () => {
-        try {
-          const { openUrl } = await import("@tauri-apps/plugin-opener");
-          await openUrl(href);
-        } catch {
-          window.open(href, "_blank", "noopener,noreferrer");
-        }
-      }}
+      onClick={() => openExternalLink(href)}
       className="mt-0.5 block w-full whitespace-normal text-left text-[color:var(--color-accent-mark)] hover:underline"
     >
       {children}

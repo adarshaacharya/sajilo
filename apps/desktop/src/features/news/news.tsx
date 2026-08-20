@@ -5,6 +5,7 @@ import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
+import { openExternalLink } from "../../shared/lib/external-link";
 import { api } from "../../shared/lib/ipc";
 import {
   catchAsFailed,
@@ -16,15 +17,6 @@ import type { NewsDigest } from "../../types/api/NewsDigest";
 import { HeadlineRow } from "./_components/headline-row";
 
 const PAGE = 20;
-
-async function openLink(url: string) {
-  try {
-    const { openUrl } = await import("@tauri-apps/plugin-opener");
-    await openUrl(url);
-  } catch {
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-}
 
 export function News() {
   const { t } = useSettings();
@@ -79,7 +71,7 @@ export function News() {
         <Stagger className="space-y-1">
           {items.map((item) => (
             <FadeUp key={`${item.source}-${item.link}`}>
-              <HeadlineRow item={item} onOpen={() => openLink(item.link)} />
+              <HeadlineRow item={item} onOpen={() => openExternalLink(item.link)} />
             </FadeUp>
           ))}
         </Stagger>
