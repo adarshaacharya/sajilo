@@ -101,7 +101,26 @@ html {
     );
 }
 
+/* Linux and Windows do not have macOS's native popover vibrancy. The base
+ * stops the transparent ambient wash from picking up a wallpaper or terminal
+ * colour, while the page outside this clipped shell remains transparent. */
+html[data-window-material="opaque"] .app-window {
+  background: #12141c;
+}
+
+html[data-window-material="opaque"] .app-window::before {
+  background:
+    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 16%, transparent), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 9%, transparent), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, color-mix(in srgb, #fff 2%, transparent), transparent 70%),
+    linear-gradient(168deg, #1c1a24 0%, #12141c 55%, #0e1016 100%);
+}
+
 @media (prefers-color-scheme: light) {
+  html[data-window-material="opaque"] .app-window {
+    background: #f0ebe2;
+  }
+
   .app-window::before {
     background:
       radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 18%, transparent), transparent 58%),

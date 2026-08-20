@@ -74,7 +74,9 @@ jobs:
       # Tauri 2.11's AppImage bundler includes libwayland from the Ubuntu build
       # host. On rolling-release Wayland systems (including current Arch), that
       # library can conflict with the host Mesa EGL driver and prevent WebKitGTK
-      # from creating a window. Keep Wayland client libraries system-provided.
+      # from creating a window. It also points GStreamer at a bundled plugin
+      # directory that does not exist, which disables WebKitGTK audio codecs.
+      # Keep Wayland and GStreamer plugin discovery system-provided.
       # See https://github.com/tauri-apps/tauri/issues/15665.
       - name: Repair AppImage Wayland compatibility
         if: matrix.target == 'linux-x64'
@@ -97,6 +99,7 @@ jobs:
           fi
 
           rm -f "$WORK/squashfs-root/usr/lib/"libwayland-*
+          sed -i '/GST_PLUGIN_SYSTEM_PATH/d' "$WORK/squashfs-root/AppRun"
           curl -fsSL -o "$WORK/appimagetool" \
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  $WORK/appimagetool" | sha256sum -c -
