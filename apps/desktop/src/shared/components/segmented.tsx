@@ -39,7 +39,7 @@ export function Segmented<T extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(option.id)}
-            className={`seg-segment relative z-[1] flex h-full min-w-0 items-center justify-center gap-1 rounded-[6px] px-2.5 text-[11px] font-medium transition-colors duration-150 ${
+            className={`seg-segment relative z-[1] flex h-full min-w-0 items-center justify-center gap-1 rounded-[6px] ${scroll ? "px-2.5" : "px-1"} text-[11px] font-medium transition-colors duration-150 ${
               scroll ? "shrink-0" : "flex-1"
             } ${selected ? "text-text" : "text-text-secondary hover:text-text"}`}
           >

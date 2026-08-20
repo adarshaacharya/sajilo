@@ -837,7 +837,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
       0 0 0 0.5px color-mix(in srgb, #3c3c43 6%, transparent);
   }
 
-  html:not([data-theme="dark"]) .mac-switch {
+  html:not([data-theme="dark"]) .mac-switch:not(.mac-switch--on) {
     background: color-mix(in srgb, #3c3c43 18%, transparent);
   }
 
@@ -930,7 +930,7 @@ html[data-theme="light"] .tab-indicator {
     0 1px 2px color-mix(in srgb, #000 4%, transparent);
 }
 
-html[data-theme="light"] .mac-switch {
+html[data-theme="light"] .mac-switch:not(.mac-switch--on) {
   background: color-mix(in srgb, #3c3c43 18%, transparent);
 }
 

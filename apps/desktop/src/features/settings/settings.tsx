@@ -18,6 +18,7 @@ export function Settings() {
         label={t("settings.general")}
         value={tab}
         onChange={setTab}
+        scrollable={false}
         options={[
           { id: "display" as const, label: t("settings.tab-display"), icon: "display" as const },
           { id: "modules" as const, label: t("settings.tab-modules"), icon: "modules" as const },
