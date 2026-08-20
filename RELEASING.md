@@ -4,19 +4,31 @@
 Linux on every `v*` tag and publishes a GitHub prerelease with the installers
 attached.
 
-## Before releasing
-
-1. Bump `version` in `apps/desktop/src-tauri/tauri.conf.json`.
-2. Commit and push.
-
-## Publish a beta
+## Cutting a release
 
 ```bash
-git tag -a v0.1.0-beta.1 -m "Sajilo 0.1.0 beta 1"
-git push origin v0.1.0-beta.1
+./scripts/bump-version.sh 0.1.3
 ```
 
-For a stable release, use the matching tag without `-beta.N`, e.g. `v0.1.0`.
+Bumps `version` in `apps/desktop/package.json` and
+`apps/desktop/src-tauri/tauri.conf.json` together, commits, pushes, then
+creates and pushes the matching `v0.1.3` tag — which is what
+`release-desktop.yml` builds from.
+
+**The version field must change on every release, no exceptions.** The
+updater decides whether a build is newer purely by comparing this number
+against what's installed; the git tag name is not part of that comparison.
+Retagging without bumping the version (`v0.1.1-beta.2`, `v0.1.1-beta.3`, …
+all reporting `0.1.1`) is exactly how several releases in a row silently
+failed to show up as updates — every install already at `0.1.1` read the
+newest one as "up to date" regardless of what the tag said. Always use the
+script rather than tagging by hand, so the tag can never drift from the
+version it's supposed to match.
+
+Every GitHub release should be published as **"Latest"**, not "Pre-release"
+— GitHub excludes anything flagged pre-release from `/releases/latest/`,
+which is the URL the updater polls, so a pre-release build is invisible to
+it no matter how new it is.
 
 ## The updater
 
