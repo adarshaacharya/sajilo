@@ -28,7 +28,7 @@ export function Segmented<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className={`seg-track flex h-[30px] rounded-[8px] p-[3px] ${scroll ? "seg-track--scroll" : ""}`}
+      className={`seg-track flex h-[30px] shrink-0 rounded-[8px] p-[3px] ${scroll ? "seg-track--scroll" : ""}`}
     >
       {options.map((option) => {
         const selected = option.id === value;
@@ -39,7 +39,7 @@ export function Segmented<T extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(option.id)}
-            className={`seg-segment relative z-[1] flex h-full min-w-0 items-center justify-center gap-1 rounded-[6px] ${scroll ? "px-2.5" : "px-1"} text-[11px] font-medium transition-colors duration-150 ${
+            className={`seg-segment relative z-[1] flex h-full items-center justify-center gap-1 rounded-[6px] ${scroll ? "min-w-0 px-2.5" : "px-1"} text-[11px] font-medium transition-colors duration-150 ${
               scroll ? "shrink-0" : "flex-1"
             } ${selected ? "text-text" : "text-text-secondary hover:text-text"}`}
           >
@@ -57,7 +57,7 @@ export function Segmented<T extends string>({
                   className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
                 />
               )}
-              <span className={scroll ? "whitespace-nowrap" : "truncate"}>{option.label}</span>
+              <span className="whitespace-nowrap">{option.label}</span>
             </span>
           </button>
         );

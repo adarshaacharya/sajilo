@@ -251,6 +251,18 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   box-shadow: var(--color-control-inset);
 }
 
+/* NSTextField has no visible up/down stepper by default — the browser's
+   spin buttons on number inputs are a WebKit form-control default, not a
+   macOS pattern. */
+.control-field[type="number"]::-webkit-inner-spin-button,
+.control-field[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.control-field[type="number"] {
+  appearance: textfield;
+}
+
 /* Route header — whisper separator, not a white rule. */
 .header-bar {
   border-bottom: 1px solid var(--color-divider);

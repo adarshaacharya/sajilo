@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../shared/components/card";
 import { Icon } from "../../shared/components/icon";
+import { MonthGrid } from "../../shared/components/month-grid";
 import { FadeUp, Stagger } from "../../shared/components/motion";
 import { useSettings } from "../../shared/context/settings-context";
 import {
@@ -16,7 +17,6 @@ import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { GlanceCards } from "./_components/glance-cards";
-import { MonthGrid } from "./_components/month-grid";
 
 const PROVISIONAL_YEARS = new Set([2085, 2086, 2087, 2088, 2089, 2090]);
 const GREG_MONTHS = [

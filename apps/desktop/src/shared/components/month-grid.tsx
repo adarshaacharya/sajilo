@@ -1,6 +1,6 @@
-import { useSettings } from "../../../shared/context/settings-context";
-import type { CalendarDay, CalendarMonth } from "../../../shared/lib/ipc";
-import { digits } from "../../../shared/lib/numerals";
+import { useSettings } from "../context/settings-context";
+import type { CalendarDay, CalendarMonth } from "../lib/ipc";
+import { digits } from "../lib/numerals";
 
 /** Swift MonthCalendarView weekday symbols. */
 const WEEKDAYS_NE = ["आ", "सो", "मं", "बु", "बि", "शु", "श"];

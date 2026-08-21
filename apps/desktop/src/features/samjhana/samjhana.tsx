@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { CONTROL } from "../../shared/components/control";
 import { Icon } from "../../shared/components/icon";
+import { MonthGrid } from "../../shared/components/month-grid";
 import { Segmented } from "../../shared/components/segmented";
+import { Select } from "../../shared/components/select";
+import { Toggle } from "../../shared/components/toggle";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
 import {
   api,
+  type CalendarMonth,
   type SamjhanaChecklistItem,
   type SamjhanaDate,
   type SamjhanaDateInput,
@@ -20,8 +25,6 @@ type Category = "all" | "identity" | "vehicle" | "home" | "money" | "health" | "
 type View = "reminders" | "records";
 type TFn = ReturnType<typeof useSettings>["t"];
 
-const CONTROL =
-  "control-field h-8 rounded-md px-2 text-[11px] outline-none placeholder:text-text-muted focus:border-[color:var(--color-accent-mark)]";
 const EMPTY_DATE = { calendar: "ad" as const, year: 2000, month: 1, day: 1 };
 
 /** Template content (title/fee/location/checklist) is English-only for now —
@@ -355,6 +358,153 @@ function ItemRow({
   );
 }
 
+/** A real calendar grid, not raw number fields — reuses the same
+ * BS-native `MonthGrid` the dashboard browses with, so picking a date
+ * feels like the rest of the app rather than a spreadsheet-style form. */
+function InlineDatePicker({
+  label,
+  showLabel = true,
+  value,
+  calendar,
+  onCalendarChange,
+  onSelect,
+  t,
+}: {
+  label: string;
+  /** False when the caller already shows this label elsewhere (e.g. a
+   * Toggle row) — avoids repeating "Issued" twice in a row. */
+  showLabel?: boolean;
+  value: SamjhanaDate | null;
+  calendar: "ad" | "bs";
+  onCalendarChange: (calendar: "ad" | "bs") => void;
+  onSelect: (date: SamjhanaDate) => void;
+  t: TFn;
+}) {
+  const [open, setOpen] = useState(false);
+  const [cursor, setCursor] = useState<{ year: number; month: number } | null>(null);
+  const [grid, setGrid] = useState<CalendarMonth | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const seed = cursor ?? (value ? { year: value.bs.year, month: value.bs.month } : null);
+    const load = (year: number, month: number) =>
+      api
+        .monthGrid(year, month)
+        .then((next) => {
+          if (!cancelled) setGrid(next);
+        })
+        .catch(() => {});
+    if (seed) {
+      if (!cursor) setCursor(seed);
+      load(seed.year, seed.month);
+    } else {
+      api
+        .today()
+        .then((today) => {
+          if (cancelled) return;
+          setCursor({ year: today.nepali.year, month: today.nepali.month });
+          load(today.nepali.year, today.nepali.month);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [open, cursor, value]);
+
+  const step = (offset: number) => {
+    if (!cursor) return;
+    api
+      .shiftMonth(cursor.year, cursor.month, offset)
+      .then(setCursor)
+      .catch(() => {});
+  };
+
+  const dateOptions: { id: "ad" | "bs"; label: string }[] = [
+    { id: "ad", label: "AD" },
+    { id: "bs", label: "BS" },
+  ];
+
+  return (
+    <div className="space-y-1.5">
+      <div className={`flex items-center gap-2 ${showLabel ? "justify-between" : "justify-end"}`}>
+        {showLabel && (
+          <p className="min-w-0 truncate text-[10px] font-medium text-text-secondary">{label}</p>
+        )}
+        <Segmented
+          options={dateOptions}
+          value={calendar}
+          onChange={onCalendarChange}
+          label={label}
+          scrollable={false}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className={`${CONTROL} flex w-full items-center gap-1.5 text-left`}
+      >
+        <Icon name="upcoming" className="size-3 shrink-0 text-text-muted" />
+        <span className="min-w-0 flex-1 truncate">
+          {value
+            ? calendar === "ad"
+              ? formatDate(value.ad)
+              : `BS ${value.bs.year}-${value.bs.month}-${value.bs.day}`
+            : t("samjhana.not-set")}
+        </span>
+      </button>
+      {value?.ad && (
+        <p className="text-[10px] text-text-muted">
+          {calendar === "ad"
+            ? `BS ${value.bs.year}-${value.bs.month}-${value.bs.day}`
+            : `AD ${value.ad}`}
+        </p>
+      )}
+      {open && (
+        <div className="surface-card space-y-1.5 p-2">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              aria-label={t("calendar.previous-month")}
+              onClick={() => step(-1)}
+              className="icon-btn size-6"
+            >
+              <span className="text-[13px] leading-none">‹</span>
+            </button>
+            <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold text-text-secondary">
+              {grid?.title ?? ""}
+            </span>
+            <button
+              type="button"
+              aria-label={t("calendar.next-month")}
+              onClick={() => step(1)}
+              className="icon-btn size-6"
+            >
+              <span className="text-[13px] leading-none">›</span>
+            </button>
+          </div>
+          {grid && (
+            <MonthGrid
+              month={grid}
+              onSelect={(day) => {
+                if (!day.date) return;
+                api
+                  .resolveSamjhanaDate({ calendar: "bs", ...day.date })
+                  .then((date) => {
+                    onSelect(date);
+                    setOpen(false);
+                  })
+                  .catch(() => {});
+              }}
+            />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DateEditor({
   item,
   onChange,
@@ -364,77 +514,15 @@ function DateEditor({
   onChange: (item: SamjhanaItem) => void;
   t: TFn;
 }) {
-  const { calendar, year, month, day } = item.dueDate;
-  const update = (part: keyof SamjhanaDateInput, value: string) =>
-    onChange({
-      ...item,
-      dueDate: {
-        ...item.dueDate,
-        [part]: part === "calendar" ? value : Number(value) || 0,
-      } as SamjhanaItem["dueDate"],
-    });
-  const resolve = () =>
-    api
-      .resolveSamjhanaDate({ calendar, year, month, day })
-      .then((date) => onChange({ ...item, dueDate: date }))
-      .catch(() => {});
-  const dateOptions: { id: "ad" | "bs"; label: string }[] = [
-    { id: "ad", label: "AD" },
-    { id: "bs", label: "BS" },
-  ];
   return (
-    <div className="space-y-1.5">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-medium text-text-secondary">{t("samjhana.due-date")}</p>
-        <Segmented
-          options={dateOptions}
-          value={calendar}
-          onChange={(value) => update("calendar", value)}
-          label={t("samjhana.due-date")}
-          scrollable={false}
-        />
-      </div>
-      <div className="flex gap-1.5">
-        <input
-          aria-label="Year"
-          type="number"
-          value={year || ""}
-          onChange={(event) => update("year", event.target.value)}
-          onBlur={resolve}
-          className={`${CONTROL} min-w-0 flex-1`}
-          placeholder="YYYY"
-        />
-        <input
-          aria-label="Month"
-          type="number"
-          min="1"
-          max="12"
-          value={month || ""}
-          onChange={(event) => update("month", event.target.value)}
-          onBlur={resolve}
-          className={`${CONTROL} w-14`}
-          placeholder="MM"
-        />
-        <input
-          aria-label="Day"
-          type="number"
-          min="1"
-          max="32"
-          value={day || ""}
-          onChange={(event) => update("day", event.target.value)}
-          onBlur={resolve}
-          className={`${CONTROL} w-14`}
-          placeholder="DD"
-        />
-      </div>
-      {item.dueDate.ad && (
-        <p className="text-[10px] text-text-muted">
-          {calendar === "ad"
-            ? `BS ${item.dueDate.bs.year}-${item.dueDate.bs.month}-${item.dueDate.bs.day}`
-            : `AD ${item.dueDate.ad}`}
-        </p>
-      )}
-    </div>
+    <InlineDatePicker
+      label={t("samjhana.due-date")}
+      value={item.dueDate}
+      calendar={item.dueDate.calendar}
+      onCalendarChange={(calendar) => onChange({ ...item, dueDate: { ...item.dueDate, calendar } })}
+      onSelect={(dueDate) => onChange({ ...item, dueDate })}
+      t={t}
+    />
   );
 }
 
@@ -476,95 +564,29 @@ function OptionalDateField({
   onChange: (value: SamjhanaDate | null) => void;
   t: TFn;
 }) {
-  const [draft, setDraft] = useState<SamjhanaDateInput>(
-    value ?? { calendar: "ad", year: 0, month: 0, day: 0 },
-  );
   const [expanded, setExpanded] = useState(value !== null);
-  const update = (part: keyof SamjhanaDateInput, raw: string) =>
-    setDraft((current) => ({
-      ...current,
-      [part]: part === "calendar" ? raw : Number(raw) || 0,
-    }));
-  const resolve = (next: SamjhanaDateInput) => {
-    if (!next.year || !next.month || !next.day) return;
-    api
-      .resolveSamjhanaDate(next)
-      .then(onChange)
-      .catch(() => {});
-  };
-  const dateOptions: { id: "ad" | "bs"; label: string }[] = [
-    { id: "ad", label: "AD" },
-    { id: "bs", label: "BS" },
-  ];
+  const [calendar, setCalendar] = useState<"ad" | "bs">(value?.calendar ?? "ad");
   return (
     <div className="space-y-1.5">
-      <label className="flex items-center gap-1.5 text-[10px] font-medium text-text-secondary">
-        <input
-          type="checkbox"
-          checked={expanded}
-          onChange={(event) => {
-            setExpanded(event.target.checked);
-            if (!event.target.checked) onChange(null);
-          }}
-          className="accent-[color:var(--color-accent-mark)]"
-        />
-        {label}
-        {!expanded && <span className="text-text-muted">· {t("samjhana.not-set")}</span>}
-      </label>
+      <Toggle
+        label={label}
+        note={expanded ? undefined : t("samjhana.not-set")}
+        checked={expanded}
+        onChange={(checked) => {
+          setExpanded(checked);
+          if (!checked) onChange(null);
+        }}
+      />
       {expanded && (
-        <>
-          <Segmented
-            options={dateOptions}
-            value={draft.calendar}
-            onChange={(next) => {
-              const updated = { ...draft, calendar: next };
-              setDraft(updated);
-              resolve(updated);
-            }}
-            label={label}
-            scrollable={false}
-          />
-          <div className="flex gap-1.5">
-            <input
-              aria-label="Year"
-              type="number"
-              value={draft.year || ""}
-              onChange={(event) => update("year", event.target.value)}
-              onBlur={() => resolve(draft)}
-              className={`${CONTROL} min-w-0 flex-1`}
-              placeholder="YYYY"
-            />
-            <input
-              aria-label="Month"
-              type="number"
-              min="1"
-              max="12"
-              value={draft.month || ""}
-              onChange={(event) => update("month", event.target.value)}
-              onBlur={() => resolve(draft)}
-              className={`${CONTROL} w-14`}
-              placeholder="MM"
-            />
-            <input
-              aria-label="Day"
-              type="number"
-              min="1"
-              max="32"
-              value={draft.day || ""}
-              onChange={(event) => update("day", event.target.value)}
-              onBlur={() => resolve(draft)}
-              className={`${CONTROL} w-14`}
-              placeholder="DD"
-            />
-          </div>
-          {value?.ad && (
-            <p className="text-[10px] text-text-muted">
-              {draft.calendar === "ad"
-                ? `BS ${value.bs.year}-${value.bs.month}-${value.bs.day}`
-                : `AD ${value.ad}`}
-            </p>
-          )}
-        </>
+        <InlineDatePicker
+          label={label}
+          showLabel={false}
+          value={value}
+          calendar={calendar}
+          onCalendarChange={setCalendar}
+          onSelect={onChange}
+          t={t}
+        />
       )}
     </div>
   );
@@ -648,22 +670,11 @@ function RecordEditor({
           <span className="text-[16px] leading-none text-text-muted">×</span>
         </button>
       </div>
-      <select
+      <Select
         value={record.documentType}
-        onChange={(event) =>
-          onChange({
-            ...record,
-            documentType: event.target.value as SamjhanaDocumentType,
-          })
-        }
-        className={`${CONTROL} w-full`}
-      >
-        {RECORD_TYPES.map((type) => (
-          <option key={type} value={type}>
-            {docTypeLabel(t, type)}
-          </option>
-        ))}
-      </select>
+        onChange={(next) => onChange({ ...record, documentType: next })}
+        options={RECORD_TYPES.map((type) => ({ id: type, label: docTypeLabel(t, type) }))}
+      />
       <input
         value={record.number}
         onChange={(event) => onChange({ ...record, number: event.target.value })}
@@ -770,40 +781,36 @@ function ItemEditor({
         </button>
       </div>
 
-      <select
+      <Select
         value={template}
-        onChange={(event) => {
-          setTemplate(event.target.value);
-          const found = TEMPLATES.find((entry) => entry.id === event.target.value);
+        onChange={(next) => {
+          setTemplate(next);
+          const found = TEMPLATES.find((entry) => entry.id === next);
           if (found) onChange(applyTemplate(item, found));
         }}
-        className={`${CONTROL} w-full`}
-      >
-        <option value="">{t("samjhana.template-placeholder")}</option>
-        {TEMPLATES.map((entry) => (
-          <option key={entry.id} value={entry.id}>
-            {entry.title}
-          </option>
-        ))}
-      </select>
+        options={[
+          { id: "", label: t("samjhana.template-placeholder") },
+          ...TEMPLATES.map((entry) => ({ id: entry.id, label: entry.title })),
+        ]}
+      />
       <input
         value={item.title}
         onChange={(event) => onChange({ ...item, title: event.target.value })}
         placeholder={t("samjhana.what-should-remember")}
         className={`${CONTROL} w-full`}
       />
-      <select
+      <Select
         value={item.category}
-        onChange={(event) => onChange({ ...item, category: event.target.value })}
-        className={`${CONTROL} w-full`}
-      >
-        <option value="identity">{t("samjhana.category.identity")}</option>
-        <option value="vehicle">{t("samjhana.category.vehicle")}</option>
-        <option value="home">{t("samjhana.category.home")}</option>
-        <option value="money">{t("samjhana.category.money")}</option>
-        <option value="health">{t("samjhana.category.health")}</option>
-        <option value="application">{t("samjhana.category.application")}</option>
-      </select>
+        onChange={(next) => onChange({ ...item, category: next })}
+        options={[
+          { id: "identity", label: t("samjhana.category.identity") },
+          { id: "vehicle", label: t("samjhana.category.vehicle") },
+          { id: "home", label: t("samjhana.category.home") },
+          { id: "money", label: t("samjhana.category.money") },
+          { id: "health", label: t("samjhana.category.health") },
+          { id: "application", label: t("samjhana.category.application") },
+        ]}
+      />
       <DateEditor item={item} onChange={onChange} t={t} />
 
       <button
@@ -821,19 +828,19 @@ function ItemEditor({
       {showMore && (
         <div className="space-y-2.5 rounded-md border border-divider p-2.5">
           <div>
-            <select
+            <Select
               value={item.personId ?? ""}
-              onChange={(event) => onChange({ ...item, personId: event.target.value || null })}
-              className={`${CONTROL} w-full`}
-            >
-              <option value="">{t("samjhana.for-me")}</option>
-              {people.map((person) => (
-                <option key={person.id} value={person.id}>
-                  {person.name}
-                  {person.relationship ? ` · ${person.relationship}` : ""}
-                </option>
-              ))}
-            </select>
+              onChange={(next) => onChange({ ...item, personId: next || null })}
+              options={[
+                { id: "", label: t("samjhana.for-me") },
+                ...people.map((person) => ({
+                  id: person.id,
+                  label: person.relationship
+                    ? `${person.name} · ${person.relationship}`
+                    : person.name,
+                })),
+              ]}
+            />
             {showPerson ? (
               <div className="mt-1.5 flex gap-1.5">
                 <input
@@ -875,29 +882,29 @@ function ItemEditor({
             )}
           </div>
           <div className="grid grid-cols-2 gap-1.5">
-            <select
+            <Select
               value={item.recurrence}
-              onChange={(event) =>
-                onChange({ ...item, recurrence: event.target.value as SamjhanaItem["recurrence"] })
+              onChange={(next) =>
+                onChange({ ...item, recurrence: next as SamjhanaItem["recurrence"] })
               }
-              className={`${CONTROL} w-full`}
-            >
-              <option value="none">{t("samjhana.recurrence.none")}</option>
-              <option value="monthly">{t("samjhana.recurrence.monthly")}</option>
-              <option value="yearlyAd">{t("samjhana.recurrence.yearlyAd")}</option>
-              <option value="yearlyBs">{t("samjhana.recurrence.yearlyBs")}</option>
-            </select>
-            <select
+              options={[
+                { id: "none", label: t("samjhana.recurrence.none") },
+                { id: "monthly", label: t("samjhana.recurrence.monthly") },
+                { id: "yearlyAd", label: t("samjhana.recurrence.yearlyAd") },
+                { id: "yearlyBs", label: t("samjhana.recurrence.yearlyBs") },
+              ]}
+            />
+            <Select
               value={item.applicationStatus}
-              onChange={(event) => onChange({ ...item, applicationStatus: event.target.value })}
-              className={`${CONTROL} w-full`}
-            >
-              <option value="notStarted">{t("samjhana.status.notStarted")}</option>
-              <option value="submitted">{t("samjhana.status.submitted")}</option>
-              <option value="inReview">{t("samjhana.status.inReview")}</option>
-              <option value="ready">{t("samjhana.status.ready")}</option>
-              <option value="completed">{t("samjhana.status.completed")}</option>
-            </select>
+              onChange={(next) => onChange({ ...item, applicationStatus: next })}
+              options={[
+                { id: "notStarted", label: t("samjhana.status.notStarted") },
+                { id: "submitted", label: t("samjhana.status.submitted") },
+                { id: "inReview", label: t("samjhana.status.inReview") },
+                { id: "ready", label: t("samjhana.status.ready") },
+                { id: "completed", label: t("samjhana.status.completed") },
+              ]}
+            />
           </div>
           <div>
             <p className="mb-1 block text-[10px] font-medium text-text-secondary">
