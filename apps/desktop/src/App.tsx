@@ -12,6 +12,7 @@ import { News } from "./features/news/news";
 import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
 import { Rashifal } from "./features/rashifal/rashifal";
+import { Samjhana } from "./features/samjhana/samjhana";
 import { Settings } from "./features/settings/settings";
 import { Tools } from "./features/tools/tools";
 import { Weather } from "./features/weather/weather";
@@ -38,6 +39,7 @@ const ROUTES = [
   { path: "/rashifal", titleKey: "screen.rashifal", element: <Rashifal /> },
   { path: "/radio", titleKey: "screen.radio", element: <Radio /> },
   { path: "/tools", titleKey: "screen.tools", element: <Tools /> },
+  { path: "/samjhana", titleKey: "screen.samjhana", element: <Samjhana /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];
 

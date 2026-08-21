@@ -4,6 +4,7 @@ import { SFArrowLeftArrowRight } from "sf-symbols-lib/monochrome/SFArrowLeftArro
 import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
+import { SFBook } from "sf-symbols-lib/monochrome/SFBook";
 import { SFCalendar } from "sf-symbols-lib/monochrome/SFCalendar";
 import { SFCalendarBadgeCheckmark } from "sf-symbols-lib/monochrome/SFCalendarBadgeCheckmark";
 import { SFChartLineUptrendXyaxis } from "sf-symbols-lib/monochrome/SFChartLineUptrendXyaxis";
@@ -62,6 +63,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   rashifal: SFMoonStarsFill,
   radio: SFDotRadiowavesLeftAndRight,
   tools: SFWrenchAndScrewdriver,
+  directory: SFBook,
+  samjhana: SFCalendarBadgeCheckmark,
   settings: SFGearshape,
   power: SFPower,
   search: SFMagnifyingglass,
@@ -113,6 +116,8 @@ export type IconName =
   | "rashifal"
   | "radio"
   | "tools"
+  | "directory"
+  | "samjhana"
   | "settings"
   | "power"
   | "search"

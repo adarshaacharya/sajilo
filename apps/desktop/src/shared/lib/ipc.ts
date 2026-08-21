@@ -103,6 +103,86 @@ export interface DayPlan {
   createdAt: string;
 }
 
+export interface SamjhanaPerson {
+  id: string;
+  name: string;
+  relationship: string;
+  createdAt: string;
+}
+
+export interface SamjhanaDateInput {
+  calendar: "ad" | "bs";
+  year: number;
+  month: number;
+  day: number;
+}
+
+export interface SamjhanaDate extends SamjhanaDateInput {
+  ad: string;
+  bs: { year: number; month: number; day: number };
+}
+
+export interface SamjhanaChecklistItem {
+  id: string;
+  label: string;
+  checked: boolean;
+}
+
+export interface SamjhanaItem {
+  id: string;
+  personId: string | null;
+  title: string;
+  category: string;
+  status: "active" | "completed" | "archived";
+  dueDate: SamjhanaDate;
+  recurrence: "none" | "monthly" | "yearlyAd" | "yearlyBs";
+  remindDays: number[];
+  note: string;
+  officialUrl: string;
+  officeLocation: string;
+  fee: string;
+  applicationStatus: string;
+  checklist: SamjhanaChecklistItem[];
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+}
+
+export type SamjhanaDocumentType = "citizenship" | "passport" | "drivingLicence" | "nid" | "pan";
+
+export interface SamjhanaRecord {
+  id: string;
+  documentType: SamjhanaDocumentType;
+  number: string;
+  issuedDate: SamjhanaDate | null;
+  expiryDate: SamjhanaDate | null;
+  office: string;
+  note: string;
+  /** The reminder auto-created from `expiryDate`, if any. Read-only. */
+  linkedItemId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SamjhanaRecordInput {
+  id: string;
+  documentType: SamjhanaDocumentType;
+  number: string;
+  /** Sent as full SamjhanaDate objects; the backend only reads the
+   * calendar/year/month/day fields and recomputes ad/bs itself. */
+  issuedDate: SamjhanaDate | null;
+  expiryDate: SamjhanaDate | null;
+  office: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface SamjhanaSnapshot {
+  people: SamjhanaPerson[];
+  items: SamjhanaItem[];
+  records: SamjhanaRecord[];
+}
+
 /** Mirrors `sajilo_core::tools::land::LandUnit`. */
 export type LandUnit =
   | "ropani"
@@ -180,6 +260,23 @@ export const api = {
   savePlan: (plan: DayPlan) => invoke<DayPlan[]>("save_plan", { plan }),
   deletePlan: (id: string) => invoke<DayPlan[]>("delete_plan", { id }),
 
+  samjhanaSnapshot: () => invoke<SamjhanaSnapshot>("samjhana_snapshot"),
+  resolveSamjhanaDate: (input: SamjhanaDateInput) =>
+    invoke<SamjhanaDate>("resolve_samjhana_date", { input }),
+  saveSamjhanaPerson: (person: SamjhanaPerson) =>
+    invoke<SamjhanaSnapshot>("save_samjhana_person", { person }),
+  deleteSamjhanaPerson: (id: string) => invoke<SamjhanaSnapshot>("delete_samjhana_person", { id }),
+  saveSamjhanaItem: (item: SamjhanaItem) =>
+    invoke<SamjhanaSnapshot>("save_samjhana_item", { item }),
+  deleteSamjhanaItem: (id: string) => invoke<SamjhanaSnapshot>("delete_samjhana_item", { id }),
+  saveSamjhanaRecord: (record: SamjhanaRecordInput) =>
+    invoke<SamjhanaSnapshot>("save_samjhana_record", { record }),
+  deleteSamjhanaRecord: (id: string) => invoke<SamjhanaSnapshot>("delete_samjhana_record", { id }),
+
+  getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
+  setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),
+  deleteSetting: (key: string) => invoke<void>("delete_setting", { key }),
+
   groupNumber: (value: number, fractionDigits: number) =>
     invoke<string>("group_number", { value, fractionDigits }),
 
@@ -194,9 +291,8 @@ export const api = {
   computeInterest: (principal: number, annualRatePercent: number, years: number) =>
     invoke<InterestResult>("compute_interest", { principal, annualRatePercent, years }),
 
-  exportBackup: () => invoke<string>("export_backup"),
-  importBackup: (contents: string) =>
-    invoke<{ dayPlans: number; exportedAt: string }>("import_backup", { contents }),
+  exportBackup: (destination: string) => invoke<void>("export_backup", { destination }),
+  importBackup: (source: string) => invoke<{ database: boolean }>("import_backup", { source }),
   isFirstRun: () => invoke<boolean>("is_first_run"),
   markLaunched: () => invoke<void>("mark_launched"),
 

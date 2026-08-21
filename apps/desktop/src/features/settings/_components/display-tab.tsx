@@ -43,26 +43,25 @@ export function DisplayTab({
   const [showTime, setShowTime] = useState(false);
 
   useEffect(() => {
-    import("@tauri-apps/plugin-store")
-      .then(({ load }) => load("sajilo.json", { autoSave: true }))
-      .then(async (store) => {
-        const saved = await store.get<string>("menuBarFormat");
+    Promise.all([
+      api.getSetting<string>("menuBarFormat"),
+      api.getSetting<boolean>("customMenuBarShowsFlag"),
+      api.getSetting<boolean>("customMenuBarShowsYear"),
+      api.getSetting<boolean>("showTrayTime"),
+    ])
+      .then(([saved, flag, year, time]) => {
         if (saved) setFormat(saved);
-        const flag = await store.get<boolean>("customMenuBarShowsFlag");
-        if (flag !== undefined) setShowFlag(flag);
-        const year = await store.get<boolean>("customMenuBarShowsYear");
-        if (year !== undefined) setShowYear(year);
-        const time = await store.get<boolean>("showTrayTime");
-        if (time !== undefined) setShowTime(time);
+        if (flag !== null) setShowFlag(flag);
+        if (year !== null) setShowYear(year);
+        if (time !== null) setShowTime(time);
       })
       .catch(() => {});
   }, []);
 
   const persistFormat = (next: string) => {
     setFormat(next);
-    import("@tauri-apps/plugin-store")
-      .then(({ load }) => load("sajilo.json", { autoSave: true }))
-      .then((store) => store.set("menuBarFormat", next))
+    api
+      .setSetting("menuBarFormat", next)
       .then(() => api.refreshTray())
       .catch(() => {});
   };
@@ -71,9 +70,8 @@ export function DisplayTab({
     key: "customMenuBarShowsFlag" | "customMenuBarShowsYear" | "showTrayTime",
     value: boolean,
   ) => {
-    import("@tauri-apps/plugin-store")
-      .then(({ load }) => load("sajilo.json", { autoSave: true }))
-      .then((store) => store.set(key, value))
+    api
+      .setSetting(key, value)
       .then(() => api.refreshTray())
       .catch(() => {});
   };

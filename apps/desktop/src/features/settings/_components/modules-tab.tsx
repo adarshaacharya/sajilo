@@ -104,6 +104,14 @@ export function ModulesTab() {
         onChange={(value) => setModules((current) => ({ ...current, clocksEnabled: value }))}
       />
 
+      <ModuleRow
+        title={t("samjhana.title")}
+        note={t("settings.module-samjhana-note")}
+        icon="samjhana"
+        checked={modules.samjhanaEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, samjhanaEnabled: value }))}
+      />
+
       {noneOn && (
         <p className="px-0.5 text-[10px] text-text-muted">{t("settings.nothing-enabled")}</p>
       )}

@@ -22,7 +22,7 @@ export function Tools() {
     { id: "vat" as const, label: t("tools.vat"), icon: "percent" as const },
     { id: "interest" as const, label: t("tools.interest"), icon: "interest" as const },
     { id: "clock" as const, label: t("tools.clock"), icon: "clock" as const },
-    { id: "emergency" as const, label: t("tools.directory"), icon: "warning" as const },
+    { id: "emergency" as const, label: t("tools.directory"), icon: "directory" as const },
   ];
 
   return (

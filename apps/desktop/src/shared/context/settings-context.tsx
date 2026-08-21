@@ -20,6 +20,7 @@ export interface ModulePrefs {
   /** IANA timezones, in the order they were added — the dashboard preview
    * shows the first few in this order. */
   clocks: string[];
+  samjhanaEnabled: boolean;
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -33,6 +34,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
   clocksEnabled: false,
   clocks: [],
+  samjhanaEnabled: true,
 };
 
 const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "QAR", "SGD"];
@@ -50,11 +52,6 @@ interface Settings {
 }
 
 const SettingsContext = createContext<Settings | null>(null);
-
-async function loadStore() {
-  const { load } = await import("@tauri-apps/plugin-store");
-  return load("sajilo.json", { autoSave: true });
-}
 
 function applyTheme(theme: ThemeMode) {
   if (theme === "system") delete document.documentElement.dataset.theme;
@@ -75,9 +72,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    loadStore()
-      .then(async (store) => {
-        const [
+    Promise.all([
+      api.getSetting<Language>("language"),
+      api.getSetting<NumeralStyle>("numeralStyle"),
+      api.getSetting<ThemeMode>("theme"),
+      api.getSetting<boolean>("weatherEnabled"),
+      api.getSetting<boolean>("forexEnabled"),
+      api.getSetting<boolean>("newsEnabled"),
+      api.getSetting<boolean>("bazarEnabled"),
+      api.getSetting<boolean>("rashifalEnabled"),
+      api.getSetting<boolean>("radioEnabled"),
+      api.getSetting<WeatherLocation>("weatherLocation"),
+      api.getSetting<string[]>("forexFavourites"),
+      api.getSetting<boolean>("clocksEnabled"),
+      api.getSetting<string[]>("clocks"),
+      api.getSetting<boolean>("samjhanaEnabled"),
+    ])
+      .then(
+        ([
           storedLanguage,
           storedNumerals,
           storedTheme,
@@ -91,41 +103,30 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           forexFavourites,
           clocksEnabled,
           clocks,
-        ] = await Promise.all([
-          store.get<Language>("language"),
-          store.get<NumeralStyle>("numeralStyle"),
-          store.get<ThemeMode>("theme"),
-          store.get<boolean>("weatherEnabled"),
-          store.get<boolean>("forexEnabled"),
-          store.get<boolean>("newsEnabled"),
-          store.get<boolean>("bazarEnabled"),
-          store.get<boolean>("rashifalEnabled"),
-          store.get<boolean>("radioEnabled"),
-          store.get<WeatherLocation>("weatherLocation"),
-          store.get<string[]>("forexFavourites"),
-          store.get<boolean>("clocksEnabled"),
-          store.get<string[]>("clocks"),
-        ]);
-        if (cancelled) return;
-        if (storedLanguage) setLanguage(storedLanguage);
-        if (storedNumerals) setNumerals(storedNumerals);
-        if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
-          setThemeState(storedTheme);
-        }
-        setModulesState((current) => ({
-          ...current,
-          ...(weatherEnabled !== undefined && { weatherEnabled }),
-          ...(forexEnabled !== undefined && { forexEnabled }),
-          ...(newsEnabled !== undefined && { newsEnabled }),
-          ...(bazarEnabled !== undefined && { bazarEnabled }),
-          ...(rashifalEnabled !== undefined && { rashifalEnabled }),
-          ...(radioEnabled !== undefined && { radioEnabled }),
-          ...(weatherLocation && { weatherLocation }),
-          ...(forexFavourites && { forexFavourites }),
-          ...(clocksEnabled !== undefined && { clocksEnabled }),
-          ...(clocks && { clocks }),
-        }));
-      })
+          samjhanaEnabled,
+        ]) => {
+          if (cancelled) return;
+          if (storedLanguage) setLanguage(storedLanguage);
+          if (storedNumerals) setNumerals(storedNumerals);
+          if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
+            setThemeState(storedTheme);
+          }
+          setModulesState((current) => ({
+            ...current,
+            ...(weatherEnabled !== null && { weatherEnabled }),
+            ...(forexEnabled !== null && { forexEnabled }),
+            ...(newsEnabled !== null && { newsEnabled }),
+            ...(bazarEnabled !== null && { bazarEnabled }),
+            ...(rashifalEnabled !== null && { rashifalEnabled }),
+            ...(radioEnabled !== null && { radioEnabled }),
+            ...(weatherLocation && { weatherLocation }),
+            ...(forexFavourites && { forexFavourites }),
+            ...(clocksEnabled !== null && { clocksEnabled }),
+            ...(clocks && { clocks }),
+            ...(samjhanaEnabled !== null && { samjhanaEnabled }),
+          }));
+        },
+      )
       .catch(() => {
         /* Not under Tauri: the defaults above stand. */
       });
@@ -135,8 +136,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const persist = useCallback((key: string, value: unknown) => {
-    loadStore()
-      .then((store) => store.set(key, value))
+    api
+      .setSetting(key, value)
       .then(() => api.refreshTray())
       .catch(() => {});
   }, []);
@@ -155,6 +156,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("forexFavourites", next.forexFavourites);
         persist("clocksEnabled", next.clocksEnabled);
         persist("clocks", next.clocks);
+        persist("samjhanaEnabled", next.samjhanaEnabled);
         return next;
       });
     },

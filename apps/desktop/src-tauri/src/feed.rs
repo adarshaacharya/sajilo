@@ -13,14 +13,12 @@ use std::future::Future;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use crate::db;
 use chrono::{DateTime, Utc};
 use sajilo_api::load_state::LoadState;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tauri::{AppHandle, Wry};
-use tauri_plugin_store::StoreExt;
-
-use crate::prefs::CACHE_FILE;
 
 /// A dead upstream is retried once before the value is given up on. Sources
 /// behind Cloudflare answer 521 while their origin restarts, which is usually
@@ -110,10 +108,7 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
         if self.hydrated.swap(true, Ordering::SeqCst) {
             return;
         }
-        let Ok(store) = app.store(CACHE_FILE) else {
-            return;
-        };
-        let Some(raw) = store.get(self.key) else {
+        let Ok(Some(raw)) = db::get_json(app, self.key) else {
             return;
         };
         if let Ok(cached) = serde_json::from_value::<Cached<T>>(raw) {
@@ -128,15 +123,11 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
             value: value.clone(),
             fetched_at: now,
         });
-        let Ok(store) = app.store(CACHE_FILE) else {
-            return;
-        };
         if let Ok(raw) = serde_json::to_value(Cached {
             value,
             fetched_at: now,
         }) {
-            store.set(self.key, raw);
-            let _ = store.save();
+            let _ = db::set_json(app, self.key, &raw);
         }
     }
 }

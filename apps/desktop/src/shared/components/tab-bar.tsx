@@ -13,7 +13,13 @@ const TABS: readonly {
   to: string;
   labelKey: LabelKey;
   icon: IconName;
-  module: "newsEnabled" | "bazarEnabled" | "rashifalEnabled" | "radioEnabled" | null;
+  module:
+    | "newsEnabled"
+    | "bazarEnabled"
+    | "rashifalEnabled"
+    | "radioEnabled"
+    | "samjhanaEnabled"
+    | null;
 }[] = [
   { to: "/", labelKey: "tab.today", icon: "today", module: null },
   { to: "/news", labelKey: "screen.news", icon: "news", module: "newsEnabled" },
@@ -21,6 +27,7 @@ const TABS: readonly {
   { to: "/rashifal", labelKey: "tab.rashifal", icon: "rashifal", module: "rashifalEnabled" },
   { to: "/radio", labelKey: "tab.radio", icon: "radio", module: "radioEnabled" },
   { to: "/tools", labelKey: "tab.tools", icon: "tools", module: null },
+  { to: "/samjhana", labelKey: "tab.samjhana", icon: "samjhana", module: "samjhanaEnabled" },
 ];
 
 export function TabBar() {

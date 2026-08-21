@@ -10,15 +10,13 @@
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 
+use crate::{db, prefs::ARTICLE_DATES_KEY};
 use chrono::{DateTime, Utc};
 use futures_util::future::join_all;
 use sajilo_api::news::{NewsDigest, NewsItem, NewsSource};
 use sajilo_providers::{HttpClient, annapurna_dates, rss};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Wry};
-use tauri_plugin_store::StoreExt;
-
-use crate::prefs::{ARTICLE_DATES_KEY, CACHE_FILE};
 
 /// Ceiling per refresh. The undated feed carries twenty items, so the first
 /// run resolves them over a couple of passes rather than opening twenty
@@ -152,22 +150,16 @@ fn trim(cache: &mut Cache) {
 }
 
 fn load(app: &AppHandle<Wry>) -> Cache {
-    let Ok(store) = app.store(CACHE_FILE) else {
-        return Cache::default();
-    };
-    store
-        .get(ARTICLE_DATES_KEY)
+    db::get_json(app, ARTICLE_DATES_KEY)
+        .ok()
+        .flatten()
         .and_then(|value| serde_json::from_value(value).ok())
         .unwrap_or_default()
 }
 
 fn save(app: &AppHandle<Wry>, cache: &Cache) {
-    let Ok(store) = app.store(CACHE_FILE) else {
-        return;
-    };
     if let Ok(value) = serde_json::to_value(cache) {
-        store.set(ARTICLE_DATES_KEY, value);
-        let _ = store.save();
+        let _ = db::set_json(app, ARTICLE_DATES_KEY, &value);
     }
 }
 

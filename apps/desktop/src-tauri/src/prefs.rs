@@ -1,16 +1,14 @@
-//! Reading user preferences from the store.
+//! Reading user preferences from the local SQLite database.
 //!
 //! The tray is built before any webview exists, so it cannot ask the frontend
-//! what the user picked — it reads the same store the Settings screen writes.
+//! what the user picked — it reads the same database the Settings screen writes.
 
+use crate::db;
+use crate::tray::title::{CustomMenuBar, MenuBarFormat};
 use sajilo_api::weather::WeatherLocation;
 use sajilo_core::numerals::NumeralStyle;
 use tauri::{AppHandle, Wry};
-use tauri_plugin_store::StoreExt;
 
-use crate::tray::title::{CustomMenuBar, MenuBarFormat};
-
-pub const STORE_FILE: &str = "sajilo.json";
 pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
 pub const NUMERAL_STYLE: &str = "numeralStyle";
 pub const CUSTOM_MENU_BAR_SHOWS_FLAG: &str = "customMenuBarShowsFlag";
@@ -18,16 +16,8 @@ pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
 /// Appends `HH:MM` to whatever date format is already showing — composes with
 /// every `MenuBarFormat`, not a format of its own.
 pub const SHOW_TRAY_TIME: &str = "showTrayTime";
-/// The same key the Swift app used, so an imported backup lands where the app
-/// already looks.
-pub const PLANS_KEY: &str = "dayPlans.v1";
-
-/// Remote-module caches live in their own file, never in `sajilo.json`.
-///
-/// The frontend opens the settings store with `autoSave`, which writes its
-/// whole in-memory map back — so a cache key written from Rust between a JS
-/// read and a JS write would be dropped. Separate files, separate owners.
-pub const CACHE_FILE: &str = "cache.json";
+// The same stable key the app uses, so an imported backup lands where the app
+// already looks.
 
 // Last good payload per remote module. Cached on disk so a cold start against
 // a dead upstream still has yesterday's value to label as stale, and kept one
@@ -70,47 +60,36 @@ pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
 pub fn tray_preferences(
     app: &AppHandle<Wry>,
 ) -> (MenuBarFormat, NumeralStyle, CustomMenuBar, bool) {
-    let Ok(store) = app.store(STORE_FILE) else {
-        return (
-            MenuBarFormat::default(),
-            NumeralStyle::default(),
-            CustomMenuBar::default(),
-            false,
-        );
-    };
-    fn read<T: serde::de::DeserializeOwned + Default>(
-        store: &tauri_plugin_store::Store<Wry>,
-        key: &str,
-    ) -> T {
-        store
-            .get(key)
+    fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &str) -> T {
+        db::get_json(app, key)
+            .ok()
+            .flatten()
             .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default()
     }
-    fn read_bool(store: &tauri_plugin_store::Store<Wry>, key: &str, default: bool) -> bool {
-        store
-            .get(key)
+    fn read_bool(app: &AppHandle<Wry>, key: &str, default: bool) -> bool {
+        db::get_json(app, key)
+            .ok()
+            .flatten()
             .and_then(|value| value.as_bool())
             .unwrap_or(default)
     }
     (
-        read(&store, MENU_BAR_FORMAT),
-        read(&store, NUMERAL_STYLE),
+        read(app, MENU_BAR_FORMAT),
+        read(app, NUMERAL_STYLE),
         CustomMenuBar {
-            show_flag: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_FLAG, true),
-            show_year: read_bool(&store, CUSTOM_MENU_BAR_SHOWS_YEAR, true),
+            show_flag: read_bool(app, CUSTOM_MENU_BAR_SHOWS_FLAG, true),
+            show_year: read_bool(app, CUSTOM_MENU_BAR_SHOWS_YEAR, true),
         },
-        read_bool(&store, SHOW_TRAY_TIME, false),
+        read_bool(app, SHOW_TRAY_TIME, false),
     )
 }
 
-/// Which city the weather module fetches for. Matches the Swift backup key.
+/// Which city the weather module fetches for. Kept stable for backups.
 pub fn weather_location(app: &AppHandle<Wry>) -> WeatherLocation {
-    let Ok(store) = app.store(STORE_FILE) else {
-        return WeatherLocation::default();
-    };
-    store
-        .get(WEATHER_LOCATION)
+    db::get_json(app, WEATHER_LOCATION)
+        .ok()
+        .flatten()
         .and_then(|value| value.as_str().map(str::to_owned))
         .and_then(|key| WeatherLocation::from_key(&key))
         .unwrap_or_default()

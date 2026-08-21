@@ -5,6 +5,7 @@
 
 pub mod article_dates;
 pub mod commands;
+pub mod db;
 pub mod feed;
 pub mod prefs;
 pub mod system;
@@ -42,9 +43,9 @@ fn updater_enabled() -> bool {
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[allow(clippy::too_many_lines)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
-        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -65,6 +66,9 @@ pub fn run() {
 
     builder
         .setup(|app| {
+            // Create and migrate the single local database before any tray or
+            // notification code reads user-owned state.
+            db::open(app.handle()).map_err(std::io::Error::other)?;
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::stocks::StocksCache::default());
@@ -81,6 +85,12 @@ pub fn run() {
                 let _ = main.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
                 #[cfg(target_os = "macos")]
                 window::polish_macos_chrome(&main);
+                // Ubuntu GNOME may not expose legacy tray icons unless an
+                // AppIndicator host is installed. Show the popover once on
+                // Linux so a missing tray host can never look like a failed
+                // installation; subsequent opens still use the tray.
+                #[cfg(target_os = "linux")]
+                window::show(&main);
             }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
@@ -123,6 +133,17 @@ pub fn run() {
             commands::plans::plans_for_day,
             commands::plans::save_plan,
             commands::plans::delete_plan,
+            commands::samjhana::samjhana_snapshot,
+            commands::samjhana::resolve_samjhana_date,
+            commands::samjhana::save_samjhana_person,
+            commands::samjhana::delete_samjhana_person,
+            commands::samjhana::save_samjhana_item,
+            commands::samjhana::delete_samjhana_item,
+            commands::samjhana::save_samjhana_record,
+            commands::samjhana::delete_samjhana_record,
+            commands::storage::get_setting,
+            commands::storage::set_setting,
+            commands::storage::delete_setting,
             commands::tools::convert_land,
             commands::tools::land_breakdown,
             commands::tools::convert_weight,

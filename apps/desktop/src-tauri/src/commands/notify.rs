@@ -5,6 +5,7 @@
 //! and remembering what has already been delivered so a restart cannot re-fire
 //! it.
 
+use crate::{db, prefs::NOTIFICATION_OPTIONS as OPTIONS_KEY};
 use chrono::Utc;
 use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::calendar::upcoming;
@@ -13,12 +14,8 @@ use sajilo_core::notify::{
     LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans, plan_festivals,
     should_fire_late,
 };
-use sajilo_core::planner::DayPlan;
 use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::{NotificationExt, PermissionState};
-use tauri_plugin_store::StoreExt;
-
-use crate::prefs::{NOTIFICATION_OPTIONS as OPTIONS_KEY, PLANS_KEY, STORE_FILE};
 
 const LAST_FIRED_KEY: &str = "lastFired.v1";
 
@@ -54,9 +51,9 @@ fn state_name(state: PermissionState) -> &'static str {
 }
 
 fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &str) -> T {
-    app.store(STORE_FILE)
+    db::get_json(app, key)
         .ok()
-        .and_then(|store| store.get(key))
+        .flatten()
         .and_then(|value| serde_json::from_value(value).ok())
         .unwrap_or_default()
 }
@@ -64,10 +61,11 @@ fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &st
 /// Everything currently pending, soonest first — festivals and day plans merged.
 pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let options: NotificationOptions = read(app, OPTIONS_KEY);
-    let plans: Vec<DayPlan> = read(app, PLANS_KEY);
+    let plans = crate::commands::plans::all_for_backup(app).unwrap_or_default();
     let now = Utc::now();
 
     let mut all = plan_day_plans(&plans, now);
+    all.extend(crate::commands::samjhana::pending_notifications(app, now));
 
     // Festivals need the event list, which is only available inside the bundled
     // calendar range.
@@ -81,6 +79,7 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     }
 
     all.sort_by_key(|notification| notification.fire_at);
+    all.truncate(sajilo_core::notify::LIMIT);
     all
 }
 
@@ -101,12 +100,8 @@ pub fn set_notification_options(
     app: AppHandle<Wry>,
     options: NotificationOptions,
 ) -> Result<Vec<PlannedNotification>> {
-    let store = app.store(STORE_FILE).map_err(|e| e.to_string())?;
-    store.set(
-        OPTIONS_KEY,
-        serde_json::to_value(options).map_err(|e| e.to_string())?,
-    );
-    store.save().map_err(|e| e.to_string())?;
+    let value = serde_json::to_value(options).map_err(|error| error.to_string())?;
+    db::set_json(&app, OPTIONS_KEY, &value)?;
     Ok(pending(&app))
 }
 
@@ -144,11 +139,8 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
 
     if delivered > 0 {
         fired.prune(now);
-        if let Ok(store) = app.store(STORE_FILE)
-            && let Ok(value) = serde_json::to_value(&fired)
-        {
-            store.set(LAST_FIRED_KEY, value);
-            let _ = store.save();
+        if let Ok(value) = serde_json::to_value(&fired) {
+            let _ = db::set_json(app, LAST_FIRED_KEY, &value);
         }
     }
     delivered

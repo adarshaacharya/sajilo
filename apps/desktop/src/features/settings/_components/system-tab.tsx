@@ -62,15 +62,13 @@ export function SystemTab() {
         : t("settings.reminder-off-note");
 
   const exportData = async () => {
-    const contents = await api.exportBackup();
     const { save } = await import("@tauri-apps/plugin-dialog");
     const path = await save({
-      defaultPath: "sajilo-backup.json",
-      filters: [{ name: "Sajilo backup", extensions: ["json"] }],
+      defaultPath: "Sajilo-backup.db",
+      filters: [{ name: "Sajilo SQLite backup", extensions: ["db"] }],
     });
     if (!path) return;
-    const { writeTextFile } = await import("@tauri-apps/plugin-fs");
-    await writeTextFile(path, contents);
+    await api.exportBackup(path);
     setMessage(t("settings.export-data"));
   };
 
@@ -78,12 +76,11 @@ export function SystemTab() {
     const { open } = await import("@tauri-apps/plugin-dialog");
     const path = await open({
       multiple: false,
-      filters: [{ name: "Sajilo backup", extensions: ["json"] }],
+      filters: [{ name: "Sajilo SQLite backup", extensions: ["db"] }],
     });
     if (typeof path !== "string") return;
-    const { readTextFile } = await import("@tauri-apps/plugin-fs");
-    const summary = await api.importBackup(await readTextFile(path));
-    setMessage(`${t("settings.backup-imported")} (${summary.dayPlans})`);
+    await api.importBackup(path);
+    setMessage(t("settings.backup-imported"));
   };
 
   const checkForUpdates = async () => {
