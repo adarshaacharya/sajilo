@@ -10,15 +10,15 @@ import { openExternalLink } from "../../shared/lib/external-link";
 import {
   api,
   type CalendarMonth,
-  type SamjhanaChecklistItem,
-  type SamjhanaDate,
-  type SamjhanaDateInput,
-  type SamjhanaDocumentType,
-  type SamjhanaItem,
-  type SamjhanaPerson,
-  type SamjhanaRecord,
-  type SamjhanaRecordInput,
-  type SamjhanaSnapshot,
+  type KeeperChecklistItem,
+  type KeeperDate,
+  type KeeperDateInput,
+  type KeeperDocumentType,
+  type KeeperItem,
+  type KeeperPerson,
+  type KeeperRecord,
+  type KeeperRecordInput,
+  type KeeperSnapshot,
 } from "../../shared/lib/ipc";
 
 type Category = "all" | "identity" | "vehicle" | "home" | "money" | "health" | "application";
@@ -179,7 +179,7 @@ function id() {
   return crypto.randomUUID();
 }
 
-function blankItem(date: SamjhanaDateInput = EMPTY_DATE): SamjhanaItem {
+function blankItem(date: KeeperDateInput = EMPTY_DATE): KeeperItem {
   return {
     id: id(),
     personId: null,
@@ -214,7 +214,7 @@ function daysUntil(date: string) {
   return Math.ceil((target - new Date().setHours(0, 0, 0, 0)) / 86_400_000);
 }
 
-function dueTone(item: SamjhanaItem) {
+function dueTone(item: KeeperItem) {
   if (item.status === "completed") return "text-positive";
   const days = daysUntil(item.dueDate.ad);
   return days < 0 ? "text-holiday" : days <= 30 ? "text-accent-mark" : "text-text-secondary";
@@ -223,23 +223,23 @@ function dueTone(item: SamjhanaItem) {
 function categoryLabel(t: TFn, category: string) {
   switch (category) {
     case "identity":
-      return t("samjhana.category.identity");
+      return t("keeper.category.identity");
     case "vehicle":
-      return t("samjhana.category.vehicle");
+      return t("keeper.category.vehicle");
     case "home":
-      return t("samjhana.category.home");
+      return t("keeper.category.home");
     case "money":
-      return t("samjhana.category.money");
+      return t("keeper.category.money");
     case "health":
-      return t("samjhana.category.health");
+      return t("keeper.category.health");
     case "application":
-      return t("samjhana.category.application");
+      return t("keeper.category.application");
     default:
-      return t("samjhana.category.other");
+      return t("keeper.category.other");
   }
 }
 
-function applyTemplate(item: SamjhanaItem, template: (typeof TEMPLATES)[number]) {
+function applyTemplate(item: KeeperItem, template: (typeof TEMPLATES)[number]) {
   return {
     ...item,
     title: template.title,
@@ -251,24 +251,24 @@ function applyTemplate(item: SamjhanaItem, template: (typeof TEMPLATES)[number])
   };
 }
 
-function Summary({ items, onAdd, t }: { items: SamjhanaItem[]; onAdd: () => void; t: TFn }) {
+function Summary({ items, onAdd, t }: { items: KeeperItem[]; onAdd: () => void; t: TFn }) {
   const active = items.filter((item) => item.status === "active");
   const urgent = active.filter((item) => daysUntil(item.dueDate.ad) <= 30).length;
   return (
     <div className="flex items-center justify-between gap-3 px-0.5">
       <div className="flex min-w-0 items-center gap-2">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[color:color-mix(in_srgb,var(--color-accent-mark)_16%,transparent)] text-accent-mark">
-          <Icon name="samjhana" className="size-4" />
+          <Icon name="keeper" className="size-4" />
         </span>
         <div className="min-w-0">
-          <h2 className="text-[13px] font-semibold">{t("samjhana.title")}</h2>
+          <h2 className="text-[13px] font-semibold">{t("keeper.title")}</h2>
           {active.length > 0 && (
             <p className="mt-0.5 truncate text-[10px] text-text-muted">
-              {active.length} {t("samjhana.active").toLowerCase()}
+              {active.length} {t("keeper.active").toLowerCase()}
               {urgent > 0 && (
                 <span className="text-accent-mark">
                   {" · "}
-                  {urgent} {t("samjhana.due-soon").toLowerCase()}
+                  {urgent} {t("keeper.due-soon").toLowerCase()}
                 </span>
               )}
             </p>
@@ -280,7 +280,7 @@ function Summary({ items, onAdd, t }: { items: SamjhanaItem[]; onAdd: () => void
         onClick={onAdd}
         className="settings-btn flex shrink-0 items-center gap-1 text-[11px]"
       >
-        <Icon name="plus" className="size-3" /> {t("samjhana.add")}
+        <Icon name="plus" className="size-3" /> {t("keeper.add")}
       </button>
     </div>
   );
@@ -294,8 +294,8 @@ function ItemRow({
   onComplete,
   t,
 }: {
-  item: SamjhanaItem;
-  person?: SamjhanaPerson;
+  item: KeeperItem;
+  person?: KeeperPerson;
   onEdit: () => void;
   onDelete: () => void;
   onComplete: () => void;
@@ -308,9 +308,7 @@ function ItemRow({
         <button
           type="button"
           onClick={onComplete}
-          aria-label={
-            item.status === "completed" ? t("samjhana.reopen") : t("samjhana.mark-complete")
-          }
+          aria-label={item.status === "completed" ? t("keeper.reopen") : t("keeper.mark-complete")}
           className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors ${item.status === "completed" ? "border-positive bg-positive text-[#10151a]" : "border-control-border hover:border-accent-mark"}`}
         >
           {item.status === "completed" && <Icon name="checkmark" className="size-3" />}
@@ -324,11 +322,11 @@ function ItemRow({
             </p>
             <span className={`shrink-0 text-[10px] font-medium tabular-nums ${dueTone(item)}`}>
               {item.status === "completed"
-                ? t("samjhana.done")
+                ? t("keeper.done")
                 : days < 0
-                  ? `${Math.abs(days)}d ${t("samjhana.days-overdue")}`
+                  ? `${Math.abs(days)}d ${t("keeper.days-overdue")}`
                   : days === 0
-                    ? t("samjhana.today")
+                    ? t("keeper.today")
                     : `${days}d`}
             </span>
           </div>
@@ -342,7 +340,7 @@ function ItemRow({
         <button
           type="button"
           onClick={onDelete}
-          aria-label={`${t("samjhana.delete")} ${item.title}`}
+          aria-label={`${t("keeper.delete")} ${item.title}`}
           className="icon-btn shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
         >
           <Icon name="trash" className="size-3 text-text-muted hover:text-holiday" />
@@ -351,7 +349,7 @@ function ItemRow({
       {item.checklist.length > 0 && (
         <p className="ml-6 mt-1 text-[10px] text-text-muted">
           {item.checklist.filter((entry) => entry.checked).length}/{item.checklist.length}{" "}
-          {t("samjhana.checklist-ready")}
+          {t("keeper.checklist-ready")}
         </p>
       )}
     </article>
@@ -374,10 +372,10 @@ function InlineDatePicker({
   /** False when the caller already shows this label elsewhere (e.g. a
    * Toggle row) — avoids repeating "Issued" twice in a row. */
   showLabel?: boolean;
-  value: SamjhanaDate | null;
+  value: KeeperDate | null;
   calendar: "ad" | "bs";
   onCalendarChange: (calendar: "ad" | "bs") => void;
-  onSelect: (date: SamjhanaDate) => void;
+  onSelect: (date: KeeperDate) => void;
   t: TFn;
 }) {
   const [open, setOpen] = useState(false);
@@ -451,7 +449,7 @@ function InlineDatePicker({
             ? calendar === "ad"
               ? formatDate(value.ad)
               : `BS ${value.bs.year}-${value.bs.month}-${value.bs.day}`
-            : t("samjhana.not-set")}
+            : t("keeper.not-set")}
         </span>
       </button>
       {value?.ad && (
@@ -490,7 +488,7 @@ function InlineDatePicker({
               onSelect={(day) => {
                 if (!day.date) return;
                 api
-                  .resolveSamjhanaDate({ calendar: "bs", ...day.date })
+                  .resolveKeeperDate({ calendar: "bs", ...day.date })
                   .then((date) => {
                     onSelect(date);
                     setOpen(false);
@@ -510,13 +508,13 @@ function DateEditor({
   onChange,
   t,
 }: {
-  item: SamjhanaItem;
-  onChange: (item: SamjhanaItem) => void;
+  item: KeeperItem;
+  onChange: (item: KeeperItem) => void;
   t: TFn;
 }) {
   return (
     <InlineDatePicker
-      label={t("samjhana.due-date")}
+      label={t("keeper.due-date")}
       value={item.dueDate}
       calendar={item.dueDate.calendar}
       onCalendarChange={(calendar) => onChange({ ...item, dueDate: { ...item.dueDate, calendar } })}
@@ -526,7 +524,7 @@ function DateEditor({
   );
 }
 
-const RECORD_TYPES: readonly SamjhanaDocumentType[] = [
+const RECORD_TYPES: readonly KeeperDocumentType[] = [
   "citizenship",
   "passport",
   "drivingLicence",
@@ -534,18 +532,18 @@ const RECORD_TYPES: readonly SamjhanaDocumentType[] = [
   "pan",
 ];
 
-function docTypeLabel(t: TFn, type: SamjhanaDocumentType) {
+function docTypeLabel(t: TFn, type: KeeperDocumentType) {
   switch (type) {
     case "citizenship":
-      return t("samjhana.doc.citizenship");
+      return t("keeper.doc.citizenship");
     case "passport":
-      return t("samjhana.doc.passport");
+      return t("keeper.doc.passport");
     case "drivingLicence":
-      return t("samjhana.doc.drivingLicence");
+      return t("keeper.doc.drivingLicence");
     case "nid":
-      return t("samjhana.doc.nid");
+      return t("keeper.doc.nid");
     case "pan":
-      return t("samjhana.doc.pan");
+      return t("keeper.doc.pan");
     default:
       return type;
   }
@@ -560,8 +558,8 @@ function OptionalDateField({
   t,
 }: {
   label: string;
-  value: SamjhanaDate | null;
-  onChange: (value: SamjhanaDate | null) => void;
+  value: KeeperDate | null;
+  onChange: (value: KeeperDate | null) => void;
   t: TFn;
 }) {
   const [expanded, setExpanded] = useState(value !== null);
@@ -570,7 +568,7 @@ function OptionalDateField({
     <div className="space-y-1.5">
       <Toggle
         label={label}
-        note={expanded ? undefined : t("samjhana.not-set")}
+        note={expanded ? undefined : t("keeper.not-set")}
         checked={expanded}
         onChange={(checked) => {
           setExpanded(checked);
@@ -592,7 +590,7 @@ function OptionalDateField({
   );
 }
 
-function blankRecord(): SamjhanaRecordInput {
+function blankRecord(): KeeperRecordInput {
   return {
     id: id(),
     documentType: "citizenship",
@@ -611,7 +609,7 @@ function RecordRow({
   onDelete,
   t,
 }: {
-  record: SamjhanaRecord;
+  record: KeeperRecord;
   onEdit: () => void;
   onDelete: () => void;
   t: TFn;
@@ -625,7 +623,7 @@ function RecordRow({
           {record.expiryDate && (
             <>
               {" · "}
-              {t("samjhana.expiry-date")} {formatDate(record.expiryDate.ad)}
+              {t("keeper.expiry-date")} {formatDate(record.expiryDate.ad)}
             </>
           )}
         </p>
@@ -633,7 +631,7 @@ function RecordRow({
       <button
         type="button"
         onClick={onDelete}
-        aria-label={`${t("samjhana.delete")} ${docTypeLabel(t, record.documentType)}`}
+        aria-label={`${t("keeper.delete")} ${docTypeLabel(t, record.documentType)}`}
         className="icon-btn shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
       >
         <Icon name="trash" className="size-3 text-text-muted hover:text-holiday" />
@@ -649,8 +647,8 @@ function RecordEditor({
   onCancel,
   t,
 }: {
-  record: SamjhanaRecordInput;
-  onChange: (record: SamjhanaRecordInput) => void;
+  record: KeeperRecordInput;
+  onChange: (record: KeeperRecordInput) => void;
   onSave: () => void;
   onCancel: () => void;
   t: TFn;
@@ -659,13 +657,13 @@ function RecordEditor({
     <section className="surface-card space-y-2.5 p-3">
       <div className="flex items-center justify-between">
         <h3 className="text-[12px] font-semibold">
-          {record.number ? t("samjhana.edit-record") : t("samjhana.new-record")}
+          {record.number ? t("keeper.edit-record") : t("keeper.new-record")}
         </h3>
         <button
           type="button"
           onClick={onCancel}
           className="icon-btn"
-          aria-label={t("samjhana.close")}
+          aria-label={t("keeper.close")}
         >
           <span className="text-[16px] leading-none text-text-muted">×</span>
         </button>
@@ -678,40 +676,40 @@ function RecordEditor({
       <input
         value={record.number}
         onChange={(event) => onChange({ ...record, number: event.target.value })}
-        placeholder={t("samjhana.record-number")}
+        placeholder={t("keeper.record-number")}
         className={`${CONTROL} w-full`}
       />
       <OptionalDateField
-        label={t("samjhana.issued-date")}
+        label={t("keeper.issued-date")}
         value={record.issuedDate}
         onChange={(issuedDate) => onChange({ ...record, issuedDate })}
         t={t}
       />
       <OptionalDateField
-        label={t("samjhana.expiry-date")}
+        label={t("keeper.expiry-date")}
         value={record.expiryDate}
         onChange={(expiryDate) => onChange({ ...record, expiryDate })}
         t={t}
       />
       {record.expiryDate && (
-        <p className="text-[10px] text-accent-mark">{t("samjhana.linked-reminder-note")}</p>
+        <p className="text-[10px] text-accent-mark">{t("keeper.linked-reminder-note")}</p>
       )}
       <input
         value={record.office}
         onChange={(event) => onChange({ ...record, office: event.target.value })}
-        placeholder={t("samjhana.office-placeholder")}
+        placeholder={t("keeper.office-placeholder")}
         className={`${CONTROL} w-full`}
       />
       <textarea
         value={record.note}
         onChange={(event) => onChange({ ...record, note: event.target.value })}
-        placeholder={t("samjhana.note-placeholder")}
+        placeholder={t("keeper.note-placeholder")}
         rows={2}
         className={`${CONTROL} h-auto w-full py-1.5`}
       />
       <div className="flex justify-end gap-1.5 pt-0.5">
         <button type="button" onClick={onCancel} className="btn-ghost text-[11px]">
-          {t("samjhana.cancel")}
+          {t("keeper.cancel")}
         </button>
         <button
           type="button"
@@ -719,7 +717,7 @@ function RecordEditor({
           disabled={!record.number.trim()}
           className="settings-btn text-[11px] disabled:opacity-40"
         >
-          {t("samjhana.save-record")}
+          {t("keeper.save-record")}
         </button>
       </div>
     </section>
@@ -735,12 +733,12 @@ function ItemEditor({
   onAddPerson,
   t,
 }: {
-  item: SamjhanaItem;
-  people: SamjhanaPerson[];
-  onChange: (item: SamjhanaItem) => void;
+  item: KeeperItem;
+  people: KeeperPerson[];
+  onChange: (item: KeeperItem) => void;
   onSave: () => void;
   onCancel: () => void;
-  onAddPerson: (name: string, relationship: string) => Promise<SamjhanaPerson | undefined>;
+  onAddPerson: (name: string, relationship: string) => Promise<KeeperPerson | undefined>;
   t: TFn;
 }) {
   const [personDraft, setPersonDraft] = useState("");
@@ -758,7 +756,7 @@ function ItemEditor({
         item.note,
     ),
   );
-  const toggleChecklist = (entry: SamjhanaChecklistItem) =>
+  const toggleChecklist = (entry: KeeperChecklistItem) =>
     onChange({
       ...item,
       checklist: item.checklist.map((itemEntry) =>
@@ -769,13 +767,13 @@ function ItemEditor({
     <section className="surface-card space-y-2.5 p-3">
       <div className="flex items-center justify-between">
         <h3 className="text-[12px] font-semibold">
-          {item.title ? t("samjhana.edit-title") : t("samjhana.new-title")}
+          {item.title ? t("keeper.edit-title") : t("keeper.new-title")}
         </h3>
         <button
           type="button"
           onClick={onCancel}
           className="icon-btn"
-          aria-label={t("samjhana.close")}
+          aria-label={t("keeper.close")}
         >
           <span className="text-[16px] leading-none text-text-muted">×</span>
         </button>
@@ -789,26 +787,26 @@ function ItemEditor({
           if (found) onChange(applyTemplate(item, found));
         }}
         options={[
-          { id: "", label: t("samjhana.template-placeholder") },
+          { id: "", label: t("keeper.template-placeholder") },
           ...TEMPLATES.map((entry) => ({ id: entry.id, label: entry.title })),
         ]}
       />
       <input
         value={item.title}
         onChange={(event) => onChange({ ...item, title: event.target.value })}
-        placeholder={t("samjhana.what-should-remember")}
+        placeholder={t("keeper.what-should-remember")}
         className={`${CONTROL} w-full`}
       />
       <Select
         value={item.category}
         onChange={(next) => onChange({ ...item, category: next })}
         options={[
-          { id: "identity", label: t("samjhana.category.identity") },
-          { id: "vehicle", label: t("samjhana.category.vehicle") },
-          { id: "home", label: t("samjhana.category.home") },
-          { id: "money", label: t("samjhana.category.money") },
-          { id: "health", label: t("samjhana.category.health") },
-          { id: "application", label: t("samjhana.category.application") },
+          { id: "identity", label: t("keeper.category.identity") },
+          { id: "vehicle", label: t("keeper.category.vehicle") },
+          { id: "home", label: t("keeper.category.home") },
+          { id: "money", label: t("keeper.category.money") },
+          { id: "health", label: t("keeper.category.health") },
+          { id: "application", label: t("keeper.category.application") },
         ]}
       />
       <DateEditor item={item} onChange={onChange} t={t} />
@@ -822,7 +820,7 @@ function ItemEditor({
           name="chevronLeft"
           className={`size-2.5 transition-transform ${showMore ? "-rotate-90" : "rotate-180"}`}
         />
-        {showMore ? t("samjhana.hide-details") : t("samjhana.more-details")}
+        {showMore ? t("keeper.hide-details") : t("keeper.more-details")}
       </button>
 
       {showMore && (
@@ -832,7 +830,7 @@ function ItemEditor({
               value={item.personId ?? ""}
               onChange={(next) => onChange({ ...item, personId: next || null })}
               options={[
-                { id: "", label: t("samjhana.for-me") },
+                { id: "", label: t("keeper.for-me") },
                 ...people.map((person) => ({
                   id: person.id,
                   label: person.relationship
@@ -846,13 +844,13 @@ function ItemEditor({
                 <input
                   value={personDraft}
                   onChange={(event) => setPersonDraft(event.target.value)}
-                  placeholder={t("samjhana.family-name")}
+                  placeholder={t("keeper.family-name")}
                   className={`${CONTROL} min-w-0 flex-1`}
                 />
                 <input
                   value={relationshipDraft}
                   onChange={(event) => setRelationshipDraft(event.target.value)}
-                  placeholder={t("samjhana.relationship-placeholder")}
+                  placeholder={t("keeper.relationship-placeholder")}
                   className={`${CONTROL} w-20`}
                 />
                 <button
@@ -868,7 +866,7 @@ function ItemEditor({
                   }}
                   className="btn-ghost text-[11px]"
                 >
-                  {t("samjhana.add")}
+                  {t("keeper.add")}
                 </button>
               </div>
             ) : (
@@ -877,7 +875,7 @@ function ItemEditor({
                 onClick={() => setShowPerson(true)}
                 className="mt-1.5 text-left text-[10px] text-accent-mark hover:underline"
               >
-                {t("samjhana.add-family-profile")}
+                {t("keeper.add-family-profile")}
               </button>
             )}
           </div>
@@ -885,30 +883,30 @@ function ItemEditor({
             <Select
               value={item.recurrence}
               onChange={(next) =>
-                onChange({ ...item, recurrence: next as SamjhanaItem["recurrence"] })
+                onChange({ ...item, recurrence: next as KeeperItem["recurrence"] })
               }
               options={[
-                { id: "none", label: t("samjhana.recurrence.none") },
-                { id: "monthly", label: t("samjhana.recurrence.monthly") },
-                { id: "yearlyAd", label: t("samjhana.recurrence.yearlyAd") },
-                { id: "yearlyBs", label: t("samjhana.recurrence.yearlyBs") },
+                { id: "none", label: t("keeper.recurrence.none") },
+                { id: "monthly", label: t("keeper.recurrence.monthly") },
+                { id: "yearlyAd", label: t("keeper.recurrence.yearlyAd") },
+                { id: "yearlyBs", label: t("keeper.recurrence.yearlyBs") },
               ]}
             />
             <Select
               value={item.applicationStatus}
               onChange={(next) => onChange({ ...item, applicationStatus: next })}
               options={[
-                { id: "notStarted", label: t("samjhana.status.notStarted") },
-                { id: "submitted", label: t("samjhana.status.submitted") },
-                { id: "inReview", label: t("samjhana.status.inReview") },
-                { id: "ready", label: t("samjhana.status.ready") },
-                { id: "completed", label: t("samjhana.status.completed") },
+                { id: "notStarted", label: t("keeper.status.notStarted") },
+                { id: "submitted", label: t("keeper.status.submitted") },
+                { id: "inReview", label: t("keeper.status.inReview") },
+                { id: "ready", label: t("keeper.status.ready") },
+                { id: "completed", label: t("keeper.status.completed") },
               ]}
             />
           </div>
           <div>
             <p className="mb-1 block text-[10px] font-medium text-text-secondary">
-              {t("samjhana.remind-before")}
+              {t("keeper.remind-before")}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {[30, 14, 7, 1].map((days) => (
@@ -934,13 +932,13 @@ function ItemEditor({
             <input
               value={item.fee}
               onChange={(event) => onChange({ ...item, fee: event.target.value })}
-              placeholder={t("samjhana.fee-placeholder")}
+              placeholder={t("keeper.fee-placeholder")}
               className={`${CONTROL} w-full`}
             />
             <input
               value={item.officeLocation}
               onChange={(event) => onChange({ ...item, officeLocation: event.target.value })}
-              placeholder={t("samjhana.location-placeholder")}
+              placeholder={t("keeper.location-placeholder")}
               className={`${CONTROL} w-full`}
             />
           </div>
@@ -948,7 +946,7 @@ function ItemEditor({
             <input
               value={item.officialUrl}
               onChange={(event) => onChange({ ...item, officialUrl: event.target.value })}
-              placeholder={t("samjhana.link-placeholder")}
+              placeholder={t("keeper.link-placeholder")}
               className={`${CONTROL} min-w-0 flex-1`}
             />
             {item.officialUrl && (
@@ -956,7 +954,7 @@ function ItemEditor({
                 type="button"
                 onClick={() => openExternalLink(item.officialUrl)}
                 className="btn-ghost shrink-0 text-[10px]"
-                aria-label={t("samjhana.open-link")}
+                aria-label={t("keeper.open-link")}
               >
                 <Icon name="openExternal" className="size-3" />
               </button>
@@ -965,14 +963,14 @@ function ItemEditor({
           <textarea
             value={item.note}
             onChange={(event) => onChange({ ...item, note: event.target.value })}
-            placeholder={t("samjhana.notes-placeholder")}
+            placeholder={t("keeper.notes-placeholder")}
             rows={2}
             className={`${CONTROL} h-auto w-full py-1.5`}
           />
           {item.checklist.length > 0 && (
             <div className="rounded-md border border-divider p-2">
               <p className="mb-1.5 text-[10px] font-medium text-text-secondary">
-                {t("samjhana.required-documents")}
+                {t("keeper.required-documents")}
               </p>
               {item.checklist.map((entry) => (
                 <label
@@ -995,7 +993,7 @@ function ItemEditor({
 
       <div className="flex justify-end gap-1.5 pt-0.5">
         <button type="button" onClick={onCancel} className="btn-ghost text-[11px]">
-          {t("samjhana.cancel")}
+          {t("keeper.cancel")}
         </button>
         <button
           type="button"
@@ -1003,28 +1001,28 @@ function ItemEditor({
           disabled={!item.title.trim() || !item.dueDate.ad}
           className="settings-btn text-[11px] disabled:opacity-40"
         >
-          {t("samjhana.save")}
+          {t("keeper.save")}
         </button>
       </div>
     </section>
   );
 }
 
-export function Samjhana() {
+export function Keeper() {
   const { t } = useSettings();
-  const [data, setData] = useState<SamjhanaSnapshot>({ people: [], items: [], records: [] });
+  const [data, setData] = useState<KeeperSnapshot>({ people: [], items: [], records: [] });
   const [view, setView] = useState<View>("reminders");
-  const [editing, setEditing] = useState<SamjhanaItem | null>(null);
-  const [editingRecord, setEditingRecord] = useState<SamjhanaRecordInput | null>(null);
+  const [editing, setEditing] = useState<KeeperItem | null>(null);
+  const [editingRecord, setEditingRecord] = useState<KeeperRecordInput | null>(null);
   const [category, setCategory] = useState<Category>("all");
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     api
-      .samjhanaSnapshot()
+      .keeperSnapshot()
       .then(setData)
-      .catch(() => setError(t("samjhana.error-load")));
+      .catch(() => setError(t("keeper.error-load")));
   }, [t]);
   const people = useMemo(
     () => new Map(data.people.map((person) => [person.id, person])),
@@ -1048,7 +1046,7 @@ export function Samjhana() {
   );
   const add = async () => {
     const today = await api.today();
-    const date = await api.resolveSamjhanaDate({
+    const date = await api.resolveKeeperDate({
       calendar: "bs",
       year: today.nepali.year,
       month: today.nepali.month,
@@ -1066,59 +1064,59 @@ export function Samjhana() {
   };
   const addPerson = async (name: string, relationship: string) => {
     if (!name.trim()) return undefined;
-    const person: SamjhanaPerson = { id: id(), name: name.trim(), relationship, createdAt: "" };
-    const next = await api.saveSamjhanaPerson(person);
+    const person: KeeperPerson = { id: id(), name: name.trim(), relationship, createdAt: "" };
+    const next = await api.saveKeeperPerson(person);
     setData(next);
     return next.people.find((entry) => entry.id === person.id);
   };
   const save = async () => {
     if (!editing) return;
     try {
-      setData(await api.saveSamjhanaItem(editing));
+      setData(await api.saveKeeperItem(editing));
       setEditing(null);
       setError("");
     } catch {
-      setError(t("samjhana.error-save"));
+      setError(t("keeper.error-save"));
     }
   };
-  const complete = async (item: SamjhanaItem) => {
+  const complete = async (item: KeeperItem) => {
     try {
       setData(
-        await api.saveSamjhanaItem({
+        await api.saveKeeperItem({
           ...item,
           status: item.status === "completed" ? "active" : "completed",
         }),
       );
     } catch {
-      setError(t("samjhana.error-save"));
+      setError(t("keeper.error-save"));
     }
   };
-  const remove = async (item: SamjhanaItem) => {
+  const remove = async (item: KeeperItem) => {
     const { ask } = await import("@tauri-apps/plugin-dialog");
-    const confirmed = await ask(t("samjhana.delete-confirm-body"), {
-      title: `${t("samjhana.delete-confirm-title")} "${item.title}"`,
+    const confirmed = await ask(t("keeper.delete-confirm-body"), {
+      title: `${t("keeper.delete-confirm-title")} "${item.title}"`,
       kind: "warning",
     });
-    if (confirmed) setData(await api.deleteSamjhanaItem(item.id));
+    if (confirmed) setData(await api.deleteKeeperItem(item.id));
   };
 
   const saveRecord = async () => {
     if (!editingRecord) return;
     try {
-      setData(await api.saveSamjhanaRecord(editingRecord));
+      setData(await api.saveKeeperRecord(editingRecord));
       setEditingRecord(null);
       setError("");
     } catch {
-      setError(t("samjhana.error-save-record"));
+      setError(t("keeper.error-save-record"));
     }
   };
-  const removeRecord = async (record: SamjhanaRecord) => {
+  const removeRecord = async (record: KeeperRecord) => {
     const { ask } = await import("@tauri-apps/plugin-dialog");
-    const confirmed = await ask(t("samjhana.delete-record-confirm-body"), {
-      title: t("samjhana.delete-record-confirm-title"),
+    const confirmed = await ask(t("keeper.delete-record-confirm-body"), {
+      title: t("keeper.delete-record-confirm-title"),
       kind: "warning",
     });
-    if (confirmed) setData(await api.deleteSamjhanaRecord(record.id));
+    if (confirmed) setData(await api.deleteKeeperRecord(record.id));
   };
 
   const onAdd = view === "reminders" ? add : () => setEditingRecord(blankRecord());
@@ -1129,13 +1127,13 @@ export function Samjhana() {
       <Summary items={data.items} onAdd={onAdd} t={t} />
       {!editorOpen && (
         <Segmented
-          label={t("samjhana.title")}
+          label={t("keeper.title")}
           value={view}
           onChange={setView}
           scrollable={false}
           options={[
-            { id: "reminders" as const, label: t("samjhana.tab-reminders") },
-            { id: "records" as const, label: t("samjhana.tab-records") },
+            { id: "reminders" as const, label: t("keeper.tab-reminders") },
+            { id: "records" as const, label: t("keeper.tab-records") },
           ]}
         />
       )}
@@ -1157,17 +1155,15 @@ export function Samjhana() {
           <section className="surface-card px-3">
             {data.records.length === 0 ? (
               <div className="px-1 py-8 text-center">
-                <Icon name="samjhana" className="mx-auto size-6 text-text-muted" />
-                <p className="mt-2 text-[12px] font-medium">{t("samjhana.records-empty-title")}</p>
-                <p className="mt-1 text-[10px] text-text-muted">
-                  {t("samjhana.records-empty-body")}
-                </p>
+                <Icon name="keeper" className="mx-auto size-6 text-text-muted" />
+                <p className="mt-2 text-[12px] font-medium">{t("keeper.records-empty-title")}</p>
+                <p className="mt-1 text-[10px] text-text-muted">{t("keeper.records-empty-body")}</p>
                 <button
                   type="button"
                   onClick={() => setEditingRecord(blankRecord())}
                   className="mt-3 text-[11px] text-accent-mark hover:underline"
                 >
-                  {t("samjhana.add-first-record")}
+                  {t("keeper.add-first-record")}
                 </button>
               </div>
             ) : (
@@ -1194,7 +1190,7 @@ export function Samjhana() {
             )}
           </section>
           <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">
-            {t("samjhana.footer-note")}
+            {t("keeper.footer-note")}
           </p>
         </>
       ) : editing ? (
@@ -1214,22 +1210,22 @@ export function Samjhana() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("samjhana.search-placeholder")}
+              placeholder={t("keeper.search-placeholder")}
               className="min-w-0 flex-1 bg-transparent py-1.5 text-[11px] outline-none placeholder:text-text-muted"
             />
           </div>
           <Segmented
-            label={t("samjhana.category.all")}
+            label={t("keeper.category.all")}
             value={category}
             onChange={setCategory}
             options={[
-              { id: "all" as const, label: t("samjhana.category.all") },
-              { id: "identity" as const, label: t("samjhana.category.identity") },
-              { id: "vehicle" as const, label: t("samjhana.category.vehicle") },
-              { id: "home" as const, label: t("samjhana.category.home") },
-              { id: "money" as const, label: t("samjhana.category.money") },
-              { id: "health" as const, label: t("samjhana.category.health") },
-              { id: "application" as const, label: t("samjhana.category.application") },
+              { id: "all" as const, label: t("keeper.category.all") },
+              { id: "identity" as const, label: t("keeper.category.identity") },
+              { id: "vehicle" as const, label: t("keeper.category.vehicle") },
+              { id: "home" as const, label: t("keeper.category.home") },
+              { id: "money" as const, label: t("keeper.category.money") },
+              { id: "health" as const, label: t("keeper.category.health") },
+              { id: "application" as const, label: t("keeper.category.application") },
             ]}
           />
           {error && (
@@ -1240,23 +1236,21 @@ export function Samjhana() {
           <section className="surface-card px-3">
             {filtered.length === 0 ? (
               <div className="px-1 py-8 text-center">
-                <Icon name="samjhana" className="mx-auto size-6 text-text-muted" />
+                <Icon name="keeper" className="mx-auto size-6 text-text-muted" />
                 <p className="mt-2 text-[12px] font-medium">
                   {data.items.length === 0
-                    ? t("samjhana.empty-title")
-                    : t("samjhana.empty-search-title")}
+                    ? t("keeper.empty-title")
+                    : t("keeper.empty-search-title")}
                 </p>
                 <p className="mt-1 text-[10px] text-text-muted">
-                  {data.items.length === 0
-                    ? t("samjhana.empty-body")
-                    : t("samjhana.empty-search-body")}
+                  {data.items.length === 0 ? t("keeper.empty-body") : t("keeper.empty-search-body")}
                 </p>
                 <button
                   type="button"
                   onClick={add}
                   className="mt-3 text-[11px] text-accent-mark hover:underline"
                 >
-                  {t("samjhana.add-first")}
+                  {t("keeper.add-first")}
                 </button>
               </div>
             ) : (
@@ -1274,7 +1268,7 @@ export function Samjhana() {
             )}
           </section>
           <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">
-            {t("samjhana.footer-note")}
+            {t("keeper.footer-note")}
           </p>
         </>
       )}

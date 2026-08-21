@@ -64,7 +64,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   radio: SFDotRadiowavesLeftAndRight,
   tools: SFWrenchAndScrewdriver,
   directory: SFBook,
-  samjhana: SFCalendarBadgeCheckmark,
+  keeper: SFCalendarBadgeCheckmark,
   settings: SFGearshape,
   power: SFPower,
   search: SFMagnifyingglass,
@@ -117,7 +117,7 @@ export type IconName =
   | "radio"
   | "tools"
   | "directory"
-  | "samjhana"
+  | "keeper"
   | "settings"
   | "power"
   | "search"

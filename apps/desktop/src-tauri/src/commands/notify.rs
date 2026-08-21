@@ -65,7 +65,7 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let now = Utc::now();
 
     let mut all = plan_day_plans(&plans, now);
-    all.extend(crate::commands::samjhana::pending_notifications(app, now));
+    all.extend(crate::commands::keeper::pending_notifications(app, now));
 
     // Festivals need the event list, which is only available inside the bundled
     // calendar range.
