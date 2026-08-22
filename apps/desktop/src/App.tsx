@@ -22,6 +22,7 @@ import { HeaderSlotProvider } from "./shared/components/header-slot";
 import { PageTransition } from "./shared/components/motion";
 import { TabBar } from "./shared/components/tab-bar";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
+import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
 
@@ -104,9 +105,11 @@ export function App() {
       <ErrorBoundary>
         <SWRConfig value={{ provider: persistentCacheProvider }}>
           <SettingsProvider>
-            <HeaderSlotProvider>
-              <Shell />
-            </HeaderSlotProvider>
+            <UpdaterProvider>
+              <HeaderSlotProvider>
+                <Shell />
+              </HeaderSlotProvider>
+            </UpdaterProvider>
           </SettingsProvider>
         </SWRConfig>
       </ErrorBoundary>

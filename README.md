@@ -109,6 +109,19 @@ Run the Rust workspace tests from the repository root:
 cargo test --workspace
 ```
 
+## Releasing
+
+Check the current version, then bump to the next one:
+
+```bash
+git tag --sort=-v:refname | head -1        # current version
+./scripts/bump-version.sh <next-version>   # e.g. 0.1.5
+```
+
+Bumps the app version, commits, pushes, tags, and pushes the tag — CI builds
+and signs all four platforms from there. See [RELEASING.md](RELEASING.md) for
+the full process (publishing, the updater, verifying a build before tagging).
+
 ## Project layout
 
 ```text

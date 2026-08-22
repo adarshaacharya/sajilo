@@ -335,6 +335,26 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   pointer-events: none;
 }
 
+.update-btn {
+  position: relative;
+  color: var(--color-accent-mark);
+}
+
+.update-btn:hover {
+  color: var(--color-accent-mark);
+}
+
+.update-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
+  box-shadow: 0 0 0 1px var(--color-surface-raised);
+}
+
 .btn-ghost {
   border-radius: 6px;
   padding: 4px 8px;

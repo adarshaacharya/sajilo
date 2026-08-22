@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
+import { useUpdater } from "../context/updater-context";
 import { useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
 
@@ -15,6 +16,7 @@ import { Icon } from "./icon";
  */
 export function Header({ title }: { title: string }) {
   const { t } = useSettings();
+  const { state: updateState, update, installUpdate, restartToUpdate } = useUpdater();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const slot = useHeaderSlotContent();
@@ -34,6 +36,29 @@ export function Header({ title }: { title: string }) {
       )}
       <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{title}</h1>
       {slot}
+      {updateState === "available" && update && (
+        <button
+          type="button"
+          onClick={() => installUpdate()}
+          aria-label={`${t("action.update-available")} ${update.version}`}
+          title={`${t("action.update-available")} ${update.version}`}
+          className="icon-btn update-btn shrink-0"
+        >
+          <Icon name="refresh" className="size-3.5" />
+          <span className="update-dot" aria-hidden="true" />
+        </button>
+      )}
+      {updateState === "installed" && (
+        <button
+          type="button"
+          onClick={() => restartToUpdate()}
+          aria-label={t("action.restart-update")}
+          title={t("action.restart-update")}
+          className="icon-btn update-btn shrink-0"
+        >
+          <Icon name="refresh" className="size-3.5" />
+        </button>
+      )}
       {pathname !== "/settings" && (
         <button
           type="button"
