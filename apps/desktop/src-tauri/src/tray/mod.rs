@@ -126,8 +126,8 @@ pub fn refresh_title(app: &AppHandle) {
     let Some((date, numerals, label)) = today(app) else {
         return;
     };
-    // `date` and `numerals` only feed the drawn icon, which is Windows-only.
-    #[cfg(not(target_os = "windows"))]
+    // The full date is conveyed in the native title/menu/tooltip. Windows'
+    // visible tray glyph is a static Nepal flag, so it has no date fields.
     let _ = (date, numerals);
 
     // The menu's date row is the one affordance every platform has, so it moves
@@ -142,16 +142,13 @@ pub fn refresh_title(app: &AppHandle) {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     let _ = tray.set_title(Some(&label));
 
-    // Windows has neither a tray title nor an indicator label, so there the day
-    // number is drawn into the icon itself — the icon is all the tray gives us.
-    // A failed render keeps the static icon: a tray with no date beats a tray
-    // with no icon.
+    // Windows has no tray title, so use a crisp Nepal flag that remains
+    // recognisable at its tiny native size. The full date stays in the tooltip
+    // and the first tray-menu item.
     #[cfg(target_os = "windows")]
-    if let Some(pixels) = icon::day_icon(date.day, numerals) {
+    if let Some(pixels) = icon::nepal_flag_icon() {
         let image = tauri::image::Image::new_owned(pixels, icon::size(), icon::size());
         let _ = tray.set_icon(Some(image));
-        // The day number alone has no month or year, so the full label stays
-        // reachable from the menu's date row.
         let _ = tray.set_icon_as_template(false);
     }
 
