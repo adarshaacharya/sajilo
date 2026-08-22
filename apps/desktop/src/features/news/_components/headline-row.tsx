@@ -23,7 +23,7 @@ export function HeadlineRow({ item, onOpen }: { item: NewsItem; onOpen: () => vo
     <button
       type="button"
       onClick={onOpen}
-      className="surface-card group w-full p-2 text-left transition-colors hover:bg-surface-hover"
+      className="surface-card group w-full cursor-pointer p-2 text-left transition-colors hover:bg-surface-hover"
     >
       <p className="text-[13px] leading-snug">{item.title}</p>
       <div className="mt-1 flex items-center gap-1 text-[10px]">
