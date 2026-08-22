@@ -1,3 +1,4 @@
+import type { Language } from "../../../shared/lib/i18n";
 import type { AqiCategory } from "../../../types/api/AqiCategory";
 import type { WeatherCondition } from "../../../types/api/WeatherCondition";
 
@@ -14,6 +15,19 @@ const TITLES: Record<WeatherCondition, string> = {
   unknown: "Weather unavailable",
 };
 
+const NEPALI_TITLES: Record<WeatherCondition, string> = {
+  clear: "खुला",
+  partlyCloudy: "आंशिक बदली",
+  overcast: "बदली",
+  fog: "कुहिरो",
+  drizzle: "सिमसिमे वर्षा",
+  rain: "वर्षा",
+  snow: "हिमपात",
+  showers: "वर्षा",
+  thunderstorm: "चट्याङसहित वर्षा",
+  unknown: "मौसम उपलब्ध छैन",
+};
+
 const PRECIP: ReadonlySet<WeatherCondition> = new Set([
   "drizzle",
   "rain",
@@ -22,8 +36,8 @@ const PRECIP: ReadonlySet<WeatherCondition> = new Set([
   "thunderstorm",
 ]);
 
-export function conditionTitle(condition: WeatherCondition): string {
-  return TITLES[condition];
+export function conditionTitle(condition: WeatherCondition, language: Language = "en"): string {
+  return language === "ne" ? NEPALI_TITLES[condition] : TITLES[condition];
 }
 
 export function hasPrecipitation(condition: WeatherCondition): boolean {

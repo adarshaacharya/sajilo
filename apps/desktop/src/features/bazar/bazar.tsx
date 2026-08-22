@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useLocation } from "react-router";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
@@ -37,7 +38,10 @@ function fetchFeeds(refresh = false): Promise<BazarFeeds> {
 
 export function Bazar() {
   const { t } = useSettings();
-  const [tab, setTab] = useState<Tab>("stocks");
+  const { search } = useLocation();
+  const [tab, setTab] = useState<Tab>(() =>
+    new URLSearchParams(search).get("tab") === "metals" ? "metals" : "stocks",
+  );
   const {
     data: feeds,
     isValidating: loadingFeeds,

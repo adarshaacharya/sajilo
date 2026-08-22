@@ -609,10 +609,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   pointer-events: none;
 }
 
-.glance-forex::before {
+.glance-metal::before {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--color-forex-tint) 20%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-mark) 20%, transparent) 0%,
     transparent 65%
   );
 }

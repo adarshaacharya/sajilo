@@ -55,6 +55,14 @@
     "longDescription": "Bikram Sambat calendar, festivals, forex, weather, news and Nepali unit tools in the menu bar.",
     "macOS": {
       "signingIdentity": "-"
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libwebkit2gtk-4.1-0",
+          "libayatana-appindicator3-1 | libappindicator3-1"
+        ]
+      }
     }
   },
   "plugins": {

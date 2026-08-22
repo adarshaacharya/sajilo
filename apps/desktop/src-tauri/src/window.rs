@@ -38,9 +38,14 @@ pub fn show(window: &WebviewWindow) {
 /// Anchors the popover to the tray icon.
 ///
 /// Tray-anchored positioning differs per platform and per multi-monitor setup,
-/// which is what `tauri-plugin-positioner` exists to absorb. If it cannot place
-/// the window — a Linux desktop with no tray host, say — the window still shows
-/// wherever it last was, because an unplaced popover beats no popover.
+/// which is what `tauri-plugin-positioner` exists to absorb.
+///
+/// The plugin learns where the icon is from tray *events*, and Linux emits
+/// none — `tray-icon`'s GTK backend returns `None` for the icon's rect — so
+/// every `Tray*` placement fails there with "Tray position not set". The
+/// fallback is centre rather than a corner: without a tray anchor there is no
+/// edge the popover belongs against, and an undecorated transparent window
+/// pinned to a corner reads as a rendering glitch rather than as the app.
 fn position_at_tray(window: &WebviewWindow) {
     use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -51,7 +56,7 @@ fn position_at_tray(window: &WebviewWindow) {
         Position::TrayCenter
     };
     if window.move_window(placement).is_err() {
-        let _ = window.move_window(Position::TopRight);
+        let _ = window.move_window(Position::Center);
     }
 }
 
@@ -60,11 +65,25 @@ fn position_at_tray(window: &WebviewWindow) {
 /// Set `SAJILO_NO_BLUR_HIDE=1` to keep the window up when it loses focus: with
 /// devtools open, clicking into the inspector blurs the popover and would
 /// otherwise dismiss the thing being inspected.
+///
+/// Linux is exempt entirely. GNOME/Wayland drops keyboard focus from an
+/// undecorated, always-on-top, skip-taskbar window for reasons the user never
+/// triggered — focus is lost seconds after launch with no interaction at all —
+/// so a focus-out is not a reliable "the user clicked away" signal there.
+/// Dismissing on it made the whole app look like it opened to nothing. On
+/// Linux the popover is dismissed from the tray menu's date row instead (see
+/// [`toggle`] and `tray::build`); macOS and Windows keep click-away dismissal.
 pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
-    if focused || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
-        return;
+    #[cfg(target_os = "linux")]
+    let _ = (window, focused);
+
+    #[cfg(not(target_os = "linux"))]
+    {
+        if focused || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
+            return;
+        }
+        let _ = window.hide();
     }
-    let _ = window.hide();
 }
 
 /// Clear NSWindow fill + apply popover vibrancy (Swift Patro / `.regularMaterial`).
