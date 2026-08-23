@@ -115,6 +115,18 @@ pub fn run() {
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());
+
+            // A brand-new install turns on launch-at-login and shows itself
+            // once. Without the second half, opening Sajilo for the very first
+            // time appears to do nothing: the window starts hidden and a new
+            // tray icon is easy to miss among a dozen others.
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            if system::autostart::apply_first_run_default(app.handle()) {
+                if let Some(main) = window::main_window(app.handle()) {
+                    window::show(&main);
+                }
+            }
+
             Ok(())
         })
         .on_window_event(|window, event| match event {

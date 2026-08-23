@@ -41,6 +41,8 @@ export function DisplayTab({
   const [showFlag, setShowFlag] = useState(true);
   const [showYear, setShowYear] = useState(true);
   const [showTime, setShowTime] = useState(false);
+  const [autostart, setAutostart] = useState(false);
+  const [dockIcon, setDockIcon] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -55,6 +57,14 @@ export function DisplayTab({
         if (year !== null) setShowYear(year);
         if (time !== null) setShowTime(time);
       })
+      .catch(() => {});
+    api
+      .isAutostartEnabled()
+      .then(setAutostart)
+      .catch(() => {});
+    api
+      .isDockIconVisible()
+      .then(setDockIcon)
       .catch(() => {});
   }, []);
 
@@ -147,6 +157,24 @@ export function DisplayTab({
             />
           </>
         )}
+      </SettingsSection>
+
+      <SettingsSection title={t("settings.startup")}>
+        <Toggle
+          label={t("settings.launch-at-login")}
+          checked={autostart}
+          onChange={async (value) => {
+            setAutostart(await api.setAutostart(value).catch(() => autostart));
+          }}
+        />
+        <Toggle
+          label={t("settings.show-dock-icon")}
+          checked={dockIcon}
+          onChange={(value) => {
+            setDockIcon(value);
+            api.setDockIconVisible(value).catch(() => {});
+          }}
+        />
       </SettingsSection>
     </div>
   );

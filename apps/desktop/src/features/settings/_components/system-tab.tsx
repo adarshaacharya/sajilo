@@ -17,8 +17,6 @@ export function SystemTab() {
     installUpdate,
     restartToUpdate,
   } = useUpdater();
-  const [autostart, setAutostart] = useState(false);
-  const [dockIcon, setDockIcon] = useState(false);
   const [options, setOptions] = useState<NotificationOptions>({
     eveOfPublicHoliday: false,
     eveOfFestival: false,
@@ -28,14 +26,6 @@ export function SystemTab() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    api
-      .isAutostartEnabled()
-      .then(setAutostart)
-      .catch(() => {});
-    api
-      .isDockIconVisible()
-      .then(setDockIcon)
-      .catch(() => {});
     api
       .getNotificationOptions()
       .then(setOptions)
@@ -101,24 +91,6 @@ export function SystemTab() {
 
   return (
     <div className="space-y-2.5">
-      <SettingsSection title={t("settings.startup")}>
-        <Toggle
-          label={t("settings.launch-at-login")}
-          checked={autostart}
-          onChange={async (value) => {
-            setAutostart(await api.setAutostart(value).catch(() => autostart));
-          }}
-        />
-        <Toggle
-          label={t("settings.show-dock-icon")}
-          checked={dockIcon}
-          onChange={(value) => {
-            setDockIcon(value);
-            api.setDockIconVisible(value).catch(() => {});
-          }}
-        />
-      </SettingsSection>
-
       {updaterEnabled && (
         <SettingsSection title={t("settings.updates")} footnote={updateNote ?? undefined}>
           {updateState === "installed" ? (

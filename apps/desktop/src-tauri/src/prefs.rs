@@ -47,6 +47,10 @@ pub const RADIO_ENABLED: &str = "radioEnabled";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";
+/// Set once, the first time Sajilo runs, when launch-at-login is turned on for
+/// the user. Its presence — not its value — is what stops that from happening
+/// twice, so switching the toggle off stays switched off.
+pub const AUTOSTART_DEFAULTED: &str = "autostartDefaulted";
 pub const VEGETABLE_FAVOURITES: &str = "vegetableFavourites";
 pub const STOCK_WATCHLIST: &str = "stockWatchlist";
 pub const SELECTED_RASHI: &str = "selectedRashi";

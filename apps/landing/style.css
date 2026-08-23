@@ -385,25 +385,118 @@ img {
   animation: rise 0.85s var(--ease-out-quart) 0.18s forwards;
 }
 
+/* The headline says "on your menu bar", so the shot shows exactly that: a
+   strip of macOS menu bar with the tray icon lit, and the popover hanging off
+   it. A floating rounded rectangle said "app screenshot"; this says where the
+   app actually lives. */
+.menubar-scene {
+  position: relative;
+  width: min(100%, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.menubar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  height: 30px;
+  padding-inline: 12px;
+  border-radius: 9px 9px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: color-mix(in srgb, #fff 10%, transparent);
+  backdrop-filter: blur(12px) saturate(1.3);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+}
+
+/* The lit tray icon — macOS inverts the item you have open. */
+.menubar-app {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: auto;
+  margin-left: 0;
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+
+
+.menubar-app--sajilo {
+  margin-right: 0;
+  margin-left: auto;
+  order: 1;
+  background: color-mix(in srgb, var(--gold) 22%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 35%, transparent);
+}
+
+.menubar-app .deva-mini {
+  font-family: var(--devanagari);
+  font-size: 11.5px;
+  color: var(--text);
+  line-height: 1;
+}
+
+.menubar-glyph {
+  order: 2;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.menubar-glyph-dot {
+  fill: currentColor;
+  stroke: none;
+}
+
+.menubar-glyph-fill {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.9;
+}
+
+.menubar-clock {
+  order: 3;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
 .hero-device {
   position: relative;
   width: min(100%, 330px);
   padding: 8px;
-  border-radius: 22px;
+  margin-top: 10px;
+  margin-right: 6px;
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface-raised) 45%, transparent);
   box-shadow: 0 40px 100px -40px rgba(8, 9, 13, 0.85);
-  transform: rotateY(-9deg) rotateX(3deg) rotate(-1.5deg);
-  transform-origin: center right;
   transition: transform 0.5s var(--ease-out-quart), box-shadow 0.5s var(--ease-out-quart);
 }
 
 .hero-shot:hover .hero-device {
-  transform: rotateY(0) rotateX(0) rotate(0);
+  transform: translateY(-3px);
   box-shadow: 0 46px 110px -40px rgba(8, 9, 13, 0.9);
 }
 
 @media (max-width: 900px) {
+  .menubar-scene {
+    margin-inline: auto;
+  }
+
   .hero-device,
   .hero-shot:hover .hero-device {
     transform: none;
@@ -996,6 +1089,10 @@ section {
 }
 
 .install-platform-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
   width: 28px;
   height: 28px;
   border-radius: 8px;
@@ -1003,18 +1100,66 @@ section {
     linear-gradient(145deg, color-mix(in srgb, var(--gold) 30%, transparent), transparent),
     color-mix(in srgb, var(--surface-hover) 100%, transparent);
   border: 1px solid var(--border);
+  color: var(--gold);
+}
+
+/* A tinted square told the reader nothing about which platform it belonged to.
+   The mark does, at a glance, before the heading is read. */
+.platform-glyph {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.platform-glyph--solid {
+  fill: currentColor;
+  stroke: none;
+}
+
+.platform-glyph .glyph-dot {
+  stroke: none;
+}
+
+.glyph-dot--red {
+  fill: #ff6b6f;
+}
+
+.glyph-dot--amber {
+  fill: var(--gold);
+}
+
+.glyph-dot--green {
+  fill: var(--forex);
+}
+
+/* Tux reads as a penguin only with the belly and the beak picked out. */
+.platform-glyph .glyph-belly {
+  fill: var(--bg-0);
+}
+
+.platform-glyph .glyph-eye {
+  fill: var(--bg-0);
+}
+
+.platform-glyph .glyph-beak {
+  fill: #e8a33d;
 }
 
 .install-platform-icon--win {
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--weather) 30%, transparent), transparent),
     color-mix(in srgb, var(--surface-hover) 100%, transparent);
+  color: var(--weather);
 }
 
 .install-platform-icon--linux {
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--forex) 30%, transparent), transparent),
     color-mix(in srgb, var(--surface-hover) 100%, transparent);
+  color: #f4f6fa;
 }
 
 .install-platform h3 {

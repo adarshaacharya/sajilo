@@ -90,9 +90,27 @@
     </div>
 
     <div class="hero-shot">
-      <div class="hero-device" aria-hidden="true">
-        <div class="hero-device-screen">
-          <img src="assets/screenshot.png" alt="Sajilo open in the menu bar, showing भदौ २०८३ on the Bikram Sambat calendar, Kathmandu weather, and gold rates">
+      <div class="menubar-scene">
+        <div class="menubar" aria-hidden="true">
+          <span class="menubar-app menubar-app--sajilo">
+            <span class="deva-mini">भदौ ८, २०८३</span>
+          </span>
+          <svg class="menubar-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M2 8.5a15 15 0 0 1 20 0M5 12.2a10 10 0 0 1 14 0M8.4 15.9a5 5 0 0 1 7.2 0" />
+            <circle cx="12" cy="19.2" r="1.15" class="menubar-glyph-dot" />
+          </svg>
+          <svg class="menubar-glyph" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2.5" y="8" width="16" height="8" rx="2.4" />
+            <path d="M20.6 11v2" />
+            <rect x="4.4" y="9.9" width="9" height="4.2" rx="1.2" class="menubar-glyph-fill" />
+          </svg>
+          <span class="menubar-clock">Mon 24 Aug&nbsp;&nbsp;2:52</span>
+        </div>
+
+        <div class="hero-device" aria-hidden="true">
+          <div class="hero-device-screen">
+            <img src="assets/screenshot.png" alt="Sajilo open in the menu bar, showing भदौ २०८३ on the Bikram Sambat calendar, Kathmandu weather, and the NEPSE index">
+          </div>
         </div>
       </div>
     </div>
@@ -220,7 +238,15 @@
   <div class="install-platforms">
     <div class="install-platform">
       <div class="install-platform-head">
-        <span class="install-platform-icon" aria-hidden="true"></span>
+        <span class="install-platform-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="platform-glyph">
+            <rect x="2.5" y="4" width="19" height="16" rx="2.5" />
+            <path d="M2.5 8.5h19" />
+            <circle cx="5.8" cy="6.25" r="0.85" class="glyph-dot glyph-dot--red" />
+            <circle cx="8.6" cy="6.25" r="0.85" class="glyph-dot glyph-dot--amber" />
+            <circle cx="11.4" cy="6.25" r="0.85" class="glyph-dot glyph-dot--green" />
+          </svg>
+        </span>
         <h3>macOS</h3>
       </div>
       <p>Gatekeeper blocks the app with a two-step warning: drag to Applications, then approve once in System Settings.</p>
@@ -231,14 +257,32 @@
     </div>
     <div class="install-platform">
       <div class="install-platform-head">
-        <span class="install-platform-icon install-platform-icon--win" aria-hidden="true"></span>
+        <span class="install-platform-icon install-platform-icon--win" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="platform-glyph platform-glyph--solid">
+            <path d="M3 5.6 10.6 4.5v7.1H3V5.6Z" />
+            <path d="M11.9 4.3 21 3v8.6h-9.1V4.3Z" />
+            <path d="M3 12.9h7.6V20L3 18.9v-6Z" />
+            <path d="M11.9 12.9H21v8.6l-9.1-1.3v-7.3Z" />
+          </svg>
+        </span>
         <h3>Windows</h3>
       </div>
       <p>SmartScreen flags the installer. Click <strong>More info → Run anyway</strong> to continue.</p>
     </div>
     <div class="install-platform">
       <div class="install-platform-head">
-        <span class="install-platform-icon install-platform-icon--linux" aria-hidden="true"></span>
+        <span class="install-platform-icon install-platform-icon--linux" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="platform-glyph platform-glyph--solid">
+            <ellipse cx="12" cy="14.2" rx="5.6" ry="6.4" />
+            <ellipse cx="12" cy="7.6" rx="3.7" ry="4.2" />
+            <ellipse cx="12" cy="15.6" rx="3.2" ry="4.4" class="glyph-belly" />
+            <circle cx="10.6" cy="7.2" r="0.78" class="glyph-eye" />
+            <circle cx="13.4" cy="7.2" r="0.78" class="glyph-eye" />
+            <path d="M12 8.6c1 0 1.7.6 1.7 1.2 0 .7-.8 1.1-1.7 1.1s-1.7-.4-1.7-1.1c0-.6.7-1.2 1.7-1.2Z" class="glyph-beak" />
+            <ellipse cx="8.8" cy="20.8" rx="2.1" ry="1.1" class="glyph-beak" />
+            <ellipse cx="15.2" cy="20.8" rx="2.1" ry="1.1" class="glyph-beak" />
+          </svg>
+        </span>
         <h3>Linux</h3>
       </div>
       <p>Right-click the AppImage → Properties → allow executing, or run <code>chmod +x</code> before launching.</p>
