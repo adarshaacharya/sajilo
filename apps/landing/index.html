@@ -74,18 +74,18 @@
       </p>
 
       <div class="download-cta" id="download">
-        <a id="primary-download" class="btn-primary" href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg">
+        <a id="primary-download" class="btn-primary" href="/dl/macos-arm64">
           Download for macOS
         </a>
         <p class="download-note">Free and open source · macOS, Windows, Linux</p>
         <details class="other-platforms" id="other-platforms">
           <summary>Other downloads</summary>
           <div class="other-platforms-links">
-            <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg">macOS (Apple Silicon)</a>
-            <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg">macOS (Intel)</a>
-            <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe">Windows</a>
-            <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-amd64.deb">Linux (.deb)</a>
-            <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage">Linux (AppImage)</a>
+            <a href="/dl/macos-arm64">macOS (Apple Silicon)</a>
+            <a href="/dl/macos-x64">macOS (Intel)</a>
+            <a href="/dl/windows">Windows</a>
+            <a href="/dl/linux-deb">Linux (.deb)</a>
+            <a href="/dl/linux-appimage">Linux (AppImage)</a>
           </div>
         </details>
       </div>
@@ -283,8 +283,8 @@
     var isWin = /Windows/.test(ua);
     var isLinux = /Linux/.test(ua) && !/Android/.test(ua);
 
-    var MAC_ARM = { href: "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg", label: "Download for macOS (Apple Silicon)" };
-    var MAC_INTEL = { href: "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg", label: "Download for macOS (Intel)" };
+    var MAC_ARM = { href: "/dl/macos-arm64", label: "Download for macOS (Apple Silicon)" };
+    var MAC_INTEL = { href: "/dl/macos-x64", label: "Download for macOS (Intel)" };
 
     function setMac(target) {
       btn.href = target.href;
@@ -299,10 +299,10 @@
         }).catch(function () {});
       }
     } else if (isWin) {
-      btn.href = "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe";
+      btn.href = "/dl/windows";
       btn.textContent = "Download for Windows";
     } else if (isLinux) {
-      btn.href = "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage";
+      btn.href = "/dl/linux-appimage";
       btn.textContent = "Download for Linux (AppImage)";
     }
   })();

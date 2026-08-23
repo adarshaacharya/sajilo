@@ -48,3 +48,5 @@ dist/
 node_modules/
 apps/desktop/dist/
 apps/desktop/src-tauri/gen/
+# Wrangler local state (Cloudflare Workers dev cache)
+.wrangler/

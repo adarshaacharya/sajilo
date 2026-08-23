@@ -1,8 +1,17 @@
 {
   "name": "sajilo",
+  "main": "src/index.js",
   "compatibility_date": "2026-08-23",
   "assets": {
     "directory": ".",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sajilo-downloads",
+      "database_id": "57dc714f-c9b0-4ea5-b14b-238bdc643e97"
+    }
+  ]
 }

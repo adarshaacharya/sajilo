@@ -1,0 +1,8 @@
+# `assets.directory` is this folder, so anything here is published unless it is
+# listed below. The site is the HTML, CSS and images; the Worker's own source
+# and configuration are not part of it.
+.assetsignore
+wrangler.jsonc
+schema.sql
+src
+.wrangler
