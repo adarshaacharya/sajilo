@@ -326,53 +326,55 @@ img {
   color: var(--text-muted);
 }
 
+/* Every platform on show, not folded away behind a disclosure. Two in five
+   visitors are not on the Mac the big button offers, and asking them to notice
+   a grey "Other downloads" line first is asking too much. */
 .other-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
   font-size: 13px;
   color: var(--text-muted);
 }
 
-.other-platforms summary {
-  cursor: pointer;
-  list-style: none;
+.other-platforms-label {
   color: var(--text-muted);
-  border-bottom: 1px dotted var(--border);
-  width: max-content;
-  transition: color 0.15s var(--ease-out-quart);
-}
-
-.other-platforms summary::-webkit-details-marker {
-  display: none;
-}
-
-.other-platforms summary:hover {
-  color: var(--gold);
-}
-
-.other-platforms-links {
-  display: flex;
-  gap: 6px 14px;
-  flex-wrap: wrap;
-  padding-top: 10px;
 }
 
 @media (max-width: 900px) {
-  .other-platforms summary {
-    margin-inline: auto;
-  }
-
-  .other-platforms-links {
+  .other-platforms {
     justify-content: center;
   }
 }
 
+/* Chips rather than a run of links: five plain anchors in a row read as one
+   sentence, and the reader cannot see where one download ends and the next
+   begins. */
 .other-platforms a {
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
   text-decoration: none;
-  border-bottom: 1px dotted color-mix(in srgb, var(--border) 100%, transparent);
+  white-space: nowrap;
+  transition: color 0.15s var(--ease-out-quart),
+    border-color 0.15s var(--ease-out-quart),
+    background-color 0.15s var(--ease-out-quart);
 }
 
 .other-platforms a:hover {
   color: var(--gold);
+  border-color: color-mix(in srgb, var(--gold) 45%, transparent);
+  background: var(--surface-hover);
+}
+
+/* The platform the big button already offers. */
+.other-platforms a[hidden] {
+  display: none;
 }
 
 .hero-shot {

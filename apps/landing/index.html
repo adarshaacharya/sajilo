@@ -78,16 +78,14 @@
           Download for macOS
         </a>
         <p class="download-note">Free and open source · macOS, Windows, Linux</p>
-        <details class="other-platforms" id="other-platforms">
-          <summary>Other downloads</summary>
-          <div class="other-platforms-links">
-            <a href="/dl/macos-arm64">macOS (Apple Silicon)</a>
-            <a href="/dl/macos-x64">macOS (Intel)</a>
-            <a href="/dl/windows">Windows</a>
-            <a href="/dl/linux-deb">Linux (.deb)</a>
-            <a href="/dl/linux-appimage">Linux (AppImage)</a>
-          </div>
-        </details>
+        <div class="other-platforms" id="other-platforms">
+          <span class="other-platforms-label">Also for</span>
+          <a href="/dl/macos-arm64" data-platform="macos-arm64">macOS (Apple Silicon)</a>
+          <a href="/dl/macos-x64" data-platform="macos-x64">macOS (Intel)</a>
+          <a href="/dl/windows" data-platform="windows">Windows</a>
+          <a href="/dl/linux-deb" data-platform="linux-deb">Linux (.deb)</a>
+          <a href="/dl/linux-appimage" data-platform="linux-appimage">Linux (AppImage)</a>
+        </div>
       </div>
     </div>
 
@@ -286,9 +284,21 @@
     var MAC_ARM = { href: "/dl/macos-arm64", label: "Download for macOS (Apple Silicon)" };
     var MAC_INTEL = { href: "/dl/macos-x64", label: "Download for macOS (Intel)" };
 
+    // The row below the button lists every other platform. Whichever one the
+    // button itself already offers is dropped from it, so the same download is
+    // never presented twice.
+    function dedupe() {
+      var current = btn.getAttribute("href");
+      var links = document.querySelectorAll("#other-platforms a");
+      for (var i = 0; i < links.length; i++) {
+        links[i].hidden = links[i].getAttribute("href") === current;
+      }
+    }
+
     function setMac(target) {
       btn.href = target.href;
       btn.textContent = target.label;
+      dedupe();
     }
 
     if (isMac) {
@@ -337,12 +347,26 @@
       }
     }
 
+    // Scrolls the track and nothing else. `scrollIntoView` walks every
+    // scrollable ancestor including the page, so with autoplay running it
+    // dragged the whole document downwards every few seconds.
+    function centreSlide(index) {
+      var slide = slides[index];
+      var offset = slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2;
+      var left = Math.max(0, Math.min(offset, track.scrollWidth - track.clientWidth));
+      if (track.scrollTo) {
+        track.scrollTo({ left: left, behavior: reduceMotion ? "auto" : "smooth" });
+      } else {
+        track.scrollLeft = left;
+      }
+    }
+
     function setActive(i, loop) {
       current = loop
         ? (i + slides.length) % slides.length
         : Math.max(0, Math.min(slides.length - 1, i));
       updateChrome();
-      slides[current].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      centreSlide(current);
     }
 
     function syncCurrentFromScroll() {
