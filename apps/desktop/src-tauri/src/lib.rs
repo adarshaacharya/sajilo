@@ -142,6 +142,7 @@ pub fn run() {
             commands::weather::get_weather,
             commands::forex::get_forex,
             commands::news::get_news,
+            commands::news::news_sources,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,

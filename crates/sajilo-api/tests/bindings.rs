@@ -17,7 +17,7 @@ use sajilo_api::bundle::{BundleRequest, BundleResponse, ModuleKey};
 use sajilo_api::forex::{ForexRate, ForexSnapshot};
 use sajilo_api::load_state::{Freshness, LoadState};
 use sajilo_api::meta::{FeedHealth, Health, Meta};
-use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
+use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource, NewsSourceInfo};
 use sajilo_api::radio::{RadioDirectory, RadioStation};
 use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalSnapshot};
 use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
@@ -58,6 +58,7 @@ fn exports_every_dto() {
     NewsSource::export_all().unwrap();
     DatePrecision::export_all().unwrap();
     NewsItem::export_all().unwrap();
+    NewsSourceInfo::export_all().unwrap();
     NewsDigest::export_all().unwrap();
 
     RashiSign::export_all().unwrap();

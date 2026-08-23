@@ -4,6 +4,7 @@ import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { NewsDigest } from "../../types/api/NewsDigest";
+import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
@@ -323,6 +324,8 @@ export const api = {
   getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
 
   getNews: (refresh = false) => invoke<LoadState<NewsDigest>>("get_news", { refresh }),
+  /** The source picker's options — static, named in Rust. */
+  newsSources: () => invoke<NewsSourceInfo[]>("news_sources"),
 
   getStations: (refresh = false) => invoke<LoadState<RadioDirectory>>("get_stations", { refresh }),
   /** Resolved per station, on play — the directory lists around 270 of them. */

@@ -54,6 +54,16 @@ dto! {
         pub precision: DatePrecision,
     }
 
+    /// One entry in the source picker.
+    ///
+    /// Sent rather than duplicated in TypeScript so the publisher names and the
+    /// language split have exactly one definition — this file.
+    pub struct NewsSourceInfo {
+        pub id: NewsSource,
+        pub name: String,
+        pub english: bool,
+    }
+
     pub struct NewsDigest {
         pub items: Vec<NewsItem>,
         /// Sources that failed this round, so partial results can say so rather
@@ -61,6 +71,20 @@ dto! {
         #[serde(default)]
         pub failed_sources: Vec<String>,
         pub freshness: Freshness,
+    }
+}
+
+impl NewsSourceInfo {
+    /// Every source, in `NewsSource::ALL` order.
+    pub fn catalog() -> Vec<Self> {
+        NewsSource::ALL
+            .into_iter()
+            .map(|source| Self {
+                id: source,
+                name: source.display_name().to_owned(),
+                english: source.is_english(),
+            })
+            .collect()
     }
 }
 

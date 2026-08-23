@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { Pressable } from "../../../shared/components/motion";
-import { Sparkline } from "../../../shared/components/sparkline";
 import { useSettings } from "../../../shared/context/settings-context";
-import { api, type Bazar } from "../../../shared/lib/ipc";
+import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
 import type { LoadState } from "../../../types/api/LoadState";
+import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
 import type { WeatherLocation } from "../../../types/api/WeatherLocation";
 import type { WeatherSnapshot } from "../../../types/api/WeatherSnapshot";
-import { headlineMetal, money0, priceChange } from "../../bazar/_lib/format";
+import { money } from "../../bazar/_lib/format";
+import { changeTone } from "../../bazar/_lib/stock-tone";
 import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
 
 const CITY: Record<WeatherLocation, { en: string; ne: string }> = {
@@ -44,7 +45,7 @@ export function GlanceCards() {
   const { language, modules, t } = useSettings();
   const navigate = useNavigate();
   const [weather, setWeather] = useState<LoadState<WeatherSnapshot>>();
-  const [bazar, setBazar] = useState<Bazar>();
+  const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
 
   useEffect(() => {
     if (!modules.weatherEnabled) return;
@@ -57,17 +58,16 @@ export function GlanceCards() {
   useEffect(() => {
     if (!modules.bazarEnabled) return;
     api
-      .getBazar()
-      .then(setBazar)
+      .getStocks()
+      .then(setStocks)
       .catch(() => {});
   }, [modules.bazarEnabled]);
 
   const weatherSnap = loadedValue(weather);
-  const metalsSnap = loadedValue(bazar?.metals);
-  const headline = metalsSnap && headlineMetal(metalsSnap);
-  const change = headline ? priceChange(headline.price, headline.previousPrice) : 0;
+  const stocksSnap = loadedValue(stocks);
+  const nepse = stocksSnap?.nepse ?? null;
   const freshness = relativeFreshness(
-    weatherSnap?.freshness.fetchedAt ?? metalsSnap?.freshness.fetchedAt,
+    weatherSnap?.freshness.fetchedAt ?? stocksSnap?.freshness.fetchedAt,
     t,
   );
 
@@ -107,33 +107,27 @@ export function GlanceCards() {
           <Pressable className="min-w-0 flex-1">
             <button
               type="button"
-              onClick={() => navigate("/bazar?tab=metals")}
-              className="surface-card glance-card glance-metal relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
+              onClick={() => navigate("/bazar?tab=stocks")}
+              className="surface-card glance-card glance-market relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
             >
               <div className="relative z-[1] flex items-center gap-1 text-text-muted">
-                <Icon name="gold" className="size-3 text-[color:var(--color-accent-mark)]" />
-                <span className="text-[10px]">{t("dashboard.gold")}</span>
+                <Icon name="interest" className="size-3 text-[color:var(--color-accent-mark)]" />
+                <span className="text-[10px]">{t("dashboard.nepse")}</span>
               </div>
               <p className="relative z-[1] mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
-                {headline
-                  ? `${language === "ne" ? "रु" : "Rs"} ${money0.format(headline.price)}`
-                  : "…"}
+                {nepse ? money.format(nepse.value) : "…"}
               </p>
-              <p className="relative z-[1] mt-1 truncate text-[10px] text-text-muted">
-                {headline
-                  ? change === 0
-                    ? t("dashboard.gold-no-change")
-                    : `${change > 0 ? "↑" : "↓"} ${language === "ne" ? "रु" : "Rs"} ${money0.format(Math.abs(change))} ${t("dashboard.today")}`
+              <p
+                className={`relative z-[1] mt-1 truncate text-[10px] tabular-nums ${
+                  nepse && nepse.change !== 0 ? changeTone(nepse.change) : "text-text-muted"
+                }`}
+              >
+                {nepse
+                  ? nepse.change === 0
+                    ? t("dashboard.nepse-no-change")
+                    : `${nepse.change > 0 ? "↑" : "↓"} ${money.format(Math.abs(nepse.change))} · ${Math.abs(nepse.changePercent).toFixed(2)}%`
                   : "—"}
               </p>
-              {metalsSnap?.goldHistory && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] px-1 pb-0.5">
-                  <Sparkline
-                    values={metalsSnap.goldHistory}
-                    className={change >= 0 ? "text-positive" : "text-holiday"}
-                  />
-                </div>
-              )}
             </button>
           </Pressable>
         )}

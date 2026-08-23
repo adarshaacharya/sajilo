@@ -10,14 +10,20 @@ import { CONTROL, CONTROL_LABEL } from "./control";
  */
 export function Select<T extends string>({
   label,
+  ariaLabel,
   value,
   onChange,
   options,
+  groups,
 }: {
   label?: string;
+  /** For an unlabelled dropdown — a picker sitting in the header bar. */
+  ariaLabel?: string;
   value: T;
   onChange: (value: T) => void;
   options: readonly { id: T; label: string }[];
+  /** Rendered as `<optgroup>`s below `options`, for a long, sectioned list. */
+  groups?: readonly { label: string; options: readonly { id: T; label: string }[] }[];
 }) {
   const id = useId();
   const select = (
@@ -25,6 +31,7 @@ export function Select<T extends string>({
       <select
         id={id}
         value={value}
+        aria-label={label ? undefined : ariaLabel}
         onChange={(event) => onChange(event.target.value as T)}
         className={`${CONTROL} w-full cursor-pointer appearance-none pr-6 hover:bg-surface-hover`}
       >
@@ -32,6 +39,15 @@ export function Select<T extends string>({
           <option key={option.id} value={option.id}>
             {option.label}
           </option>
+        ))}
+        {groups?.map((group) => (
+          <optgroup key={group.label} label={group.label}>
+            {group.options.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
       <svg

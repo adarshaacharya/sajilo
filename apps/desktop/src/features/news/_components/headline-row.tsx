@@ -18,7 +18,16 @@ function age(item: NewsItem): string {
   );
 }
 
-export function HeadlineRow({ item, onOpen }: { item: NewsItem; onOpen: () => void }) {
+export function HeadlineRow({
+  item,
+  showSource = true,
+  onOpen,
+}: {
+  item: NewsItem;
+  /** False when the list is already filtered to one publisher. */
+  showSource?: boolean;
+  onOpen: () => void;
+}) {
   return (
     <button
       type="button"
@@ -27,10 +36,14 @@ export function HeadlineRow({ item, onOpen }: { item: NewsItem; onOpen: () => vo
     >
       <p className="text-[13px] leading-snug">{item.title}</p>
       <div className="mt-1 flex items-center gap-1 text-[10px]">
-        <span className="font-medium text-[color:var(--color-accent-mark)]">{item.sourceName}</span>
+        {showSource && (
+          <span className="font-medium text-[color:var(--color-accent-mark)]">
+            {item.sourceName}
+          </span>
+        )}
         {item.published && (
           <>
-            <span className="text-text-muted">·</span>
+            {showSource && <span className="text-text-muted">·</span>}
             <span className="text-text-secondary">{age(item)}</span>
           </>
         )}

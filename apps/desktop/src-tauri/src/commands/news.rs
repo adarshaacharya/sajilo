@@ -2,7 +2,7 @@
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::news::NewsDigest;
+use sajilo_api::news::{NewsDigest, NewsSourceInfo};
 use sajilo_providers::{HttpClient, rss};
 use tauri::{AppHandle, Manager, Wry};
 
@@ -44,4 +44,10 @@ pub async fn get_news(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadState<N
             }
         })
         .await
+}
+
+/// The source picker's options. Static — no network, no cache.
+#[tauri::command]
+pub fn news_sources() -> Vec<NewsSourceInfo> {
+    NewsSourceInfo::catalog()
 }
