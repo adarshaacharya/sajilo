@@ -1052,6 +1052,29 @@ section {
   stroke-width: 1.6;
 }
 
+/* ---------- install section ---------- */
+
+.install-section {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.install-section::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 100% 90% at 50% 120%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 62%),
+    var(--bg-1);
+}
+
 /* ---------- cta band ---------- */
 
 .cta-band {
