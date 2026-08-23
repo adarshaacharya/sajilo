@@ -42,9 +42,35 @@ fn updater_enabled() -> bool {
     option_env!("SAJILO_UPDATER_PUBKEY").is_some()
 }
 
+/// Runs the GTK shell on X11 (XWayland) rather than as a native Wayland client.
+///
+/// Wayland deliberately denies a client any say over its own placement, and it
+/// ignores GTK's skip-taskbar hint. For a tray popover both matter: without
+/// them the window lands wherever the compositor likes — centred on GNOME,
+/// nowhere near the tray icon it belongs to — and it picks up a dock entry that
+/// `skipTaskbar: true` was supposed to prevent. Under XWayland the same binary
+/// anchors itself beside the tray and sets `_NET_WM_STATE_SKIP_TASKBAR`, so the
+/// popover behaves like the menu-bar utility it is on every desktop.
+///
+/// Respects an explicit `GDK_BACKEND` so anyone wanting the native Wayland
+/// surface (and the centred, docked window that comes with it) can still ask.
+/// Must run before GTK initialises, hence the top of [`run`].
+#[cfg(target_os = "linux")]
+fn prefer_x11_backend() {
+    if std::env::var_os("GDK_BACKEND").is_some() {
+        return;
+    }
+    // SAFETY: single-threaded — this is the first statement of `run`, which is
+    // called straight from `main`, before Tauri or GTK spawns any thread.
+    unsafe { std::env::set_var("GDK_BACKEND", "x11") };
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(clippy::too_many_lines)]
 pub fn run() {
+    #[cfg(target_os = "linux")]
+    prefer_x11_backend();
+
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
@@ -85,12 +111,6 @@ pub fn run() {
                 let _ = main.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
                 #[cfg(target_os = "macos")]
                 window::polish_macos_chrome(&main);
-                // Ubuntu GNOME may not expose legacy tray icons unless an
-                // AppIndicator host is installed. Show the popover once on
-                // Linux so a missing tray host can never look like a failed
-                // installation; subsequent opens still use the tray.
-                #[cfg(target_os = "linux")]
-                window::show(&main);
             }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
@@ -102,7 +122,9 @@ pub fn run() {
             // webview and with it every loaded feed and scroll position.
             WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                let _ = window.hide();
+                if let Some(main) = window.get_webview_window(window::MAIN) {
+                    window::hide(&main);
+                }
             }
             WindowEvent::Focused(focused) => {
                 if let Some(main) = window.get_webview_window(window::MAIN) {

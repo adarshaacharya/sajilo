@@ -5,25 +5,54 @@ pub mod title;
 
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+#[cfg(not(target_os = "linux"))]
+use tauri::menu::PredefinedMenuItem;
+use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::window;
 
+#[cfg(target_os = "linux")]
+const OPEN_LABEL: &str = "Open Sajilo";
+#[cfg(target_os = "linux")]
+const HIDE_LABEL: &str = "Hide Sajilo";
+
+/// The Linux menu's single item, kept so its label can track the popover.
+#[cfg(target_os = "linux")]
+struct PopoverItem(MenuItem<tauri::Wry>);
+
+/// Names what the menu item will actually do next.
+///
+/// The item both opens and dismisses the popover, because on Linux it stands in
+/// for the tray click the platform never delivers. A fixed "Open Sajilo" would
+/// therefore be wrong half the time — it would hide a popover that is already
+/// up.
+///
+/// Takes the state being moved *into* rather than reading it back off the
+/// window: GTK maps and unmaps asynchronously, so `is_visible` still reports the
+/// previous state when called right after `show`/`hide`, which left the label a
+/// step behind and naming the wrong action.
+#[cfg(target_os = "linux")]
+pub fn set_popover_shown(app: &AppHandle, shown: bool) {
+    use tauri::Manager as _;
+
+    let Some(item) = app.try_state::<PopoverItem>() else {
+        return;
+    };
+    let _ = item.0.set_text(if shown { HIDE_LABEL } else { OPEN_LABEL });
+}
+
 /// The date row at the top of the tray menu, kept so `refresh_title` can move
 /// it forward with the day.
 ///
-/// It exists because a tray *click* is not something every platform gives us.
-/// `tray-icon`'s Linux backend documents `TrayIconEvent` as unsupported — the
-/// event is never emitted, so `on_tray_icon_event` below is dead code there and
-/// the menu is the only thing a click can reach. Carrying the same label the
-/// tray shows makes that menu's first row read as "the date you clicked", and
-/// opening the popover from it is what gives Linux the affordance macOS gets
-/// from a left click.
+/// macOS and Windows only: Linux's menu is a single toggle item (see `build`),
+/// so there is no date row to move there — the date rides the appindicator
+/// label instead.
 struct DateItem(MenuItem<Wry>);
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
+    #[cfg(not(target_os = "linux"))]
     let date = MenuItem::with_id(
         app,
         "open",
@@ -31,8 +60,35 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         true,
         None::<&str>,
     )?;
+    #[cfg(not(target_os = "linux"))]
     let settings = MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))?;
+    #[cfg(not(target_os = "linux"))]
     let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, Some("CmdOrCtrl+Q"))?;
+
+    // Linux gets a one-item menu that opens the app, and nothing else.
+    //
+    // `show_menu_on_left_click(false)` is documented as unsupported there, and
+    // the libappindicator item exposes no `Activate` method, so a
+    // StatusNotifier host (GNOME's AppIndicator extension) has nothing to call
+    // and opens this menu on *every* click — left included, which is why the
+    // `TrayIconEvent::Click` branch below never fires on Linux. The menu is
+    // therefore the only route to the popover, and the shortest such route is a
+    // single item that opens it: Settings and Quit are already in the popover's
+    // own header, so repeating them here only puts more between the tray icon
+    // and the app. Escape dismisses the popover (Linux skips blur-to-dismiss).
+    //
+    // macOS and Windows keep the full menu: there, left click toggles the
+    // popover and this menu is the right-click affordance.
+    #[cfg(target_os = "linux")]
+    let open = MenuItem::with_id(app, "open", OPEN_LABEL, true, None::<&str>)?;
+
+    #[cfg(target_os = "linux")]
+    let menu = Menu::with_items(app, &[&open])?;
+
+    // Kept so the label can follow the popover; see `set_popover_shown`.
+    #[cfg(target_os = "linux")]
+    app.manage(PopoverItem(open));
+    #[cfg(not(target_os = "linux"))]
     let menu = Menu::with_items(
         app,
         &[
@@ -43,6 +99,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             &quit,
         ],
     )?;
+    #[cfg(not(target_os = "linux"))]
     app.manage(DateItem(date));
 
     #[cfg_attr(target_os = "macos", allow(unused_mut))]
@@ -51,8 +108,8 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     // macOS carries the date as the tray *title*, like the Swift app did, so it
     // needs no glyph — the app icon is a filled square and a template render of
     // it is an unreadable blob. Elsewhere the tray starts from the app icon:
-    // Windows then draws the day number into it, and Linux keeps it as-is,
-    // since libayatana-appindicator refuses to show a label without one.
+    // Windows then swaps in the Nepal flag, and Linux keeps it as-is, since
+    // libayatana-appindicator refuses to show a label without one.
     #[cfg(not(target_os = "macos"))]
     {
         builder = builder
@@ -70,6 +127,8 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         .show_menu_on_left_click(false)
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
+            // The date row on macOS and Windows; on Linux the single menu item,
+            // standing in for the tray click that platform never delivers.
             "open" => window::toggle(app),
             "settings" => open_settings(app),
             "quit" => app.exit(0),
@@ -130,8 +189,8 @@ pub fn refresh_title(app: &AppHandle) {
     // visible tray glyph is a static Nepal flag, so it has no date fields.
     let _ = (date, numerals);
 
-    // The menu's date row is the one affordance every platform has, so it moves
-    // with the day even where the tray itself cannot show text.
+    // The menu's date row moves with the day where it exists; Linux has no such
+    // row (its menu is the toggle item) and carries the date in the label below.
     if let Some(item) = app.try_state::<DateItem>() {
         let _ = item.0.set_text(&label);
     }
