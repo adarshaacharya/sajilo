@@ -3,9 +3,13 @@
 /**
  * The feeds Sajilo reads.
  *
- * Every one is an official publisher RSS endpoint returning
- * `application/rss+xml`. Kantipur and Hamro Patro are deliberately absent:
- * neither publishes a real feed, and parsing their HTML is the same
- * technique that silently cost this app 349 days of bundled festival data.
+ * Most are official publisher RSS endpoints returning
+ * `application/rss+xml`. Two are not shaped that way: Kantipur publishes
+ * no feed at all, but its own front end is served by a keyless public JSON
+ * endpoint, so it is read from that rather than scraped; and The Himalayan
+ * Times publishes no combined feed, only one per section, so several are
+ * read and merged back into a single source. Hamro Patro remains absent —
+ * there is nothing there but HTML, and parsing that is the technique that
+ * silently cost this app 349 days of bundled festival data.
  */
-export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "risingNepal" | "ratopatiEnglish";
+export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "risingNepal" | "ratopatiEnglish" | "kantipur" | "himalayanTimes";

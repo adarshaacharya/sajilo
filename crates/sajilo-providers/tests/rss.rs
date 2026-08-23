@@ -6,6 +6,7 @@ use sajilo_providers::rss::{self, parser};
 
 const KATHMANDU_POST: &str = include_str!("../../../fixtures/rss/kathmandupost.xml");
 const ONLINE_KHABAR: &str = include_str!("../../../fixtures/rss/onlinekhabar.xml");
+const HIMALAYAN_TIMES: &str = include_str!("../../../fixtures/rss/himalayantimes-nepal.xml");
 
 #[test]
 fn decodes_a_recorded_feed() {
@@ -266,19 +267,22 @@ fn the_sort_is_stable_on_ties() {
     assert_eq!(rss::newest_first(sorted.clone()), sorted);
 }
 
-/// Every source is a real, distinct feed endpoint.
+/// Every feed URL is real and distinct, no source claims another's, and
+/// Kantipur — the one source with no feed at all — lists none.
 #[test]
 fn every_source_has_a_distinct_feed_url() {
-    let mut urls: Vec<&str> = NewsSource::ALL.iter().map(|s| s.feed_url()).collect();
+    let mut urls: Vec<&str> = NewsSource::ALL
+        .iter()
+        .flat_map(|s| s.rss_feeds().iter().copied())
+        .collect();
     let count = urls.len();
     urls.sort_unstable();
     urls.dedup();
-    assert_eq!(urls.len(), count);
-    assert!(
-        NewsSource::ALL
-            .iter()
-            .all(|s| s.feed_url().starts_with("https://"))
-    );
+    assert_eq!(urls.len(), count, "two sources share a feed URL");
+    assert!(urls.iter().all(|url| url.starts_with("https://")));
+    assert!(NewsSource::Kantipur.rss_feeds().is_empty());
+    // The Himalayan Times publishes no combined feed, so it reads several.
+    assert!(NewsSource::HimalayanTimes.rss_feeds().len() > 1);
     // Only The Kathmandu Post is dated from its link path.
     assert_eq!(
         NewsSource::ALL
@@ -287,4 +291,68 @@ fn every_source_has_a_distinct_feed_url() {
             .count(),
         1
     );
+}
+
+/// The Himalayan Times escapes HTML entities *inside* CDATA, which an XML
+/// parser is right to leave alone. Decoding them is this parser's job, or
+/// `Three-year-old&#039;s` reaches the reader exactly as written.
+#[test]
+fn decodes_entities_left_inside_cdata() {
+    assert!(
+        HIMALAYAN_TIMES.contains("&#039;"),
+        "the fixture should still hold the escapes this test is about"
+    );
+    let items = parser::parse(HIMALAYAN_TIMES, NewsSource::HimalayanTimes, 100);
+    assert_eq!(items.len(), 50);
+    assert!(
+        items.iter().any(|item| item.title.contains('\'')),
+        "the escaped apostrophes should have become real ones"
+    );
+    assert!(
+        !items.iter().any(|item| item.title.contains("&#")),
+        "no escape should survive into a headline"
+    );
+}
+
+/// The paper dates every story with a real `+0545` offset, so its headlines
+/// rank against the rest of the merge rather than sinking to the bottom.
+#[test]
+fn reads_the_himalayan_times_timestamps() {
+    let items = parser::parse(HIMALAYAN_TIMES, NewsSource::HimalayanTimes, 100);
+    assert!(items.iter().all(|item| item.published.is_some()));
+    assert!(
+        items
+            .iter()
+            .all(|item| item.precision == DatePrecision::Exact)
+    );
+    assert!(
+        items
+            .iter()
+            .all(|item| item.link.starts_with("https://thehimalayantimes.com/"))
+    );
+}
+
+/// A stray ampersand is not an entity, and an already-escaped escape decodes
+/// exactly once.
+#[test]
+fn decodes_each_escape_only_once() {
+    let feed = |title: &str| {
+        format!(
+            "<rss><channel><item><title><![CDATA[{title}]]></title>\
+             <link>https://example.com/a</link></item></channel></rss>"
+        )
+    };
+    let title = |raw: &str| {
+        parser::parse(&feed(raw), NewsSource::HimalayanTimes, 1)
+            .first()
+            .map(|item| item.title.clone())
+            .unwrap_or_default()
+    };
+
+    assert_eq!(title("Fish &amp; chips"), "Fish & chips");
+    assert_eq!(title("&amp;lt;tag&amp;gt;"), "&lt;tag&gt;");
+    assert_eq!(title("Rs 5 &amp; up"), "Rs 5 & up");
+    assert_eq!(title("Q&A on tax"), "Q&A on tax");
+    assert_eq!(title("&#x27;quoted&#x27;"), "'quoted'");
+    assert_eq!(title("&notarealentity; here"), "&notarealentity; here");
 }

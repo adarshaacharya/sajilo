@@ -1,4 +1,8 @@
-//! The nine-source news merge. Ported from `RSSNewsProvider.swift`.
+//! The ten-source news merge. Ported from `RSSNewsProvider.swift`.
+//!
+//! Nine of the ten are RSS. Kantipur is not — it is decoded by
+//! [`crate::kantipur`] from the JSON endpoint its own site runs on — and is
+//! merged here on equal terms with the feeds.
 
 pub mod parser;
 
@@ -10,6 +14,7 @@ use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
 
 use crate::error::Result;
 use crate::http::HttpClient;
+use crate::kantipur;
 
 pub const SOURCE_NAME: &str = "RSS news";
 
@@ -26,17 +31,36 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>, limit: usize) -> Res
     let mut failed = Vec::new();
 
     for source in NewsSource::ALL {
-        match client.get_text(SOURCE_NAME, source.feed_url()).await {
-            Ok(body) => {
+        // Kantipur has no feed to read; it is fetched from its JSON endpoint
+        // below and joins the merge as one more list of headlines.
+        if source.rss_feeds().is_empty() {
+            continue;
+        }
+
+        let mut desks = Vec::new();
+        for url in source.rss_feeds() {
+            if let Ok(body) = client.get_text(SOURCE_NAME, url).await {
                 let items = parser::parse(&body, source, parser::DEFAULT_LIMIT);
-                if items.is_empty() {
-                    failed.push(source.display_name().to_owned());
-                } else {
-                    feeds.push(items);
+                if !items.is_empty() {
+                    desks.push(items);
                 }
             }
-            Err(_) => failed.push(source.display_name().to_owned()),
         }
+
+        // A paper split across section feeds is one source to a reader, so its
+        // desks are round-robined into a single list before the papers are.
+        // Concatenating instead would bury Sports under fifty Nepal stories.
+        let items = interleave(&desks, parser::DEFAULT_LIMIT);
+        if items.is_empty() {
+            failed.push(source.display_name().to_owned());
+        } else {
+            feeds.push(items);
+        }
+    }
+
+    match kantipur::fetch(client, parser::DEFAULT_LIMIT).await {
+        Ok(items) if !items.is_empty() => feeds.push(items),
+        _ => failed.push(NewsSource::Kantipur.display_name().to_owned()),
     }
 
     Ok(NewsDigest {

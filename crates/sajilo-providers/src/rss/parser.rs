@@ -90,7 +90,63 @@ fn local_name(raw: &[u8]) -> String {
     name.rsplit(':').next().unwrap_or(&name).to_lowercase()
 }
 
+/// Turns `&#039;` and friends back into the characters they stand for.
+///
+/// Feeds wrap a title in CDATA to say "this is text, not markup", and then some
+/// of them escape the text inside it anyway — The Himalayan Times files
+/// `Three-year-old&#039;s murder protests` that way. An XML parser is right not
+/// to touch CDATA, so the decoding has to happen here or the escape reaches the
+/// reader verbatim.
+///
+/// Scanned once, left to right, so a literal `&amp;lt;` decodes to `&lt;` and
+/// stops there rather than unravelling a second time into `<`.
+fn decode_entities(raw: &str) -> String {
+    let mut out = String::with_capacity(raw.len());
+    let mut rest = raw;
+
+    while let Some(start) = rest.find('&') {
+        out.push_str(&rest[..start]);
+        rest = &rest[start..];
+
+        // An entity is short; anything longer is a stray ampersand.
+        let Some(end) = rest[..rest.len().min(12)].find(';') else {
+            out.push('&');
+            rest = &rest[1..];
+            continue;
+        };
+
+        match decode_one(&rest[1..end]) {
+            Some(character) => out.push(character),
+            None => out.push_str(&rest[..=end]),
+        }
+        rest = &rest[end + 1..];
+    }
+
+    out.push_str(rest);
+    out
+}
+
+fn decode_one(body: &str) -> Option<char> {
+    match body {
+        "amp" => return Some('&'),
+        "lt" => return Some('<'),
+        "gt" => return Some('>'),
+        "quot" => return Some('"'),
+        "apos" => return Some('\''),
+        "nbsp" => return Some(' '),
+        _ => {}
+    }
+
+    let digits = body.strip_prefix('#')?;
+    let code = match digits.strip_prefix(['x', 'X']) {
+        Some(hex) => u32::from_str_radix(hex, 16).ok()?,
+        None => digits.parse().ok()?,
+    };
+    char::from_u32(code)
+}
+
 fn build(title: &str, link: &str, pub_date: &str, source: NewsSource) -> Option<NewsItem> {
+    let title = decode_entities(title.trim());
     let title = title.trim();
     let link = link.trim();
     // Only ever hand the browser a web link.
