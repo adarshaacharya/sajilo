@@ -15,11 +15,7 @@ export function UpdateHeaderButton() {
 
   if (state === "downloading") {
     return (
-      <span
-        className="update-header-btn update-header-btn--busy shrink-0"
-        aria-live="polite"
-        aria-label={t("header.update-downloading")}
-      >
+      <span className="update-header-btn update-header-btn--busy shrink-0" aria-live="polite">
         {t("header.update-downloading")}
       </span>
     );
