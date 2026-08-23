@@ -23,6 +23,7 @@ import { PageTransition } from "./shared/components/motion";
 import { TabBar } from "./shared/components/tab-bar";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
 import type { translate } from "./shared/lib/i18n";
+import { api } from "./shared/lib/ipc";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -61,6 +62,26 @@ function TrayNavigation() {
   return null;
 }
 
+/** Escape dismisses the popover, the way a menu-bar panel is expected to close.
+ *
+ * On macOS and Windows clicking away is enough. Linux has no such luxury: the
+ * compositor pulls focus from an undecorated always-on-top window on its own,
+ * so blur cannot be trusted to mean "the user left" and the popover stays up
+ * until something asks it to go. Escape is that something. */
+function DismissOnEscape() {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      api.hidePopover().catch(() => {});
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  return null;
+}
+
 function Shell() {
   const { t } = useSettings();
   const location = useLocation();
@@ -68,6 +89,7 @@ function Shell() {
   return (
     <div className="app-window flex flex-col">
       <TrayNavigation />
+      <DismissOnEscape />
       <AnimatePresence mode="wait" initial={false}>
         <Routes location={location} key={location.pathname}>
           {ROUTES.map((route) => (

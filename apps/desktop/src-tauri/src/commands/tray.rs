@@ -23,6 +23,6 @@ pub fn quit_app(app: AppHandle<Wry>) {
 #[tauri::command]
 pub fn hide_popover(app: AppHandle<Wry>) {
     if let Some(window) = crate::window::main_window(&app) {
-        let _ = window.hide();
+        crate::window::hide(&window);
     }
 }
