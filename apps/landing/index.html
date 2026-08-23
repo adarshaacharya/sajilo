@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sajilo: Bikram Sambat calendar & Nepali daily essentials</title>
+<meta name="description" content="Bikram Sambat calendar, news from nine Nepali newsrooms, bazar and NEPSE rates, daily rashifal, and Nepali unit tools. Free, open source, no account needed. Menu bar app for macOS, Windows, and Linux.">
+
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="canonical" href="https://sajilo.fyi/">
+
+<meta property="og:title" content="Sajilo: Bikram Sambat calendar & Nepali daily essentials">
+<meta property="og:description" content="News, bazar and NEPSE rates, daily rashifal, and Nepali unit tools, alongside an offline-first BS calendar. Free and open source.">
+<meta property="og:image" content="https://sajilo.fyi/assets/og-image.png">
+<meta property="og:url" content="https://sajilo.fyi/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Sajilo",
+  "url": "https://sajilo.fyi/",
+  "description": "Bikram Sambat calendar, news from nine Nepali newsrooms, bazar and NEPSE rates, daily rashifal, and Nepali unit tools in the menu bar.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS, Windows, Linux",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "isAccessibleForFree": true,
+  "softwareHelp": "https://sajilo.fyi/install.html",
+  "downloadUrl": "https://github.com/adarshaacharya/sajilo/releases/latest"
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Public+Sans:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="wrap">
+  <nav class="nav">
+    <div class="brand">
+      <img src="assets/icon.png" alt="">
+      Sajilo
+    </div>
+    <a class="github" href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      Source
+    </a>
+  </nav>
+</header>
+
+<div class="hero-shell">
+  <main class="hero wrap" id="main">
+    <div class="hero-copy">
+      <p class="deva">सजिलो</p>
+      <h1>The Nepali desk, in your menu bar.</h1>
+      <p class="tagline">
+        Bikram Sambat dates, news from nine Nepali newsrooms, bazar and NEPSE
+        rates, and daily rashifal. Checked in seconds, without opening a
+        browser.
+      </p>
+      <p class="trust-line">
+        <span>Free</span><span>Open source</span><span>No account</span><span>Calendar works offline</span>
+      </p>
+
+      <div class="download-cta">
+        <a id="primary-download" class="btn-primary" href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg">
+          Download for macOS
+        </a>
+        <div class="other-platforms" id="other-platforms">
+          <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg">macOS (Apple Silicon)</a>
+          <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg">macOS (Intel)</a>
+          <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe">Windows</a>
+          <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-amd64.deb">Linux (.deb)</a>
+          <a href="https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage">Linux (AppImage)</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-shot">
+      <img src="assets/screenshot.png" alt="Sajilo open in the menu bar, showing भदौ २०८३ on the Bikram Sambat calendar, Kathmandu weather at 25°, and gold rates at रु 3,19,500">
+    </div>
+  </main>
+</div>
+
+<section class="wrap">
+  <h2>What's inside</h2>
+  <p class="section-sub">Nine tools, all reading the same day.</p>
+
+  <div class="feature-list">
+
+    <div class="feature-row lead">
+      <h3>Bikram Sambat calendar</h3>
+      <p>AD conversion, tithi, festivals, and public holidays. Works fully offline, so you don't need a connection to know today's date.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>News</h3>
+      <p>Headlines from <strong>nine Nepali newsrooms</strong>, in Nepali and English, updated through the day.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Bazar <span class="accent forex">&amp; NEPSE</span></h3>
+      <p>Kathmandu gold and silver, fuel, and Kalimati vegetable rates, alongside a NEPSE watchlist with live movers, gainers, and losers.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Rashifal</h3>
+      <p>Daily rashifal for all twelve rashis, sourced from Hamro Patro.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Day plans &amp; reminders</h3>
+      <p>Personal notes, plus family renewals and bills, tracked by due date.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Weather <span class="accent weather">&amp; forex</span></h3>
+      <p>Kathmandu weather and air quality, alongside Nepal Rastra Bank exchange rates.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>World clocks &amp; radio</h3>
+      <p>A second clock beside Nepal time, plus Nepali radio stations, right in the app.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Nepali unit tools</h3>
+      <p>Land, weight, VAT, and simple-interest conversions in Nepali units.</p>
+    </div>
+
+    <div class="feature-row">
+      <h3>Nepali or English</h3>
+      <p>The full interface in either language, with Devanagari or English numerals.</p>
+    </div>
+
+  </div>
+</section>
+
+<section class="wrap carousel-shell">
+  <h2>See it in action</h2>
+  <p class="section-sub">Every screen is real, captured straight from the app.</p>
+
+  <div class="carousel" id="carousel">
+    <div class="slide"><img src="assets/showcase/today.png" alt="Today tab: भदौ २०८३ Bikram Sambat calendar with the day's tithi, weather, and gold rate"><p class="caption">Today</p></div>
+    <div class="slide"><img src="assets/showcase/date-details.png" alt="Date details: tithi, sunrise/sunset, Rahu Kaal, and the day plan for ७ भदौ"><p class="caption">Day details</p></div>
+    <div class="slide"><img src="assets/showcase/news.png" alt="News tab: headlines from Bizkhabar, OnlineKhabar, Ratopati, and The Kathmandu Post"><p class="caption">News</p></div>
+    <div class="slide"><img src="assets/showcase/bazar.png" alt="Bazar tab: NEPSE index, top gainers, and stock watchlist"><p class="caption">Bazar</p></div>
+    <div class="slide"><img src="assets/showcase/rashifal.png" alt="Rashifal tab: daily reading for Mesh (Aries)"><p class="caption">Rashifal</p></div>
+    <div class="slide"><img src="assets/showcase/radio.png" alt="Radio tab: Radio Kantipur playing, with a list of Nepali stations"><p class="caption">Radio</p></div>
+    <div class="slide"><img src="assets/showcase/tools.png" alt="Tools tab: land/weight/VAT/interest calculators, a second clock, date converter, and directory"><p class="caption">Tools</p></div>
+    <div class="slide"><img src="assets/showcase/keeper.png" alt="Keeper tab: adding a driving licence with its expiry date"><p class="caption">Keeper</p></div>
+  </div>
+
+  <div class="carousel-controls">
+    <button class="carousel-arrow" id="carousel-prev" aria-label="Previous screenshot">
+      <svg viewBox="0 0 16 16"><path d="M10.5 13.5 5 8l5.5-5.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="carousel-dots" id="carousel-dots"></div>
+    <button class="carousel-arrow" id="carousel-next" aria-label="Next screenshot">
+      <svg viewBox="0 0 16 16"><path d="M5.5 2.5 11 8l-5.5 5.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <dialog class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close">
+      <svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3 3 13" stroke-linecap="round"/></svg>
+    </button>
+    <div class="lightbox-frame">
+      <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous screenshot">
+        <svg viewBox="0 0 16 16"><path d="M10.5 13.5 5 8l5.5-5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="position: relative;">
+        <img id="lightbox-img" src="" alt="">
+        <p class="lightbox-caption" id="lightbox-caption"></p>
+      </div>
+      <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next screenshot">
+        <svg viewBox="0 0 16 16"><path d="M5.5 2.5 11 8l-5.5 5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </dialog>
+</section>
+
+<section class="wrap">
+  <h2>Installing</h2>
+  <p class="install-lead">
+    <strong>Current beta builds aren't code-signed yet</strong>, so each
+    platform shows a one-time security warning on first launch. It takes
+    about 30 seconds to get past, once, per update.
+  </p>
+
+  <div class="install-platforms">
+    <div class="install-platform">
+      <h3>macOS</h3>
+      <p>Gatekeeper blocks the app with a two-step warning: drag to Applications, then approve it once in System Settings.</p>
+      <a class="guide-link" href="install.html">
+        Step-by-step guide with screenshots
+        <svg viewBox="0 0 16 16"><path d="M5.5 2.5 11 8l-5.5 5.5"/></svg>
+      </a>
+    </div>
+    <div class="install-platform">
+      <h3>Windows</h3>
+      <p>SmartScreen flags the installer. Click <strong>More info &rarr; Run anyway</strong> to continue.</p>
+    </div>
+    <div class="install-platform">
+      <h3>Linux</h3>
+      <p>Right-click the AppImage &rarr; Properties &rarr; allow executing, or run <code>chmod +x</code> on it before launching.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  Sajilo is free and open source.
+  <a href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">Source on GitHub</a>.
+  Built by <a href="https://adarsha.dev" target="_blank" rel="noopener">Adarsha Acharya</a>.
+</footer>
+
+<script>
+  (function () {
+    var ua = navigator.userAgent;
+    var btn = document.getElementById("primary-download");
+    var isMac = /Macintosh|Mac OS X/.test(ua);
+    var isWin = /Windows/.test(ua);
+    var isLinux = /Linux/.test(ua) && !/Android/.test(ua);
+
+    var MAC_ARM = { href: "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg", label: "Download for macOS (Apple Silicon)" };
+    var MAC_INTEL = { href: "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg", label: "Download for macOS (Intel)" };
+
+    function setMac(target) {
+      btn.href = target.href;
+      btn.textContent = target.label;
+    }
+
+    if (isMac) {
+      // Chrome's plain user-agent string always reports "Intel" on macOS, even
+      // on Apple Silicon (kept for site-compatibility reasons), so it can't
+      // tell the two apart. The Client Hints API can, but only in Chromium
+      // browsers and only async — so this defaults to Apple Silicon (the
+      // large majority of Macs sold since 2020) and corrects itself a moment
+      // later if the API reports Intel instead.
+      setMac(MAC_ARM);
+      if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+        navigator.userAgentData.getHighEntropyValues(["architecture"]).then(function (info) {
+          if (info.architecture === "x86") setMac(MAC_INTEL);
+        }).catch(function () {});
+      }
+    } else if (isWin) {
+      btn.href = "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe";
+      btn.textContent = "Download for Windows";
+    } else if (isLinux) {
+      btn.href = "https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage";
+      btn.textContent = "Download for Linux (AppImage)";
+    }
+  })();
+
+  (function () {
+    var track = document.getElementById("carousel");
+    var dotsEl = document.getElementById("carousel-dots");
+    var prev = document.getElementById("carousel-prev");
+    var next = document.getElementById("carousel-next");
+    if (!track) return;
+
+    var slides = Array.prototype.slice.call(track.querySelectorAll(".slide"));
+    var dots = [];
+    // The source of truth for "which slide is active" — not derived from
+    // scrollLeft, which drifts under rapid clicks: a new smooth-scroll
+    // animation starting before the last one settles compounds relative
+    // deltas incorrectly. Every click computes its target from this index,
+    // never from the scroll position mid-flight.
+    var current = 0;
+
+    function setActive(i, loop) {
+      current = loop
+        ? (i + slides.length) % slides.length
+        : Math.max(0, Math.min(slides.length - 1, i));
+      dots.forEach(function (dot, idx) {
+        dot.classList.toggle("active", idx === current);
+      });
+      slides[current].scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    }
+
+    slides.forEach(function (slide, i) {
+      var dot = document.createElement("button");
+      dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+      dot.addEventListener("click", function () {
+        stopAutoplay();
+        setActive(i, false);
+      });
+      dotsEl.appendChild(dot);
+      dots.push(dot);
+    });
+
+    prev.addEventListener("click", function () {
+      stopAutoplay();
+      setActive(current - 1, true);
+    });
+    next.addEventListener("click", function () {
+      stopAutoplay();
+      setActive(current + 1, true);
+    });
+
+    // Swiping/dragging the track directly still needs to sync the dots —
+    // debounced to the scroll-end, not every frame, since intermediate
+    // positions during a drag don't correspond to a settled slide.
+    var scrollEndTimer;
+    track.addEventListener("scroll", function () {
+      clearTimeout(scrollEndTimer);
+      scrollEndTimer = setTimeout(function () {
+        var w = slides[0].getBoundingClientRect().width + 20; // + gap
+        setActiveFromScroll(Math.round(track.scrollLeft / w));
+      }, 120);
+    });
+    // A manual drag/swipe is deliberate browsing too — treat it the same as
+    // an arrow click and stop the timer, not just resync the dots.
+    track.addEventListener("pointerdown", stopAutoplay);
+    track.addEventListener("wheel", stopAutoplay, { passive: true });
+
+    // Same as setActive but skips the scrollIntoView call, since the user's
+    // own scroll is already what moved the track.
+    function setActiveFromScroll(i) {
+      current = Math.max(0, Math.min(slides.length - 1, i));
+      dots.forEach(function (dot, idx) {
+        dot.classList.toggle("active", idx === current);
+      });
+    }
+
+    // ---------- autoplay ----------
+    // Off by default for anyone who has asked the OS for less motion — this
+    // is decorative, not load-bearing, so there's no reason to override that
+    // preference. Also pauses on hover/focus, while the tab is hidden, and
+    // once the carousel has scrolled out of view — and stops for good the
+    // moment a visitor touches the controls, since a rail that keeps sliding
+    // out from under a hand that's actively steering it is worse than none.
+    var AUTOPLAY_MS = 4200;
+    var timer = null;
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var inView = true;
+
+    function startAutoplay() {
+      if (reduceMotion || timer || !inView || document.hidden) return;
+      timer = setInterval(function () {
+        setActive(current + 1, true);
+      }, AUTOPLAY_MS);
+    }
+    function stopAutoplay() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    if (!reduceMotion) {
+      track.addEventListener("mouseenter", stopAutoplay);
+      track.addEventListener("mouseleave", startAutoplay);
+      track.addEventListener("focusin", stopAutoplay);
+      track.addEventListener("focusout", startAutoplay);
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) stopAutoplay();
+        else startAutoplay();
+      });
+      if (window.IntersectionObserver) {
+        new IntersectionObserver(function (entries) {
+          inView = entries[0].isIntersecting;
+          if (inView) startAutoplay();
+          else stopAutoplay();
+        }, { threshold: 0.4 }).observe(track);
+      }
+    }
+
+    // ---------- lightbox ----------
+    var lightbox = document.getElementById("lightbox");
+    var lightboxImg = document.getElementById("lightbox-img");
+    var lightboxCaption = document.getElementById("lightbox-caption");
+    var lightboxIndex = 0;
+
+    function showInLightbox(i) {
+      lightboxIndex = (i + slides.length) % slides.length;
+      var img = slides[lightboxIndex].querySelector("img");
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightboxCaption.textContent = slides[lightboxIndex].querySelector(".caption").textContent;
+    }
+
+    slides.forEach(function (slide, i) {
+      slide.querySelector("img").addEventListener("click", function () {
+        stopAutoplay();
+        showInLightbox(i);
+        lightbox.showModal();
+      });
+    });
+
+    document.getElementById("lightbox-prev").addEventListener("click", function () {
+      showInLightbox(lightboxIndex - 1);
+    });
+    document.getElementById("lightbox-next").addEventListener("click", function () {
+      showInLightbox(lightboxIndex + 1);
+    });
+    document.getElementById("lightbox-close").addEventListener("click", function () {
+      lightbox.close();
+    });
+    // Click on the backdrop (the dialog element itself, outside the frame)
+    // closes it too — <dialog> doesn't do this natively.
+    lightbox.addEventListener("click", function (e) {
+      if (e.target === lightbox) lightbox.close();
+    });
+    lightbox.addEventListener("close", function () {
+      setActive(lightboxIndex, false);
+    });
+
+    setActive(0, false);
+    startAutoplay();
+  })();
+</script>
+
+</body>
+</html>

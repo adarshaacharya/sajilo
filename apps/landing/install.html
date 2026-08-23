@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installing Sajilo on macOS</title>
+<meta name="description" content="Step-by-step guide to installing Sajilo on macOS, including the one-time security warning beta builds show on first launch.">
+
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="canonical" href="https://sajilo.fyi/install.html">
+
+<meta property="og:title" content="Installing Sajilo on macOS">
+<meta property="og:description" content="Step-by-step guide to installing Sajilo on macOS, including the one-time security warning beta builds show on first launch.">
+<meta property="og:image" content="https://sajilo.fyi/assets/og-image.png">
+<meta property="og:url" content="https://sajilo.fyi/install.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="stylesheet" href="style.css">
+<style>
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .step {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .step-num {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #1a160c;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-top: 2px;
+  }
+  .step-body p {
+    margin: 0 0 14px;
+    font-size: 16px;
+  }
+  .step-body img {
+    max-width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .step-body img.small {
+    max-width: 260px;
+  }
+  .step-images {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .back-link:hover {
+    color: var(--gold);
+  }
+  .platform-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .platform-tabs a {
+    text-decoration: none;
+    font-size: 14px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+  }
+  .platform-tabs a.active {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+  }
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="wrap">
+  <nav class="nav">
+    <div class="brand">
+      <img src="assets/icon.png" alt="">
+      Sajilo
+    </div>
+    <a class="github" href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </nav>
+</header>
+
+<main class="wrap" id="main" style="padding-top: 8px; padding-bottom: 60px;">
+  <a class="back-link" href="index.html">&larr; Back to Sajilo</a>
+
+  <h1 style="margin-bottom: 6px;">Installing on macOS</h1>
+  <p style="color: var(--text-muted); max-width: 560px; margin-bottom: 8px;">
+    Sajilo's beta builds aren't code-signed yet, so macOS shows a one-time
+    security warning the first time you open it. This takes about 30 seconds
+    and only needs to be done once per update.
+  </p>
+
+  <div class="platform-tabs">
+    <a href="install.html" class="active">macOS</a>
+  </div>
+
+  <div class="steps" style="margin-top: 36px;">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p>Open the downloaded <code>.dmg</code>, then drag <strong>Sajilo</strong> onto the <strong>Applications</strong> shortcut.</p>
+        <img src="assets/install/0-drag-to-applications.png" alt="Dragging Sajilo.app onto the Applications shortcut" style="max-width: 420px;">
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p>Open Sajilo from Applications, Launchpad, or Spotlight. macOS shows <strong>"Sajilo" Not Opened</strong>. Click <strong>Done</strong>, not Move to Trash.</p>
+        <img class="small" src="assets/install/1-not-opened.png" alt="“Sajilo” Not Opened dialog">
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p>Open <strong>System Settings &rarr; Privacy &amp; Security</strong>, scroll to the <strong>Security</strong> section. You'll see <em>"Sajilo" was blocked to protect your Mac</em> with an <strong>Open Anyway</strong> button. Click it.</p>
+        <img src="assets/install/2-open-anyway.png" alt="Security section showing the Open Anyway button" style="max-width: 480px;">
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p>Confirm <strong>Open Anyway</strong> again in the dialog that follows, then authenticate with Touch ID or your admin password.</p>
+        <div class="step-images">
+          <img class="small" src="assets/install/3-confirm-open.png" alt="Open Sajilo confirmation dialog">
+          <img class="small" src="assets/install/4-authenticate.png" alt="Touch ID or admin password prompt">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p style="color: var(--text-muted); margin-top: 40px;">
+    Sajilo opens and now launches normally from Launchpad or Spotlight going
+    forward. No need to repeat these steps until the next update. Sajilo
+    lives in the menu bar; it has no Dock icon or window unless you turn one
+    on in Settings.
+  </p>
+
+  <div style="text-align: center; margin-top: 36px;">
+    <img src="assets/install/5-running.png" alt="Sajilo popover open, showing the calendar, weather, and Bazar cards" style="max-width: 280px; border-radius: 16px; border: 1px solid var(--border);">
+  </div>
+</main>
+
+<footer class="wrap">
+  Sajilo is free and open source.
+  <a href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">Source on GitHub</a>.
+  Built by <a href="https://adarsha.dev" target="_blank" rel="noopener">Adarsha Acharya</a>.
+</footer>
+
+</body>
+</html>
