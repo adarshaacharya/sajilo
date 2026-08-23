@@ -1097,48 +1097,55 @@ section {
   padding-block: 48px 28px;
 }
 
-.site-footer-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 32px;
-  padding-bottom: 36px;
-}
-
-@media (max-width: 760px) {
-  .site-footer-grid {
-    grid-template-columns: 1fr;
-    gap: 28px;
-  }
+.site-footer-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px clamp(32px, 6vw, 80px);
+  flex-wrap: wrap;
+  padding-bottom: 28px;
 }
 
 .footer-brand p {
-  margin: 12px 0 0;
-  max-width: 28ch;
+  margin: 10px 0 0;
+  max-width: 36ch;
   font-size: 14px;
   color: var(--text-muted);
   line-height: 1.6;
 }
 
-.footer-links h3 {
-  margin: 0 0 12px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.footer-contact {
+  margin: 14px 0 0;
+  max-width: 36ch;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--text-muted);
+}
+
+.footer-contact a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  transition: color 0.15s var(--ease-out-quart);
+}
+
+.footer-contact a:hover {
+  color: var(--gold);
 }
 
 .footer-links {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px clamp(18px, 2.5vw, 28px);
+  padding-top: 6px;
 }
 
 .footer-links a {
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 14px;
-  width: fit-content;
+  transition: color 0.15s var(--ease-out-quart);
 }
 
 .footer-links a:hover {
@@ -1146,6 +1153,11 @@ section {
 }
 
 .footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
   padding-top: 20px;
   border-top: 1px solid var(--divider);
 }
@@ -1157,12 +1169,25 @@ section {
 }
 
 .footer-bottom a {
-  color: var(--text-secondary);
-  text-decoration: underline;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color 0.15s var(--ease-out-quart);
 }
 
 .footer-bottom a:hover {
   color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .site-footer-inner {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .footer-links {
+    padding-top: 0;
+  }
 }
 
 /* ---------- install page compat ---------- */

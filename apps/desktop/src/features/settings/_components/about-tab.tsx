@@ -45,7 +45,10 @@ export function AboutTab() {
         </p>
       )}
 
-      <div className="mt-4 flex items-center gap-1.5">
+      <p className="mt-5 max-w-[240px] text-[10px] leading-relaxed text-text-muted">
+        {t("about.feedback")}
+      </p>
+      <div className="mt-1.5 flex items-center gap-1.5">
         <QuietLink label="GitHub" href={REPO_URL} />
         <span className="text-[10px] text-text-muted">·</span>
         <QuietLink label={t("about.report-issue")} href={ISSUES_URL} />
