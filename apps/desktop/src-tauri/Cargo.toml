@@ -36,6 +36,11 @@ tauri-plugin-process = "2"
 tokio = { version = "1", features = ["macros", "rt"] }
 tiny-skia = "0.11"
 cosmic-text = "0.14"
+# Renders the bundled Nepal flag SVG for Windows' tray icon. Pinned to 0.44 —
+# the last resvg release on tiny-skia 0.11, matching the pin above rather than
+# the 0.12 that newer resvg wants. `default-features = false` drops text/font
+# support (`usvg`'s "text" feature and friends): the flag has no text in it.
+resvg = { version = "0.44", default-features = false }
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-autostart = "2"

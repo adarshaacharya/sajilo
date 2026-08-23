@@ -60,15 +60,15 @@ fn migrate(connection: &Connection) -> Result<()> {
             );
             CREATE INDEX IF NOT EXISTS day_plans_date_idx
                 ON day_plans (year, month, day);
-            CREATE TABLE IF NOT EXISTS samjhana_people (
+            CREATE TABLE IF NOT EXISTS keeper_people (
                 id TEXT PRIMARY KEY NOT NULL,
                 name TEXT NOT NULL,
                 relationship TEXT NOT NULL,
                 created_at TEXT NOT NULL
             );
-            CREATE TABLE IF NOT EXISTS samjhana_items (
+            CREATE TABLE IF NOT EXISTS keeper_items (
                 id TEXT PRIMARY KEY NOT NULL,
-                person_id TEXT REFERENCES samjhana_people(id) ON DELETE SET NULL,
+                person_id TEXT REFERENCES keeper_people(id) ON DELETE SET NULL,
                 title TEXT NOT NULL,
                 category TEXT NOT NULL,
                 status TEXT NOT NULL,
@@ -89,11 +89,11 @@ fn migrate(connection: &Connection) -> Result<()> {
                 updated_at TEXT NOT NULL,
                 completed_at TEXT
             );
-            CREATE INDEX IF NOT EXISTS samjhana_items_due_idx
-                ON samjhana_items (due_ad, status);
-            CREATE INDEX IF NOT EXISTS samjhana_items_person_idx
-                ON samjhana_items (person_id);
-            CREATE TABLE IF NOT EXISTS samjhana_records (
+            CREATE INDEX IF NOT EXISTS keeper_items_due_idx
+                ON keeper_items (due_ad, status);
+            CREATE INDEX IF NOT EXISTS keeper_items_person_idx
+                ON keeper_items (person_id);
+            CREATE TABLE IF NOT EXISTS keeper_records (
                 id TEXT PRIMARY KEY NOT NULL,
                 document_type TEXT NOT NULL,
                 number TEXT NOT NULL,

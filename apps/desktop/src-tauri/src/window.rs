@@ -50,9 +50,14 @@ pub fn show(window: &WebviewWindow) {
 /// Anchors the popover to the tray icon.
 ///
 /// Tray-anchored positioning differs per platform and per multi-monitor setup,
-/// which is what `tauri-plugin-positioner` exists to absorb. If it cannot place
-/// the window — a Linux desktop with no tray host, say — the window still shows
-/// wherever it last was, because an unplaced popover beats no popover.
+/// which is what `tauri-plugin-positioner` exists to absorb.
+///
+/// The plugin learns where the icon is from tray *events*, and Linux emits
+/// none — `tray-icon`'s GTK backend returns `None` for the icon's rect — so
+/// every `Tray*` placement fails there with "Tray position not set". The
+/// fallback is centre rather than a corner: without a tray anchor there is no
+/// edge the popover belongs against, and an undecorated transparent window
+/// pinned to a corner reads as a rendering glitch rather than as the app.
 fn position_at_tray(window: &WebviewWindow) {
     use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -67,11 +72,11 @@ fn position_at_tray(window: &WebviewWindow) {
         let placement = if cfg!(target_os = "macos") {
             Position::TrayBottomCenter
         } else {
-            // Windows panels sit at the bottom of the screen.
+            // Windows and most Linux panels sit at the bottom of the screen.
             Position::TrayCenter
         };
         if window.move_window(placement).is_err() {
-            let _ = window.move_window(Position::TopRight);
+            let _ = window.move_window(Position::Center);
         }
     }
 }
@@ -135,12 +140,14 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
 /// triggered — in testing, focus was lost a couple of seconds after launch with
 /// no interaction at all — so a focus-out is not a reliable "the user clicked
 /// away" signal there. Dismissing on it made the whole app look like it opened
-/// to nothing. On Linux the popover is instead toggled from the tray icon (see
-/// [`toggle`]); macOS and Windows keep the click-away dismissal.
+/// to nothing. On Linux the popover is instead toggled from the tray menu item
+/// (see [`toggle`] and `tray::build`) or dismissed with Escape; macOS and
+/// Windows keep the click-away dismissal.
 pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
     // Linux: never auto-hide; the tray menu is the only dismiss.
     #[cfg(target_os = "linux")]
     let _ = (window, focused);
+
     #[cfg(not(target_os = "linux"))]
     {
         if focused || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {

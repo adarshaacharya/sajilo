@@ -20,7 +20,7 @@ export interface ModulePrefs {
   /** IANA timezones, in the order they were added — the dashboard preview
    * shows the first few in this order. */
   clocks: string[];
-  samjhanaEnabled: boolean;
+  keeperEnabled: boolean;
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -34,7 +34,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
   clocksEnabled: false,
   clocks: [],
-  samjhanaEnabled: true,
+  keeperEnabled: true,
 };
 
 const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "QAR", "SGD"];
@@ -86,7 +86,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<string[]>("forexFavourites"),
       api.getSetting<boolean>("clocksEnabled"),
       api.getSetting<string[]>("clocks"),
-      api.getSetting<boolean>("samjhanaEnabled"),
+      api.getSetting<boolean>("keeperEnabled"),
     ])
       .then(
         ([
@@ -103,7 +103,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           forexFavourites,
           clocksEnabled,
           clocks,
-          samjhanaEnabled,
+          keeperEnabled,
         ]) => {
           if (cancelled) return;
           if (storedLanguage) setLanguage(storedLanguage);
@@ -123,7 +123,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             ...(forexFavourites && { forexFavourites }),
             ...(clocksEnabled !== null && { clocksEnabled }),
             ...(clocks && { clocks }),
-            ...(samjhanaEnabled !== null && { samjhanaEnabled }),
+            ...(keeperEnabled !== null && { keeperEnabled }),
           }));
         },
       )
@@ -156,7 +156,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("forexFavourites", next.forexFavourites);
         persist("clocksEnabled", next.clocksEnabled);
         persist("clocks", next.clocks);
-        persist("samjhanaEnabled", next.samjhanaEnabled);
+        persist("keeperEnabled", next.keeperEnabled);
         return next;
       });
     },

@@ -6,7 +6,8 @@ import { openExternalLink } from "../../../shared/lib/external-link";
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
 const ISSUES_URL = `${REPO_URL}/issues`;
 const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
-const CONTACT_EMAIL = "hi@adarsha.dev";
+const WEBSITE_URL = "https://sajilo.fyi";
+const CONTACT_EMAIL = "contact@sajilo.fyi";
 
 function QuietLink({ label, href }: { label: string; href: string }) {
   return (
@@ -37,6 +38,7 @@ export function AboutTab() {
 
       <p className="mt-2 text-[17px] font-semibold tracking-tight">Sajilo</p>
       <p className="text-[11px] text-text-secondary">{t("about.tagline")}</p>
+      <QuietLink label="sajilo.fyi" href={WEBSITE_URL} />
       {version && (
         <p className="mt-0.5 text-[10px] text-text-muted">
           {t("about.version")} {version}

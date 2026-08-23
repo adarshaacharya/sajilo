@@ -8,11 +8,11 @@ import { Dashboard } from "./features/calendar/dashboard";
 import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
 import { Forex } from "./features/forex/forex";
+import { Keeper } from "./features/keeper/keeper";
 import { News } from "./features/news/news";
 import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
 import { Rashifal } from "./features/rashifal/rashifal";
-import { Samjhana } from "./features/samjhana/samjhana";
 import { Settings } from "./features/settings/settings";
 import { Tools } from "./features/tools/tools";
 import { Weather } from "./features/weather/weather";
@@ -22,6 +22,7 @@ import { HeaderSlotProvider } from "./shared/components/header-slot";
 import { PageTransition } from "./shared/components/motion";
 import { TabBar } from "./shared/components/tab-bar";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
+import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
 import { api } from "./shared/lib/ipc";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
@@ -40,7 +41,7 @@ const ROUTES = [
   { path: "/rashifal", titleKey: "screen.rashifal", element: <Rashifal /> },
   { path: "/radio", titleKey: "screen.radio", element: <Radio /> },
   { path: "/tools", titleKey: "screen.tools", element: <Tools /> },
-  { path: "/samjhana", titleKey: "screen.samjhana", element: <Samjhana /> },
+  { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];
 
@@ -126,9 +127,11 @@ export function App() {
       <ErrorBoundary>
         <SWRConfig value={{ provider: persistentCacheProvider }}>
           <SettingsProvider>
-            <HeaderSlotProvider>
-              <Shell />
-            </HeaderSlotProvider>
+            <UpdaterProvider>
+              <HeaderSlotProvider>
+                <Shell />
+              </HeaderSlotProvider>
+            </UpdaterProvider>
           </SettingsProvider>
         </SWRConfig>
       </ErrorBoundary>

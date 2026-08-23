@@ -1,4 +1,4 @@
-//! Mero Samjhana: private, offline-first household deadlines and documents.
+//! Mero Keeper: private, offline-first household deadlines and documents.
 //!
 //! Dates are deliberately resolved here. The frontend can display both AD and
 //! Bikram Sambat, but it never owns a second copy of the calendar engine.
@@ -16,7 +16,7 @@ type Result<T> = std::result::Result<T, String>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaPerson {
+pub struct KeeperPerson {
     pub id: String,
     pub name: String,
     pub relationship: String,
@@ -25,7 +25,7 @@ pub struct SamjhanaPerson {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaDateInput {
+pub struct KeeperDateInput {
     pub calendar: String,
     pub year: i32,
     pub month: u32,
@@ -34,18 +34,18 @@ pub struct SamjhanaDateInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaDate {
+pub struct KeeperDate {
     pub calendar: String,
     pub year: i32,
     pub month: u32,
     pub day: u32,
     pub ad: String,
-    pub bs: SamjhanaBsDate,
+    pub bs: KeeperBsDate,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaBsDate {
+pub struct KeeperBsDate {
     pub year: i32,
     pub month: u32,
     pub day: u32,
@@ -53,7 +53,7 @@ pub struct SamjhanaBsDate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaChecklistItem {
+pub struct KeeperChecklistItem {
     pub id: String,
     pub label: String,
     pub checked: bool,
@@ -61,13 +61,13 @@ pub struct SamjhanaChecklistItem {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaItem {
+pub struct KeeperItem {
     pub id: String,
     pub person_id: Option<String>,
     pub title: String,
     pub category: String,
     pub status: String,
-    pub due_date: SamjhanaDate,
+    pub due_date: KeeperDate,
     pub recurrence: String,
     pub remind_days: Vec<u32>,
     pub note: String,
@@ -75,7 +75,7 @@ pub struct SamjhanaItem {
     pub office_location: String,
     pub fee: String,
     pub application_status: String,
-    pub checklist: Vec<SamjhanaChecklistItem>,
+    pub checklist: Vec<KeeperChecklistItem>,
     pub created_at: String,
     pub updated_at: String,
     pub completed_at: Option<String>,
@@ -83,15 +83,15 @@ pub struct SamjhanaItem {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaRecord {
+pub struct KeeperRecord {
     pub id: String,
     /// One of "citizenship" | "passport" | "drivingLicence" | "nid" | "pan".
     pub document_type: String,
     pub number: String,
     /// Citizenship, NID, and PAN never expire; passports and driving
     /// licences do. Left `None` rather than guessed at.
-    pub issued_date: Option<SamjhanaDate>,
-    pub expiry_date: Option<SamjhanaDate>,
+    pub issued_date: Option<KeeperDate>,
+    pub expiry_date: Option<KeeperDate>,
     pub office: String,
     pub note: String,
     /// The reminder auto-created from `expiry_date`, kept in sync with it.
@@ -104,12 +104,12 @@ pub struct SamjhanaRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaRecordInput {
+pub struct KeeperRecordInput {
     pub id: String,
     pub document_type: String,
     pub number: String,
-    pub issued_date: Option<SamjhanaDateInput>,
-    pub expiry_date: Option<SamjhanaDateInput>,
+    pub issued_date: Option<KeeperDateInput>,
+    pub expiry_date: Option<KeeperDateInput>,
     pub office: String,
     pub note: String,
     pub created_at: String,
@@ -117,15 +117,15 @@ pub struct SamjhanaRecordInput {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaSnapshot {
-    pub people: Vec<SamjhanaPerson>,
-    pub items: Vec<SamjhanaItem>,
-    pub records: Vec<SamjhanaRecord>,
+pub struct KeeperSnapshot {
+    pub people: Vec<KeeperPerson>,
+    pub items: Vec<KeeperItem>,
+    pub records: Vec<KeeperRecord>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SamjhanaReminder {
+pub struct KeeperReminder {
     pub id: String,
     pub title: String,
     pub body: String,
@@ -140,7 +140,7 @@ fn parse_ad(value: &str) -> Result<NaiveDate> {
     NaiveDate::parse_from_str(value, "%Y-%m-%d").map_err(|_| "That date is not valid.".to_owned())
 }
 
-fn resolve_date(input: &SamjhanaDateInput) -> Result<(NaiveDate, sajilo_core::NepaliDate)> {
+fn resolve_date(input: &KeeperDateInput) -> Result<(NaiveDate, sajilo_core::NepaliDate)> {
     if input.calendar == "bs" {
         let bs = sajilo_core::NepaliDate::new(input.year, input.month, input.day);
         let ad = gregorian_date_from(bs).map_err(|error| error.to_string())?;
@@ -153,19 +153,19 @@ fn resolve_date(input: &SamjhanaDateInput) -> Result<(NaiveDate, sajilo_core::Ne
     }
 }
 
-fn output_date(calendar: &str, ad: NaiveDate, bs: sajilo_core::NepaliDate) -> SamjhanaDate {
+fn output_date(calendar: &str, ad: NaiveDate, bs: sajilo_core::NepaliDate) -> KeeperDate {
     let (year, month, day) = if calendar == "bs" {
         (bs.year, bs.month, bs.day)
     } else {
         (ad.year(), ad.month(), ad.day())
     };
-    SamjhanaDate {
+    KeeperDate {
         calendar: calendar.to_owned(),
         year,
         month,
         day,
         ad: ad.to_string(),
-        bs: SamjhanaBsDate {
+        bs: KeeperBsDate {
             year: bs.year,
             month: bs.month,
             day: bs.day,
@@ -178,7 +178,7 @@ fn parse_json<T: for<'de> Deserialize<'de>>(raw: String) -> rusqlite::Result<T> 
 }
 
 fn resolve_opt_date(
-    input: Option<&SamjhanaDateInput>,
+    input: Option<&KeeperDateInput>,
 ) -> Result<Option<(NaiveDate, sajilo_core::NepaliDate)>> {
     input.map(resolve_date).transpose()
 }
@@ -189,7 +189,7 @@ fn output_opt_date(
     bs_year: Option<i32>,
     bs_month: Option<u32>,
     bs_day: Option<u32>,
-) -> Result<Option<SamjhanaDate>> {
+) -> Result<Option<KeeperDate>> {
     let (Some(calendar), Some(ad)) = (calendar, ad) else {
         return Ok(None);
     };
@@ -206,7 +206,7 @@ fn output_opt_date(
 /// record can own at most one reminder, so there is nothing a foreign key
 /// would tell us that this doesn't already guarantee.
 fn linked_item_id(record_id: &str) -> String {
-    format!("samjhana-record-link-{record_id}")
+    format!("keeper-record-link-{record_id}")
 }
 
 /// Citizenship, NID, and PAN never expire in Nepal; this title only ever
@@ -222,16 +222,14 @@ fn renewal_title(document_type: &str) -> &'static str {
     }
 }
 
-fn people(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaPerson>> {
+fn people(app: &AppHandle<Wry>) -> Result<Vec<KeeperPerson>> {
     let connection = db::open(app)?;
     let mut statement = connection
-        .prepare(
-            "SELECT id, name, relationship, created_at FROM samjhana_people ORDER BY created_at",
-        )
+        .prepare("SELECT id, name, relationship, created_at FROM keeper_people ORDER BY created_at")
         .map_err(|error| error.to_string())?;
     let rows = statement
         .query_map([], |row| {
-            Ok(SamjhanaPerson {
+            Ok(KeeperPerson {
                 id: row.get(0)?,
                 name: row.get(1)?,
                 relationship: row.get(2)?,
@@ -243,11 +241,11 @@ fn people(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaPerson>> {
         .map_err(|error| error.to_string())
 }
 
-fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<SamjhanaItem> {
+fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<KeeperItem> {
     let calendar: String = row.get(4)?;
     let ad = parse_ad(&row.get::<_, String>(5)?).map_err(|_| rusqlite::Error::InvalidQuery)?;
     let bs = sajilo_core::NepaliDate::new(row.get(6)?, row.get(7)?, row.get(8)?);
-    Ok(SamjhanaItem {
+    Ok(KeeperItem {
         id: row.get(0)?,
         person_id: row.get(1)?,
         title: row.get(2)?,
@@ -268,7 +266,7 @@ fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<SamjhanaItem> {
     })
 }
 
-fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(SamjhanaRecord, Result<()>)> {
+fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(KeeperRecord, Result<()>)> {
     let id: String = row.get(0)?;
     let issued = output_opt_date(
         row.get(3)?,
@@ -293,7 +291,7 @@ fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(SamjhanaRecord,
         Err(error) => (None, Err(error)),
     };
     let has_expiry = expiry.is_some();
-    let record = SamjhanaRecord {
+    let record = KeeperRecord {
         linked_item_id: has_expiry.then(|| linked_item_id(&id)),
         document_type: row.get(1)?,
         number: row.get(2)?,
@@ -308,7 +306,7 @@ fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(SamjhanaRecord,
     Ok((record, issued_err.and(expiry_err)))
 }
 
-fn records(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaRecord>> {
+fn records(app: &AppHandle<Wry>) -> Result<Vec<KeeperRecord>> {
     let connection = db::open(app)?;
     let mut statement = connection
         .prepare(
@@ -316,7 +314,7 @@ fn records(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaRecord>> {
                 issued_bs_year, issued_bs_month, issued_bs_day,
                 expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
                 office, note, created_at, updated_at
-         FROM samjhana_records ORDER BY created_at",
+         FROM keeper_records ORDER BY created_at",
         )
         .map_err(|error| error.to_string())?;
     let rows = statement
@@ -331,7 +329,7 @@ fn records(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaRecord>> {
     Ok(result)
 }
 
-fn items(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaItem>> {
+fn items(app: &AppHandle<Wry>) -> Result<Vec<KeeperItem>> {
     let connection = db::open(app)?;
     let mut statement = connection
         .prepare(
@@ -339,7 +337,7 @@ fn items(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaItem>> {
                 due_bs_year, due_bs_month, due_bs_day, status, recurrence,
                 remind_days, note, official_url, office_location, fee,
                 application_status, checklist, created_at, updated_at, completed_at
-         FROM samjhana_items ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, due_ad, title",
+         FROM keeper_items ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, due_ad, title",
         )
         .map_err(|error| error.to_string())?;
     let rows = statement
@@ -350,8 +348,8 @@ fn items(app: &AppHandle<Wry>) -> Result<Vec<SamjhanaItem>> {
 }
 
 #[tauri::command]
-pub fn samjhana_snapshot(app: AppHandle<Wry>) -> Result<SamjhanaSnapshot> {
-    Ok(SamjhanaSnapshot {
+pub fn keeper_snapshot(app: AppHandle<Wry>) -> Result<KeeperSnapshot> {
+    Ok(KeeperSnapshot {
         people: people(&app)?,
         items: items(&app)?,
         records: records(&app)?,
@@ -359,43 +357,51 @@ pub fn samjhana_snapshot(app: AppHandle<Wry>) -> Result<SamjhanaSnapshot> {
 }
 
 #[tauri::command]
-pub fn resolve_samjhana_date(input: SamjhanaDateInput) -> Result<SamjhanaDate> {
+pub fn resolve_keeper_date(input: KeeperDateInput) -> Result<KeeperDate> {
     let (ad, bs) = resolve_date(&input)?;
     Ok(output_date(&input.calendar, ad, bs))
 }
 
 #[tauri::command]
-pub fn save_samjhana_person(
-    app: AppHandle<Wry>,
-    person: SamjhanaPerson,
-) -> Result<SamjhanaSnapshot> {
+pub fn save_keeper_person(app: AppHandle<Wry>, person: KeeperPerson) -> Result<KeeperSnapshot> {
     if person.name.trim().is_empty() {
         return Err("A family member needs a name.".to_owned());
     }
     let connection = db::open(&app)?;
-    connection.execute(
-        "INSERT INTO samjhana_people (id, name, relationship, created_at) VALUES (?1, ?2, ?3, ?4)
+    connection
+        .execute(
+            "INSERT INTO keeper_people (id, name, relationship, created_at) VALUES (?1, ?2, ?3, ?4)
          ON CONFLICT(id) DO UPDATE SET name = excluded.name, relationship = excluded.relationship",
-        params![person.id, person.name.trim(), person.relationship.trim(), if person.created_at.is_empty() { now() } else { person.created_at }],
-    ).map_err(|error| error.to_string())?;
-    samjhana_snapshot(app)
+            params![
+                person.id,
+                person.name.trim(),
+                person.relationship.trim(),
+                if person.created_at.is_empty() {
+                    now()
+                } else {
+                    person.created_at
+                }
+            ],
+        )
+        .map_err(|error| error.to_string())?;
+    keeper_snapshot(app)
 }
 
 #[tauri::command]
-pub fn delete_samjhana_person(app: AppHandle<Wry>, id: String) -> Result<SamjhanaSnapshot> {
+pub fn delete_keeper_person(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
     let connection = db::open(&app)?;
     connection
-        .execute("DELETE FROM samjhana_people WHERE id = ?1", [id])
+        .execute("DELETE FROM keeper_people WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
-    samjhana_snapshot(app)
+    keeper_snapshot(app)
 }
 
 #[tauri::command]
-pub fn save_samjhana_item(app: AppHandle<Wry>, item: SamjhanaItem) -> Result<SamjhanaSnapshot> {
+pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperSnapshot> {
     if item.title.trim().is_empty() {
         return Err("Give this reminder a name first.".to_owned());
     }
-    let (ad, bs) = resolve_date(&SamjhanaDateInput {
+    let (ad, bs) = resolve_date(&KeeperDateInput {
         calendar: item.due_date.calendar.clone(),
         year: item.due_date.year,
         month: item.due_date.month,
@@ -417,7 +423,7 @@ pub fn save_samjhana_item(app: AppHandle<Wry>, item: SamjhanaItem) -> Result<Sam
     };
     let connection = db::open(&app)?;
     connection.execute(
-        "INSERT INTO samjhana_items
+        "INSERT INTO keeper_items
           (id, person_id, title, category, status, due_calendar, due_ad,
            due_bs_year, due_bs_month, due_bs_day, recurrence, remind_days, note,
            official_url, office_location, fee, application_status, checklist,
@@ -435,23 +441,23 @@ pub fn save_samjhana_item(app: AppHandle<Wry>, item: SamjhanaItem) -> Result<Sam
             item.official_url, item.office_location, item.fee, item.application_status, checklist,
             created, updated, completed_at],
     ).map_err(|error| error.to_string())?;
-    samjhana_snapshot(app)
+    keeper_snapshot(app)
 }
 
 #[tauri::command]
-pub fn delete_samjhana_item(app: AppHandle<Wry>, id: String) -> Result<SamjhanaSnapshot> {
+pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
     let connection = db::open(&app)?;
     connection
-        .execute("DELETE FROM samjhana_items WHERE id = ?1", [id])
+        .execute("DELETE FROM keeper_items WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
-    samjhana_snapshot(app)
+    keeper_snapshot(app)
 }
 
 #[tauri::command]
-pub fn save_samjhana_record(
+pub fn save_keeper_record(
     app: AppHandle<Wry>,
-    record: SamjhanaRecordInput,
-) -> Result<SamjhanaSnapshot> {
+    record: KeeperRecordInput,
+) -> Result<KeeperSnapshot> {
     if record.number.trim().is_empty() {
         return Err("Give this document a number first.".to_owned());
     }
@@ -467,7 +473,7 @@ pub fn save_samjhana_record(
     let connection = db::open(&app)?;
     connection
         .execute(
-            "INSERT INTO samjhana_records
+            "INSERT INTO keeper_records
           (id, document_type, number, issued_calendar, issued_ad,
            issued_bs_year, issued_bs_month, issued_bs_day,
            expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
@@ -506,9 +512,9 @@ pub fn save_samjhana_record(
     match (record.expiry_date.as_ref(), expiry) {
         (Some(input), Some((ad, bs))) => {
             let due_date = output_date(&input.calendar, ad, bs);
-            save_samjhana_item(
+            save_keeper_item(
                 app.clone(),
-                SamjhanaItem {
+                KeeperItem {
                     id: link_id,
                     person_id: None,
                     title: renewal_title(&record.document_type).to_owned(),
@@ -531,27 +537,27 @@ pub fn save_samjhana_record(
         }
         _ => {
             connection
-                .execute("DELETE FROM samjhana_items WHERE id = ?1", [link_id])
+                .execute("DELETE FROM keeper_items WHERE id = ?1", [link_id])
                 .map_err(|error| error.to_string())?;
         }
     }
 
-    samjhana_snapshot(app)
+    keeper_snapshot(app)
 }
 
 #[tauri::command]
-pub fn delete_samjhana_record(app: AppHandle<Wry>, id: String) -> Result<SamjhanaSnapshot> {
+pub fn delete_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
     let connection = db::open(&app)?;
     connection
         .execute(
-            "DELETE FROM samjhana_items WHERE id = ?1",
+            "DELETE FROM keeper_items WHERE id = ?1",
             [linked_item_id(&id)],
         )
         .map_err(|error| error.to_string())?;
     connection
-        .execute("DELETE FROM samjhana_records WHERE id = ?1", [id])
+        .execute("DELETE FROM keeper_records WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
-    samjhana_snapshot(app)
+    keeper_snapshot(app)
 }
 
 fn month_date(year: i32, month: u32, day: u32) -> NaiveDate {
@@ -561,7 +567,7 @@ fn month_date(year: i32, month: u32, day: u32) -> NaiveDate {
         .unwrap_or_else(|| NaiveDate::from_ymd_opt(year, month, 1).expect("valid month"))
 }
 
-fn next_due(item: &SamjhanaItem, today: NaiveDate) -> Option<NaiveDate> {
+fn next_due(item: &KeeperItem, today: NaiveDate) -> Option<NaiveDate> {
     let original = parse_ad(&item.due_date.ad).ok()?;
     match item.recurrence.as_str() {
         "monthly" => {
@@ -644,7 +650,7 @@ pub fn pending_notifications(
                 .and_then(|id| names.get(id))
                 .map_or("", String::as_str);
             result.push(PlannedNotification {
-                id: format!("sajilo.samjhana.{}.{}", item.id, days),
+                id: format!("sajilo.keeper.{}.{}", item.id, days),
                 title: item.title.clone(),
                 body: if person.is_empty() {
                     format!("Due in {days} days")

@@ -335,6 +335,42 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   pointer-events: none;
 }
 
+.update-header-btn {
+  display: inline-flex;
+  max-width: 7.5rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 32%, transparent);
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+  color: var(--color-accent-mark);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.update-header-btn:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 22%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 42%, transparent);
+}
+
+.update-header-btn:active {
+  background: color-mix(in srgb, var(--color-accent-mark) 30%, transparent);
+}
+
+.update-header-btn--busy {
+  opacity: 0.75;
+  cursor: default;
+}
+
 .btn-ghost {
   border-radius: 6px;
   padding: 4px 8px;
@@ -609,10 +645,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   pointer-events: none;
 }
 
-.glance-forex::before {
+.glance-metal::before {
   background: linear-gradient(
     145deg,
-    color-mix(in srgb, var(--color-forex-tint) 20%, transparent) 0%,
+    color-mix(in srgb, var(--color-accent-mark) 20%, transparent) 0%,
     transparent 65%
   );
 }
@@ -880,6 +916,15 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
     background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
   }
 
+  html:not([data-theme="dark"]) .update-header-btn {
+    background: color-mix(in srgb, var(--color-accent-mark) 10%, #ffffff);
+    border-color: color-mix(in srgb, var(--color-accent-mark) 28%, #3c3c43 8%);
+  }
+
+  html:not([data-theme="dark"]) .update-header-btn:hover {
+    background: color-mix(in srgb, var(--color-accent-mark) 16%, #ffffff);
+  }
+
   html:not([data-theme="dark"]) ::-webkit-scrollbar-thumb {
     background: color-mix(in srgb, #3c3c43 22%, transparent);
   }
@@ -971,6 +1016,15 @@ html[data-theme="light"] .toggle-chip--on {
 
 html[data-theme="light"] .toggle-chip--on:hover {
   background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
+}
+
+html[data-theme="light"] .update-header-btn {
+  background: color-mix(in srgb, var(--color-accent-mark) 10%, #ffffff);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 28%, #3c3c43 8%);
+}
+
+html[data-theme="light"] .update-header-btn:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 16%, #ffffff);
 }
 
 html[data-theme="light"] ::-webkit-scrollbar-thumb {

@@ -3,11 +3,13 @@
 pub mod icon;
 pub mod title;
 
+use sajilo_core::NepaliDate;
+use sajilo_core::numerals::NumeralStyle;
 #[cfg(not(target_os = "linux"))]
 use tauri::menu::PredefinedMenuItem;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::window;
 
@@ -41,7 +43,23 @@ pub fn set_popover_shown(app: &AppHandle, shown: bool) {
     let _ = item.0.set_text(if shown { HIDE_LABEL } else { OPEN_LABEL });
 }
 
+/// The date row at the top of the tray menu, kept so `refresh_title` can move
+/// it forward with the day.
+///
+/// macOS and Windows only: Linux's menu is a single toggle item (see `build`),
+/// so there is no date row to move there — the date rides the appindicator
+/// label instead.
+struct DateItem(MenuItem<Wry>);
+
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
+    #[cfg(not(target_os = "linux"))]
+    let date = MenuItem::with_id(
+        app,
+        "open",
+        label(app).unwrap_or_else(|| "Sajilo".to_owned()),
+        true,
+        None::<&str>,
+    )?;
     #[cfg(not(target_os = "linux"))]
     let settings = MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))?;
     #[cfg(not(target_os = "linux"))]
@@ -73,16 +91,25 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let menu = Menu::with_items(
         app,
-        &[&settings, &PredefinedMenuItem::separator(app)?, &quit],
+        &[
+            &date,
+            &PredefinedMenuItem::separator(app)?,
+            &settings,
+            &PredefinedMenuItem::separator(app)?,
+            &quit,
+        ],
     )?;
+    #[cfg(not(target_os = "linux"))]
+    app.manage(DateItem(date));
 
     #[cfg_attr(target_os = "macos", allow(unused_mut))]
     let mut builder = TrayIconBuilder::with_id("main");
 
-    // ponytail: macOS carries the date as the tray *title*, like the Swift app
-    // did, so it needs no glyph — the app icon is a filled square and a template
-    // render of it is an unreadable blob. Every other platform draws the day
-    // number into the icon (see `refresh_title`), so it starts from the app icon.
+    // macOS carries the date as the tray *title*, like the Swift app did, so it
+    // needs no glyph — the app icon is a filled square and a template render of
+    // it is an unreadable blob. Elsewhere the tray starts from the app icon:
+    // Windows then swaps in the Nepal flag, and Linux keeps it as-is, since
+    // libayatana-appindicator refuses to show a label without one.
     #[cfg(not(target_os = "macos"))]
     {
         builder = builder
@@ -94,12 +121,14 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 
     builder
         .tooltip("Sajilo")
-        // Left click toggles the popover; the menu is the right-click affordance.
+        // Left click toggles the popover; the menu is the right-click
+        // affordance. Linux ignores this — appindicator opens the menu on any
+        // click — which is the other half of why the menu leads with the date.
         .show_menu_on_left_click(false)
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
-            // Linux only (see the menu above): stands in for the tray click
-            // that platform never delivers, so it toggles like that click would.
+            // The date row on macOS and Windows; on Linux the single menu item,
+            // standing in for the tray click that platform never delivers.
             "open" => window::toggle(app),
             "settings" => open_settings(app),
             "quit" => app.exit(0),
@@ -126,15 +155,12 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Redraws the tray label from the current date and preferences.
-pub fn refresh_title(app: &AppHandle) {
-    let Some(tray) = app.tray_by_id("main") else {
-        return;
-    };
-    let Some(date) = title::today() else {
-        return;
-    };
-
+/// Today's date, the numeral style to draw it in, and the text the tray
+/// carries: the date in the configured format, plus the clock when that
+/// preference is on. `None` only when today falls outside the bundled calendar
+/// range.
+fn today(app: &AppHandle) -> Option<(NepaliDate, NumeralStyle, String)> {
+    let date = title::today()?;
     let (format, numerals, custom, show_time) = crate::prefs::tray_preferences(app);
     let mut label = title::title(date, format, numerals, custom);
     if show_time {
@@ -143,27 +169,50 @@ pub fn refresh_title(app: &AppHandle) {
             title::clock(sajilo_core::nepal_time::now(), numerals)
         );
     }
+    Some((date, numerals, label))
+}
 
-    // macOS shows text beside the tray icon natively; Linux does too via the
-    // libayatana-appindicator label (with a StatusNotifier host such as GNOME's
-    // AppIndicator extension). Both carry the full date as text.
+/// The tray menu's date row, for the one call that needs the text alone.
+fn label(app: &AppHandle) -> Option<String> {
+    today(app).map(|(.., label)| label)
+}
+
+/// Redraws the tray label from the current date and preferences.
+pub fn refresh_title(app: &AppHandle) {
+    let Some(tray) = app.tray_by_id("main") else {
+        return;
+    };
+    let Some((date, numerals, label)) = today(app) else {
+        return;
+    };
+    // The full date is conveyed in the native title/menu/tooltip. Windows'
+    // visible tray glyph is a static Nepal flag, so it has no date fields.
+    let _ = (date, numerals);
+
+    // The menu's date row moves with the day where it exists; Linux has no such
+    // row (its menu is the toggle item) and carries the date in the label below.
+    if let Some(item) = app.try_state::<DateItem>() {
+        let _ = item.0.set_text(&label);
+    }
+
+    // macOS renders text beside the tray icon natively; Linux does the same
+    // through the libayatana-appindicator label, given a StatusNotifier host
+    // such as GNOME's AppIndicator extension. Both carry the full date.
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     let _ = tray.set_title(Some(&label));
 
-    // Windows is the one platform left with no tray text, so there the day
-    // number is drawn into the icon itself — the icon is all the tray gives us.
-    // A failed render keeps the static icon: a tray with no date beats a tray
-    // with no icon. macOS and Linux skip this; they carry the full date in the
-    // label above, and drawing the day as well renders it twice ("६ भदौ ६").
-    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
-    if let Some(pixels) = icon::day_icon(date.day, numerals) {
+    // Windows has no tray title, so use a crisp Nepal flag that remains
+    // recognisable at its tiny native size. The full date stays in the tooltip
+    // and the first tray-menu item.
+    #[cfg(target_os = "windows")]
+    if let Some(pixels) = icon::nepal_flag_icon() {
         let image = tauri::image::Image::new_owned(pixels, icon::size(), icon::size());
         let _ = tray.set_icon(Some(image));
-        // The day number alone has no month or year, so the full label stays
-        // reachable on hover.
         let _ = tray.set_icon_as_template(false);
     }
 
+    // A no-op on Linux — `tray-icon`'s GTK backend implements `set_tooltip` as
+    // an empty `Ok(())`, which is why the date row above exists.
     let _ = tray.set_tooltip(Some(&label));
 }
 

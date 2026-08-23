@@ -35,7 +35,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          # libayatana-appindicator, not the deprecated libappindicator:
+          # `libappindicator-sys` dlopens `libayatana-appindicator3.so.1`
+          # first and only falls back to the old name, and on Ubuntu 24.04
+          # `libappindicator3-dev` is a transitional package for it anyway.
+          # Without one of the two present at *runtime*, that dlopen panics and
+          # the tray never appears — hence `bundle.linux.deb.depends`.
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
       - name: Set up bun
         uses: oven-sh/setup-bun@v2
       - name: Add the Rust target

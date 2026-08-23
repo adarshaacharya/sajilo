@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
+import { UpdateHeaderButton } from "../../../shared/components/update-header-button";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Today } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
@@ -63,6 +64,7 @@ export function DateHeader({ today }: { today: Today }) {
       </div>
 
       <div className="flex shrink-0 gap-0.5 pt-0.5">
+        <UpdateHeaderButton />
         <button
           type="button"
           onClick={() => navigate("/settings")}

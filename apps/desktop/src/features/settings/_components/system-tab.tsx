@@ -2,11 +2,21 @@ import { useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
+import { useUpdater } from "../../../shared/context/updater-context";
 import { api, type NotificationOptions, type PermissionState } from "../../../shared/lib/ipc";
 import { SettingsSection } from "./settings-section";
 
 export function SystemTab() {
   const { t } = useSettings();
+  const {
+    enabled: updaterEnabled,
+    state: updateState,
+    update,
+    error: updateError,
+    checkForUpdates,
+    installUpdate,
+    restartToUpdate,
+  } = useUpdater();
   const [autostart, setAutostart] = useState(false);
   const [dockIcon, setDockIcon] = useState(false);
   const [options, setOptions] = useState<NotificationOptions>({
@@ -16,12 +26,6 @@ export function SystemTab() {
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
-  const [updaterEnabled, setUpdaterEnabled] = useState(false);
-  const [updateState, setUpdateState] = useState<
-    "idle" | "checking" | "up-to-date" | "downloading" | "installed" | "failed"
-  >("idle");
-  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
-  const [updateError, setUpdateError] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -31,10 +35,6 @@ export function SystemTab() {
     api
       .isDockIconVisible()
       .then(setDockIcon)
-      .catch(() => {});
-    api
-      .updaterEnabled()
-      .then(setUpdaterEnabled)
       .catch(() => {});
     api
       .getNotificationOptions()
@@ -83,37 +83,15 @@ export function SystemTab() {
     setMessage(t("settings.backup-imported"));
   };
 
-  const checkForUpdates = async () => {
-    setUpdateState("checking");
-    setUpdateError(null);
-    try {
-      const { check } = await import("@tauri-apps/plugin-updater");
-      const update = await check();
-      if (!update) {
-        setUpdateState("up-to-date");
-        return;
-      }
-      setUpdateVersion(update.version);
-      setUpdateState("downloading");
-      await update.downloadAndInstall();
-      setUpdateState("installed");
-    } catch (error) {
-      setUpdateError(String(error));
-      setUpdateState("failed");
-    }
-  };
-
-  const restartToUpdate = async () => {
-    const { relaunch } = await import("@tauri-apps/plugin-process");
-    await relaunch();
-  };
-
   const updateNote = {
     idle: null,
     checking: t("settings.update-checking"),
     "up-to-date": t("settings.update-up-to-date"),
-    downloading: updateVersion
-      ? `${t("settings.update-available")} ${updateVersion}…`
+    available: update
+      ? `${t("settings.update-found")} ${update.version}`
+      : t("settings.update-checking"),
+    downloading: update
+      ? `${t("settings.update-available")} ${update.version}…`
       : t("settings.update-checking"),
     installed: t("settings.update-installed"),
     failed: updateError
@@ -147,6 +125,16 @@ export function SystemTab() {
             <button type="button" onClick={() => restartToUpdate()} className="settings-btn">
               <Icon name="refresh" className="size-3 shrink-0" />
               {t("settings.update-restart")}
+            </button>
+          ) : updateState === "available" ? (
+            <button
+              type="button"
+              onClick={() => installUpdate()}
+              disabled={!update}
+              className="settings-btn"
+            >
+              <Icon name="refresh" className="size-3 shrink-0" />
+              {t("settings.install-update")}
             </button>
           ) : (
             <button

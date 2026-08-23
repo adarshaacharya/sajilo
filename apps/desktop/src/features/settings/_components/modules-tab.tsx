@@ -105,11 +105,11 @@ export function ModulesTab() {
       />
 
       <ModuleRow
-        title={t("samjhana.title")}
-        note={t("settings.module-samjhana-note")}
-        icon="samjhana"
-        checked={modules.samjhanaEnabled}
-        onChange={(value) => setModules((current) => ({ ...current, samjhanaEnabled: value }))}
+        title={t("keeper.title")}
+        note={t("settings.module-keeper-note")}
+        icon="keeper"
+        checked={modules.keeperEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, keeperEnabled: value }))}
       />
 
       {noneOn && (

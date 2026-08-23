@@ -1,8 +1,8 @@
-<p align="center">
-  <img src="docs/icon.png" alt="Sajilo" width="120" height="120">
-</p>
+
 
 # Sajilo
+
+**[sajilo.fyi](https://sajilo.fyi)**
 
 A small desktop companion for Nepal: Bikram Sambat dates, festivals, day plans,
 and everyday Nepali tools. Sajilo lives in the system tray on macOS, Windows, and
@@ -14,11 +14,15 @@ whether it is fresh, stale, or unavailable — never silently blank.
 
 ## Platforms
 
-| Platform | Desktop package |
-| --- | --- |
-| macOS | `.dmg` |
-| Windows | NSIS installer |
-| Linux | `.deb` and AppImage |
+
+| Platform | Desktop package     |
+| -------- | ------------------- |
+| macOS    | `.dmg`              |
+| Windows  | NSIS installer      |
+| Linux    | `.deb` and AppImage |
+
+
+
 
 ## What Sajilo includes
 
@@ -26,21 +30,25 @@ whether it is fresh, stale, or unavailable — never silently blank.
 - Personal day plans and reminders
 - Upcoming events and detailed day information
 - Weather and air quality, NRB forex, Bazar (gold/silver, fuel, Kalimati
-  vegetables), stocks, news from 9 Nepali/English sources, rashifal, and radio
+vegetables), stocks, news from 9 Nepali/English sources, rashifal, and radio
 - World clocks alongside Nepal time
 - Land, weight, VAT, and simple-interest tools
 - Nepali and English interface options, with Devanagari or English numerals
 - Tray date display designed for each platform
 
+
+
 ## Install
 
-| Platform | Download |
-| --- | --- |
-| macOS (Apple Silicon) | [Sajilo-macos-arm64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg) |
-| macOS (Intel) | [Sajilo-macos-x64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg) |
-| Windows | [Sajilo-windows-x64.exe](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe) |
-| Linux (.deb) | [Sajilo-linux-amd64.deb](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-amd64.deb) |
-| Linux (AppImage) | [Sajilo-linux-x86_64.AppImage](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage) |
+
+| Platform              | Download                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| macOS (Apple Silicon) | [Sajilo-macos-arm64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-arm64.dmg)             |
+| macOS (Intel)         | [Sajilo-macos-x64.dmg](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-macos-x64.dmg)                 |
+| Windows               | [Sajilo-windows-x64.exe](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-windows-x64.exe)             |
+| Linux (.deb)          | [Sajilo-linux-amd64.deb](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-amd64.deb)             |
+| Linux (AppImage)      | [Sajilo-linux-x86_64.AppImage](https://github.com/adarshaacharya/sajilo/releases/latest/download/Sajilo-linux-x86_64.AppImage) |
+
 
 Each link always points at the current release — no need to visit the
 [releases page](https://github.com/adarshaacharya/sajilo/releases) unless you
@@ -48,33 +56,18 @@ want an older version or release notes.
 
 ### macOS
 
-Open the downloaded `.dmg`, then drag **Sajilo.app** into the Applications folder.
+- Apple Silicon Macs (M1, M2, M3, M4) need the `aarch64` download.
+- Intel Macs need the `x64` download.
 
-- Apple Silicon Macs (M1, M2, M3, M4) need the **`aarch64`** download.
-- Intel Macs need the **`x64`** download.
-
-### First launch
-
-Current beta builds are not yet Apple-signed or notarized. If macOS says
-**“Sajilo is damaged and can’t be opened”**, only continue if you downloaded it
-from Sajilo’s GitHub Releases page above. In Terminal, run:
-
-```bash
-mkdir -p ~/Applications
-ditto /Applications/Sajilo.app ~/Applications/Sajilo.app
-xattr -cr ~/Applications/Sajilo.app
-open ~/Applications/Sajilo.app
-```
-
-This creates a user-owned copy in `~/Applications` and removes macOS’s download
-quarantine from that copy. You only need to do this once per beta build. Sajilo
-then lives in the menu bar — it has no Dock icon or window unless you turn one
-on in Settings.
-
-> Proper Apple code signing and notarization are planned before the stable release;
-> this workaround is temporary beta-installation guidance.
+Current beta builds are not yet Apple-signed or notarized, so macOS blocks the
+first launch with a **"Sajilo" Not Opened** or *was blocked to protect your Mac*
+message. See `[INSTALLATION_INSTRUCTIONS.md](INSTALLATION_INSTRUCTIONS.md)` for
+the step-by-step, screenshotted walkthrough — it only needs to be done once per
+beta build.
 
 ## Run from source
+
+
 
 ### Prerequisites
 
@@ -109,6 +102,21 @@ Run the Rust workspace tests from the repository root:
 cargo test --workspace
 ```
 
+
+
+## Releasing
+
+Check the current version, then bump to the next one:
+
+```bash
+git tag --sort=-v:refname | head -1        # current version
+./scripts/bump-version.sh <next-version>   # e.g. 0.1.5
+```
+
+Bumps the app version, commits, pushes, tags, and pushes the tag — CI builds
+and signs all four platforms from there. See [RELEASING.md](RELEASING.md) for
+the full process (publishing, the updater, verifying a build before tagging).
+
 ## Project layout
 
 ```text
@@ -117,6 +125,8 @@ apps/desktop/        Tauri desktop app (Rust tray shell + React interface)
 apps/server/         Scheduled cache and API for public data sources
 data/calendar-events/ Bundled Bikram Sambat event data
 ```
+
+
 
 ## License
 

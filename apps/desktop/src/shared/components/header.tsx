@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
 import { useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
+import { UpdateHeaderButton } from "./update-header-button";
 
 /**
  * The popover has no title bar of its own — the window is undecorated — and it
@@ -34,6 +35,7 @@ export function Header({ title }: { title: string }) {
       )}
       <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{title}</h1>
       {slot}
+      <UpdateHeaderButton />
       {pathname !== "/settings" && (
         <button
           type="button"
