@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { Pressable } from "../../../shared/components/motion";
+import { SkeletonBlock } from "../../../shared/components/skeleton";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
@@ -92,7 +93,11 @@ export function GlanceCards() {
                 </span>
               </div>
               <p className="mt-0.5 text-[20px] font-semibold leading-none">
-                {weatherSnap ? formatCelsius(weatherSnap.temperatureCelsius) : "…"}
+                {weatherSnap ? (
+                  formatCelsius(weatherSnap.temperatureCelsius)
+                ) : (
+                  <SkeletonBlock className="h-[18px] w-14" />
+                )}
               </p>
               <p className="mt-1 truncate text-[10px] text-text-muted">
                 {weatherSnap
@@ -115,7 +120,7 @@ export function GlanceCards() {
                 <span className="text-[10px]">{t("dashboard.nepse")}</span>
               </div>
               <p className="mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
-                {nepse ? money.format(nepse.value) : "…"}
+                {nepse ? money.format(nepse.value) : <SkeletonBlock className="h-[16px] w-16" />}
               </p>
               <p
                 className={`mt-1 truncate text-[10px] tabular-nums ${
