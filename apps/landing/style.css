@@ -1,32 +1,72 @@
-/* Tokens — aligned with apps/desktop/src/index.css */
+/*
+ * Tokens — the same flat, opaque system the app ships (apps/desktop/src/index.css).
+ *
+ * The previous palette was the app's *old* one: a near-black ramp, gilt accent,
+ * six radial gradient washes and glass on every raised surface. The app dropped
+ * all of that for solid colour, so a landing page still wearing it advertises a
+ * product that no longer looks like this. Every pair below is checked against
+ * WCAG AA, which is only possible because nothing is translucent any more.
+ */
 :root {
-  --bg-0: #0e1016;
-  --bg-1: #12141c;
-  --bg-2: #1c1a24;
-  --surface-raised: color-mix(in srgb, #fff 9%, transparent);
-  --surface-hover: color-mix(in srgb, #fff 13%, transparent);
-  --border: color-mix(in srgb, #f4f6fa 12%, transparent);
-  --divider: color-mix(in srgb, #f4f6fa 8%, transparent);
+  color-scheme: light dark;
 
-  --text: #f4f6fa;
-  --text-secondary: #b4bac6;
-  --text-muted: #8a90a0;
+  /* Light is the default: this page is read in a browser, in daylight, by
+     someone deciding whether to install a utility — not in a dark editor. */
+  --canvas: #f2f2f7;
+  --surface: #ffffff;
+  --surface-hover: #e8e8ed;
+  --border: #d8d8dd;
+  --divider: #e3e3e8;
 
-  --gold: #d4a84a;
-  --gold-ink: #8a6a2f;
-  --weather: #5b9fd4;
-  --forex: #6bc49a;
-  --holiday: #ff6b6f;
+  --text: #1d1d1f;
+  --text-secondary: #545458;
+  --text-muted: #6e6e73;
+
+  /* Gilt splits into a text tone and a fill tone, because white on gilt
+     measured 2.21:1 in the app and had to go. */
+  --gold: #8a6414;
+  --gold-fill: #8a6414;
+  --gold-ink: #ffffff;
+
+  --holiday: #c0392b;
 
   --serif: "Source Serif 4", ui-serif, Georgia, serif;
   --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --devanagari: "Noto Serif Devanagari", "Noto Sans Devanagari", serif;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
   --header-h: 64px;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 6%);
+  --shadow-lift-raw: 0 18px 48px -24px rgb(0 0 0 / 22%);
+  --shadow-lift: 0 18px 48px -24px rgb(0 0 0 / 22%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #1c1c1e;
+    --surface: #2c2c2e;
+    --surface-hover: #3a3a3c;
+    --border: #38383a;
+    --divider: #2f2f31;
+
+    --text: #f5f5f7;
+    --text-secondary: #aeaeb2;
+    --text-muted: #98989d;
+
+    --gold: #d4a84a;
+    --gold-fill: #d4a84a;
+    --gold-ink: #1c1c1e;
+
+    --holiday: #ff6b6f;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 24%);
+    --shadow-lift-raw: 0 18px 48px -24px rgb(0 0 0 / 70%);
+    --shadow-lift: 0 18px 48px -24px rgb(0 0 0 / 70%);
+  }
 }
 
 * {
@@ -46,7 +86,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--bg-1);
+  background: var(--canvas);
   color: var(--text);
   font-family: var(--sans);
   font-size: 16px;
@@ -56,6 +96,44 @@ body {
 
 a {
   color: var(--gold);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: from-font;
+}
+
+/* The chrome we did not author still ships with someone else's design system.
+   Selection, caret, and scrollbar are the cheapest tell that a page was built
+   rather than assembled. */
+::selection {
+  background: color-mix(in srgb, var(--gold) 28%, transparent);
+  color: var(--text);
+}
+
+:root {
+  caret-color: var(--gold);
+  accent-color: var(--gold);
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 2px solid var(--canvas);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Every figure on this page is a number someone reads against another number. */
+.deva,
+.deva-mini,
+.menubar-clock {
+  font-variant-numeric: tabular-nums;
 }
 
 :focus-visible {
@@ -70,7 +148,7 @@ a {
   left: 16px;
   z-index: 100;
   background: var(--gold);
-  color: #1a160c;
+  color: var(--gold-ink);
   font-weight: 600;
   font-size: 14px;
   padding: 10px 16px;
@@ -101,10 +179,8 @@ img {
   top: 0;
   z-index: 50;
   height: var(--header-h);
-  border-bottom: 1px solid color-mix(in srgb, var(--divider) 100%, transparent);
-  background: color-mix(in srgb, var(--bg-1) 78%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid var(--divider);
+  background: var(--canvas);
 }
 
 .site-nav {
@@ -173,7 +249,7 @@ img {
   padding: 9px 16px;
   border-radius: 9px;
   background: var(--gold);
-  color: #1a160c;
+  color: var(--gold-ink);
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
@@ -202,17 +278,6 @@ img {
 .hero-shell {
   position: relative;
   overflow: hidden;
-}
-
-.hero-shell::before {
-  content: "";
-  position: absolute;
-  inset: -20% -15% -40%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 60% 45% at 12% 0%, color-mix(in srgb, var(--gold) 12%, transparent), transparent 62%),
-    linear-gradient(168deg, var(--bg-2) 0%, var(--bg-1) 52%, var(--bg-0) 100%);
 }
 
 .hero {
@@ -296,7 +361,7 @@ img {
   justify-content: center;
   gap: 10px;
   background: var(--gold);
-  color: #1a160c;
+  color: var(--gold-ink);
   font-weight: 600;
   font-size: 16px;
   text-decoration: none;
@@ -357,7 +422,7 @@ img {
   padding: 5px 11px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--text-secondary);
   text-decoration: none;
   white-space: nowrap;
@@ -408,9 +473,7 @@ img {
   border-radius: 9px 9px 0 0;
   border: 1px solid var(--border);
   border-bottom: none;
-  background: color-mix(in srgb, #fff 10%, transparent);
-  backdrop-filter: blur(12px) saturate(1.3);
-  -webkit-backdrop-filter: blur(12px) saturate(1.3);
+  background: var(--surface-hover);
   font-size: 11.5px;
   color: var(--text-secondary);
 }
@@ -480,14 +543,14 @@ img {
   margin-right: 6px;
   border-radius: 16px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface-raised) 45%, transparent);
-  box-shadow: 0 40px 100px -40px rgba(8, 9, 13, 0.85);
+  background: var(--surface);
+  box-shadow: var(--shadow-lift);
   transition: transform 0.5s var(--ease-out-quart), box-shadow 0.5s var(--ease-out-quart);
 }
 
 .hero-shot:hover .hero-device {
   transform: translateY(-3px);
-  box-shadow: 0 46px 110px -40px rgba(8, 9, 13, 0.9);
+  box-shadow: var(--shadow-lift);
 }
 
 @media (max-width: 900px) {
@@ -540,7 +603,7 @@ img {
 .pillars {
   border-top: 1px solid var(--divider);
   border-bottom: 1px solid var(--divider);
-  background: color-mix(in srgb, var(--bg-0) 55%, transparent);
+  background: var(--surface);
 }
 
 .pillars-grid {
@@ -583,15 +646,6 @@ section {
   max-width: 640px;
 }
 
-.section-eyebrow {
-  margin: 0 0 8px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
 .section-head h2 {
   font-family: var(--serif);
   font-weight: 600;
@@ -618,17 +672,12 @@ section {
 
 .carousel-stage {
   position: relative;
-  --carousel-fade: color-mix(in srgb, var(--surface-raised) 55%, var(--bg-1));
+  --carousel-fade: color-mix(in srgb, var(--surface) 55%, var(--canvas));
   padding: clamp(28px, 4vw, 40px) clamp(18px, 3vw, 28px) clamp(24px, 3vw, 32px);
   border-radius: 24px;
   border: 1px solid var(--border);
-  background:
-    radial-gradient(ellipse 90% 70% at 50% -20%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 58%),
-    radial-gradient(ellipse 60% 50% at 100% 100%, color-mix(in srgb, var(--weather) 8%, transparent), transparent 55%),
-    color-mix(in srgb, var(--surface-raised) 55%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent),
-    0 28px 80px -48px rgba(8, 9, 13, 0.85);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
 }
 
 .carousel-track-wrap {
@@ -689,31 +738,24 @@ section {
 
 .slide-frame {
   position: relative;
-  padding: 3px;
-  border-radius: 20px;
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--gold) 34%, transparent),
-    color-mix(in srgb, var(--border) 100%, transparent) 48%,
-    color-mix(in srgb, var(--weather) 18%, transparent)
-  );
+  padding: 1px;
+  border-radius: var(--radius-lg);
+  background: var(--border);
   box-shadow:
-    0 28px 70px -36px rgba(8, 9, 13, 0.9),
-    inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+    var(--shadow-lift-raw),;
   transition: box-shadow 0.35s var(--ease-out-quart);
 }
 
 .slide.is-active .slide-frame {
   box-shadow:
-    0 36px 90px -32px rgba(8, 9, 13, 0.95),
-    0 0 0 1px color-mix(in srgb, var(--gold) 22%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+    var(--shadow-lift-raw),
+    0 0 0 1px color-mix(in srgb, var(--gold) 22%, transparent),;
 }
 
 .slide-frame img {
   width: 100%;
   border-radius: 17px;
-  border: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  border: 1px solid var(--border);
   cursor: zoom-in;
 }
 
@@ -771,11 +813,7 @@ section {
   height: 100%;
   width: 8.333%;
   border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--gold) 88%, #fff 12%),
-    var(--gold)
-  );
+  background: var(--gold-fill);
   transition: width 0.35s var(--ease-out-quart);
 }
 
@@ -788,15 +826,13 @@ section {
   height: 44px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--bg-0) 82%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--surface);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 12px 32px -18px rgba(8, 9, 13, 0.9);
+  box-shadow: var(--shadow-card);
   transition:
     border-color 0.15s var(--ease-out-quart),
     background-color 0.15s var(--ease-out-quart),
@@ -814,7 +850,7 @@ section {
 
 .carousel-arrow:hover {
   border-color: color-mix(in srgb, var(--gold) 45%, var(--border));
-  background: color-mix(in srgb, var(--bg-0) 94%, transparent);
+  background: color-mix(in srgb, var(--canvas) 94%, transparent);
   box-shadow: 0 16px 36px -16px color-mix(in srgb, var(--gold) 28%, transparent);
 }
 
@@ -873,7 +909,7 @@ section {
 }
 
 .lightbox::backdrop {
-  background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  background: var(--surface);
   backdrop-filter: blur(6px);
 }
 
@@ -894,7 +930,7 @@ section {
   max-width: 100%;
   border-radius: 18px;
   border: 1px solid var(--border);
-  box-shadow: 0 40px 100px -30px rgba(8, 9, 13, 0.7);
+  box-shadow: var(--shadow-lift);
 }
 
 .lightbox-caption {
@@ -915,7 +951,7 @@ section {
   height: 40px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -946,7 +982,7 @@ section {
   height: 44px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: var(--surface-raised);
+  background: var(--surface);
   color: var(--text);
   display: flex;
   align-items: center;
@@ -994,9 +1030,7 @@ section {
 /* ---------- features ---------- */
 
 .features-section {
-  background:
-    radial-gradient(ellipse 70% 50% at 0% 0%, color-mix(in srgb, var(--gold) 6%, transparent), transparent 55%),
-    var(--bg-1);
+  background: var(--canvas);
 }
 
 .feature-list {
@@ -1071,7 +1105,7 @@ section {
 }
 
 .install-platform {
-  background: color-mix(in srgb, var(--surface-raised) 80%, transparent);
+  background: var(--surface-hover);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 22px 20px;
@@ -1094,11 +1128,9 @@ section {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--gold) 30%, transparent), transparent),
-    color-mix(in srgb, var(--surface-hover) 100%, transparent);
+  background: var(--surface-hover);
   border: 1px solid var(--border);
-  color: var(--gold);
+  color: var(--text);
 }
 
 /* A tinted square told the reader nothing about which platform it belonged to.
@@ -1122,43 +1154,32 @@ section {
 }
 
 .glyph-dot--red {
-  fill: #ff6b6f;
+  fill: #ff5f57;
 }
 
 .glyph-dot--amber {
-  fill: var(--gold);
+  fill: #febc2e;
 }
 
 .glyph-dot--green {
-  fill: var(--forex);
+  fill: #28c840;
 }
 
 /* Tux reads as a penguin only with the belly and the beak picked out. */
 .platform-glyph .glyph-belly {
-  fill: var(--bg-0);
+  fill: var(--canvas);
 }
 
 .platform-glyph .glyph-eye {
-  fill: var(--bg-0);
+  fill: var(--canvas);
 }
 
 .platform-glyph .glyph-beak {
-  fill: #e8a33d;
+  fill: var(--gold);
 }
 
-.install-platform-icon--win {
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--weather) 30%, transparent), transparent),
-    color-mix(in srgb, var(--surface-hover) 100%, transparent);
-  color: var(--weather);
-}
-
-.install-platform-icon--linux {
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--forex) 30%, transparent), transparent),
-    color-mix(in srgb, var(--surface-hover) 100%, transparent);
-  color: #f4f6fa;
-}
+/* --win and --linux keep their hooks; the mark inside carries the identity,
+   so they no longer need a tint of their own. */
 
 .install-platform h3 {
   margin: 0;
@@ -1215,18 +1236,14 @@ section {
   width: 100vw;
   transform: translateX(-50%);
   pointer-events: none;
-  background:
-    radial-gradient(ellipse 100% 90% at 50% 120%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 62%),
-    var(--bg-1);
+  background: var(--canvas);
 }
 
 /* ---------- cta band ---------- */
 
 .cta-band {
   border-top: 1px solid var(--divider);
-  background:
-    radial-gradient(ellipse 80% 80% at 50% 120%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 58%),
-    var(--bg-0);
+  background: var(--surface);
 }
 
 .cta-band-inner {
@@ -1407,7 +1424,7 @@ footer.wrap a {
 }
 
 code {
-  background: color-mix(in srgb, #000 30%, var(--surface-raised));
+  background: color-mix(in srgb, #000 30%, var(--surface));
   border: 1px solid var(--border);
   border-radius: 5px;
   padding: 1px 6px;
