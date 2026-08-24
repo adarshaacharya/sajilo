@@ -93,9 +93,9 @@ fn local_name(raw: &[u8]) -> String {
 /// Turns `&#039;` and friends back into the characters they stand for.
 ///
 /// Feeds wrap a title in CDATA to say "this is text, not markup", and then some
-/// of them escape the text inside it anyway — The Himalayan Times files
-/// `Three-year-old&#039;s murder protests` that way. An XML parser is right not
-/// to touch CDATA, so the decoding has to happen here or the escape reaches the
+/// of them escape the text inside it anyway — `Three-year-old&#039;s murder
+/// protests` rather than the apostrophe itself. An XML parser is right not to
+/// touch CDATA, so the decoding has to happen here or the escape reaches the
 /// reader verbatim.
 ///
 /// Scanned once, left to right, so a literal `&amp;lt;` decodes to `&lt;` and

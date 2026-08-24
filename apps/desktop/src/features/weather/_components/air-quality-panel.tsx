@@ -33,9 +33,7 @@ export function AirQualityPanel({
   return (
     <section className="surface-card p-2.5">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-          {title}
-        </span>
+        <span className="text-[11px] font-semibold text-text-secondary">{title}</span>
         <div className="flex items-baseline gap-1.5">
           <span className="text-lg font-semibold tabular-nums" style={{ color: tint }}>
             {airQuality.usAqi}

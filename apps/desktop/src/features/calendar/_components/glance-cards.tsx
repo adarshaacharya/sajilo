@@ -81,9 +81,9 @@ export function GlanceCards() {
             <button
               type="button"
               onClick={() => navigate("/weather")}
-              className="surface-card glance-card glance-weather relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
+              className="surface-card relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
             >
-              <div className="relative z-[1] flex items-center gap-1 text-text-muted">
+              <div className="flex items-center gap-1 text-text-muted">
                 <Icon name="weather" className="size-3 text-[color:var(--color-weather-tint)]" />
                 <span className="text-[10px]">
                   {weatherSnap
@@ -91,10 +91,10 @@ export function GlanceCards() {
                     : CITY[modules.weatherLocation][language]}
                 </span>
               </div>
-              <p className="relative z-[1] mt-0.5 text-[20px] font-semibold leading-none">
+              <p className="mt-0.5 text-[20px] font-semibold leading-none">
                 {weatherSnap ? formatCelsius(weatherSnap.temperatureCelsius) : "…"}
               </p>
-              <p className="relative z-[1] mt-1 truncate text-[10px] text-text-muted">
+              <p className="mt-1 truncate text-[10px] text-text-muted">
                 {weatherSnap
                   ? `${conditionTitle(weatherSnap.condition, language)} · ${t("dashboard.high")} ${formatCelsius(weatherSnap.highCelsius)} ${t("dashboard.low")} ${formatCelsius(weatherSnap.lowCelsius)}`
                   : "—"}
@@ -108,17 +108,17 @@ export function GlanceCards() {
             <button
               type="button"
               onClick={() => navigate("/bazar?tab=stocks")}
-              className="surface-card glance-card glance-market relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
+              className="surface-card relative flex min-h-[72px] w-full flex-col p-2.5 text-left"
             >
-              <div className="relative z-[1] flex items-center gap-1 text-text-muted">
+              <div className="flex items-center gap-1 text-text-muted">
                 <Icon name="interest" className="size-3 text-[color:var(--color-accent-mark)]" />
                 <span className="text-[10px]">{t("dashboard.nepse")}</span>
               </div>
-              <p className="relative z-[1] mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
+              <p className="mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
                 {nepse ? money.format(nepse.value) : "…"}
               </p>
               <p
-                className={`relative z-[1] mt-1 truncate text-[10px] tabular-nums ${
+                className={`mt-1 truncate text-[10px] tabular-nums ${
                   nepse && nepse.change !== 0 ? changeTone(nepse.change) : "text-text-muted"
                 }`}
               >

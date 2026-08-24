@@ -72,10 +72,10 @@ export function Forex() {
 
   return (
     <div className="space-y-2.5">
-      <section className="surface-card forex-converter p-2.5">
+      <section className="surface-card p-2.5">
         <StateBanner state={banner} onRetry={() => load(true)}>
           {snapshot && selected ? (
-            <div className="relative z-[1] space-y-2.5">
+            <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -120,7 +120,7 @@ export function Forex() {
 
       {favourites.length > 0 && (
         <section className="surface-card p-2.5">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          <p className="mb-1 text-[11px] font-semibold text-text-secondary">
             {t("forex.favourites")}
           </p>
           {favourites.map((rate) => (
@@ -131,7 +131,7 @@ export function Forex() {
 
       {others.length > 0 && (
         <section className="surface-card p-2.5">
-          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+          <p className="mb-1 text-[11px] font-semibold text-text-secondary">
             {t("forex.all-currencies")}
           </p>
           {others.map((rate) => (

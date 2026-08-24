@@ -282,7 +282,7 @@
   "settings.module-bazar-note": "Gold, silver, fuel and Kalimati produce prices.",
   "settings.module-clocks-note": "A second clock next to Nepal time — add cities from Tools.",
   "settings.module-forex-note": "Nepal Rastra Bank exchange rates.",
-  "settings.module-news-note": "Headlines from eleven Nepali newsrooms.",
+  "settings.module-news-note": "Headlines from ten Nepali newsrooms.",
   "settings.module-radio-note": "Nepali radio stations.",
   "settings.module-rashifal-note": "Daily rashifal for all twelve signs.",
   "settings.module-keeper-note": "Family renewals, bills, and reminders in a menu bar tab.",
@@ -383,5 +383,10 @@
   "tools.weight": "Weight",
   "tools.years": "Years",
   "upcoming.empty": "No upcoming events recorded.",
-  "weather.tomorrow": "Tomorrow"
+  "weather.tomorrow": "Tomorrow",
+  "error.render-failed": "Something broke on this screen",
+  "error.render-failed-hint": "The rest of Sajilo is still working.",
+  "state.failed": "Couldn't reach the source",
+  "state.failed-hint": "Check your connection, then try again.",
+  "state.not-yet-hint": "This fills in the next time Sajilo refreshes."
 }

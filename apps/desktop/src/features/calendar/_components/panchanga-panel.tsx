@@ -36,9 +36,7 @@ export function PanchangaPanel({ panchanga }: { panchanga: Panchanga }) {
 
   return (
     <section className="surface-card p-3">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-        {t("panchanga.title")}
-      </p>
+      <p className="mb-2 text-[11px] font-semibold text-text-secondary">{t("panchanga.title")}</p>
 
       <div className="flex gap-2">
         <Reading

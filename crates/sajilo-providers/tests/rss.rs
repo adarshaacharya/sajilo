@@ -6,7 +6,11 @@ use sajilo_providers::rss::{self, parser};
 
 const KATHMANDU_POST: &str = include_str!("../../../fixtures/rss/kathmandupost.xml");
 const ONLINE_KHABAR: &str = include_str!("../../../fixtures/rss/onlinekhabar.xml");
-const HIMALAYAN_TIMES: &str = include_str!("../../../fixtures/rss/himalayantimes-nepal.xml");
+/// Recorded from The Himalayan Times before it went behind a bot challenge.
+/// The paper is no longer a source; the fixture stays because it is the only
+/// real-world example of a feed escaping HTML entities inside CDATA, which the
+/// parser has to undo for every feed that does it next.
+const ENTITIES_IN_CDATA: &str = include_str!("../../../fixtures/rss/himalayantimes-nepal.xml");
 
 #[test]
 fn decodes_a_recorded_feed() {
@@ -281,8 +285,6 @@ fn every_source_has_a_distinct_feed_url() {
     assert_eq!(urls.len(), count, "two sources share a feed URL");
     assert!(urls.iter().all(|url| url.starts_with("https://")));
     assert!(NewsSource::Kantipur.rss_feeds().is_empty());
-    // The Himalayan Times publishes no combined feed, so it reads several.
-    assert!(NewsSource::HimalayanTimes.rss_feeds().len() > 1);
     // Only The Kathmandu Post is dated from its link path.
     assert_eq!(
         NewsSource::ALL
@@ -293,16 +295,16 @@ fn every_source_has_a_distinct_feed_url() {
     );
 }
 
-/// The Himalayan Times escapes HTML entities *inside* CDATA, which an XML
-/// parser is right to leave alone. Decoding them is this parser's job, or
+/// Some feeds escape HTML entities *inside* CDATA, which an XML parser is
+/// right to leave alone. Decoding them is this parser's job, or
 /// `Three-year-old&#039;s` reaches the reader exactly as written.
 #[test]
 fn decodes_entities_left_inside_cdata() {
     assert!(
-        HIMALAYAN_TIMES.contains("&#039;"),
+        ENTITIES_IN_CDATA.contains("&#039;"),
         "the fixture should still hold the escapes this test is about"
     );
-    let items = parser::parse(HIMALAYAN_TIMES, NewsSource::HimalayanTimes, 100);
+    let items = parser::parse(ENTITIES_IN_CDATA, NewsSource::Ratopati, 100);
     assert_eq!(items.len(), 50);
     assert!(
         items.iter().any(|item| item.title.contains('\'')),
@@ -311,24 +313,6 @@ fn decodes_entities_left_inside_cdata() {
     assert!(
         !items.iter().any(|item| item.title.contains("&#")),
         "no escape should survive into a headline"
-    );
-}
-
-/// The paper dates every story with a real `+0545` offset, so its headlines
-/// rank against the rest of the merge rather than sinking to the bottom.
-#[test]
-fn reads_the_himalayan_times_timestamps() {
-    let items = parser::parse(HIMALAYAN_TIMES, NewsSource::HimalayanTimes, 100);
-    assert!(items.iter().all(|item| item.published.is_some()));
-    assert!(
-        items
-            .iter()
-            .all(|item| item.precision == DatePrecision::Exact)
-    );
-    assert!(
-        items
-            .iter()
-            .all(|item| item.link.starts_with("https://thehimalayantimes.com/"))
     );
 }
 
@@ -343,7 +327,7 @@ fn decodes_each_escape_only_once() {
         )
     };
     let title = |raw: &str| {
-        parser::parse(&feed(raw), NewsSource::HimalayanTimes, 1)
+        parser::parse(&feed(raw), NewsSource::Ratopati, 1)
             .first()
             .map(|item| item.title.clone())
             .unwrap_or_default()

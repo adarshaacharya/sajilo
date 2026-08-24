@@ -3,6 +3,9 @@
 //! Nine of the ten are RSS. Kantipur is not — it is decoded by
 //! [`crate::kantipur`] from the JSON endpoint its own site runs on — and is
 //! merged here on equal terms with the feeds.
+//!
+//! A source may list more than one feed, so a paper that splits its output by
+//! section still reads as one name in the list.
 
 pub mod parser;
 

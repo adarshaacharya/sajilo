@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import type { WeatherLocation } from "../../types/api/WeatherLocation";
 import type { Language } from "../lib/i18n";
-import { translate } from "../lib/i18n";
+import { setActiveLanguage, translate } from "../lib/i18n";
 import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
@@ -69,6 +69,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
 
   useEffect(() => applyTheme(theme), [theme]);
+
+  // Mirrored for the outermost error boundary, which renders above this
+  // provider and so cannot read the context.
+  useEffect(() => setActiveLanguage(language), [language]);
 
   useEffect(() => {
     let cancelled = false;

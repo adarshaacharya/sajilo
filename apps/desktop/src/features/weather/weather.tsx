@@ -169,7 +169,7 @@ export function Weather() {
 
         {tomorrow && (
           <section className="surface-card p-2.5">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+            <p className="mb-1 text-[11px] font-semibold text-text-secondary">
               {t("weather.tomorrow")}
             </p>
             <ForecastRow forecast={tomorrow} dayLabel="" />
@@ -178,7 +178,7 @@ export function Weather() {
 
         {snapshot && snapshot.daily.length > 0 && (
           <section className="surface-card p-2.5">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+            <p className="mb-1 text-[11px] font-semibold text-text-secondary">
               Next {snapshot.daily.length} days
             </p>
             <div>

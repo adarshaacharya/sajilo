@@ -15,11 +15,7 @@ export function ProduceList({
   if (prices.length === 0) return null;
   return (
     <section className="surface-card p-2.5">
-      {title && (
-        <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-          {title}
-        </p>
-      )}
+      {title && <p className="mb-1 text-[11px] font-semibold text-text-secondary">{title}</p>}
       {prices.map((price) => (
         <ProduceRow
           key={price.name}

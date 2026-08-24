@@ -26,9 +26,7 @@ export function MetalCalculator({ snapshot }: { snapshot: MetalRateSnapshot }) {
 
   return (
     <section className="surface-card p-2.5">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-        {t("bazar.quantity")}
-      </p>
+      <p className="mb-2 text-[11px] font-semibold text-text-secondary">{t("bazar.quantity")}</p>
       <div className="grid grid-cols-[minmax(0,1fr)_72px_minmax(94px,1.15fr)] gap-2">
         <input
           type="number"

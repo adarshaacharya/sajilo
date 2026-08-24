@@ -232,9 +232,7 @@ export function DayPlanSection({
   return (
     <section className="surface-card p-3">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-          {t("planner.title")}
-        </p>
+        <p className="text-[11px] font-semibold text-text-secondary">{t("planner.title")}</p>
         {!draft && (
           <button
             type="button"

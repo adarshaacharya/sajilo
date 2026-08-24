@@ -282,7 +282,7 @@
   "settings.module-bazar-note": "सुन, चाँदी, इन्धन र कालीमाटीको मूल्य।",
   "settings.module-clocks-note": "नेपाली समयसँगै अर्को घडी — औजारबाट सहर थप्नुहोस्।",
   "settings.module-forex-note": "नेपाल राष्ट्र बैंकको विनिमय दर।",
-  "settings.module-news-note": "एघारवटा नेपाली समाचार कक्षका शीर्षक।",
+  "settings.module-news-note": "दसवटा नेपाली समाचार कक्षका शीर्षक।",
   "settings.module-radio-note": "नेपाली रेडियो स्टेसनहरू।",
   "settings.module-rashifal-note": "बाह्रै राशिको दैनिक राशिफल।",
   "settings.module-keeper-note": "नवीकरण, बिल र रिमाइन्डरहरू मेनु बार ट्याबमा।",
@@ -383,5 +383,10 @@
   "tools.weight": "तौल",
   "tools.years": "वर्ष",
   "upcoming.empty": "आजपछिका कुनै कार्यक्रम अभिलेख छैन।",
-  "weather.tomorrow": "भोलि"
+  "weather.tomorrow": "भोलि",
+  "error.render-failed": "यो स्क्रिनमा केही बिग्रियो",
+  "error.render-failed-hint": "साजिलोका अरू भाग चलिरहेका छन्।",
+  "state.failed": "स्रोतसम्म पुग्न सकिएन",
+  "state.failed-hint": "इन्टरनेट जडान जाँचेर फेरि प्रयास गर्नुहोस्।",
+  "state.not-yet-hint": "साजिलोले अर्को पटक अद्यावधिक गर्दा देखिनेछ।"
 }

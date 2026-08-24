@@ -3,13 +3,19 @@
 /**
  * The feeds Sajilo reads.
  *
- * Most are official publisher RSS endpoints returning
- * `application/rss+xml`. Two are not shaped that way: Kantipur publishes
- * no feed at all, but its own front end is served by a keyless public JSON
- * endpoint, so it is read from that rather than scraped; and The Himalayan
- * Times publishes no combined feed, only one per section, so several are
- * read and merged back into a single source. Hamro Patro remains absent —
- * there is nothing there but HTML, and parsing that is the technique that
- * silently cost this app 349 days of bundled festival data.
+ * All but one are official publisher RSS endpoints returning
+ * `application/rss+xml`. Kantipur is the exception: it publishes no feed,
+ * but its own front end is served by a keyless public JSON endpoint, so it
+ * is read from that rather than scraped.
+ *
+ * Two papers are deliberately absent. Hamro Patro offers nothing but HTML,
+ * and parsing that is the technique that silently cost this app 349 days
+ * of bundled festival data. The Himalayan Times published perfectly good
+ * per-section feeds until it put the whole site behind a Sucuri
+ * JavaScript challenge: every request now answers `307` into a page that
+ * says scripting is required. A browser solves it, an HTTP client cannot,
+ * and defeating a bot check to read a newspaper is not something this app
+ * does. It was removed rather than left to fail on every refresh — an
+ * error line that is always there is one nobody reads when it matters.
  */
-export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "risingNepal" | "ratopatiEnglish" | "kantipur" | "himalayanTimes";
+export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "risingNepal" | "ratopatiEnglish" | "kantipur";

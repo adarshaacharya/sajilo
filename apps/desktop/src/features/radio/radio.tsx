@@ -143,9 +143,7 @@ function StationList({
   return (
     <section className="surface-card mt-2 p-1">
       {title && (
-        <p className="px-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
-          {title}
-        </p>
+        <p className="px-1.5 pt-1 text-[11px] font-semibold text-text-secondary">{title}</p>
       )}
       <ul>
         {stations.map((station) => {
@@ -274,11 +272,11 @@ export function Radio() {
   return (
     <div className="space-y-2.5">
       {current && (
-        <section className="surface-card radio-now-playing p-2.5">
-          <div className="relative z-[1] flex items-center gap-2.5">
+        <section className="surface-card p-2.5">
+          <div className="flex items-center gap-2.5">
             <StationArt station={current} isPlaying={state.isPlaying} />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-text-muted">
+              <p className="text-[11px] font-semibold text-text-secondary">
                 {t("radio.now-playing")}
               </p>
               <p className="truncate text-[14px] font-semibold leading-tight">{current.name}</p>

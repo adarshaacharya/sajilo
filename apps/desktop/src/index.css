@@ -1,35 +1,66 @@
 @import "tailwindcss";
 
 /*
- * Patro skin — cool glass over macOS vibrancy (light) / warm depth (dark).
- * Brass gilt for today / marks; holiday red for Saturdays only (as text).
+ * Patro skin — flat opaque surfaces, macOS system palette.
+ *
+ * The rule this file follows: translucency is a *window* property, not a
+ * surface property. Real menu-bar apps (Raycast, Fantastical, Bartender) draw
+ * opaque content on a single window material; they do not re-blur every card.
+ * Stacking glass on cards, chrome, and the tab bar at once is what made this
+ * read as generated rather than native — and it also made contrast
+ * unverifiable, because a `color-mix(... transparent)` surface has no known
+ * backdrop to measure text against.
+ *
+ * So: every surface here is a solid colour, every text/background pair below
+ * is checked against WCAG AA (4.5:1 body, 3:1 large), and the gilt accent is
+ * spent in exactly three places — the active tab, today, and the selected
+ * state. Nowhere else.
  */
 @theme {
-  --color-surface: transparent;
-  --color-surface-raised: color-mix(in srgb, #fff 9%, transparent);
-  --color-surface-hover: color-mix(in srgb, #fff 13%, transparent);
-  /* Hairline — label-derived, never a bright white stroke. */
-  --color-border: color-mix(in srgb, var(--color-text) 9%, transparent);
-  --color-divider: color-mix(in srgb, var(--color-text) 5.5%, transparent);
-  --color-text: #f4f6fa;
-  --color-text-secondary: #b4bac6;
-  --color-text-muted: #7d8594;
-  --color-accent: #8a6a2f;
+  /* Window chrome and canvas. */
+  --color-canvas: #1c1c1e;
+  --color-chrome: #1c1c1e;
+
+  /* Surfaces. Opaque: a card is a card, not a pane of glass. */
+  --color-surface: #2c2c2e;
+  --color-surface-raised: #2c2c2e;
+  --color-surface-hover: #3a3a3c;
+
+  /* Hairlines — label-derived, never a bright white stroke. */
+  --color-border: #38383a;
+  --color-divider: #2f2f31;
+
+  /* Ink. Ratios are against --color-surface (#2c2c2e), the worst case.
+     text 12.80:1 · secondary 6.30:1 · muted 4.85:1 */
+  --color-text: #f5f5f7;
+  --color-text-secondary: #aeaeb2;
+  --color-text-muted: #98989d;
+
+  /* Gilt. `accent-mark` is the text/stroke tone (6.30:1 on surface);
+     `accent-fill` is the solid-fill tone, and `accent-ink` is what sits on
+     top of it (7.70:1). White on gilt was 2.21:1 — that is why it is gone. */
+  --color-accent: #d4a84a;
   --color-accent-mark: #d4a84a;
+  --color-accent-fill: #d4a84a;
+  --color-accent-ink: #1c1c1e;
+
+  /* Semantics. Never the only channel — pair with a glyph or +/- prefix. */
   --color-holiday: #ff6b6f;
   --color-positive: #4ecf8a;
   --color-negative: #ff6b6f;
-  --color-weather-tint: #5b9fd4;
-  --color-forex-tint: #6bc49a;
-  --color-control-bg: color-mix(in srgb, var(--color-surface-raised) 88%, #000 12%);
-  --color-control-border: color-mix(in srgb, var(--color-border) 55%, transparent);
-  --color-control-inset: inset 0 1px 0 color-mix(in srgb, #fff 5%, transparent);
-  --shadow-card:
-    0 1px 2px color-mix(in srgb, #000 16%, transparent),
-    0 6px 20px color-mix(in srgb, #000 18%, transparent);
-  --shadow-card-hover:
-    0 2px 4px color-mix(in srgb, #000 14%, transparent),
-    0 10px 28px color-mix(in srgb, #000 22%, transparent);
+
+  /* Feature identity comes from the icon and the data, not a background wash.
+     These two survive only as icon tints. */
+  --color-weather-tint: #6aa9dd;
+  --color-forex-tint: #5cc79b;
+
+  --color-control-bg: #1c1c1e;
+  --color-control-border: #48484a;
+  --color-control-inset: inset 0 1px 0 rgb(255 255 255 / 3%);
+
+  /* One shadow. Cards do not lift on hover in macOS. */
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 24%);
+  --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 24%);
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -38,60 +69,66 @@
   --radius-xl: 12px;
   --radius-2xl: 14px;
   --radius-3xl: 16px;
-  --radius-card: 14px;
+  --radius-card: 10px;
 }
 
+/* Light palette. Ratios against --color-surface (#ffffff) / canvas (#f2f2f7):
+   text 16.83 · secondary 7.54 · muted 5.07/4.54 · accent-mark 5.37/4.81 */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
+    --color-canvas: #f2f2f7;
+    --color-chrome: #f2f2f7;
+    --color-surface: #ffffff;
     --color-surface-raised: #ffffff;
-    --color-surface-hover: #ececf0;
-    --color-border: color-mix(in srgb, #3c3c43 12%, transparent);
-    --color-divider: color-mix(in srgb, #3c3c43 8%, transparent);
+    --color-surface-hover: #e8e8ed;
+    --color-border: #d8d8dd;
+    --color-divider: #e3e3e8;
     --color-text: #1d1d1f;
-    --color-text-secondary: #636366;
-    --color-text-muted: #86868b;
-    --color-accent: #7a5f28;
-    --color-accent-mark: #a67c1a;
-    --color-weather-tint: #3d7ab5;
-    --color-forex-tint: #3d9a6e;
+    --color-text-secondary: #545458;
+    --color-text-muted: #6e6e73;
+    --color-accent: #8a6414;
+    --color-accent-mark: #8a6414;
+    --color-accent-fill: #8a6414;
+    --color-accent-ink: #ffffff;
+    --color-holiday: #c0392b;
+    --color-positive: #0f7a3d;
+    --color-negative: #c0392b;
+    --color-weather-tint: #2f6fa8;
+    --color-forex-tint: #1a7f52;
     --color-control-bg: #ffffff;
-    --color-control-border: color-mix(in srgb, #3c3c43 16%, transparent);
-    --color-control-inset:
-      inset 0 0.5px 0 color-mix(in srgb, #000 6%, transparent),
-      inset 0 1px 2px color-mix(in srgb, #000 3%, transparent);
-    --shadow-card:
-      0 0.5px 0 color-mix(in srgb, #000 3%, transparent),
-      0 1px 2px color-mix(in srgb, #000 4%, transparent);
-    --shadow-card-hover:
-      0 1px 3px color-mix(in srgb, #000 5%, transparent),
-      0 4px 12px color-mix(in srgb, #000 4%, transparent);
+    --color-control-border: #c6c6cb;
+    --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 6%);
+    --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 6%);
   }
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
+  --color-canvas: #f2f2f7;
+  --color-chrome: #f2f2f7;
+  --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
-  --color-surface-hover: #ececf0;
-  --color-border: color-mix(in srgb, #3c3c43 12%, transparent);
-  --color-divider: color-mix(in srgb, #3c3c43 8%, transparent);
+  --color-surface-hover: #e8e8ed;
+  --color-border: #d8d8dd;
+  --color-divider: #e3e3e8;
   --color-text: #1d1d1f;
-  --color-text-secondary: #636366;
-  --color-text-muted: #86868b;
-  --color-accent: #7a5f28;
-  --color-accent-mark: #a67c1a;
-  --color-weather-tint: #3d7ab5;
-  --color-forex-tint: #3d9a6e;
+  --color-text-secondary: #545458;
+  --color-text-muted: #6e6e73;
+  --color-accent: #8a6414;
+  --color-accent-mark: #8a6414;
+  --color-accent-fill: #8a6414;
+  --color-accent-ink: #ffffff;
+  --color-holiday: #c0392b;
+  --color-positive: #0f7a3d;
+  --color-negative: #c0392b;
+  --color-weather-tint: #2f6fa8;
+  --color-forex-tint: #1a7f52;
   --color-control-bg: #ffffff;
-  --color-control-border: color-mix(in srgb, #3c3c43 16%, transparent);
-  --color-control-inset:
-    inset 0 0.5px 0 color-mix(in srgb, #000 6%, transparent),
-    inset 0 1px 2px color-mix(in srgb, #000 3%, transparent);
-  --shadow-card:
-    0 0.5px 0 color-mix(in srgb, #000 3%, transparent),
-    0 1px 2px color-mix(in srgb, #000 4%, transparent);
-  --shadow-card-hover:
-    0 1px 3px color-mix(in srgb, #000 5%, transparent),
-    0 4px 12px color-mix(in srgb, #000 4%, transparent);
+  --color-control-border: #c6c6cb;
+  --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 6%);
+  --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 6%);
 }
 
 :root[data-theme="dark"] {
@@ -111,17 +148,26 @@ html {
   color-scheme: light dark;
 }
 
-/* Glass shell — vibrancy underneath, warm ambient wash on top. */
+/*
+ * The shell. One solid colour, one hairline, one radius — no ambient wash.
+ *
+ * The window is painted rather than left transparent so every contrast ratio
+ * in this file is a fact instead of a guess: text drawn straight on the canvas
+ * (the tab labels, the state banner) would otherwise sit on whatever the
+ * desktop happens to show through. `data-window-material` is kept as a hook
+ * but no longer changes the fill; the macOS vibrancy call in src-tauri is now
+ * redundant and can be dropped.
+ */
 .app-window {
   box-sizing: border-box;
   position: relative;
   isolation: isolate;
   height: 100%;
   overflow: hidden;
-  border-radius: 14px;
-  clip-path: inset(0 round 14px);
+  border-radius: 12px;
+  clip-path: inset(0 round 12px);
   border: 1px solid var(--color-border);
-  background: transparent;
+  background: var(--color-canvas);
   color: var(--color-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
@@ -129,88 +175,6 @@ html {
   font-size: 12px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
-}
-
-/* Ambient canvas — breaks up the flat grey slab. */
-.app-window::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  border-radius: inherit;
-  background:
-    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 22%, transparent), transparent 58%),
-    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 14%, transparent), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 40%, color-mix(in srgb, #fff 3%, transparent), transparent 70%),
-    linear-gradient(
-      168deg,
-      color-mix(in srgb, #1c1a24 68%, transparent) 0%,
-      color-mix(in srgb, #12141c 74%, transparent) 55%,
-      color-mix(in srgb, #0e1016 78%, transparent) 100%
-    );
-}
-
-/* Linux and Windows do not have macOS's native popover vibrancy. The base
- * stops the transparent ambient wash from picking up a wallpaper or terminal
- * colour, while the page outside this clipped shell remains transparent. */
-html[data-window-material="opaque"] .app-window {
-  background: #12141c;
-}
-
-html[data-window-material="opaque"] .app-window::before {
-  background:
-    radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--color-accent-mark) 16%, transparent), transparent 58%),
-    radial-gradient(ellipse 70% 50% at 95% 105%, color-mix(in srgb, var(--color-weather-tint) 9%, transparent), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 40%, color-mix(in srgb, #fff 2%, transparent), transparent 70%),
-    linear-gradient(168deg, #1c1a24 0%, #12141c 55%, #0e1016 100%);
-}
-
-@media (prefers-color-scheme: light) {
-  html:not([data-theme="dark"]) .app-window {
-    background: #f2f2f7;
-  }
-
-  html:not([data-theme="dark"]) .app-window::before {
-    background:
-      radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 5%, transparent), transparent 52%),
-      radial-gradient(ellipse 80% 45% at 100% 110%, color-mix(in srgb, var(--color-weather-tint) 4%, transparent), transparent 48%);
-  }
-}
-
-html[data-theme="light"] .app-window {
-  background: #f2f2f7;
-}
-
-html[data-theme="light"] .app-window::before {
-  background:
-    radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 5%, transparent), transparent 52%),
-    radial-gradient(ellipse 80% 45% at 100% 110%, color-mix(in srgb, var(--color-weather-tint) 4%, transparent), transparent 48%);
-}
-
-html[data-theme="light"][data-window-material="opaque"] .app-window {
-  background: #f2f2f7;
-}
-
-html[data-theme="light"][data-window-material="opaque"] .app-window::before {
-  background:
-    radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 4%, transparent), transparent 52%);
-}
-
-@media (prefers-color-scheme: light) {
-  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window {
-    background: #f2f2f7;
-  }
-
-  html:not([data-theme="dark"])[data-window-material="opaque"] .app-window::before {
-    background:
-      radial-gradient(ellipse 100% 55% at 0% -15%, color-mix(in srgb, var(--color-accent-mark) 4%, transparent), transparent 52%);
-  }
-}
-
-.app-window > * {
-  position: relative;
-  z-index: 1;
 }
 
 ::-webkit-scrollbar {
@@ -224,24 +188,38 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   background: transparent;
 }
 
-/* Raised glass card — depth without a chalk-white rim. */
+/*
+ * One focus ring for every control in the app.
+ *
+ * Before this, `focus-visible` existed on exactly one selector — the text
+ * field — so keyboard users had no visible position anywhere else in a window
+ * that has no chrome of its own to orient against.
+ */
+:where(
+  button,
+  a,
+  [role="button"],
+  [tabindex]:not([tabindex="-1"]),
+  summary,
+  input,
+  select,
+  textarea
+):focus-visible {
+  outline: 2px solid var(--color-accent-mark);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Opaque card. No backdrop-filter: the surface underneath is a known colour,
+   and blurring it 49 times per screen bought nothing but compositing layers. */
 .surface-card {
   border-radius: var(--radius-card);
   border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface-raised) 100%, transparent);
-  backdrop-filter: blur(16px) saturate(1.35);
-  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  background: var(--color-surface-raised);
   box-shadow: var(--shadow-card);
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-
-.surface-card:hover {
-  border-color: color-mix(in srgb, var(--color-accent-mark) 18%, var(--color-border));
-  box-shadow: var(--shadow-card-hover);
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 /* macOS NSTextField-style inputs. */
@@ -263,12 +241,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   appearance: textfield;
 }
 
-/* Route header — whisper separator, not a white rule. */
+/* Route header — flat chrome, hairline rule. */
 .header-bar {
   border-bottom: 1px solid var(--color-divider);
-  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-chrome);
 }
 
 /* Inset list dividers — macOS Settings-style, not edge-to-edge white lines. */
@@ -317,9 +293,9 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 6px;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
@@ -345,25 +321,24 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   white-space: nowrap;
   border-radius: 6px;
   padding: 3px 8px;
-  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 32%, transparent);
-  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
-  color: var(--color-accent-mark);
-  font-size: 10px;
-  font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 500;
   line-height: 1.2;
   transition:
     background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
+    border-color 0.15s ease;
 }
 
 .update-header-btn:hover {
-  background: color-mix(in srgb, var(--color-accent-mark) 22%, transparent);
-  border-color: color-mix(in srgb, var(--color-accent-mark) 42%, transparent);
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent-mark);
 }
 
 .update-header-btn:active {
-  background: color-mix(in srgb, var(--color-accent-mark) 30%, transparent);
+  background: var(--color-surface-hover);
 }
 
 .update-header-btn--busy {
@@ -392,10 +367,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   gap: 3px;
   border-radius: var(--radius-sm);
   padding: 3px 7px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--color-text-secondary);
-  background: color-mix(in srgb, var(--color-surface-raised) 88%, transparent);
+  background: var(--color-surface-hover);
   transition:
     color 0.12s ease,
     background-color 0.12s ease;
@@ -416,7 +391,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   align-items: center;
   justify-content: center;
   min-width: 2.75rem;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 5px 10px;
   font-size: 11px;
   font-weight: 500;
@@ -425,13 +400,12 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   transition:
     background-color 0.15s ease,
     border-color 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+    color 0.15s ease;
 }
 
 .toggle-chip--off {
-  background: color-mix(in srgb, var(--color-text) 6%, transparent);
-  border-color: color-mix(in srgb, var(--color-text) 8%, transparent);
+  background: var(--color-surface);
+  border-color: var(--color-border);
   color: var(--color-text-secondary);
 }
 
@@ -440,28 +414,28 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   color: var(--color-text);
 }
 
+/* Selected: gilt fill with contrasting ink. White on gilt measured 2.21:1. */
 .toggle-chip--on {
-  background: var(--color-accent-mark);
-  border-color: color-mix(in srgb, var(--color-accent-mark) 72%, #000 28%);
-  color: #fff;
-  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 22%, transparent);
+  background: var(--color-accent-fill);
+  border-color: var(--color-accent-fill);
+  color: var(--color-accent-ink);
 }
 
 .toggle-chip--on:hover {
-  background: color-mix(in srgb, var(--color-accent-mark) 92%, #fff 8%);
+  background: var(--color-accent-fill);
 }
 
 .day-plan-editor {
   border-radius: var(--radius-md);
   padding: 8px;
-  background: color-mix(in srgb, var(--color-surface-raised) 70%, transparent);
+  background: var(--color-surface-hover);
 }
 
 /* Rashifal — reading card + sign strip. */
 .rashifal-pick-tile {
   border-radius: var(--radius-md);
   padding: 8px;
-  background: color-mix(in srgb, var(--color-surface-raised) 75%, transparent);
+  background: var(--color-surface-hover);
   transition: background-color 0.12s ease;
 }
 
@@ -470,7 +444,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 }
 
 .rashifal-pick-tile-active {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-mark);
 }
 
 .rashifal-sign-cell {
@@ -490,12 +464,12 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 }
 
 .rashifal-sign-cell-active {
-  color: var(--color-accent-mark);
-  background: color-mix(in srgb, var(--color-accent-mark) 12%, transparent);
+  color: var(--color-accent-ink);
+  background: var(--color-accent-fill);
 }
 
 .rashifal-sign-cell-mine {
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent-mark) 38%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-accent-mark);
 }
 
 .settings-btn {
@@ -504,10 +478,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   gap: 4px;
   border-radius: 6px;
   border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface-raised) 75%, transparent);
+  background: var(--color-surface);
   padding: 4px 10px;
   font-size: 11px;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
   transition:
     background-color 0.15s ease,
     color 0.15s ease;
@@ -515,7 +489,6 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 
 .settings-btn:hover {
   background: var(--color-surface-hover);
-  color: var(--color-text);
 }
 
 /* macOS NSSwitch — used in Settings, planner, VAT tool. */
@@ -525,14 +498,14 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   width: 28px;
   height: 16px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-text) 20%, transparent);
-  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 12%, transparent);
+  background: var(--color-surface-hover);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   transition: background 0.2s ease;
 }
 
 .mac-switch--on {
-  background: color-mix(in srgb, var(--color-accent-mark) 88%, #2d6b3a 12%);
-  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--color-accent-mark) 40%, transparent);
+  background: var(--color-accent-fill);
+  box-shadow: inset 0 0 0 1px var(--color-accent-fill);
 }
 
 .mac-switch-knob {
@@ -543,9 +516,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   height: 12px;
   border-radius: 50%;
   background: #fff;
-  box-shadow:
-    0 0.5px 1px rgba(0, 0, 0, 0.28),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 22%);
   transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -553,139 +524,53 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   transform: translateX(12px);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .mac-switch,
-  .mac-switch-knob {
-    transition: none;
-  }
-}
-
-/* Today date plate — gilt glow. */
+/* Today date plate — flat card. The gilt gradient plate was decoration; the
+   date is already the largest type on the screen. */
 .date-plate {
-  border-color: color-mix(in srgb, var(--color-accent-mark) 28%, var(--color-border));
-  background: linear-gradient(
-    155deg,
-    color-mix(in srgb, var(--color-accent-mark) 18%, transparent),
-    color-mix(in srgb, var(--color-surface-raised) 100%, transparent) 55%
-  );
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+  border-color: var(--color-border);
+  background: var(--color-surface-raised);
 }
 
-/* Glance widgets — tinted glass instead of identical grey boxes. */
-.glance-card {
-  position: relative;
-  overflow: hidden;
-}
-
-.glance-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.9;
-  border-radius: inherit;
-}
-
-.glance-weather::before {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-weather-tint) 22%, transparent) 0%,
-    transparent 65%
-  );
-}
-
-.bazar-headline {
-  position: relative;
-  overflow: hidden;
-}
-
-.bazar-headline::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 90% 70% at 0% 0%,
-    color-mix(in srgb, var(--color-accent-mark) 18%, transparent),
-    transparent 58%
-  );
-  pointer-events: none;
-}
-
-.radio-now-playing {
-  position: relative;
-  overflow: hidden;
-}
-
-.radio-now-playing::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--color-accent-mark) 14%, transparent) 0%,
-    transparent 62%
-  );
-  pointer-events: none;
-}
-
+/*
+ * Glance widgets, bazar headline, radio now-playing, forex converter.
+ *
+ * These carried six separate `::before` gradient washes — one tinted overlay
+ * per feature. Every card having its own colour is the decoration reflex that
+ * made the app read as generated; the icon and the number already say which
+ * module you are looking at. The hooks stay so markup does not have to change,
+ * and so a single deliberate treatment can be added back later if one earns it.
+ */
+.glance-card,
+.glance-weather,
+.glance-market,
+.glance-event,
+.dashboard-event,
+.bazar-headline,
+.radio-now-playing,
 .forex-converter {
   position: relative;
-  overflow: hidden;
 }
 
-.forex-converter::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 90% 70% at 0% 0%,
-    color-mix(in srgb, var(--color-forex-tint) 16%, transparent),
-    transparent 58%
-  );
-  pointer-events: none;
-}
-
-.glance-market::before {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-accent-mark) 20%, transparent) 0%,
-    transparent 65%
-  );
-}
-
-.glance-event::before {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--color-accent-mark) 14%, transparent) 0%,
-    transparent 70%
-  );
-}
-
-/* Calendar today cell — gilt gradient, not flat fill. */
+/* Calendar today cell — solid accent, the way macOS Calendar draws it. */
 .cal-today {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--color-accent-mark) 95%, #fff 5%),
-    color-mix(in srgb, var(--color-accent) 90%, #000 10%)
-  );
-  box-shadow:
-    0 2px 8px color-mix(in srgb, var(--color-accent-mark) 35%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 20%, transparent);
+  background: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+  border-radius: 8px;
 }
 
 /* Dashboard — compact capsules and grouped calendar. */
 .clock-chip {
   border-radius: 999px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
 }
 
 .calendar-panel {
   padding: 10px 12px 12px;
 }
 
-.dashboard-event::before {
-  opacity: 0.85;
-}
-
+/* Controls over the weather hero image — the one place a translucent white
+   control is right, because it sits on artwork rather than on a surface. */
 .weather-glass-btn {
   display: inline-flex;
   align-items: center;
@@ -693,27 +578,25 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   width: 26px;
   height: 26px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #fff;
-  background: color-mix(in srgb, #fff 16%, transparent);
-  border: 1px solid color-mix(in srgb, #fff 12%, transparent);
+  background: rgb(0 0 0 / 28%);
+  border: 1px solid rgb(255 255 255 / 18%);
   transition: background 0.12s ease;
 }
 
 .weather-glass-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, #fff 28%, transparent);
+  background: rgb(0 0 0 / 40%);
 }
 
 .weather-glass-btn:disabled {
   opacity: 0.6;
 }
 
-/* Tab bar — frosted dock. */
+/* Tab bar — flat chrome, hairline rule. */
 .tab-bar {
   border-top: 1px solid var(--color-divider);
-  background: color-mix(in srgb, var(--color-surface-raised) 55%, transparent);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  background: var(--color-chrome);
 }
 
 .tab-link {
@@ -723,10 +606,8 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 .tab-indicator {
   position: absolute;
   inset: 0;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-accent-mark) 12%, var(--color-surface-hover));
-  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 16%, transparent);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-accent-mark) 8%, transparent);
+  border-radius: 6px;
+  background: var(--color-surface-hover);
 }
 
 /* Equalizer */
@@ -750,7 +631,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 }
 
 .eq-playing .eq-bar {
-  animation: eq-bounce 0.55s ease-in-out infinite alternate;
+  animation: eq-level 0.55s ease-in-out infinite alternate;
 }
 
 .eq-playing .eq-bar:nth-child(1) {
@@ -766,7 +647,7 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   animation-delay: 180ms;
 }
 
-@keyframes eq-bounce {
+@keyframes eq-level {
   from {
     transform: scaleY(0.32);
   }
@@ -775,23 +656,10 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .eq-playing .eq-bar {
-    animation: none;
-    transform: scaleY(0.7);
-  }
-
-  .surface-card {
-    transition: none;
-  }
-}
-
-/* macOS NSSegmentedControl — inset track + sliding glass thumb. */
+/* macOS NSSegmentedControl — inset track + sliding thumb. */
 .seg-track {
-  background: color-mix(in srgb, var(--color-text) 7%, transparent);
-  box-shadow:
-    inset 0 1px 2px color-mix(in srgb, #000 22%, transparent),
-    inset 0 0 0 0.5px color-mix(in srgb, var(--color-text) 6%, transparent);
+  background: var(--color-surface-hover);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
 .seg-track--scroll {
@@ -806,242 +674,21 @@ html[data-theme="light"][data-window-material="opaque"] .app-window::before {
 }
 
 .seg-thumb {
-  background: color-mix(in srgb, var(--color-surface-raised) 90%, #fff 10%);
+  background: var(--color-surface-raised);
   box-shadow:
-    0 0.5px 1px color-mix(in srgb, #000 24%, transparent),
-    0 0 0 0.5px color-mix(in srgb, var(--color-text) 7%, transparent);
+    0 1px 2px rgb(0 0 0 / 18%),
+    inset 0 0 0 1px var(--color-border);
 }
 
-@media (prefers-color-scheme: light) {
-  html:not([data-theme="dark"]) .surface-card {
-    background: #ffffff;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+@media (prefers-reduced-motion: reduce) {
+  .mac-switch,
+  .mac-switch-knob,
+  .surface-card {
+    transition: none;
   }
 
-  html:not([data-theme="dark"]) .surface-card:hover {
-    border-color: color-mix(in srgb, #3c3c43 12%, transparent);
-    box-shadow: var(--shadow-card);
+  .eq-playing .eq-bar {
+    animation: none;
+    transform: scaleY(0.7);
   }
-
-  html:not([data-theme="dark"]) .date-plate {
-    background: #ffffff;
-    box-shadow: none;
-    border-color: color-mix(in srgb, var(--color-accent-mark) 32%, #3c3c43 8%);
-  }
-
-  html:not([data-theme="dark"]) .glance-card::before {
-    opacity: 0.42;
-  }
-
-  html:not([data-theme="dark"]) .dashboard-event::before {
-    opacity: 0.28;
-  }
-
-  html:not([data-theme="dark"]) .clock-chip {
-    background: #ffffff;
-    box-shadow: 0 0.5px 1px color-mix(in srgb, #000 5%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .cal-today {
-    border-radius: 10px;
-    box-shadow:
-      0 1px 4px color-mix(in srgb, var(--color-accent-mark) 28%, transparent),
-      inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .header-bar {
-    background: #f2f2f7;
-    border-bottom-color: color-mix(in srgb, #3c3c43 8%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .tab-bar {
-    background: #f2f2f7;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-top-color: color-mix(in srgb, #3c3c43 8%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .tab-indicator {
-    background: #ffffff;
-    border-color: color-mix(in srgb, #3c3c43 8%, transparent);
-    box-shadow:
-      0 0.5px 1px color-mix(in srgb, #000 7%, transparent),
-      0 1px 2px color-mix(in srgb, #000 4%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .seg-track {
-    background: color-mix(in srgb, #3c3c43 7%, transparent);
-    box-shadow:
-      inset 0 1px 2px color-mix(in srgb, #000 6%, transparent),
-      inset 0 0 0 0.5px color-mix(in srgb, #3c3c43 8%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .seg-thumb {
-    background: #ffffff;
-    box-shadow:
-      0 0.5px 1px color-mix(in srgb, #000 8%, transparent),
-      0 1px 2px color-mix(in srgb, #000 4%, transparent),
-      0 0 0 0.5px color-mix(in srgb, #3c3c43 6%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .mac-switch:not(.mac-switch--on) {
-    background: color-mix(in srgb, #3c3c43 18%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .copy-chip {
-    background: color-mix(in srgb, #fff 88%, #3c3c43 12%);
-    border: 1px solid color-mix(in srgb, #3c3c43 8%, transparent);
-  }
-
-  html:not([data-theme="dark"]) .toggle-chip--off {
-    background: #ffffff;
-    border-color: color-mix(in srgb, #3c3c43 14%, transparent);
-    color: var(--color-text-secondary);
-  }
-
-  html:not([data-theme="dark"]) .toggle-chip--off:hover {
-    background: #f2f2f7;
-    color: var(--color-text);
-  }
-
-  html:not([data-theme="dark"]) .toggle-chip--on {
-    background: var(--color-accent-mark);
-    border-color: color-mix(in srgb, var(--color-accent-mark) 78%, #000 22%);
-    color: #ffffff;
-    box-shadow: none;
-  }
-
-  html:not([data-theme="dark"]) .toggle-chip--on:hover {
-    background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
-  }
-
-  html:not([data-theme="dark"]) .update-header-btn {
-    background: color-mix(in srgb, var(--color-accent-mark) 10%, #ffffff);
-    border-color: color-mix(in srgb, var(--color-accent-mark) 28%, #3c3c43 8%);
-  }
-
-  html:not([data-theme="dark"]) .update-header-btn:hover {
-    background: color-mix(in srgb, var(--color-accent-mark) 16%, #ffffff);
-  }
-
-  html:not([data-theme="dark"]) ::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, #3c3c43 22%, transparent);
-  }
-}
-
-html[data-theme="light"] .surface-card {
-  background: #ffffff;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-html[data-theme="light"] .surface-card:hover {
-  border-color: color-mix(in srgb, #3c3c43 12%, transparent);
-  box-shadow: var(--shadow-card);
-}
-
-html[data-theme="light"] .date-plate {
-  background: #ffffff;
-  box-shadow: none;
-  border-color: color-mix(in srgb, var(--color-accent-mark) 32%, #3c3c43 8%);
-}
-
-html[data-theme="light"] .glance-card::before {
-  opacity: 0.42;
-}
-
-html[data-theme="light"] .dashboard-event::before {
-  opacity: 0.28;
-}
-
-html[data-theme="light"] .clock-chip {
-  background: #ffffff;
-  box-shadow: 0 0.5px 1px color-mix(in srgb, #000 5%, transparent);
-}
-
-html[data-theme="light"] .cal-today {
-  border-radius: 10px;
-  box-shadow:
-    0 1px 4px color-mix(in srgb, var(--color-accent-mark) 28%, transparent),
-    inset 0 1px 0 color-mix(in srgb, #fff 25%, transparent);
-}
-
-html[data-theme="light"] .header-bar {
-  background: #f2f2f7;
-  border-bottom-color: color-mix(in srgb, #3c3c43 8%, transparent);
-}
-
-html[data-theme="light"] .tab-bar {
-  background: #f2f2f7;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-top-color: color-mix(in srgb, #3c3c43 8%, transparent);
-}
-
-html[data-theme="light"] .tab-indicator {
-  background: #ffffff;
-  border-color: color-mix(in srgb, #3c3c43 8%, transparent);
-  box-shadow:
-    0 0.5px 1px color-mix(in srgb, #000 7%, transparent),
-    0 1px 2px color-mix(in srgb, #000 4%, transparent);
-}
-
-html[data-theme="light"] .mac-switch:not(.mac-switch--on) {
-  background: color-mix(in srgb, #3c3c43 18%, transparent);
-}
-
-html[data-theme="light"] .copy-chip {
-  background: color-mix(in srgb, #fff 88%, #3c3c43 12%);
-  border: 1px solid color-mix(in srgb, #3c3c43 8%, transparent);
-}
-
-html[data-theme="light"] .toggle-chip--off {
-  background: #ffffff;
-  border-color: color-mix(in srgb, #3c3c43 14%, transparent);
-  color: var(--color-text-secondary);
-}
-
-html[data-theme="light"] .toggle-chip--off:hover {
-  background: #f2f2f7;
-  color: var(--color-text);
-}
-
-html[data-theme="light"] .toggle-chip--on {
-  background: var(--color-accent-mark);
-  border-color: color-mix(in srgb, var(--color-accent-mark) 78%, #000 22%);
-  color: #ffffff;
-  box-shadow: none;
-}
-
-html[data-theme="light"] .toggle-chip--on:hover {
-  background: color-mix(in srgb, var(--color-accent-mark) 94%, #000 6%);
-}
-
-html[data-theme="light"] .update-header-btn {
-  background: color-mix(in srgb, var(--color-accent-mark) 10%, #ffffff);
-  border-color: color-mix(in srgb, var(--color-accent-mark) 28%, #3c3c43 8%);
-}
-
-html[data-theme="light"] .update-header-btn:hover {
-  background: color-mix(in srgb, var(--color-accent-mark) 16%, #ffffff);
-}
-
-html[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, #3c3c43 22%, transparent);
-}
-
-html[data-theme="light"] .seg-track {
-  background: color-mix(in srgb, #3c3c43 7%, transparent);
-  box-shadow:
-    inset 0 1px 2px color-mix(in srgb, #000 6%, transparent),
-    inset 0 0 0 0.5px color-mix(in srgb, #3c3c43 8%, transparent);
-}
-
-html[data-theme="light"] .seg-thumb {
-  background: #ffffff;
-  box-shadow:
-    0 0.5px 1px color-mix(in srgb, #000 8%, transparent),
-    0 1px 2px color-mix(in srgb, #000 4%, transparent),
-    0 0 0 0.5px color-mix(in srgb, #3c3c43 6%, transparent);
 }

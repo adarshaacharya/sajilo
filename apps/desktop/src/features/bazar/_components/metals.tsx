@@ -24,8 +24,8 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
   return (
     <div className="space-y-2.5">
       {headline && (
-        <section className="surface-card bazar-headline p-2.5">
-          <div className="relative z-[1]">
+        <section className="surface-card p-2.5">
+          <div>
             <div className="flex items-baseline justify-between gap-2">
               <div>
                 <p className="text-[11px] font-semibold text-text-secondary">

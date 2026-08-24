@@ -193,16 +193,14 @@ export function Dashboard() {
           <button
             type="button"
             onClick={() => navigate("/events")}
-            className="surface-card glance-card glance-event dashboard-event flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
+            className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
           >
             <Icon
               name="festival"
-              className="relative z-[1] size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
+              className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
             />
-            <span className="relative z-[1] min-w-0 flex-1 truncate text-[12px]">
-              {upNext.name}
-            </span>
-            <span className="relative z-[1] shrink-0 text-[11px] text-text-muted">
+            <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
+            <span className="shrink-0 text-[11px] text-text-muted">
               {relativeText(upNext.days_away, t, numerals)} ›
             </span>
           </button>

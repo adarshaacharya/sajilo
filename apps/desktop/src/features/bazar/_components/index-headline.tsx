@@ -8,8 +8,8 @@ type TFn = (key: TranslationKey) => string;
 
 export function IndexHeadline({ index, t }: { index: MarketIndex; t: TFn }) {
   return (
-    <section className="surface-card bazar-headline p-2.5">
-      <div className="relative z-[1]">
+    <section className="surface-card p-2.5">
+      <div>
         <div className="flex items-baseline justify-between gap-2">
           <p className="text-[11px] font-semibold text-text-secondary">{index.name}</p>
           <ChangeBadge change={index.change} previous={index.value - index.change} percentOnly />

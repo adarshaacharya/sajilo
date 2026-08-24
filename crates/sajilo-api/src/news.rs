@@ -1,4 +1,4 @@
-//! Merged headlines from eleven Nepali and English publishers. Ported from
+//! Merged headlines from ten Nepali and English publishers. Ported from
 //! `NewsItem.swift`.
 
 use chrono::{DateTime, Utc};
@@ -8,14 +8,20 @@ use crate::load_state::Freshness;
 dto_enum! {
     /// The feeds Sajilo reads.
     ///
-    /// Most are official publisher RSS endpoints returning
-    /// `application/rss+xml`. Two are not shaped that way: Kantipur publishes
-    /// no feed at all, but its own front end is served by a keyless public JSON
-    /// endpoint, so it is read from that rather than scraped; and The Himalayan
-    /// Times publishes no combined feed, only one per section, so several are
-    /// read and merged back into a single source. Hamro Patro remains absent —
-    /// there is nothing there but HTML, and parsing that is the technique that
-    /// silently cost this app 349 days of bundled festival data.
+    /// All but one are official publisher RSS endpoints returning
+    /// `application/rss+xml`. Kantipur is the exception: it publishes no feed,
+    /// but its own front end is served by a keyless public JSON endpoint, so it
+    /// is read from that rather than scraped.
+    ///
+    /// Two papers are deliberately absent. Hamro Patro offers nothing but HTML,
+    /// and parsing that is the technique that silently cost this app 349 days
+    /// of bundled festival data. The Himalayan Times published perfectly good
+    /// per-section feeds until it put the whole site behind a Sucuri
+    /// JavaScript challenge: every request now answers `307` into a page that
+    /// says scripting is required. A browser solves it, an HTTP client cannot,
+    /// and defeating a bot check to read a newspaper is not something this app
+    /// does. It was removed rather than left to fail on every refresh — an
+    /// error line that is always there is one nobody reads when it matters.
     pub enum NewsSource {
         OnlineKhabar,
         OnlineKhabarEnglish,
@@ -27,7 +33,6 @@ dto_enum! {
         RisingNepal,
         RatopatiEnglish,
         Kantipur,
-        HimalayanTimes,
     }
 
     /// How precisely `published` is known.
@@ -95,7 +100,7 @@ impl NewsSourceInfo {
 }
 
 impl NewsSource {
-    pub const ALL: [Self; 11] = [
+    pub const ALL: [Self; 10] = [
         Self::OnlineKhabar,
         Self::OnlineKhabarEnglish,
         Self::AnnapurnaPost,
@@ -106,7 +111,6 @@ impl NewsSource {
         Self::RisingNepal,
         Self::RatopatiEnglish,
         Self::Kantipur,
-        Self::HimalayanTimes,
     ];
 
     pub fn display_name(self) -> &'static str {
@@ -121,17 +125,15 @@ impl NewsSource {
             Self::RisingNepal => "The Rising Nepal",
             Self::RatopatiEnglish => "Ratopati English",
             Self::Kantipur => "Kantipur",
-            Self::HimalayanTimes => "The Himalayan Times",
         }
     }
 
     /// The RSS endpoints a source publishes.
     ///
-    /// Most papers put everything in one feed. The Himalayan Times does not: it
-    /// has no combined feed at all, only 107 per-section ones, so its desks are
-    /// listed here and merged back into a single source. Kantipur is empty —
-    /// it publishes no feed and is read from its JSON list endpoint instead,
-    /// see `sajilo_providers::kantipur`.
+    /// A slice rather than one URL: a paper split across per-section feeds is
+    /// still one source to a reader. Kantipur is empty — it publishes no feed
+    /// and is read from its JSON list endpoint instead, see
+    /// `sajilo_providers::kantipur`.
     pub fn rss_feeds(self) -> &'static [&'static str] {
         match self {
             Self::OnlineKhabar => &["https://www.onlinekhabar.com/feed"],
@@ -144,16 +146,6 @@ impl NewsSource {
             Self::RisingNepal => &["https://risingnepaldaily.com/rss"],
             Self::RatopatiEnglish => &["https://english.ratopati.com/feed"],
             Self::Kantipur => &[],
-            // Nepal, Kathmandu, Sports and Business. The paper's International
-            // feed (`/rssFeed/5`) answers 200 with an empty channel, so it is
-            // deliberately not listed — an always-empty feed would report the
-            // whole paper as failed on every refresh.
-            Self::HimalayanTimes => &[
-                "https://www.thehimalayantimes.com/rssFeed/15",
-                "https://www.thehimalayantimes.com/rssFeed/14",
-                "https://www.thehimalayantimes.com/rssFeed/3",
-                "https://www.thehimalayantimes.com/rssFeed/11",
-            ],
         }
     }
 
@@ -165,7 +157,6 @@ impl NewsSource {
                 | Self::Khabarhub
                 | Self::RisingNepal
                 | Self::RatopatiEnglish
-                | Self::HimalayanTimes
         )
     }
 

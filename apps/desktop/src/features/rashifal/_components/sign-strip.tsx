@@ -15,7 +15,7 @@ export function SignStrip({
 
   return (
     <section className="surface-card p-3">
-      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-text-muted">
+      <p className="mb-2 text-[11px] font-semibold text-text-secondary">
         {t("rashifal.all-signs")}
       </p>
       <div className="grid grid-cols-4 gap-1">
