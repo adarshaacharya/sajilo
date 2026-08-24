@@ -30,9 +30,20 @@
 
   --holiday: #c0392b;
 
-  --serif: "Source Serif 4", ui-serif, Georgia, serif;
-  --sans: "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --devanagari: "Noto Serif Devanagari", "Noto Sans Devanagari", serif;
+  /*
+   * Anek (Ek Type) — one superfamily drawn across Devanagari and Latin.
+   *
+   * The page previously set its headlines in Source Serif 4 over a neutral
+   * grotesque, which is the most-copied landing-page pairing of the moment,
+   * and its Devanagari in Noto — the universal fallback family. A product
+   * whose entire premise is Nepali had the Nepali word in its own hero set in
+   * the typographic equivalent of Arial. Anek was drawn for exactly this: the
+   * two scripts share a skeleton, so `सजिलो` and `Sajilo` are the same voice
+   * rather than two fonts sitting next to each other.
+   */
+  --display: "Anek Latin", "Anek Devanagari", system-ui, sans-serif;
+  --sans: "Anek Latin", "Anek Devanagari", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --devanagari: "Anek Devanagari", "Anek Latin", sans-serif;
 
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --radius-lg: 14px;
@@ -194,7 +205,7 @@ img {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-weight: 600;
   font-size: 18px;
   letter-spacing: -0.01em;
@@ -306,20 +317,16 @@ img {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   color: var(--gold);
   margin: 0 0 8px;
-  opacity: 0;
-  animation: rise 0.7s var(--ease-out-quart) 0.08s forwards;
 }
 
 .hero-copy h1 {
-  font-family: var(--serif);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
   font-size: clamp(2.5rem, 4.2vw + 1rem, 4.25rem);
   letter-spacing: -0.03em;
   line-height: 1.04;
   margin: 0 0 18px;
   text-wrap: balance;
-  opacity: 0;
-  animation: rise 0.7s var(--ease-out-quart) 0.14s forwards;
 }
 
 .hero-copy .tagline {
@@ -329,8 +336,6 @@ img {
   max-width: 48ch;
   margin: 0 0 22px;
   text-wrap: pretty;
-  opacity: 0;
-  animation: rise 0.7s var(--ease-out-quart) 0.2s forwards;
 }
 
 @media (max-width: 900px) {
@@ -345,8 +350,6 @@ img {
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  opacity: 0;
-  animation: rise 0.7s var(--ease-out-quart) 0.26s forwards;
 }
 
 @media (max-width: 900px) {
@@ -446,8 +449,6 @@ img {
   display: flex;
   justify-content: center;
   perspective: 1400px;
-  opacity: 0;
-  animation: rise 0.85s var(--ease-out-quart) 0.18s forwards;
 }
 
 /* The headline says "on your menu bar", so the shot shows exactly that: a
@@ -570,6 +571,12 @@ img {
   border-radius: 15px;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .hero-shot {
+    animation: rise 0.8s var(--ease-out-quart) both;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -582,14 +589,8 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-copy .deva,
-  .hero-copy h1,
-  .hero-copy .tagline,
-  .download-cta,
   .hero-shot {
     animation: none;
-    opacity: 1;
-    transform: none;
   }
 
   .hero-device,
@@ -621,7 +622,7 @@ img {
 
 .pillar h2 {
   margin: 0 0 8px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -647,8 +648,8 @@ section {
 }
 
 .section-head h2 {
-  font-family: var(--serif);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
   font-size: clamp(1.75rem, 2vw + 1rem, 2.25rem);
   letter-spacing: -0.02em;
   margin: 0 0 10px;
@@ -786,7 +787,7 @@ section {
 
 .carousel-live-caption {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: clamp(1.125rem, 1vw + 1rem, 1.375rem);
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -1183,7 +1184,7 @@ section {
 
 .install-platform h3 {
   margin: 0;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: 1.125rem;
   font-weight: 600;
 }
@@ -1256,7 +1257,7 @@ section {
 
 .cta-band h2 {
   margin: 0 0 8px;
-  font-family: var(--serif);
+  font-family: var(--display);
   font-size: clamp(1.5rem, 2vw + 1rem, 2rem);
   letter-spacing: -0.02em;
 }
