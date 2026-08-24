@@ -491,6 +491,24 @@ html {
   background: var(--color-surface-hover);
 }
 
+/* An update waiting to be installed, or installed and waiting for a restart,
+   is the one thing in Settings asking to be clicked, so it is marked — but in
+   the same voice as the version pill in About: gold edge, gold text, the
+   faintest gold behind it. A solid fill would shout across a 380px popover
+   where nothing else does. Deliberately not used on "Check for updates",
+   which is routine. */
+.settings-btn--accent {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 40%, transparent);
+  background: color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.settings-btn--accent:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 18%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+}
+
 /* macOS NSSwitch — used in Settings, planner, VAT tool. */
 .mac-switch {
   position: relative;

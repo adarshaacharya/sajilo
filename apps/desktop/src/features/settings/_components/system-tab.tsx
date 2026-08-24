@@ -73,16 +73,30 @@ export function SystemTab() {
     setMessage(t("settings.backup-imported"));
   };
 
+  // The version number is the part of this line a reader is actually looking
+  // for, so it is picked out rather than left to dissolve into grey.
+  const version = (value: string) => (
+    <span className="font-medium tabular-nums text-accent">{value}</span>
+  );
+
   const updateNote = {
     idle: null,
     checking: t("settings.update-checking"),
     "up-to-date": t("settings.update-up-to-date"),
-    available: update
-      ? `${t("settings.update-found")} ${update.version}`
-      : t("settings.update-checking"),
-    downloading: update
-      ? `${t("settings.update-available")} ${update.version}…`
-      : t("settings.update-checking"),
+    available: update ? (
+      <>
+        {t("settings.update-found")} {version(update.version)}
+      </>
+    ) : (
+      t("settings.update-checking")
+    ),
+    downloading: update ? (
+      <>
+        {t("settings.update-available")} {version(update.version)}…
+      </>
+    ) : (
+      t("settings.update-checking")
+    ),
     installed: t("settings.update-installed"),
     failed: updateError
       ? `${t("settings.update-failed")} — ${updateError}`
@@ -94,7 +108,11 @@ export function SystemTab() {
       {updaterEnabled && (
         <SettingsSection title={t("settings.updates")} footnote={updateNote ?? undefined}>
           {updateState === "installed" ? (
-            <button type="button" onClick={() => restartToUpdate()} className="settings-btn">
+            <button
+              type="button"
+              onClick={() => restartToUpdate()}
+              className="settings-btn settings-btn--accent"
+            >
               <Icon name="refresh" className="size-3 shrink-0" />
               {t("settings.update-restart")}
             </button>
@@ -103,7 +121,7 @@ export function SystemTab() {
               type="button"
               onClick={() => installUpdate()}
               disabled={!update}
-              className="settings-btn"
+              className="settings-btn settings-btn--accent"
             >
               <Icon name="refresh" className="size-3 shrink-0" />
               {t("settings.install-update")}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
 import { useSettings } from "../../../shared/context/settings-context";
+import { useUpdater } from "../../../shared/context/updater-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
@@ -23,7 +24,9 @@ function QuietLink({ label, href }: { label: string; href: string }) {
 
 export function AboutTab() {
   const { t } = useSettings();
+  const { state: updateState, update } = useUpdater();
   const [version, setVersion] = useState<string | null>(null);
+  const newVersion = updateState === "available" && update ? update.version : null;
 
   useEffect(() => {
     import("@tauri-apps/api/app")
@@ -40,8 +43,15 @@ export function AboutTab() {
       <p className="text-[11px] text-text-secondary">{t("about.tagline")}</p>
       <QuietLink label="sajilo.fyi" href={WEBSITE_URL} />
       {version && (
-        <p className="mt-0.5 text-[10px] text-text-muted">
-          {t("about.version")} {version}
+        <p className="mt-1 inline-flex items-center gap-1 rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] text-text-muted">
+          {t("about.version")}
+          <span className="font-medium tabular-nums text-accent">{version}</span>
+        </p>
+      )}
+      {newVersion && (
+        <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent-fill px-2 py-0.5 text-[10px] text-accent-ink">
+          {t("settings.update-found")}
+          <span className="font-medium tabular-nums">{newVersion}</span>
         </p>
       )}
 

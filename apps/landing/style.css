@@ -321,9 +321,9 @@ img {
 
 .hero-copy h1 {
   font-family: var(--display);
-  font-weight: 700;
+  font-weight: 800;
   font-size: clamp(2.5rem, 4.2vw + 1rem, 4.25rem);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   line-height: 1.04;
   margin: 0 0 18px;
   text-wrap: balance;

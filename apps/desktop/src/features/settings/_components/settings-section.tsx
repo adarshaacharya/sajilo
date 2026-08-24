@@ -7,7 +7,8 @@ export function SettingsSection({
   children,
 }: {
   title: string;
-  footnote?: string;
+  /** Text, or a fragment when part of it needs its own emphasis. */
+  footnote?: ReactNode;
   children: ReactNode;
 }) {
   return (
