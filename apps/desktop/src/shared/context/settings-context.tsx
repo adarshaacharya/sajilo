@@ -125,7 +125,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             ...(radioEnabled !== null && { radioEnabled }),
             ...(weatherLocation && { weatherLocation }),
             ...(forexFavourites && { forexFavourites }),
-            ...(clocksEnabled !== null && { clocksEnabled }),
+            // Cities saved before the module switch existed: having picked one
+            // is the opt-in. Only an explicitly stored `false` keeps the row
+            // hidden, so turning it off in Settings still sticks.
+            ...(clocksEnabled !== null
+              ? { clocksEnabled }
+              : clocks && clocks.length > 0
+                ? { clocksEnabled: true }
+                : {}),
             ...(clocks && { clocks }),
             ...(keeperEnabled !== null && { keeperEnabled }),
           }));

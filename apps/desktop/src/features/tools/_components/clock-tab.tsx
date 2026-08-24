@@ -15,13 +15,26 @@ export function ClockTab() {
   const times = useWorldClocks(modules.clocks);
   const results = useMemo(() => searchTimezones(query), [query]);
 
+  /**
+   * Adding a city here is what turns the dashboard row on.
+   *
+   * The row is gated on `clocksEnabled`, which defaults to false and is only
+   * settable from Settings › Modules. So adding a city used to save it, list it
+   * on this screen, and change nothing on Today — the feature looked broken
+   * from the one place you would ever set it up. Picking a city is an
+   * unambiguous request to see that city, so it enables the module too.
+   */
   const toggle = (timeZone: string) => {
-    setModules((current) => ({
-      ...current,
-      clocks: current.clocks.includes(timeZone)
-        ? current.clocks.filter((tz) => tz !== timeZone)
-        : [...current.clocks, timeZone],
-    }));
+    setModules((current) => {
+      const adding = !current.clocks.includes(timeZone);
+      return {
+        ...current,
+        clocksEnabled: adding || current.clocksEnabled,
+        clocks: adding
+          ? [...current.clocks, timeZone]
+          : current.clocks.filter((tz) => tz !== timeZone),
+      };
+    });
   };
 
   return (
