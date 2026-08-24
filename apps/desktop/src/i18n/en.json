@@ -388,5 +388,6 @@
   "error.render-failed-hint": "The rest of Sajilo is still working.",
   "state.failed": "Couldn't reach the source",
   "state.failed-hint": "Check your connection, then try again.",
-  "state.not-yet-hint": "This fills in the next time Sajilo refreshes."
+  "state.not-yet-hint": "This fills in the next time Sajilo refreshes.",
+  "news.could-not-reach": "Could not reach {sources}."
 }

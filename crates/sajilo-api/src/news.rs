@@ -142,7 +142,9 @@ impl NewsSource {
             Self::Ratopati => &["https://www.ratopati.com/feed"],
             Self::Bizkhabar => &["https://www.bizkhabar.com/feed"],
             Self::KathmanduPost => &["https://kathmandupost.com/rss"],
-            Self::Khabarhub => &["https://english.khabarhub.com/feed"],
+            // Trailing slash: without it the site answers 301 to exactly this
+            // URL, costing a round trip on every refresh.
+            Self::Khabarhub => &["https://english.khabarhub.com/feed/"],
             Self::RisingNepal => &["https://risingnepaldaily.com/rss"],
             Self::RatopatiEnglish => &["https://english.ratopati.com/feed"],
             Self::Kantipur => &[],

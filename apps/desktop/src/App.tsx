@@ -1,4 +1,3 @@
-import { AnimatePresence } from "motion/react";
 import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router";
 import { SWRConfig } from "swr";
@@ -19,7 +18,6 @@ import { Weather } from "./features/weather/weather";
 import { ErrorBoundary } from "./shared/components/error-boundary";
 import { Header } from "./shared/components/header";
 import { HeaderSlotProvider } from "./shared/components/header-slot";
-import { PageTransition } from "./shared/components/motion";
 import { TabBar } from "./shared/components/tab-bar";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
 import { UpdaterProvider } from "./shared/context/updater-context";
@@ -91,30 +89,28 @@ function Shell() {
     <div className="app-window flex flex-col">
       <TrayNavigation />
       <DismissOnEscape />
-      <AnimatePresence mode="wait" initial={false}>
-        <Routes location={location} key={location.pathname}>
-          {ROUTES.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <PageTransition className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  {route.path !== "/" && route.path !== "/weather" && (
-                    <Header title={t(route.titleKey)} />
-                  )}
-                  <main
-                    className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
-                      route.path === "/" ? "p-3" : route.path === "/weather" ? "" : "p-2.5"
-                    }`}
-                  >
-                    <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
-                  </main>
-                </PageTransition>
-              }
-            />
-          ))}
-        </Routes>
-      </AnimatePresence>
+      <Routes location={location}>
+        {ROUTES.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                {route.path !== "/" && route.path !== "/weather" && (
+                  <Header title={t(route.titleKey)} />
+                )}
+                <main
+                  className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
+                    route.path === "/" ? "p-3" : route.path === "/weather" ? "" : "p-2.5"
+                  }`}
+                >
+                  <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
+                </main>
+              </div>
+            }
+          />
+        ))}
+      </Routes>
       <RadioMiniPlayer />
       <TabBar />
     </div>

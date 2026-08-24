@@ -63,21 +63,32 @@ export default {
   },
 };
 
+/// Asia/Kathmandu is a fixed +05:45 with no daylight saving, so the local wall
+/// clock is UTC shifted by a constant — the same reasoning as `nepal_time` in
+/// `sajilo-core`.
+const NEPAL_OFFSET_MINUTES = 5 * 60 + 45;
+
 async function record(env, platform, request) {
   if (!env.DB) return;
 
-  const day = new Date().toISOString().slice(0, 10);
+  // Day and hour are both Nepali local time. In UTC a download made at a
+  // quarter to nine in the morning in Kathmandu files itself under 3am, and
+  // "when do people install this" is a question about Nepal's day rather than
+  // Greenwich's.
+  const nepal = new Date(Date.now() + NEPAL_OFFSET_MINUTES * 60_000);
+  const day = nepal.toISOString().slice(0, 10);
+  const hour = nepal.getUTCHours();
   const country = request.cf?.country ?? "XX";
   const referrer = referrerHost(request.headers.get("Referer"));
 
   try {
     await env.DB.prepare(
-      `INSERT INTO download_clicks (day, platform, country, referrer, clicks)
-       VALUES (?1, ?2, ?3, ?4, 1)
-       ON CONFLICT (day, platform, country, referrer)
+      `INSERT INTO download_clicks (day, hour, platform, country, referrer, clicks)
+       VALUES (?1, ?2, ?3, ?4, ?5, 1)
+       ON CONFLICT (day, hour, platform, country, referrer)
        DO UPDATE SET clicks = clicks + 1`,
     )
-      .bind(day, platform, country, referrer)
+      .bind(day, hour, platform, country, referrer)
       .run();
   } catch {
     // A missed tally is not worth a failed download.

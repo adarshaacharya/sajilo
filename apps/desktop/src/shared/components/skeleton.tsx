@@ -10,9 +10,7 @@
  */
 export function SkeletonBlock({ className }: { className?: string }) {
   return (
-    <div
-      className={`animate-pulse rounded bg-surface-hover${className ? ` ${className}` : ""}`}
-    />
+    <div className={`animate-pulse rounded bg-surface-hover${className ? ` ${className}` : ""}`} />
   );
 }
 

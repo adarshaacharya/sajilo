@@ -163,7 +163,9 @@ export function News() {
       )}
 
       {failed.length > 0 && (
-        <p className="mt-2 text-[10px] text-text-muted">Could not reach {failed.join(", ")}.</p>
+        <p className="mt-2 text-[11px] text-text-secondary">
+          {t("news.could-not-reach").replace("{sources}", failed.join(", "))}
+        </p>
       )}
 
       {freshness && items.length > 0 && (

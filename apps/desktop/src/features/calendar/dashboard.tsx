@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../shared/components/card";
 import { Icon } from "../../shared/components/icon";
 import { MonthGrid } from "../../shared/components/month-grid";
-import { FadeUp, Stagger } from "../../shared/components/motion";
+import { SkeletonBlock } from "../../shared/components/skeleton";
+import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import {
   api,
@@ -17,6 +18,38 @@ import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { GlanceCards } from "./_components/glance-cards";
+
+/**
+ * The dashboard at its own shape, before the data lands.
+ *
+ * Sized to the real layout — date header, month grid, event row, glance pair —
+ * so the popover opens at its final height instead of growing under the
+ * pointer. This screen used to render a single `…` here, which told the user
+ * nothing and then jumped.
+ */
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-2.5" aria-hidden>
+      <div className="surface-card p-2.5">
+        <SkeletonBlock className="h-5 w-1/2" />
+        <SkeletonBlock className="mt-1.5 h-3 w-1/3" />
+      </div>
+      <div className="surface-card calendar-panel">
+        <SkeletonBlock className="mx-auto h-3 w-2/5" />
+        <div className="mt-2.5 grid grid-cols-7 gap-1">
+          {Array.from({ length: 42 }, (_, cell) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed grid, never reordered
+            <SkeletonBlock key={cell} className="aspect-square w-full" />
+          ))}
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-2.5">
+        <SkeletonBlock className="h-[72px] w-full rounded-[10px]" />
+        <SkeletonBlock className="h-[72px] w-full rounded-[10px]" />
+      </div>
+    </div>
+  );
+}
 
 const PROVISIONAL_YEARS = new Set([2085, 2086, 2087, 2088, 2089, 2090]);
 const GREG_MONTHS = [
@@ -77,7 +110,8 @@ export function Dashboard() {
     return keys;
   }, [plans]);
 
-  useEffect(() => {
+  const reload = useCallback(() => {
+    setError(null);
     api
       .today()
       .then((value) => {
@@ -94,6 +128,8 @@ export function Dashboard() {
       .then(setPlans)
       .catch(() => setPlans([]));
   }, []);
+
+  useEffect(reload, [reload]);
 
   useEffect(() => {
     if (!cursor) return;
@@ -126,90 +162,72 @@ export function Dashboard() {
   };
 
   if (error) {
-    return (
-      <Card title={t("state.unavailable")}>
-        <p className="text-text-secondary">{error}</p>
-      </Card>
-    );
+    return <StateBanner state={{ status: "failed", message: error }} onRetry={reload} />;
   }
-  if (!today || !month) {
-    return <p className="text-text-muted">…</p>;
-  }
+  if (!today || !month) return <DashboardSkeleton />;
 
   const provisional = cursor && PROVISIONAL_YEARS.has(cursor.year);
   const upNext = upcoming[0];
 
   return (
-    <Stagger className="space-y-2.5">
-      <FadeUp>
-        <DateHeader today={today} />
-      </FadeUp>
+    <div className="space-y-2.5">
+      <DateHeader today={today} />
 
       {modules.clocksEnabled && modules.clocks.length > 0 && (
-        <FadeUp>
-          <ClockRow timeZones={modules.clocks} />
-        </FadeUp>
+        <ClockRow timeZones={modules.clocks} />
       )}
-
-      <FadeUp>
-        <Card className="calendar-panel">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <button
-              type="button"
-              aria-label={t("calendar.previous-month")}
-              onClick={() => step(-1)}
-              className="icon-btn size-7"
-            >
-              <span className="text-[15px] leading-none">‹</span>
-            </button>
-            <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
-              {month.title}
-              {monthSpan ? ` · ${monthSpan}` : ""}
-            </span>
-            <button
-              type="button"
-              aria-label={t("calendar.next-month")}
-              onClick={() => step(1)}
-              className="icon-btn size-7"
-            >
-              <span className="text-[15px] leading-none">›</span>
-            </button>
-          </div>
-          <MonthGrid
-            month={month}
-            planDays={planDays}
-            onSelect={(day) =>
-              day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
-            }
-          />
-          {provisional && (
-            <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
-          )}
-        </Card>
-      </FadeUp>
-
-      {upNext && (
-        <FadeUp>
+      <Card className="calendar-panel">
+        <div className="mb-2 flex items-center justify-between gap-2">
           <button
             type="button"
-            onClick={() => navigate("/events")}
-            className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
+            aria-label={t("calendar.previous-month")}
+            onClick={() => step(-1)}
+            className="icon-btn size-7"
           >
-            <Icon
-              name="festival"
-              className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
-            />
-            <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
-            <span className="shrink-0 text-[11px] text-text-muted">
-              {relativeText(upNext.days_away, t, numerals)} ›
-            </span>
+            <span className="text-[15px] leading-none">‹</span>
           </button>
-        </FadeUp>
-      )}
+          <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
+            {month.title}
+            {monthSpan ? ` · ${monthSpan}` : ""}
+          </span>
+          <button
+            type="button"
+            aria-label={t("calendar.next-month")}
+            onClick={() => step(1)}
+            className="icon-btn size-7"
+          >
+            <span className="text-[15px] leading-none">›</span>
+          </button>
+        </div>
+        <MonthGrid
+          month={month}
+          planDays={planDays}
+          onSelect={(day) =>
+            day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
+          }
+        />
+        {provisional && (
+          <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
+        )}
+      </Card>
 
-      <FadeUp>
-        <GlanceCards />
-      </FadeUp>
-    </Stagger>
+      {upNext && (
+        <button
+          type="button"
+          onClick={() => navigate("/events")}
+          className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
+        >
+          <Icon
+            name="festival"
+            className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
+          />
+          <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
+          <span className="shrink-0 text-[11px] text-text-muted">
+            {relativeText(upNext.days_away, t, numerals)} ›
+          </span>
+        </button>
+      )}
+      <GlanceCards />
+    </div>
   );
 }

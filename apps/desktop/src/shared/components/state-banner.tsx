@@ -53,10 +53,7 @@ export function StateBanner({
           role="status"
           className="mb-2 flex items-center gap-1.5 rounded-lg border border-[color:var(--color-accent-mark)] bg-surface px-2 py-1.5 text-[11px] text-text"
         >
-          <Icon
-            name="clock"
-            className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
-          />
+          <Icon name="clock" className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]" />
           <span className="min-w-0 flex-1">
             {state.since ? `${t("state.stale-since")} ${state.since}` : t("state.stale")}
           </span>
