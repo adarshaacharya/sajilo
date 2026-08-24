@@ -5,7 +5,12 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // Assets are served before the Worker runs, so `/dl/…` — which matches no
+    // file — was answered with 404.html and the redirect never happened. These
+    // routes have to reach the Worker first; every other path keeps the
+    // assets-first behaviour.
+    "run_worker_first": ["/dl/*"]
   },
   "d1_databases": [
     {
