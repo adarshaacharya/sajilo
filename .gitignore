@@ -50,3 +50,19 @@ apps/desktop/dist/
 apps/desktop/src-tauri/gen/
 # Wrangler local state (Cloudflare Workers dev cache)
 .wrangler/
+
+# Agent tooling — installed globally per-developer, not part of the product.
+# NOTE: .github/workflows and pull_request_template.md are real CI. Never
+# ignore .github wholesale, only the subfolders the skill installer creates.
+.claude/skills/
+.claude/settings.local.json
+.agents/
+.codex/
+.github/skills/
+.github/agents/
+.github/hooks/
+
+# Impeccable local state. Critiques in .impeccable/critique/ stay tracked —
+# they are the design backlog.
+.impeccable/config.local.json
+.impeccable/hook.cache.json
