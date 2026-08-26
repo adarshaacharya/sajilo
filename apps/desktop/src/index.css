@@ -311,6 +311,12 @@ html {
   pointer-events: none;
 }
 
+/* The one header control that is genuinely time-sensitive — and it appears
+   only when there is actually an update — so it is the one that carries
+   colour. Same voice as `.settings-btn--accent`: gilt edge, gilt text, the
+   faintest gilt behind it. Not a solid fill: that would out-shout the today
+   cell, which should stay the loudest thing on the screen. In plain chrome it
+   read as one more disabled-looking pill and was missed entirely. */
 .update-header-btn {
   display: inline-flex;
   max-width: 7.5rem;
@@ -321,28 +327,34 @@ html {
   white-space: nowrap;
   border-radius: 6px;
   padding: 3px 8px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 42%, transparent);
+  background: color-mix(in srgb, var(--color-accent-mark) 12%, transparent);
+  color: var(--color-accent);
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.2;
   transition:
     background-color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .update-header-btn:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 20%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 60%, transparent);
 }
 
 .update-header-btn:active {
-  background: var(--color-surface-hover);
+  background: color-mix(in srgb, var(--color-accent-mark) 28%, transparent);
 }
 
+/* Downloading is a status, not an invitation. Back to plain chrome so the
+   gilt only ever means "there is something here to click". */
 .update-header-btn--busy {
-  opacity: 0.75;
+  border-color: var(--color-border);
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  font-weight: 500;
   cursor: default;
 }
 

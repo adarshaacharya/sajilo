@@ -11,7 +11,7 @@ advertising, and no subscription sits behind any of it.
 
 Sajilo sources its data from:
 
-- **News:** OnlineKhabar, Annapurna Post, Ratopati, Bizkhabar, OnlineKhabar English, The Kathmandu Post, Khabarhub, The Rising Nepal, and Ratopati English, via each publisher's own RSS feed.
+- **News:** OnlineKhabar, Annapurna Post, Ratopati, Bizkhabar, OnlineKhabar English, The Kathmandu Post, Khabarhub, Ratopati English, and Gorkhapatra, via each publisher's own RSS feed; Kantipur, via the keyless public JSON endpoint its own front end reads.
 - **Rashifal:** Hamro Patro
 - **Exchange rates:** Nepal Rastra Bank, the country's central bank.
 - **Gold and silver rates:** the Federation of Nepal Gold and Silver

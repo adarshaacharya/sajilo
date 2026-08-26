@@ -6,6 +6,7 @@ use sajilo_providers::rss::{self, parser};
 
 const KATHMANDU_POST: &str = include_str!("../../../fixtures/rss/kathmandupost.xml");
 const ONLINE_KHABAR: &str = include_str!("../../../fixtures/rss/onlinekhabar.xml");
+const GORKHAPATRA: &str = include_str!("../../../fixtures/rss/gorkhapatra.xml");
 /// Recorded from The Himalayan Times before it went behind a bot challenge.
 /// The paper is no longer a source; the fixture stays because it is the only
 /// real-world example of a feed escaping HTML entities inside CDATA, which the
@@ -36,6 +37,46 @@ fn prefers_the_feeds_own_timestamp() {
             .iter()
             .filter(|item| item.published.is_some())
             .all(|item| item.precision == DatePrecision::Exact)
+    );
+}
+
+/// Gorkhapatra replaced The Rising Nepal, its English sibling from the same
+/// publisher, when that paper's host stopped answering on 80 and 443. Its feed
+/// is undiscoverable — only `/rss` serves — and short, ten items to
+/// OnlineKhabar's fifty, which is exactly why it must not be ranked or
+/// interleaved out of the list.
+#[test]
+fn decodes_the_gorkhapatra_feed() {
+    let items = parser::parse(GORKHAPATRA, NewsSource::Gorkhapatra, 100);
+    assert_eq!(items.len(), 10, "the feed publishes ten items");
+    assert!(items.iter().all(|item| !item.title.is_empty()));
+    assert!(
+        items
+            .iter()
+            .all(|item| item.link.starts_with("https://gorkhapatraonline.com/"))
+    );
+    assert!(
+        items
+            .iter()
+            .all(|item| item.source == NewsSource::Gorkhapatra)
+    );
+    // A Nepali-language paper: the headlines arrive in Devanagari, and nothing
+    // in the pipeline may mangle them.
+    assert!(
+        items.iter().any(|item| item
+            .title
+            .chars()
+            .any(|c| ('\u{0900}'..='\u{097f}').contains(&c))),
+        "the titles are Devanagari"
+    );
+    // Every item carries a real `pubDate`, so none is dated from its link path
+    // — which is numeric anyway, `/news/219994`.
+    assert!(!NewsSource::Gorkhapatra.dates_from_link_path());
+    assert!(
+        items
+            .iter()
+            .all(|item| item.published.is_some() && item.precision == DatePrecision::Exact),
+        "the feed ships pubDate on every item"
     );
 }
 

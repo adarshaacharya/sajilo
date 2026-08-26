@@ -8,14 +8,23 @@
  * but its own front end is served by a keyless public JSON endpoint, so it
  * is read from that rather than scraped.
  *
- * Two papers are deliberately absent. Hamro Patro offers nothing but HTML,
- * and parsing that is the technique that silently cost this app 349 days
- * of bundled festival data. The Himalayan Times published perfectly good
- * per-section feeds until it put the whole site behind a Sucuri
+ * Three papers are deliberately absent. Hamro Patro offers nothing but
+ * HTML, and parsing that is the technique that silently cost this app 349
+ * days of bundled festival data. The Himalayan Times published perfectly
+ * good per-section feeds until it put the whole site behind a Sucuri
  * JavaScript challenge: every request now answers `307` into a page that
  * says scripting is required. A browser solves it, an HTTP client cannot,
  * and defeating a bot check to read a newspaper is not something this app
  * does. It was removed rather than left to fail on every refresh — an
  * error line that is always there is one nobody reads when it matters.
+ *
+ * The Rising Nepal went the same way in August 2026, for a duller reason:
+ * its host answers ICMP but refuses every TCP connection on 80 and 443,
+ * from inside Nepal and abroad alike, while `gorkhapatraonline.com` — the
+ * same publisher, the neighbouring address in the same /24 — serves fine.
+ * Nothing was announced and Gorkhapatra still links to
+ * `risingnepaldaily.com`, so there is no new feed to follow. Note that
+ * `risingnep.com` is not one: that domain lapsed and now serves gambling
+ * spam under the paper's old title.
  */
-export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "risingNepal" | "ratopatiEnglish" | "kantipur";
+export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "ratopatiEnglish" | "kantipur";

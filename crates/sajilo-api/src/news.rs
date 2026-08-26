@@ -13,15 +13,25 @@ dto_enum! {
     /// but its own front end is served by a keyless public JSON endpoint, so it
     /// is read from that rather than scraped.
     ///
-    /// Two papers are deliberately absent. Hamro Patro offers nothing but HTML,
-    /// and parsing that is the technique that silently cost this app 349 days
-    /// of bundled festival data. The Himalayan Times published perfectly good
-    /// per-section feeds until it put the whole site behind a Sucuri
+    /// Three papers are deliberately absent. Hamro Patro offers nothing but
+    /// HTML, and parsing that is the technique that silently cost this app 349
+    /// days of bundled festival data. The Himalayan Times published perfectly
+    /// good per-section feeds until it put the whole site behind a Sucuri
     /// JavaScript challenge: every request now answers `307` into a page that
     /// says scripting is required. A browser solves it, an HTTP client cannot,
     /// and defeating a bot check to read a newspaper is not something this app
     /// does. It was removed rather than left to fail on every refresh — an
     /// error line that is always there is one nobody reads when it matters.
+    ///
+    /// The Rising Nepal went the same way in August 2026, for a duller reason:
+    /// its host answers ICMP but refuses every TCP connection on 80 and 443,
+    /// from inside Nepal and abroad alike, while `gorkhapatraonline.com` — the
+    /// same publisher, the neighbouring address in the same /24 — serves fine.
+    /// Nothing was announced and Gorkhapatra still links to
+    /// `risingnepaldaily.com`, so there is no new feed to follow. Note that
+    /// `risingnep.com` is not one: that domain lapsed and now serves gambling
+    /// spam under the paper's old title. Gorkhapatra, its Nepali sibling from
+    /// the same publisher, is read in its place and answers fine.
     pub enum NewsSource {
         OnlineKhabar,
         OnlineKhabarEnglish,
@@ -30,9 +40,9 @@ dto_enum! {
         Bizkhabar,
         KathmanduPost,
         Khabarhub,
-        RisingNepal,
         RatopatiEnglish,
         Kantipur,
+        Gorkhapatra,
     }
 
     /// How precisely `published` is known.
@@ -108,9 +118,9 @@ impl NewsSource {
         Self::Bizkhabar,
         Self::KathmanduPost,
         Self::Khabarhub,
-        Self::RisingNepal,
         Self::RatopatiEnglish,
         Self::Kantipur,
+        Self::Gorkhapatra,
     ];
 
     pub fn display_name(self) -> &'static str {
@@ -122,9 +132,9 @@ impl NewsSource {
             Self::Bizkhabar => "Bizkhabar",
             Self::KathmanduPost => "The Kathmandu Post",
             Self::Khabarhub => "Khabarhub",
-            Self::RisingNepal => "The Rising Nepal",
             Self::RatopatiEnglish => "Ratopati English",
             Self::Kantipur => "Kantipur",
+            Self::Gorkhapatra => "Gorkhapatra",
         }
     }
 
@@ -145,9 +155,13 @@ impl NewsSource {
             // Trailing slash: without it the site answers 301 to exactly this
             // URL, costing a round trip on every refresh.
             Self::Khabarhub => &["https://english.khabarhub.com/feed/"],
-            Self::RisingNepal => &["https://risingnepaldaily.com/rss"],
             Self::RatopatiEnglish => &["https://english.ratopati.com/feed"],
             Self::Kantipur => &[],
+            // Undiscoverable: the homepage advertises no `<link
+            // rel="alternate">` and `/feed` and `/rss.xml` both answer 404.
+            // Only `/rss` serves, and it names itself in an `atom:link
+            // rel="self"`, so it is the feed the paper means to publish.
+            Self::Gorkhapatra => &["https://gorkhapatraonline.com/rss"],
         }
     }
 
@@ -157,7 +171,6 @@ impl NewsSource {
             Self::OnlineKhabarEnglish
                 | Self::KathmanduPost
                 | Self::Khabarhub
-                | Self::RisingNepal
                 | Self::RatopatiEnglish
         )
     }
