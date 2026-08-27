@@ -38,6 +38,9 @@ Linux.
 | `apps/server/` | Background service: fetches and caches every source on a schedule, serves `/v1/*`. |
 | `apps/desktop/src-tauri/` | The tray shell: window, tray icon/title, notifications, backup, autostart, updater, commands. |
 | `apps/desktop/src/` | The web UI — React 19 + TypeScript + Tailwind, feature-based (`features/<name>/`, `shared/` for cross-cutting). |
+| `apps/landing/` | The marketing site: static files plus a Cloudflare Worker that counts download clicks. No build step of its own. |
+| `apps/showcase/` | The landing page's carousel. Mounts `apps/desktop/src` in a browser with the Tauri IPC layer stubbed, so the site embeds the real app rather than screenshots of it. |
+| `apps/showcase-data/` | Records what that stub answers, by running the real engine and parsers over `fixtures/`. Regenerate with `cargo run -p sajilo-showcase-data`. |
 | `data/calendar-events/` | Bundled BS calendar events (2066–2083), embedded into `sajilo-core` at build time. |
 | `fixtures/` | Recorded upstream HTML/JSON so provider parser tests never touch the network. |
 
@@ -47,6 +50,12 @@ Linux.
 cargo test --workspace       # Rust: core, providers, api, server, desktop
 cargo clippy --workspace --exclude sajilo-desktop --all-targets -- -D warnings
 cargo fmt --all --check
+```
+
+```bash
+cd apps/showcase
+bun run data                 # re-record scenes.json from fixtures/
+bun run build                # -> apps/landing/assets/app/
 ```
 
 ```bash
@@ -78,3 +87,7 @@ Non-negotiables:
   since ts-rs names those files after the Rust type.
 - New Rust tests are ordinary `#[test]`s reading only from `fixtures/`, never a
   live network call.
+- The landing page shows the app, not pictures of it. Nothing in
+  `apps/showcase` may hand-write sample data: every value it renders comes from
+  the recording, and the recording comes from the same parsers the product
+  ships.

@@ -1,0 +1,37 @@
+/* The app's stylesheet, whole and unedited — the showcase must not have its own
+ * idea of what a card looks like.
+ *
+ * Tailwind v4 discovers utilities by scanning the files next to the stylesheet
+ * it is compiling. Compiled from here, that scan would find this package and
+ * miss the app itself, so every `grid-cols-7` in ../desktop/src would silently
+ * fail to emit and the panel would render as one long column. `@source` points
+ * the scan back at the real source tree. */
+@import "../../desktop/src/index.css";
+@source "../../desktop/src";
+
+/*
+ * The little that separates an embedded panel from the real popover.
+ *
+ * The desktop window is transparent and lets the macOS material through; an
+ * iframe has nothing behind it, so the page paints the canvas itself. Nothing
+ * here touches a component — the app's own stylesheet still owns every surface.
+ */
+html,
+body {
+  background: var(--color-canvas) !important;
+}
+
+/* The popover draws its own rounded border, and the embedder rounds the iframe
+ * to match. Two radii stacked read as a double frame, so this one goes. */
+.app-window {
+  border: 0;
+  border-radius: 0;
+  clip-path: none;
+}
+
+/* A carousel slide is scrolled past, not scrolled in. Leaving the app's own
+ * scrollbars visible inside an embedded panel reads as a stuck viewport. */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}

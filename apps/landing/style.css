@@ -565,9 +565,7 @@ img {
   }
 }
 
-.hero-device-screen img {
-  display: block;
-  width: 100%;
+.hero-device-screen {
   border-radius: 15px;
 }
 
@@ -753,11 +751,74 @@ section {
     0 0 0 1px color-mix(in srgb, var(--gold) 22%, transparent),;
 }
 
-.slide-frame img {
-  width: 100%;
+/*
+ * The panel, not a picture of it.
+ *
+ * Each slide embeds the real app — the same React build the desktop ships,
+ * reading a recording of its own IPC layer — laid out at the popover's true
+ * 380x560 and scaled down to the slide. Scaling rather than resizing is the
+ * point: the app keeps its real pixel dimensions, so what a visitor sees is the
+ * genuine layout at genuine proportions, and never a responsive reflow the
+ * product itself would never do.
+ *
+ * The scale is derived from the slide width above rather than measured in
+ * JavaScript, so it stays correct through a resize with no script running.
+ */
+/* The frames the panel is measured against. An element cannot query itself, so
+ * the container is the wrapper and the screen inside it reads `cqw` from
+ * there. */
+.slide-frame,
+.hero-device {
+  container-type: inline-size;
+}
+
+.slide-screen,
+.hero-device-screen,
+.lightbox-screen {
+  --app-width: 380;
+  --app-height: 560;
+  position: relative;
+  overflow: hidden;
   border-radius: 17px;
   border: 1px solid var(--border);
+  height: calc(var(--app-height) * var(--app-scale) * 1px);
+}
+
+/* The scale comes from the frame's own measured width, so the panel fits
+ * whatever the layout gives it — a 280px slide, a 330px hero, a phone at 72vw —
+ * with no resize listener and no hard-coded number to keep in step. */
+.slide-screen,
+.hero-device-screen {
+  /* Divided by a length, not by a number: `100cqw / 380` is still a length, and
+   * `scale()` silently rejects one. */
+  --app-scale: calc(100cqw / (var(--app-width) * 1px));
+}
+
+.slide-app,
+.hero-app,
+.lightbox-app {
+  display: block;
+  width: calc(var(--app-width) * 1px);
+  height: calc(var(--app-height) * 1px);
+  border: 0;
+  transform: scale(var(--app-scale));
+  transform-origin: top left;
+  /* A slide is scrolled past, not used. Letting the embedded app take the
+   * pointer would swallow the page's own wheel and turn a click meant for the
+   * lightbox into a tap on whatever tab sat under it. The lightbox copy below
+   * takes the rule back. */
+  pointer-events: none;
+}
+
+.slide-screen {
   cursor: zoom-in;
+}
+
+/* Nothing is mounted until the slide is near enough to be looked at; twelve
+ * simultaneous copies of an app is not a landing page. The empty frame keeps
+ * the slide's exact size so the track never reflows as they come and go. */
+.slide-app:not([src]) {
+  background: var(--surface);
 }
 
 .slide .caption {
@@ -926,12 +987,25 @@ section {
   position: relative;
 }
 
-.lightbox img {
-  max-height: 84vh;
-  max-width: 100%;
+/*
+ * Opened, the panel becomes usable.
+ *
+ * This is the one place the embedded app takes the pointer, and the reason the
+ * carousel is worth clicking: the tabs switch, the news list scrolls, the
+ * calendar pages. It is the product, running, on the page that describes it.
+ */
+/* The only frame with a width of its own: opened, the panel is sized to the
+ * viewport's height rather than to a slot in the layout, and never blown up
+ * past 1.5x, where a 12px type scale starts to look like a mockup. */
+.lightbox-screen {
+  --app-scale: min(1.5, calc(84vh / (var(--app-height) * 1px)), calc(92vw / (var(--app-width) * 1px)));
+  width: calc(var(--app-width) * var(--app-scale) * 1px);
   border-radius: 18px;
-  border: 1px solid var(--border);
   box-shadow: var(--shadow-lift);
+}
+
+.lightbox-app {
+  pointer-events: auto;
 }
 
 .lightbox-caption {

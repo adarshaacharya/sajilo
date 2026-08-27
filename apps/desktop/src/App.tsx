@@ -117,9 +117,14 @@ function Shell() {
   );
 }
 
-export function App() {
+/**
+ * `initialEntries` exists for the landing page, which renders this same app —
+ * not a mock of it — one screen per carousel slide, against a recorded IPC
+ * layer. The popover itself never passes it and opens on "/" as always.
+ */
+export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
   return (
-    <MemoryRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       <ErrorBoundary>
         <SWRConfig value={{ provider: persistentCacheProvider }}>
           <SettingsProvider>

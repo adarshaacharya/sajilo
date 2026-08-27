@@ -17,6 +17,10 @@ import { VegetablesTab } from "./_components/vegetables";
 
 type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 
+/** Also the set `?tab=` accepts, so anything that links into this screen — the
+ * tray, the landing page — can open it on the panel it means. */
+const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables"];
+
 function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadStatus {
   if (!state) return { status: "loading" };
   switch (state.status) {
@@ -39,9 +43,10 @@ function fetchFeeds(refresh = false): Promise<BazarFeeds> {
 export function Bazar() {
   const { t } = useSettings();
   const { search } = useLocation();
-  const [tab, setTab] = useState<Tab>(() =>
-    new URLSearchParams(search).get("tab") === "metals" ? "metals" : "stocks",
-  );
+  const [tab, setTab] = useState<Tab>(() => {
+    const requested = new URLSearchParams(search).get("tab");
+    return TABS.includes(requested as Tab) ? (requested as Tab) : "stocks";
+  });
   const {
     data: feeds,
     isValidating: loadingFeeds,

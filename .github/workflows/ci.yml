@@ -54,6 +54,44 @@ jobs:
             fi
           done
 
+  showcase:
+    name: Showcase
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - name: Install dependencies
+        working-directory: apps/showcase
+        run: bun install --frozen-lockfile
+      # The recording is a pure function of the fixtures and the parsers, so a
+      # fresh run must reproduce the committed file byte for byte. A diff here
+      # means a parser changed and the landing page is still showing what the
+      # old one produced. The bundle itself is not compared — its filenames
+      # carry content hashes that a different toolchain version would churn.
+      - name: Check the recording is current
+        working-directory: apps/showcase
+        run: bun run data
+      - name: Check for drift
+        run: |
+          if ! git diff --quiet -- src/data/scenes.json; then
+            echo "apps/showcase/src/data/scenes.json is stale. Run:"
+            echo "  cd apps/showcase && bun run data && bun run build"
+            git diff --stat -- src/data/scenes.json
+            exit 1
+          fi
+        working-directory: apps/showcase
+      - name: Typecheck and build
+        working-directory: apps/showcase
+        run: |
+          bun run typecheck
+          bun run build
+
   desktop:
     name: Desktop ${{ matrix.os }}
     runs-on: ${{ matrix.os }}

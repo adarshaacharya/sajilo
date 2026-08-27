@@ -109,7 +109,7 @@
 
         <div class="hero-device" aria-hidden="true">
           <div class="hero-device-screen">
-            <img src="assets/screenshot.png" alt="Sajilo open in the menu bar, showing भदौ २०८३ on the Bikram Sambat calendar, Kathmandu weather, and the NEPSE index">
+            <iframe class="hero-app" id="hero-app" title="Sajilo open in the menu bar, showing भदौ २०८३ on the Bikram Sambat calendar, Kathmandu weather, and the NEPSE index" tabindex="-1" scrolling="no"></iframe>
           </div>
         </div>
       </div>
@@ -124,25 +124,25 @@
 
   <div class="carousel-stage">
     <div class="carousel-track-wrap">
-      <div class="carousel" id="carousel" aria-roledescription="carousel" aria-label="App screenshots">
-        <div class="slide is-active" aria-hidden="false"><div class="slide-frame"><img src="assets/showcase/today.png" alt="Today tab: भदौ २०८३ Bikram Sambat calendar with the day's tithi, weather, and gold rate"></div><p class="caption">Today</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/date-details.png" alt="Date details: tithi, sunrise/sunset, Rahu Kaal, and the day plan for ७ भदौ"></div><p class="caption">Day details</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/news.png" alt="News tab: headlines from Bizkhabar, OnlineKhabar, Ratopati, and The Kathmandu Post"></div><p class="caption">News</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/bazar.png" alt="Bazar tab: NEPSE index, top gainers, and stock watchlist"></div><p class="caption">Bazar · Stocks</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/bazar-gold-silver.png" alt="Bazar tab: fine gold and silver rates per tola and per 10 grams"></div><p class="caption">Bazar · Gold &amp; Silver</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/bazar-fuel.png" alt="Bazar tab: petrol, diesel, kerosene, and LPG cylinder prices from Nepal Oil Corporation"></div><p class="caption">Bazar · Fuel</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/bazar-vegetables.png" alt="Bazar tab: Kalimati vegetable prices, tomato and potato varieties"></div><p class="caption">Bazar · Vegetables</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/rashifal.png" alt="Rashifal tab: daily reading for Mesh (Aries)"></div><p class="caption">Rashifal</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/radio.png" alt="Radio tab: Radio Kantipur playing, with a list of Nepali stations"></div><p class="caption">Radio</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/tools.png" alt="Tools tab: land/weight/VAT/interest calculators, a second clock, date converter, and directory"></div><p class="caption">Tools</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/tools-directory.png" alt="Tools directory: emergency phone numbers including Nepal Police, Fire Brigade, and Ambulance"></div><p class="caption">Tools · Directory</p></div>
-        <div class="slide"><div class="slide-frame"><img src="assets/showcase/keeper.png" alt="Keeper tab: adding a driving licence with its expiry date"></div><p class="caption">Keeper</p></div>
+      <div class="carousel" id="carousel" aria-roledescription="carousel" aria-label="The app, screen by screen">
+        <div class="slide is-active" aria-hidden="false"><div class="slide-frame" role="img" aria-label="Today tab: the भदौ २०८३ Bikram Sambat month grid, Kathmandu weather, and the NEPSE index"><div class="slide-screen"><iframe class="slide-app" data-route="/" title="Today tab: the भदौ २०८३ Bikram Sambat month grid, Kathmandu weather, and the NEPSE index" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Today</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Date details: tithi, sunrise and sunset, Rahu Kaal, and the day's plan"><div class="slide-screen"><iframe class="slide-app" data-route="/day" title="Date details: tithi, sunrise and sunset, Rahu Kaal, and the day's plan" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Day details</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="News tab: headlines from Gorkhapatra, Kantipur, OnlineKhabar, and The Kathmandu Post"><div class="slide-screen"><iframe class="slide-app" data-route="/news" title="News tab: headlines from Gorkhapatra, Kantipur, OnlineKhabar, and The Kathmandu Post" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">News</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Bazar tab: the NEPSE index, top gainers, and the stock watchlist"><div class="slide-screen"><iframe class="slide-app" data-route="/bazar?tab=stocks" title="Bazar tab: the NEPSE index, top gainers, and the stock watchlist" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Bazar · Stocks</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Bazar tab: fine gold and silver rates per tola and per ten grams"><div class="slide-screen"><iframe class="slide-app" data-route="/bazar?tab=metals" title="Bazar tab: fine gold and silver rates per tola and per ten grams" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Bazar · Gold &amp; Silver</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Bazar tab: petrol, diesel, kerosene, and LPG prices from Nepal Oil Corporation"><div class="slide-screen"><iframe class="slide-app" data-route="/bazar?tab=fuel" title="Bazar tab: petrol, diesel, kerosene, and LPG prices from Nepal Oil Corporation" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Bazar · Fuel</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Bazar tab: wholesale Kalimati vegetable prices"><div class="slide-screen"><iframe class="slide-app" data-route="/bazar?tab=vegetables" title="Bazar tab: wholesale Kalimati vegetable prices" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Bazar · Vegetables</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Rashifal tab: the day's reading, by sign"><div class="slide-screen"><iframe class="slide-app" data-route="/rashifal" title="Rashifal tab: the day's reading, by sign" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Rashifal</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Radio tab: the directory of Nepali FM stations"><div class="slide-screen"><iframe class="slide-app" data-route="/radio" title="Radio tab: the directory of Nepali FM stations" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Radio</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Tools tab: land, weight, VAT and interest calculators, a second clock, and the date converter"><div class="slide-screen"><iframe class="slide-app" data-route="/tools" title="Tools tab: land, weight, VAT and interest calculators, a second clock, and the date converter" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Tools</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Exchange rates: Nepal Rastra Bank's buy and sell rates"><div class="slide-screen"><iframe class="slide-app" data-route="/forex" title="Exchange rates: Nepal Rastra Bank's buy and sell rates" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Exchange rates</p></div>
+        <div class="slide" aria-hidden="true"><div class="slide-frame" role="img" aria-label="Keeper tab: reminders for documents, bills and renewals"><div class="slide-screen"><iframe class="slide-app" data-route="/keeper" title="Keeper tab: reminders for documents, bills and renewals" tabindex="-1" scrolling="no" loading="lazy"></iframe></div></div><p class="caption">Keeper</p></div>
       </div>
 
-      <button class="carousel-arrow carousel-prev" id="carousel-prev" aria-label="Previous screenshot" type="button">
+      <button class="carousel-arrow carousel-prev" id="carousel-prev" aria-label="Previous screen" type="button">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 13.5 5 8l5.5-5.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="carousel-arrow carousel-next" id="carousel-next" aria-label="Next screenshot" type="button">
+      <button class="carousel-arrow carousel-next" id="carousel-next" aria-label="Next screen" type="button">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 2.5 11 8l-5.5 5.5" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -163,14 +163,14 @@
       <svg viewBox="0 0 16 16"><path d="M3 3l10 10M13 3 3 13" stroke-linecap="round"/></svg>
     </button>
     <div class="lightbox-frame">
-      <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous screenshot" type="button">
+      <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous screen" type="button">
         <svg viewBox="0 0 16 16"><path d="M10.5 13.5 5 8l5.5-5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <div class="lightbox-media">
-        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-screen"><iframe class="lightbox-app" id="lightbox-app" title="Sajilo"></iframe></div>
         <p class="lightbox-caption" id="lightbox-caption"></p>
       </div>
-      <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next screenshot" type="button">
+      <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next screen" type="button">
         <svg viewBox="0 0 16 16"><path d="M5.5 2.5 11 8l-5.5 5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
@@ -362,6 +362,11 @@
   })();
 
   (function () {
+    var hero = document.getElementById("hero-app");
+    if (hero) hero.src = "assets/app/index.html?route=%2F&inert=1";
+  })();
+
+  (function () {
     var track = document.getElementById("carousel");
     var prev = document.getElementById("carousel-prev");
     var next = document.getElementById("carousel-next");
@@ -376,6 +381,38 @@
 
     if (totalLabel) totalLabel.textContent = String(slides.length);
 
+    // Each slide holds the real app, not a screenshot of it, and an app costs
+    // something to run. Only the slides within reach of the current one are
+    // mounted; the rest are an empty frame of the right size. MOUNT_AHEAD is
+    // wider than the two slides actually visible so the next one has finished
+    // painting before autoplay reaches it, and KEEP_MOUNTED is wider still so
+    // stepping back and forth over a boundary does not tear one down and build
+    // it again.
+    var MOUNT_AHEAD = 2;
+    var KEEP_MOUNTED = 4;
+
+    // The whole route travels as one encoded value, query string and all, so
+    // "/bazar?tab=fuel" arrives at the router intact. `inert` is what the
+    // embedded document reads to keep itself out of the tab order — a slide is
+    // scenery, and only the lightbox copy is meant to be used.
+    function appUrl(route, usable) {
+      return "assets/app/index.html?route=" + encodeURIComponent(route) +
+        (usable ? "" : "&inert=1");
+    }
+
+    function mountNearby() {
+      slides.forEach(function (slide, index) {
+        var frame = slide.querySelector(".slide-app");
+        if (!frame) return;
+        var distance = Math.abs(index - current);
+        if (distance <= MOUNT_AHEAD) {
+          if (!frame.getAttribute("src")) frame.src = appUrl(frame.dataset.route, false);
+        } else if (distance > KEEP_MOUNTED && frame.getAttribute("src")) {
+          frame.removeAttribute("src");
+        }
+      });
+    }
+
     function updateChrome() {
       slides.forEach(function (slide, index) {
         var active = index === current;
@@ -386,6 +423,7 @@
         liveCaption.textContent = slides[current].querySelector(".caption").textContent;
       }
       if (currentLabel) currentLabel.textContent = String(current + 1);
+      mountNearby();
       if (progressFill) {
         progressFill.style.width = ((current + 1) / slides.length * 100) + "%";
       }
@@ -487,20 +525,23 @@
     }
 
     var lightbox = document.getElementById("lightbox");
-    var lightboxImg = document.getElementById("lightbox-img");
+    var lightboxApp = document.getElementById("lightbox-app");
     var lightboxCaption = document.getElementById("lightbox-caption");
     var lightboxIndex = 0;
 
+    // A fresh document each time, so the panel opens on its own screen rather
+    // than wherever the last visitor left it.
     function showInLightbox(i) {
       lightboxIndex = (i + slides.length) % slides.length;
-      var img = slides[lightboxIndex].querySelector("img");
-      lightboxImg.src = img.src;
-      lightboxImg.alt = img.alt;
-      lightboxCaption.textContent = slides[lightboxIndex].querySelector(".caption").textContent;
+      var slide = slides[lightboxIndex];
+      var frame = slide.querySelector(".slide-app");
+      lightboxApp.src = appUrl(frame.dataset.route, true);
+      lightboxApp.title = frame.title;
+      lightboxCaption.textContent = slide.querySelector(".caption").textContent;
     }
 
     slides.forEach(function (slide, i) {
-      slide.querySelector("img").addEventListener("click", function () {
+      slide.querySelector(".slide-frame").addEventListener("click", function () {
         stopAutoplay();
         current = i;
         updateChrome();
@@ -522,6 +563,7 @@
       if (e.target === lightbox) lightbox.close();
     });
     lightbox.addEventListener("close", function () {
+      lightboxApp.removeAttribute("src");
       setActive(lightboxIndex, false);
     });
 
