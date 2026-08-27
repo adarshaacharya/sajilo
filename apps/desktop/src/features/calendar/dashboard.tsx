@@ -6,6 +6,7 @@ import { MonthGrid } from "../../shared/components/month-grid";
 import { SkeletonBlock } from "../../shared/components/skeleton";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
+import { openExternalLink } from "../../shared/lib/external-link";
 import {
   api,
   type CalendarMonth,
@@ -66,6 +67,10 @@ const GREG_MONTHS = [
   "Nov",
   "Dec",
 ];
+
+// Temporary public-safety link for the Rasuwa–Bhotekoshi flood response.
+// Remove this once the live bulletin is no longer needed on Today.
+const RASUWA_FLOOD_BULLETIN_URL = "https://nirajbhusal.github.io/rasuwa-flood-bulletin/";
 
 function relativeText(
   daysAway: number,
@@ -172,6 +177,29 @@ export function Dashboard() {
   return (
     <div className="space-y-2.5">
       <DateHeader today={today} />
+
+      <button
+        type="button"
+        onClick={() => openExternalLink(RASUWA_FLOOD_BULLETIN_URL)}
+        aria-label={t("dashboard.flood-aria-label")}
+        className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-colors hover:bg-surface-hover active:scale-[0.99]"
+      >
+        <span className="live-status-dot ml-0.5 shrink-0" aria-hidden />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[12px] font-medium">
+            {t("dashboard.flood-title")}
+          </span>
+          <span className="block truncate text-[10px] text-text-muted">
+            {t("dashboard.flood-detail")}
+          </span>
+        </span>
+        <span className="flex shrink-0 items-center gap-0.5 text-[11px] font-medium text-[color:var(--color-accent-mark)]">
+          {t("dashboard.flood-action")}
+          <span className="text-[8px] font-normal leading-none opacity-55" aria-hidden>
+            ↗
+          </span>
+        </span>
+      </button>
 
       {modules.clocksEnabled && modules.clocks.length > 0 && (
         <ClockRow timeZones={modules.clocks} />

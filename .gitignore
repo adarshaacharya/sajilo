@@ -66,3 +66,6 @@ apps/desktop/src-tauri/gen/
 # they are the design backlog.
 .impeccable/config.local.json
 .impeccable/hook.cache.json
+
+
+.sajilo-dev-*

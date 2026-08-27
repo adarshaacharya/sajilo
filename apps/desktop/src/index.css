@@ -222,6 +222,45 @@ html {
     border-color 0.15s ease;
 }
 
+/* A quiet broadcast indicator for time-sensitive links. The ring breathes
+   instead of flashing so it reads as current without turning the whole row
+   into an alarm. */
+.live-status-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-negative);
+}
+
+.live-status-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1px solid var(--color-negative);
+  border-radius: inherit;
+  animation: live-status-breathe 2.2s ease-out infinite;
+}
+
+@keyframes live-status-breathe {
+  0% {
+    opacity: 0.65;
+    transform: scale(0.55);
+  }
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-status-dot::after {
+    animation: none;
+    opacity: 0.35;
+  }
+}
+
 /* macOS NSTextField-style inputs. */
 .control-field {
   background: var(--color-control-bg);
