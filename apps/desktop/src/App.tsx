@@ -8,6 +8,7 @@ import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
 import { Forex } from "./features/forex/forex";
 import { Keeper } from "./features/keeper/keeper";
+import { GovernmentUpdateDetail } from "./features/news/government-update-detail";
 import { News } from "./features/news/news";
 import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
@@ -35,6 +36,11 @@ const ROUTES = [
   { path: "/weather", titleKey: "screen.weather", element: <Weather /> },
   { path: "/forex", titleKey: "screen.exchange-rates", element: <Forex /> },
   { path: "/news", titleKey: "screen.news", element: <News /> },
+  {
+    path: "/news/government",
+    titleKey: "screen.official-update",
+    element: <GovernmentUpdateDetail />,
+  },
   { path: "/bazar", titleKey: "screen.bazar", element: <Bazar /> },
   { path: "/rashifal", titleKey: "screen.rashifal", element: <Rashifal /> },
   { path: "/radio", titleKey: "screen.radio", element: <Radio /> },

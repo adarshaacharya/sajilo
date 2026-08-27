@@ -1,4 +1,5 @@
-//! The ten-source news merge. Ported from `RSSNewsProvider.swift`.
+//! The publisher and official-update news merge. Ported from
+//! `RSSNewsProvider.swift`.
 //!
 //! Nine of the ten are RSS. Kantipur is not — it is decoded by
 //! [`crate::kantipur`] from the JSON endpoint its own site runs on — and is
@@ -17,7 +18,7 @@ use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
 
 use crate::error::Result;
 use crate::http::HttpClient;
-use crate::kantipur;
+use crate::{government_updates, kantipur};
 
 pub const SOURCE_NAME: &str = "RSS news";
 
@@ -34,8 +35,8 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>, limit: usize) -> Res
     let mut failed = Vec::new();
 
     for source in NewsSource::ALL {
-        // Kantipur has no feed to read; it is fetched from its JSON endpoint
-        // below and joins the merge as one more list of headlines.
+        // JSON sources have no RSS feed; they are fetched below and join the
+        // merge as peer lists.
         if source.rss_feeds().is_empty() {
             continue;
         }
@@ -64,6 +65,11 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>, limit: usize) -> Res
     match kantipur::fetch(client, parser::DEFAULT_LIMIT).await {
         Ok(items) if !items.is_empty() => feeds.push(items),
         _ => failed.push(NewsSource::Kantipur.display_name().to_owned()),
+    }
+
+    match government_updates::fetch(client, parser::DEFAULT_LIMIT).await {
+        Ok(items) if !items.is_empty() => feeds.push(items),
+        _ => failed.push(NewsSource::NepalGovernment.display_name().to_owned()),
     }
 
     Ok(NewsDigest {

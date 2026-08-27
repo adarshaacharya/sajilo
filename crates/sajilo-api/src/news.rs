@@ -1,5 +1,5 @@
-//! Merged headlines from ten Nepali and English publishers. Ported from
-//! `NewsItem.swift`.
+//! Merged headlines from Nepali and English publishers plus official Nepal
+//! Government updates. Ported from `NewsItem.swift`.
 
 use chrono::{DateTime, Utc};
 
@@ -8,10 +8,10 @@ use crate::load_state::Freshness;
 dto_enum! {
     /// The feeds Sajilo reads.
     ///
-    /// All but one are official publisher RSS endpoints returning
-    /// `application/rss+xml`. Kantipur is the exception: it publishes no feed,
-    /// but its own front end is served by a keyless public JSON endpoint, so it
-    /// is read from that rather than scraped.
+    /// Most are publisher RSS endpoints returning `application/rss+xml`.
+    /// Kantipur and Nepal Government are the exceptions: both expose the
+    /// keyless JSON endpoints their own front ends use, so Sajilo reads those
+    /// rather than scraping rendered HTML.
     ///
     /// Three papers are deliberately absent. Hamro Patro offers nothing but
     /// HTML, and parsing that is the technique that silently cost this app 349
@@ -33,6 +33,7 @@ dto_enum! {
     /// spam under the paper's old title. Gorkhapatra, its Nepali sibling from
     /// the same publisher, is read in its place and answers fine.
     pub enum NewsSource {
+        NepalGovernment,
         OnlineKhabar,
         OnlineKhabarEnglish,
         AnnapurnaPost,
@@ -58,21 +59,43 @@ dto_enum! {
 }
 
 dto! {
+    /// A file attached to an official government update.
+    pub struct NewsAttachment {
+        pub id: String,
+        pub filename: String,
+        pub mime_type: String,
+        pub size: u32,
+        pub url: String,
+    }
+
     /// A single headline.
     ///
-    /// Deliberately just a title, a link, and where it came from. The feeds
-    /// carry more — OnlineKhabar ships `content:encoded` with the whole article
-    /// body — and none of it is read. Syndicating a feed is not a licence to
-    /// republish what it contains.
+    /// Publisher entries deliberately retain only a title, a link, and where
+    /// they came from. Official government notices additionally retain their
+    /// public body and attachments so Sajilo can provide a usable detail view.
     pub struct NewsItem {
+        // Stable only for sources that publish one. Government updates use
+        // this to open their complete cached text inside Sajilo.
+        #[serde(default)]
+        pub id: Option<String>,
         pub title: String,
         pub link: String,
         pub source: NewsSource,
         pub source_name: String,
-        /// Absent in some feeds — Annapurna Post publishes no `pubDate` at all
-        /// — so nothing may depend on it being there.
+        // Absent in some feeds — Annapurna Post publishes no `pubDate` at all
+        // — so nothing may depend on it being there.
         pub published: Option<DateTime<Utc>>,
         pub precision: DatePrecision,
+        // Full text is retained only for official government updates. News
+        // publishers remain headline-and-link only.
+        #[serde(default)]
+        pub content: Option<String>,
+        #[serde(default)]
+        pub department: Option<String>,
+        #[serde(default)]
+        pub tags: Vec<String>,
+        #[serde(default)]
+        pub attachments: Vec<NewsAttachment>,
     }
 
     /// One entry in the source picker.
@@ -83,6 +106,7 @@ dto! {
         pub id: NewsSource,
         pub name: String,
         pub english: bool,
+        pub official: bool,
     }
 
     pub struct NewsDigest {
@@ -104,13 +128,15 @@ impl NewsSourceInfo {
                 id: source,
                 name: source.display_name().to_owned(),
                 english: source.is_english(),
+                official: source.is_official(),
             })
             .collect()
     }
 }
 
 impl NewsSource {
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 11] = [
+        Self::NepalGovernment,
         Self::OnlineKhabar,
         Self::OnlineKhabarEnglish,
         Self::AnnapurnaPost,
@@ -125,6 +151,7 @@ impl NewsSource {
 
     pub fn display_name(self) -> &'static str {
         match self {
+            Self::NepalGovernment => "Nepal Government",
             Self::OnlineKhabar => "OnlineKhabar",
             Self::OnlineKhabarEnglish => "OnlineKhabar English",
             Self::AnnapurnaPost => "Annapurna Post",
@@ -146,6 +173,7 @@ impl NewsSource {
     /// `sajilo_providers::kantipur`.
     pub fn rss_feeds(self) -> &'static [&'static str] {
         match self {
+            Self::NepalGovernment => &[],
             Self::OnlineKhabar => &["https://www.onlinekhabar.com/feed"],
             Self::OnlineKhabarEnglish => &["https://english.onlinekhabar.com/feed"],
             Self::AnnapurnaPost => &["https://annapurnapost.com/rss/"],
@@ -173,6 +201,10 @@ impl NewsSource {
                 | Self::Khabarhub
                 | Self::RatopatiEnglish
         )
+    }
+
+    pub fn is_official(self) -> bool {
+        self == Self::NepalGovernment
     }
 
     /// The Kathmandu Post ships no `pubDate`, but every one of its links spells

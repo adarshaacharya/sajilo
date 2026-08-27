@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
@@ -28,6 +29,7 @@ const SOURCE_KEY = "news.source";
 
 export function News() {
   const { t } = useSettings();
+  const navigate = useNavigate();
   const [visible, setVisible] = useState(PAGE);
   const [sources, setSources] = useState<NewsSourceInfo[]>([]);
   const [saved, setSaved] = usePersistedString(SOURCE_KEY);
@@ -118,9 +120,15 @@ export function News() {
           options={[{ id: ALL, label: t("news.all-sources") }]}
           groups={[
             {
+              label: t("news.group-official"),
+              options: sources
+                .filter((source) => source.official)
+                .map((source) => ({ id: source.id as string, label: source.name })),
+            },
+            {
               label: t("news.group-nepali"),
               options: sources
-                .filter((source) => !source.english)
+                .filter((source) => !source.english && !source.official)
                 .map((source) => ({ id: source.id as string, label: source.name })),
             },
             {
@@ -145,7 +153,11 @@ export function News() {
               <HeadlineRow
                 item={item}
                 showSource={showSource}
-                onOpen={() => openExternalLink(item.link)}
+                onOpen={() =>
+                  item.source === "nepalGovernment" && item.id
+                    ? navigate(`/news/government?id=${encodeURIComponent(item.id)}`)
+                    : openExternalLink(item.link)
+                }
               />
             </FadeUp>
           ))}

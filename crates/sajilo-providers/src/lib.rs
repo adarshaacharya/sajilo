@@ -8,6 +8,7 @@
 pub mod annapurna_dates;
 pub mod error;
 pub mod fenegosida;
+pub mod government_updates;
 pub mod hamropatro;
 pub mod hamropatro_metals;
 pub mod html;

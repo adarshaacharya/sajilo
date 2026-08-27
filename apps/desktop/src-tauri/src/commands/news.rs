@@ -1,4 +1,4 @@
-//! Nine-source RSS headline merge.
+//! Publisher headlines plus official Nepal Government updates.
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;

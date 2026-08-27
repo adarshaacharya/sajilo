@@ -172,12 +172,17 @@ mod tests {
 
     fn item(title: &str, published: Option<DateTime<Utc>>) -> NewsItem {
         NewsItem {
+            id: None,
             title: title.to_owned(),
             link: format!("https://annapurnapost.com/story/{title}"),
             source: NewsSource::AnnapurnaPost,
             source_name: "Annapurna Post".to_owned(),
             published,
             precision: sajilo_api::news::DatePrecision::Exact,
+            content: None,
+            department: None,
+            tags: Vec::new(),
+            attachments: Vec::new(),
         }
     }
 

@@ -181,12 +181,17 @@ fn item(
     precision: DatePrecision,
 ) -> NewsItem {
     NewsItem {
+        id: None,
         title: link.to_owned(),
         link: link.to_owned(),
         source,
         source_name: source.display_name().to_owned(),
         published: published.map(|secs| Utc.timestamp_opt(secs, 0).unwrap()),
         precision,
+        content: None,
+        department: None,
+        tags: Vec::new(),
+        attachments: Vec::new(),
     }
 }
 

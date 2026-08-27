@@ -3,10 +3,10 @@
 /**
  * The feeds Sajilo reads.
  *
- * All but one are official publisher RSS endpoints returning
- * `application/rss+xml`. Kantipur is the exception: it publishes no feed,
- * but its own front end is served by a keyless public JSON endpoint, so it
- * is read from that rather than scraped.
+ * Most are publisher RSS endpoints returning `application/rss+xml`.
+ * Kantipur and Nepal Government are the exceptions: both expose the
+ * keyless JSON endpoints their own front ends use, so Sajilo reads those
+ * rather than scraping rendered HTML.
  *
  * Three papers are deliberately absent. Hamro Patro offers nothing but
  * HTML, and parsing that is the technique that silently cost this app 349
@@ -25,6 +25,7 @@
  * Nothing was announced and Gorkhapatra still links to
  * `risingnepaldaily.com`, so there is no new feed to follow. Note that
  * `risingnep.com` is not one: that domain lapsed and now serves gambling
- * spam under the paper's old title.
+ * spam under the paper's old title. Gorkhapatra, its Nepali sibling from
+ * the same publisher, is read in its place and answers fine.
  */
-export type NewsSource = "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "ratopatiEnglish" | "kantipur";
+export type NewsSource = "nepalGovernment" | "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "ratopatiEnglish" | "kantipur" | "gorkhapatra";

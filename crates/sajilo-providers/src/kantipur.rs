@@ -63,12 +63,17 @@ fn build(entry: Entry) -> Option<NewsItem> {
     }
 
     Some(NewsItem {
+        id: None,
         title: title.to_owned(),
         link: link.to_owned(),
         source: NewsSource::Kantipur,
         source_name: NewsSource::Kantipur.display_name().to_owned(),
         published: parse_nepal_time(&entry.pub_date),
         precision: DatePrecision::Exact,
+        content: None,
+        department: None,
+        tags: Vec::new(),
+        attachments: Vec::new(),
     })
 }
 

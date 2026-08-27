@@ -66,6 +66,11 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: ". -> target"
+      # The showcase compiles the desktop source directly. TypeScript resolves
+      # imports relative to that source, so its dependencies must exist too.
+      - name: Install desktop frontend dependencies
+        working-directory: apps/desktop
+        run: bun install --frozen-lockfile
       - name: Install dependencies
         working-directory: apps/showcase
         run: bun install --frozen-lockfile

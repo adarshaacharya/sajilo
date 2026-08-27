@@ -7,4 +7,4 @@ import type { NewsSource } from "./NewsSource";
  * Sent rather than duplicated in TypeScript so the publisher names and the
  * language split have exactly one definition — this file.
  */
-export type NewsSourceInfo = { id: NewsSource, name: string, english: boolean, };
+export type NewsSourceInfo = { id: NewsSource, name: string, english: boolean, official: boolean, };

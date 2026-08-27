@@ -165,6 +165,7 @@ fn build(title: &str, link: &str, pub_date: &str, source: NewsSource) -> Option<
     };
 
     Some(NewsItem {
+        id: None,
         title: title.to_owned(),
         link: link.to_owned(),
         source,
@@ -175,6 +176,10 @@ fn build(title: &str, link: &str, pub_date: &str, source: NewsSource) -> Option<
         } else {
             DatePrecision::Day
         },
+        content: None,
+        department: None,
+        tags: Vec::new(),
+        attachments: Vec::new(),
     })
 }
 
