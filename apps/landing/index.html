@@ -181,47 +181,101 @@
   <div class="wrap">
     <div class="section-head">
       <h2>Everything Nepal checks in a day</h2>
-      <p class="section-sub">Nine modules, one compact popover. Toggle what you need in Settings.</p>
+      <p class="section-sub">A real day, exactly as the app shows it. Every number below is genuine, not a mockup.</p>
     </div>
 
-    <div class="feature-list">
-      <article class="feature-item">
-        <h3>Bikram Sambat calendar</h3>
-        <p>AD conversion, tithi, festivals, and public holidays. Fully offline.</p>
-      </article>
-      <article class="feature-item">
-        <h3>News</h3>
-        <p>Headlines from ten Nepali newsrooms, in Nepali and English, all day.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Bazar &amp; NEPSE</h3>
-        <p>Gold, silver, fuel, Kalimati vegetables, and a NEPSE watchlist.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Rashifal</h3>
-        <p>Daily rashifal for all twelve rashis, with a quick sign finder.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Day plans &amp; Keeper</h3>
-        <p>Notes on any BS date, plus renewals and bills tracked by due date.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Weather &amp; forex</h3>
-        <p>Kathmandu weather and air quality, plus Nepal Rastra Bank rates.</p>
-      </article>
-      <article class="feature-item">
-        <h3>World clocks &amp; radio</h3>
-        <p>Pin cities beside Nepal time and stream Nepali FM stations in-app.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Nepali unit tools</h3>
-        <p>Land, weight, VAT, and simple-interest conversions in Nepali units.</p>
-      </article>
-      <article class="feature-item">
-        <h3>Nepali or English</h3>
-        <p>The full interface in either language, with Devanagari or English numerals.</p>
-      </article>
+    <!--
+      The date, the tithi, the festivals and every rate below are read out of
+      apps/showcase/src/data/scenes.json — the recording the panels above run
+      on, produced by apps/showcase-data from the real engine and the real
+      parsers. They describe the same day the carousel does. Refresh them
+      together: `cd apps/showcase && bun run data && bun run build`.
+    -->
+    <div class="day">
+      <div class="day-date">
+        <p class="day-bs" lang="ne">१० भदौ २०८३</p>
+        <p class="day-ad">Wednesday, 26 August 2026 <span class="day-tithi" lang="ne">त्रयोदशी</span></p>
+        <p class="day-note">Dates, festivals and public holidays work fully offline, every year from 2066 to 2083 &mdash; and you can jot a note on any day.</p>
+      </div>
+
+      <ol class="day-next">
+        <li>
+          <span class="day-next-name" lang="ne">पूर्णिमाव्रत, बाजुरा बडिमालिका मेला</span>
+          <span class="day-next-when">Tomorrow</span>
+        </li>
+        <li class="is-holiday">
+          <span class="day-next-name" lang="ne">ऋषितर्पणी, रक्षाबन्धन</span>
+          <span class="day-next-when">In 2 days <span class="day-next-flag">Public holiday</span></span>
+        </li>
+        <li class="is-holiday">
+          <span class="day-next-name" lang="ne">गाईजात्रा (सापारू)</span>
+          <span class="day-next-when">In 3 days <span class="day-next-flag">Public holiday</span></span>
+        </li>
+      </ol>
     </div>
+
+    <dl class="board">
+      <div class="board-row">
+        <dt><span lang="ne">समाचार</span> <span class="board-en">News</span></dt>
+        <dd class="board-value">10 newsrooms</dd>
+        <p class="board-note">Gorkhapatra, Kantipur, OnlineKhabar, Ratopati, The Kathmandu Post and five more, in Nepali and English.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">सुनचाँदी</span> <span class="board-en">Fine gold</span></dt>
+        <dd class="board-value">Rs 3,06,800 <span class="board-unit">/ tola</span></dd>
+        <p class="board-note">FENEGOSIDA's published rate, up Rs 1,600 on the day before. Silver Rs 4,770.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">नेप्से</span> <span class="board-en">NEPSE</span></dt>
+        <dd class="board-value">2,558.35 <span class="board-delta">&minus;1.38%</span></dd>
+        <p class="board-note">The index, thirteen sub-indices, four leaderboards and all 348 listed companies.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">इन्धन</span> <span class="board-en">Petrol</span></dt>
+        <dd class="board-value">Rs 200 <span class="board-unit">/ litre</span></dd>
+        <p class="board-note">Nepal Oil Corporation, in force since 2 August. Diesel, kerosene and the LPG cylinder too.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">तरकारी</span> <span class="board-en">Kalimati</span></dt>
+        <dd class="board-value">Rs 65 <span class="board-unit">/ kg</span></dd>
+        <p class="board-note">Average for <span lang="ne">गोलभेडा ठूलो(नेपाली)</span>. 101 items, wholesale, with the day's low and high.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">मौसम</span> <span class="board-en">Kathmandu</span></dt>
+        <dd class="board-value">23&deg; <span class="board-unit">AQI 90</span></dd>
+        <p class="board-note">Open-Meteo: six-day forecast, PM2.5 and PM10, and what the air quality means today.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">विनिमय दर</span> <span class="board-en">US dollar</span></dt>
+        <dd class="board-value">Rs 152.39</dd>
+        <p class="board-note">Nepal Rastra Bank's buying rate. 22 currencies, buy and sell, with your own pinned first.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">राशिफल</span> <span class="board-en">Rashifal</span></dt>
+        <dd class="board-value">12 <span class="board-unit" lang="ne">राशि</span></dd>
+        <p class="board-note">The day's reading for every sign, and a finder that takes the first syllable of a name.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">रेडियो</span> <span class="board-en">Radio</span></dt>
+        <dd class="board-value">272 stations</dd>
+        <p class="board-note">Nepali FM, streamed in the popover, with the player docked while you use the rest.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">औजार</span> <span class="board-en">Tools</span></dt>
+        <dd class="board-value">1 ropani = 5,476 ft&sup2;</dd>
+        <p class="board-note">Land in ropani and bigha, tola to grams, VAT, simple interest, and a second clock for any city.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">सम्हाल</span> <span class="board-en">Keeper</span></dt>
+        <dd class="board-value">5 document types</dd>
+        <p class="board-note">Citizenship, passport, licence, national ID and PAN, with renewals and bills tracked by due date.</p>
+      </div>
+      <div class="board-row">
+        <dt><span lang="ne">भाषा</span> <span class="board-en">Language</span></dt>
+        <dd class="board-value" lang="ne">नेपाली <span class="board-unit">/ English</span></dd>
+        <p class="board-note">The whole interface in either, with Devanagari or Latin numerals. Any module you do not want, off in Settings.</p>
+      </div>
+    </dl>
   </div>
 </section>
 

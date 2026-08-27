@@ -1104,53 +1104,216 @@ section {
 
 /* ---------- features ---------- */
 
+/*
+ * The rate board.
+ *
+ * This section used to be nine equal cells of heading-and-sentence, which is
+ * the shape every landing page reaches for and the one place on this page that
+ * described the product instead of showing it. Everything above it embeds the
+ * running app; this opted out and read as filler.
+ *
+ * What replaced it is the thing the app actually is: a board of the day's
+ * figures, the way a rate is posted in a shop window — a Bikram Sambat date at
+ * full display size, the festivals it leads to, and beneath them what each
+ * module answered, in the units Nepal uses. Every number is read out of the
+ * same recording the panels above run on, so the section cannot claim a figure
+ * the product could not produce.
+ */
+
 .features-section {
   background: var(--canvas);
 }
 
-.feature-list {
+/* ---- the day */
+
+.day {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  column-gap: clamp(28px, 4vw, 56px);
-  border-bottom: 1px solid var(--divider);
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(28px, 5vw, 72px);
+  padding-bottom: clamp(30px, 4vw, 44px);
 }
 
-@media (max-width: 860px) {
-  .feature-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 780px) {
+  .day {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
   }
 }
 
-@media (max-width: 560px) {
-  .feature-list {
-    grid-template-columns: 1fr;
-  }
+.day-bs {
+  font-family: var(--devanagari);
+  font-weight: 700;
+  /* The one place on the page where Devanagari runs at display size. It is the
+     product's subject, so it gets the largest type in the section. */
+  font-size: clamp(2.5rem, 5vw + 1rem, 4.25rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
 }
 
-.feature-item {
-  padding: 20px 0 26px;
+.day-ad {
+  margin: 10px 0 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-tithi {
+  font-family: var(--devanagari);
+  color: var(--gold);
+  margin-left: 6px;
+}
+
+.day-note {
+  margin: 18px 0 0;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  text-wrap: pretty;
+}
+
+/* ---- what the date leads to */
+
+.day-next {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+}
+
+.day-next li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
   border-top: 1px solid var(--divider);
 }
 
-.feature-item h3 {
-  margin: 0 0 6px;
-  font-size: 0.95rem;
+.day-next li:last-child {
+  border-bottom: 1px solid var(--divider);
+}
+
+.day-next-name {
+  font-family: var(--devanagari);
+  font-size: 15px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-next li.is-holiday .day-next-name {
+  color: var(--holiday);
+}
+
+.day-next-when {
+  flex: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Never colour alone: the holiday tint above is paired with the word. */
+.day-next-flag {
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--holiday) 32%, transparent);
+  color: var(--holiday);
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* ---- the board */
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(28px, 4vw, 64px);
+  margin: 0;
+  border-bottom: 1px solid var(--divider);
+}
+
+@media (max-width: 780px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 20px;
+  padding: 16px 0 18px;
+  border-top: 1px solid var(--divider);
+}
+
+.board-row dt {
+  font-family: var(--devanagari);
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  transition: color 0.15s var(--ease-out-quart);
+  min-width: 0;
 }
 
-.feature-item:hover h3 {
-  color: var(--gold);
-}
-
-.feature-item p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
+.board-en {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 13px;
   color: var(--text-muted);
-  max-width: 34ch;
+  margin-left: 8px;
+}
+
+.board-value {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.0625rem;
+  letter-spacing: -0.015em;
+  /* A board of figures has to align down the column, and these are numbers
+     being compared, not text being read. */
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.board-unit {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-muted);
+  letter-spacing: 0;
+}
+
+.board-delta {
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--holiday);
+  letter-spacing: 0;
+}
+
+.board-note {
+  grid-column: 1 / -1;
+  margin: 7px 0 0;
+  max-width: 46ch;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
   text-wrap: pretty;
+}
+
+@media (max-width: 420px) {
+  .board-row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
+  }
+
+  .board-value {
+    white-space: normal;
+  }
 }
 
 /* ---------- install ---------- */
