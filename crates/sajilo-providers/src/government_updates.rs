@@ -21,15 +21,32 @@ pub async fn fetch(client: &HttpClient, limit: usize) -> Result<Vec<NewsItem>> {
 }
 
 pub fn parse(body: &str, limit: usize) -> Result<Vec<NewsItem>> {
-    let mut updates: Vec<NewsItem> = serde_json::from_str::<Vec<WireUpdate>>(body)
+    let response = serde_json::from_str::<WireResponse>(body)
         .map_err(|error| ProviderError::parse(SOURCE_NAME, error.to_string()))?
-        .into_iter()
-        .filter_map(build)
-        .collect();
+        .into_items();
+    let mut updates: Vec<NewsItem> = response.into_iter().filter_map(build).collect();
 
     updates.sort_by_key(|update| std::cmp::Reverse(update.published));
     updates.truncate(limit);
     Ok(updates)
+}
+
+/// The portal originally returned a bare array, then moved to cursor-based
+/// pagination in August 2026. Accepting both keeps older recordings useful and
+/// prevents another server-side rollout from immediately breaking Sajilo.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum WireResponse {
+    List(Vec<WireUpdate>),
+    Page { items: Vec<WireUpdate> },
+}
+
+impl WireResponse {
+    fn into_items(self) -> Vec<WireUpdate> {
+        match self {
+            Self::List(items) | Self::Page { items } => items,
+        }
+    }
 }
 
 fn build(update: WireUpdate) -> Option<NewsItem> {
@@ -166,5 +183,30 @@ mod tests {
         ]"#;
 
         assert!(parse(body, 10).expect("valid response").is_empty());
+    }
+
+    #[test]
+    fn accepts_the_portals_paginated_response() {
+        let body = r#"{
+          "items": [{
+            "id": "update-2",
+            "title": "Relief notice",
+            "content": "Complete notice text.",
+            "status": "APPROVED",
+            "createdAt": "2026-08-28T15:07:04.906Z",
+            "author": {"department": "Ministry of Home Affairs"},
+            "tags": [],
+            "attachments": []
+          }],
+          "nextCursor": "older-update"
+        }"#;
+
+        let updates = parse(body, 10).expect("valid paginated response");
+        assert_eq!(updates.len(), 1);
+        assert_eq!(updates[0].id.as_deref(), Some("update-2"));
+        assert_eq!(
+            updates[0].department.as_deref(),
+            Some("Ministry of Home Affairs")
+        );
     }
 }
