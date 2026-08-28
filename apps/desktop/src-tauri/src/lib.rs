@@ -112,6 +112,11 @@ pub fn run() {
                 #[cfg(target_os = "macos")]
                 window::polish_macos_chrome(&main);
             }
+            if let Some(update) = app.get_webview_window(window::UPDATE) {
+                let _ = update.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
+                #[cfg(target_os = "macos")]
+                window::polish_macos_chrome(&update);
+            }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());
@@ -134,13 +139,19 @@ pub fn run() {
             // webview and with it every loaded feed and scroll position.
             WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                if let Some(main) = window.get_webview_window(window::MAIN) {
-                    window::hide(&main);
+                if window.label() == window::MAIN {
+                    if let Some(main) = window.get_webview_window(window::MAIN) {
+                        window::hide(&main);
+                    }
+                } else {
+                    let _ = window.hide();
                 }
             }
             WindowEvent::Focused(focused) => {
-                if let Some(main) = window.get_webview_window(window::MAIN) {
-                    window::hide_on_blur(&main, *focused);
+                if window.label() == window::MAIN {
+                    if let Some(main) = window.get_webview_window(window::MAIN) {
+                        window::hide_on_blur(&main, *focused);
+                    }
                 }
             }
             _ => {}

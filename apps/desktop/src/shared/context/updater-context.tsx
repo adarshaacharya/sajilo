@@ -21,22 +21,31 @@ export type UpdateState =
 
 interface Updater {
   enabled: boolean;
+  automaticUpdates: boolean;
   state: UpdateState;
   update: Update | null;
   error: string | null;
   checkForUpdates: () => Promise<void>;
-  installUpdate: () => Promise<void>;
+  installUpdate: () => Promise<boolean>;
   restartToUpdate: () => Promise<void>;
+  setAutomaticUpdates: (enabled: boolean) => void;
 }
 
 const UpdaterContext = createContext<Updater | null>(null);
-
-export function UpdaterProvider({ children }: { children: ReactNode }) {
+export function UpdaterProvider({
+  children,
+  handlesAutomaticUpdates = false,
+}: {
+  children: ReactNode;
+  handlesAutomaticUpdates?: boolean;
+}) {
   const [enabled, setEnabled] = useState(false);
+  const [automaticUpdates, setAutomaticUpdatesState] = useState(true);
   const [state, setState] = useState<UpdateState>("idle");
   const [update, setUpdate] = useState<Update | null>(null);
   const [error, setError] = useState<string | null>(null);
   const stateRef = useRef<UpdateState>("idle");
+  const automaticUpdatesRef = useRef(true);
 
   useEffect(() => {
     stateRef.current = state;
@@ -49,23 +58,33 @@ export function UpdaterProvider({ children }: { children: ReactNode }) {
       const { check } = await import("@tauri-apps/plugin-updater");
       const next = await check();
       setUpdate(next);
-      setState(next ? "available" : "up-to-date");
+      if (!next) {
+        setState("up-to-date");
+      } else if (handlesAutomaticUpdates && automaticUpdatesRef.current) {
+        setState("downloading");
+        await next.downloadAndInstall();
+        setState("installed");
+      } else {
+        setState("available");
+      }
     } catch (checkError) {
       setError(String(checkError));
       setState("failed");
     }
-  }, []);
+  }, [handlesAutomaticUpdates]);
 
   const installUpdate = useCallback(async () => {
-    if (!update) return;
+    if (!update) return false;
     setState("downloading");
     setError(null);
     try {
       await update.downloadAndInstall();
       setState("installed");
+      return true;
     } catch (installError) {
       setError(String(installError));
       setState("failed");
+      return false;
     }
   }, [update]);
 
@@ -74,13 +93,32 @@ export function UpdaterProvider({ children }: { children: ReactNode }) {
     await relaunch();
   }, []);
 
+  const setAutomaticUpdates = useCallback((next: boolean) => {
+    automaticUpdatesRef.current = next;
+    setAutomaticUpdatesState(next);
+    void api.setSetting("automaticUpdates", next).catch(() => {});
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     let interval: number | undefined;
-    api
-      .updaterEnabled()
-      .then((isEnabled) => {
+    const previewVersion = import.meta.env.DEV
+      ? import.meta.env.VITE_SAJILO_UPDATE_PREVIEW
+      : undefined;
+    if (previewVersion) {
+      // Visual QA without a signed updater build. Production replaces this
+      // branch at compile time and can only receive a real Update resource.
+      setEnabled(true);
+      setUpdate({ version: previewVersion } as Update);
+      setState("available");
+      return;
+    }
+    Promise.all([api.updaterEnabled(), api.getSetting<boolean>("automaticUpdates")])
+      .then(([isEnabled, storedAutomaticUpdates]) => {
         if (cancelled) return;
+        const nextAutomaticUpdates = storedAutomaticUpdates ?? true;
+        automaticUpdatesRef.current = nextAutomaticUpdates;
+        setAutomaticUpdatesState(nextAutomaticUpdates);
         setEnabled(isEnabled);
         if (!isEnabled) return;
         void checkForUpdates();
@@ -104,12 +142,14 @@ export function UpdaterProvider({ children }: { children: ReactNode }) {
     <UpdaterContext.Provider
       value={{
         enabled,
+        automaticUpdates,
         state,
         update,
         error,
         checkForUpdates,
         installUpdate,
         restartToUpdate,
+        setAutomaticUpdates,
       }}
     >
       {children}

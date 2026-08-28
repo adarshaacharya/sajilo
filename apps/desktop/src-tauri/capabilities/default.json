@@ -3,7 +3,8 @@
   "identifier": "default",
   "description": "The minimum the popover needs. Anything not listed here is unreachable from the web layer by design.",
   "windows": [
-    "main"
+    "main",
+    "update"
   ],
   "permissions": [
     "core:default",

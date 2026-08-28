@@ -8,6 +8,7 @@
 use tauri::{AppHandle, Manager, WebviewWindow};
 
 pub const MAIN: &str = "main";
+pub const UPDATE: &str = "update";
 
 pub fn main_window(app: &AppHandle) -> Option<WebviewWindow> {
     app.get_webview_window(MAIN)

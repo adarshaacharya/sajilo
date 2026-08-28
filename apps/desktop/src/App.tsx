@@ -20,6 +20,7 @@ import { ErrorBoundary } from "./shared/components/error-boundary";
 import { Header } from "./shared/components/header";
 import { HeaderSlotProvider } from "./shared/components/header-slot";
 import { TabBar } from "./shared/components/tab-bar";
+import { UpdateWindow } from "./shared/components/update-prompt";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
 import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
@@ -129,6 +130,20 @@ function Shell() {
  * layer. The popover itself never passes it and opens on "/" as always.
  */
 export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
+  const isUpdateWindow = new URLSearchParams(window.location.search).get("surface") === "update";
+
+  if (isUpdateWindow) {
+    return (
+      <ErrorBoundary>
+        <SettingsProvider>
+          <UpdaterProvider handlesAutomaticUpdates>
+            <UpdateWindow />
+          </UpdaterProvider>
+        </SettingsProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <MemoryRouter initialEntries={initialEntries}>
       <ErrorBoundary>

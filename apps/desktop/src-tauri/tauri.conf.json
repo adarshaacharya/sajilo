@@ -27,6 +27,24 @@
         "visible": false,
         "center": false,
         "shadow": true
+      },
+      {
+        "label": "update",
+        "title": "Sajilo Update",
+        "url": "index.html?surface=update",
+        "width": 430,
+        "height": 235,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "backgroundColor": "#00000000",
+        "alwaysOnTop": true,
+        "skipTaskbar": false,
+        "visible": false,
+        "center": true,
+        "shadow": true
       }
     ],
     "security": {
