@@ -302,6 +302,14 @@ const WEBSITES: readonly Website[] = [
     url: "https://eportal.hib.gov.np/register",
   },
   {
+    name: "Free Health Portal",
+    nameNe: "निःशुल्क स्वास्थ्य पोर्टल",
+    description: "Find hospitals and available free-treatment beds",
+    descriptionNe: "अस्पताल र उपलब्ध निःशुल्क उपचार बेड खोज्नुहोस्",
+    type: "checker",
+    url: "https://freehealth.mohp.gov.np/",
+  },
+  {
     name: "Police clearance",
     nameNe: "प्रहरी चारित्रिक प्रमाणपत्र",
     description: "Online police clearance registration",
