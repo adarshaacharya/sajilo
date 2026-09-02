@@ -16,6 +16,7 @@ import { Rashifal } from "./features/rashifal/rashifal";
 import { Settings } from "./features/settings/settings";
 import { Tools } from "./features/tools/tools";
 import { Weather } from "./features/weather/weather";
+import { BackgroundFeedRefresh } from "./shared/components/background-feed-refresh";
 import { ErrorBoundary } from "./shared/components/error-boundary";
 import { Header } from "./shared/components/header";
 import { HeaderSlotProvider } from "./shared/components/header-slot";
@@ -150,6 +151,7 @@ export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
         <SWRConfig value={{ provider: persistentCacheProvider }}>
           <SettingsProvider>
             <UpdaterProvider>
+              <BackgroundFeedRefresh />
               <HeaderSlotProvider>
                 <Shell />
               </HeaderSlotProvider>

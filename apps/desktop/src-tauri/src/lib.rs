@@ -4,6 +4,7 @@
 //! dismisses, and nothing product-specific. The screens arrive in M6.
 
 pub mod article_dates;
+pub mod background_refresh;
 pub mod commands;
 pub mod db;
 pub mod feed;
@@ -120,6 +121,7 @@ pub fn run() {
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());
+            background_refresh::spawn(app.handle().clone());
 
             // A brand-new install turns on launch-at-login and shows itself
             // once. Without the second half, opening Sajilo for the very first
