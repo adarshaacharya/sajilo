@@ -46,4 +46,7 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build (no publish, no signing)
         working-directory: apps/desktop
-        run: bun run tauri build ${{ matrix.args }}
+        # The normal config creates signed updater archives. Verification has
+        # deliberately no signing secrets, so disable only those artifacts;
+        # the platform app/installers are still built exactly as in release.
+        run: bun run tauri build ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":false}}'
