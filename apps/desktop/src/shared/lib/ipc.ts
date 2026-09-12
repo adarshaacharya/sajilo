@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
@@ -324,6 +325,8 @@ export const api = {
   getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
 
   getNews: (refresh = false) => invoke<LoadState<NewsDigest>>("get_news", { refresh }),
+  getAnnouncement: (refresh = false) =>
+    invoke<LoadState<AnnouncementResponse>>("get_announcement", { refresh }),
   /** The source picker's options — static, named in Rust. */
   newsSources: () => invoke<NewsSourceInfo[]>("news_sources"),
 

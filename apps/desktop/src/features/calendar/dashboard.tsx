@@ -18,6 +18,7 @@ import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { GlanceCards } from "./_components/glance-cards";
+import { HomeAnnouncement } from "./_components/home-announcement";
 
 /**
  * The dashboard at its own shape, before the data lands.
@@ -172,6 +173,8 @@ export function Dashboard() {
   return (
     <div className="space-y-2.5">
       <DateHeader today={today} />
+
+      <HomeAnnouncement />
 
       {modules.clocksEnabled && modules.clocks.length > 0 && (
         <ClockRow timeZones={modules.clocks} />

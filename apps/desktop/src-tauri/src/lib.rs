@@ -104,6 +104,7 @@ pub fn run() {
             app.manage(commands::weather::WeatherCache::default());
             app.manage(commands::forex::ForexCache::default());
             app.manage(commands::news::NewsCache::default());
+            app.manage(commands::announcement::AnnouncementCache::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Clear chrome + popover vibrancy so the web UI sits on frosted glass
@@ -168,6 +169,7 @@ pub fn run() {
             commands::forex::get_forex,
             commands::news::get_news,
             commands::news::news_sources,
+            commands::announcement::get_announcement,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,

@@ -1,3 +1,4 @@
+pub mod announcement;
 pub mod backup;
 pub mod bazar;
 pub mod calendar;

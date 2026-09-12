@@ -1,0 +1,21 @@
+{
+  "id": "example-ipo-window",
+  "level": "important",
+  "title": {
+    "en": "IPO application window",
+    "ne": "आईपीओ आवेदन समय"
+  },
+  "body": {
+    "en": "Review the issue details and apply before the closing date.",
+    "ne": "विवरण हेर्नुहोस् र अन्तिम मितिअघि आवेदन दिनुहोस्।"
+  },
+  "startsAt": "2026-09-13T00:00:00Z",
+  "expiresAt": "2026-09-20T18:00:00Z",
+  "action": {
+    "url": "https://cdsc.com.np/index.php/ipolist",
+    "label": {
+      "en": "View current issues",
+      "ne": "हालका निष्कासन हेर्नुहोस्"
+    }
+  }
+}

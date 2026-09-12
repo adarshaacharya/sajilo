@@ -46,6 +46,7 @@ macro_rules! dto_enum {
     };
 }
 
+pub mod announcement;
 pub mod bazar;
 pub mod bundle;
 pub mod forex;

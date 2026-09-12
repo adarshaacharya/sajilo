@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sajilo-announcements",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-12",
+  "kv_namespaces": [
+    {
+      "binding": "SAJILO_ANNOUNCEMENTS",
+      "id": "6279198d6d26434689d26b4fbc62f565"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  }
+}

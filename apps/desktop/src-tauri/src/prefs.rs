@@ -33,6 +33,7 @@ pub const WEATHER_POKHARA_KEY: &str = "weather.pokhara.v1";
 pub const WEATHER_LALITPUR_KEY: &str = "weather.lalitpur.v1";
 pub const FOREX_KEY: &str = "forex.v1";
 pub const NEWS_KEY: &str = "news.v1";
+pub const ANNOUNCEMENT_KEY: &str = "announcement.v1";
 /// Same key the Swift app used, so a story resolved once there is not
 /// re-fetched here after a migration.
 pub const ARTICLE_DATES_KEY: &str = "articleDates.v1";

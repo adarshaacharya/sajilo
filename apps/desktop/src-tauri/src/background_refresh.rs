@@ -38,6 +38,7 @@ async fn refresh(app: &AppHandle<Wry>) {
     let stocks_app = app.clone();
     let rashifal_app = app.clone();
     let radio_app = app.clone();
+    let announcement_app = app.clone();
 
     tokio::join!(
         async move {
@@ -70,6 +71,9 @@ async fn refresh(app: &AppHandle<Wry>) {
             if radio_enabled {
                 commands::radio::get_stations(radio_app, Some(false)).await;
             }
+        },
+        async move {
+            commands::announcement::get_announcement(announcement_app, Some(false)).await;
         },
     );
 }

@@ -13,6 +13,12 @@ export function BackgroundFeedRefresh() {
   const syncCaches = useCallback(async () => {
     const refreshes: Promise<unknown>[] = [];
 
+    refreshes.push(
+      mutate("announcement", catchAsFailed(api.getAnnouncement(false)), {
+        revalidate: false,
+      }),
+    );
+
     if (modules.newsEnabled) {
       refreshes.push(
         mutate("news", catchAsFailed(api.getNews(false)), {
