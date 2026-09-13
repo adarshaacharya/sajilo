@@ -1,9 +1,11 @@
 {
   "name": "sajilo",
-  "main": "src/index.js",
+  "main": "worker/index.js",
   "compatibility_date": "2026-08-23",
   "assets": {
-    "directory": ".",
+    // Astro's build output. Run `bun run build` before `wrangler deploy`
+    // (or just `bun run deploy`, which does both).
+    "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
     // Assets are served before the Worker runs, so `/dl/…` — which matches no

@@ -1,0 +1,176 @@
+---
+import Base from "../layouts/Base.astro";
+
+interface Shot { src: string; alt: string; wide?: boolean }
+const steps: { text: string; images: Shot[] }[] = [
+  {
+    text: "Open the downloaded .dmg and drag Sajilo onto the Applications shortcut.",
+    images: [{ src: "/assets/install/0-drag-to-applications.png", alt: "Dragging Sajilo.app onto the Applications shortcut", wide: true }],
+  },
+  {
+    text: "Open Sajilo from Applications, Launchpad or Spotlight. macOS says “Sajilo” Not Opened. Click Done, not Move to Trash.",
+    images: [{ src: "/assets/install/1-not-opened.png", alt: "“Sajilo” Not Opened dialog" }],
+  },
+  {
+    text: "Open System Settings, then Privacy & Security, and scroll to Security. Next to “Sajilo” was blocked to protect your Mac, click Open Anyway.",
+    images: [{ src: "/assets/install/2-open-anyway.png", alt: "Security section showing the Open Anyway button", wide: true }],
+  },
+  {
+    text: "Confirm Open Anyway once more, then authenticate with Touch ID or your password.",
+    images: [
+      { src: "/assets/install/3-confirm-open.png", alt: "Open Sajilo confirmation dialog" },
+      { src: "/assets/install/4-authenticate.png", alt: "Touch ID or admin password prompt" },
+    ],
+  },
+];
+---
+
+<Base
+  title="Installing Sajilo on macOS"
+  description="Sajilo's beta builds are not code-signed yet. Four steps, with screenshots, to open it the first time on macOS."
+  path="/install.html"
+>
+  <main class="wrap guide" id="main">
+    <p class="eyebrow"><b>Install</b> macOS</p>
+    <h1 class="display guide-h1">Four clicks, once.</h1>
+    <p class="lede">
+      Beta builds are not signed with an Apple certificate yet, so Gatekeeper asks before the first launch.
+      This takes about thirty seconds and repeats only when you update.
+    </p>
+
+    <ol class="steps">
+      {steps.map((s, i) => (
+        <li class="step reveal">
+          <span class="step-num" lang="ne">{"०१२३४५६७८९"[i + 1]}</span>
+          <div class="step-body">
+            <p>{s.text}</p>
+            <div class="step-images">
+              {s.images.map((img) => (
+                <img src={img.src} alt={img.alt} loading="lazy" class:list={{ wide: img.wide }} />
+              ))}
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <div class="done reveal">
+      <img src="/assets/install/5-running.png" alt="Sajilo open in the menu bar, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index" loading="lazy" />
+      <div>
+        <p class="done-ne" lang="ne">भयो।</p>
+        <p>
+          Sajilo now opens from Launchpad or Spotlight like anything else and starts with your Mac. It lives in
+          the menu bar, with no Dock icon or window unless you turn one on in Settings.
+        </p>
+        <p class="done-help">Stuck on a step? <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a></p>
+        <a class="btn btn--sm" href="/#download">Back to downloads</a>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .guide {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    max-width: 760px;
+  }
+  .guide .eyebrow {
+    margin-bottom: 18px;
+  }
+  .guide-h1 {
+    font-size: clamp(48px, 8vw, 92px);
+    margin-bottom: 22px;
+  }
+  .steps {
+    display: grid;
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 20px;
+    padding: 32px 0;
+    border-top: 1px solid var(--line);
+  }
+  .step-num {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--sindoor);
+  }
+  .step-body {
+    display: grid;
+    gap: 16px;
+  }
+  .step-body p {
+    font-size: 17px;
+    color: var(--paper);
+    max-width: 52ch;
+  }
+  .step-images {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .step-images img {
+    max-width: 260px;
+    border-radius: 10px;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 20px 40px -20px rgb(0 0 0 / 0.6);
+  }
+  .step-images img.wide {
+    max-width: 100%;
+  }
+  .done {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+    align-items: center;
+    margin-top: 40px;
+    padding: 32px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--ink-2);
+  }
+  .done img {
+    border-radius: 14px;
+    border: 1px solid var(--line-2);
+  }
+  .done div {
+    display: grid;
+    gap: 12px;
+    justify-items: start;
+  }
+  .done-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .done p {
+    color: var(--paper-2);
+  }
+  .done-help {
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .done-help a {
+    color: var(--gilt);
+  }
+  @media (max-width: 640px) {
+    .step {
+      grid-template-columns: 40px 1fr;
+      gap: 14px;
+    }
+    .step-num {
+      font-size: 34px;
+    }
+    .done {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

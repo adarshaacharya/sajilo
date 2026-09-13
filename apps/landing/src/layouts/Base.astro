@@ -1,0 +1,83 @@
+---
+import "../styles/global.css";
+import SiteNav from "../components/SiteNav.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  noindex?: boolean;
+  ogTitle?: string;
+}
+
+const { title, description, path = "/", noindex = false, ogTitle = title } = Astro.props;
+const canonical = new URL(path, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/assets/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
+    <meta name="theme-color" content="#14110e" />
+
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL("/assets/og-image.png", Astro.site).href} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Eczar:wght@600;700;800&family=Anek+Devanagari:wght@400;500;600;700&family=Anek+Latin:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <SiteNav />
+    <slot />
+    <SiteFooter />
+
+    <script>
+      // Reveal-on-scroll. Anything already in view is shown at once, without
+      // waiting on the observer; the rest gets `.in` the first time it
+      // scrolls into view and is then forgotten, so nothing keeps animating
+      // off-screen.
+      const items = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const show = (el: Element) => el.classList.add("in");
+
+      if (reduce || !("IntersectionObserver" in window)) {
+        items.forEach(show);
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                show(e.target);
+                io.unobserve(e.target);
+              }
+            }
+          },
+          { rootMargin: "0px 0px -6% 0px", threshold: 0 },
+        );
+        const limit = window.innerHeight * 0.96;
+        for (const el of items) {
+          if (el.getBoundingClientRect().top < limit) show(el);
+          else io.observe(el);
+        }
+      }
+    </script>
+  </body>
+</html>

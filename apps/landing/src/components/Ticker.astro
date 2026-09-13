@@ -1,0 +1,99 @@
+---
+import { bullion, fuel, nepse, usd, kathmandu, vegetables, upcoming } from "../data/showcase";
+import { ne, rs, signed } from "../lib/format";
+
+// One strip of the day's numbers, every one read from the recording.
+const items: { ne: string; en: string; value: string; delta?: string; tone?: "up" | "down" | "red" }[] = [
+  { ne: "सुन", en: "Fine gold / tola", value: `Rs ${rs(bullion.gold)}`, delta: signed(bullion.goldDelta), tone: bullion.goldDelta >= 0 ? "up" : "down" },
+  { ne: "नेप्से", en: "NEPSE", value: rs(nepse.value), delta: `${signed(nepse.changePercent, 2)}%`, tone: nepse.change >= 0 ? "up" : "down" },
+  { ne: "डलर", en: "USD buy", value: `Rs ${usd.buy.toFixed(2)}` },
+  { ne: "पेट्रोल", en: "Petrol / litre", value: `Rs ${rs(fuel.petrol)}` },
+  { ne: "चाँदी", en: "Silver / tola", value: `Rs ${rs(bullion.silver)}`, delta: signed(bullion.silverDelta), tone: bullion.silverDelta >= 0 ? "up" : "down" },
+  { ne: "काठमाडौं", en: "Kathmandu", value: `${kathmandu.temperature}°`, delta: `AQI ${kathmandu.aqi}` },
+  { ne: vegetables.first.name, en: `Kalimati / ${vegetables.first.unit === "kilogram" ? "kg" : vegetables.first.unit}`, value: `Rs ${rs(vegetables.first.average)}` },
+  { ne: "ग्यास", en: "LPG cylinder", value: `Rs ${rs(fuel.lpg)}` },
+  { ne: upcoming[0].name.split(",")[0], en: "Tomorrow", value: `${ne(upcoming[0].date.day)} गते`, tone: upcoming[0].is_public_holiday ? "red" : undefined },
+];
+---
+
+<div class="ticker" aria-label="Today's numbers, as the app shows them">
+  <div class="ticker-track">
+    {[0, 1].map((copy) => (
+      <ul class="ticker-set" aria-hidden={copy === 1 ? "true" : undefined}>
+        {items.map((it) => (
+          <li class="tk">
+            <span class="tk-ne" lang="ne">{it.ne}</span>
+            <span class="tk-en">{it.en}</span>
+            <span class={`tk-val num${it.tone === "red" ? " is-red" : ""}`}>{it.value}</span>
+            {it.delta && <span class={`tk-delta num ${it.tone ?? ""}`}>{it.delta}</span>}
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</div>
+
+<style>
+  .ticker {
+    position: relative;
+    z-index: 1;
+    border-block: 1px solid var(--line);
+    background: var(--ink-2);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker 70s linear infinite;
+  }
+  .ticker:hover .ticker-track {
+    animation-play-state: paused;
+  }
+  .ticker-set {
+    display: flex;
+    flex: none;
+  }
+  .tk {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 16px 28px;
+    border-right: 1px solid var(--line);
+    white-space: nowrap;
+    font-size: 14px;
+  }
+  .tk-ne {
+    font-size: 15px;
+    color: var(--gilt-2);
+  }
+  .tk-en {
+    color: var(--paper-3);
+    font-size: 12.5px;
+  }
+  .tk-val {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--paper);
+  }
+  .tk-val.is-red {
+    color: var(--sindoor-2);
+  }
+  .tk-delta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--paper-3);
+  }
+  .tk-delta.up { color: var(--leaf); }
+  .tk-delta.down { color: var(--sindoor-2); }
+
+  @keyframes ticker {
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track { animation: none; }
+    .ticker { mask-image: none; -webkit-mask-image: none; overflow-x: auto; }
+  }
+</style>

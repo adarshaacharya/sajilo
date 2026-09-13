@@ -69,3 +69,5 @@ apps/desktop/src-tauri/gen/
 
 
 .sajilo-dev-*
+# Astro generated types (apps/landing)
+.astro/

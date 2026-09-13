@@ -1,0 +1,19 @@
+{
+  "name": "sajilo-landing",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "deploy": "astro build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "astro": "^5.13.0",
+    "typescript": "^5.9.0",
+    "wrangler": "^4.30.0"
+  }
+}

@@ -1,0 +1,434 @@
+---
+import { nepse, bullion, fuel, vegetables, usd, forexCount, kathmandu, newsSources, stationCount, rashifalSigns, ropaniInSqFt, upcoming } from "../data/showcase";
+import { rs, signed, ne } from "../lib/format";
+
+interface Stop {
+  route: string;
+  ne: string;
+  en: string;
+  copy: string;
+  fact: string;
+  factNote: string;
+}
+
+const stops: Stop[] = [
+  {
+    route: "/",
+    ne: "आज",
+    en: "Today",
+    copy: "The month at a glance, today ringed in gilt, the next festival, the weather, and NEPSE. This is what opens on the click.",
+    fact: `${ne(upcoming[0].date.day)} गते`,
+    factNote: upcoming[0].name.split(",")[0],
+  },
+  {
+    route: "/day",
+    ne: "दिन",
+    en: "Day details",
+    copy: "Tithi, sunrise and sunset, Rahu Kaal, and whatever you wrote down for the day. Tap any square in the grid to get here.",
+    fact: "२०६६–२०८३",
+    factNote: "every day, offline",
+  },
+  {
+    route: "/news",
+    ne: "समाचार",
+    en: "News",
+    copy: "Headlines from Nepali and English newsrooms, plus notices straight from nepal.gov.np, in one list sorted by time. Mute the ones you do not read.",
+    fact: String(newsSources.length),
+    factNote: "sources, both languages",
+  },
+  {
+    route: "/bazar?tab=stocks",
+    ne: "नेप्से",
+    en: "Stocks",
+    copy: "The index, every sub-index, the day's gainers, losers and turnover leaders, and all listed companies with a watchlist of your own.",
+    fact: rs(nepse.value),
+    factNote: `NEPSE, ${signed(nepse.changePercent, 2)}% on the day`,
+  },
+  {
+    route: "/bazar?tab=metals",
+    ne: "सुनचाँदी",
+    en: "Gold & silver",
+    copy: "The federation's published rate per tola and per ten grams, with yesterday's for comparison.",
+    fact: `Rs ${rs(bullion.gold)}`,
+    factNote: `fine gold per tola, ${signed(bullion.goldDelta)}`,
+  },
+  {
+    route: "/bazar?tab=fuel",
+    ne: "इन्धन",
+    en: "Fuel",
+    copy: "Petrol, diesel, kerosene and the LPG cylinder at Nepal Oil Corporation's retail price, with the date it took effect.",
+    fact: `Rs ${rs(fuel.petrol)}`,
+    factNote: "petrol per litre",
+  },
+  {
+    route: "/bazar?tab=vegetables",
+    ne: "तरकारी",
+    en: "Kalimati",
+    copy: "Wholesale prices from the Kalimati market, every item, with the day's low, high and average. Search in either script.",
+    fact: String(vegetables.count),
+    factNote: "items priced today",
+  },
+  {
+    route: "/forex",
+    ne: "विनिमय",
+    en: "Exchange rates",
+    copy: "Nepal Rastra Bank's buy and sell rates, a week of history per currency, and yours pinned to the top.",
+    fact: `Rs ${usd.buy.toFixed(2)}`,
+    factNote: `USD buy, ${forexCount} currencies`,
+  },
+  {
+    route: "/weather",
+    ne: "मौसम",
+    en: "Weather & air",
+    copy: "A six-day forecast for your city, PM2.5 and PM10, and a plain sentence about what today's air means.",
+    fact: `AQI ${kathmandu.aqi}`,
+    factNote: `Kathmandu, PM2.5 at ${kathmandu.pm25}`,
+  },
+  {
+    route: "/rashifal",
+    ne: "राशिफल",
+    en: "Rashifal",
+    copy: "The day's reading for each sign, and a finder that takes the first syllable of a name for anyone who does not know theirs.",
+    fact: String(rashifalSigns),
+    factNote: "signs, refreshed daily",
+  },
+  {
+    route: "/radio",
+    ne: "रेडियो",
+    en: "Radio",
+    copy: "Nepali FM streamed inside the popover. The player docks at the bottom while you read the rest.",
+    fact: String(stationCount),
+    factNote: "stations",
+  },
+  {
+    route: "/tools",
+    ne: "औजार",
+    en: "Tools",
+    copy: "Ropani to square feet, bigha to ropani, tola to grams, VAT, simple interest, a second clock, and the date converter.",
+    fact: `${rs(ropaniInSqFt)} ft²`,
+    factNote: "in one ropani",
+  },
+  {
+    route: "/keeper",
+    ne: "सम्हाल",
+    en: "Keeper",
+    copy: "Citizenship, passport, licence, national ID and PAN, with expiry reminders, and bills tracked by due date. Kept on your machine only.",
+    fact: "0",
+    factNote: "bytes leave your computer",
+  },
+];
+---
+
+<section class="tour" id="tour">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow"><b>०२</b> Every screen</p>
+      <h2>This is the app.<br />Not pictures of it.</h2>
+      <p class="lede">
+        Each panel below is Sajilo's own interface running in your browser, over a day recorded with the same
+        parsers the app ships. Scroll, and it turns the pages.
+      </p>
+    </div>
+
+    <div class="tour-grid">
+      <div class="tour-stage">
+        <div class="tour-frame">
+          <div class="tour-screen">
+            <iframe class="tour-app is-front" title="Sajilo" tabindex="-1" scrolling="no" data-slot="a"></iframe>
+            <iframe class="tour-app" title="" aria-hidden="true" tabindex="-1" scrolling="no" data-slot="b"></iframe>
+          </div>
+        </div>
+        <p class="tour-label">
+          <span class="tour-label-ne" lang="ne" id="tour-label-ne">{stops[0].ne}</span>
+          <span class="tour-label-en" id="tour-label-en">{stops[0].en}</span>
+          <span class="tour-count num"><span id="tour-index">01</span> / {String(stops.length).padStart(2, "0")}</span>
+        </p>
+      </div>
+
+      <ol class="tour-stops">
+        {stops.map((s, i) => (
+          <li class="stop" data-route={s.route} data-ne={s.ne} data-en={s.en} data-index={i}>
+            <span class="stop-num num">{String(i + 1).padStart(2, "0")}</span>
+            <h3 class="stop-title">
+              <span class="stop-ne" lang="ne">{s.ne}</span>
+              <span class="stop-en">{s.en}</span>
+            </h3>
+            <p class="stop-copy">{s.copy}</p>
+            <p class="stop-fact">
+              <span class="stop-fact-val num">{s.fact}</span>
+              <span class="stop-fact-note">{s.factNote}</span>
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tour {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .tour-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+  .tour-stage {
+    position: sticky;
+    top: 92px;
+  }
+  .tour-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+    container-type: inline-size;
+  }
+  /* The app is laid out at its real popover width and the whole screen is
+     scaled to fit the frame, so a narrow frame shows the same screen smaller
+     rather than the app reflowing into a phone layout it was never drawn for. */
+  .tour-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(calc(100cqw / 380));
+    transform-origin: 0 0;
+  }
+  .tour-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    opacity: 0;
+    transform: scale(1.015);
+    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease);
+    pointer-events: none;
+  }
+  .tour-app.is-front {
+    opacity: 1;
+    transform: none;
+    z-index: 1;
+  }
+  .tour-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .tour-label-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .tour-label-en {
+    color: var(--paper-2);
+    font-size: 15px;
+  }
+  .tour-count {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--paper-3);
+  }
+
+  .tour-stops {
+    display: grid;
+  }
+  .stop {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    grid-template-areas: "num title" ". copy" ". fact";
+    gap: 8px 0;
+    padding: clamp(36px, 5vw, 64px) 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 92px;
+    transition: opacity 0.4s;
+  }
+  .stop:first-child {
+    border-top: 0;
+    padding-top: 8px;
+  }
+  .tour-stops.has-active .stop:not(.is-active) {
+    opacity: 0.38;
+  }
+  .stop-num {
+    grid-area: num;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--paper-3);
+    padding-top: 14px;
+  }
+  .stop.is-active .stop-num {
+    color: var(--sindoor-2);
+  }
+  .stop-title {
+    grid-area: title;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .stop-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(38px, 4.4vw, 56px);
+    line-height: 1;
+  }
+  .stop-en {
+    font-size: 16px;
+    color: var(--paper-3);
+    font-weight: 500;
+  }
+  .stop-copy {
+    grid-area: copy;
+    color: var(--paper-2);
+    max-width: 48ch;
+    font-size: 16.5px;
+    text-wrap: pretty;
+  }
+  .stop-fact {
+    grid-area: fact;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .stop-fact-val {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--gilt-2);
+  }
+  .stop-fact-note {
+    font-size: 13.5px;
+    color: var(--paper-3);
+  }
+
+  @media (max-width: 860px) {
+    .tour-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .tour-stage {
+      top: 64px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(150px, 36%) 1fr;
+      gap: 16px;
+      align-items: end;
+      padding: 12px 0 14px;
+      background: var(--ink);
+      box-shadow: 0 18px 18px -12px var(--ink);
+    }
+    .tour-frame {
+      border-radius: 12px;
+    }
+    .tour-label {
+      margin: 0;
+      padding: 0 0 6px;
+      border: 0;
+      flex-wrap: wrap;
+    }
+    .tour-count {
+      margin-left: 0;
+      width: 100%;
+    }
+    .stop {
+      padding: 28px 0;
+      grid-template-columns: 34px 1fr;
+    }
+    .stop-ne {
+      font-size: 34px;
+    }
+  }
+</style>
+
+<script>
+  // Two frames, double-buffered: the next route loads in the hidden one and
+  // is only brought forward once it has painted, so a page turn is a crossfade
+  // between two finished screens rather than a flash of empty canvas.
+  const stops = Array.from(document.querySelectorAll<HTMLLIElement>(".stop"));
+  const list = document.querySelector(".tour-stops")!;
+  const frames = Array.from(document.querySelectorAll<HTMLIFrameElement>(".tour-app"));
+  const labelNe = document.getElementById("tour-label-ne")!;
+  const labelEn = document.getElementById("tour-label-en")!;
+  const index = document.getElementById("tour-index")!;
+
+  const url = (route: string) => `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=dark`;
+  const loaded = new Map<HTMLIFrameElement, string>();
+  let current = -1;
+  let pending: number | null = null;
+
+  function front() {
+    return frames.find((f) => f.classList.contains("is-front"))!;
+  }
+
+  function show(i: number) {
+    if (i === current) return;
+    const stop = stops[i];
+    const route = stop.dataset.route!;
+    current = i;
+    stops.forEach((s, k) => s.classList.toggle("is-active", k === i));
+    list.classList.add("has-active");
+    labelNe.textContent = stop.dataset.ne!;
+    labelEn.textContent = stop.dataset.en!;
+    index.textContent = String(i + 1).padStart(2, "0");
+
+    const f = front();
+    if (loaded.get(f) === route) return;
+    const back = frames.find((x) => x !== f)!;
+    pending = i;
+    const flip = () => {
+      if (pending !== i) return;
+      back.classList.add("is-front");
+      f.classList.remove("is-front");
+      pending = null;
+    };
+    if (loaded.get(back) === route) { flip(); return; }
+    loaded.set(back, route);
+    back.onload = () => requestAnimationFrame(() => requestAnimationFrame(flip));
+    back.src = url(route);
+  }
+
+  // The first screen mounts on its own so there is something in the frame
+  // before any scrolling happens.
+  loaded.set(frames[0], stops[0].dataset.route!);
+  frames[0].src = url(stops[0].dataset.route!);
+  show(0);
+
+  // Whichever stop straddles the line a third of the way down the viewport is
+  // the one on screen. A band rather than a point so a long stop stays active
+  // through its whole height.
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) if (e.isIntersecting) show(Number((e.target as HTMLElement).dataset.index));
+    },
+    { rootMargin: "-38% 0px -52% 0px", threshold: 0 },
+  );
+  stops.forEach((s) => io.observe(s));
+
+  // Warm the second screen once the first is in, so the first page turn is
+  // instant.
+  frames[0].addEventListener("load", () => {
+    if (stops[1] && !loaded.get(frames[1])) {
+      loaded.set(frames[1], stops[1].dataset.route!);
+      frames[1].src = url(stops[1].dataset.route!);
+    }
+  }, { once: true });
+</script>

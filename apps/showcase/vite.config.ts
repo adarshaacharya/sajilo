@@ -1,13 +1,29 @@
+import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+const outDir = fileURLToPath(new URL("../landing/public/assets/app", import.meta.url));
+
+/* The desktop app links its Devanagari webfont by absolute path — `/fonts/…`
+ * is the root of a Tauri window. Embedded under /assets/app/ on the landing
+ * site that path is the site's root instead, and every glyph would fall back
+ * to whatever Devanagari face the visitor's OS has. The copied stylesheet is
+ * rewritten to sit beside its own files. */
+const relativeFontUrls = () => ({
+  name: "sajilo:relative-font-urls",
+  closeBundle() {
+    const css = `${outDir}/fonts/noto-devanagari.css`;
+    writeFileSync(css, readFileSync(css, "utf8").replaceAll("url(/fonts/", "url(./"));
+  },
+});
+
 const stub = (name: string) => fileURLToPath(new URL(`./src/tauri-stub/${name}.ts`, import.meta.url));
 
 export default defineConfig({
   base: "./",
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), relativeFontUrls()],
   resolve: {
     /* The app's own source lives in ../desktop, so an unqualified `react`
      * inside it resolves against that package's node_modules and React ends up
@@ -32,7 +48,7 @@ export default defineConfig({
    * /assets/app/ without the path being configured in two places. */
   build: {
     target: "safari15",
-    outDir: fileURLToPath(new URL("../landing/assets/app", import.meta.url)),
+    outDir,
     emptyOutDir: true,
   },
 });

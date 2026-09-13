@@ -1,0 +1,107 @@
+---
+const platforms = [
+  {
+    id: "macos",
+    name: "macOS",
+    step: "Drag to Applications, open, then allow it once under Privacy & Security.",
+    link: { href: "/install.html", label: "Screenshots for each step" },
+    dl: [{ id: "macos-arm64", label: "Apple Silicon" }, { id: "macos-x64", label: "Intel" }],
+  },
+  {
+    id: "windows",
+    name: "Windows",
+    step: "SmartScreen will pause. More info, then Run anyway.",
+    dl: [{ id: "windows", label: "Installer (.exe)" }],
+  },
+  {
+    id: "linux",
+    name: "Linux",
+    step: "Install the .deb, or mark the AppImage executable and run it.",
+    dl: [{ id: "linux-deb", label: ".deb" }, { id: "linux-appimage", label: "AppImage" }],
+  },
+];
+---
+
+<section class="install wrap" id="install">
+  <div class="section-head reveal">
+    <p class="eyebrow"><b>०४</b> Install</p>
+    <h2>Thirty seconds,<br />then it lives up there.</h2>
+    <p class="lede">
+      Beta builds are not code-signed yet, so each system asks once before the first launch. After that Sajilo
+      starts with your computer and sits in the menu bar. No Dock icon, no window, unless you want one.
+    </p>
+  </div>
+
+  <ul class="platform-grid">
+    {platforms.map((p, i) => (
+      <li class="platform reveal" style={`--d:${i * 90}ms`}>
+        <h3>{p.name}</h3>
+        <p class="platform-step">{p.step}</p>
+        <div class="platform-dl">
+          {p.dl.map((d) => (
+            <a class="btn btn--ghost btn--sm" href={`/dl/${d.id}`}>
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
+              {d.label}
+            </a>
+          ))}
+        </div>
+        {p.link && <a class="platform-link" href={p.link.href}>{p.link.label} →</a>}
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .install {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .platform {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    padding: 28px 26px 30px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--ink-2);
+    transition: border-color 0.3s, transform 0.4s var(--ease);
+  }
+  .platform:hover {
+    border-color: var(--line-2);
+    transform: translateY(-2px);
+  }
+  .platform h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .platform-step {
+    color: var(--paper-2);
+    font-size: 15px;
+    min-height: 3lh;
+  }
+  .platform-dl {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .platform-link {
+    font-size: 14px;
+    color: var(--gilt);
+    width: fit-content;
+  }
+  .platform-link:hover {
+    color: var(--gilt-2);
+  }
+  @media (max-width: 760px) {
+    .platform-grid { grid-template-columns: 1fr; }
+    .platform-step { min-height: 0; }
+  }
+</style>

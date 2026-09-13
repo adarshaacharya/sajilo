@@ -1,0 +1,112 @@
+---
+import { newsSources } from "../data/showcase";
+
+// Where each number is fetched from. These are the endpoints in
+// crates/sajilo-providers; if a provider changes, this list should too.
+const sources = [
+  { name: "Nepal Rastra Bank", gives: "Exchange rates", ne: "नेपाल राष्ट्र बैंक" },
+  { name: "NEPSE via ShareSansar", gives: "Index, sub-indices, quotes", ne: "नेप्से" },
+  { name: "FENEGOSIDA", gives: "Gold and silver", ne: "सुनचाँदी महासंघ" },
+  { name: "Nepal Oil Corporation", gives: "Fuel prices", ne: "नेपाल आयल निगम" },
+  { name: "Kalimati Market Board", gives: "Vegetable prices", ne: "कालीमाटी बजार" },
+  { name: "Open-Meteo", gives: "Weather and air quality", ne: "मौसम" },
+  { name: "Hamro Patro", gives: "Rashifal", ne: "राशिफल" },
+  { name: "Ratopati", gives: "Radio directory", ne: "रेडियो" },
+];
+const newsrooms = newsSources.map((s) => s.name);
+---
+
+<section class="sources wrap" id="sources">
+  <div class="section-head reveal">
+    <p class="eyebrow"><b>०३</b> Sources</p>
+    <h2>Every number has<br />a name on it.</h2>
+    <p class="lede">
+      Sajilo reads public pages and public APIs, the same ones you would open yourself, and shows you when it
+      last managed to. A stale rate is labelled stale. A source that is down says so. Nothing is ever quietly
+      blank.
+    </p>
+  </div>
+
+  <ul class="source-grid">
+    {sources.map((s, i) => (
+      <li class="source reveal" style={`--d:${(i % 4) * 60}ms`}>
+        <span class="source-ne" lang="ne">{s.ne}</span>
+        <span class="source-name">{s.name}</span>
+        <span class="source-gives">{s.gives}</span>
+      </li>
+    ))}
+  </ul>
+
+  <div class="newsrooms reveal">
+    <p class="eyebrow">Newsrooms</p>
+    <p class="newsroom-list">
+      {newsrooms.map((n, i) => (
+        <>
+          <span>{n}</span>{i < newsrooms.length - 1 && <span class="sep" aria-hidden="true">·</span>}
+        </>
+      ))}
+    </p>
+  </div>
+</section>
+
+<style>
+  .sources {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .source-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .source {
+    display: grid;
+    gap: 6px;
+    padding: 24px 22px 26px;
+    background: var(--ink);
+    transition: background 0.3s;
+  }
+  .source:hover {
+    background: var(--ink-2);
+  }
+  .source-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1.1;
+    color: var(--gilt-2);
+    margin-bottom: 10px;
+  }
+  .source-name {
+    font-weight: 600;
+    font-size: 15.5px;
+  }
+  .source-gives {
+    font-size: 13.5px;
+    color: var(--paper-3);
+  }
+  .newsrooms {
+    margin-top: 40px;
+    display: grid;
+    gap: 12px;
+  }
+  .newsroom-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(20px, 2.6vw, 30px);
+    line-height: 1.2;
+    color: var(--paper-2);
+  }
+  .sep {
+    color: var(--sindoor);
+  }
+  @media (max-width: 900px) {
+    .source-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

@@ -1,0 +1,226 @@
+---
+import { today, todayTithi, upcoming, kathmandu, supportedRange } from "../data/showcase";
+import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
+---
+
+<section class="leaf-section wrap" id="today">
+  <div class="section-head reveal">
+    <p class="eyebrow"><b>०१</b> The calendar</p>
+    <h2>A patro that never<br />needs the internet.</h2>
+    <p class="lede">
+      Every Bikram Sambat date, tithi, festival and public holiday from {ne(supportedRange.firstEventYear)} to
+      {ne(supportedRange.lastEventYear)} ships inside the app. Open it on a plane, in Jumla, on a bad day
+      for NTC. It is always there.
+    </p>
+  </div>
+
+  <div class="leaf reveal">
+    <div class="leaf-date">
+      <p class="leaf-month" lang="ne">{today.nepaliMonthName} {ne(today.nepali.year)}</p>
+      <p class="leaf-day" lang="ne">{ne(today.nepali.day)}</p>
+      <p class="leaf-weekday" lang="ne">{weekdayNe(today.weekday)}</p>
+      <p class="leaf-ad num">{longDate(today.gregorian)}</p>
+    </div>
+
+    <dl class="leaf-facts">
+      <div>
+        <dt>Tithi</dt>
+        <dd lang="ne">{todayTithi ?? "—"}</dd>
+      </div>
+      <div>
+        <dt>Sunrise</dt>
+        <dd class="num">{nepalClock(kathmandu.sunrise)}</dd>
+      </div>
+      <div>
+        <dt>Sunset</dt>
+        <dd class="num">{nepalClock(kathmandu.sunset)}</dd>
+      </div>
+      <div>
+        <dt>Kathmandu</dt>
+        <dd class="num">{kathmandu.temperature}°, {kathmandu.condition}</dd>
+      </div>
+    </dl>
+
+    <div class="leaf-next">
+      <p class="eyebrow">Coming up</p>
+      <ol>
+        {upcoming.map((e, i) => (
+          <li class:list={["reveal", { "is-holiday": e.is_public_holiday }]} style={`--d:${i * 70}ms`}>
+            <span class="next-date" lang="ne">{ne(e.date.day)}</span>
+            <span class="next-body">
+              <span class="next-name" lang="ne">{e.name.replace(/\(.*?\)/g, "").trim()}</span>
+              <span class="next-when">
+                {daysAway(e.days_away)}
+                {e.is_public_holiday && <em>Public holiday</em>}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <p class="leaf-foot">
+      Jot a plan on any day, get a nudge the evening before a festival, and convert any date either way in the
+      converter. Not one of those needs a connection.
+    </p>
+  </div>
+</section>
+
+<style>
+  .leaf-section {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(72px, 10vw, 140px);
+  }
+  .leaf {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-areas:
+      "date next"
+      "facts next"
+      "foot foot";
+    gap: 0 clamp(28px, 5vw, 72px);
+    padding: clamp(28px, 4vw, 52px);
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 6px;
+    box-shadow: 0 30px 80px -30px rgb(0 0 0 / 0.6);
+    /* The little punched hole of a wall calendar. */
+    position: relative;
+  }
+  .leaf::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    box-shadow: inset 0 2px 3px rgb(0 0 0 / 0.5);
+  }
+  .leaf-date {
+    grid-area: date;
+    display: grid;
+    align-content: start;
+    padding-top: 10px;
+  }
+  .leaf-month {
+    font-family: var(--deva);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--paper-4);
+  }
+  .leaf-day {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(160px, 22vw, 260px);
+    line-height: 0.82;
+    color: var(--sindoor);
+    margin: 8px 0 14px -0.03em;
+  }
+  .leaf-weekday {
+    font-family: var(--deva);
+    font-size: 26px;
+    font-weight: 600;
+  }
+  .leaf-ad {
+    color: var(--paper-4);
+    font-size: 15px;
+  }
+  .leaf-facts {
+    grid-area: facts;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 24px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid rgb(20 17 14 / 0.15);
+  }
+  .leaf-facts dt {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper-4);
+  }
+  .leaf-facts dd {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .leaf-next {
+    grid-area: next;
+    padding-top: 10px;
+    border-left: 1px solid rgb(20 17 14 / 0.15);
+    padding-left: clamp(20px, 3vw, 40px);
+  }
+  .leaf-next .eyebrow {
+    color: var(--paper-4);
+    margin-bottom: 14px;
+  }
+  .leaf-next li {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 14px;
+    padding: 14px 0;
+    border-top: 1px solid rgb(20 17 14 / 0.12);
+  }
+  .next-date {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .is-holiday .next-date {
+    color: var(--sindoor);
+  }
+  .next-name {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .next-when {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    color: var(--paper-4);
+  }
+  .next-when em {
+    font-style: normal;
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: var(--sindoor);
+    color: var(--paper);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .leaf-foot {
+    grid-area: foot;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid rgb(20 17 14 / 0.15);
+    color: var(--paper-4);
+    max-width: 70ch;
+    font-size: 15px;
+  }
+  @media (max-width: 760px) {
+    .leaf {
+      grid-template-columns: 1fr;
+      grid-template-areas: "date" "facts" "next" "foot";
+    }
+    .leaf-next {
+      border-left: 0;
+      padding-left: 0;
+      margin-top: 28px;
+      border-top: 1px solid rgb(20 17 14 / 0.15);
+      padding-top: 22px;
+    }
+  }
+</style>

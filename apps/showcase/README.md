@@ -34,12 +34,15 @@ date. Instants are slid forward at load time so a recorded headline still reads
 ```sh
 cd apps/showcase
 bun run data     # re-reads fixtures/ -> src/data/scenes.json
-bun run build    # -> apps/landing/assets/app/
+bun run build    # -> apps/landing/public/assets/app/
 ```
 
-Both outputs are committed: the landing site is a folder of files served by a
-Worker, with no build step of its own, so `assets/app/` has to be in the tree
-for a deploy to carry it.
+Both outputs are committed. The landing site is an Astro project that copies
+`public/` into its build verbatim, and CI builds the site from the tree rather
+than from this package, so `public/assets/app/` has to be checked in for a
+deploy to carry it. The landing page also imports `scenes.json` directly at
+build time for every number it prints, so the copy and the panels always
+describe the same day.
 
 `bun run dev` serves a single panel — `http://localhost:5173/?route=/news`, and
 `&inert=1` for the non-interactive form the carousel embeds.

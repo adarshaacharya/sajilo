@@ -96,6 +96,17 @@ jobs:
         run: |
           bun run typecheck
           bun run build
+      # The landing site is an Astro project that imports the same recording
+      # at build time, so a shape change in scenes.json fails here rather than
+      # on deploy.
+      - name: Install landing dependencies
+        working-directory: apps/landing
+        run: bun install --frozen-lockfile
+      - name: Check and build the landing site
+        working-directory: apps/landing
+        run: |
+          bun run check
+          bun run build
 
   desktop:
     name: Desktop ${{ matrix.os }}

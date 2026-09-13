@@ -1,0 +1,62 @@
+---
+const items = [
+  { ne: "अफलाइन", title: "The calendar is yours", copy: "Dates, tithi, festivals and holidays are compiled into the app. No server decides what day it is." },
+  { ne: "खाता छैन", title: "No account, no keys", copy: "Nothing to sign up for. There is no analytics inside the app, and no API key you could ever be asked for." },
+  { ne: "खुला", title: "Open source, MIT", copy: "Rust underneath, a small web UI on top. Read every parser, or run the whole thing yourself." },
+  { ne: "साँचो", title: "Honest about age", copy: "Every fetched value keeps the time it was fetched. When it is old, the app says old. When it fails, it says failed." },
+];
+---
+
+<section class="principles wrap" id="principles">
+  <div class="rule reveal"></div>
+  <ul class="principle-grid">
+    {items.map((p, i) => (
+      <li class="principle reveal" style={`--d:${i * 80}ms`}>
+        <span class="principle-ne" lang="ne">{p.ne}</span>
+        <h3>{p.title}</h3>
+        <p>{p.copy}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .principles {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(64px, 9vw, 120px);
+  }
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    padding-top: 32px;
+  }
+  .principle {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+  }
+  .principle-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--sindoor-2);
+    margin-bottom: 6px;
+  }
+  .principle h3 {
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .principle p {
+    font-size: 14.5px;
+    color: var(--paper-3);
+    text-wrap: pretty;
+  }
+  @media (max-width: 860px) {
+    .principle-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .principle-grid { grid-template-columns: 1fr; }
+  }
+</style>

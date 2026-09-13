@@ -43,7 +43,7 @@ export function MonthGrid({
               title={day.eventName ?? day.tithi ?? undefined}
               className={`relative flex h-[34px] flex-col items-center justify-center rounded-md transition-all duration-200 ${
                 day.isToday
-                  ? "cal-today text-white"
+                  ? "cal-today"
                   : day.isHoliday
                     ? "font-medium text-holiday hover:bg-holiday/12"
                     : "hover:bg-surface-hover"
@@ -55,7 +55,7 @@ export function MonthGrid({
               <span
                 className={`text-[9px] leading-none ${
                   day.isToday
-                    ? "text-white/70"
+                    ? "text-accent-ink/70"
                     : day.isHoliday
                       ? "text-holiday/70"
                       : "text-text-muted"
@@ -66,7 +66,7 @@ export function MonthGrid({
               {planDays?.has(`${day.date.year}-${day.date.month}-${day.date.day}`) && (
                 <span
                   className={`absolute bottom-0.5 size-1 rounded-full ${
-                    day.isToday ? "bg-white" : "bg-[color:var(--color-accent-mark)]"
+                    day.isToday ? "bg-accent-ink" : "bg-[color:var(--color-accent-mark)]"
                   }`}
                 />
               )}

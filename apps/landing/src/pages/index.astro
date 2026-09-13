@@ -1,0 +1,38 @@
+---
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Ticker from "../components/Ticker.astro";
+import PatroLeaf from "../components/PatroLeaf.astro";
+import Tour from "../components/Tour.astro";
+import Sources from "../components/Sources.astro";
+import Principles from "../components/Principles.astro";
+import Install from "../components/Install.astro";
+
+const description =
+  "Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati prices, weather, forex, rashifal, radio and Nepali news, in the menu bar. Free, open source, no account. macOS, Windows, Linux.";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Sajilo",
+  url: "https://sajilo.fyi/",
+  description,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "macOS, Windows, Linux",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  isAccessibleForFree: true,
+  softwareHelp: "https://sajilo.fyi/install.html",
+  downloadUrl: "https://github.com/adarshaacharya/sajilo/releases/latest",
+};
+---
+
+<Base title="Sajilo: Nepal, in your menu bar" ogTitle="Sajilo: Nepal, in your menu bar" description={description}>
+  <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+  <Hero />
+  <Ticker />
+  <PatroLeaf />
+  <Tour />
+  <Sources />
+  <Principles />
+  <Install />
+</Base>

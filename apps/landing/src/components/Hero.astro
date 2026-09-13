@@ -1,0 +1,372 @@
+---
+import { today, kathmandu, nepse } from "../data/showcase";
+import { ne, weekdayNe } from "../lib/format";
+
+const platforms = [
+  { id: "macos-arm64", label: "macOS · Apple Silicon", short: "macOS (Apple Silicon)" },
+  { id: "macos-x64", label: "macOS · Intel", short: "macOS (Intel)" },
+  { id: "windows", label: "Windows", short: "Windows" },
+  { id: "linux-deb", label: "Linux · .deb", short: "Linux (.deb)" },
+  { id: "linux-appimage", label: "Linux · AppImage", short: "Linux (AppImage)" },
+];
+const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepali.year)}`;
+---
+
+<section class="hero" id="main">
+  <!-- The day's number, patro-sized, as a watermark behind everything. -->
+  <span class="hero-mark" aria-hidden="true" lang="ne">{ne(today.nepali.day)}</span>
+
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow hero-eyebrow">
+        <b lang="ne">{weekdayNe(today.weekday)}</b>
+        <span lang="ne">{menubarDate}</span>
+        <span class="eyebrow-dot" aria-hidden="true"></span>
+        <span>Bikram Sambat</span>
+      </p>
+
+      <h1 class="display hero-h1">
+        Nepal,<br />
+        <span class="hero-h1-line">in your</span><br />
+        menu bar.
+      </h1>
+
+      <p class="lede">
+        The Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati
+        prices, weather, forex, rashifal, radio, and eleven newsrooms. One
+        click from the top of your screen, never a tab.
+      </p>
+
+      <div class="cta" id="download">
+        <a id="primary-download" class="btn btn--sindoor" href="/dl/macos-arm64" data-label="Download for macOS">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
+          <span id="primary-download-label">Download for macOS</span>
+        </a>
+        <div class="cta-meta">
+          <span>Free · MIT · no account</span>
+          <details class="platforms">
+            <summary>Other platforms</summary>
+            <ul>
+              {platforms.map((p) => (
+                <li><a href={`/dl/${p.id}`} data-platform={p.id}>{p.short}</a></li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stage" aria-hidden="true">
+      <div class="menubar">
+        <span class="mb-chip" lang="ne">{menubarDate}</span>
+        <span class="mb-glyph mb-wifi"></span>
+        <span class="mb-glyph mb-batt"></span>
+        <span class="mb-clock">Wed 26 Aug&nbsp;&nbsp;14:20</span>
+      </div>
+      <div class="popover">
+        <div class="popover-nib"></div>
+        <iframe
+          class="popover-app"
+          id="hero-app"
+          title={`Sajilo open in the menu bar, showing ${today.nepaliMonthName} ${ne(today.nepali.year)}, Kathmandu at ${kathmandu.temperature}°, and NEPSE at ${nepse.value}`}
+          tabindex="-1"
+          scrolling="no"
+          data-src="/assets/app/index.html?route=%2F&inert=1&theme=dark"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(48px, 8vw, 110px) clamp(40px, 6vw, 80px);
+    overflow: clip;
+  }
+  .hero-mark {
+    position: absolute;
+    right: -0.05em;
+    top: -0.12em;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(320px, 52vw, 760px);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-2);
+    opacity: 0.55;
+    pointer-events: none;
+    user-select: none;
+    animation: mark-drift 18s ease-in-out infinite alternate;
+  }
+  @keyframes mark-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-2%, 3%, 0); }
+  }
+
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+    animation: rise 0.9s var(--ease) both;
+  }
+  .hero-eyebrow [lang="ne"] {
+    font-family: var(--deva);
+    font-size: 15px;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .eyebrow-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gilt);
+  }
+
+  .hero-h1 {
+    font-size: clamp(60px, 8.4vw, 124px);
+    margin-bottom: 26px;
+    animation: rise 1s var(--ease) 0.08s both;
+  }
+  .hero-h1-line {
+    color: var(--sindoor);
+  }
+
+  .lede {
+    animation: rise 1s var(--ease) 0.16s both;
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    animation: rise 1s var(--ease) 0.24s both;
+  }
+  .cta-meta {
+    display: grid;
+    gap: 4px;
+    font-size: 13.5px;
+    color: var(--paper-3);
+  }
+  .platforms {
+    position: relative;
+  }
+  .platforms summary {
+    cursor: pointer;
+    list-style: none;
+    color: var(--paper-2);
+    font-weight: 500;
+    width: fit-content;
+    border-bottom: 1px dotted var(--paper-4);
+  }
+  .platforms summary::-webkit-details-marker {
+    display: none;
+  }
+  .platforms ul {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 10px);
+    z-index: 5;
+    min-width: 220px;
+    padding: 6px;
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.45);
+    animation: pop 0.25s var(--spring) both;
+  }
+  .platforms li a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--paper);
+  }
+  .platforms li a:hover {
+    background: var(--ink-4);
+  }
+  .platforms li a[hidden] {
+    display: none;
+  }
+
+  /* ---------- The stage: menu bar + popover ---------- */
+
+  .hero-stage {
+    position: relative;
+    justify-self: end;
+    width: min(100%, 420px);
+  }
+  .menubar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 10px 10px 0 0;
+    background: var(--ink-3);
+    border: 1px solid var(--line-2);
+    border-bottom: 0;
+    font-size: 12.5px;
+    color: var(--paper-2);
+    animation: rise 0.8s var(--ease) 0.3s both;
+  }
+  .mb-chip {
+    margin-right: auto;
+    padding: 2px 9px;
+    border-radius: 6px;
+    background: var(--gilt);
+    color: var(--ink);
+    font-family: var(--deva);
+    font-weight: 600;
+    font-size: 12.5px;
+    animation: chip-pulse 2.4s var(--ease) 1s 2;
+  }
+  @keyframes chip-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(217 169 74 / 0.5); }
+    40% { box-shadow: 0 0 0 7px rgb(217 169 74 / 0); }
+  }
+  .mb-glyph {
+    width: 14px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--paper-3);
+    opacity: 0.8;
+  }
+  .mb-wifi {
+    width: 12px;
+    height: 12px;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    background: none;
+    border: 2px solid var(--paper-3);
+    border-bottom: 0;
+  }
+  .mb-batt {
+    position: relative;
+    width: 20px;
+    height: 10px;
+    border: 1.5px solid var(--paper-3);
+    background: none;
+  }
+  .mb-batt::after {
+    content: "";
+    position: absolute;
+    inset: 1.5px;
+    right: 5px;
+    background: var(--paper-3);
+    border-radius: 1px;
+  }
+  .mb-clock {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .popover {
+    position: relative;
+    margin-top: 10px;
+    transform-origin: 50% -20px;
+    animation: drop 1.1s var(--spring) 0.55s both;
+  }
+  .popover-nib {
+    position: absolute;
+    left: 28px;
+    top: -7px;
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    background: #1c1c1e;
+    border-left: 1px solid var(--line-2);
+    border-top: 1px solid var(--line-2);
+    border-radius: 3px 0 0 0;
+  }
+  .popover-app {
+    display: block;
+    width: 100%;
+    aspect-ratio: 380 / 560;
+    border: 1px solid var(--line-2);
+    border-radius: 18px;
+    background: #1c1c1e;
+    box-shadow:
+      0 40px 80px -20px rgb(0 0 0 / 0.7),
+      0 0 0 1px rgb(255 255 255 / 0.03) inset;
+    pointer-events: none;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes drop {
+    from { opacity: 0; transform: translateY(-24px) scaleY(0.92); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-stage {
+      justify-self: center;
+      width: min(100%, 380px);
+    }
+    .hero-mark {
+      font-size: clamp(260px, 80vw, 420px);
+      right: -0.1em;
+      top: 0;
+    }
+  }
+</style>
+
+<script>
+  // Which download the big button offers. Apple Silicon versus Intel cannot be
+  // read from the user agent, so a WebGL renderer string is tried first and
+  // Apple Silicon is assumed when it says nothing — that is most Macs now.
+  const btn = document.getElementById("primary-download") as HTMLAnchorElement;
+  const label = document.getElementById("primary-download-label")!;
+  const ua = navigator.userAgent;
+
+  function set(platform: string, text: string) {
+    btn.href = `/dl/${platform}`;
+    label.textContent = text;
+    document.querySelectorAll<HTMLAnchorElement>(".platforms a").forEach((a) => {
+      a.hidden = a.dataset.platform === platform;
+    });
+  }
+
+  if (/Windows/.test(ua)) set("windows", "Download for Windows");
+  else if (/Linux/.test(ua) && !/Android/.test(ua)) set("linux-appimage", "Download for Linux");
+  else if (/Macintosh/.test(ua)) {
+    let arm = true;
+    try {
+      const gl = document.createElement("canvas").getContext("webgl");
+      const dbg = gl?.getExtension("WEBGL_debug_renderer_info");
+      const renderer = dbg ? String(gl!.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : "";
+      if (/Intel|AMD|Radeon|NVIDIA/i.test(renderer) && !/Apple/i.test(renderer)) arm = false;
+    } catch {}
+    set(arm ? "macos-arm64" : "macos-x64", arm ? "Download for macOS" : "Download for macOS (Intel)");
+  } else set("macos-arm64", "Download for macOS");
+
+  // The app is only mounted once the fonts are in, so its first paint is the
+  // right one rather than a fallback-font flash inside the frame.
+  const frame = document.getElementById("hero-app") as HTMLIFrameElement;
+  const mount = () => { if (!frame.src) frame.src = frame.dataset.src!; };
+  if (document.fonts?.ready) document.fonts.ready.then(mount, mount);
+  else mount();
+  setTimeout(mount, 1500);
+</script>

@@ -1,0 +1,107 @@
+---
+import { recordedAt } from "../data/showcase";
+const recorded = new Date(recordedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Kathmandu" });
+---
+
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <p class="footer-mark" lang="ne">सजिलो</p>
+      <p class="footer-line">Nepal, in your menu bar. Free, open source, no account.</p>
+      <p class="footer-contact">
+        Ideas, bugs, hello: <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a>
+      </p>
+    </div>
+    <nav class="footer-col" aria-label="Product">
+      <p class="eyebrow">Product</p>
+      <a href="/#download">Download</a>
+      <a href="/install.html">Install guide</a>
+      <a href="/#tour">Every screen</a>
+      <a href="/#sources">Sources</a>
+    </nav>
+    <nav class="footer-col" aria-label="Project">
+      <p class="eyebrow">Project</p>
+      <a href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/adarshaacharya/sajilo/releases/latest" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/adarshaacharya/sajilo/issues" target="_blank" rel="noopener">Report an issue</a>
+      <a href="https://github.com/adarshaacharya/sajilo/blob/main/LICENSE" target="_blank" rel="noopener">MIT licence</a>
+    </nav>
+  </div>
+  <div class="wrap footer-bottom">
+    <p>Numbers on this page were recorded on {recorded} and are shown exactly as the app rendered them.</p>
+    <p>Built in Kathmandu by <a href="https://adarsha.dev" target="_blank" rel="noopener">Adarsha Acharya</a></p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: 1;
+    margin-top: clamp(80px, 10vw, 140px);
+    border-top: 1px solid var(--line);
+    background: var(--ink-2);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 40px;
+    padding-block: 56px 40px;
+  }
+  .footer-mark {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .footer-line {
+    color: var(--paper-2);
+    max-width: 34ch;
+  }
+  .footer-contact {
+    margin-top: 10px;
+    color: var(--paper-3);
+    font-size: 14px;
+  }
+  .footer-contact a {
+    color: var(--gilt);
+  }
+  .footer-col {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+  }
+  .footer-col .eyebrow {
+    margin-bottom: 6px;
+  }
+  .footer-col a {
+    color: var(--paper-2);
+    font-size: 15px;
+    width: fit-content;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover {
+    color: var(--paper);
+  }
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-block: 20px 28px;
+    border-top: 1px solid var(--line);
+    color: var(--paper-3);
+    font-size: 13px;
+  }
+  .footer-bottom a {
+    color: var(--paper-2);
+  }
+  @media (max-width: 720px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+  }
+</style>
