@@ -31,11 +31,10 @@ const steps: { text: string; images: Shot[] }[] = [
   path="/install.html"
 >
   <main class="wrap guide" id="main">
-    <p class="eyebrow"><b>Install</b> macOS</p>
-    <h1 class="display guide-h1">Four clicks, once.</h1>
+    <h1 class="display guide-h1">Installing on macOS</h1>
     <p class="lede">
-      Beta builds are not signed with an Apple certificate yet, so Gatekeeper asks before the first launch.
-      This takes about thirty seconds and repeats only when you update.
+      Beta builds are not signed with an Apple certificate yet, so macOS blocks the first launch. These
+      steps are needed once per update.
     </p>
 
     <ol class="steps">
@@ -59,10 +58,10 @@ const steps: { text: string; images: Shot[] }[] = [
       <div>
         <p class="done-ne" lang="ne">भयो।</p>
         <p>
-          Sajilo now opens from Launchpad or Spotlight like anything else and starts with your Mac. It lives in
-          the menu bar, with no Dock icon or window unless you turn one on in Settings.
+          Sajilo now opens normally from Launchpad or Spotlight and starts with your Mac. It runs in the menu
+          bar with no Dock icon unless you turn one on in Settings.
         </p>
-        <p class="done-help">Stuck on a step? <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a></p>
+        <p class="done-help">Problems: <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a></p>
         <a class="btn btn--sm" href="/#download">Back to downloads</a>
       </div>
     </div>
@@ -75,9 +74,6 @@ const steps: { text: string; images: Shot[] }[] = [
     z-index: 1;
     padding-top: clamp(40px, 7vw, 90px);
     max-width: 760px;
-  }
-  .guide .eyebrow {
-    margin-bottom: 18px;
   }
   .guide-h1 {
     font-size: clamp(48px, 8vw, 92px);

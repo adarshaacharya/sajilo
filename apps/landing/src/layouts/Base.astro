@@ -50,33 +50,56 @@ const canonical = new URL(path, Astro.site).href;
     <SiteFooter />
 
     <script>
-      // Reveal-on-scroll. Anything already in view is shown at once, without
-      // waiting on the observer; the rest gets `.in` the first time it
-      // scrolls into view and is then forgotten, so nothing keeps animating
-      // off-screen.
-      const items = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+      // Reveal-on-scroll. Anything already in view is shown at once; the rest
+      // gets `.in` the first time it scrolls into view. An observer does the
+      // work, with a throttled scroll check behind it so a section can never
+      // stay hidden if the observer is late or unavailable.
+      const items = new Set(document.querySelectorAll<HTMLElement>(".reveal"));
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const show = (el: Element) => el.classList.add("in");
 
-      if (reduce || !("IntersectionObserver" in window)) {
+      const show = (el: Element) => {
+        el.classList.add("in");
+        items.delete(el as HTMLElement);
+      };
+
+      if (reduce) {
         items.forEach(show);
       } else {
-        const io = new IntersectionObserver(
-          (entries) => {
-            for (const e of entries) {
-              if (e.isIntersecting) {
-                show(e.target);
-                io.unobserve(e.target);
+        const sweep = () => {
+          const limit = window.innerHeight * 0.96;
+          for (const el of Array.from(items)) {
+            if (el.getBoundingClientRect().top < limit) show(el);
+          }
+        };
+
+        if ("IntersectionObserver" in window) {
+          const io = new IntersectionObserver(
+            (entries) => {
+              for (const e of entries) {
+                if (e.isIntersecting) {
+                  show(e.target);
+                  io.unobserve(e.target);
+                }
               }
-            }
-          },
-          { rootMargin: "0px 0px -6% 0px", threshold: 0 },
-        );
-        const limit = window.innerHeight * 0.96;
-        for (const el of items) {
-          if (el.getBoundingClientRect().top < limit) show(el);
-          else io.observe(el);
+            },
+            { rootMargin: "0px 0px -4% 0px", threshold: 0 },
+          );
+          items.forEach((el) => io.observe(el));
         }
+
+        let ticking = false;
+        const onScroll = () => {
+          if (ticking || items.size === 0) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            sweep();
+            ticking = false;
+          });
+        };
+        sweep();
+        setTimeout(sweep, 400);
+        addEventListener("scroll", onScroll, { passive: true });
+        addEventListener("resize", onScroll, { passive: true });
       }
     </script>
   </body>

@@ -16,7 +16,7 @@ const stops: Stop[] = [
     route: "/",
     ne: "आज",
     en: "Today",
-    copy: "The month at a glance, today ringed in gilt, the next festival, the weather, and NEPSE. This is what opens on the click.",
+    copy: "The month grid, the next festival, the weather and NEPSE. This is the screen that opens from the menu bar.",
     fact: `${ne(upcoming[0].date.day)} गते`,
     factNote: upcoming[0].name.split(",")[0],
   },
@@ -24,7 +24,7 @@ const stops: Stop[] = [
     route: "/day",
     ne: "दिन",
     en: "Day details",
-    copy: "Tithi, sunrise and sunset, Rahu Kaal, and whatever you wrote down for the day. Tap any square in the grid to get here.",
+    copy: "Tithi, sunrise and sunset, Rahu Kaal, and your notes for the day. Open it from any date in the grid.",
     fact: "२०६६–२०८३",
     factNote: "every day, offline",
   },
@@ -32,7 +32,7 @@ const stops: Stop[] = [
     route: "/news",
     ne: "समाचार",
     en: "News",
-    copy: "Headlines from Nepali and English newsrooms, plus notices straight from nepal.gov.np, in one list sorted by time. Mute the ones you do not read.",
+    copy: "Headlines from Nepali and English newsrooms and notices from nepal.gov.np, in one list by time. Sources can be turned off.",
     fact: String(newsSources.length),
     factNote: "sources, both languages",
   },
@@ -40,7 +40,7 @@ const stops: Stop[] = [
     route: "/bazar?tab=stocks",
     ne: "नेप्से",
     en: "Stocks",
-    copy: "The index, every sub-index, the day's gainers, losers and turnover leaders, and all listed companies with a watchlist of your own.",
+    copy: "The NEPSE index, sub-indices, the day's gainers, losers and turnover leaders, and every listed company. Add stocks to a watchlist.",
     fact: rs(nepse.value),
     factNote: `NEPSE, ${signed(nepse.changePercent, 2)}% on the day`,
   },
@@ -48,7 +48,7 @@ const stops: Stop[] = [
     route: "/bazar?tab=metals",
     ne: "सुनचाँदी",
     en: "Gold & silver",
-    copy: "The federation's published rate per tola and per ten grams, with yesterday's for comparison.",
+    copy: "FENEGOSIDA's rate per tola and per ten grams, next to the previous day's.",
     fact: `Rs ${rs(bullion.gold)}`,
     factNote: `fine gold per tola, ${signed(bullion.goldDelta)}`,
   },
@@ -56,7 +56,7 @@ const stops: Stop[] = [
     route: "/bazar?tab=fuel",
     ne: "इन्धन",
     en: "Fuel",
-    copy: "Petrol, diesel, kerosene and the LPG cylinder at Nepal Oil Corporation's retail price, with the date it took effect.",
+    copy: "Petrol, diesel, kerosene and LPG at Nepal Oil Corporation's retail price, with the date it took effect.",
     fact: `Rs ${rs(fuel.petrol)}`,
     factNote: "petrol per litre",
   },
@@ -64,7 +64,7 @@ const stops: Stop[] = [
     route: "/bazar?tab=vegetables",
     ne: "तरकारी",
     en: "Kalimati",
-    copy: "Wholesale prices from the Kalimati market, every item, with the day's low, high and average. Search in either script.",
+    copy: "Wholesale prices from the Kalimati market, with the day's low, high and average for each item.",
     fact: String(vegetables.count),
     factNote: "items priced today",
   },
@@ -72,7 +72,7 @@ const stops: Stop[] = [
     route: "/forex",
     ne: "विनिमय",
     en: "Exchange rates",
-    copy: "Nepal Rastra Bank's buy and sell rates, a week of history per currency, and yours pinned to the top.",
+    copy: "Nepal Rastra Bank's buying and selling rates, with a week of history. Pin the currencies you use.",
     fact: `Rs ${usd.buy.toFixed(2)}`,
     factNote: `USD buy, ${forexCount} currencies`,
   },
@@ -80,7 +80,7 @@ const stops: Stop[] = [
     route: "/weather",
     ne: "मौसम",
     en: "Weather & air",
-    copy: "A six-day forecast for your city, PM2.5 and PM10, and a plain sentence about what today's air means.",
+    copy: "A six-day forecast for your city, with PM2.5, PM10 and the US AQI.",
     fact: `AQI ${kathmandu.aqi}`,
     factNote: `Kathmandu, PM2.5 at ${kathmandu.pm25}`,
   },
@@ -88,7 +88,7 @@ const stops: Stop[] = [
     route: "/rashifal",
     ne: "राशिफल",
     en: "Rashifal",
-    copy: "The day's reading for each sign, and a finder that takes the first syllable of a name for anyone who does not know theirs.",
+    copy: "The day's reading for each sign. If you do not know yours, look it up from the first syllable of a name.",
     fact: String(rashifalSigns),
     factNote: "signs, refreshed daily",
   },
@@ -96,7 +96,7 @@ const stops: Stop[] = [
     route: "/radio",
     ne: "रेडियो",
     en: "Radio",
-    copy: "Nepali FM streamed inside the popover. The player docks at the bottom while you read the rest.",
+    copy: "Nepali FM stations, streamed in the app. The player stays at the bottom while you use other screens.",
     fact: String(stationCount),
     factNote: "stations",
   },
@@ -104,7 +104,7 @@ const stops: Stop[] = [
     route: "/tools",
     ne: "औजार",
     en: "Tools",
-    copy: "Ropani to square feet, bigha to ropani, tola to grams, VAT, simple interest, a second clock, and the date converter.",
+    copy: "Land units, tola to grams, VAT, simple interest, a second clock and the date converter.",
     fact: `${rs(ropaniInSqFt)} ft²`,
     factNote: "in one ropani",
   },
@@ -112,9 +112,9 @@ const stops: Stop[] = [
     route: "/keeper",
     ne: "सम्हाल",
     en: "Keeper",
-    copy: "Citizenship, passport, licence, national ID and PAN, with expiry reminders, and bills tracked by due date. Kept on your machine only.",
-    fact: "0",
-    factNote: "bytes leave your computer",
+    copy: "Expiry dates for citizenship, passport, licence, national ID and PAN, plus bills by due date. Stored only on your computer.",
+    fact: "5",
+    factNote: "document types",
   },
 ];
 ---
@@ -122,11 +122,9 @@ const stops: Stop[] = [
 <section class="tour" id="tour">
   <div class="wrap">
     <div class="section-head reveal">
-      <p class="eyebrow"><b>०२</b> Every screen</p>
-      <h2>This is the app.<br />Not pictures of it.</h2>
+      <h2>Every screen</h2>
       <p class="lede">
-        Each panel below is Sajilo's own interface running in your browser, over a day recorded with the same
-        parsers the app ships. Scroll, and it turns the pages.
+        The panel is the app itself, running in your browser on one recorded day. Scroll to move through it.
       </p>
     </div>
 
@@ -189,18 +187,18 @@ const stops: Stop[] = [
     background: #1c1c1e;
     border: 1px solid var(--line-2);
     box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
-    container-type: inline-size;
   }
   /* The app is laid out at its real popover width and the whole screen is
-     scaled to fit the frame, so a narrow frame shows the same screen smaller
-     rather than the app reflowing into a phone layout it was never drawn for. */
+     scaled to fit the frame (the script sets --fit from the frame's width),
+     so a narrow frame shows the same screen smaller rather than the app
+     reflowing into a phone layout it was never drawn for. */
   .tour-screen {
     position: absolute;
     top: 0;
     left: 0;
     width: 380px;
     height: 560px;
-    transform: scale(calc(100cqw / 380));
+    transform: scale(var(--fit, 1));
     transform-origin: 0 0;
   }
   .tour-app {
@@ -241,8 +239,7 @@ const stops: Stop[] = [
   }
   .tour-count {
     margin-left: auto;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--paper-3);
   }
 
@@ -269,8 +266,7 @@ const stops: Stop[] = [
   }
   .stop-num {
     grid-area: num;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--paper-3);
     padding-top: 14px;
   }
@@ -323,20 +319,23 @@ const stops: Stop[] = [
   @media (max-width: 860px) {
     .tour-grid {
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 12px;
     }
+    /* On a phone the frame sits above the text, so it is sized by height —
+       about a third of the viewport — and the text gets the rest. */
     .tour-stage {
       top: 64px;
       z-index: 2;
       display: grid;
-      grid-template-columns: minmax(150px, 36%) 1fr;
-      gap: 16px;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
       align-items: end;
-      padding: 12px 0 14px;
+      padding: 10px 0 12px;
       background: var(--ink);
       box-shadow: 0 18px 18px -12px var(--ink);
     }
     .tour-frame {
+      width: min(44vw, calc(34vh * 380 / 560));
       border-radius: 12px;
     }
     .tour-label {
@@ -344,17 +343,30 @@ const stops: Stop[] = [
       padding: 0 0 6px;
       border: 0;
       flex-wrap: wrap;
+      gap: 6px 10px;
+    }
+    .tour-label-ne {
+      font-size: 26px;
     }
     .tour-count {
       margin-left: 0;
       width: 100%;
     }
     .stop {
-      padding: 28px 0;
-      grid-template-columns: 34px 1fr;
+      padding: 22px 0;
+      grid-template-columns: 30px 1fr;
+    }
+    .stop:first-child {
+      padding-top: 4px;
     }
     .stop-ne {
-      font-size: 34px;
+      font-size: 32px;
+    }
+    .stop-copy {
+      font-size: 15.5px;
+    }
+    .stop-fact-val {
+      font-size: 24px;
     }
   }
 </style>
@@ -369,6 +381,13 @@ const stops: Stop[] = [
   const labelNe = document.getElementById("tour-label-ne")!;
   const labelEn = document.getElementById("tour-label-en")!;
   const index = document.getElementById("tour-index")!;
+
+  // Scale the 380px screen to whatever width the frame has.
+  const frame = document.querySelector<HTMLElement>(".tour-frame")!;
+  const screen = document.querySelector<HTMLElement>(".tour-screen")!;
+  const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+  fit();
+  new ResizeObserver(fit).observe(frame);
 
   const url = (route: string) => `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=dark`;
   const loaded = new Map<HTMLIFrameElement, string>();
@@ -412,16 +431,36 @@ const stops: Stop[] = [
   frames[0].src = url(stops[0].dataset.route!);
   show(0);
 
-  // Whichever stop straddles the line a third of the way down the viewport is
-  // the one on screen. A band rather than a point so a long stop stays active
-  // through its whole height.
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) if (e.isIntersecting) show(Number((e.target as HTMLElement).dataset.index));
-    },
-    { rootMargin: "-38% 0px -52% 0px", threshold: 0 },
-  );
-  stops.forEach((s) => io.observe(s));
+  // Whichever stop crosses the detection band is the one on screen. On a
+  // wide layout the band is a third of the way down the viewport; on a
+  // phone the stage covers the top of the viewport, so the band is placed
+  // just below it, where the text actually is.
+  const stage = document.querySelector<HTMLElement>(".tour-stage")!;
+  const narrow = window.matchMedia("(max-width: 860px)");
+  let io: IntersectionObserver | null = null;
+
+  function observe() {
+    io?.disconnect();
+    let rootMargin = "-38% 0px -52% 0px";
+    if (narrow.matches) {
+      const bottom = stage.getBoundingClientRect().height + 64;
+      const band = 140;
+      rootMargin = `-${bottom}px 0px -${Math.max(0, window.innerHeight - bottom - band)}px 0px`;
+    }
+    io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) show(Number((e.target as HTMLElement).dataset.index));
+      },
+      { rootMargin, threshold: 0 },
+    );
+    stops.forEach((s) => io!.observe(s));
+  }
+  observe();
+  let resizeTimer: number | undefined;
+  addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(observe, 150);
+  }, { passive: true });
 
   // Warm the second screen once the first is in, so the first page turn is
   // instant.

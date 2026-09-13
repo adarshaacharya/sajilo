@@ -3,20 +3,20 @@ const platforms = [
   {
     id: "macos",
     name: "macOS",
-    step: "Drag to Applications, open, then allow it once under Privacy & Security.",
-    link: { href: "/install.html", label: "Screenshots for each step" },
+    step: "Drag to Applications, open it, then click Open Anyway under Privacy & Security.",
+    link: { href: "/install.html", label: "Step-by-step with screenshots" },
     dl: [{ id: "macos-arm64", label: "Apple Silicon" }, { id: "macos-x64", label: "Intel" }],
   },
   {
     id: "windows",
     name: "Windows",
-    step: "SmartScreen will pause. More info, then Run anyway.",
+    step: "SmartScreen shows a warning. Click More info, then Run anyway.",
     dl: [{ id: "windows", label: "Installer (.exe)" }],
   },
   {
     id: "linux",
     name: "Linux",
-    step: "Install the .deb, or mark the AppImage executable and run it.",
+    step: "Install the .deb, or make the AppImage executable and run it.",
     dl: [{ id: "linux-deb", label: ".deb" }, { id: "linux-appimage", label: "AppImage" }],
   },
 ];
@@ -24,11 +24,10 @@ const platforms = [
 
 <section class="install wrap" id="install">
   <div class="section-head reveal">
-    <p class="eyebrow"><b>०४</b> Install</p>
-    <h2>Thirty seconds,<br />then it lives up there.</h2>
+    <h2>Install</h2>
     <p class="lede">
-      Beta builds are not code-signed yet, so each system asks once before the first launch. After that Sajilo
-      starts with your computer and sits in the menu bar. No Dock icon, no window, unless you want one.
+      Beta builds are not code-signed yet, so each system shows a warning on the first launch. After that,
+      Sajilo starts with your computer and sits in the menu bar.
     </p>
   </div>
 

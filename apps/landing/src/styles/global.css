@@ -164,15 +164,9 @@ button {
 }
 
 .eyebrow {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--paper-3);
-}
-.eyebrow b {
-  color: var(--accent);
+  font-size: 13px;
   font-weight: 500;
+  color: var(--paper-3);
 }
 
 .lede {

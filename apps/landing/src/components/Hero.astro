@@ -18,12 +18,7 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
 
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow hero-eyebrow">
-        <b lang="ne">{weekdayNe(today.weekday)}</b>
-        <span lang="ne">{menubarDate}</span>
-        <span class="eyebrow-dot" aria-hidden="true"></span>
-        <span>Bikram Sambat</span>
-      </p>
+      <p class="hero-date" lang="ne">{weekdayNe(today.weekday)}, {menubarDate}</p>
 
       <h1 class="display hero-h1">
         Nepal,<br />
@@ -32,9 +27,9 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
       </h1>
 
       <p class="lede">
-        The Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati
-        prices, weather, forex, rashifal, radio, and eleven newsrooms. One
-        click from the top of your screen, never a tab.
+        Bikram Sambat calendar, festivals, NEPSE, gold, fuel and Kalimati
+        prices, weather, exchange rates, rashifal, FM radio and Nepali news,
+        in a small menu bar app for macOS, Windows and Linux.
       </p>
 
       <div class="cta" id="download">
@@ -43,7 +38,7 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
           <span id="primary-download-label">Download for macOS</span>
         </a>
         <div class="cta-meta">
-          <span>Free · MIT · no account</span>
+          <span>Free and open source. No account.</span>
           <details class="platforms">
             <summary>Other platforms</summary>
             <ul>
@@ -113,25 +108,12 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
     align-items: center;
   }
 
-  .hero-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+  .hero-date {
+    font-family: var(--deva);
+    font-size: 16px;
+    color: var(--accent);
     margin-bottom: 26px;
     animation: rise 0.9s var(--ease) both;
-  }
-  .hero-eyebrow [lang="ne"] {
-    font-family: var(--deva);
-    font-size: 15px;
-    letter-spacing: 0;
-    text-transform: none;
-  }
-  .eyebrow-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--gilt);
   }
 
   .hero-h1 {

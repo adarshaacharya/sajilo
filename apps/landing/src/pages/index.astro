@@ -9,7 +9,7 @@ import Principles from "../components/Principles.astro";
 import Install from "../components/Install.astro";
 
 const description =
-  "Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati prices, weather, forex, rashifal, radio and Nepali news, in the menu bar. Free, open source, no account. macOS, Windows, Linux.";
+  "Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati prices, weather, exchange rates, rashifal, radio and Nepali news in a menu bar app. Free and open source. macOS, Windows, Linux.";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -26,7 +26,7 @@ const jsonLd = {
 };
 ---
 
-<Base title="Sajilo: Nepal, in your menu bar" ogTitle="Sajilo: Nepal, in your menu bar" description={description}>
+<Base title="Sajilo: Bikram Sambat calendar and Nepali daily information" ogTitle="Sajilo: Nepal in your menu bar" description={description}>
   <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <Hero />
   <Ticker />

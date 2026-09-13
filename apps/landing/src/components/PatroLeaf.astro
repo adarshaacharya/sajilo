@@ -5,12 +5,10 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
 
 <section class="leaf-section wrap" id="today">
   <div class="section-head reveal">
-    <p class="eyebrow"><b>०१</b> The calendar</p>
-    <h2>A patro that never<br />needs the internet.</h2>
+    <h2>The calendar works offline.</h2>
     <p class="lede">
-      Every Bikram Sambat date, tithi, festival and public holiday from {ne(supportedRange.firstEventYear)} to
-      {ne(supportedRange.lastEventYear)} ships inside the app. Open it on a plane, in Jumla, on a bad day
-      for NTC. It is always there.
+      Dates, tithi, festivals and public holidays for {ne(supportedRange.firstEventYear)} to
+      {ne(supportedRange.lastEventYear)} are built into the app. Nothing is fetched to show you the day.
     </p>
   </div>
 
@@ -42,7 +40,7 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     </dl>
 
     <div class="leaf-next">
-      <p class="eyebrow">Coming up</p>
+      <p class="leaf-next-title">Coming up</p>
       <ol>
         {upcoming.map((e, i) => (
           <li class:list={["reveal", { "is-holiday": e.is_public_holiday }]} style={`--d:${i * 70}ms`}>
@@ -60,8 +58,8 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     </div>
 
     <p class="leaf-foot">
-      Jot a plan on any day, get a nudge the evening before a festival, and convert any date either way in the
-      converter. Not one of those needs a connection.
+      You can add a note to any day, get a reminder the evening before a festival, and convert dates between
+      BS and AD.
     </p>
   </div>
 </section>
@@ -144,10 +142,7 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     border-top: 1px solid rgb(20 17 14 / 0.15);
   }
   .leaf-facts dt {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-size: 13px;
     color: var(--paper-4);
   }
   .leaf-facts dd {
@@ -161,7 +156,8 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     border-left: 1px solid rgb(20 17 14 / 0.15);
     padding-left: clamp(20px, 3vw, 40px);
   }
-  .leaf-next .eyebrow {
+  .leaf-next-title {
+    font-size: 13px;
     color: var(--paper-4);
     margin-bottom: 14px;
   }

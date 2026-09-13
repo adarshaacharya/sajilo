@@ -10,7 +10,6 @@ const links = [
   <nav class="wrap nav" aria-label="Primary">
     <a class="brand" href="/">
       <span class="brand-deva" lang="ne">सजिलो</span>
-      <span class="brand-latin">Sajilo</span>
     </a>
     <ul class="nav-links">
       {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
@@ -56,13 +55,6 @@ const links = [
     font-size: 26px;
     line-height: 1;
     color: var(--paper);
-  }
-  .brand-latin {
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--paper-3);
   }
   .nav-links {
     display: flex;
