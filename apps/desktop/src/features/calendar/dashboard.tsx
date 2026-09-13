@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Card } from "../../shared/components/card";
-import { Icon } from "../../shared/components/icon";
 import { MonthGrid } from "../../shared/components/month-grid";
 import { SkeletonBlock } from "../../shared/components/skeleton";
 import { StateBanner } from "../../shared/components/state-banner";
@@ -19,6 +18,7 @@ import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { GlanceCards } from "./_components/glance-cards";
 import { HomeAnnouncement } from "./_components/home-announcement";
+import { UpNext } from "./_components/up-next";
 
 /**
  * The dashboard at its own shape, before the data lands.
@@ -214,22 +214,11 @@ export function Dashboard() {
         )}
       </Card>
 
-      {upNext && (
-        <button
-          type="button"
-          onClick={() => navigate("/events")}
-          className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-transform active:scale-[0.99]"
-        >
-          <Icon
-            name="festival"
-            className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
-          />
-          <span className="min-w-0 flex-1 truncate text-[12px]">{upNext.name}</span>
-          <span className="shrink-0 text-[11px] text-text-muted">
-            {relativeText(upNext.days_away, t, numerals)} ›
-          </span>
-        </button>
-      )}
+      <UpNext
+        event={
+          upNext ? { name: upNext.name, when: relativeText(upNext.days_away, t, numerals) } : null
+        }
+      />
       <GlanceCards />
     </div>
   );

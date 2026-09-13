@@ -57,17 +57,25 @@ export function Stocks({
   ipoState,
   onRetry,
   onRetryIpos,
+  linkedIpo = null,
+  linkedIpoList = false,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
   ipoState: LoadState<IpoSnapshot> | undefined;
   onRetry: () => void;
   onRetryIpos: () => void;
+  /** An issue key to open on arrival, e.g. from the home screen's up-next row. */
+  linkedIpo?: string | null;
+  linkedIpoList?: boolean;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
   const ipoSnapshot = loadedValue(ipoState);
   const [query, setQuery] = useState("");
-  const [panel, setPanel] = useState<Panel | null>(null);
+  const [panel, setPanel] = useState<Panel | null>(() => {
+    if (linkedIpo) return { kind: "ipo", key: linkedIpo, from: "market" };
+    return linkedIpoList ? { kind: "ipos" } : null;
+  });
   const [watchlist, setWatchlist] = usePersistedList(WATCHLIST_KEY);
   const [board, setBoard] = useState<MoverBoard>("gainers");
 

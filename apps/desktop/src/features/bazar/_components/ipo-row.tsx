@@ -9,24 +9,7 @@ import {
   shortCompanyName,
   subscriptionRatio,
 } from "../_lib/ipo";
-
-type TFn = ReturnType<typeof useSettings>["t"];
-
-export function phaseLabel(phase: IpoPhase, t: TFn): string | null {
-  switch (phase.kind) {
-    case "open":
-      if (phase.daysLeft === 0) return t("stocks.ipo-closes-today");
-      if (phase.daysLeft === 1) return t("stocks.ipo-closes-tomorrow");
-      return t("stocks.ipo-closes-in").replace("{n}", String(phase.daysLeft));
-    case "upcoming":
-      if (phase.daysUntil === 1) return t("stocks.ipo-opens-tomorrow");
-      return t("stocks.ipo-opens-in").replace("{n}", String(phase.daysUntil));
-    case "closed":
-      return t("stocks.ipo-closed");
-    default:
-      return null;
-  }
-}
+import { phaseLabel } from "../_lib/ipo-labels";
 
 /** Open is the one state worth the accent; the rest step back. */
 export function PhasePill({ phase }: { phase: IpoPhase }) {

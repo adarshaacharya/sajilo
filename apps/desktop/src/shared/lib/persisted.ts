@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 import { api } from "./ipc";
 
+/**
+ * The third value turns true once the stored list has been read (or failed
+ * to be). Screens that hide something *because* it is in the list wait for it,
+ * so the item does not flash in and back out.
+ */
 export function usePersistedList(
   key: string,
-): [string[], (next: string[] | ((current: string[]) => string[])) => void] {
+): [string[], (next: string[] | ((current: string[]) => string[])) => void, boolean] {
   const [items, setItems] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -13,7 +19,10 @@ export function usePersistedList(
       .then((saved) => {
         if (!cancelled && Array.isArray(saved)) setItems(saved);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -28,7 +37,7 @@ export function usePersistedList(
     });
   };
 
-  return [items, update];
+  return [items, update, loaded];
 }
 
 export function usePersistedString(key: string): [string | null, (next: string | null) => void] {

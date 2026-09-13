@@ -11,6 +11,7 @@ import {
   ratioText,
   subscriptionRatio,
 } from "../_lib/ipo";
+import { useAppliedIpos } from "../_lib/ipo-applied";
 import { PhasePill, WindowBar } from "./ipo-row";
 
 const MEROSHARE_URL = "https://meroshare.cdsc.com.np/";
@@ -28,6 +29,8 @@ export function IpoDetail({ entry, onBack }: { entry: PhasedIssue; onBack: () =>
   const detail = issueDetail(issue);
   const ratio = subscriptionRatio(issue);
   const amount = parseCount(issue.amount);
+  const { applied, toggle } = useAppliedIpos();
+  const isApplied = applied.has(entry.key);
 
   const progress = phase.kind === "open" ? phase.progress : phase.kind === "closed" ? 1 : 0;
 
@@ -120,14 +123,34 @@ export function IpoDetail({ entry, onBack }: { entry: PhasedIssue; onBack: () =>
       )}
 
       {phase.kind === "open" && (
-        <button
-          type="button"
-          onClick={() => openExternalLink(MEROSHARE_URL)}
-          className="mt-3 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-accent-fill text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 active:opacity-80"
-        >
-          {t("stocks.ipo-apply")}
-          <Icon name="openExternal" className="size-3" />
-        </button>
+        <div className="mt-3 space-y-1">
+          {!isApplied && (
+            <button
+              type="button"
+              onClick={() => openExternalLink(MEROSHARE_URL)}
+              className="flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-accent-fill text-[12px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 active:opacity-80"
+            >
+              {t("stocks.ipo-apply")}
+              <Icon name="openExternal" className="size-3" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => toggle(entry.key)}
+            aria-pressed={isApplied}
+            className={`flex w-full items-center justify-center gap-1.5 rounded-lg text-[11px] transition-colors duration-150 ${
+              isApplied
+                ? "h-8 bg-surface-hover text-text"
+                : "h-7 text-text-secondary hover:bg-surface-hover hover:text-text"
+            }`}
+          >
+            {isApplied && (
+              <Icon name="checkmark" className="size-3 text-[color:var(--color-accent-mark)]" />
+            )}
+            {isApplied ? t("stocks.ipo-applied-done") : t("stocks.ipo-mark-applied")}
+            {isApplied && <span className="text-text-muted">· {t("stocks.ipo-undo")}</span>}
+          </button>
+        </div>
       )}
     </section>
   );

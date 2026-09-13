@@ -48,6 +48,7 @@ function fetchFeeds(refresh = false): Promise<BazarFeeds> {
 export function Bazar() {
   const { t } = useSettings();
   const { search } = useLocation();
+  const linked = useMemo(() => new URLSearchParams(search), [search]);
   const [tab, setTab] = useState<Tab>(() => {
     const requested = new URLSearchParams(search).get("tab");
     return TABS.includes(requested as Tab) ? (requested as Tab) : "stocks";
@@ -131,7 +132,14 @@ export function Bazar() {
       />
 
       {tab === "stocks" && (
-        <Stocks state={stocks} ipoState={ipos} onRetry={() => load(true)} onRetryIpos={retryIpos} />
+        <Stocks
+          state={stocks}
+          ipoState={ipos}
+          onRetry={() => load(true)}
+          onRetryIpos={retryIpos}
+          linkedIpo={linked.get("ipo")}
+          linkedIpoList={linked.has("ipos")}
+        />
       )}
 
       {tab === "metals" && (
