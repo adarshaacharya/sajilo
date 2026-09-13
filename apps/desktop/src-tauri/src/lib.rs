@@ -99,6 +99,7 @@ pub fn run() {
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::stocks::StocksCache::default());
+            app.manage(commands::ipos::IposCache::default());
             app.manage(commands::rashifal::RashifalCache::default());
             app.manage(commands::radio::RadioCache::default());
             app.manage(commands::weather::WeatherCache::default());
@@ -162,6 +163,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
             commands::stocks::get_stocks,
+            commands::ipos::get_ipos,
             commands::rashifal::get_rashifal,
             commands::radio::get_stations,
             commands::radio::station_stream,

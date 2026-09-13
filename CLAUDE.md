@@ -63,7 +63,7 @@ cd apps/landing
 bun install
 bun run dev                  # Astro dev server
 bun run check && bun run build
-bun run deploy               # build, then wrangler deploy
+bun run deploy               # build, then wrangler deploy (Cloudflare Workers Builds does this on push to main)
 ```
 
 ```bash

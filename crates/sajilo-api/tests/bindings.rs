@@ -15,6 +15,7 @@ use sajilo_api::bazar::{
 };
 use sajilo_api::bundle::{BundleRequest, BundleResponse, ModuleKey};
 use sajilo_api::forex::{ForexRate, ForexSnapshot};
+use sajilo_api::ipos::{IpoIssue, IpoSnapshot};
 use sajilo_api::load_state::{Freshness, LoadState};
 use sajilo_api::meta::{FeedHealth, Health, Meta};
 use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource, NewsSourceInfo};
@@ -36,6 +37,9 @@ fn exports_every_dto() {
 
     ForexRate::export_all().unwrap();
     ForexSnapshot::export_all().unwrap();
+
+    IpoIssue::export_all().unwrap();
+    IpoSnapshot::export_all().unwrap();
 
     Metal::export_all().unwrap();
     MetalUnit::export_all().unwrap();

@@ -50,6 +50,7 @@ pub mod announcement;
 pub mod bazar;
 pub mod bundle;
 pub mod forex;
+pub mod ipos;
 pub mod load_state;
 pub mod meta;
 pub mod news;

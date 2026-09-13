@@ -4,9 +4,11 @@ import { type LoadStatus, StateBanner } from "../../../shared/components/state-b
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { usePersistedList } from "../../../shared/lib/persisted";
+import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { MoverBoard } from "../../../types/api/MoverBoard";
 import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
+import { findIssue, groupIssues, nepalToday } from "../_lib/ipo";
 import {
   changeTone,
   percentText,
@@ -18,11 +20,25 @@ import { BazarSearch } from "./bazar-search";
 import { CompanyDetail } from "./company-detail";
 import { FollowButton } from "./follow-button";
 import { IndexHeadline } from "./index-headline";
+import { IpoCard } from "./ipo-card";
+import { IpoDetail } from "./ipo-detail";
+import { IpoList } from "./ipo-list";
 import { MoverRow } from "./mover-row";
 import { QuoteRow } from "./quote-row";
 
 const WATCHLIST_KEY = "stockWatchlist";
 const WATCHLIST_LIMIT = 12;
+
+/**
+ * What the stocks tab is drilled into, if anything. One stack for every
+ * detail view keeps "back" meaning the same thing everywhere: an IPO opened
+ * from the full list returns to the list, one opened from the market view
+ * returns to the market.
+ */
+type Panel =
+  | { kind: "quote"; symbol: string }
+  | { kind: "ipos" }
+  | { kind: "ipo"; key: string; from: "market" | "ipos" };
 
 function banner(state: LoadState<StockMarketSnapshot> | undefined): LoadStatus {
   if (!state) return { status: "loading" };
@@ -38,17 +54,28 @@ function banner(state: LoadState<StockMarketSnapshot> | undefined): LoadStatus {
 
 export function Stocks({
   state,
+  ipoState,
   onRetry,
+  onRetryIpos,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
+  ipoState: LoadState<IpoSnapshot> | undefined;
   onRetry: () => void;
+  onRetryIpos: () => void;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
+  const ipoSnapshot = loadedValue(ipoState);
   const [query, setQuery] = useState("");
-  const [opened, setOpened] = useState<string | null>(null);
+  const [panel, setPanel] = useState<Panel | null>(null);
   const [watchlist, setWatchlist] = usePersistedList(WATCHLIST_KEY);
   const [board, setBoard] = useState<MoverBoard>("gainers");
+
+  const today = nepalToday();
+  const ipoGroups = useMemo(
+    () => (ipoSnapshot ? groupIssues(ipoSnapshot.issues, today) : undefined),
+    [ipoSnapshot, today],
+  );
 
   const toggleFollow = (symbol: string) => {
     const upper = symbol.toUpperCase();
@@ -69,144 +96,186 @@ export function Stocks({
     [snapshot, query],
   );
 
-  const openQuote = opened && snapshot ? quoteOf(snapshot, opened) : undefined;
-  const movers = snapshot?.movers.filter((row) => row.board === board) ?? [];
+  // IPO panels do not depend on the ShareSansar feed, so they open even when
+  // the market itself failed to load.
+  if (panel?.kind === "ipos" && ipoGroups) {
+    return (
+      <IpoList
+        groups={ipoGroups}
+        onBack={() => setPanel(null)}
+        onOpen={(key) => setPanel({ kind: "ipo", key, from: "ipos" })}
+      />
+    );
+  }
+
+  const openIssue = panel?.kind === "ipo" ? findIssue(ipoGroups, panel.key) : undefined;
+  if (panel?.kind === "ipo" && openIssue) {
+    return (
+      <IpoDetail
+        entry={openIssue}
+        onBack={() => setPanel(panel.from === "ipos" ? { kind: "ipos" } : null)}
+      />
+    );
+  }
+
+  const ipoCard = (
+    <IpoCard
+      state={ipoState}
+      groups={ipoGroups}
+      onOpenIssue={(key) => setPanel({ kind: "ipo", key, from: "market" })}
+      onOpenAll={() => setPanel({ kind: "ipos" })}
+      onRetry={onRetryIpos}
+    />
+  );
+
+  if (!snapshot) {
+    return (
+      <div className="space-y-2.5">
+        <StateBanner state={banner(state)} onRetry={onRetry} />
+        {state && state.status !== "loading" && ipoCard}
+      </div>
+    );
+  }
+
+  const openQuote = panel?.kind === "quote" ? quoteOf(snapshot, panel.symbol) : undefined;
+  const openSymbol = (symbol: string) => setPanel({ kind: "quote", symbol });
+  const movers = snapshot.movers.filter((row) => row.board === board);
 
   return (
     <StateBanner state={banner(state)} onRetry={onRetry}>
-      {snapshot && (
-        <div className="space-y-2.5">
-          <BazarSearch
-            value={query}
-            onChange={(value) => {
-              setQuery(value);
-              setOpened(null);
-            }}
-            placeholder={t("stocks.search")}
-          />
+      <div className="space-y-2.5">
+        <BazarSearch
+          value={query}
+          onChange={(value) => {
+            setQuery(value);
+            setPanel(null);
+          }}
+          placeholder={t("stocks.search")}
+        />
 
-          {openQuote ? (
-            <CompanyDetail
-              quote={openQuote}
-              followed={followed(openQuote.symbol)}
-              onBack={() => setOpened(null)}
-              onToggle={() => toggleFollow(openQuote.symbol)}
-              t={t}
-            />
-          ) : query.trim() ? (
+        {openQuote ? (
+          <CompanyDetail
+            quote={openQuote}
+            followed={followed(openQuote.symbol)}
+            onBack={() => setPanel(null)}
+            onToggle={() => toggleFollow(openQuote.symbol)}
+            t={t}
+          />
+        ) : query.trim() ? (
+          <section className="surface-card p-2.5">
+            {results.length === 0 ? (
+              <p className="text-text-secondary">{t("stocks.no-match")}</p>
+            ) : (
+              results
+                .slice(0, 25)
+                .map((quote) => (
+                  <QuoteRow
+                    key={quote.symbol}
+                    quote={quote}
+                    followed={followed(quote.symbol)}
+                    onOpen={() => openSymbol(quote.symbol)}
+                    onToggle={() => toggleFollow(quote.symbol)}
+                  />
+                ))
+            )}
+            {results.length > 25 && (
+              <p className="pt-1 text-[10px] text-text-muted">+{results.length - 25}</p>
+            )}
+          </section>
+        ) : (
+          <>
+            {snapshot.nepse && <IndexHeadline index={snapshot.nepse} t={t} />}
+
+            {ipoCard}
+
             <section className="surface-card p-2.5">
-              {results.length === 0 ? (
-                <p className="text-text-secondary">{t("stocks.no-match")}</p>
+              <p className="mb-1 text-[11px] font-semibold text-text-secondary">
+                {t("stocks.watchlist")}
+              </p>
+              {watchlist.length === 0 ? (
+                <p className="text-[11px] text-text-secondary">{t("stocks.empty-watchlist")}</p>
               ) : (
-                results
-                  .slice(0, 25)
-                  .map((quote) => (
+                watchlist.map((symbol) => {
+                  const quote = quoteOf(snapshot, symbol);
+                  if (!quote) {
+                    return (
+                      <div key={symbol} className="row-line flex items-center gap-2 py-1.5">
+                        <span className="font-semibold">{symbol}</span>
+                        <span className="flex-1 text-[10px] text-text-muted">
+                          {t("bazar.not-traded-today")}
+                        </span>
+                        <FollowButton followed onToggle={() => toggleFollow(symbol)} />
+                      </div>
+                    );
+                  }
+                  return (
                     <QuoteRow
-                      key={quote.symbol}
+                      key={symbol}
                       quote={quote}
-                      followed={followed(quote.symbol)}
-                      onOpen={() => setOpened(quote.symbol)}
-                      onToggle={() => toggleFollow(quote.symbol)}
+                      followed
+                      onOpen={() => openSymbol(symbol)}
+                      onToggle={() => toggleFollow(symbol)}
                     />
-                  ))
-              )}
-              {results.length > 25 && (
-                <p className="pt-1 text-[10px] text-text-muted">+{results.length - 25}</p>
+                  );
+                })
               )}
             </section>
-          ) : (
-            <>
-              {snapshot.nepse && <IndexHeadline index={snapshot.nepse} t={t} />}
 
+            {snapshot.movers.length > 0 && (
               <section className="surface-card p-2.5">
-                <p className="mb-1 text-[11px] font-semibold text-text-secondary">
-                  {t("stocks.watchlist")}
-                </p>
-                {watchlist.length === 0 ? (
-                  <p className="text-[11px] text-text-secondary">{t("stocks.empty-watchlist")}</p>
-                ) : (
-                  watchlist.map((symbol) => {
-                    const quote = quoteOf(snapshot, symbol);
-                    if (!quote) {
-                      return (
-                        <div key={symbol} className="row-line flex items-center gap-2 py-1.5">
-                          <span className="font-semibold">{symbol}</span>
-                          <span className="flex-1 text-[10px] text-text-muted">
-                            {t("bazar.not-traded-today")}
-                          </span>
-                          <FollowButton followed onToggle={() => toggleFollow(symbol)} />
-                        </div>
-                      );
-                    }
-                    return (
-                      <QuoteRow
-                        key={symbol}
-                        quote={quote}
-                        followed
-                        onOpen={() => setOpened(symbol)}
-                        onToggle={() => toggleFollow(symbol)}
-                      />
-                    );
-                  })
-                )}
+                <Segmented
+                  label={t("stocks.movers")}
+                  value={board}
+                  onChange={setBoard}
+                  options={[
+                    { id: "gainers" as const, label: t("stocks.gainers") },
+                    { id: "losers" as const, label: t("stocks.losers") },
+                    { id: "turnover" as const, label: t("stocks.turnover") },
+                    { id: "volume" as const, label: t("stocks.volume") },
+                  ]}
+                />
+                <div className="mt-2">
+                  {movers.map((mover) => (
+                    <MoverRow
+                      key={`${mover.board}-${mover.symbol}`}
+                      mover={mover}
+                      onOpen={() => openSymbol(mover.symbol)}
+                    />
+                  ))}
+                  {movers.length === 0 && (
+                    <p className="text-[11px] text-text-muted">{t("stocks.no-match")}</p>
+                  )}
+                </div>
               </section>
+            )}
 
-              {snapshot.movers.length > 0 && (
-                <section className="surface-card p-2.5">
-                  <Segmented
-                    label={t("stocks.movers")}
-                    value={board}
-                    onChange={setBoard}
-                    options={[
-                      { id: "gainers" as const, label: t("stocks.gainers") },
-                      { id: "losers" as const, label: t("stocks.losers") },
-                      { id: "turnover" as const, label: t("stocks.turnover") },
-                      { id: "volume" as const, label: t("stocks.volume") },
-                    ]}
-                  />
-                  <div className="mt-2">
-                    {movers.map((mover) => (
-                      <MoverRow
-                        key={`${mover.board}-${mover.symbol}`}
-                        mover={mover}
-                        onOpen={() => setOpened(mover.symbol)}
-                      />
-                    ))}
-                    {movers.length === 0 && (
-                      <p className="text-[11px] text-text-muted">{t("stocks.no-match")}</p>
-                    )}
-                  </div>
-                </section>
-              )}
-
-              {snapshot.subIndices.length > 0 && (
-                <section className="surface-card p-2.5">
-                  <p className="mb-1.5 text-[11px] font-semibold text-text-secondary">
-                    {t("stocks.sectors")}
-                  </p>
-                  <div className="grid grid-cols-2 gap-1">
-                    {snapshot.subIndices.map((index) => (
-                      <div
-                        key={index.name}
-                        className="flex items-center gap-1 rounded-md bg-surface px-1.5 py-1"
+            {snapshot.subIndices.length > 0 && (
+              <section className="surface-card p-2.5">
+                <p className="mb-1.5 text-[11px] font-semibold text-text-secondary">
+                  {t("stocks.sectors")}
+                </p>
+                <div className="grid grid-cols-2 gap-1">
+                  {snapshot.subIndices.map((index) => (
+                    <div
+                      key={index.name}
+                      className="flex items-center gap-1 rounded-md bg-surface px-1.5 py-1"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-[10px]">
+                        {shortSectorName(index.name)}
+                      </span>
+                      <span
+                        className={`shrink-0 text-[10px] font-medium tabular-nums ${changeTone(index.change)}`}
                       >
-                        <span className="min-w-0 flex-1 truncate text-[10px]">
-                          {shortSectorName(index.name)}
-                        </span>
-                        <span
-                          className={`shrink-0 text-[10px] font-medium tabular-nums ${changeTone(index.change)}`}
-                        >
-                          {percentText(index.change, index.changePercent)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-        </div>
-      )}
+                        {percentText(index.change, index.changePercent)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+      </div>
     </StateBanner>
   );
 }

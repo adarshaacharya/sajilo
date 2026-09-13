@@ -8,6 +8,7 @@ import { type LoadStatus, StateBanner } from "../../shared/components/state-bann
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
+import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import { FuelTab } from "./_components/fuel";
@@ -31,6 +32,10 @@ function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadSta
     default:
       return { status: state.status };
   }
+}
+
+function fetchIpos(refresh = false): Promise<LoadState<IpoSnapshot>> {
+  return catchAsFailed(api.getIpos(refresh));
 }
 
 function fetchFeeds(refresh = false): Promise<BazarFeeds> {
@@ -57,8 +62,20 @@ export function Bazar() {
     isValidating: loadingStocks,
     mutate: mutateStocks,
   } = useSWR("bazar-stocks", () => catchAsFailed(api.getStocks(false)));
+  // CDSC is only asked while the stocks tab is showing; its cache answers
+  // everything else.
+  const {
+    data: ipos,
+    isValidating: loadingIpos,
+    mutate: mutateIpos,
+  } = useSWR(tab === "stocks" ? "bazar-ipos" : null, () => fetchIpos(false));
 
-  const loading = tab === "stocks" ? loadingStocks : loadingFeeds;
+  const retryIpos = useCallback(
+    () => void mutateIpos(fetchIpos(true), { revalidate: false }),
+    [mutateIpos],
+  );
+
+  const loading = tab === "stocks" ? loadingStocks || loadingIpos : loadingFeeds;
 
   const load = useCallback(
     (refresh = false) => {
@@ -67,12 +84,14 @@ export function Bazar() {
         mutateStocks(catchAsFailed<StockMarketSnapshot>(api.getStocks(true)), {
           revalidate: false,
         });
+        if (tab === "stocks") mutateIpos(fetchIpos(true), { revalidate: false });
       } else {
         mutateFeeds();
         mutateStocks();
+        mutateIpos();
       }
     },
-    [mutateFeeds, mutateStocks],
+    [mutateFeeds, mutateIpos, mutateStocks, tab],
   );
 
   const metals = loadedValue(feeds?.metals);
@@ -111,7 +130,9 @@ export function Bazar() {
         scrollable={false}
       />
 
-      {tab === "stocks" && <Stocks state={stocks} onRetry={() => load(true)} />}
+      {tab === "stocks" && (
+        <Stocks state={stocks} ipoState={ipos} onRetry={() => load(true)} onRetryIpos={retryIpos} />
+      )}
 
       {tab === "metals" && (
         <StateBanner

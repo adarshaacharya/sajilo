@@ -4,9 +4,27 @@
     {
       "name": "landing",
       "runtimeExecutable": "bun",
-      "runtimeArgs": ["run", "dev", "--port", "4321"],
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--port",
+        "4321"
+      ],
       "cwd": "apps/landing",
       "port": 4321
+    },
+    {
+      "name": "showcase",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
+      "cwd": "apps/showcase",
+      "port": 5174
     }
   ]
 }
