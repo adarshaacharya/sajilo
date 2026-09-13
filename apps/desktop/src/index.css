@@ -44,10 +44,13 @@
   --color-accent-fill: #d4a84a;
   --color-accent-ink: #1c1c1e;
 
-  /* Semantics. Never the only channel — pair with a glyph or +/- prefix. */
-  --color-holiday: #ff6b6f;
+  /* Semantics. Never the only channel — pair with a glyph or +/- prefix.
+     The red is sindoor, the same one the landing site uses for holidays, so
+     the product and its page share a palette: gilt for the accent, sindoor
+     for what a patro prints in red. 5.2:1 on surface. */
+  --color-holiday: #ff6a52;
   --color-positive: #4ecf8a;
-  --color-negative: #ff6b6f;
+  --color-negative: #ff6a52;
 
   /* Feature identity comes from the icon and the data, not a background wash.
      These two survive only as icon tints. */
@@ -90,9 +93,9 @@
     --color-accent-mark: #8a6414;
     --color-accent-fill: #8a6414;
     --color-accent-ink: #ffffff;
-    --color-holiday: #c0392b;
+    --color-holiday: #c93a22;
     --color-positive: #0f7a3d;
-    --color-negative: #c0392b;
+    --color-negative: #c93a22;
     --color-weather-tint: #2f6fa8;
     --color-forex-tint: #1a7f52;
     --color-control-bg: #ffffff;
@@ -119,9 +122,9 @@
   --color-accent-mark: #8a6414;
   --color-accent-fill: #8a6414;
   --color-accent-ink: #ffffff;
-  --color-holiday: #c0392b;
+  --color-holiday: #c93a22;
   --color-positive: #0f7a3d;
-  --color-negative: #c0392b;
+  --color-negative: #c93a22;
   --color-weather-tint: #2f6fa8;
   --color-forex-tint: #1a7f52;
   --color-control-bg: #ffffff;

@@ -2,8 +2,10 @@
  * Sajilo — the patro leaf.
  *
  * The visual idea is the Nepali wall calendar: one big red date, hairline
- * rules, tithi in small type, festivals in red. Warm ink ground, cream text,
- * sindoor for the accent and gilt for the app's own colour. Type is Eczar
+ * rules, tithi in small type, festivals in red. Warm ink ground, cream text.
+ * The two colours are the app's own: gilt (#d4a84a) is the accent in both,
+ * and sindoor is the red both print holidays and losses in — never the
+ * accent, because in a patro red means a holiday. Type is Eczar
  * (drawn across Devanagari and Latin by Rosetta, so the masthead reads as one
  * voice and १० is a real १०) over Anek for running text.
  */
@@ -23,8 +25,11 @@
 
   --sindoor: #e4472f;
   --sindoor-2: #ff6a52;
-  --gilt: #d9a94a;
+  --gilt: #d4a84a;
   --gilt-2: #f0c66a;
+  --accent: var(--gilt);
+  --accent-2: var(--gilt-2);
+  --accent-ink: var(--ink);
   --leaf: #5fc98f;
 
   --display: "Eczar", "Anek Devanagari", Georgia, serif;
@@ -166,7 +171,7 @@ button {
   color: var(--paper-3);
 }
 .eyebrow b {
-  color: var(--sindoor-2);
+  color: var(--accent);
   font-weight: 500;
 }
 
@@ -194,7 +199,7 @@ button {
 }
 .section-head h2 em {
   font-style: normal;
-  color: var(--sindoor);
+  color: var(--accent-2);
 }
 
 .num {
@@ -239,9 +244,9 @@ button {
 .btn:active {
   transform: scale(0.98);
 }
-.btn--sindoor {
-  --bg: var(--sindoor);
-  --fg: var(--paper);
+.btn--accent {
+  --bg: var(--accent);
+  --fg: var(--accent-ink);
 }
 .btn--ghost {
   --bg: transparent;

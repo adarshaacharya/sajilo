@@ -1,5 +1,5 @@
 ---
-import { today, todayTithi, upcoming, kathmandu, supportedRange } from "../data/showcase";
+import { today, todayTithi, todayIsHoliday, upcoming, kathmandu, supportedRange } from "../data/showcase";
 import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
 ---
 
@@ -14,7 +14,7 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     </p>
   </div>
 
-  <div class="leaf reveal">
+  <div class:list={["leaf", "reveal", { "is-holiday": todayIsHoliday }]}>
     <div class="leaf-date">
       <p class="leaf-month" lang="ne">{today.nepaliMonthName} {ne(today.nepali.year)}</p>
       <p class="leaf-day" lang="ne">{ne(today.nepali.day)}</p>
@@ -113,13 +113,17 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     letter-spacing: 0.02em;
     color: var(--paper-4);
   }
+  /* Red only on a holiday. That is the one rule every wall patro follows. */
   .leaf-day {
     font-family: var(--display);
     font-weight: 700;
     font-size: clamp(160px, 22vw, 260px);
     line-height: 0.82;
-    color: var(--sindoor);
+    color: var(--ink);
     margin: 8px 0 14px -0.03em;
+  }
+  .leaf.is-holiday .leaf-day {
+    color: var(--sindoor);
   }
   .leaf-weekday {
     font-family: var(--deva);

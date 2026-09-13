@@ -28,8 +28,9 @@ export interface UpcomingEvent {
 }
 
 const todayKey = `events_for:${today.nepali.year}:${today.nepali.month}:${today.nepali.day}`;
-const todayEvents = (c as unknown as Record<string, { tithi: string | null } | undefined>)[todayKey];
+const todayEvents = (c as unknown as Record<string, { tithi: string | null; is_public_holiday: boolean } | undefined>)[todayKey];
 export const todayTithi: string | null = todayEvents?.tithi ?? null;
+export const todayIsHoliday = todayEvents?.is_public_holiday ?? false;
 
 export const supportedRange = c.supported_range;
 
