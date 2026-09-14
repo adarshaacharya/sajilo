@@ -192,7 +192,9 @@ export function Stocks({
           </section>
         ) : (
           <>
-            {snapshot.nepse && <IndexHeadline index={snapshot.nepse} t={t} />}
+            {snapshot.nepse && (
+              <IndexHeadline index={snapshot.nepse} marketStatus={snapshot.marketStatus} t={t} />
+            )}
 
             {ipoCard}
 

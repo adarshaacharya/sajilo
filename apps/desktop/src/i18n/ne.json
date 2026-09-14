@@ -384,6 +384,8 @@
   "stocks.ipos": "आईपीओ",
   "stocks.losers": "घट्ने",
   "stocks.low": "न्यून",
+  "stocks.market-closed": "बन्द",
+  "stocks.market-open": "खुला",
   "stocks.movers": "अग्रणी",
   "stocks.no-match": "मिल्ने सूचीबद्ध कम्पनी भेटिएन।",
   "stocks.no-open-ipos": "अहिले कुनै आईपीओ आवेदन खुला छैन।",

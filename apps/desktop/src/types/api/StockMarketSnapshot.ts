@@ -2,6 +2,7 @@
 import type { Freshness } from "./Freshness";
 import type { MarketIndex } from "./MarketIndex";
 import type { MarketMover } from "./MarketMover";
+import type { MarketStatus } from "./MarketStatus";
 import type { StockQuote } from "./StockQuote";
 
-export type StockMarketSnapshot = { nepse: MarketIndex | null, subIndices: Array<MarketIndex>, movers: Array<MarketMover>, quotes: Array<StockQuote>, freshness: Freshness, };
+export type StockMarketSnapshot = { nepse: MarketIndex | null, marketStatus: MarketStatus | null, subIndices: Array<MarketIndex>, movers: Array<MarketMover>, quotes: Array<StockQuote>, freshness: Freshness, };

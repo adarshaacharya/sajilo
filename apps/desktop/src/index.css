@@ -233,14 +233,14 @@ html {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--color-negative);
+  background: var(--live-dot-color, var(--color-negative));
 }
 
 .live-status-dot::after {
   content: "";
   position: absolute;
   inset: -3px;
-  border: 1px solid var(--color-negative);
+  border: 1px solid var(--live-dot-color, var(--color-negative));
   border-radius: inherit;
   animation: live-status-breathe 2.2s ease-out infinite;
 }

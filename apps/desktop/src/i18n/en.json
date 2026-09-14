@@ -384,6 +384,8 @@
   "stocks.ipos": "IPOs",
   "stocks.losers": "Top losers",
   "stocks.low": "Low",
+  "stocks.market-closed": "Closed",
+  "stocks.market-open": "Open",
   "stocks.movers": "Movers",
   "stocks.no-match": "No listed company matches that.",
   "stocks.no-open-ipos": "No IPO applications are open right now.",
