@@ -833,7 +833,6 @@ html {
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  mask-image: linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent);
 }
 
 .seg-track--scroll::-webkit-scrollbar {
