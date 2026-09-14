@@ -641,7 +641,7 @@ pub fn pending_notifications(
             else {
                 continue;
             };
-            if fire_at <= now {
+            if !sajilo_core::notify::still_deliverable(fire_at, now) {
                 continue;
             }
             let person = item

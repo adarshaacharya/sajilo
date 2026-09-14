@@ -11,7 +11,6 @@ import type { LoadState } from "../../../types/api/LoadState";
 import {
   companyName,
   groupIssues,
-  isPublicOffer,
   nepalToday,
   ratioText,
   shortCompanyName,
@@ -69,7 +68,7 @@ export function UpNext({ event }: { event: { name: string; when: string } | null
   const open = useMemo(() => {
     if (!modules.bazarEnabled || !loaded || ipos?.status !== "fresh") return [];
     return groupIssues(ipos.value.issues, today).open.filter(
-      (entry) => isPublicOffer(entry.issue) && !applied.has(entry.key),
+      (entry) => entry.issue.openToPublic && !applied.has(entry.key),
     );
   }, [applied, ipos, loaded, modules.bazarEnabled, today]);
 

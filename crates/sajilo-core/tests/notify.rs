@@ -5,7 +5,7 @@ use chrono::{Duration, NaiveDate, TimeZone, Utc};
 use sajilo_core::calendar::upcoming::UpcomingEvent;
 use sajilo_core::notify::{
     LATE_FIRE_WINDOW_HOURS, LIMIT, LastFired, NotificationOptions, next_wake, plan_day_plans,
-    plan_festivals, should_fire_late,
+    plan_festivals, should_fire_late, still_deliverable,
 };
 use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder};
 use sajilo_core::{NepaliDate, nepal_time};
@@ -35,6 +35,7 @@ fn enabled() -> NotificationOptions {
         eve_of_public_holiday: true,
         eve_of_festival: true,
         hour: 19,
+        ipo_closing_day: false,
     }
 }
 
@@ -62,6 +63,7 @@ fn the_two_toggles_are_independent() {
         eve_of_public_holiday: true,
         eve_of_festival: false,
         hour: 19,
+        ipo_closing_day: false,
     };
     let planned = plan_festivals(&events, holidays_only, now);
     assert_eq!(planned.len(), 1);
@@ -71,6 +73,7 @@ fn the_two_toggles_are_independent() {
         eve_of_public_holiday: false,
         eve_of_festival: true,
         hour: 19,
+        ipo_closing_day: false,
     };
     let planned = plan_festivals(&events, festivals_only, now);
     assert_eq!(planned.len(), 1);
@@ -327,4 +330,63 @@ fn the_reminder_date_matches_the_event() {
         .date_naive();
     // BS 2083-04-20 is 5 August 2026, so the eve is the 4th.
     assert_eq!(fire, expected);
+}
+
+// ------------------------------------------------ waking after a fire time
+
+/// The scheduler wakes a moment *after* a fire time and replans before it
+/// delivers. The reminder it woke for must still be in that plan, or it is
+/// never delivered at all.
+#[test]
+fn a_festival_reminder_is_still_planned_just_after_it_comes_due() {
+    let events = vec![event(20, "Festival", false)];
+    let fire_at = plan_festivals(&events, enabled(), nepal(2026, 8, 1, 9))[0].fire_at;
+
+    let woke = fire_at + Duration::seconds(2);
+    let replanned = plan_festivals(&events, enabled(), woke);
+    assert_eq!(replanned.len(), 1);
+
+    let mut fired = LastFired::default();
+    assert!(should_fire_late(&replanned[0], woke, &fired));
+    fired.record(&replanned[0].id, woke);
+    assert!(
+        !should_fire_late(&replanned[0], woke, &fired),
+        "kept in the plan, but delivered only once"
+    );
+}
+
+#[test]
+fn a_day_plan_reminder_is_still_planned_just_after_it_comes_due() {
+    let fire_at = plan_day_plans(&[timed_plan("a", 20, 9, 15)], nepal(2026, 8, 1, 9))[0].fire_at;
+
+    let woke = fire_at + Duration::seconds(2);
+    let replanned = plan_day_plans(&[timed_plan("a", 20, 9, 15)], woke);
+    assert_eq!(replanned.len(), 1);
+    assert!(should_fire_late(&replanned[0], woke, &LastFired::default()));
+}
+
+/// Kept only as long as it could still be delivered.
+#[test]
+fn a_reminder_leaves_the_plan_once_the_late_window_has_passed() {
+    let events = vec![event(20, "Festival", false)];
+    let fire_at = plan_festivals(&events, enabled(), nepal(2026, 8, 1, 9))[0].fire_at;
+    let window_end = fire_at + Duration::hours(LATE_FIRE_WINDOW_HOURS);
+
+    assert!(still_deliverable(fire_at, window_end));
+    assert!(!still_deliverable(
+        fire_at,
+        window_end + Duration::minutes(1)
+    ));
+    assert!(plan_festivals(&events, enabled(), window_end + Duration::minutes(1)).is_empty());
+}
+
+/// A due reminder stays in the plan, but must not make the scheduler spin.
+#[test]
+fn the_next_wake_ignores_reminders_already_due() {
+    let events = vec![event(20, "Festival", false)];
+    let fire_at = plan_festivals(&events, enabled(), nepal(2026, 8, 1, 9))[0].fire_at;
+
+    let woke = fire_at + Duration::seconds(2);
+    let replanned = plan_festivals(&events, enabled(), woke);
+    assert_eq!(next_wake(&replanned, woke), None);
 }

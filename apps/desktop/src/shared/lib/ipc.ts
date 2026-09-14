@@ -227,6 +227,7 @@ export interface NotificationOptions {
   eveOfPublicHoliday: boolean;
   eveOfFestival: boolean;
   hour: number;
+  ipoClosingDay: boolean;
 }
 
 export interface PlannedNotification {

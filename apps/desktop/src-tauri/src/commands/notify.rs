@@ -5,14 +5,14 @@
 //! and remembering what has already been delivered so a restart cannot re-fire
 //! it.
 
-use crate::{db, prefs::NOTIFICATION_OPTIONS as OPTIONS_KEY};
-use chrono::Utc;
+use crate::{db, prefs, prefs::NOTIFICATION_OPTIONS as OPTIONS_KEY};
+use chrono::{NaiveDate, Utc};
 use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::calendar::upcoming;
 use sajilo_core::nepal_time;
 use sajilo_core::notify::{
-    LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans, plan_festivals,
-    should_fire_late,
+    IpoDeadline, LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans,
+    plan_festivals, plan_ipo_closing, should_fire_late,
 };
 use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::{NotificationExt, PermissionState};
@@ -58,7 +58,10 @@ fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &st
         .unwrap_or_default()
 }
 
-/// Everything currently pending, soonest first — festivals and day plans merged.
+/// Everything the scheduler may deliver, soonest first — festivals, day plans,
+/// Keeper and IPO reminders merged. Includes reminders that came due within
+/// the late window, delivered or not: `deliver_due` checks `LastFired`, and
+/// `upcoming` hides them from the UI.
 pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let options: NotificationOptions = read(app, OPTIONS_KEY);
     let plans = crate::commands::plans::all_for_backup(app).unwrap_or_default();
@@ -66,6 +69,7 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
 
     let mut all = plan_day_plans(&plans, now);
     all.extend(crate::commands::keeper::pending_notifications(app, now));
+    all.extend(ipo_closing(app, options, now));
 
     // Festivals need the event list, which is only available inside the bundled
     // calendar range.
@@ -83,9 +87,68 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     all
 }
 
+/// Closing-day reminders from the cached IPO list. Planning never fetches; the
+/// scheduler warms the list before each delivery instead.
+fn ipo_closing(
+    app: &AppHandle<Wry>,
+    options: NotificationOptions,
+    now: chrono::DateTime<Utc>,
+) -> Vec<PlannedNotification> {
+    if !wants_ipo_reminders(app, options) {
+        return Vec::new();
+    }
+    let Some((snapshot, fetched_at)) = crate::commands::ipos::cached(app) else {
+        return Vec::new();
+    };
+    let applied: Vec<String> = read(app, prefs::IPO_APPLIED);
+
+    let deadlines: Vec<IpoDeadline> = snapshot
+        .issues
+        .iter()
+        .filter(|issue| issue.open_to_public && !applied.contains(&issue.id))
+        .filter_map(|issue| {
+            let close_date = NaiveDate::parse_from_str(issue.close_date.trim(), "%Y-%m-%d").ok()?;
+            let name = issue.symbol.clone().unwrap_or_else(|| {
+                if issue.name.is_empty() {
+                    issue.company_name.clone()
+                } else {
+                    issue.name.clone()
+                }
+            });
+            Some(IpoDeadline { name, close_date })
+        })
+        .collect();
+
+    plan_ipo_closing(&deadlines, options, fetched_at, now)
+}
+
+fn wants_ipo_reminders(app: &AppHandle<Wry>, options: NotificationOptions) -> bool {
+    options.ipo_closing_day && crate::background_refresh::enabled(app, prefs::BAZAR_ENABLED)
+}
+
+/// A due closing-day reminder only goes out on a list fetched that day, so the
+/// list is refreshed before every delivery. `Feed` still limits CDSC to one
+/// request per half hour however often the scheduler wakes.
+async fn warm_ipos(app: &AppHandle<Wry>) {
+    let options: NotificationOptions = read(app, OPTIONS_KEY);
+    if wants_ipo_reminders(app, options) {
+        crate::commands::ipos::get_ipos(app.clone(), Some(false)).await;
+    }
+}
+
+/// What is still to come, for the UI: `pending` without anything already
+/// delivered.
+fn upcoming(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
+    let fired: LastFired = read(app, LAST_FIRED_KEY);
+    pending(app)
+        .into_iter()
+        .filter(|notification| !fired.was_fired(&notification.id))
+        .collect()
+}
+
 #[tauri::command]
 pub fn pending_notifications(app: AppHandle<Wry>) -> Vec<PlannedNotification> {
-    pending(&app)
+    upcoming(&app)
 }
 
 #[tauri::command]
@@ -102,7 +165,7 @@ pub fn set_notification_options(
 ) -> Result<Vec<PlannedNotification>> {
     let value = serde_json::to_value(options).map_err(|error| error.to_string())?;
     db::set_json(&app, OPTIONS_KEY, &value)?;
-    Ok(pending(&app))
+    Ok(upcoming(&app))
 }
 
 /// Delivers anything whose time has come, and returns how many went out.
@@ -159,6 +222,7 @@ fn tracing_warn(id: &str, message: &str) {
 pub fn spawn_scheduler(app: AppHandle<Wry>) {
     tauri::async_runtime::spawn(async move {
         // Anything missed while the app was closed, within the late window.
+        warm_ipos(&app).await;
         deliver_due(&app);
 
         loop {
@@ -176,6 +240,7 @@ pub fn spawn_scheduler(app: AppHandle<Wry>) {
             if handle.await.is_err() {
                 return;
             }
+            warm_ipos(&app).await;
             deliver_due(&app);
         }
     });

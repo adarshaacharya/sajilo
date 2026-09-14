@@ -101,6 +101,17 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
         }
     }
 
+    /// The last good value and when it was fetched, without fetching. For
+    /// callers that must never touch the network, such as reminder planning.
+    pub fn peek(&self, app: &AppHandle<Wry>) -> Option<(T, DateTime<Utc>)> {
+        self.hydrate(app);
+        self.slot
+            .lock()
+            .expect("feed cache mutex poisoned")
+            .as_ref()
+            .map(|entry| (entry.value.clone(), entry.fetched_at))
+    }
+
     /// Fills the slot from the store on first use. A payload written by a newer
     /// build must not take the screen down, so an unreadable one reads as
     /// "nothing cached" and is replaced by the next successful fetch.

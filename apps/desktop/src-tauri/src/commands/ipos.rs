@@ -1,6 +1,6 @@
 //! CDSC's current IPO issues, shown alongside the stock market view.
 
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use sajilo_api::ipos::IpoSnapshot;
 use sajilo_api::load_state::LoadState;
 use sajilo_providers::{HttpClient, cdsc};
@@ -26,6 +26,11 @@ impl Default for IposCache {
             client: HttpClient::new(),
         }
     }
+}
+
+/// The cached list and when it was fetched, without touching the network.
+pub fn cached(app: &AppHandle<Wry>) -> Option<(IpoSnapshot, DateTime<Utc>)> {
+    app.try_state::<IposCache>()?.feed.peek(app)
 }
 
 #[tauri::command]

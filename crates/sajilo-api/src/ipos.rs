@@ -5,6 +5,10 @@ use crate::load_state::Freshness;
 dto! {
     /// One row from CDSC's server-rendered Current Issue Update table.
     pub struct IpoIssue {
+        /// Stable across refreshes: the raw name cell with both dates. What the
+        /// app remembers an issue by, e.g. when the user marks it applied.
+        #[serde(default)]
+        pub id: String,
         /// The cell exactly as CDSC publishes it, e.g.
         /// `Beni Hydropower Project Limited - BENI (IPO - For General Public)`.
         pub company_name: String,
@@ -20,6 +24,11 @@ dto! {
         /// Who may apply, e.g. `General Public`, without CDSC's leading "For".
         #[serde(default)]
         pub audience: Option<String>,
+        /// Whether anyone can apply. False for right shares and reserved quotas
+        /// (foreign employment, project-affected locals): real issues, but not
+        /// ones to put in front of everybody.
+        #[serde(default)]
+        pub open_to_public: bool,
         pub issue_manager: String,
         /// Kept as source text: CDSC publishes whole units, often with separators.
         pub issued_units: String,

@@ -9,7 +9,7 @@
 
 use std::collections::BTreeMap;
 
-use chrono::{DateTime, Duration, TimeZone, Utc};
+use chrono::{DateTime, Duration, NaiveDate, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::calendar::bikram_sambat::{LAST_YEAR, gregorian_date_from, nepali_date_from};
@@ -32,6 +32,9 @@ pub struct NotificationOptions {
     /// enough not to arrive after the user has gone to bed.
     #[serde(default = "default_hour")]
     pub hour: u32,
+    /// The morning an IPO the user can still apply to closes.
+    #[serde(default)]
+    pub ipo_closing_day: bool,
 }
 
 fn default_hour() -> u32 {
@@ -44,12 +47,17 @@ impl Default for NotificationOptions {
             eve_of_public_holiday: false,
             eve_of_festival: false,
             hour: default_hour(),
+            ipo_closing_day: false,
         }
     }
 }
 
 impl NotificationOptions {
     pub fn is_any_enabled(&self) -> bool {
+        self.festivals_enabled() || self.ipo_closing_day
+    }
+
+    fn festivals_enabled(self) -> bool {
         self.eve_of_public_holiday || self.eve_of_festival
     }
 }
@@ -73,13 +81,25 @@ pub const LIMIT: usize = 30;
 /// from last week should not arrive as a surprise.
 pub const LATE_FIRE_WINDOW_HOURS: i64 = 6;
 
+/// Whether a reminder due at `fire_at` can still be delivered at `now`: it is
+/// still ahead, or it came due within the late window.
+///
+/// Every planner keeps both. The scheduler wakes a moment *after* a fire time
+/// and replans before it delivers, so a planner that dropped everything at or
+/// before `now` would drop the very reminder the scheduler woke up for — and
+/// nothing would ever be delivered. `LastFired` is what stops a kept reminder
+/// from firing twice.
+pub fn still_deliverable(fire_at: DateTime<Utc>, now: DateTime<Utc>) -> bool {
+    now - fire_at <= Duration::hours(LATE_FIRE_WINDOW_HOURS)
+}
+
 /// Festival and holiday reminders, one per date.
 pub fn plan_festivals(
     events: &[UpcomingEvent],
     options: NotificationOptions,
     now: DateTime<Utc>,
 ) -> Vec<PlannedNotification> {
-    if !options.is_any_enabled() {
+    if !options.festivals_enabled() {
         return Vec::new();
     }
 
@@ -96,7 +116,7 @@ pub fn plan_festivals(
         .filter_map(|(date, same_day)| {
             let first = same_day.first()?;
             let fire_at = eve_of(first.gregorian, options.hour)?;
-            if fire_at <= now {
+            if !still_deliverable(fire_at, now) {
                 return None;
             }
             let is_holiday = same_day.iter().any(|event| event.is_public_holiday);
@@ -117,6 +137,88 @@ pub fn plan_festivals(
         })
         .take(LIMIT)
         .collect()
+}
+
+/// The morning of closing day, Nepal time: early enough to leave the working
+/// day to apply, late enough to be read rather than slept through.
+pub const IPO_CLOSING_HOUR: u32 = 10;
+
+/// An issue the user could still apply to, as the desktop shell hands it over.
+///
+/// Core knows nothing of CDSC. By the time an issue reaches here the shell has
+/// already dropped the ones not open to the general public and the ones the
+/// user marked as applied.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IpoDeadline {
+    /// What the notification calls it: the symbol when CDSC gives one.
+    pub name: String,
+    pub close_date: NaiveDate,
+}
+
+/// One closing-day reminder per date, listing every issue that closes then.
+///
+/// `fetched_at` is when the issue list was fetched. A reminder still ahead is
+/// planned from any list, so the scheduler wakes for it on time. A reminder
+/// already due goes out only on a list fetched that same Nepal day: CDSC closes
+/// an oversubscribed issue early, and "closes today" about an issue that shut
+/// yesterday is worse than no reminder at all.
+pub fn plan_ipo_closing(
+    deadlines: &[IpoDeadline],
+    options: NotificationOptions,
+    fetched_at: DateTime<Utc>,
+    now: DateTime<Utc>,
+) -> Vec<PlannedNotification> {
+    if !options.ipo_closing_day {
+        return Vec::new();
+    }
+
+    let today = now.with_timezone(&nepal_time::offset()).date_naive();
+    let fetched_on = fetched_at.with_timezone(&nepal_time::offset()).date_naive();
+
+    let mut by_date: BTreeMap<NaiveDate, Vec<&str>> = BTreeMap::new();
+    for deadline in deadlines
+        .iter()
+        .filter(|deadline| deadline.close_date >= today)
+    {
+        let names = by_date.entry(deadline.close_date).or_default();
+        if !names.contains(&deadline.name.as_str()) {
+            names.push(deadline.name.as_str());
+        }
+    }
+
+    by_date
+        .into_iter()
+        .filter_map(|(date, names)| {
+            let fire_at = at_nepal_time(date, IPO_CLOSING_HOUR, 0)?;
+            let due_on_stale_list = fire_at <= now && fetched_on != date;
+            if due_on_stale_list || !still_deliverable(fire_at, now) {
+                return None;
+            }
+            let (title, body) = match names.as_slice() {
+                [one] => (
+                    format!("{one} IPO closes today"),
+                    "Last day to apply on MeroShare.".to_owned(),
+                ),
+                many => (
+                    format!("{} IPOs close today", many.len()),
+                    format!("{} · last day to apply on MeroShare.", many.join(", ")),
+                ),
+            };
+            Some(PlannedNotification {
+                id: ipo_closing_id(date),
+                title,
+                body,
+                fire_at,
+            })
+        })
+        .take(LIMIT)
+        .collect()
+}
+
+/// One id per closing date, so a replan after the list refreshes replaces the
+/// reminder rather than adding a second one beside it.
+pub fn ipo_closing_id(date: NaiveDate) -> String {
+    format!("sajilo.ipo.close.{date}")
 }
 
 /// Stable across replans, so rescheduling overwrites the previous request for a
@@ -189,7 +291,7 @@ fn notification_for(
     let day = gregorian_date_from(date).ok()?;
     let event_at = at_nepal_time(day, time.hour, time.minute)?;
     let fire_at = event_at - Duration::minutes(i64::from(reminder.0));
-    if fire_at <= now {
+    if !still_deliverable(fire_at, now) {
         return None;
     }
 

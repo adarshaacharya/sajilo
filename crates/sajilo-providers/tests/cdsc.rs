@@ -46,6 +46,23 @@ fn splits_the_recorded_name_into_company_symbol_and_issue() {
     assert_eq!(issue.symbol.as_deref(), Some("BENI"));
     assert_eq!(issue.issue_type.as_deref(), Some("IPO"));
     assert_eq!(issue.audience.as_deref(), Some("General Public"));
+    assert!(issue.open_to_public);
+    assert_eq!(
+        issue.id,
+        "Beni Hydropower Project Limited - BENI (IPO - For General Public)|2026-09-07|2026-09-11"
+    );
+}
+
+#[test]
+fn only_general_public_offers_are_open_to_public() {
+    assert!(
+        !issue_named(
+            "Himalayan Hydropower Limited - HHL (IPO - For Nepalese citizens working abroad)"
+        )
+        .open_to_public
+    );
+    assert!(!issue_named("Nabil Bank Limited - NABIL (Right Share)").open_to_public);
+    assert!(issue_named("Nabil Bank Debenture 2089 - NABILD2089").open_to_public);
 }
 
 #[test]

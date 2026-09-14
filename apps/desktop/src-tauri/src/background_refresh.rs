@@ -15,7 +15,8 @@ const INITIAL_DELAY: Duration = Duration::from_secs(15);
 const REFRESH_INTERVAL: Duration = Duration::from_secs(60 * 60);
 const REFRESHED_EVENT: &str = "sajilo://feeds-refreshed";
 
-fn enabled(app: &AppHandle<Wry>, key: &str) -> bool {
+/// Module toggles default to on: a missing preference is a module nobody switched off.
+pub(crate) fn enabled(app: &AppHandle<Wry>, key: &str) -> bool {
     db::get_json(app, key)
         .ok()
         .flatten()

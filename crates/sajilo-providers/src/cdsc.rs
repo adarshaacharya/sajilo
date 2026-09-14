@@ -68,22 +68,37 @@ fn issue(header: &[String], row: &[String]) -> Option<IpoIssue> {
     }
 
     let parts = split_company_name(&company_name);
+    let open_date = value("open date");
+    let close_date = value("close date");
+    let open_to_public = is_open_to_public(parts.issue_type.as_deref(), parts.audience.as_deref());
 
     Some(IpoIssue {
+        id: format!("{company_name}|{open_date}|{close_date}"),
         company_name,
         name: parts.name,
         symbol: parts.symbol,
         issue_type: parts.issue_type,
         audience: parts.audience,
+        open_to_public,
         issue_manager: value("issue manager"),
         issued_units: value("issued unit"),
         application_count: value("number of application"),
         applied_units: value("applied unit"),
         amount: value("amount"),
-        open_date: value("open date"),
-        close_date: value("close date"),
+        open_date,
+        close_date,
         last_update: value("last update"),
     })
+}
+
+/// A named audience decides it; without one, anything but a right share is
+/// taken as a public offer, since that is what CDSC lists by default.
+fn is_open_to_public(issue_type: Option<&str>, audience: Option<&str>) -> bool {
+    let mentions = |text: &str, word: &str| text.to_ascii_lowercase().contains(word);
+    audience.map_or_else(
+        || !issue_type.is_some_and(|kind| mentions(kind, "right")),
+        |audience| mentions(audience, "general public"),
+    )
 }
 
 #[derive(Debug, Default)]

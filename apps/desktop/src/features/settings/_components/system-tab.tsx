@@ -6,6 +6,10 @@ import { useUpdater } from "../../../shared/context/updater-context";
 import { api, type NotificationOptions, type PermissionState } from "../../../shared/lib/ipc";
 import { SettingsSection } from "./settings-section";
 
+function anyReminder(options: NotificationOptions): boolean {
+  return options.eveOfFestival || options.eveOfPublicHoliday || options.ipoClosingDay;
+}
+
 export function SystemTab() {
   const { t } = useSettings();
   const {
@@ -21,6 +25,7 @@ export function SystemTab() {
     eveOfPublicHoliday: false,
     eveOfFestival: false,
     hour: 19,
+    ipoClosingDay: false,
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
@@ -37,7 +42,7 @@ export function SystemTab() {
   }, []);
 
   const updateOptions = async (next: NotificationOptions) => {
-    if ((next.eveOfFestival || next.eveOfPublicHoliday) && permission !== "granted") {
+    if (anyReminder(next) && permission !== "granted") {
       setPermission(await api.requestNotificationPermission().catch(() => "denied" as const));
     }
     setOptions(next);
@@ -47,7 +52,7 @@ export function SystemTab() {
   const reminderNote =
     permission === "denied"
       ? t("settings.reminder-denied-note")
-      : options.eveOfFestival || options.eveOfPublicHoliday
+      : anyReminder(options)
         ? t("settings.reminder-enabled-note")
         : t("settings.reminder-off-note");
 
@@ -150,6 +155,11 @@ export function SystemTab() {
           label={t("reminder.festival-tomorrow")}
           checked={options.eveOfFestival}
           onChange={(value) => updateOptions({ ...options, eveOfFestival: value })}
+        />
+        <Toggle
+          label={t("reminder.ipo-closing-day")}
+          checked={options.ipoClosingDay}
+          onChange={(value) => updateOptions({ ...options, ipoClosingDay: value })}
         />
       </SettingsSection>
 

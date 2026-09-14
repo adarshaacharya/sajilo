@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { usePersistedList } from "../../../shared/lib/persisted";
 
+/** Also read by the tray's closing-day reminders (`prefs::IPO_APPLIED`). */
 const APPLIED_KEY = "ipoApplied";
 /** Old keys age out on their own; nobody needs a record of last year's issues. */
 const APPLIED_LIMIT = 40;

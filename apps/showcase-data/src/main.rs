@@ -410,6 +410,7 @@ fn system(commands: &mut BTreeMap<String, Value>) {
             "eveOfPublicHoliday": true,
             "eveOfFestival": true,
             "hour": 18,
+            "ipoClosingDay": false,
         }),
     );
     insert(commands, "get_setting", &Value::Null);

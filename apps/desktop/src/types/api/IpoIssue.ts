@@ -5,6 +5,11 @@
  */
 export type IpoIssue = { 
 /**
+ * Stable across refreshes: the raw name cell with both dates. What the
+ * app remembers an issue by, e.g. when the user marks it applied.
+ */
+id: string, 
+/**
  * The cell exactly as CDSC publishes it, e.g.
  * `Beni Hydropower Project Limited - BENI (IPO - For General Public)`.
  */
@@ -21,7 +26,13 @@ issueType: string | null,
 /**
  * Who may apply, e.g. `General Public`, without CDSC's leading "For".
  */
-audience: string | null, issueManager: string, 
+audience: string | null, 
+/**
+ * Whether anyone can apply. False for right shares and reserved quotas
+ * (foreign employment, project-affected locals): real issues, but not
+ * ones to put in front of everybody.
+ */
+openToPublic: boolean, issueManager: string, 
 /**
  * Kept as source text: CDSC publishes whole units, often with separators.
  */

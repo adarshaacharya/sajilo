@@ -57,8 +57,9 @@ export function ipoPhase(issue: IpoIssue, today: number): IpoPhase {
   return { kind: "open", daysLeft: close - today, progress: (today - open + 1) / span };
 }
 
+/** The parser's stable id; rebuilt the same way for a list cached before it existed. */
 export function issueKey(issue: IpoIssue): string {
-  return `${issue.companyName}|${issue.openDate}|${issue.closeDate}`;
+  return issue.id || `${issue.companyName}|${issue.openDate}|${issue.closeDate}`;
 }
 
 /** Open first (closing soonest), then upcoming (opening soonest), then closed (latest first). */
@@ -138,14 +139,4 @@ export function issueDate(iso: string, language: "en" | "ne"): string | null {
     day: "numeric",
     timeZone: "UTC",
   }).format(new Date(day * DAY_MS));
-}
-
-/**
- * Whether anyone can apply. Right shares and reserved quotas (foreign
- * employment, project-affected locals) are real issues but not ones to put in
- * front of everybody, so only general-public offers reach the home screen.
- */
-export function isPublicOffer(issue: IpoIssue): boolean {
-  if (issue.audience) return /general public/i.test(issue.audience);
-  return !/right/i.test(issue.issueType ?? "");
 }

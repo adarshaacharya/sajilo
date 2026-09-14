@@ -55,6 +55,9 @@ pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";
 pub const AUTOSTART_DEFAULTED: &str = "autostartDefaulted";
 pub const VEGETABLE_FAVOURITES: &str = "vegetableFavourites";
 pub const STOCK_WATCHLIST: &str = "stockWatchlist";
+/// Issue ids the user marked as applied, written by the IPO detail screen.
+/// Closing-day reminders skip these.
+pub const IPO_APPLIED: &str = "ipoApplied";
 pub const SELECTED_RASHI: &str = "selectedRashi";
 pub const RADIO_FAVOURITES: &str = "radioFavourites";
 /// Same key `commands/notify.rs` reads/writes — kept here too since backup
