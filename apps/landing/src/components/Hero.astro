@@ -13,8 +13,12 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
 ---
 
 <section class="hero" id="main">
-  <!-- The day's number, patro-sized, as a watermark behind everything. -->
-  <span class="hero-mark" aria-hidden="true" lang="ne">{ne(today.nepali.day)}</span>
+  <!-- The day's number, patro-sized, as a watermark behind everything. It is
+       clipped on its own layer, not by the section, so the platform menu can
+       still hang over the ticker below. -->
+  <div class="hero-mark-clip" aria-hidden="true">
+    <span class="hero-mark" lang="ne">{ne(today.nepali.day)}</span>
+  </div>
 
   <div class="wrap hero-grid">
     <div class="hero-copy">
@@ -76,9 +80,15 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
 <style>
   .hero {
     position: relative;
-    z-index: 1;
+    /* Above the ticker that follows, so an open platform menu overlaps it. */
+    z-index: 2;
     padding-block: clamp(48px, 8vw, 110px) clamp(40px, 6vw, 80px);
+  }
+  .hero-mark-clip {
+    position: absolute;
+    inset: 0;
     overflow: clip;
+    pointer-events: none;
   }
   .hero-mark {
     position: absolute;
@@ -106,6 +116,14 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     gap: clamp(32px, 5vw, 72px);
     align-items: center;
+  }
+
+  /* Above the stage. Its entrance animations make the menu bar and popover
+     their own layers, and on one column they sit right under the platform
+     menu, so without this they paint over it. */
+  .hero-copy {
+    position: relative;
+    z-index: 1;
   }
 
   .hero-date {
@@ -156,6 +174,11 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
   }
   .platforms summary::-webkit-details-marker {
     display: none;
+  }
+  .platforms summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
   }
   .platforms ul {
     position: absolute;
@@ -343,6 +366,26 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
     } catch {}
     set(arm ? "macos-arm64" : "macos-x64", arm ? "Download for macOS" : "Download for macOS (Intel)");
   } else set("macos-arm64", "Download for macOS");
+
+  // A menu, not a disclosure: it closes on a click elsewhere, on Escape, and
+  // once a platform is picked.
+  const platforms = document.querySelector<HTMLDetailsElement>(".platforms");
+  if (platforms) {
+    document.addEventListener("click", (event) => {
+      if (platforms.open && !platforms.contains(event.target as Node)) platforms.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && platforms.open) {
+        platforms.open = false;
+        platforms.querySelector("summary")?.focus();
+      }
+    });
+    platforms.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => {
+        platforms.open = false;
+      }),
+    );
+  }
 
   // The app is only mounted once the fonts are in, so its first paint is the
   // right one rather than a fallback-font flash inside the frame.
