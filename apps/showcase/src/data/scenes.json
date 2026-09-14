@@ -1388,6 +1388,225 @@
         }
       }
     },
+    "get_dividends": {
+      "status": "fresh",
+      "value": {
+        "closures": [
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-08-26",
+            "cashPercent": 8.4211,
+            "companyName": "Reliable Samriddhi Yojana",
+            "fiscalYear": "2082/2083",
+            "symbol": "RSY"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-08-31",
+            "cashPercent": 8.0,
+            "companyName": "Siddhartha Investment Growth Scheme - 2",
+            "fiscalYear": "2082/2083",
+            "symbol": "SIGS2"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-08-31",
+            "cashPercent": 10.0,
+            "companyName": "Siddhartha Investment Growth Scheme 3",
+            "fiscalYear": "2082/2083",
+            "symbol": "SIGS3"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-03",
+            "cashPercent": 5.0,
+            "companyName": "Sanima Growth Fund",
+            "fiscalYear": "2082/2083",
+            "symbol": "SAGF"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-03",
+            "cashPercent": 4.5,
+            "companyName": "Sunrise Focused Equity Fund",
+            "fiscalYear": "2082/2083",
+            "symbol": "SFEF"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-04",
+            "cashPercent": 18.9473,
+            "companyName": "Aashutosh Energy Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "AELTD"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-04",
+            "cashPercent": 20.0,
+            "companyName": "Hilton Hydro Energy Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "HHEL"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-04",
+            "cashPercent": 16.3158,
+            "companyName": "Kabeli Hydropower Company Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "KHCL"
+          },
+          {
+            "bonusPercent": 15.0,
+            "bookClosureDate": "2026-09-08",
+            "cashPercent": 0.7895,
+            "companyName": "Super Madi Hydropower Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "SMHL"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-09",
+            "cashPercent": 2.2,
+            "companyName": "Muktinath Mutual Fund 1",
+            "fiscalYear": "2082/2083",
+            "symbol": "MNMF1"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-10",
+            "cashPercent": 12.0,
+            "companyName": "Prabhu Smart Fund",
+            "fiscalYear": "2082/2083",
+            "symbol": "PRSF"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-10",
+            "cashPercent": 12.0,
+            "companyName": "Prabhu Select Fund",
+            "fiscalYear": "2082/2083",
+            "symbol": "PSF"
+          },
+          {
+            "bonusPercent": 1.25,
+            "bookClosureDate": "2026-09-11",
+            "cashPercent": 0.0658,
+            "companyName": "Divine Healthcare Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "DIVINE"
+          },
+          {
+            "bonusPercent": 5.0,
+            "bookClosureDate": "2026-09-17",
+            "cashPercent": 10.0,
+            "companyName": "Everest Bank Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "EBL"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-17",
+            "cashPercent": 10.0,
+            "companyName": "Sanima Bank Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "SANIMA"
+          },
+          {
+            "bonusPercent": 4.0,
+            "bookClosureDate": "2026-09-21",
+            "cashPercent": 6.0,
+            "companyName": "Global IME Bank Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "GBIME"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-21",
+            "cashPercent": 10.5263,
+            "companyName": "ICFC Finance Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "ICFC"
+          },
+          {
+            "bonusPercent": 15.0,
+            "bookClosureDate": "2026-09-21",
+            "cashPercent": 6.0526,
+            "companyName": "Nepal Lube Oil Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "NLO"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-22",
+            "cashPercent": 15.0,
+            "companyName": "Himalayan 80-20",
+            "fiscalYear": "2082/2083",
+            "symbol": "H8020"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-23",
+            "cashPercent": 3.5,
+            "companyName": "NABIL BALANCED FUND-2",
+            "fiscalYear": "2082/2083",
+            "symbol": "NBF2"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-23",
+            "cashPercent": 2.5,
+            "companyName": "Nabil Balanced Fund-3",
+            "fiscalYear": "2082/2083",
+            "symbol": "NBF3"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-24",
+            "cashPercent": 5.25,
+            "companyName": "Citizens Super 30 Mutual Fund",
+            "fiscalYear": "2082/2083",
+            "symbol": "C30MF"
+          },
+          {
+            "bonusPercent": 0.0,
+            "bookClosureDate": "2026-09-24",
+            "cashPercent": 13.0,
+            "companyName": "Citizens Capital Ltd. (Former CBIL Capital )",
+            "fiscalYear": "2082/2083",
+            "symbol": "CBIL"
+          },
+          {
+            "bonusPercent": 10.0,
+            "bookClosureDate": "2026-09-24",
+            "cashPercent": 11.0526,
+            "companyName": "Nabil Investment Banking Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "NABILINV"
+          },
+          {
+            "bonusPercent": 8.5,
+            "bookClosureDate": "2026-09-25",
+            "cashPercent": 0.4474,
+            "companyName": "Kalinchowk Darshan Limited",
+            "fiscalYear": "2082/2083",
+            "symbol": "KDL"
+          },
+          {
+            "bonusPercent": 5.0,
+            "bookClosureDate": "2026-09-29",
+            "cashPercent": 0.263,
+            "companyName": "Arun Valley Hydropower Development Co. Ltd.",
+            "fiscalYear": "2082/2083",
+            "symbol": "AHPC"
+          }
+        ],
+        "freshness": {
+          "fetchedAt": "2026-08-26T14:20:00Z",
+          "sourceTimestamp": null
+        }
+      }
+    },
     "get_forex": {
       "status": "fresh",
       "value": {
@@ -4582,11 +4801,17 @@
     "get_stocks": {
       "status": "fresh",
       "value": {
+        "breadth": {
+          "advanced": 47,
+          "declined": 290,
+          "unchanged": 11
+        },
         "freshness": {
           "fetchedAt": "2026-08-26T14:20:00Z",
           "sourceTimestamp": "2016-12-15T00:00:00Z"
         },
         "marketStatus": {
+          "asOf": "2026-09-14T09:15:00Z",
           "isOpen": false
         },
         "movers": [
@@ -12906,6 +13131,9 @@
     "group_number:0.05:0": "0",
     "group_number:0.05:1": "0.1",
     "group_number:0.05:2": "0.05",
+    "group_number:0.0658:0": "0",
+    "group_number:0.0658:1": "0.1",
+    "group_number:0.0658:2": "0.07",
     "group_number:0.08:0": "0",
     "group_number:0.08:1": "0.1",
     "group_number:0.08:2": "0.08",
@@ -12924,6 +13152,9 @@
     "group_number:0.22:0": "0",
     "group_number:0.22:1": "0.2",
     "group_number:0.22:2": "0.22",
+    "group_number:0.263:0": "0",
+    "group_number:0.263:1": "0.3",
+    "group_number:0.263:2": "0.26",
     "group_number:0.27:0": "0",
     "group_number:0.27:1": "0.3",
     "group_number:0.27:2": "0.27",
@@ -12939,6 +13170,9 @@
     "group_number:0.42:0": "0",
     "group_number:0.42:1": "0.4",
     "group_number:0.42:2": "0.42",
+    "group_number:0.4474:0": "0",
+    "group_number:0.4474:1": "0.4",
+    "group_number:0.4474:2": "0.45",
     "group_number:0.44:0": "0",
     "group_number:0.44:1": "0.4",
     "group_number:0.44:2": "0.44",
@@ -12957,6 +13191,9 @@
     "group_number:0.67:0": "1",
     "group_number:0.67:1": "0.7",
     "group_number:0.67:2": "0.67",
+    "group_number:0.7895:0": "1",
+    "group_number:0.7895:1": "0.8",
+    "group_number:0.7895:2": "0.79",
     "group_number:0.81:0": "1",
     "group_number:0.81:1": "0.8",
     "group_number:0.81:2": "0.81",
@@ -12993,6 +13230,9 @@
     "group_number:1.18:0": "1",
     "group_number:1.18:1": "1.2",
     "group_number:1.18:2": "1.18",
+    "group_number:1.25:0": "1",
+    "group_number:1.25:1": "1.2",
+    "group_number:1.25:2": "1.25",
     "group_number:1.3:0": "1",
     "group_number:1.3:1": "1.3",
     "group_number:1.3:2": "1.30",
@@ -13068,6 +13308,9 @@
     "group_number:10.4:0": "10",
     "group_number:10.4:1": "10.4",
     "group_number:10.4:2": "10.40",
+    "group_number:10.5263:0": "11",
+    "group_number:10.5263:1": "10.5",
+    "group_number:10.5263:2": "10.53",
     "group_number:10.54:0": "11",
     "group_number:10.54:1": "10.5",
     "group_number:10.54:2": "10.54",
@@ -13641,6 +13884,9 @@
     "group_number:11.03:0": "11",
     "group_number:11.03:1": "11.0",
     "group_number:11.03:2": "11.03",
+    "group_number:11.0526:0": "11",
+    "group_number:11.0526:1": "11.1",
+    "group_number:11.0526:2": "11.05",
     "group_number:11.13:0": "11",
     "group_number:11.13:1": "11.1",
     "group_number:11.13:2": "11.13",
@@ -15000,6 +15246,9 @@
     "group_number:16.06:0": "16",
     "group_number:16.06:1": "16.1",
     "group_number:16.06:2": "16.06",
+    "group_number:16.3158:0": "16",
+    "group_number:16.3158:1": "16.3",
+    "group_number:16.3158:2": "16.32",
     "group_number:160.15:0": "160",
     "group_number:160.15:1": "160.2",
     "group_number:160.15:2": "160.15",
@@ -15303,6 +15552,9 @@
     "group_number:17:0": "17",
     "group_number:17:1": "17.0",
     "group_number:17:2": "17.00",
+    "group_number:18.9473:0": "19",
+    "group_number:18.9473:1": "18.9",
+    "group_number:18.9473:2": "18.95",
     "group_number:18.9:0": "19",
     "group_number:18.9:1": "18.9",
     "group_number:18.9:2": "18.90",
@@ -15693,6 +15945,12 @@
     "group_number:2.27:0": "2",
     "group_number:2.27:1": "2.3",
     "group_number:2.27:2": "2.27",
+    "group_number:2.2:0": "2",
+    "group_number:2.2:1": "2.2",
+    "group_number:2.2:2": "2.20",
+    "group_number:2.5:0": "2",
+    "group_number:2.5:1": "2.5",
+    "group_number:2.5:2": "2.50",
     "group_number:2.6:0": "3",
     "group_number:2.6:1": "2.6",
     "group_number:2.6:2": "2.60",
@@ -17256,6 +17514,9 @@
     "group_number:3.3:0": "3",
     "group_number:3.3:1": "3.3",
     "group_number:3.3:2": "3.30",
+    "group_number:3.5:0": "4",
+    "group_number:3.5:1": "3.5",
+    "group_number:3.5:2": "3.50",
     "group_number:3.9:0": "4",
     "group_number:3.9:1": "3.9",
     "group_number:3.9:2": "3.90",
@@ -18465,6 +18726,9 @@
     "group_number:4.59:0": "5",
     "group_number:4.59:1": "4.6",
     "group_number:4.59:2": "4.59",
+    "group_number:4.5:0": "4",
+    "group_number:4.5:1": "4.5",
+    "group_number:4.5:2": "4.50",
     "group_number:4.61:0": "5",
     "group_number:4.61:1": "4.6",
     "group_number:4.61:2": "4.61",
@@ -19464,6 +19728,9 @@
     "group_number:479:0": "479",
     "group_number:479:1": "479.0",
     "group_number:479:2": "479.00",
+    "group_number:47:0": "47",
+    "group_number:47:1": "47.0",
+    "group_number:47:2": "47.00",
     "group_number:48.33:0": "48",
     "group_number:48.33:1": "48.3",
     "group_number:48.33:2": "48.33",
@@ -19695,6 +19962,9 @@
     "group_number:4:0": "4",
     "group_number:4:1": "4.0",
     "group_number:4:2": "4.00",
+    "group_number:5.25:0": "5",
+    "group_number:5.25:1": "5.2",
+    "group_number:5.25:2": "5.25",
     "group_number:5.62:0": "6",
     "group_number:5.62:1": "5.6",
     "group_number:5.62:2": "5.62",
@@ -20673,6 +20943,9 @@
     "group_number:5:0": "5",
     "group_number:5:1": "5.0",
     "group_number:5:2": "5.00",
+    "group_number:6.0526:0": "6",
+    "group_number:6.0526:1": "6.1",
+    "group_number:6.0526:2": "6.05",
     "group_number:6.08:0": "6",
     "group_number:6.08:1": "6.1",
     "group_number:6.08:2": "6.08",
@@ -22020,6 +22293,9 @@
     "group_number:8.3:0": "8",
     "group_number:8.3:1": "8.3",
     "group_number:8.3:2": "8.30",
+    "group_number:8.4211:0": "8",
+    "group_number:8.4211:1": "8.4",
+    "group_number:8.4211:2": "8.42",
     "group_number:8.43:0": "8",
     "group_number:8.43:1": "8.4",
     "group_number:8.43:2": "8.43",

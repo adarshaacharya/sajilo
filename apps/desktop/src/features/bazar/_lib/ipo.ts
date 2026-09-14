@@ -46,6 +46,12 @@ export function nepalToday(now = new Date()): number {
   return Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)) / DAY_MS;
 }
 
+/** Whole days from `today` (see `nepalToday`) to an ISO date; negative once it has passed. */
+export function daysUntil(iso: string, today: number): number | null {
+  const day = dayNumber(iso);
+  return day == null ? null : day - today;
+}
+
 export function ipoPhase(issue: IpoIssue, today: number): IpoPhase {
   const open = dayNumber(issue.openDate);
   const close = dayNumber(issue.closeDate);

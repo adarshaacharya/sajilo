@@ -4,4 +4,9 @@
  * NEPSE's own open/closed flag, read separately from the price snapshot
  * so the UI never has to infer it from prices or the calendar.
  */
-export type MarketStatus = { isOpen: boolean, };
+export type MarketStatus = { isOpen: boolean, 
+/**
+ * When the exchange last opened or closed; while closed, the end of
+ * the last trading session.
+ */
+asOf: string | null, };

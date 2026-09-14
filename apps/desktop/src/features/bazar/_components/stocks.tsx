@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
-import { Segmented } from "../../../shared/components/segmented";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
+import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { usePersistedList } from "../../../shared/lib/persisted";
+import type { DividendSnapshot } from "../../../types/api/DividendSnapshot";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { MoverBoard } from "../../../types/api/MoverBoard";
@@ -18,6 +19,7 @@ import {
 } from "../_lib/stock-tone";
 import { BazarSearch } from "./bazar-search";
 import { CompanyDetail } from "./company-detail";
+import { DividendCard } from "./dividend-card";
 import { FollowButton } from "./follow-button";
 import { IndexHeadline } from "./index-headline";
 import { IpoCard } from "./ipo-card";
@@ -55,15 +57,19 @@ function banner(state: LoadState<StockMarketSnapshot> | undefined): LoadStatus {
 export function Stocks({
   state,
   ipoState,
+  dividendState,
   onRetry,
   onRetryIpos,
+  onRetryDividends,
   linkedIpo = null,
   linkedIpoList = false,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
   ipoState: LoadState<IpoSnapshot> | undefined;
+  dividendState: LoadState<DividendSnapshot> | undefined;
   onRetry: () => void;
   onRetryIpos: () => void;
+  onRetryDividends: () => void;
   /** An issue key to open on arrival, e.g. from the home screen's up-next row. */
   linkedIpo?: string | null;
   linkedIpoList?: boolean;
@@ -193,7 +199,12 @@ export function Stocks({
         ) : (
           <>
             {snapshot.nepse && (
-              <IndexHeadline index={snapshot.nepse} marketStatus={snapshot.marketStatus} t={t} />
+              <IndexHeadline
+                index={snapshot.nepse}
+                marketStatus={snapshot.marketStatus}
+                breadth={snapshot.breadth ?? null}
+                t={t}
+              />
             )}
 
             {ipoCard}
@@ -231,20 +242,27 @@ export function Stocks({
               )}
             </section>
 
+            <DividendCard
+              state={dividendState}
+              followed={followed}
+              onOpen={openSymbol}
+              onRetry={onRetryDividends}
+            />
+
             {snapshot.movers.length > 0 && (
-              <section className="surface-card p-2.5">
-                <Segmented
+              <section className="surface-card p-2.5 pt-2" aria-label={t("stocks.movers")}>
+                <TabStrip
                   label={t("stocks.movers")}
                   value={board}
                   onChange={setBoard}
-                  options={[
+                  tabs={[
                     { id: "gainers" as const, label: t("stocks.gainers") },
                     { id: "losers" as const, label: t("stocks.losers") },
                     { id: "turnover" as const, label: t("stocks.turnover") },
                     { id: "volume" as const, label: t("stocks.volume") },
                   ]}
                 />
-                <div className="mt-2">
+                <div className="mt-1" role="tabpanel">
                   {movers.map((mover) => (
                     <MoverRow
                       key={`${mover.board}-${mover.symbol}`}

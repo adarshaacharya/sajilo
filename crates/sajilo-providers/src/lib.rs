@@ -7,6 +7,7 @@
 
 pub mod annapurna_dates;
 pub mod cdsc;
+pub mod dividends;
 pub mod error;
 pub mod fenegosida;
 pub mod government_updates;

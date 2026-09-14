@@ -8,7 +8,9 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, NaiveDate, NaiveTime, TimeZone, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
+use sajilo_api::stocks::{
+    MarketBreadth, MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote,
+};
 use serde::Deserialize;
 
 use crate::error::{ProviderError, Result};
@@ -51,14 +53,40 @@ pub fn parse(
         freshness = freshness.with_source(published);
     }
 
+    let breadth = breadth(&quotes);
     Ok(StockMarketSnapshot {
         nepse,
         market_status: None,
+        breadth: Some(breadth),
         sub_indices: parse_index_table(market_html, "Sub Index"),
         movers: movers(market_html),
         quotes,
         freshness,
     })
+}
+
+/// Every traded company counted by which way it closed. Counted from the price
+/// table rather than read from another source, so the bar can never disagree
+/// with the rows beneath it.
+fn breadth(quotes: &[StockQuote]) -> MarketBreadth {
+    let mut breadth = MarketBreadth {
+        advanced: 0,
+        declined: 0,
+        unchanged: 0,
+    };
+    for quote in quotes
+        .iter()
+        .filter(|quote| quote.volume.is_none_or(|volume| volume > 0.0))
+    {
+        if quote.change.abs() < 0.005 {
+            breadth.unchanged += 1;
+        } else if quote.change > 0.0 {
+            breadth.advanced += 1;
+        } else {
+            breadth.declined += 1;
+        }
+    }
+    breadth
 }
 
 pub fn quotes(html: &str) -> Result<Vec<StockQuote>> {
@@ -337,6 +365,14 @@ mod tests {
             Some(532.0)
         );
         assert!(snapshot.freshness.source_timestamp.is_some());
+        assert_eq!(
+            snapshot.breadth,
+            Some(MarketBreadth {
+                advanced: 1,
+                declined: 1,
+                unchanged: 0,
+            })
+        );
     }
 
     #[test]

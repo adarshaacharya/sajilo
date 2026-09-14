@@ -8,6 +8,7 @@ import { type LoadStatus, StateBanner } from "../../shared/components/state-bann
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
+import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
@@ -36,6 +37,10 @@ function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadSta
 
 function fetchIpos(refresh = false): Promise<LoadState<IpoSnapshot>> {
   return catchAsFailed(api.getIpos(refresh));
+}
+
+function fetchDividends(refresh = false): Promise<LoadState<DividendSnapshot>> {
+  return catchAsFailed(api.getDividends(refresh));
 }
 
 function fetchFeeds(refresh = false): Promise<BazarFeeds> {
@@ -70,13 +75,23 @@ export function Bazar() {
     isValidating: loadingIpos,
     mutate: mutateIpos,
   } = useSWR(tab === "stocks" ? "bazar-ipos" : null, () => fetchIpos(false));
+  const {
+    data: dividends,
+    isValidating: loadingDividends,
+    mutate: mutateDividends,
+  } = useSWR(tab === "stocks" ? "bazar-dividends" : null, () => fetchDividends(false));
 
   const retryIpos = useCallback(
     () => void mutateIpos(fetchIpos(true), { revalidate: false }),
     [mutateIpos],
   );
+  const retryDividends = useCallback(
+    () => void mutateDividends(fetchDividends(true), { revalidate: false }),
+    [mutateDividends],
+  );
 
-  const loading = tab === "stocks" ? loadingStocks || loadingIpos : loadingFeeds;
+  const loading =
+    tab === "stocks" ? loadingStocks || loadingIpos || loadingDividends : loadingFeeds;
 
   const load = useCallback(
     (refresh = false) => {
@@ -85,14 +100,18 @@ export function Bazar() {
         mutateStocks(catchAsFailed<StockMarketSnapshot>(api.getStocks(true)), {
           revalidate: false,
         });
-        if (tab === "stocks") mutateIpos(fetchIpos(true), { revalidate: false });
+        if (tab === "stocks") {
+          mutateIpos(fetchIpos(true), { revalidate: false });
+          mutateDividends(fetchDividends(true), { revalidate: false });
+        }
       } else {
         mutateFeeds();
         mutateStocks();
         mutateIpos();
+        mutateDividends();
       }
     },
-    [mutateFeeds, mutateIpos, mutateStocks, tab],
+    [mutateDividends, mutateFeeds, mutateIpos, mutateStocks, tab],
   );
 
   const metals = loadedValue(feeds?.metals);
@@ -135,8 +154,10 @@ export function Bazar() {
         <Stocks
           state={stocks}
           ipoState={ipos}
+          dividendState={dividends}
           onRetry={() => load(true)}
           onRetryIpos={retryIpos}
+          onRetryDividends={retryDividends}
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
         />

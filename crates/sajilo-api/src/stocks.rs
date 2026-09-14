@@ -57,11 +57,25 @@ dto! {
     /// so the UI never has to infer it from prices or the calendar.
     pub struct MarketStatus {
         pub is_open: bool,
+        /// When the exchange last opened or closed; while closed, the end of
+        /// the last trading session.
+        #[serde(default)]
+        pub as_of: Option<chrono::DateTime<chrono::Utc>>,
+    }
+
+    /// How many traded companies closed up, down, or level on the day.
+    pub struct MarketBreadth {
+        pub advanced: u32,
+        pub declined: u32,
+        pub unchanged: u32,
     }
 
     pub struct StockMarketSnapshot {
         pub nepse: Option<MarketIndex>,
         pub market_status: Option<MarketStatus>,
+        /// Counted from the price table, so it always agrees with the quotes.
+        #[serde(default)]
+        pub breadth: Option<MarketBreadth>,
         #[serde(default)]
         pub sub_indices: Vec<MarketIndex>,
         #[serde(default)]

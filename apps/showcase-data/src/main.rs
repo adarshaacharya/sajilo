@@ -29,8 +29,8 @@ use sajilo_core::calendar::events::{FIRST_EVENT_YEAR, LAST_EVENT_YEAR, events};
 use sajilo_core::calendar::month::month;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
-    cdsc, fenegosida, hamropatro, kalimati, kantipur, market_status, noc, nrb, open_meteo,
-    ratopati, rss, sharesansar,
+    cdsc, dividends, fenegosida, hamropatro, kalimati, kantipur, market_status, noc, nrb,
+    open_meteo, ratopati, rss, sharesansar,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -274,6 +274,10 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     commands.insert(
         "get_ipos".to_owned(),
         load_state(cdsc::parse(&read("cdsc/current-issues.html"), now)),
+    );
+    commands.insert(
+        "get_dividends".to_owned(),
+        load_state(dividends::parse(&read("sharehub/dividends.json"), now)),
     );
     commands.insert(
         "get_forex".to_owned(),

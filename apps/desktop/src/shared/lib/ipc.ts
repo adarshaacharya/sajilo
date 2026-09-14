@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
+import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
@@ -323,6 +324,9 @@ export const api = {
   getStocks: (refresh = false) => invoke<LoadState<StockMarketSnapshot>>("get_stocks", { refresh }),
   /** CDSC's current-issue list; cached for half an hour, `refresh` forces a live pull. */
   getIpos: (refresh = false) => invoke<LoadState<IpoSnapshot>>("get_ipos", { refresh }),
+  /** ShareHub's upcoming book closures; cached for an hour, `refresh` forces a live pull. */
+  getDividends: (refresh = false) =>
+    invoke<LoadState<DividendSnapshot>>("get_dividends", { refresh }),
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),
