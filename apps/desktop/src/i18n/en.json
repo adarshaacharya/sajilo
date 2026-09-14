@@ -327,7 +327,6 @@
   "settings.update-up-to-date": "You're on the latest version.",
   "settings.updates": "Updates",
   "settings.usage-insights": "Help improve Sajilo",
-  "settings.usage-insights-note": "One anonymous daily count: app version, previous version when updated, operating system, architecture, approximate country, and days since the last count. Only totals are stored — no account, identifier, IP address, or activity. On by default; switched off, nothing is sent.",
   "updater.install-failed": "The update could not be installed. Check your connection and try again.",
   "updater.close": "Close update window",
   "updater.automatic-updates": "Automatically download and install future updates",
