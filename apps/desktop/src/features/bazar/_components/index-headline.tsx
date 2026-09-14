@@ -1,4 +1,3 @@
-import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { translate } from "../../../shared/lib/i18n";
 import type { IndexIntraday } from "../../../types/api/IndexIntraday";
@@ -35,7 +34,7 @@ export function IndexHeadline({
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <p className="truncate text-[11px] font-semibold text-text-secondary">{index.name}</p>
-            {marketStatus && <MarketStatusChip isOpen={marketStatus.isOpen} t={t} />}
+            {marketStatus && <MarketStatusChip status={marketStatus} t={t} />}
           </div>
           <ChangeBadge
             change={index.change}
@@ -50,9 +49,6 @@ export function IndexHeadline({
         <p className="mt-1.5 text-[11px] text-text-muted tabular-nums">
           {t("bazar.market-turnover")} · Rs {money0.format(index.turnover)}
         </p>
-        {marketStatus && !marketStatus.isOpen && marketStatus.asOf && (
-          <LastTraded asOf={marketStatus.asOf} />
-        )}
         <IndexChart
           state={intraday}
           previousClose={index.value - index.change}
@@ -65,12 +61,14 @@ export function IndexHeadline({
 }
 
 /**
- * When the last session ended, in Kathmandu time. Only drawn while the market
- * is closed: on a Saturday or a festival the numbers above are days old, and
- * this is what says so.
+ * When the last session ended, in Kathmandu time: "today 3:00 PM", or
+ * "Sep 12, 3:00 PM" on a Saturday or a festival, when the numbers are days
+ * old. Spelled out in full — a desktop webview shows no hover tooltips, so
+ * nothing can hide behind one.
  */
-function LastTraded({ asOf }: { asOf: string }) {
+function useLastTraded(asOf: string | null): string | null {
   const { t, language } = useSettings();
+  if (!asOf) return null;
   const instant = new Date(asOf);
   if (Number.isNaN(instant.getTime())) return null;
 
@@ -80,22 +78,12 @@ function LastTraded({ asOf }: { asOf: string }) {
     minute: "2-digit",
     timeZone: "Asia/Kathmandu",
   }).format(instant);
-  const day =
-    nepalToday(instant) === nepalToday()
-      ? t("stocks.today")
-      : new Intl.DateTimeFormat(locale, {
-          weekday: "short",
-          month: "short",
-          day: "numeric",
-          timeZone: "Asia/Kathmandu",
-        }).format(instant);
-
-  return (
-    <p className="mt-1 flex items-center gap-1 text-[10px] text-text-muted tabular-nums">
-      <Icon name="clock" className="size-3 shrink-0" />
-      {t("stocks.last-traded").replace("{when}", `${day} · ${time}`)}
-    </p>
-  );
+  const date = new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    timeZone: "Asia/Kathmandu",
+  }).format(instant);
+  return nepalToday(instant) === nepalToday() ? `${t("stocks.today")} ${time}` : `${date}, ${time}`;
 }
 
 /**
@@ -143,11 +131,15 @@ function BreadthBar({ breadth, t }: { breadth: MarketBreadth; t: TFn }) {
 }
 
 /** Sits beside the index name: a breathing dot while trading, a quiet grey
- *  one after hours, so "closed" reads as a normal state rather than an error. */
-function MarketStatusChip({ isOpen, t }: { isOpen: boolean; t: TFn }) {
+ *  one after hours, so "closed" reads as a normal state rather than an error.
+ *  While closed it also says when trading last happened. */
+function MarketStatusChip({ status, t }: { status: MarketStatus; t: TFn }) {
+  const { isOpen } = status;
+  const lastTraded = useLastTraded(isOpen ? null : status.asOf);
+
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-none ${
+      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-none tabular-nums ${
         isOpen
           ? "bg-[color-mix(in_srgb,var(--color-positive)_12%,transparent)] text-positive"
           : "bg-surface-hover text-text-muted"
@@ -162,6 +154,7 @@ function MarketStatusChip({ isOpen, t }: { isOpen: boolean; t: TFn }) {
         <span className="size-1.5 rounded-full bg-text-muted/60" aria-hidden="true" />
       )}
       {isOpen ? t("stocks.market-open") : t("stocks.market-closed")}
+      {lastTraded && <span className="-ml-0.5 font-normal">· {lastTraded}</span>}
     </span>
   );
 }
