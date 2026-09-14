@@ -41,8 +41,8 @@ export function SystemTab() {
       .then(setPermission)
       .catch(() => {});
     api
-      .getSetting<boolean>("usageInsightsEnabled")
-      .then((saved) => setUsageInsightsEnabled(saved === true))
+      .usageInsightsEnabled()
+      .then((enabled) => setUsageInsightsEnabled(enabled === true))
       .catch(() => {});
   }, []);
 
@@ -63,10 +63,7 @@ export function SystemTab() {
 
   const setUsageInsights = (enabled: boolean) => {
     setUsageInsightsEnabled(enabled);
-    api
-      .setSetting("usageInsightsEnabled", enabled)
-      .then(() => (enabled ? api.sendUsagePing() : undefined))
-      .catch(() => {});
+    api.setUsageInsightsEnabled(enabled).catch(() => setUsageInsightsEnabled(!enabled));
   };
 
   const exportData = async () => {
