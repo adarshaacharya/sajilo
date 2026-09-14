@@ -2,9 +2,14 @@
   "name": "sajilo",
   "main": "worker/index.js",
   "compatibility_date": "2026-08-23",
+  // Every `wrangler deploy` builds the site first. Cloudflare Workers Builds
+  // runs a bare `npx wrangler deploy` on a fresh clone, where `dist/` does not
+  // exist yet — without this the deploy fails before uploading anything.
+  "build": {
+    "command": "bun run build"
+  },
   "assets": {
-    // Astro's build output. Run `bun run build` before `wrangler deploy`
-    // (or just `bun run deploy`, which does both).
+    // Astro's build output, produced by the build command above.
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
