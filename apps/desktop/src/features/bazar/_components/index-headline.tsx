@@ -1,12 +1,15 @@
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { translate } from "../../../shared/lib/i18n";
+import type { IndexIntraday } from "../../../types/api/IndexIntraday";
+import type { LoadState } from "../../../types/api/LoadState";
 import type { MarketBreadth } from "../../../types/api/MarketBreadth";
 import type { MarketIndex } from "../../../types/api/MarketIndex";
 import type { MarketStatus } from "../../../types/api/MarketStatus";
 import { money, money0 } from "../_lib/format";
 import { nepalToday } from "../_lib/ipo";
 import { ChangeBadge } from "./change-badge";
+import { IndexChart } from "./index-chart";
 
 type TranslationKey = Parameters<typeof translate>[0];
 type TFn = (key: TranslationKey) => string;
@@ -15,11 +18,15 @@ export function IndexHeadline({
   index,
   marketStatus,
   breadth,
+  intraday,
+  onRetryIntraday,
   t,
 }: {
   index: MarketIndex;
   marketStatus: MarketStatus | null;
   breadth: MarketBreadth | null;
+  intraday: LoadState<IndexIntraday> | undefined;
+  onRetryIntraday: () => void;
   t: TFn;
 }) {
   return (
@@ -30,7 +37,12 @@ export function IndexHeadline({
             <p className="truncate text-[11px] font-semibold text-text-secondary">{index.name}</p>
             {marketStatus && <MarketStatusChip isOpen={marketStatus.isOpen} t={t} />}
           </div>
-          <ChangeBadge change={index.change} previous={index.value - index.change} percentOnly />
+          <ChangeBadge
+            change={index.change}
+            previous={index.value - index.change}
+            percent={index.changePercent}
+            percentOnly
+          />
         </div>
         <p className="mt-1 text-[28px] font-semibold leading-none tabular-nums">
           {money.format(index.value)}
@@ -41,6 +53,11 @@ export function IndexHeadline({
         {marketStatus && !marketStatus.isOpen && marketStatus.asOf && (
           <LastTraded asOf={marketStatus.asOf} />
         )}
+        <IndexChart
+          state={intraday}
+          previousClose={index.value - index.change}
+          onRetry={onRetryIntraday}
+        />
         {breadth && <BreadthBar breadth={breadth} t={t} />}
       </div>
     </section>

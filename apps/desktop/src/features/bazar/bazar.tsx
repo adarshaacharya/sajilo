@@ -9,6 +9,7 @@ import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
+import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
@@ -41,6 +42,10 @@ function fetchIpos(refresh = false): Promise<LoadState<IpoSnapshot>> {
 
 function fetchDividends(refresh = false): Promise<LoadState<DividendSnapshot>> {
   return catchAsFailed(api.getDividends(refresh));
+}
+
+function fetchIntraday(refresh = false): Promise<LoadState<IndexIntraday>> {
+  return catchAsFailed(api.getNepseIntraday(refresh));
 }
 
 function fetchFeeds(refresh = false): Promise<BazarFeeds> {
@@ -80,6 +85,11 @@ export function Bazar() {
     isValidating: loadingDividends,
     mutate: mutateDividends,
   } = useSWR(tab === "stocks" ? "bazar-dividends" : null, () => fetchDividends(false));
+  const {
+    data: intraday,
+    isValidating: loadingIntraday,
+    mutate: mutateIntraday,
+  } = useSWR(tab === "stocks" ? "bazar-nepse-intraday" : null, () => fetchIntraday(false));
 
   const retryIpos = useCallback(
     () => void mutateIpos(fetchIpos(true), { revalidate: false }),
@@ -89,9 +99,15 @@ export function Bazar() {
     () => void mutateDividends(fetchDividends(true), { revalidate: false }),
     [mutateDividends],
   );
+  const retryIntraday = useCallback(
+    () => void mutateIntraday(fetchIntraday(true), { revalidate: false }),
+    [mutateIntraday],
+  );
 
   const loading =
-    tab === "stocks" ? loadingStocks || loadingIpos || loadingDividends : loadingFeeds;
+    tab === "stocks"
+      ? loadingStocks || loadingIpos || loadingDividends || loadingIntraday
+      : loadingFeeds;
 
   const load = useCallback(
     (refresh = false) => {
@@ -103,15 +119,17 @@ export function Bazar() {
         if (tab === "stocks") {
           mutateIpos(fetchIpos(true), { revalidate: false });
           mutateDividends(fetchDividends(true), { revalidate: false });
+          mutateIntraday(fetchIntraday(true), { revalidate: false });
         }
       } else {
         mutateFeeds();
         mutateStocks();
         mutateIpos();
         mutateDividends();
+        mutateIntraday();
       }
     },
-    [mutateDividends, mutateFeeds, mutateIpos, mutateStocks, tab],
+    [mutateDividends, mutateFeeds, mutateIntraday, mutateIpos, mutateStocks, tab],
   );
 
   const metals = loadedValue(feeds?.metals);
@@ -155,9 +173,11 @@ export function Bazar() {
           state={stocks}
           ipoState={ipos}
           dividendState={dividends}
+          intradayState={intraday}
           onRetry={() => load(true)}
           onRetryIpos={retryIpos}
           onRetryDividends={retryDividends}
+          onRetryIntraday={retryIntraday}
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
         />

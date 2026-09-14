@@ -3,6 +3,7 @@ import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse"
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
+import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
@@ -327,6 +328,9 @@ export const api = {
   /** ShareHub's upcoming book closures; cached for an hour, `refresh` forces a live pull. */
   getDividends: (refresh = false) =>
     invoke<LoadState<DividendSnapshot>>("get_dividends", { refresh }),
+  /** NEPSE a minute at a time through its latest session, from ShareHub. */
+  getNepseIntraday: (refresh = false) =>
+    invoke<LoadState<IndexIntraday>>("get_nepse_intraday", { refresh }),
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),

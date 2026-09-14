@@ -5,6 +5,7 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { usePersistedList } from "../../../shared/lib/persisted";
 import type { DividendSnapshot } from "../../../types/api/DividendSnapshot";
+import type { IndexIntraday } from "../../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { MoverBoard } from "../../../types/api/MoverBoard";
@@ -58,18 +59,22 @@ export function Stocks({
   state,
   ipoState,
   dividendState,
+  intradayState,
   onRetry,
   onRetryIpos,
   onRetryDividends,
+  onRetryIntraday,
   linkedIpo = null,
   linkedIpoList = false,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
   ipoState: LoadState<IpoSnapshot> | undefined;
   dividendState: LoadState<DividendSnapshot> | undefined;
+  intradayState: LoadState<IndexIntraday> | undefined;
   onRetry: () => void;
   onRetryIpos: () => void;
   onRetryDividends: () => void;
+  onRetryIntraday: () => void;
   /** An issue key to open on arrival, e.g. from the home screen's up-next row. */
   linkedIpo?: string | null;
   linkedIpoList?: boolean;
@@ -203,6 +208,8 @@ export function Stocks({
                 index={snapshot.nepse}
                 marketStatus={snapshot.marketStatus}
                 breadth={snapshot.breadth ?? null}
+                intraday={intradayState}
+                onRetryIntraday={onRetryIntraday}
                 t={t}
               />
             )}

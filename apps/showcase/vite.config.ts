@@ -29,7 +29,15 @@ export default defineConfig({
      * inside it resolves against that package's node_modules and React ends up
      * loaded twice — which shows up as "Invalid hook call" and a blank panel.
      * Every runtime dependency is pinned to this package's single copy. */
-    dedupe: ["react", "react-dom", "react-router", "swr", "motion", "sf-symbols-lib"],
+    dedupe: [
+      "react",
+      "react-dom",
+      "react-router",
+      "swr",
+      "motion",
+      "sf-symbols-lib",
+      "lightweight-charts",
+    ],
     alias: [
       { find: /^@tauri-apps\/api\/core$/, replacement: stub("core") },
       { find: /^@tauri-apps\/api\/event$/, replacement: stub("event") },

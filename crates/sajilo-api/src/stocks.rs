@@ -83,4 +83,17 @@ dto! {
         pub quotes: Vec<StockQuote>,
         pub freshness: Freshness,
     }
+
+    /// One sample of an index during a session.
+    pub struct IndexPoint {
+        pub time: chrono::DateTime<chrono::Utc>,
+        pub value: f64,
+    }
+
+    /// NEPSE through its latest session, a sample a minute, oldest first.
+    pub struct IndexIntraday {
+        #[serde(default)]
+        pub points: Vec<IndexPoint>,
+        pub freshness: Freshness,
+    }
 }

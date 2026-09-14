@@ -19,6 +19,7 @@ pub mod kalimati;
 pub mod kantipur;
 pub mod market_status;
 pub mod nepalipatro;
+pub mod nepse_intraday;
 pub mod noc;
 pub mod nrb;
 pub mod open_meteo;
