@@ -8,33 +8,29 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, NaiveDate, NaiveTime, TimeZone, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::stocks::{
-    MarketIndex, MarketMover, MarketStatus, MoverBoard, StockMarketSnapshot, StockQuote,
-};
+use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
 use serde::Deserialize;
 
 use crate::error::{ProviderError, Result};
 use crate::html;
 use crate::http::HttpClient;
+use crate::market_status;
 
 pub const SOURCE_NAME: &str = "ShareSansar";
 
 const MARKET_URL: &str = "https://www.sharesansar.com/index.php/market";
 const PRICES_URL: &str = "https://www.sharesansar.com/index.php/today-share-price";
-const MARKET_STATUS_URL: &str = "https://shubhamnpk.github.io/yonepse/data/market/status.json";
-const MARKET_STATUS_SOURCE: &str = "YONEPSE market status";
 
 pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<StockMarketSnapshot> {
     let (market, prices, status) = tokio::join!(
         client.get_text(SOURCE_NAME, MARKET_URL),
         client.get_text(SOURCE_NAME, PRICES_URL),
-        client.get_text(MARKET_STATUS_SOURCE, MARKET_STATUS_URL),
+        market_status::fetch(client),
     );
     let mut snapshot = parse(&market?, &prices?, now)?;
-    // The indicator is useful only when it is explicit. If this small
-    // companion endpoint is unavailable or changes format, prices still load
-    // and the UI leaves the status line out instead of making a guess.
-    snapshot.market_status = status.ok().and_then(|body| parse_market_status(&body));
+    // Prices load whether or not the exchange flag does; without an explicit
+    // flag the UI leaves the status out instead of making a guess.
+    snapshot.market_status = status;
     Ok(snapshot)
 }
 
@@ -63,19 +59,6 @@ pub fn parse(
         quotes,
         freshness,
     })
-}
-
-fn parse_market_status(body: &str) -> Option<MarketStatus> {
-    #[derive(Deserialize)]
-    struct StatusResponse {
-        is_open: bool,
-    }
-
-    serde_json::from_str::<StatusResponse>(body)
-        .ok()
-        .map(|status| MarketStatus {
-            is_open: status.is_open,
-        })
 }
 
 pub fn quotes(html: &str) -> Result<Vec<StockQuote>> {
@@ -354,15 +337,6 @@ mod tests {
             Some(532.0)
         );
         assert!(snapshot.freshness.source_timestamp.is_some());
-    }
-
-    #[test]
-    fn reads_the_explicit_market_status() {
-        assert!(
-            parse_market_status(r#"{"is_open":true,"last_checked":"2026-09-14T11:00:00"}"#)
-                .is_some_and(|status| status.is_open)
-        );
-        assert!(parse_market_status("{}").is_none());
     }
 
     #[test]

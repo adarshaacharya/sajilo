@@ -53,8 +53,8 @@ dto! {
         pub metric: f64,
     }
 
-    /// A lightweight exchange state from YONEPSE, kept separate from the
-    /// ShareSansar price snapshot so the UI never has to infer it from prices.
+    /// NEPSE's own open/closed flag, read separately from the price snapshot
+    /// so the UI never has to infer it from prices or the calendar.
     pub struct MarketStatus {
         pub is_open: bool,
     }

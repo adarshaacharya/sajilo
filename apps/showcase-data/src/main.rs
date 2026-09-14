@@ -29,8 +29,8 @@ use sajilo_core::calendar::events::{FIRST_EVENT_YEAR, LAST_EVENT_YEAR, events};
 use sajilo_core::calendar::month::month;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
-    cdsc, fenegosida, hamropatro, kalimati, kantipur, noc, nrb, open_meteo, ratopati, rss,
-    sharesansar,
+    cdsc, fenegosida, hamropatro, kalimati, kantipur, market_status, noc, nrb, open_meteo,
+    ratopati, rss, sharesansar,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -256,11 +256,20 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     // -- the rest, one recorded upstream each
     commands.insert(
         "get_stocks".to_owned(),
-        load_state(sharesansar::parse(
-            &read("sharesansar/market.html"),
-            &read("sharesansar/prices.html"),
-            now,
-        )),
+        load_state(
+            sharesansar::parse(
+                &read("sharesansar/market.html"),
+                &read("sharesansar/prices.html"),
+                now,
+            )
+            .map(|mut snapshot| {
+                // The live fetch joins this companion endpoint onto the price
+                // snapshot; the recording does the same from its own fixture.
+                snapshot.market_status =
+                    market_status::parse_sharehub(&read("sharehub/market-status.json"));
+                snapshot
+            }),
+        ),
     );
     commands.insert(
         "get_ipos".to_owned(),

@@ -4586,6 +4586,9 @@
           "fetchedAt": "2026-08-26T14:20:00Z",
           "sourceTimestamp": "2016-12-15T00:00:00Z"
         },
+        "marketStatus": {
+          "isOpen": false
+        },
         "movers": [
           {
             "board": "gainers",

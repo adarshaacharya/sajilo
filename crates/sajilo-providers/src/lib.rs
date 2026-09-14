@@ -16,6 +16,7 @@ pub mod html;
 pub mod http;
 pub mod kalimati;
 pub mod kantipur;
+pub mod market_status;
 pub mod nepalipatro;
 pub mod noc;
 pub mod nrb;
