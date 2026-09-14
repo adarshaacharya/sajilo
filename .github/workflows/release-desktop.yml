@@ -51,7 +51,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - name: Install frontend dependencies
         working-directory: apps/desktop
-        run: bun install --frozen-lockfile
+        # bun can fail copying a package out of its global cache ("failed
+        # copying files from cache to destination"), which once cost a release
+        # its macOS arm64 bundle. A second attempt from an emptied cache
+        # downloads fresh and gets past it.
+        shell: bash
+        run: bun install --frozen-lockfile || (bun pm cache rm && bun install --frozen-lockfile)
       - name: Build and bundle
         uses: tauri-apps/tauri-action@v0
         env:
