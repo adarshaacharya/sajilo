@@ -26,9 +26,9 @@ function QuietLink({ label, href }: { label: string; href: string }) {
 
 export function AboutTab() {
   const { t } = useSettings();
-  const { state: updateState, update } = useUpdater();
+  const { state: updateState, version: updateVersion } = useUpdater();
   const [version, setVersion] = useState<string | null>(null);
-  const newVersion = updateState === "available" && update ? update.version : null;
+  const newVersion = updateState === "available" ? updateVersion : null;
 
   useEffect(() => {
     import("@tauri-apps/api/app")

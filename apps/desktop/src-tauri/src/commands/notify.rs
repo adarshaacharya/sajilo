@@ -21,8 +21,10 @@ const LAST_FIRED_KEY: &str = "lastFired.v1";
 
 type Result<T> = std::result::Result<T, String>;
 
-/// Permission is requested only when the user switches a reminder on — never at
-/// launch, and never for a feature nobody asked for.
+/// Permission is requested when the user switches a reminder on, never at
+/// launch. Reminders are on by default without a request: desktop notification
+/// permission is granted by the plugin, so there is nothing to ask for on the
+/// platforms Sajilo ships.
 #[tauri::command]
 pub fn notification_permission(app: AppHandle<Wry>) -> Result<String> {
     app.notification()

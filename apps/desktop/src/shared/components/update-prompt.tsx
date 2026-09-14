@@ -29,17 +29,16 @@ export function UpdateWindow() {
     enabled,
     automaticUpdates,
     state,
-    update,
+    version,
     installUpdate,
     restartToUpdate,
     setAutomaticUpdates,
   } = useUpdater();
   const [hiddenVersion, setHiddenVersion] = useState<string | null>(null);
   const [installFailed, setInstallFailed] = useState(false);
-  const version = update?.version;
   const visible =
     enabled &&
-    version !== undefined &&
+    version !== null &&
     hiddenVersion !== version &&
     !isSnoozed(version) &&
     ["available", "downloading", "installed", "failed"].includes(state) &&
@@ -56,7 +55,7 @@ export function UpdateWindow() {
       .catch(() => {});
   }, [visible]);
 
-  if (!update || !version) return null;
+  if (!version) return null;
 
   const later = () => {
     localStorage.setItem(

@@ -8,8 +8,7 @@ function formatVersionLabel(template: string, version: string): string {
 /** Compact labelled update control for screen headers. */
 export function UpdateHeaderButton() {
   const { t } = useSettings();
-  const { enabled, state, update, installUpdate, restartToUpdate } = useUpdater();
-  const version = update?.version;
+  const { enabled, state, version, installUpdate, restartToUpdate } = useUpdater();
 
   if (!enabled) return null;
 

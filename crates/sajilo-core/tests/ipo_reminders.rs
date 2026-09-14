@@ -27,13 +27,15 @@ fn deadline(name: &str, close_day: u32) -> IpoDeadline {
 
 fn ipo_only() -> NotificationOptions {
     NotificationOptions {
+        eve_of_public_holiday: false,
+        eve_of_festival: false,
         ipo_closing_day: true,
         ..NotificationOptions::default()
     }
 }
 
 #[test]
-fn nothing_is_planned_until_the_user_opts_in() {
+fn closing_day_reminders_are_on_by_default() {
     let now = nepal(2026, 9, 9, 8);
     let planned = plan_ipo_closing(
         &[deadline("BENI", 11)],
@@ -41,6 +43,17 @@ fn nothing_is_planned_until_the_user_opts_in() {
         now,
         now,
     );
+    assert!(!planned.is_empty());
+}
+
+#[test]
+fn nothing_is_planned_once_the_user_switches_it_off() {
+    let now = nepal(2026, 9, 9, 8);
+    let off = NotificationOptions {
+        ipo_closing_day: false,
+        ..NotificationOptions::default()
+    };
+    let planned = plan_ipo_closing(&[deadline("BENI", 11)], off, now, now);
     assert!(planned.is_empty());
 }
 

@@ -137,7 +137,7 @@ export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
     return (
       <ErrorBoundary>
         <SettingsProvider>
-          <UpdaterProvider handlesAutomaticUpdates>
+          <UpdaterProvider mode="owner">
             <UpdateWindow />
           </UpdaterProvider>
         </SettingsProvider>
@@ -150,7 +150,7 @@ export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
       <ErrorBoundary>
         <SWRConfig value={{ provider: persistentCacheProvider }}>
           <SettingsProvider>
-            <UpdaterProvider>
+            <UpdaterProvider mode="mirror">
               <BackgroundFeedRefresh />
               <HeaderSlotProvider>
                 <Shell />

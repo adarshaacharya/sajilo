@@ -18,22 +18,23 @@ use crate::calendar::upcoming::UpcomingEvent;
 use crate::nepal_time;
 use crate::planner::{DayPlan, Recurrence};
 
-/// Everything is off until the user says otherwise: notifications are opt-in and
-/// individually configurable, and permission is asked for only once one of these
-/// is switched on.
+/// Every reminder starts on: a holiday or festival tomorrow and an IPO closing
+/// today are what people open a Nepali calendar to find out, and each fires at
+/// most once a day. Every toggle stays individually configurable, and a choice
+/// the user has saved is always kept.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotificationOptions {
-    #[serde(default)]
+    #[serde(default = "enabled_by_default")]
     pub eve_of_public_holiday: bool,
-    #[serde(default)]
+    #[serde(default = "enabled_by_default")]
     pub eve_of_festival: bool,
     /// Evening before, in Nepal time. Late enough to read as "tomorrow", early
     /// enough not to arrive after the user has gone to bed.
     #[serde(default = "default_hour")]
     pub hour: u32,
     /// The morning an IPO the user can still apply to closes.
-    #[serde(default)]
+    #[serde(default = "enabled_by_default")]
     pub ipo_closing_day: bool,
 }
 
@@ -41,13 +42,19 @@ fn default_hour() -> u32 {
     19
 }
 
+/// Also what a field missing from saved options reads as, so options stored
+/// before a reminder existed pick up its default.
+fn enabled_by_default() -> bool {
+    true
+}
+
 impl Default for NotificationOptions {
     fn default() -> Self {
         Self {
-            eve_of_public_holiday: false,
-            eve_of_festival: false,
+            eve_of_public_holiday: enabled_by_default(),
+            eve_of_festival: enabled_by_default(),
             hour: default_hour(),
-            ipo_closing_day: false,
+            ipo_closing_day: enabled_by_default(),
         }
     }
 }

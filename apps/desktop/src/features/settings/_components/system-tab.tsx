@@ -15,17 +15,17 @@ export function SystemTab() {
   const {
     enabled: updaterEnabled,
     state: updateState,
-    update,
+    version: updateVersion,
     error: updateError,
     checkForUpdates,
     installUpdate,
     restartToUpdate,
   } = useUpdater();
   const [options, setOptions] = useState<NotificationOptions>({
-    eveOfPublicHoliday: false,
-    eveOfFestival: false,
+    eveOfPublicHoliday: true,
+    eveOfFestival: true,
     hour: 19,
-    ipoClosingDay: false,
+    ipoClosingDay: true,
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
@@ -98,16 +98,16 @@ export function SystemTab() {
     idle: null,
     checking: t("settings.update-checking"),
     "up-to-date": t("settings.update-up-to-date"),
-    available: update ? (
+    available: updateVersion ? (
       <>
-        {t("settings.update-found")} {version(update.version)}
+        {t("settings.update-found")} {version(updateVersion)}
       </>
     ) : (
       t("settings.update-checking")
     ),
-    downloading: update ? (
+    downloading: updateVersion ? (
       <>
-        {t("settings.update-available")} {version(update.version)}…
+        {t("settings.update-available")} {version(updateVersion)}…
       </>
     ) : (
       t("settings.update-checking")
@@ -135,7 +135,7 @@ export function SystemTab() {
             <button
               type="button"
               onClick={() => installUpdate()}
-              disabled={!update}
+              disabled={!updateVersion}
               className="settings-btn settings-btn--accent"
             >
               <Icon name="refresh" className="size-3 shrink-0" />

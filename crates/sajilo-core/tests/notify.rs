@@ -39,18 +39,33 @@ fn enabled() -> NotificationOptions {
     }
 }
 
-/// Everything is off until the user opts in, so permission is never requested
-/// for a feature nobody switched on.
+/// Every reminder starts on, so a fresh install hears about tomorrow's festival
+/// without visiting Settings first.
 #[test]
-fn nothing_is_planned_by_default() {
+fn every_reminder_is_on_by_default() {
     let events = vec![event(20, "Something", false)];
-    let planned = plan_festivals(
-        &events,
-        NotificationOptions::default(),
-        nepal(2026, 8, 1, 9),
-    );
-    assert!(planned.is_empty());
-    assert!(!NotificationOptions::default().is_any_enabled());
+    let defaults = NotificationOptions::default();
+    assert!(defaults.eve_of_festival && defaults.eve_of_public_holiday);
+    assert!(defaults.ipo_closing_day);
+    let planned = plan_festivals(&events, defaults, nepal(2026, 8, 1, 9));
+    assert_eq!(planned.len(), 1);
+}
+
+/// A field missing from saved options takes its default, while an explicit
+/// "off" the user chose is kept.
+#[test]
+fn stored_options_keep_an_explicit_choice() {
+    let empty: NotificationOptions = serde_json::from_str("{}").unwrap();
+    assert_eq!(empty, NotificationOptions::default());
+
+    let legacy: NotificationOptions =
+        serde_json::from_str(r#"{"eveOfPublicHoliday":true,"eveOfFestival":false,"hour":19}"#)
+            .unwrap();
+    assert!(!legacy.eve_of_festival);
+    assert!(legacy.ipo_closing_day);
+
+    let declined: NotificationOptions = serde_json::from_str(r#"{"ipoClosingDay":false}"#).unwrap();
+    assert!(!declined.ipo_closing_day);
 }
 
 /// Each toggle is independent: turning on holidays must not deliver festivals.

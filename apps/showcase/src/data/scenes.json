@@ -3800,7 +3800,7 @@
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
       "hour": 18,
-      "ipoClosingDay": false
+      "ipoClosingDay": true
     },
     "get_rashifal": {
       "status": "fresh",
