@@ -1778,6 +1778,34 @@
         ]
       }
     },
+    "get_ipos": {
+      "status": "fresh",
+      "value": {
+        "freshness": {
+          "fetchedAt": "2026-08-26T14:20:00Z",
+          "sourceTimestamp": null
+        },
+        "issues": [
+          {
+            "amount": "2637174000",
+            "applicationCount": "2361124",
+            "appliedUnits": "26371740",
+            "audience": "General Public",
+            "closeDate": "2026-09-11",
+            "companyName": "Beni Hydropower Project Limited - BENI (IPO - For General Public)",
+            "id": "Beni Hydropower Project Limited - BENI (IPO - For General Public)|2026-09-07|2026-09-11",
+            "issueManager": "NMB CAPITAL LIMITED",
+            "issueType": "IPO",
+            "issuedUnits": "863200",
+            "lastUpdate": "2026-09-11 17:15:21",
+            "name": "Beni Hydropower Project Limited",
+            "openDate": "2026-09-07",
+            "openToPublic": true,
+            "symbol": "BENI"
+          }
+        ]
+      }
+    },
     "get_news": {
       "status": "fresh",
       "value": {
@@ -2573,7 +2601,8 @@
     "get_notification_options": {
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
-      "hour": 18
+      "hour": 18,
+      "ipoClosingDay": false
     },
     "get_rashifal": {
       "status": "fresh",
