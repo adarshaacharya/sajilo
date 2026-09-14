@@ -29,6 +29,7 @@ export function SystemTab() {
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
+  const [usageInsightsEnabled, setUsageInsightsEnabled] = useState(false);
 
   useEffect(() => {
     api
@@ -38,6 +39,10 @@ export function SystemTab() {
     api
       .notificationPermission()
       .then(setPermission)
+      .catch(() => {});
+    api
+      .getSetting<boolean>("usageInsightsEnabled")
+      .then((saved) => setUsageInsightsEnabled(saved === true))
       .catch(() => {});
   }, []);
 
@@ -55,6 +60,14 @@ export function SystemTab() {
       : anyReminder(options)
         ? t("settings.reminder-enabled-note")
         : t("settings.reminder-off-note");
+
+  const setUsageInsights = (enabled: boolean) => {
+    setUsageInsightsEnabled(enabled);
+    api
+      .setSetting("usageInsightsEnabled", enabled)
+      .then(() => (enabled ? api.sendUsagePing() : undefined))
+      .catch(() => {});
+  };
 
   const exportData = async () => {
     const { save } = await import("@tauri-apps/plugin-dialog");
@@ -160,6 +173,14 @@ export function SystemTab() {
           label={t("reminder.ipo-closing-day")}
           checked={options.ipoClosingDay}
           onChange={(value) => updateOptions({ ...options, ipoClosingDay: value })}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t("settings.privacy")} footnote={t("settings.usage-insights-note")}>
+        <Toggle
+          label={t("settings.usage-insights")}
+          checked={usageInsightsEnabled}
+          onChange={setUsageInsights}
         />
       </SettingsSection>
 

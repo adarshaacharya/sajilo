@@ -71,24 +71,24 @@ const NEPAL_OFFSET_MINUTES = 5 * 60 + 45;
 async function record(env, platform, request) {
   if (!env.DB) return;
 
-  // Day and hour are both Nepali local time. In UTC a download made at a
+  // The bucket timestamp is Nepali local time. In UTC a download made at a
   // quarter to nine in the morning in Kathmandu files itself under 3am, and
   // "when do people install this" is a question about Nepal's day rather than
   // Greenwich's.
   const nepal = new Date(Date.now() + NEPAL_OFFSET_MINUTES * 60_000);
-  const day = nepal.toISOString().slice(0, 10);
   const hour = nepal.getUTCHours();
+  const hourStartedAtNpt = `${nepal.toISOString().slice(0, 10)}T${String(hour).padStart(2, "0")}:00:00+05:45`;
   const country = request.cf?.country ?? "XX";
   const referrer = referrerHost(request.headers.get("Referer"));
 
   try {
     await env.DB.prepare(
-      `INSERT INTO download_clicks (day, hour, platform, country, referrer, clicks)
-       VALUES (?1, ?2, ?3, ?4, ?5, 1)
-       ON CONFLICT (day, hour, platform, country, referrer)
+      `INSERT INTO download_clicks (hour_started_at_npt, platform, country, referrer, clicks)
+       VALUES (?1, ?2, ?3, ?4, 1)
+       ON CONFLICT (hour_started_at_npt, platform, country, referrer)
        DO UPDATE SET clicks = clicks + 1`,
     )
-      .bind(day, hour, platform, country, referrer)
+      .bind(hourStartedAtNpt, platform, country, referrer)
       .run();
   } catch {
     // A missed tally is not worth a failed download.

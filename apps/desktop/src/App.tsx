@@ -125,6 +125,39 @@ function Shell() {
   );
 }
 
+/** One clear choice before the optional aggregate usage count can begin. */
+function UsageInsightsConsent() {
+  const { t } = useSettings();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const requestConsent = async () => {
+      const choice = await api.getSetting<boolean>("usageInsightsEnabled");
+      if (choice !== null || cancelled) return;
+
+      const { ask } = await import("@tauri-apps/plugin-dialog");
+      const allowed = await ask(t("usage-insights.prompt-body"), {
+        title: t("usage-insights.prompt-title"),
+        kind: "info",
+        okLabel: t("usage-insights.allow"),
+        cancelLabel: t("usage-insights.decline"),
+      });
+      if (cancelled) return;
+
+      await api.setSetting("usageInsightsEnabled", allowed);
+      if (allowed) await api.sendUsagePing();
+    };
+
+    void requestConsent().catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [t]);
+
+  return null;
+}
+
 /**
  * `initialEntries` exists for the landing page, which renders this same app —
  * not a mock of it — one screen per carousel slide, against a recorded IPC
@@ -154,6 +187,7 @@ export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
               <BackgroundFeedRefresh />
               <HeaderSlotProvider>
                 <Shell />
+                <UsageInsightsConsent />
               </HeaderSlotProvider>
             </UpdaterProvider>
           </SettingsProvider>

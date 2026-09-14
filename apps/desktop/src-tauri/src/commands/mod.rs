@@ -12,6 +12,7 @@ pub mod radio;
 pub mod rashifal;
 pub mod stocks;
 pub mod storage;
+pub mod telemetry;
 pub mod tools;
 pub mod tray;
 pub mod weather;

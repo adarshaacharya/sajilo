@@ -279,6 +279,7 @@ export const api = {
   getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
   setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),
   deleteSetting: (key: string) => invoke<void>("delete_setting", { key }),
+  sendUsagePing: () => invoke<boolean>("send_usage_ping_now"),
 
   groupNumber: (value: number, fractionDigits: number) =>
     invoke<string>("group_number", { value, fractionDigits }),

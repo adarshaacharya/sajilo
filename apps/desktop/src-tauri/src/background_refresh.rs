@@ -40,6 +40,7 @@ async fn refresh(app: &AppHandle<Wry>) {
     let rashifal_app = app.clone();
     let radio_app = app.clone();
     let announcement_app = app.clone();
+    let telemetry_app = app.clone();
 
     tokio::join!(
         async move {
@@ -75,6 +76,9 @@ async fn refresh(app: &AppHandle<Wry>) {
         },
         async move {
             commands::announcement::get_announcement(announcement_app, Some(false)).await;
+        },
+        async move {
+            let _ = commands::telemetry::send_usage_ping(telemetry_app).await;
         },
     );
 }

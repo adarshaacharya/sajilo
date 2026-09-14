@@ -63,6 +63,11 @@ pub const RADIO_FAVOURITES: &str = "radioFavourites";
 /// Same key `commands/notify.rs` reads/writes — kept here too since backup
 /// import/export needs it and that module's copy is private.
 pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
+/// Explicit consent for one anonymous aggregate ping per Nepal day. A missing
+/// value means the user has not been asked yet, and must never send a ping.
+pub const USAGE_INSIGHTS_ENABLED: &str = "usageInsightsEnabled";
+pub const USAGE_INSIGHTS_LAST_PING_DAY: &str = "usageInsightsLastPingDay";
+pub const USAGE_INSIGHTS_LAST_PING_VERSION: &str = "usageInsightsLastPingVersion";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.

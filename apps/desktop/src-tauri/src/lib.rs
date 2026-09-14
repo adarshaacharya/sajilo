@@ -172,6 +172,7 @@ pub fn run() {
             commands::news::get_news,
             commands::news::news_sources,
             commands::announcement::get_announcement,
+            commands::telemetry::send_usage_ping_now,
             commands::calendar::today,
             commands::calendar::month_grid,
             commands::calendar::shift_month,
