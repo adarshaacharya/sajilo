@@ -15,7 +15,7 @@ export function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => 
     <button
       type="button"
       onClick={onOpen}
-      className="row-line flex w-full items-center gap-2 py-1.5 text-left"
+      className="row-line flex w-full items-center gap-2 py-2 text-left"
     >
       <span className="w-[68px] shrink-0 text-[11px] font-semibold">{mover.symbol}</span>
       <span className="text-[11px] text-text-muted tabular-nums">Rs {money.format(mover.ltp)}</span>
@@ -27,6 +27,9 @@ export function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => 
           : mover.board === "turnover"
             ? `Rs ${money0.format(mover.metric)}`
             : money0.format(mover.metric)}
+      </span>
+      <span aria-hidden className="shrink-0 text-[13px] leading-none text-text-muted">
+        ›
       </span>
     </button>
   );

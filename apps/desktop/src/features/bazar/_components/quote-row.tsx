@@ -19,7 +19,7 @@ export function QuoteRow({
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-surface-hover"
       >
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-semibold">{quote.symbol}</span>

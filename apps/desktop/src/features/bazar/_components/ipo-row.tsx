@@ -67,7 +67,7 @@ export function IpoRow({ entry, onOpen }: { entry: PhasedIssue; onOpen: () => vo
     <button
       type="button"
       onClick={onOpen}
-      className="row-line flex w-full flex-col gap-1.5 py-2 text-left"
+      className="row-line flex w-full flex-col gap-1.5 py-2.5 text-left"
     >
       <span className="flex w-full items-start gap-2">
         <span className="min-w-0 flex-1">

@@ -133,8 +133,10 @@ export function Dashboard() {
       .today()
       .then(setToday)
       .catch((cause) => setError(String(cause)));
+    // Enough of the season to find the next public holiday for Up next, not
+    // just the next observance, which is usually a tithi a day or two away.
     api
-      .upcomingEvents(1)
+      .upcomingEvents(40, 180)
       .then(setUpcoming)
       .catch(() => setUpcoming([]));
     api
@@ -189,6 +191,17 @@ export function Dashboard() {
 
   const provisional = cursorYear !== undefined && PROVISIONAL_YEARS.has(cursorYear);
   const upNext = upcoming[0];
+  const nextHoliday = upcoming.find((event) => event.is_public_holiday);
+  const eventSlides = [
+    upNext,
+    nextHoliday && nextHoliday.name !== upNext?.name ? nextHoliday : null,
+  ]
+    .filter((event): event is NonNullable<typeof event> => event != null)
+    .map((event) => ({
+      name: event.name,
+      when: relativeText(event.days_away, t, numerals),
+      holiday: event.is_public_holiday,
+    }));
 
   return (
     <div className="space-y-2.5">
@@ -234,11 +247,7 @@ export function Dashboard() {
         )}
       </Card>
 
-      <UpNext
-        event={
-          upNext ? { name: upNext.name, when: relativeText(upNext.days_away, t, numerals) } : null
-        }
-      />
+      <UpNext events={eventSlides} />
       <GlanceCards />
     </div>
   );

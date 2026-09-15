@@ -19,9 +19,10 @@ import {
 import { useAppliedIpos } from "../../bazar/_lib/ipo-applied";
 import { phaseLabel } from "../../bazar/_lib/ipo-labels";
 
-const HOLD_MS = 4500;
+/** Short enough to show the next slide in a tray glance, long enough to read. */
+const HOLD_MS = 2800;
 /** A deadline that runs out today stays up long enough to be read twice. */
-const URGENT_HOLD_MS = 7000;
+const URGENT_HOLD_MS = 5000;
 
 type Slide = {
   id: string;
@@ -37,15 +38,22 @@ type Slide = {
 /**
  * The home screen's one "what's coming" row.
  *
- * It holds the next calendar event and, while one is open, the IPO you can
- * still apply to — taking turns in the same slot rather than adding a card.
- * The tray panel is opened for a glance, so the row always opens on the most
- * urgent thing: an issue closing today goes first, otherwise the festival does,
- * exactly as the row read before IPOs existed. It stops while the pointer or
- * focus is on it, so a click never lands on the slide that just arrived, and
- * with reduced motion it never moves on its own — the dots still switch it.
+ * It holds the next observances by name, and the IPO you can still apply to
+ * while one is open — taking turns in the same slot rather than adding a
+ * card. The first calendar slide is whatever is next (often a tithi); the
+ * next public holiday follows so a glance still sees a day off, not only a
+ * lunar date. Each opens the full list. The tray panel is opened for a
+ * glance, so the row always opens on the most urgent thing: an issue closing
+ * today goes first, otherwise the nearest observance does. It stops while the
+ * pointer or focus is on it, so a click never lands on the slide that just
+ * arrived, and with reduced motion it never moves on its own. The trailing
+ * chevron is the cue that the row opens a fuller screen.
  */
-export function UpNext({ event }: { event: { name: string; when: string } | null }) {
+export function UpNext({
+  events,
+}: {
+  events: { name: string; when: string; holiday: boolean }[];
+}) {
   const { t, numerals, modules } = useSettings();
   const navigate = useNavigate();
   const motionEnabled = useMotionEnabled();
@@ -110,10 +118,10 @@ export function UpNext({ event }: { event: { name: string; when: string } | null
   }
 
   if (ipoSlide?.urgent) slides.push(ipoSlide);
-  if (event) {
+  for (const event of events) {
     slides.push({
-      id: `event:${event.name}`,
-      icon: "festival",
+      id: `event:${event.holiday ? "holiday" : "day"}:${event.name}:${event.when}`,
+      icon: event.holiday ? "holiday" : "festival",
       title: event.name,
       detail: null,
       when: event.when,
@@ -156,7 +164,7 @@ export function UpNext({ event }: { event: { name: string; when: string } | null
         if (!focus.currentTarget.contains(focus.relatedTarget as Node | null)) setHeld(false);
       }}
     >
-      <div className="relative h-8 min-w-0 flex-1" aria-live={rotates ? "off" : "polite"}>
+      <div className="relative h-9 min-w-0 flex-1" aria-live={rotates ? "off" : "polite"}>
         <AnimatePresence initial={false}>
           <motion.button
             key={current.id}
@@ -166,8 +174,7 @@ export function UpNext({ event }: { event: { name: string; when: string } | null
             animate={{ y: 0, opacity: 1 }}
             exit={motionEnabled ? { y: "-100%", opacity: 0 } : { opacity: 0 }}
             transition={motionEnabled ? spring.snappy : { duration: 0 }}
-            className="absolute inset-0 flex w-full items-center gap-2 pl-2.5 text-left active:scale-[0.99]"
-            style={{ paddingRight: total > 1 ? 4 : 10 }}
+            className="absolute inset-0 flex w-full cursor-pointer items-center gap-2 px-2.5 text-left active:scale-[0.99]"
           >
             <Icon
               name={current.icon}
@@ -180,40 +187,20 @@ export function UpNext({ event }: { event: { name: string; when: string } | null
               )}
             </span>
             <span
-              className={`shrink-0 text-[11px] ${
+              className={`flex shrink-0 items-center gap-1 text-[11px] ${
                 current.urgent
                   ? "font-medium text-[color:var(--color-accent-mark)]"
                   : "text-text-muted"
               }`}
             >
-              {current.when} ›
+              {current.when}
+              <span aria-hidden className="text-[13px] leading-none">
+                ›
+              </span>
             </span>
           </motion.button>
         </AnimatePresence>
       </div>
-
-      {total > 1 && (
-        <div className="flex shrink-0 flex-col items-center justify-center pr-1.5 pl-0.5">
-          {slides.map((slide, position) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => setShown({ signature, index: position })}
-              aria-label={t("dashboard.up-next-show").replace("{name}", slide.title)}
-              aria-current={position === index}
-              className="flex size-3 items-center justify-center"
-            >
-              <span
-                className={`size-[4px] rounded-full transition-colors duration-150 ${
-                  position === index
-                    ? "bg-text-secondary"
-                    : "bg-[color:var(--color-control-border)]"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      )}
     </section>
   );
 }

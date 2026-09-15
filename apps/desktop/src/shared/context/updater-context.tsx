@@ -48,7 +48,10 @@ type UpdaterRequest =
 
 const STATE_EVENT = "sajilo://updater-state";
 const REQUEST_EVENT = "sajilo://updater-request";
-const CHECK_INTERVAL_MS = 60 * 60 * 1000;
+/** A check is one fetch of the release's `latest.json` (about a kilobyte) from
+ * GitHub's release CDN — not the rate-limited REST API — so half-hourly costs
+ * nothing noticeable and gets a fix to people within the half hour. */
+const CHECK_INTERVAL_MS = 30 * 60 * 1000;
 /** While one of these holds, another check would only repeat what is known. */
 const SETTLED: readonly UpdateState[] = ["checking", "available", "downloading", "installed"];
 

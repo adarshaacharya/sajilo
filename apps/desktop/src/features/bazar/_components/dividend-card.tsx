@@ -66,6 +66,7 @@ export function DividendCard({
               <>
                 {t("stocks.ipo-all")}
                 <span className="tabular-nums text-text-muted">{rows.length}</span>
+                <span aria-hidden>›</span>
               </>
             )}
           </button>
@@ -124,7 +125,7 @@ function DividendRow({ row, onOpen }: { row: Row; onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="row-line flex w-full items-start gap-2 py-2 text-left"
+      className="row-line flex w-full items-center gap-2 py-2.5 text-left"
     >
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1">
@@ -151,6 +152,9 @@ function DividendRow({ row, onOpen }: { row: Row; onOpen: () => void }) {
         >
           {when}
         </span>
+      </span>
+      <span aria-hidden className="shrink-0 text-[13px] leading-none text-text-muted">
+        ›
       </span>
     </button>
   );

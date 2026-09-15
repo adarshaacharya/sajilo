@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
@@ -24,11 +24,74 @@ function QuietLink({ label, href }: { label: string; href: string }) {
   );
 }
 
+/**
+ * The update, offered where people look for the version number. The screen
+ * header carries a compact control for the same thing; this one says what the
+ * update is before asking for the click. It follows the updater through every
+ * state a user can act on or wait for — found, installing, ready to restart —
+ * and stays out of the way otherwise.
+ */
+function AboutUpdate() {
+  const { t } = useSettings();
+  const { enabled, state, version, installUpdate, restartToUpdate } = useUpdater();
+
+  if (!enabled) return null;
+
+  let message: ReactNode;
+  let control: ReactNode;
+  if (state === "installed") {
+    message = t("settings.update-installed");
+    control = (
+      <button
+        type="button"
+        onClick={() => restartToUpdate()}
+        className="update-header-btn"
+        style={{ maxWidth: "none" }}
+      >
+        {t("settings.update-restart")}
+      </button>
+    );
+  } else if ((state === "available" || state === "downloading") && version) {
+    message = (
+      <>
+        {t("settings.update-found")}{" "}
+        <span className="font-medium tabular-nums text-accent">{version}</span>
+      </>
+    );
+    control =
+      state === "downloading" ? (
+        <span
+          className="update-header-btn update-header-btn--busy"
+          style={{ maxWidth: "none" }}
+          aria-live="polite"
+        >
+          {t("updater.installing")}
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => installUpdate()}
+          className="update-header-btn"
+          style={{ maxWidth: "none" }}
+        >
+          {t("settings.install-update")}
+        </button>
+      );
+  } else {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 flex flex-col items-center gap-1.5">
+      <p className="text-[10px] text-text-muted">{message}</p>
+      {control}
+    </div>
+  );
+}
+
 export function AboutTab() {
   const { t } = useSettings();
-  const { state: updateState, version: updateVersion } = useUpdater();
   const [version, setVersion] = useState<string | null>(null);
-  const newVersion = updateState === "available" ? updateVersion : null;
 
   useEffect(() => {
     import("@tauri-apps/api/app")
@@ -50,12 +113,7 @@ export function AboutTab() {
           <span className="font-medium tabular-nums text-accent">{version}</span>
         </p>
       )}
-      {newVersion && (
-        <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-accent-fill px-2 py-0.5 text-[10px] text-accent-ink">
-          {t("settings.update-found")}
-          <span className="font-medium tabular-nums">{newVersion}</span>
-        </p>
-      )}
+      <AboutUpdate />
 
       <p className="mt-5 max-w-[240px] text-[10px] leading-relaxed text-text-muted">
         {t("about.feedback")}

@@ -326,6 +326,25 @@ html {
   pointer-events: none;
 }
 
+/* Tappable market rows: the chevron says they open; the fill says they
+   respond before the click. Padding lives inside the hover, so type is not
+   flush with the fill; no negative margin, so the pill stays in the card. */
+button.row-line {
+  cursor: pointer;
+  padding-inline: 8px;
+  border-radius: 8px;
+  transition: background-color 0.12s ease;
+}
+
+button.row-line:hover {
+  background: var(--color-surface-hover);
+}
+
+button.row-line + button.row-line::before {
+  left: 8px;
+  right: 8px;
+}
+
 .section-divider {
   border-top: 1px solid var(--color-divider);
 }
