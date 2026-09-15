@@ -22,7 +22,7 @@ static USAGE_PING_IN_FLIGHT: AtomicBool = AtomicBool::new(false);
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct UsagePing {
-    version: &'static str,
+    version: String,
     platform: &'static str,
     architecture: &'static str,
     /// The Nepal day this install de-duplicated against. The endpoint files the
@@ -60,6 +60,18 @@ fn gap_days(previous_day: Option<&str>, today: NaiveDate) -> i64 {
         return 0;
     };
     (today - previous_day).num_days().clamp(1, MAX_GAP_DAYS)
+}
+
+/// The version this install last reported, when it differs from the running
+/// one — i.e. the version it upgraded from.
+///
+/// Builds up to 0.1.24 reported `CARGO_PKG_VERSION`, the workspace crate
+/// version, which never moved off its placeholder while the app version in
+/// `tauri.conf.json` climbed. No app release that old ever sent a ping, so a
+/// stored placeholder is that bug's marker, not a real version: reporting it
+/// would file every existing install under "upgraded from 0.1.0".
+fn upgraded_from(previous: Option<String>, current: &str) -> Option<String> {
+    previous.filter(|previous| previous != current && previous != env!("CARGO_PKG_VERSION"))
 }
 
 /// A missing preference is a count nobody switched off.
@@ -110,15 +122,18 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
         return false;
     }
 
-    let version = env!("CARGO_PKG_VERSION");
+    // The app's version, from `tauri.conf.json` — the one releases bump and the
+    // updater compares. `CARGO_PKG_VERSION` is the workspace crate version and
+    // does not follow releases.
+    let version = app.package_info().version.to_string();
     let previous_version = read_string(&app, prefs::USAGE_INSIGHTS_LAST_PING_VERSION);
     let payload = UsagePing {
-        version,
+        version: version.clone(),
         platform: platform(),
         architecture: architecture(),
         day_npt: today_text.clone(),
         gap_days: gap_days(previous_day.as_deref(), today),
-        upgraded_from_version: previous_version.filter(|previous| previous != version),
+        upgraded_from_version: upgraded_from(previous_version, &version),
     };
 
     if sajilo_providers::HttpClient::new()
@@ -157,7 +172,7 @@ pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> d
 mod tests {
     use chrono::NaiveDate;
 
-    use super::{UsagePing, gap_days, is_enabled};
+    use super::{UsagePing, gap_days, is_enabled, upgraded_from};
 
     #[test]
     fn caps_and_normalizes_the_gap() {
@@ -176,9 +191,24 @@ mod tests {
     }
 
     #[test]
+    fn reports_a_real_upgrade_only() {
+        assert_eq!(upgraded_from(None, "0.1.25"), None);
+        assert_eq!(upgraded_from(Some("0.1.25".to_owned()), "0.1.25"), None);
+        assert_eq!(
+            upgraded_from(Some("0.1.24".to_owned()), "0.1.25"),
+            Some("0.1.24".to_owned())
+        );
+        // What builds up to 0.1.24 stored: the crate placeholder, not a release.
+        assert_eq!(
+            upgraded_from(Some(env!("CARGO_PKG_VERSION").to_owned()), "0.1.25"),
+            None
+        );
+    }
+
+    #[test]
     fn omits_an_unknown_previous_version_from_the_payload() {
         let payload = UsagePing {
-            version: "0.1.23",
+            version: "0.1.23".to_owned(),
             platform: "macos",
             architecture: "arm64",
             day_npt: "2026-09-14".to_owned(),
