@@ -8,7 +8,8 @@
  * is a doorway: it records that a click happened and then hands the visitor
  * straight to the same GitHub URL they would have got anyway.
  *
- * What is written down is a running count per day, platform and country. There
+ * What is written down is a running count per UTC hour, platform, country and
+ * referring site. There
  * is no row per person: no address, no user agent, no identifier, nothing that
  * describes who downloaded, only how many did.
  */
@@ -63,32 +64,23 @@ export default {
   },
 };
 
-/// Asia/Kathmandu is a fixed +05:45 with no daylight saving, so the local wall
-/// clock is UTC shifted by a constant — the same reasoning as `nepal_time` in
-/// `sajilo-core`.
-const NEPAL_OFFSET_MINUTES = 5 * 60 + 45;
-
 async function record(env, platform, request) {
   if (!env.DB) return;
 
-  // The bucket timestamp is Nepali local time. In UTC a download made at a
-  // quarter to nine in the morning in Kathmandu files itself under 3am, and
-  // "when do people install this" is a question about Nepal's day rather than
-  // Greenwich's.
-  const nepal = new Date(Date.now() + NEPAL_OFFSET_MINUTES * 60_000);
-  const hour = nepal.getUTCHours();
-  const hourStartedAtNpt = `${nepal.toISOString().slice(0, 10)}T${String(hour).padStart(2, "0")}:00:00+05:45`;
+  // The bucket is the UTC hour the click fell in, as a plain ISO timestamp —
+  // the same clock every other count in this database is kept in.
+  const hourStartedAtUtc = `${new Date().toISOString().slice(0, 13)}:00:00Z`;
   const country = request.cf?.country ?? "XX";
   const referrer = referrerHost(request.headers.get("Referer"));
 
   try {
     await env.DB.prepare(
-      `INSERT INTO download_clicks (hour_started_at_npt, platform, country, referrer, clicks)
+      `INSERT INTO download_clicks (hour_started_at_utc, platform, country, referrer, clicks)
        VALUES (?1, ?2, ?3, ?4, 1)
-       ON CONFLICT (hour_started_at_npt, platform, country, referrer)
+       ON CONFLICT (hour_started_at_utc, platform, country, referrer)
        DO UPDATE SET clicks = clicks + 1`,
     )
-      .bind(hourStartedAtNpt, platform, country, referrer)
+      .bind(hourStartedAtUtc, platform, country, referrer)
       .run();
   } catch {
     // A missed tally is not worth a failed download.

@@ -6,12 +6,18 @@ type Ping = {
   version: string;
   platform: (typeof PLATFORMS)[number];
   architecture: (typeof ARCHITECTURES)[number];
-  dayNpt: string;
+  /** The UTC date the app de-duplicated against. Sent from 0.1.25. */
+  dayUtc?: string;
+  /**
+   * The Nepal date builds up to 0.1.24 de-duplicate against. Still accepted so
+   * those installs keep counting, but a Nepal day does not line up with a UTC
+   * one, so it is never used to file the count.
+   */
+  dayNpt?: string;
   gapDays: number;
   upgradedFromVersion?: string;
 };
 
-const NEPAL_OFFSET_MILLISECONDS = (5 * 60 + 45) * 60 * 1_000;
 const DAY_MILLISECONDS = 24 * 60 * 60 * 1_000;
 const MAX_BODY_BYTES = 1_024;
 const MAX_GAP_DAYS = 45;
@@ -22,19 +28,27 @@ const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const PLATFORMS = ["macos", "windows", "linux", "other"] as const;
 const ARCHITECTURES = ["arm64", "x64", "other"] as const;
 
-function nepalDay(now = Date.now()): string {
-  return new Date(now + NEPAL_OFFSET_MILLISECONDS).toISOString().slice(0, 10);
+function utcDay(now = Date.now()): string {
+  return new Date(now).toISOString().slice(0, 10);
 }
 
 /**
- * The day a ping counts towards. The app de-duplicates by its own Nepal day, so
- * that is the day to file it under — filed by arrival instead, a ping sent at
- * 23:59 lands on tomorrow and tomorrow's ping counts the same install twice. A
- * device clock more than a day out is not trusted; the server's day wins.
+ * The UTC day a ping counts towards, as the instant that day began.
+ *
+ * The app de-duplicates by its own UTC day, so that is the day to file it
+ * under — filed by arrival instead, a ping sent at 23:59 lands on tomorrow and
+ * tomorrow's ping counts the same install twice. A device clock more than a day
+ * out is not trusted, and an older build's Nepal day cannot be mapped onto a UTC
+ * one; both fall back to the day the ping arrived.
  */
-function countedDay(clientDay: string, now = Date.now()): string {
-  const plausible = [now - DAY_MILLISECONDS, now, now + DAY_MILLISECONDS].map(nepalDay);
-  return plausible.includes(clientDay) ? clientDay : nepalDay(now);
+function dayStartedAtUtc(ping: Ping, now = Date.now()): string {
+  const plausible = [now - DAY_MILLISECONDS, now, now + DAY_MILLISECONDS].map(utcDay);
+  const day = ping.dayUtc !== undefined && plausible.includes(ping.dayUtc) ? ping.dayUtc : utcDay(now);
+  return `${day}T00:00:00Z`;
+}
+
+function isDay(value: unknown): boolean {
+  return typeof value === "string" && DAY_PATTERN.test(value);
 }
 
 function isPing(value: unknown): value is Ping {
@@ -45,8 +59,9 @@ function isPing(value: unknown): value is Ping {
     VERSION_PATTERN.test(ping.version) &&
     PLATFORMS.some((platform) => platform === ping.platform) &&
     ARCHITECTURES.some((architecture) => architecture === ping.architecture) &&
-    typeof ping.dayNpt === "string" &&
-    DAY_PATTERN.test(ping.dayNpt) &&
+    (ping.dayUtc !== undefined || ping.dayNpt !== undefined) &&
+    (ping.dayUtc === undefined || isDay(ping.dayUtc)) &&
+    (ping.dayNpt === undefined || isDay(ping.dayNpt)) &&
     Number.isInteger(ping.gapDays) &&
     Number(ping.gapDays) >= 0 &&
     Number(ping.gapDays) <= MAX_GAP_DAYS &&
@@ -83,13 +98,13 @@ export default {
     const upgradedFromVersion = payload.upgradedFromVersion ?? "";
     await env.DB.prepare(
       `INSERT INTO app_pings
-        (day_npt, version, platform, architecture, country, gap_days, upgraded_from_version, pings)
+        (day_started_at_utc, version, platform, architecture, country, gap_days, upgraded_from_version, pings)
        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-       ON CONFLICT(day_npt, version, platform, architecture, country, gap_days, upgraded_from_version)
+       ON CONFLICT(day_started_at_utc, version, platform, architecture, country, gap_days, upgraded_from_version)
        DO UPDATE SET pings = pings + 1`,
     )
       .bind(
-        countedDay(payload.dayNpt),
+        dayStartedAtUtc(payload),
         payload.version,
         payload.platform,
         payload.architecture,

@@ -65,7 +65,7 @@ pub const RADIO_FAVOURITES: &str = "radioFavourites";
 /// Same key `commands/notify.rs` reads/writes — kept here too since backup
 /// import/export needs it and that module's copy is private.
 pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
-/// One anonymous aggregate count per Nepal day. On unless switched off — a
+/// One anonymous aggregate count per UTC day. On unless switched off — a
 /// missing value is a count nobody turned off.
 pub const USAGE_INSIGHTS_ENABLED: &str = "usageInsightsEnabled";
 pub const USAGE_INSIGHTS_LAST_PING_DAY: &str = "usageInsightsLastPingDay";

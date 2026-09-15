@@ -7,7 +7,7 @@
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Utc};
 use serde::Serialize;
 use serde_json::{Value, json};
 use tauri::{AppHandle, Wry};
@@ -25,10 +25,10 @@ struct UsagePing {
     version: String,
     platform: &'static str,
     architecture: &'static str,
-    /// The Nepal day this install de-duplicated against. The endpoint files the
+    /// The UTC day this install de-duplicated against. The endpoint files the
     /// count under it, so a ping sent just before midnight is not counted again
     /// the next day.
-    day_npt: String,
+    day_utc: String,
     gap_days: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     upgraded_from_version: Option<String>,
@@ -62,6 +62,18 @@ fn gap_days(previous_day: Option<&str>, today: NaiveDate) -> i64 {
     (today - previous_day).num_days().clamp(1, MAX_GAP_DAYS)
 }
 
+/// Whether this UTC day has already been counted.
+///
+/// Builds up to 0.1.24 stored the Nepal date, which runs up to a day ahead of
+/// UTC: from 18:15 UTC it is already tomorrow in Kathmandu. A stored day up to
+/// one day ahead therefore means "sent", so moving to UTC never counts an
+/// install twice on the day it updates — at worst it skips that one day.
+fn already_counted(previous_day: Option<&str>, today: NaiveDate) -> bool {
+    previous_day
+        .and_then(|day| NaiveDate::parse_from_str(day, "%Y-%m-%d").ok())
+        .is_some_and(|day| (0..=1).contains(&(day - today).num_days()))
+}
+
 /// The version this install last reported, when it differs from the running
 /// one — i.e. the version it upgraded from.
 ///
@@ -91,7 +103,7 @@ fn read_string(app: &AppHandle<Wry>, key: &str) -> Option<String> {
     read(app, key).and_then(|value| value.as_str().map(str::to_owned))
 }
 
-/// Sends at most one event per Nepal calendar day, unless switched off. Failed
+/// Sends at most one event per UTC day, unless switched off. Failed
 /// requests leave the local marker untouched so the next hourly background
 /// refresh can try again.
 pub async fn send_usage_ping(app: AppHandle<Wry>) -> bool {
@@ -115,10 +127,10 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
         return false;
     }
 
-    let today = sajilo_core::nepal_time::today();
+    let today = Utc::now().date_naive();
     let today_text = today.format("%Y-%m-%d").to_string();
     let previous_day = read_string(&app, prefs::USAGE_INSIGHTS_LAST_PING_DAY);
-    if previous_day.as_deref() == Some(today_text.as_str()) {
+    if already_counted(previous_day.as_deref(), today) {
         return false;
     }
 
@@ -131,7 +143,7 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
         version: version.clone(),
         platform: platform(),
         architecture: architecture(),
-        day_npt: today_text.clone(),
+        day_utc: today_text.clone(),
         gap_days: gap_days(previous_day.as_deref(), today),
         upgraded_from_version: upgraded_from(previous_version, &version),
     };
@@ -172,7 +184,19 @@ pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> d
 mod tests {
     use chrono::NaiveDate;
 
-    use super::{UsagePing, gap_days, is_enabled, upgraded_from};
+    use super::{UsagePing, already_counted, gap_days, is_enabled, upgraded_from};
+
+    #[test]
+    fn counts_each_utc_day_once_across_the_switch_from_nepal_days() {
+        let today = NaiveDate::from_ymd_opt(2026, 9, 15).unwrap();
+        assert!(!already_counted(None, today));
+        assert!(!already_counted(Some("2026-09-14"), today));
+        assert!(already_counted(Some("2026-09-15"), today));
+        // A Nepal date stored after 18:15 UTC is a day ahead: already sent.
+        assert!(already_counted(Some("2026-09-16"), today));
+        assert!(!already_counted(Some("2026-09-20"), today));
+        assert!(!already_counted(Some("not-a-date"), today));
+    }
 
     #[test]
     fn caps_and_normalizes_the_gap() {
@@ -211,12 +235,12 @@ mod tests {
             version: "0.1.23".to_owned(),
             platform: "macos",
             architecture: "arm64",
-            day_npt: "2026-09-14".to_owned(),
+            day_utc: "2026-09-14".to_owned(),
             gap_days: 0,
             upgraded_from_version: None,
         };
         let json = serde_json::to_value(payload).unwrap();
         assert!(json.get("upgradedFromVersion").is_none());
-        assert_eq!(json["dayNpt"], "2026-09-14");
+        assert_eq!(json["dayUtc"], "2026-09-14");
     }
 }
