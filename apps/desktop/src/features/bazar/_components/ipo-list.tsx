@@ -1,4 +1,4 @@
-import { Icon } from "../../../shared/components/icon";
+import { BackButton } from "../../../shared/components/back-button";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { IssueGroups, PhasedIssue } from "../_lib/ipo";
 import { IpoRow } from "./ipo-row";
@@ -22,14 +22,7 @@ export function IpoList({
   return (
     <section className="surface-card p-2.5">
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label={t("action.back")}
-          className="icon-btn shrink-0"
-        >
-          <Icon name="chevronLeft" className="size-3.5" />
-        </button>
+        <BackButton onClick={onBack} />
         <p className="flex-1 text-[13px] font-semibold">{t("stocks.ipos")}</p>
       </div>
 

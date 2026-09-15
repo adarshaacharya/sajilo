@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { Card } from "../../shared/components/card";
 import { MonthGrid } from "../../shared/components/month-grid";
 import { SkeletonBlock } from "../../shared/components/skeleton";
@@ -82,6 +82,22 @@ function planKey(date: NepaliDate): string {
   return `${date.year}-${date.month}-${date.day}`;
 }
 
+/**
+ * The month the grid is showing, read from the dashboard's own history entry.
+ *
+ * It lives in the URL rather than component state because opening a day
+ * unmounts this screen: state would be lost and Back would land on the current
+ * month again — painful when stepping through every day of Dashain. `null`
+ * means "the current month", which is also what the Today tab navigates to.
+ */
+function viewedMonth(params: URLSearchParams): { year: number; month: number } | null {
+  const year = Number(params.get("y"));
+  const month = Number(params.get("m"));
+  return Number.isInteger(year) && year > 0 && Number.isInteger(month) && month > 0
+    ? { year, month }
+    : null;
+}
+
 function gregorianSpan(first: string, last: string): string {
   const [y1, m1] = first.split("-").map(Number);
   const [y2, m2] = last.split("-").map(Number);
@@ -96,9 +112,9 @@ function gregorianSpan(first: string, last: string): string {
 export function Dashboard() {
   const { numerals, t, modules } = useSettings();
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
 
   const [today, setToday] = useState<Today | null>(null);
-  const [cursor, setCursor] = useState<NepaliDate | null>(null);
   const [month, setMonth] = useState<CalendarMonth | null>(null);
   const [monthSpan, setMonthSpan] = useState("");
   const [upcoming, setUpcoming] = useState<UpcomingEvent[]>([]);
@@ -115,10 +131,7 @@ export function Dashboard() {
     setError(null);
     api
       .today()
-      .then((value) => {
-        setToday(value);
-        setCursor(value.nepali);
-      })
+      .then(setToday)
       .catch((cause) => setError(String(cause)));
     api
       .upcomingEvents(1)
@@ -132,10 +145,14 @@ export function Dashboard() {
 
   useEffect(reload, [reload]);
 
+  const viewed = viewedMonth(params);
+  const cursorYear = viewed?.year ?? today?.nepali.year;
+  const cursorMonth = viewed?.month ?? today?.nepali.month;
+
   useEffect(() => {
-    if (!cursor) return;
+    if (!cursorYear || !cursorMonth) return;
     api
-      .monthGrid(cursor.year, cursor.month)
+      .monthGrid(cursorYear, cursorMonth)
       .then(async (grid) => {
         setMonth(grid);
         const days = grid.days.filter((day) => day.date);
@@ -152,13 +169,16 @@ export function Dashboard() {
         setMonthSpan(gregorianSpan(a.gregorian, b.gregorian));
       })
       .catch((cause) => setError(String(cause)));
-  }, [cursor]);
+  }, [cursorYear, cursorMonth]);
 
+  // `replace`, so paging months never piles up entries that Back would replay.
   const step = (offset: number) => {
-    if (!cursor) return;
+    if (!cursorYear || !cursorMonth) return;
     api
-      .shiftMonth(cursor.year, cursor.month, offset)
-      .then(setCursor)
+      .shiftMonth(cursorYear, cursorMonth, offset)
+      .then((next: NepaliDate) =>
+        setParams({ y: String(next.year), m: String(next.month) }, { replace: true }),
+      )
       .catch(() => {});
   };
 
@@ -167,7 +187,7 @@ export function Dashboard() {
   }
   if (!today || !month) return <DashboardSkeleton />;
 
-  const provisional = cursor && PROVISIONAL_YEARS.has(cursor.year);
+  const provisional = cursorYear !== undefined && PROVISIONAL_YEARS.has(cursorYear);
   const upNext = upcoming[0];
 
   return (

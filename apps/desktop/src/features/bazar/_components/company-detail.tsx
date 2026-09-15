@@ -1,4 +1,4 @@
-import { Icon } from "../../../shared/components/icon";
+import { BackButton } from "../../../shared/components/back-button";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { translate } from "../../../shared/lib/i18n";
 import type { StockQuote } from "../../../types/api/StockQuote";
@@ -59,14 +59,7 @@ export function CompanyDetail({
   return (
     <section className="surface-card p-2.5">
       <div className="flex items-start gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label={t("action.back")}
-          className="icon-btn shrink-0"
-        >
-          <Icon name="chevronLeft" className="size-3.5" />
-        </button>
+        <BackButton onClick={onBack} />
         <div className="min-w-0 flex-1">
           <p className="text-[16px] font-semibold leading-tight">{quote.symbol}</p>
           {quote.companyName && <p className="text-[11px] text-text-muted">{quote.companyName}</p>}

@@ -1,3 +1,4 @@
+import { BackButton } from "../../../shared/components/back-button";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
@@ -47,14 +48,7 @@ export function IpoDetail({ entry, onBack }: { entry: PhasedIssue; onBack: () =>
   return (
     <section className="surface-card p-2.5">
       <div className="flex items-start gap-2">
-        <button
-          type="button"
-          onClick={onBack}
-          aria-label={t("action.back")}
-          className="icon-btn shrink-0"
-        >
-          <Icon name="chevronLeft" className="size-3.5" />
-        </button>
+        <BackButton onClick={onBack} />
         <div className="min-w-0 flex-1">
           <p className="text-[16px] font-semibold leading-tight">{issue.symbol ?? name}</p>
           {issue.symbol && <p className="text-[11px] text-text-muted">{name}</p>}

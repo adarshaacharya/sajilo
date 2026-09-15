@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
+import { BackButton } from "./back-button";
 import { useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
 import { UpdateHeaderButton } from "./update-header-button";
@@ -23,16 +24,7 @@ export function Header({ title }: { title: string }) {
 
   return (
     <header className="header-bar flex h-10 shrink-0 items-center gap-1.5 px-2.5">
-      {canGoBack && (
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          aria-label={t("action.back")}
-          className="icon-btn"
-        >
-          <Icon name="chevronLeft" className="size-3.5" />
-        </button>
-      )}
+      {canGoBack && <BackButton onClick={() => navigate(-1)} />}
       <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{title}</h1>
       {slot}
       <UpdateHeaderButton />

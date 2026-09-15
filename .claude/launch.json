@@ -25,6 +25,17 @@
       ],
       "cwd": "apps/showcase",
       "port": 5174
+    },
+    {
+      "name": "desktop",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": [
+        "run",
+        "tauri",
+        "dev"
+      ],
+      "cwd": "apps/desktop",
+      "port": 1420
     }
   ]
 }

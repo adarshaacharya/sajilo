@@ -353,6 +353,32 @@ html {
   pointer-events: none;
 }
 
+/* Back chevron, macOS toolbar scale: 22px target, no plate at rest, a
+   translucent one on hover so it tints whatever chrome sits behind it instead
+   of stamping a solid grey square there. */
+.back-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+
+.back-btn:hover {
+  background: color-mix(in srgb, var(--color-text) 9%, transparent);
+  color: var(--color-text);
+}
+
+.back-btn:active {
+  background: color-mix(in srgb, var(--color-text) 15%, transparent);
+}
+
 /* The one header control that is genuinely time-sensitive — and it appears
    only when there is actually an update — so it is the one that carries
    colour. Same voice as `.settings-btn--accent`: gilt edge, gilt text, the
