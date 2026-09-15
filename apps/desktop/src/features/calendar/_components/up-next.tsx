@@ -49,11 +49,7 @@ type Slide = {
  * arrived, and with reduced motion it never moves on its own. The trailing
  * chevron is the cue that the row opens a fuller screen.
  */
-export function UpNext({
-  events,
-}: {
-  events: { name: string; when: string; holiday: boolean }[];
-}) {
+export function UpNext({ events }: { events: { name: string; when: string; holiday: boolean }[] }) {
   const { t, numerals, modules } = useSettings();
   const navigate = useNavigate();
   const motionEnabled = useMotionEnabled();
