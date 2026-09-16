@@ -15,6 +15,7 @@ export function Select<T extends string>({
   onChange,
   options,
   groups,
+  placeholder,
 }: {
   label?: string;
   /** For an unlabelled dropdown — a picker sitting in the header bar. */
@@ -24,7 +25,11 @@ export function Select<T extends string>({
   options: readonly { id: T; label: string }[];
   /** Rendered as `<optgroup>`s below `options`, for a long, sectioned list. */
   groups?: readonly { label: string; options: readonly { id: T; label: string }[] }[];
+  /** Shown, muted, while `value` is empty — a prompt, not a choice, so it
+   * can't be picked back once something is chosen. */
+  placeholder?: string;
 }) {
+  const prompting = placeholder !== undefined && value === "";
   const id = useId();
   const select = (
     <div className="relative">
@@ -33,10 +38,17 @@ export function Select<T extends string>({
         value={value}
         aria-label={label ? undefined : ariaLabel}
         onChange={(event) => onChange(event.target.value as T)}
-        className={`${CONTROL} w-full cursor-pointer appearance-none pr-6 hover:bg-surface-hover`}
+        className={`${CONTROL} w-full cursor-pointer appearance-none pr-6 hover:bg-surface-hover ${prompting ? "text-text-muted" : ""}`}
       >
+        {prompting && (
+          <option value="" disabled hidden>
+            {placeholder}
+          </option>
+        )}
         {options.map((option) => (
-          <option key={option.id} value={option.id}>
+          // The closed select inherits the muted prompt colour; the open list
+          // should still read at full strength.
+          <option key={option.id} value={option.id} className="text-text">
             {option.label}
           </option>
         ))}

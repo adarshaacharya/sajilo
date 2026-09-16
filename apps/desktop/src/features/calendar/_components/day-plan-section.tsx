@@ -135,7 +135,7 @@ function PlanEditor({
           type="button"
           onClick={onSave}
           disabled={!draft.title.trim()}
-          className="settings-btn text-[11px] disabled:opacity-40"
+          className="settings-btn text-[11px]"
         >
           {t("planner.save")}
         </button>

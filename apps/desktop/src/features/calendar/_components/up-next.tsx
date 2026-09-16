@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
-import { api } from "../../../shared/lib/ipc";
+import { api, type KeeperSnapshot } from "../../../shared/lib/ipc";
 import { spring, useMotionEnabled } from "../../../shared/lib/motion";
 import { digits } from "../../../shared/lib/numerals";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
@@ -18,6 +18,13 @@ import {
 } from "../../bazar/_lib/ipo";
 import { useAppliedIpos } from "../../bazar/_lib/ipo-applied";
 import { phaseLabel } from "../../bazar/_lib/ipo-labels";
+import { personName, recordName } from "../../keeper/_lib/documents";
+import { dueLabel } from "../../keeper/_lib/shared";
+import { upcomingOf } from "../../keeper/_lib/upcoming";
+
+/** Home is a glance: only what's due within a week earns a slide. Keeper's own
+ * list looks further ahead. */
+const KEEPER_HORIZON_DAYS = 7;
 
 /** Short enough to show the next slide in a tray glance, long enough to read. */
 const HOLD_MS = 2800;
@@ -38,8 +45,8 @@ type Slide = {
 /**
  * The home screen's one "what's coming" row.
  *
- * It holds the next observances by name, and the IPO you can still apply to
- * while one is open — taking turns in the same slot rather than adding a
+ * It holds the next observances by name, the IPO you can still apply to
+ * while one is open, and whatever Keeper has due this week — taking turns in the same slot rather than adding a
  * card. The first calendar slide is whatever is next (often a tithi); the
  * next public holiday follows so a glance still sees a day off, not only a
  * lunar date. Each opens the full list. The tray panel is opened for a
@@ -56,6 +63,15 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
   const { applied, loaded } = useAppliedIpos();
   const [ipos, setIpos] = useState<LoadState<IpoSnapshot>>();
   const [held, setHeld] = useState(false);
+  const [keeper, setKeeper] = useState<KeeperSnapshot>();
+
+  useEffect(() => {
+    if (!modules.keeperEnabled) return;
+    api
+      .keeperSnapshot()
+      .then(setKeeper)
+      .catch(() => {});
+  }, [modules.keeperEnabled]);
 
   useEffect(() => {
     if (!modules.bazarEnabled) return;
@@ -113,6 +129,32 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
     }
   }
 
+  const due =
+    modules.keeperEnabled && keeper
+      ? upcomingOf(keeper.records, keeper.items).filter(
+          (entry) => entry.days <= KEEPER_HORIZON_DAYS,
+        )
+      : [];
+  let keeperSlide: Slide | null = null;
+  const first = due[0];
+  if (first) {
+    const name = first.record ? recordName(t, first.record) : (first.item?.title ?? "");
+    const personId = first.record?.personId ?? first.item?.personId ?? null;
+    keeperSlide = {
+      id: `keeper:${due.map((entry) => `${entry.key}:${entry.days}`).join("|")}`,
+      icon: "keeper",
+      title: due.length === 1 ? name : t("dashboard.keeper-due").replace("{n}", count(due.length)),
+      detail:
+        due.length === 1 ? (personId ? personName(t, keeper?.people ?? [], personId) : null) : name,
+      when: dueLabel(t, first.days),
+      // Today, tomorrow, or already late: lead with it.
+      urgent: first.days <= 1,
+      hold: first.days <= 1 ? URGENT_HOLD_MS : HOLD_MS,
+      open: () => navigate("/keeper"),
+    };
+  }
+
+  if (keeperSlide?.urgent) slides.push(keeperSlide);
   if (ipoSlide?.urgent) slides.push(ipoSlide);
   for (const event of events) {
     slides.push({
@@ -127,6 +169,7 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
     });
   }
   if (ipoSlide && !ipoSlide.urgent) slides.push(ipoSlide);
+  if (keeperSlide && !keeperSlide.urgent) slides.push(keeperSlide);
 
   // A different set of slides starts over on the first, most urgent one.
   const signature = slides.map((slide) => slide.id).join("\n");

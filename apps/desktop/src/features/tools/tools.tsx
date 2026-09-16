@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHeaderInner } from "../../shared/components/header-slot";
 import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import { Converter } from "../calendar/converter";
@@ -29,6 +30,7 @@ export function Tools() {
   const essentialTools = tools.slice(0, 3);
   const calculatorTools = tools.slice(3);
   const selectedTool = tools.find((tool) => tool.id === tab);
+  useHeaderInner(selectedTool ? { title: selectedTool.label, onBack: () => setTab(null) } : null);
 
   return (
     <div className="min-w-0 space-y-2.5">
@@ -39,18 +41,6 @@ export function Tools() {
         </div>
       ) : (
         <>
-          <div className="flex h-7 items-center gap-1.5 px-0.5">
-            <button
-              type="button"
-              onClick={() => setTab(null)}
-              className="flex items-center gap-0.5 rounded-md px-1.5 py-1 text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
-            >
-              <Icon name="chevronLeft" className="size-3" />
-              {t("tools.all")}
-            </button>
-            <span aria-hidden="true" className="h-3.5 w-px bg-divider" />
-            <p className="min-w-0 truncate text-[12px] font-medium">{selectedTool?.label}</p>
-          </div>
           {tab === "date" && <Converter />}
           {tab === "land" && <LandTab />}
           {tab === "weight" && <WeightTab />}

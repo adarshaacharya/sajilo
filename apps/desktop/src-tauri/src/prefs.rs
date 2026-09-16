@@ -48,6 +48,7 @@ pub const NEWS_ENABLED: &str = "newsEnabled";
 pub const BAZAR_ENABLED: &str = "bazarEnabled";
 pub const RASHIFAL_ENABLED: &str = "rashifalEnabled";
 pub const RADIO_ENABLED: &str = "radioEnabled";
+pub const KEEPER_ENABLED: &str = "keeperEnabled";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

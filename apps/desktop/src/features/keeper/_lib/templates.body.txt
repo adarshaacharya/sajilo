@@ -1,0 +1,208 @@
+type Template = {
+  id: string;
+  title: string;
+  category: Category;
+  url: string;
+  fee: string;
+  location: string;
+  checklist: string[];
+  /** False for things with no deadline of their own — applying for a
+   * citizenship certificate or a PAN happens when you need it, so the editor
+   * drops the due date instead of making one up. */
+  needsDate: boolean;
+  recurrence?: KeeperItem["recurrence"];
+  note?: string;
+};
+
+/** Template content (title/fee/location/checklist) is English-only for now —
+ * these mirror official government form names, which Nepali speakers
+ * commonly use in English day to day. Everything the user actually
+ * interacts with around them (labels, buttons, categories) is localized. */
+const TEMPLATES: readonly Template[] = [
+  {
+    id: "citizenship",
+    title: "Citizenship certificate",
+    category: "identity",
+    url: "https://moha.gov.np/",
+    fee: "Rs 10 revenue stamp",
+    location: "District Administration Office of your permanent district",
+    checklist: [
+      "Parents’ citizenship certificates",
+      "Birth registration certificate",
+      "Ward office recommendation",
+      "School / SEE certificate",
+      "Two passport-size photos",
+      "Relative with citizenship as witness",
+      "Migration certificate (if applying in another district)",
+    ],
+    needsDate: false,
+  },
+  {
+    id: "passport",
+    title: "Passport renewal",
+    category: "identity",
+    url: "https://nepalpassport.gov.np/en",
+    fee: "From Rs 5,000 (34 pages); verify current revenue",
+    location: "Department of Passports, Tripureshwor, or your DAO",
+    checklist: [
+      "Online pre-enrolment and appointment",
+      "Citizenship certificate",
+      "National ID number (NIN)",
+      "Current passport",
+      "Revenue payment receipt",
+      "Marriage or migration certificate (if details changed)",
+    ],
+    needsDate: true,
+    note: "Pre-enrol and book an appointment online first, then go in person for biometrics. Fast track costs more.",
+  },
+  {
+    id: "licence",
+    title: "Driving licence renewal",
+    category: "vehicle",
+    url: "https://edlvrs.dotm.gov.np/",
+    fee: "Provincial fee shown on EDLVRS",
+    location: "Apply on EDLVRS, then the Transport Management Office for biometrics",
+    checklist: [
+      "Original driving licence",
+      "Citizenship certificate or National ID",
+      "Medical certificate (within 3 months)",
+      "EDLVRS application and payment receipt",
+    ],
+    needsDate: true,
+    note: "Renewal moved to the provincial EDLVRS portal from Shrawan 2083. Renewing late adds a fine, so apply before the expiry date.",
+  },
+  {
+    // Bluebook renewal and annual vehicle tax are one visit and one receipt
+    // in Nepal: tax by engine CC/kW, the renewal fee, and proof of insurance.
+    id: "bluebook",
+    title: "Bluebook renewal & vehicle tax",
+    category: "vehicle",
+    url: "https://dotm.gov.np/",
+    fee: "Provincial tax by CC/kW + renewal fee",
+    location: "Transport Management Office, Nagarik App, or provincial portal",
+    checklist: [
+      "Original bluebook",
+      "Valid third-party or comprehensive insurance",
+      "Owner’s citizenship or NID copy",
+      "Previous tax receipt",
+    ],
+    needsDate: true,
+    recurrence: "yearlyBs",
+    note: "Due by Ashad end each fiscal year. Late fine on the tax: 5% within 30 days, 10% for the next 45, 20% after that, then 32% per year.",
+  },
+  {
+    id: "insurance",
+    title: "Insurance renewal",
+    category: "money",
+    url: "",
+    fee: "Premium amount",
+    location: "Insurance company branch or app",
+    checklist: [
+      "Policy number",
+      "Previous policy or renewal notice",
+      "Bluebook copy (vehicle policy)",
+      "Premium payment receipt",
+    ],
+    needsDate: true,
+    recurrence: "yearlyAd",
+    note: "A lapsed vehicle policy blocks bluebook renewal. Life policies usually allow a grace period of about 30 days (15 for monthly premiums).",
+  },
+  {
+    id: "warranty",
+    title: "Warranty ends",
+    category: "home",
+    url: "",
+    fee: "",
+    location: "Brand service centre or seller",
+    checklist: [
+      "Purchase bill / invoice",
+      "Stamped warranty card",
+      "Serial or IMEI number",
+      "Box and accessories",
+    ],
+    needsDate: true,
+  },
+  {
+    id: "pan",
+    title: "PAN registration",
+    category: "application",
+    url: "https://ird.gov.np/",
+    fee: "Free",
+    location: "IRD taxpayer portal or Nagarik App, then Inland Revenue Office",
+    checklist: [
+      "Citizenship certificate (both sides)",
+      "Passport-size photo",
+      "Mobile number for OTP",
+      "Proof of address (if asked)",
+    ],
+    needsDate: false,
+    note: "Apply online, then visit the chosen Inland Revenue Office for photo and fingerprint. The PAN arrives by SMS.",
+  },
+  {
+    id: "internet",
+    title: "Internet bill",
+    category: "home",
+    url: "",
+    fee: "Monthly amount",
+    location: "Provider app, eSewa / Khalti, or counter",
+    checklist: ["Customer ID or username", "Payment receipt"],
+    needsDate: true,
+    recurrence: "monthly",
+  },
+  {
+    id: "electricity",
+    title: "Electricity bill",
+    category: "home",
+    url: "https://nea.org.np/",
+    fee: "2% off if paid within 7 days of reading",
+    location: "eSewa, Khalti, connectIPS, or NEA counter",
+    checklist: ["SC number", "Customer ID", "NEA counter (branch)", "Payment receipt"],
+    needsDate: true,
+    recurrence: "monthly",
+    note: "Pay within 7 days of the meter reading for a 2% rebate. From day 16 a penalty applies: 5%, then 10% after day 30, 25% after day 40; the line can be cut after 60 days.",
+  },
+  {
+    id: "rent",
+    title: "Rent payment",
+    category: "home",
+    url: "",
+    fee: "Monthly amount",
+    location: "Landlord or bank transfer",
+    checklist: ["Rental agreement", "Payment receipt"],
+    needsDate: true,
+    recurrence: "monthly",
+    note: "The landlord owes 10% house rent tax to the ward office; the agreement should say who pays it.",
+  },
+  {
+    id: "school",
+    title: "School fee",
+    category: "home",
+    url: "",
+    fee: "Term amount",
+    location: "School office or portal",
+    checklist: ["Student ID", "Payment receipt"],
+    needsDate: true,
+  },
+  {
+    id: "loan",
+    title: "Loan instalment",
+    category: "money",
+    url: "",
+    fee: "Instalment amount",
+    location: "Bank or finance provider",
+    checklist: ["Loan account number", "Payment receipt"],
+    needsDate: true,
+    recurrence: "monthly",
+    note: "Late instalments draw penal interest after a short grace period; a loan overdue past 90 days is classed non-performing.",
+  },
+  {
+    id: "medicine",
+    title: "Medicine refill",
+    category: "health",
+    url: "",
+    fee: "Prescription amount",
+    location: "Pharmacy or hospital",
+    checklist: ["Prescription", "Medicine name and dose"],
+    needsDate: true,
+  },
+];

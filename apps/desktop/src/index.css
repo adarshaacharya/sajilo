@@ -590,6 +590,15 @@ button.row-line + button.row-line::before {
   background: var(--color-surface-hover);
 }
 
+/* Not yet available (a form missing its required field) rather than broken:
+   the outline stays, the label steps back. Fading the whole pill made it read
+   as a glitch next to its neighbours. */
+.settings-btn:disabled {
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: default;
+}
+
 /* An update waiting to be installed, or installed and waiting for a restart,
    is the one thing in Settings asking to be clicked, so it is marked — but in
    the same voice as the version pill in About: gold edge, gold text, the
@@ -603,7 +612,14 @@ button.row-line + button.row-line::before {
   font-weight: 500;
 }
 
-.settings-btn--accent:hover {
+.settings-btn--accent:disabled {
+  border-color: var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+.settings-btn--accent:hover:not(:disabled) {
   background: color-mix(in srgb, var(--color-accent-mark) 18%, transparent);
   border-color: color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
 }

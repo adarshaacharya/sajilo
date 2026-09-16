@@ -3,7 +3,9 @@
 //! Dates are deliberately resolved here. The frontend can display both AD and
 //! Bikram Sambat, but it never owns a second copy of the calendar engine.
 
-use chrono::{Datelike, Duration, NaiveDate, TimeZone, Utc};
+use std::collections::BTreeMap;
+
+use chrono::{Datelike, Duration, Months, NaiveDate, TimeZone, Utc};
 use rusqlite::params;
 use sajilo_core::calendar::bikram_sambat::{gregorian_date_from, nepali_date_from};
 use serde::{Deserialize, Serialize};
@@ -67,7 +69,9 @@ pub struct KeeperItem {
     pub title: String,
     pub category: String,
     pub status: String,
-    pub due_date: KeeperDate,
+    /// `None` for things with no deadline of their own, such as applying for
+    /// a citizenship certificate. Undated items never notify.
+    pub due_date: Option<KeeperDate>,
     pub recurrence: String,
     pub remind_days: Vec<u32>,
     pub note: String,
@@ -81,23 +85,43 @@ pub struct KeeperItem {
     pub completed_at: Option<String>,
 }
 
+/// A document the household holds. Some are only a record (citizenship, NID,
+/// PAN never expire); others carry a date that needs action — a passport's
+/// expiry, a bluebook's yearly tax, a life policy's premium — and notify on
+/// their own. There is no separate reminder behind a record.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct KeeperRecord {
     pub id: String,
-    /// One of "citizenship" | "passport" | "drivingLicence" | "nid" | "pan".
+    /// One of "citizenship" | "passport" | "drivingLicence" | "nid" | "pan" |
+    /// "bluebook" | "insurance" | "warranty".
     pub document_type: String,
+    /// Whose document this is; `None` for the user / the household.
+    pub person_id: Option<String>,
+    /// The type's primary identifier: document number, vehicle registration
+    /// number (bluebook), policy number (insurance), or serial/IMEI (warranty).
     pub number: String,
-    /// Citizenship, NID, and PAN never expire; passports and driving
-    /// licences do. Left `None` rather than guessed at.
+    /// For insurance this is the policy start, for a warranty the purchase
+    /// date.
     pub issued_date: Option<KeeperDate>,
+    /// When the document next needs action: expiry, tax due, premium due, or
+    /// the day a warranty ends. `None` for documents that never expire.
     pub expiry_date: Option<KeeperDate>,
+    /// How `expiry_date` moves when the user marks it paid or renewed:
+    /// "none" | "monthly" | "quarterly" | "halfYearly" | "yearlyAd" | "yearlyBs".
+    pub recurrence: String,
+    /// Days before `expiry_date` to notify.
+    pub remind_days: Vec<u32>,
     pub office: String,
     pub note: String,
-    /// The reminder auto-created from `expiry_date`, kept in sync with it.
-    /// `None` when there is no expiry to track. Derived from `id`, not
-    /// stored — see `linked_item_id`.
-    pub linked_item_id: Option<String>,
+    /// Type-specific fields (e.g. `chassisNumber`, `insurer`, `product`).
+    /// Free-form so a new field is a frontend change, not a migration.
+    pub details: BTreeMap<String, String>,
+    /// Other records this one points at (a bluebook's insurance policy).
+    /// Stored one way; the frontend shows the reverse side too.
+    pub links: Vec<String>,
+    /// The user's own label/value pairs on a custom document, in their order.
+    pub custom_fields: Vec<KeeperField>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -107,12 +131,35 @@ pub struct KeeperRecord {
 pub struct KeeperRecordInput {
     pub id: String,
     pub document_type: String,
+    #[serde(default)]
+    pub person_id: Option<String>,
     pub number: String,
     pub issued_date: Option<KeeperDateInput>,
     pub expiry_date: Option<KeeperDateInput>,
+    #[serde(default = "no_recurrence")]
+    pub recurrence: String,
+    #[serde(default)]
+    pub remind_days: Vec<u32>,
     pub office: String,
     pub note: String,
+    #[serde(default)]
+    pub details: BTreeMap<String, String>,
+    #[serde(default)]
+    pub links: Vec<String>,
+    #[serde(default)]
+    pub custom_fields: Vec<KeeperField>,
     pub created_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct KeeperField {
+    pub label: String,
+    pub value: String,
+}
+
+fn no_recurrence() -> String {
+    "none".to_owned()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -202,24 +249,88 @@ fn output_opt_date(
     Ok(Some(output_date(&calendar, ad, bs)))
 }
 
-/// The linked reminder's id is derived from the record's, not stored — a
-/// record can own at most one reminder, so there is nothing a foreign key
-/// would tell us that this doesn't already guarantee.
-fn linked_item_id(record_id: &str) -> String {
-    format!("keeper-record-link-{record_id}")
+const RECORD_RECURRENCES: [&str; 6] = [
+    "none",
+    "monthly",
+    "quarterly",
+    "halfYearly",
+    "yearlyAd",
+    "yearlyBs",
+];
+
+fn detail<'a>(details: &'a BTreeMap<String, String>, key: &str) -> &'a str {
+    details.get(key).map_or("", |value| value.trim())
 }
 
-/// Citizenship, NID, and PAN never expire in Nepal; this title only ever
-/// surfaces on the passport/driving-licence path where an expiry exists.
-fn renewal_title(document_type: &str) -> &'static str {
-    match document_type {
-        "passport" => "Passport renewal",
-        "drivingLicence" => "Driving licence renewal",
-        "citizenship" => "Citizenship certificate renewal",
-        "nid" => "National ID renewal",
-        "pan" => "PAN renewal",
-        _ => "Document renewal",
+/// The field a record cannot be saved without. A warranty is known by its
+/// product — plenty of bills never print a serial number.
+fn missing_identity(record: &KeeperRecordInput) -> Option<&'static str> {
+    match record.document_type.as_str() {
+        "warranty" if detail(&record.details, "product").is_empty() => {
+            Some("Name the product this warranty covers first.")
+        }
+        "warranty" => None,
+        "custom" if detail(&record.details, "name").is_empty() => Some("Name this document first."),
+        "custom" => None,
+        "bluebook" if record.number.trim().is_empty() => Some("Add the vehicle number first."),
+        "insurance" if record.number.trim().is_empty() => Some("Add the policy number first."),
+        _ if record.number.trim().is_empty() => Some("Give this document a number first."),
+        _ => None,
     }
+}
+
+/// The notification title for a record's date.
+fn record_title(record: &KeeperRecord) -> String {
+    let with = |base: &str, suffix: &str| {
+        if suffix.is_empty() {
+            base.to_owned()
+        } else {
+            format!("{base} · {suffix}")
+        }
+    };
+    match record.document_type.as_str() {
+        "passport" => "Passport renewal".to_owned(),
+        "drivingLicence" => "Driving licence renewal".to_owned(),
+        "bluebook" => with("Bluebook tax", record.number.trim()),
+        "insurance" if detail(&record.details, "insuranceType") == "life" => {
+            with("Insurance premium", detail(&record.details, "insurer"))
+        }
+        "insurance" => with("Insurance renewal", detail(&record.details, "insurer")),
+        "warranty" => with("Warranty ends", detail(&record.details, "product")),
+        "custom" => detail(&record.details, "name").to_owned(),
+        _ => "Document renewal".to_owned(),
+    }
+}
+
+/// Moves a record's date forward one period, as when the tax is paid or the
+/// policy renewed. A BS yearly date keeps its month and day, stepping the day
+/// back when the next year's month is shorter (Ashad has 31 or 32 days).
+fn advance_date(
+    ad: NaiveDate,
+    bs: sajilo_core::NepaliDate,
+    recurrence: &str,
+) -> Result<(NaiveDate, sajilo_core::NepaliDate)> {
+    let months = match recurrence {
+        "monthly" => 1,
+        "quarterly" => 3,
+        "halfYearly" => 6,
+        "yearlyAd" => 12,
+        "yearlyBs" => {
+            return (1..=bs.day)
+                .rev()
+                .find_map(|day| {
+                    let next = sajilo_core::NepaliDate::new(bs.year + 1, bs.month, day);
+                    gregorian_date_from(next).ok().map(|ad| (ad, next))
+                })
+                .ok_or_else(|| "The next Bikram Sambat year is out of range.".to_owned());
+        }
+        _ => return Err("This document doesn't repeat.".to_owned()),
+    };
+    let next = ad
+        .checked_add_months(Months::new(months))
+        .ok_or_else(|| "That date is out of range.".to_owned())?;
+    let next_bs = nepali_date_from(next).map_err(|error| error.to_string())?;
+    Ok((next, next_bs))
 }
 
 fn people(app: &AppHandle<Wry>) -> Result<Vec<KeeperPerson>> {
@@ -242,16 +353,21 @@ fn people(app: &AppHandle<Wry>) -> Result<Vec<KeeperPerson>> {
 }
 
 fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<KeeperItem> {
-    let calendar: String = row.get(4)?;
-    let ad = parse_ad(&row.get::<_, String>(5)?).map_err(|_| rusqlite::Error::InvalidQuery)?;
-    let bs = sajilo_core::NepaliDate::new(row.get(6)?, row.get(7)?, row.get(8)?);
+    let due_date = output_opt_date(
+        row.get(4)?,
+        row.get(5)?,
+        row.get(6)?,
+        row.get(7)?,
+        row.get(8)?,
+    )
+    .map_err(|_| rusqlite::Error::InvalidQuery)?;
     Ok(KeeperItem {
         id: row.get(0)?,
         person_id: row.get(1)?,
         title: row.get(2)?,
         category: row.get(3)?,
         status: row.get(9)?,
-        due_date: output_date(&calendar, ad, bs),
+        due_date,
         recurrence: row.get(10)?,
         remind_days: parse_json(row.get(11)?)?,
         note: row.get(12)?,
@@ -290,9 +406,7 @@ fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(KeeperRecord, R
         Ok(value) => (value, Ok(())),
         Err(error) => (None, Err(error)),
     };
-    let has_expiry = expiry.is_some();
     let record = KeeperRecord {
-        linked_item_id: has_expiry.then(|| linked_item_id(&id)),
         document_type: row.get(1)?,
         number: row.get(2)?,
         issued_date: issued,
@@ -301,6 +415,12 @@ fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(KeeperRecord, R
         note: row.get(14)?,
         created_at: row.get(15)?,
         updated_at: row.get(16)?,
+        details: parse_json(row.get(17)?)?,
+        person_id: row.get(18)?,
+        recurrence: row.get(19)?,
+        remind_days: parse_json(row.get(20)?)?,
+        links: parse_json(row.get(21)?)?,
+        custom_fields: parse_json(row.get(22)?)?,
         id,
     };
     Ok((record, issued_err.and(expiry_err)))
@@ -313,7 +433,8 @@ fn records(app: &AppHandle<Wry>) -> Result<Vec<KeeperRecord>> {
             "SELECT id, document_type, number, issued_calendar, issued_ad,
                 issued_bs_year, issued_bs_month, issued_bs_day,
                 expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
-                office, note, created_at, updated_at
+                office, note, created_at, updated_at, details,
+                person_id, recurrence, remind_days, links, custom_fields
          FROM keeper_records ORDER BY created_at",
         )
         .map_err(|error| error.to_string())?;
@@ -401,12 +522,13 @@ pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperS
     if item.title.trim().is_empty() {
         return Err("Give this reminder a name first.".to_owned());
     }
-    let (ad, bs) = resolve_date(&KeeperDateInput {
-        calendar: item.due_date.calendar.clone(),
-        year: item.due_date.year,
-        month: item.due_date.month,
-        day: item.due_date.day,
-    })?;
+    let due_input = item.due_date.as_ref().map(|date| KeeperDateInput {
+        calendar: date.calendar.clone(),
+        year: date.year,
+        month: date.month,
+        day: date.day,
+    });
+    let due = resolve_opt_date(due_input.as_ref())?;
     let created = if item.created_at.is_empty() {
         now()
     } else {
@@ -436,8 +558,9 @@ pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperS
            note=excluded.note, official_url=excluded.official_url, office_location=excluded.office_location,
            fee=excluded.fee, application_status=excluded.application_status, checklist=excluded.checklist,
            updated_at=excluded.updated_at, completed_at=excluded.completed_at",
-        params![item.id, item.person_id, item.title.trim(), item.category, item.status, item.due_date.calendar,
-            ad.to_string(), bs.year, bs.month, bs.day, item.recurrence, remind_days, item.note,
+        params![item.id, item.person_id, item.title.trim(), item.category, item.status,
+            due_input.as_ref().map(|date| date.calendar.clone()), due.map(|(ad, _)| ad.to_string()),
+            due.map(|(_, bs)| bs.year), due.map(|(_, bs)| bs.month), due.map(|(_, bs)| bs.day), item.recurrence, remind_days, item.note,
             item.official_url, item.office_location, item.fee, item.application_status, checklist,
             created, updated, completed_at],
     ).map_err(|error| error.to_string())?;
@@ -458,9 +581,46 @@ pub fn save_keeper_record(
     app: AppHandle<Wry>,
     record: KeeperRecordInput,
 ) -> Result<KeeperSnapshot> {
-    if record.number.trim().is_empty() {
-        return Err("Give this document a number first.".to_owned());
+    if let Some(message) = missing_identity(&record) {
+        return Err(message.to_owned());
     }
+    if !RECORD_RECURRENCES.contains(&record.recurrence.as_str()) {
+        return Err("That repeat interval isn't supported.".to_owned());
+    }
+    if record.recurrence != "none" && record.expiry_date.is_none() {
+        return Err("Add the next due date first.".to_owned());
+    }
+    let details = record
+        .details
+        .iter()
+        .map(|(key, value)| (key.as_str(), value.trim()))
+        .filter(|(_, value)| !value.is_empty())
+        .collect::<BTreeMap<_, _>>();
+    let details = serde_json::to_string(&details).map_err(|error| error.to_string())?;
+    let mut links = record
+        .links
+        .iter()
+        .filter(|link| **link != record.id)
+        .collect::<Vec<_>>();
+    links.sort();
+    links.dedup();
+    let links = serde_json::to_string(&links).map_err(|error| error.to_string())?;
+    let mut remind_days = record.remind_days.clone();
+    remind_days.sort_unstable_by(|a, b| b.cmp(a));
+    remind_days.dedup();
+    let remind_days = serde_json::to_string(&remind_days).map_err(|error| error.to_string())?;
+    // A field with neither label nor value is an empty row the user added
+    // and never filled; don't keep it.
+    let custom_fields = record
+        .custom_fields
+        .iter()
+        .map(|field| KeeperField {
+            label: field.label.trim().to_owned(),
+            value: field.value.trim().to_owned(),
+        })
+        .filter(|field| !field.label.is_empty() || !field.value.is_empty())
+        .collect::<Vec<_>>();
+    let custom_fields = serde_json::to_string(&custom_fields).map_err(|error| error.to_string())?;
     let issued = resolve_opt_date(record.issued_date.as_ref())?;
     let expiry = resolve_opt_date(record.expiry_date.as_ref())?;
     let created = if record.created_at.is_empty() {
@@ -477,15 +637,20 @@ pub fn save_keeper_record(
           (id, document_type, number, issued_calendar, issued_ad,
            issued_bs_year, issued_bs_month, issued_bs_day,
            expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
-           office, note, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)
+           office, note, created_at, updated_at, details,
+           person_id, recurrence, remind_days, links, custom_fields)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18,
+                 ?19, ?20, ?21, ?22, ?23)
          ON CONFLICT(id) DO UPDATE SET document_type=excluded.document_type, number=excluded.number,
            issued_calendar=excluded.issued_calendar, issued_ad=excluded.issued_ad,
            issued_bs_year=excluded.issued_bs_year, issued_bs_month=excluded.issued_bs_month,
            issued_bs_day=excluded.issued_bs_day, expiry_calendar=excluded.expiry_calendar,
            expiry_ad=excluded.expiry_ad, expiry_bs_year=excluded.expiry_bs_year,
            expiry_bs_month=excluded.expiry_bs_month, expiry_bs_day=excluded.expiry_bs_day,
-           office=excluded.office, note=excluded.note, updated_at=excluded.updated_at",
+           office=excluded.office, note=excluded.note, updated_at=excluded.updated_at,
+           details=excluded.details, person_id=excluded.person_id,
+           recurrence=excluded.recurrence, remind_days=excluded.remind_days, links=excluded.links,
+           custom_fields=excluded.custom_fields",
             params![
                 record.id,
                 record.document_type,
@@ -504,56 +669,65 @@ pub fn save_keeper_record(
                 record.note.trim(),
                 created,
                 updated,
+                details,
+                record.person_id,
+                record.recurrence,
+                remind_days,
+                links,
+                custom_fields,
             ],
         )
         .map_err(|error| error.to_string())?;
+    keeper_snapshot(app)
+}
 
-    let link_id = linked_item_id(&record.id);
-    match (record.expiry_date.as_ref(), expiry) {
-        (Some(input), Some((ad, bs))) => {
-            let due_date = output_date(&input.calendar, ad, bs);
-            save_keeper_item(
-                app.clone(),
-                KeeperItem {
-                    id: link_id,
-                    person_id: None,
-                    title: renewal_title(&record.document_type).to_owned(),
-                    category: "identity".to_owned(),
-                    status: "active".to_owned(),
-                    due_date,
-                    recurrence: "none".to_owned(),
-                    remind_days: vec![30, 7, 1],
-                    note: String::new(),
-                    official_url: String::new(),
-                    office_location: record.office.clone(),
-                    fee: String::new(),
-                    application_status: "notStarted".to_owned(),
-                    checklist: Vec::new(),
-                    created_at: String::new(),
-                    updated_at: String::new(),
-                    completed_at: None,
-                },
-            )?;
-        }
-        _ => {
-            connection
-                .execute("DELETE FROM keeper_items WHERE id = ?1", [link_id])
-                .map_err(|error| error.to_string())?;
-        }
-    }
-
+/// Marks a repeating record's date as handled — tax paid, policy renewed,
+/// premium paid — by moving it forward one period.
+#[tauri::command]
+pub fn advance_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
+    let record = records(&app)?
+        .into_iter()
+        .find(|record| record.id == id)
+        .ok_or_else(|| "That document no longer exists.".to_owned())?;
+    let due = record
+        .expiry_date
+        .as_ref()
+        .ok_or_else(|| "This document has no due date.".to_owned())?;
+    let bs = sajilo_core::NepaliDate::new(due.bs.year, due.bs.month, due.bs.day);
+    let (ad, bs) = advance_date(parse_ad(&due.ad)?, bs, &record.recurrence)?;
+    let connection = db::open(&app)?;
+    connection
+        .execute(
+            "UPDATE keeper_records SET expiry_ad = ?1, expiry_bs_year = ?2, expiry_bs_month = ?3,
+               expiry_bs_day = ?4, updated_at = ?5 WHERE id = ?6",
+            params![ad.to_string(), bs.year, bs.month, bs.day, now(), id],
+        )
+        .map_err(|error| error.to_string())?;
     keeper_snapshot(app)
 }
 
 #[tauri::command]
 pub fn delete_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
     let connection = db::open(&app)?;
-    connection
-        .execute(
-            "DELETE FROM keeper_items WHERE id = ?1",
-            [linked_item_id(&id)],
-        )
-        .map_err(|error| error.to_string())?;
+    // Links are stored one way, so drop this id from whichever records point
+    // at it rather than leave a dangling reference.
+    for other in records(&app)?
+        .into_iter()
+        .filter(|other| other.links.contains(&id))
+    {
+        let links = other
+            .links
+            .iter()
+            .filter(|link| **link != id)
+            .collect::<Vec<_>>();
+        let links = serde_json::to_string(&links).map_err(|error| error.to_string())?;
+        connection
+            .execute(
+                "UPDATE keeper_records SET links = ?1 WHERE id = ?2",
+                params![links, other.id],
+            )
+            .map_err(|error| error.to_string())?;
+    }
     connection
         .execute("DELETE FROM keeper_records WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
@@ -568,7 +742,8 @@ fn month_date(year: i32, month: u32, day: u32) -> NaiveDate {
 }
 
 fn next_due(item: &KeeperItem, today: NaiveDate) -> Option<NaiveDate> {
-    let original = parse_ad(&item.due_date.ad).ok()?;
+    let due_date = item.due_date.as_ref()?;
+    let original = parse_ad(&due_date.ad).ok()?;
     match item.recurrence.as_str() {
         "monthly" => {
             let mut year = today.year();
@@ -592,8 +767,8 @@ fn next_due(item: &KeeperItem, today: NaiveDate) -> Option<NaiveDate> {
             for year in today_bs.year..=today_bs.year + 2 {
                 if let Ok(candidate) = gregorian_date_from(sajilo_core::NepaliDate::new(
                     year,
-                    item.due_date.bs.month,
-                    item.due_date.bs.day,
+                    due_date.bs.month,
+                    due_date.bs.day,
                 )) && candidate >= today
                 {
                     return Some(candidate);
@@ -608,6 +783,55 @@ fn next_due(item: &KeeperItem, today: NaiveDate) -> Option<NaiveDate> {
     }
 }
 
+/// The day after the due date, one last nudge that it has passed.
+const OVERDUE: i64 = -1;
+
+/// Every notification one dated thing sends: one per chosen remind-before day
+/// (0 is the day itself), plus an overdue one the day after. Each id carries
+/// the due date, so a monthly bill's next cycle is a new notification rather
+/// than one the scheduler remembers having delivered last month.
+fn plan_due(
+    key: &str,
+    title: &str,
+    person: &str,
+    due: NaiveDate,
+    remind_days: &[u32],
+    now: chrono::DateTime<Utc>,
+) -> Vec<PlannedNotification> {
+    remind_days
+        .iter()
+        .map(|days| i64::from(*days))
+        .chain(std::iter::once(OVERDUE))
+        .filter_map(|days| {
+            let naive = (due - Duration::days(days)).and_hms_opt(9, 0, 0)?;
+            let fire_at = sajilo_core::nepal_time::offset()
+                .from_local_datetime(&naive)
+                .single()?
+                .with_timezone(&Utc);
+            sajilo_core::notify::still_deliverable(fire_at, now).then(|| PlannedNotification {
+                id: format!("sajilo.keeper.{key}.{due}.{days}"),
+                title: title.to_owned(),
+                body: due_body(person, days),
+                fire_at,
+            })
+        })
+        .collect()
+}
+
+fn due_body(person: &str, days: i64) -> String {
+    let when = match days {
+        OVERDUE => "Overdue since yesterday".to_owned(),
+        0 => "Due today".to_owned(),
+        1 => "Due tomorrow".to_owned(),
+        days => format!("Due in {days} days"),
+    };
+    if person.is_empty() {
+        when
+    } else {
+        format!("{person} · {}", when.to_lowercase())
+    }
+}
+
 pub fn pending_notifications(
     app: &AppHandle<Wry>,
     now: chrono::DateTime<Utc>,
@@ -615,53 +839,249 @@ pub fn pending_notifications(
     let today = now
         .with_timezone(&sajilo_core::nepal_time::offset())
         .date_naive();
+    // Still planning yesterday's due dates is what lets the overdue nudge go
+    // out; anything older has nothing left that could be delivered.
+    let yesterday = today - Duration::days(1);
     let names = people(app)
         .unwrap_or_default()
         .into_iter()
         .map(|person| (person.id, person.name))
         .collect::<std::collections::HashMap<_, _>>();
+    let name_of = |id: &Option<String>| {
+        id.as_deref()
+            .and_then(|id| names.get(id))
+            .map_or(String::new(), Clone::clone)
+    };
     let mut result = Vec::new();
     for item in items(app)
         .unwrap_or_default()
         .into_iter()
         .filter(|item| item.status == "active")
     {
-        let Some(due) = next_due(&item, today) else {
+        if let Some(due) = next_due(&item, yesterday) {
+            result.extend(plan_due(
+                &item.id,
+                &item.title,
+                &name_of(&item.person_id),
+                due,
+                &item.remind_days,
+                now,
+            ));
+        }
+    }
+    for record in records(app).unwrap_or_default() {
+        let Some(due) = record
+            .expiry_date
+            .as_ref()
+            .and_then(|date| parse_ad(&date.ad).ok())
+            .filter(|due| *due >= yesterday)
+        else {
             continue;
         };
-        for days in item.remind_days.iter().copied() {
-            let fire_date = due - Duration::days(i64::from(days));
-            let Some(naive) = fire_date.and_hms_opt(9, 0, 0) else {
-                continue;
-            };
-            let Some(fire_at) = sajilo_core::nepal_time::offset()
-                .from_local_datetime(&naive)
-                .single()
-                .map(|date| date.with_timezone(&Utc))
-            else {
-                continue;
-            };
-            if !sajilo_core::notify::still_deliverable(fire_at, now) {
-                continue;
-            }
-            let person = item
-                .person_id
-                .as_deref()
-                .and_then(|id| names.get(id))
-                .map_or("", String::as_str);
-            result.push(PlannedNotification {
-                id: format!("sajilo.keeper.{}.{}", item.id, days),
-                title: item.title.clone(),
-                body: if person.is_empty() {
-                    format!("Due in {days} days")
-                } else {
-                    format!("{person} · due in {days} days")
-                },
-                fire_at,
-            });
-        }
+        result.extend(plan_due(
+            &format!("record.{}", record.id),
+            &record_title(&record),
+            &name_of(&record.person_id),
+            due,
+            &record.remind_days,
+            now,
+        ));
     }
     result.sort_by_key(|item| item.fire_at);
     result.truncate(LIMIT);
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn input(document_type: &str, number: &str, details: &[(&str, &str)]) -> KeeperRecordInput {
+        KeeperRecordInput {
+            id: "r".to_owned(),
+            document_type: document_type.to_owned(),
+            person_id: None,
+            number: number.to_owned(),
+            issued_date: None,
+            expiry_date: None,
+            recurrence: "none".to_owned(),
+            remind_days: Vec::new(),
+            office: String::new(),
+            note: String::new(),
+            details: details
+                .iter()
+                .map(|(key, value)| ((*key).to_owned(), (*value).to_owned()))
+                .collect(),
+            links: Vec::new(),
+            custom_fields: Vec::new(),
+            created_at: String::new(),
+        }
+    }
+
+    fn record(document_type: &str, number: &str, details: &[(&str, &str)]) -> KeeperRecord {
+        let input = input(document_type, number, details);
+        KeeperRecord {
+            id: input.id,
+            document_type: input.document_type,
+            person_id: None,
+            number: input.number,
+            issued_date: None,
+            expiry_date: None,
+            recurrence: input.recurrence,
+            remind_days: Vec::new(),
+            office: String::new(),
+            note: String::new(),
+            details: input.details,
+            links: Vec::new(),
+            custom_fields: Vec::new(),
+            created_at: String::new(),
+            updated_at: String::new(),
+        }
+    }
+
+    #[test]
+    fn warranty_is_identified_by_product_not_serial() {
+        assert!(missing_identity(&input("warranty", "", &[("product", "Fridge")])).is_none());
+        assert!(missing_identity(&input("warranty", "SN1", &[])).is_some());
+        assert!(missing_identity(&input("bluebook", " ", &[])).is_some());
+        assert!(missing_identity(&input("insurance", "P-1", &[])).is_none());
+        // A custom document is known by the name the user gave it.
+        assert!(missing_identity(&input("custom", "", &[("name", "Land ownership")])).is_none());
+        assert!(missing_identity(&input("custom", "123", &[])).is_some());
+    }
+
+    #[test]
+    fn record_titles_name_the_thing_that_is_due() {
+        assert_eq!(
+            record_title(&record("bluebook", "Ba 12 Pa 3456", &[])),
+            "Bluebook tax · Ba 12 Pa 3456"
+        );
+        assert_eq!(
+            record_title(&record("insurance", "P-1", &[("insurer", "Shikhar")])),
+            "Insurance renewal · Shikhar"
+        );
+        assert_eq!(
+            record_title(&record(
+                "insurance",
+                "P-1",
+                &[("insurer", "Nepal Life"), ("insuranceType", "life")]
+            )),
+            "Insurance premium · Nepal Life"
+        );
+        assert_eq!(record_title(&record("warranty", "", &[])), "Warranty ends");
+        assert_eq!(
+            record_title(&record("custom", "", &[("name", "Gym membership")])),
+            "Gym membership"
+        );
+    }
+
+    #[test]
+    fn advancing_steps_one_period() {
+        let ad = NaiveDate::from_ymd_opt(2026, 1, 31).unwrap();
+        let bs = nepali_date_from(ad).unwrap();
+        assert_eq!(
+            advance_date(ad, bs, "monthly").unwrap().0,
+            NaiveDate::from_ymd_opt(2026, 2, 28).unwrap()
+        );
+        assert_eq!(
+            advance_date(ad, bs, "quarterly").unwrap().0,
+            NaiveDate::from_ymd_opt(2026, 4, 30).unwrap()
+        );
+        assert_eq!(
+            advance_date(ad, bs, "yearlyAd").unwrap().0,
+            NaiveDate::from_ymd_opt(2027, 1, 31).unwrap()
+        );
+        assert!(advance_date(ad, bs, "none").is_err());
+    }
+
+    #[test]
+    fn bs_yearly_keeps_month_and_clamps_the_day() {
+        // Ashad's length varies year to year; the last day must still land
+        // on a real date in Ashad of the next year.
+        let bs = sajilo_core::NepaliDate::new(2082, 3, 32);
+        if let Ok(ad) = gregorian_date_from(bs) {
+            let (_, next) = advance_date(ad, bs, "yearlyBs").unwrap();
+            assert_eq!((next.year, next.month), (2083, 3));
+            assert!(next.day >= 29);
+        }
+        let bs = sajilo_core::NepaliDate::new(2082, 3, 15);
+        let ad = gregorian_date_from(bs).unwrap();
+        let (_, next) = advance_date(ad, bs, "yearlyBs").unwrap();
+        assert_eq!((next.year, next.month, next.day), (2083, 3, 15));
+    }
+
+    #[test]
+    fn undated_items_never_come_due() {
+        let item = KeeperItem {
+            id: "i".to_owned(),
+            person_id: None,
+            title: "Citizenship certificate".to_owned(),
+            category: "identity".to_owned(),
+            status: "active".to_owned(),
+            due_date: None,
+            recurrence: "none".to_owned(),
+            remind_days: vec![7],
+            note: String::new(),
+            official_url: String::new(),
+            office_location: String::new(),
+            fee: String::new(),
+            application_status: "notStarted".to_owned(),
+            checklist: Vec::new(),
+            created_at: String::new(),
+            updated_at: String::new(),
+            completed_at: None,
+        };
+        let today = NaiveDate::from_ymd_opt(2026, 9, 16).unwrap();
+        assert_eq!(next_due(&item, today), None);
+    }
+
+    #[test]
+    fn a_due_date_notifies_ahead_on_the_day_and_once_overdue() {
+        let due = NaiveDate::from_ymd_opt(2026, 10, 10).unwrap();
+        // 8 days out at 10am Nepal time: 7d, 1d, on the day, and overdue are
+        // all still ahead.
+        let now = sajilo_core::nepal_time::offset()
+            .from_local_datetime(
+                &NaiveDate::from_ymd_opt(2026, 10, 2)
+                    .unwrap()
+                    .and_hms_opt(10, 0, 0)
+                    .unwrap(),
+            )
+            .unwrap()
+            .with_timezone(&Utc);
+        let planned = plan_due("i", "Rent", "Aama", due, &[7, 1, 0], now);
+        let bodies = planned.iter().map(|n| n.body.as_str()).collect::<Vec<_>>();
+        assert_eq!(
+            bodies,
+            [
+                "Aama · due in 7 days",
+                "Aama · due tomorrow",
+                "Aama · due today",
+                "Aama · overdue since yesterday"
+            ]
+        );
+        assert!(planned.iter().all(|n| n.id.contains("2026-10-10")));
+    }
+
+    #[test]
+    fn next_months_bill_is_a_different_notification() {
+        let now = Utc::now();
+        let this = plan_due(
+            "i",
+            "Rent",
+            "",
+            now.date_naive() + Duration::days(3),
+            &[0],
+            now,
+        );
+        let next = plan_due(
+            "i",
+            "Rent",
+            "",
+            now.date_naive() + Duration::days(33),
+            &[0],
+            now,
+        );
+        assert_ne!(this[0].id, next[0].id);
+    }
 }

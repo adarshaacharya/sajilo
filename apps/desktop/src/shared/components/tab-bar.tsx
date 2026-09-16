@@ -9,7 +9,7 @@ import { Icon, type IconName } from "./icon";
 
 type LabelKey = Parameters<ReturnType<typeof useSettings>["t"]>[0];
 
-const TABS: readonly {
+export const TABS: readonly {
   to: string;
   labelKey: LabelKey;
   icon: IconName;

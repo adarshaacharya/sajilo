@@ -1,8 +1,9 @@
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
-import { BackButton } from "./back-button";
-import { useHeaderSlotContent } from "./header-slot";
+import { BackButton, useGoBack } from "./back-button";
+import { useHeaderInnerContent, useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
+import { TABS } from "./tab-bar";
 import { UpdateHeaderButton } from "./update-header-button";
 
 /**
@@ -14,18 +15,26 @@ import { UpdateHeaderButton } from "./update-header-button";
  *
  * Settings lives here rather than in the tab bar: it is visited rarely, and a
  * seventh tab would cost every other tab the width its label needs.
+ *
+ * Back means "up", never browser history: a tab's root has no back button
+ * (the tab bar is its navigation), an inner screen a tab opened closes back to
+ * that tab, and a pushed page (settings, converter) returns to where it came
+ * from — or to Today when the app was opened straight onto it.
  */
 export function Header({ title }: { title: string }) {
   const { t } = useSettings();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const goBack = useGoBack();
   const slot = useHeaderSlotContent();
-  const canGoBack = pathname !== "/";
+  const inner = useHeaderInnerContent();
+  const isTabRoot = TABS.some((tab) => tab.to === pathname);
+  const back = inner ? inner.onBack : isTabRoot ? null : goBack;
 
   return (
     <header className="header-bar flex h-10 shrink-0 items-center gap-1.5 px-2.5">
-      {canGoBack && <BackButton onClick={() => navigate(-1)} />}
-      <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{title}</h1>
+      {back && <BackButton onClick={back} />}
+      <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{inner?.title ?? title}</h1>
       {slot}
       <UpdateHeaderButton />
       {pathname !== "/settings" && (

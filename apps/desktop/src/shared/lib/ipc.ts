@@ -139,7 +139,9 @@ export interface KeeperItem {
   title: string;
   category: string;
   status: "active" | "completed" | "archived";
-  dueDate: KeeperDate;
+  /** Null for things with no deadline of their own (a citizenship
+   * application). Undated items never notify. */
+  dueDate: KeeperDate | null;
   recurrence: "none" | "monthly" | "yearlyAd" | "yearlyBs";
   remindDays: number[];
   note: string;
@@ -153,18 +155,44 @@ export interface KeeperItem {
   completedAt: string | null;
 }
 
-export type KeeperDocumentType = "citizenship" | "passport" | "drivingLicence" | "nid" | "pan";
+export type KeeperDocumentType =
+  | "citizenship"
+  | "passport"
+  | "drivingLicence"
+  | "nid"
+  | "pan"
+  | "bluebook"
+  | "insurance"
+  | "warranty";
 
+export type KeeperRecurrence =
+  | "none"
+  | "monthly"
+  | "quarterly"
+  | "halfYearly"
+  | "yearlyAd"
+  | "yearlyBs";
+
+/** A document the household holds. Its own date (expiry, tax due, premium
+ * due) notifies directly — there's no separate reminder behind it. */
 export interface KeeperRecord {
   id: string;
   documentType: KeeperDocumentType;
+  /** Whose document; null for the user / household. */
+  personId: string | null;
   number: string;
   issuedDate: KeeperDate | null;
+  /** When it next needs action; null for documents that never expire. */
   expiryDate: KeeperDate | null;
+  /** How `expiryDate` moves when marked paid or renewed. */
+  recurrence: KeeperRecurrence;
+  remindDays: number[];
   office: string;
   note: string;
-  /** The reminder auto-created from `expiryDate`, if any. Read-only. */
-  linkedItemId: string | null;
+  /** Type-specific fields, e.g. `chassisNumber`, `insurer`, `product`. */
+  details: Record<string, string>;
+  /** Ids of records this one points at. Stored one way. */
+  links: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -172,13 +200,18 @@ export interface KeeperRecord {
 export interface KeeperRecordInput {
   id: string;
   documentType: KeeperDocumentType;
+  personId: string | null;
   number: string;
   /** Sent as full KeeperDate objects; the backend only reads the
    * calendar/year/month/day fields and recomputes ad/bs itself. */
   issuedDate: KeeperDate | null;
   expiryDate: KeeperDate | null;
+  recurrence: KeeperRecurrence;
+  remindDays: number[];
   office: string;
   note: string;
+  details: Record<string, string>;
+  links: string[];
   createdAt: string;
 }
 
@@ -277,6 +310,7 @@ export const api = {
   saveKeeperRecord: (record: KeeperRecordInput) =>
     invoke<KeeperSnapshot>("save_keeper_record", { record }),
   deleteKeeperRecord: (id: string) => invoke<KeeperSnapshot>("delete_keeper_record", { id }),
+  advanceKeeperRecord: (id: string) => invoke<KeeperSnapshot>("advance_keeper_record", { id }),
 
   getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
   setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),

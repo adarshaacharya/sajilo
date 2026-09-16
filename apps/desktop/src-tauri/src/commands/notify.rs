@@ -70,7 +70,11 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let now = Utc::now();
 
     let mut all = plan_day_plans(&plans, now);
-    all.extend(crate::commands::keeper::pending_notifications(app, now));
+    // Hiding Keeper in Settings silences it too; a module you turned off
+    // shouldn't keep talking.
+    if crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
+        all.extend(crate::commands::keeper::pending_notifications(app, now));
+    }
     all.extend(ipo_closing(app, options, now));
 
     // Festivals need the event list, which is only available inside the bundled

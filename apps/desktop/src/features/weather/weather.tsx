@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { useNavigate } from "react-router";
 import useSWR from "swr";
+import { useGoBack } from "../../shared/components/back-button";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
@@ -53,7 +53,7 @@ function locationLabel(location: WeatherSnapshot["location"], language: "en" | "
 
 export function Weather() {
   const { t, language, modules } = useSettings();
-  const navigate = useNavigate();
+  const goBack = useGoBack();
   const {
     data: state,
     isValidating,
@@ -81,7 +81,7 @@ export function Weather() {
       <div className="relative z-[2] flex items-center gap-1.5">
         <button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={goBack}
           aria-label={t("action.back")}
           className="weather-glass-btn"
         >
@@ -101,7 +101,7 @@ export function Weather() {
         </button>
       </div>
     ),
-    [snapshot, language, t, navigate, load, loading],
+    [snapshot, language, t, goBack, load, loading],
   );
 
   return (

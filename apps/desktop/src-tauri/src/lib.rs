@@ -198,6 +198,7 @@ pub fn run() {
             commands::keeper::save_keeper_item,
             commands::keeper::delete_keeper_item,
             commands::keeper::save_keeper_record,
+            commands::keeper::advance_keeper_record,
             commands::keeper::delete_keeper_record,
             commands::storage::get_setting,
             commands::storage::set_setting,
