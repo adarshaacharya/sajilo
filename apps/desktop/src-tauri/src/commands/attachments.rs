@@ -191,6 +191,46 @@ pub fn list_keeper_attachments(
         .map_err(|error| error.to_string())
 }
 
+/// How many photos each document or reminder of one kind has, with the first
+/// one's thumbnail — enough for a list row, in one query instead of one per
+/// row.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KeeperAttachmentSummary {
+    pub owner_id: String,
+    pub count: u32,
+    pub thumbnail: String,
+}
+
+#[tauri::command]
+pub fn summarize_keeper_attachments(
+    app: AppHandle<Wry>,
+    owner_kind: String,
+) -> Result<Vec<KeeperAttachmentSummary>> {
+    check_owner_kind(&owner_kind)?;
+    let connection = db::open(&app)?;
+    let mut statement = connection
+        .prepare(
+            "SELECT a.owner_id, COUNT(*),
+               (SELECT b.thumbnail FROM keeper_attachments b
+                 WHERE b.owner_kind = a.owner_kind AND b.owner_id = a.owner_id
+                 ORDER BY b.position, b.created_at LIMIT 1)
+             FROM keeper_attachments a WHERE a.owner_kind = ?1 GROUP BY a.owner_id",
+        )
+        .map_err(|error| error.to_string())?;
+    let rows = statement
+        .query_map([owner_kind], |row| {
+            Ok(KeeperAttachmentSummary {
+                owner_id: row.get(0)?,
+                count: row.get(1)?,
+                thumbnail: data_url(&row.get::<_, Vec<u8>>(2)?),
+            })
+        })
+        .map_err(|error| error.to_string())?;
+    rows.collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(|error| error.to_string())
+}
+
 /// Adds photos from files on disk — the file picker and drag-and-drop both
 /// hand over paths. Stops at the first file that fails, keeping the ones
 /// before it.

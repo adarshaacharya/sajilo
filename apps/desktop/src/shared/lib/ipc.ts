@@ -241,6 +241,13 @@ export interface KeeperAttachment {
   createdAt: string;
 }
 
+/** One document's or reminder's photo count and first thumbnail. */
+export interface KeeperAttachmentSummary {
+  ownerId: string;
+  count: number;
+  thumbnail: string;
+}
+
 export interface KeeperSnapshot {
   people: KeeperPerson[];
   items: KeeperItem[];
@@ -340,6 +347,8 @@ export const api = {
   completeKeeperItem: (id: string) => invoke<KeeperSnapshot>("complete_keeper_item", { id }),
   listKeeperAttachments: (ownerKind: KeeperOwnerKind, ownerId: string) =>
     invoke<KeeperAttachment[]>("list_keeper_attachments", { ownerKind, ownerId }),
+  summarizeKeeperAttachments: (ownerKind: KeeperOwnerKind) =>
+    invoke<KeeperAttachmentSummary[]>("summarize_keeper_attachments", { ownerKind }),
   addKeeperAttachmentsFromPaths: (ownerKind: KeeperOwnerKind, ownerId: string, paths: string[]) =>
     invoke<KeeperAttachment[]>("add_keeper_attachments_from_paths", { ownerKind, ownerId, paths }),
   /** Raw bytes as the body — a pasted screenshot, without a JSON number array. */

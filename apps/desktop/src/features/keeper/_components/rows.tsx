@@ -1,17 +1,27 @@
 import { Icon } from "../../../shared/components/icon";
-import type { KeeperDate, KeeperItem, KeeperRecord } from "../../../shared/lib/ipc";
+import {
+  api,
+  type KeeperAttachmentSummary,
+  type KeeperDate,
+  type KeeperItem,
+  type KeeperRecord,
+} from "../../../shared/lib/ipc";
 import { daysUntil, dueLabel, dueTone, type TFn } from "../_lib/shared";
+import { PhotoBadge } from "./photo-strip";
 import { RecordDue } from "./record-detail";
 
 export function ItemRow({
   item,
   personName,
+  photos,
   onOpen,
   onComplete,
   t,
 }: {
   item: KeeperItem;
   personName?: string;
+  /** This reminder's photos, when it has any. */
+  photos?: KeeperAttachmentSummary;
   onOpen: () => void;
   onComplete: () => void;
   t: TFn;
@@ -47,6 +57,13 @@ export function ItemRow({
           </span>
         </span>
       </button>
+      {photos && (
+        <PhotoBadge
+          summary={photos}
+          onOpen={() => api.openKeeperViewer("item", item.id, 0).catch(() => {})}
+          t={t}
+        />
+      )}
       <TickButton item={item} onToggle={onComplete} t={t} />
     </div>
   );

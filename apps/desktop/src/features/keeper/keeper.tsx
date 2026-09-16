@@ -17,6 +17,7 @@ import { AddPicker } from "./_components/add-picker";
 import { GroupPage } from "./_components/group-page";
 import { ItemEditor } from "./_components/item-editor";
 import type { NewPerson } from "./_components/person-select";
+import { usePhotoSummaries } from "./_components/photo-strip";
 import { RecordDetail } from "./_components/record-detail";
 import { RecordEditor } from "./_components/record-editor";
 import { DueTile, GroupRow, ItemGroupRow, ItemRow, TickButton } from "./_components/rows";
@@ -65,6 +66,7 @@ export function Keeper() {
   }, [t]);
 
   const screen = stack.at(-1) ?? null;
+  const itemPhotos = usePhotoSummaries("item");
   const push = (next: Screen) => setStack((current) => [...current, next]);
   const back = () =>
     setStack((current) => {
@@ -297,6 +299,7 @@ export function Keeper() {
               key={item.id}
               item={item}
               personName={item.personId ? personName(t, data.people, item.personId) : undefined}
+              photos={itemPhotos.get(item.id)}
               onOpen={() => push({ name: "editItem", draft: item, newPerson: null })}
               onComplete={() => toggleItem(item)}
               t={t}

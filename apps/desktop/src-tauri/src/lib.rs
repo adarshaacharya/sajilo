@@ -201,6 +201,7 @@ pub fn run() {
             commands::keeper::advance_keeper_record,
             commands::keeper::complete_keeper_item,
             commands::attachments::list_keeper_attachments,
+            commands::attachments::summarize_keeper_attachments,
             commands::attachments::add_keeper_attachments_from_paths,
             commands::attachments::add_keeper_attachment_bytes,
             commands::attachments::get_keeper_attachment,

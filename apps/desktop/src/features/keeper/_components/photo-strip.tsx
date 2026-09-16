@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
-import { api, type KeeperAttachment, type KeeperOwnerKind } from "../../../shared/lib/ipc";
+import {
+  api,
+  type KeeperAttachment,
+  type KeeperAttachmentSummary,
+  type KeeperOwnerKind,
+} from "../../../shared/lib/ipc";
 import { withPopoverPinned } from "../../../shared/lib/popover-dialog";
 import type { TFn } from "../_lib/shared";
 
@@ -255,5 +260,65 @@ export function PhotoStrip({
       )}
       {error && <p className="px-0.5 text-[10px] text-holiday">{error}</p>}
     </div>
+  );
+}
+
+/** Photo counts and first thumbnails for every document or reminder of one
+ * kind, kept current as photos are added, rotated, or deleted anywhere. */
+export function usePhotoSummaries(ownerKind: KeeperOwnerKind) {
+  const [summaries, setSummaries] = useState<Map<string, KeeperAttachmentSummary>>(new Map());
+  useEffect(() => {
+    const load = () =>
+      api
+        .summarizeKeeperAttachments(ownerKind)
+        .then((list) => setSummaries(new Map((list ?? []).map((entry) => [entry.ownerId, entry]))))
+        .catch(() => {});
+    load();
+    let unlisten: (() => void) | undefined;
+    import("@tauri-apps/api/event")
+      .then(({ listen }) => listen(PHOTOS_CHANGED, load))
+      .then((stop) => {
+        unlisten = stop;
+      })
+      .catch(() => {});
+    return () => unlisten?.();
+  }, [ownerKind]);
+  return summaries;
+}
+
+/** A row's photos at a glance: the first one, small, with how many there
+ * are. Opens the viewer. */
+export function PhotoBadge({
+  summary,
+  onOpen,
+  t,
+}: {
+  summary: KeeperAttachmentSummary;
+  onOpen: () => void;
+  t: TFn;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onOpen();
+      }}
+      aria-label={`${t("keeper.photos.title")} · ${summary.count}`}
+      title={`${t("keeper.photos.title")} · ${summary.count}`}
+      className="relative size-7 shrink-0 rounded-[6px] transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-mark"
+    >
+      <img
+        src={summary.thumbnail}
+        alt=""
+        draggable={false}
+        className="size-full rounded-[6px] border border-divider object-cover"
+      />
+      {summary.count > 1 && (
+        <span className="absolute -right-1 -bottom-1 min-w-3.5 rounded-full border border-[color:var(--color-surface)] bg-[color:var(--color-accent-mark)] px-1 text-center text-[8px] font-semibold leading-[13px] tabular-nums text-[#1a1408]">
+          {summary.count}
+        </span>
+      )}
+    </button>
   );
 }
