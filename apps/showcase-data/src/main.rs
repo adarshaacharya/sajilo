@@ -50,6 +50,7 @@ fn main() {
 
     let mut commands = BTreeMap::<String, Value>::new();
     calendar(&mut commands, now);
+    let holidays = holiday_year(now);
     modules(&mut commands, &root, now);
     tools(&mut commands);
     system(&mut commands);
@@ -58,6 +59,7 @@ fn main() {
     let document = json!({
         "recordedAt": now.to_rfc3339(),
         "commands": commands,
+        "holidayYear": holidays,
     });
 
     let destination = root.join("apps/showcase/src/data/scenes.json");
@@ -96,6 +98,51 @@ fn load_state<T: Serialize, E: std::fmt::Display>(result: Result<T, E>) -> Value
         Ok(value) => json!({ "status": "fresh", "value": value }),
         Err(error) => json!({ "status": "failed", "value": error.to_string() }),
     }
+}
+
+/// The landing page's holiday count: every named public holiday from today to
+/// the end of the BS year after it, month by month. Not an app command — the
+/// app lists festivals a dozen at a time — so it sits beside `commands` rather
+/// than inside them, where the showcase stub would never be asked for it.
+fn holiday_year(now: DateTime<Utc>) -> Value {
+    let gregorian = now.date_naive();
+    let today = bs::nepali_date_from(gregorian).expect("the recorded day is inside the BS table");
+    let mut months = Vec::new();
+    let mut first = NepaliDate::new(today.year, today.month, 1);
+    for _ in 0..12 {
+        let days = bs::days_in_month(first.year, first.month)
+            .expect("a year ahead of the recorded day is inside the table");
+        let holidays: Vec<Value> = events(first.year, first.month)
+            .into_iter()
+            .filter(|(_, event)| event.is_public_holiday)
+            .filter_map(|(day, event)| {
+                let name = event.name?;
+                let date = NepaliDate::new(first.year, first.month, day);
+                let ad = bs::gregorian_date_from(date).ok()?;
+                Some(json!({
+                    "day": day,
+                    "name": name,
+                    "gregorian": ad.to_string(),
+                    "daysAway": (ad - gregorian).num_days(),
+                }))
+            })
+            .collect();
+        months.push(json!({
+            "year": first.year,
+            "month": first.month,
+            "name": first.nepali_month_name(),
+            "days": days,
+            // Sunday = 0, so the page can shade Saturdays without doing any
+            // BS arithmetic of its own.
+            "firstWeekday": bs::gregorian_date_from(first)
+                .expect("the month's first day converts")
+                .weekday()
+                .num_days_from_sunday(),
+            "holidays": holidays,
+        }));
+        first = bs::adding_months(1, first).expect("the next month is inside the table");
+    }
+    json!({ "today": today, "months": months })
 }
 
 // ------------------------------------------------------------------ calendar

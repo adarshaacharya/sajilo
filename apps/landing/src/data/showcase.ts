@@ -35,6 +35,29 @@ export const todayIsHoliday = todayEvents?.is_public_holiday ?? false;
 
 export const supportedRange = c.supported_range;
 
+// ---------- Holidays ----------
+
+export interface HolidayMonth {
+  year: number;
+  month: number;
+  name: string;
+  days: number;
+  firstWeekday: number;
+  holidays: { day: number; name: string; gregorian: string; daysAway: number }[];
+}
+
+/** The recorded BS months ahead, trimmed where the bundled festival data ends
+ * (a month with no holiday at all is past it, not a year off work). */
+const holidayMonths = scenes.holidayYear.months as HolidayMonth[];
+const lastWithHoliday = holidayMonths.findLastIndex((m) => m.holidays.length > 0);
+export const holidayYear = holidayMonths.slice(0, lastWithHoliday + 1);
+const aheadHolidays = holidayYear.flatMap((m) => m.holidays).filter((h) => h.daysAway >= 0);
+export const holidaysAhead = aheadHolidays.length;
+const firstNamed = (pattern: RegExp) => aheadHolidays.find((h) => pattern.test(h.name));
+export const dashain = firstNamed(/दशैं?को टिका|विजया दशमी/);
+export const tihar = firstNamed(/भाइटीका/);
+export const chhath = firstNamed(/छठ/);
+
 // ---------- Weather ----------
 
 const weather = c.get_weather.value;
@@ -72,6 +95,20 @@ const veg = c.get_bazar.vegetables.value.prices;
 export const vegetables = {
   count: veg.length,
   first: veg[0],
+};
+/** A tarkari stall's worth: the first recorded variety of each everyday
+ * vegetable, by its English name. */
+export const vegetableTags = ["Tomato", "Potato", "Onion", "Cauli", "Cucumber", "Chilli"]
+  .map((word) => veg.find((v) => v.englishName?.toLowerCase().includes(word.toLowerCase())))
+  .filter((v) => v !== undefined);
+/** The dearest thing on the Kalimati list that day, whatever it was. */
+export const priciestVegetable = veg.reduce((top, v) => (v.average > top.average ? v : top));
+export const bazarPrices = {
+  gold,
+  silver,
+  fuel: fuelPrices,
+  fuelEffectiveFrom: c.get_bazar.fuel.value.effectiveFrom,
+  vegetablesOn: c.get_bazar.vegetables.value.publishedOn,
 };
 
 // ---------- Stocks ----------

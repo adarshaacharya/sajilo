@@ -1,0 +1,315 @@
+---
+// The rest of Bazar, the prices people actually argue about: the day's rate
+// board in a New Road jeweller's window, the numbers on a petrol pump, and
+// cardboard price tags stuck in a Kalimati crate. Every price and change is
+// the recording's (src/data/showcase.ts); only the jokes are ours.
+import { bazarPrices, priciestVegetable, vegetableTags } from "../data/showcase";
+import { ne, rs } from "../lib/format";
+
+const signedRs = (n: number) => (n > 0 ? "▲ " : n < 0 ? "▼ " : "") + rs(Math.abs(n));
+
+const { gold, silver } = bazarPrices;
+const goldUp = gold.price - gold.previousPrice;
+const silverUp = silver.price - silver.previousPrice;
+
+const FUEL = {
+  petrol: { ne: "पेट्रोल", unit: "/ litre" },
+  diesel: { ne: "डिजेल", unit: "/ litre" },
+  kerosene: { ne: "मट्टितेल", unit: "/ litre" },
+  lpg: { ne: "ग्यास", unit: "/ cylinder" },
+} as const;
+const pumps = bazarPrices.fuel.filter((f) => f.fuel in FUEL);
+const petrol = bazarPrices.fuel.find((f) => f.fuel === "petrol");
+const litresOfPetrol = petrol ? Math.floor(priciestVegetable.average / petrol.price) : 0;
+const fuelDate = new Date(`${bazarPrices.fuelEffectiveFrom}T00:00:00Z`).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "long",
+  timeZone: "UTC",
+});
+const UNIT: Record<string, string> = { kilogram: "केजी", dozen: "दर्जन", piece: "गोटा" };
+const tagName = (name: string) => name.replace(/\(.*?\)/g, "").trim();
+const tilt = (i: number) => [-6, 4, -3, 7, -5, 3][i % 6];
+---
+
+<section class="bazar wrap" id="bazar" aria-labelledby="bazar-title">
+  <div class="section-head reveal">
+    <p class="bazar-mark">
+      <span lang="ne">बजार भाउ</span>
+      <span class="bazar-mark-en">Gold · Fuel · Vegetables</span>
+    </p>
+    <h2 id="bazar-title">Bargain like you checked Kalimati this morning. <em>Because you did.</em></h2>
+    <p class="lede">
+      Today's gold and silver, the fuel prices after every revision, and more than a hundred Kalimati
+      vegetable and fruit prices, in the same menu bar as your stocks.
+    </p>
+  </div>
+
+  <div class="stalls">
+    <!-- A New Road jeweller's window board. -->
+    <figure class="stall-card jeweller reveal">
+      <div class="rate-board">
+        <p class="rate-title" lang="ne">आजको सुनचाँदी भाउ</p>
+        <dl class="rates">
+          <div>
+            <dt><span lang="ne">छापावाल सुन</span><small>per tola</small></dt>
+            <dd>
+              <span class="rate">रु {rs(gold.price)}</span>
+              <span class:list={["delta", goldUp >= 0 ? "up" : "down"]}>{signedRs(goldUp)}</span>
+            </dd>
+          </div>
+          <div>
+            <dt><span lang="ne">चाँदी</span><small>per tola</small></dt>
+            <dd>
+              <span class="rate">रु {rs(silver.price)}</span>
+              <span class:list={["delta", silverUp >= 0 ? "up" : "down"]}>{signedRs(silverUp)}</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+      <figcaption>
+        {goldUp > 0
+          ? `Up Rs ${rs(goldUp)} a tola since yesterday. The wedding is still on.`
+          : goldUp < 0
+            ? `Down Rs ${rs(-goldUp)} a tola. Tell Aama before the jeweller does.`
+            : "Unchanged today. The wedding is still on."}
+      </figcaption>
+    </figure>
+
+    <!-- The pump's own display: amber digits on black. -->
+    <figure class="stall-card pump reveal">
+      <div class="pump-body">
+        {pumps.map((f) => (
+          <div class="pump-row">
+            <span class="pump-name" lang="ne">{FUEL[f.fuel as keyof typeof FUEL].ne}</span>
+            <span class="pump-digits">{f.price.toFixed(2)}</span>
+            <span class="pump-unit">{FUEL[f.fuel as keyof typeof FUEL].unit}</span>
+            {f.previousPrice !== f.price && <s class="pump-was">{f.previousPrice.toFixed(0)}</s>}
+          </div>
+        ))}
+      </div>
+      <figcaption>
+        {petrol && petrol.price !== petrol.previousPrice
+          ? `Petrol went ${petrol.price > petrol.previousPrice ? "up" : "down"} Rs ${rs(Math.abs(petrol.price - petrol.previousPrice))} on ${fuelDate}. Your scooter noticed first.`
+          : `Prices since ${fuelDate}. Your scooter says thank you.`}
+      </figcaption>
+    </figure>
+
+    <!-- Cardboard tags pushed into a Kalimati crate. -->
+    <figure class="stall-card crate reveal">
+      <div class="tags">
+        {vegetableTags.map((v, i) => (
+          <div class="tag" style={`--tilt:${tilt(i)}deg`}>
+            <span class="tag-name" lang="ne">{tagName(v.name)}</span>
+            <span class="tag-price" lang="ne">रु {ne(Math.round(v.average))}</span>
+            <span class="tag-unit" lang="ne">/{UNIT[v.unit] ?? v.unit}</span>
+          </div>
+        ))}
+      </div>
+      <figcaption>
+        {litresOfPetrol >= 2
+          ? `${tagName(priciestVegetable.name)} is Rs ${rs(Math.round(priciestVegetable.average))} a kilo. That's ${litresOfPetrol} litres of petrol.`
+          : `${tagName(priciestVegetable.name)} tops the list at Rs ${rs(Math.round(priciestVegetable.average))} a kilo.`}
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .bazar {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .bazar-mark {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+  }
+  .bazar-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .bazar-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .stalls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: clamp(20px, 3vw, 32px);
+    margin-top: clamp(28px, 4vw, 48px);
+    align-items: stretch;
+  }
+  .stall-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+  }
+  .stall-card > :first-child {
+    flex: 1;
+  }
+  figcaption {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--paper-2);
+  }
+
+  /* Jeweller: red lettering on cream, a gilt frame, the way every New Road
+     window puts it. */
+  .rate-board {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 18px 20px;
+    background: #f4ecd8;
+    color: #2a1d10;
+    border: 6px solid #b98d38;
+    outline: 1px solid #6b4f1c;
+    border-radius: 4px;
+    box-shadow: 0 30px 50px -28px rgb(0 0 0 / 0.85);
+  }
+  .rate-title {
+    padding-bottom: 10px;
+    border-bottom: 2px solid #a8281a;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 21px;
+    text-align: center;
+    color: #a8281a;
+  }
+  .rates {
+    display: grid;
+    gap: 12px;
+    margin: 12px 0 0;
+  }
+  .rates > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .rates dt [lang="ne"] {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+  }
+  .rates small {
+    font-size: 11px;
+    color: rgb(42 29 16 / 0.55);
+  }
+  .rates dd {
+    margin: 0;
+    text-align: right;
+  }
+  .rate {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 2.4vw, 28px);
+    font-variant-numeric: tabular-nums;
+  }
+  .delta {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .delta.up {
+    color: #2f7a3e;
+  }
+  .delta.down {
+    color: #a8281a;
+  }
+
+  /* Pump: seven-segment amber on black, set into a scuffed red housing. */
+  .pump-body {
+    display: grid;
+    gap: 10px;
+    align-content: center;
+    padding: 18px;
+    background: linear-gradient(180deg, #b3261a, #8c1d14);
+    border-radius: 10px;
+    box-shadow: 0 30px 50px -28px rgb(0 0 0 / 0.85);
+  }
+  .pump-row {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 8px 12px;
+    background: #0d0c0b;
+    border-radius: 4px;
+    box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.9);
+  }
+  .pump-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #f4ecd8;
+  }
+  .pump-digits {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: clamp(24px, 2.6vw, 30px);
+    font-weight: 700;
+    text-align: right;
+    letter-spacing: 0.04em;
+    color: #ffb02e;
+    text-shadow: 0 0 10px rgb(255 176 46 / 0.55);
+  }
+  .pump-unit {
+    font-size: 11px;
+    color: rgb(244 236 216 / 0.5);
+  }
+  .pump-was {
+    grid-column: 2;
+    justify-self: end;
+    margin-top: -6px;
+    font-size: 11px;
+    color: rgb(244 236 216 / 0.4);
+  }
+
+  /* Crate: slatted wood with torn cardboard tags, prices in marker. */
+  .tags {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 10px;
+    align-content: center;
+    padding: 20px 14px;
+    background:
+      repeating-linear-gradient(180deg, #8a6036 0 26px, #5d3e21 26px 30px);
+    border-radius: 6px;
+    box-shadow: 0 30px 50px -28px rgb(0 0 0 / 0.85);
+  }
+  .tag {
+    display: grid;
+    justify-items: center;
+    padding: 8px 4px 9px;
+    color: #1d1a16;
+    background: #d9c39b;
+    border-radius: 2px 6px 3px 5px;
+    transform: rotate(var(--tilt));
+    box-shadow: 0 6px 10px -4px rgb(0 0 0 / 0.6);
+  }
+  .tag-name {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.1;
+    text-align: center;
+  }
+  .tag-price {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.1;
+    color: #1b3f7a;
+  }
+  .tag-unit {
+    font-size: 11px;
+    color: rgb(29 26 22 / 0.6);
+  }
+</style>

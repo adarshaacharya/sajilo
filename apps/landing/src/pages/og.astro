@@ -1,0 +1,525 @@
+---
+// The social card, drawn as a page so it stays in step with the site: the
+// same fonts, the same ink and gilt, and the recording's own numbers. Not
+// linked anywhere; `bun run og` renders it to public/assets/og-image.png at
+// exactly 1200×630.
+import "../styles/global.css";
+import { nepse, newsSources, radioDial, dashain, rashifal, stationCount, today, upcoming } from "../data/showcase";
+import { ne, weekdayNe } from "../lib/format";
+
+const up = nepse.change >= 0;
+// The FM band as a transistor scale: a tick for every recorded station, and
+// the needle resting on the middle one.
+const BAND = { from: 88, to: 108 };
+// Inset 7% each side so the end labels sit inside the window.
+const at = (frequency: number) => 7 + ((frequency - BAND.from) / (BAND.to - BAND.from)) * 86;
+const tuned = radioDial[Math.floor(radioDial.length / 2)];
+const sign = rashifal[0];
+// Dashain, the festival everyone is waiting for; the next holiday if the
+// recording has no Dashain ahead.
+const nextHoliday = dashain ?? upcoming.find((event) => event.is_public_holiday);
+const holidayName = nextHoliday?.name.replace(/\(.*?\)/g, "").split(",")[0].trim();
+// Keeper's own document kinds, as on the landing page's Keeper section — no
+// dates or numbers, so nothing reads as somebody's papers.
+const reminders = [
+  { ne: "ब्लुबुक नवीकरण", done: true },
+  { ne: "घरभाडा", done: false },
+  { ne: "बीमा", done: false },
+  { ne: "बिजुली बिल", done: true },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>Sajilo social card</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Eczar:wght@600;700;800&family=Anek+Devanagari:wght@400;500;600;700&family=Anek+Latin:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="card">
+      <div class="copy">
+        <p class="brand"><span lang="ne">सजिलो</span> Sajilo</p>
+        <h1>Nepal,<br /><em>in your</em><br />menu bar.</h1>
+        <p class="list">Patro · News · NEPSE · Gold · Radio · Rashifal · Reminders &amp; more</p>
+        <p class="free">Free for macOS, Windows &amp; Linux</p>
+      </div>
+
+      <div class="collage" aria-hidden="true">
+        <div class="leaf">
+          <p class="leaf-month" lang="ne">{today.nepaliMonthName} {ne(today.nepali.year)}</p>
+          <p class="leaf-day" lang="ne">{ne(today.nepali.day)}</p>
+          <p class="leaf-week" lang="ne">{weekdayNe(today.weekday)}</p>
+          {holidayName && (
+            <p class="leaf-next" lang="ne">
+              <span>आउँदो चाड</span> {holidayName}
+            </p>
+          )}
+        </div>
+
+        <div class="slip">
+          <p class="slip-title" lang="ne">सम्झना</p>
+          <ul>
+            {reminders.map((item) => (
+              <li class:list={{ done: item.done }} lang="ne">
+                <span class="box">{item.done ? "✓" : ""}</span>
+                {item.ne}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {sign && (
+          <div class="sticker">
+            <span class="sticker-label" lang="ne">राशिफल</span>
+            <span class="sticker-sign" lang="ne">{sign.ne}</span>
+            {sign.number && <span class="sticker-lucky" lang="ne">शुभ अंक {sign.number}</span>}
+          </div>
+        )}
+
+        <div class="nepse">
+          <p class="nepse-label">NEPSE</p>
+          <p class="nepse-value">{nepse.value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p class:list={["nepse-change", up ? "up" : "down"]}>
+            {up ? "▲" : "▼"} {Math.abs(nepse.changePercent).toFixed(2)}%
+          </p>
+        </div>
+
+        <div class="paper">
+          <span class="peg"></span>
+          <p class="masthead" lang="ne">समाचार</p>
+          <p class="dateline"><span lang="ne">{today.nepaliMonthName} {ne(today.nepali.day)}</span><span>{newsSources.length} newsrooms</span></p>
+          <div class="columns">
+            <span class="photo"></span><span class="lines"></span><span class="lines"></span><span class="lines"></span>
+          </div>
+        </div>
+
+        <div class="radio">
+          <span class="antenna"></span>
+          <span class="grille"></span>
+          <div class="radio-face">
+            <div class="window">
+              {radioDial.map((stop) => (
+                <span class="tick" style={`left:${at(stop.frequency)}%`}></span>
+              ))}
+              {[88, 98, 108].map((mark) => (
+                <span class="mark" style={`left:${at(mark)}%`}>{mark}</span>
+              ))}
+              {tuned && <span class="needle" style={`left:${at(tuned.frequency)}%`}></span>}
+            </div>
+            <p class="radio-label">
+              <span lang="ne">रेडियो</span>
+              <span>{stationCount} FM stations</span>
+            </p>
+          </div>
+          <span class="knob"></span>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body {
+    margin: 0;
+    background: #14110e;
+  }
+</style>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 540px 1fr;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    color: var(--paper);
+    background:
+      radial-gradient(520px 380px at 88% 30%, rgb(212 168 74 / 0.16), transparent 70%),
+      var(--ink);
+  }
+  .copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 0 0 76px;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+  .brand [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 34px;
+    color: var(--gilt-2);
+  }
+  h1 {
+    margin: 22px 0 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 90px;
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--gilt-2);
+  }
+  .list {
+    margin-top: 30px;
+    font-size: 19px;
+    white-space: nowrap;
+    color: var(--paper-2);
+  }
+  .free {
+    margin-top: 8px;
+    font-size: 17px;
+    color: var(--paper-4);
+  }
+
+  .collage {
+    position: relative;
+  }
+  .collage > * {
+    position: absolute;
+    box-shadow: 0 30px 50px -18px rgb(0 0 0 / 0.85);
+  }
+
+  /* The wall patro's day leaf. */
+  .leaf {
+    top: 58px;
+    left: 70px;
+    width: 250px;
+    padding: 18px 0 20px;
+    text-align: center;
+    color: #221c14;
+    background: #f3e9d6;
+    border-top: 18px solid #c0392b;
+    border-radius: 4px;
+    transform: rotate(-4deg);
+  }
+  .leaf-month {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+  }
+  .leaf-day {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 132px;
+    line-height: 0.95;
+    color: #c0392b;
+  }
+  .leaf-week {
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .leaf-next {
+    margin: 10px 16px 0;
+    padding-top: 8px;
+    border-top: 1px dashed rgb(34 28 20 / 0.3);
+    font-size: 16px;
+    font-weight: 600;
+    color: #c0392b;
+  }
+  .leaf-next span {
+    font-weight: 500;
+    color: rgb(34 28 20 / 0.6);
+  }
+
+  /* Keeper: a to-do slip tucked against the patro. */
+  .slip {
+    top: 236px;
+    left: 392px;
+    z-index: 3;
+    width: 230px;
+    padding: 10px 18px 12px;
+    color: #221c14;
+    background: #fbf4dc;
+    border-top: 8px solid var(--gilt);
+    border-radius: 3px;
+    transform: rotate(-2deg);
+  }
+  .slip-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 21px;
+  }
+  .slip ul {
+    display: grid;
+    gap: 4px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .slip li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .slip li.done {
+    color: rgb(34 28 20 / 0.45);
+    text-decoration: line-through;
+  }
+  .box {
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    font-size: 12px;
+    color: #2f7a3e;
+    border: 1.5px solid rgb(34 28 20 / 0.5);
+    border-radius: 3px;
+  }
+
+  /* A round sticker slapped on the patro's corner. */
+  .sticker {
+    top: 22px;
+    left: 250px;
+    z-index: 2;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    width: 112px;
+    height: 112px;
+    color: #2a1d10;
+    background: radial-gradient(circle at 35% 30%, #f7d98a, #d4a84a 70%);
+    border: 3px dashed rgb(42 29 16 / 0.35);
+    border-radius: 50%;
+    transform: rotate(12deg);
+  }
+  .sticker-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgb(42 29 16 / 0.7);
+  }
+  .sticker-sign {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1.05;
+  }
+  .sticker-lucky {
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .nepse {
+    top: 70px;
+    left: 392px;
+    width: 230px;
+    padding: 18px 22px;
+    background: #1f1b18;
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    transform: rotate(3deg);
+  }
+  .nepse-label {
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    color: var(--paper-3);
+  }
+  .nepse-value {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1.1;
+  }
+  .nepse-change {
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .nepse-change.up {
+    color: #4cc26b;
+  }
+  .nepse-change.down {
+    color: var(--sindoor-2);
+  }
+
+  /* A paper pegged to the news stall's string. */
+  .paper {
+    top: 420px;
+    left: 70px;
+    width: 220px;
+    padding: 24px 14px 14px;
+    color: #1f1a14;
+    background: #ece3d0;
+    border-radius: 2px;
+    transform: rotate(3deg);
+  }
+  .peg {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 12px;
+    height: 32px;
+    margin-left: -6px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #a77b4c, #d3a877 45%, #9a6f41);
+  }
+  .masthead {
+    padding-bottom: 5px;
+    border-bottom: 3px solid #1f1a14;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    text-align: center;
+  }
+  .dateline {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid rgb(31 26 20 / 0.4);
+    font-size: 12px;
+    color: rgb(31 26 20 / 0.65);
+  }
+  .columns {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 7px;
+    margin-top: 8px;
+    height: 70px;
+  }
+  .columns span {
+    border-radius: 1px;
+  }
+  .photo {
+    grid-row: 1 / 3;
+    background: linear-gradient(135deg, rgb(31 26 20 / 0.3), rgb(31 26 20 / 0.12));
+  }
+  .lines {
+    background: repeating-linear-gradient(180deg, rgb(31 26 20 / 0.25) 0 3px, transparent 3px 7px);
+  }
+
+  /* A transistor set: cream plastic, a round speaker grille, the tuning
+     window lit amber from behind, a knob and a pulled-out antenna. */
+  .radio {
+    z-index: 4;
+    top: 478px;
+    left: 346px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 262px;
+    height: 104px;
+    padding: 0 30px 0 14px;
+    box-sizing: border-box;
+    background: linear-gradient(180deg, #e9dcc0, #cdb991);
+    border-bottom: 10px solid #7a2a22;
+    border-radius: 16px;
+    transform: rotate(-3deg);
+    overflow: visible;
+  }
+  .antenna {
+    position: absolute;
+    right: 34px;
+    bottom: 92px;
+    width: 3px;
+    height: 70px;
+    background: linear-gradient(90deg, #8a8a8a, #e6e6e6, #8a8a8a);
+    border-radius: 2px;
+    transform-origin: bottom center;
+    transform: rotate(28deg);
+  }
+  .antenna::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    left: -2.5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d9d9d9;
+  }
+  .grille {
+    flex: 0 0 66px;
+    height: 66px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #3a2f26 1.6px, transparent 2px) 0 0 / 7px 7px,
+      #b59f74;
+    box-shadow:
+      inset 0 2px 5px rgb(0 0 0 / 0.35),
+      0 0 0 3px #d8c6a0;
+  }
+  .radio-face {
+    flex: 1;
+    min-width: 0;
+  }
+  .window {
+    position: relative;
+    height: 36px;
+    background: radial-gradient(120% 140% at 50% 50%, #ffc56a, #e08a2c 70%, #9a5418);
+    border: 2px solid #3a2f26;
+    border-radius: 5px;
+    box-shadow:
+      inset 0 0 10px rgb(80 30 0 / 0.55),
+      0 0 14px rgb(255 170 60 / 0.35);
+    overflow: hidden;
+  }
+  .tick {
+    position: absolute;
+    top: 3px;
+    width: 1px;
+    height: 10px;
+    background: rgb(40 20 5 / 0.55);
+  }
+  .mark {
+    position: absolute;
+    bottom: 1px;
+    transform: translateX(-50%);
+    font-size: 10.5px;
+    font-weight: 700;
+    color: rgb(40 20 5 / 0.8);
+  }
+  .needle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.5px;
+    background: #b3160c;
+  }
+  .radio-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgb(42 29 16 / 0.6);
+  }
+  .radio-label [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 18px;
+    color: #2a1d10;
+  }
+  .knob {
+    position: absolute;
+    right: -14px;
+    top: 30px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background:
+      repeating-conic-gradient(#5a4636 0 10deg, #3a2f26 10deg 20deg);
+    box-shadow:
+      inset 0 0 0 5px #4a3a2d,
+      0 4px 8px rgb(0 0 0 / 0.5);
+  }
+</style>

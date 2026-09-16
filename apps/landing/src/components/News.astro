@@ -1,14 +1,24 @@
 ---
-// Every newsroom the app reads, set as a wall of front-page nameplates. The
-// names, which are official and which write in English, and the dateline all
-// come from the recording (src/data/showcase.ts). The recorded headlines
-// themselves are left to the live screen: a marketing page is the wrong place
-// to set someone's tragedy in display type.
+// Every newsroom the app reads, pegged to the string of a Kathmandu news
+// stall. Names, which are official and which write in English, and the
+// dateline all come from the recording (src/data/showcase.ts). The front pages
+// carry no headlines — only grey type-blocks — because the recorded stories
+// are left to the live screen: a marketing page is the wrong place to set
+// someone's tragedy in display type.
 import { newsItems, newsSources, today } from "../data/showcase";
-import { longDate, ne } from "../lib/format";
+import { ne } from "../lib/format";
 
-const dateline = longDate(today.gregorian);
+const dateline = new Date(`${today.gregorian}T00:00:00Z`).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepali.year)}`;
+// A fixed, gentle disorder — the same on every build, so nothing jumps.
+const tilt = (i: number) => [-2.2, 1.4, -0.6, 2.4, -1.6, 0.8, -2.6, 1.8][i % 8];
+// Front-page layouts to rotate through: lead photo left, right, or across.
+const LAYOUTS = ["lead-left", "lead-top", "lead-right"] as const;
 ---
 
 <section class="news wrap" id="news" aria-labelledby="news-title">
@@ -19,33 +29,42 @@ const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepa
           <span lang="ne">समाचार</span>
           <span class="news-mark-en">News</span>
         </p>
-        <h2 id="news-title">Every front page, before breakfast.</h2>
+        <h2 id="news-title">Every front page, <em>before your chiya goes cold.</em></h2>
         <p class="lede">
-          Nepali and English newsrooms and government notices, merged into one list by time. Skim all of
-          it from the menu bar; open a story when one is worth it.
+          No more reading the paper over uncle's shoulder at the pasal. Nepali and English newsrooms and
+          government notices, merged into one list by time, in your menu bar.
         </p>
       </div>
 
-      <ul class="stand reveal" aria-label="Newsrooms Sajilo reads">
+      <div class="stall reveal" role="list" aria-label="Newsrooms Sajilo reads">
         {newsSources.map((source, i) => (
-          <li
-            class:list={["plate", { "plate--wide": i % 5 === 0, "plate--official": source.official }]}
-            style={`--d:${i * 50}ms`}
+          <div
+            role="listitem"
+            class:list={["paper", LAYOUTS[i % 3], { official: source.official }]}
+            style={`--tilt:${tilt(i)}deg; --d:${i * 60}ms`}
           >
-            <span class="plate-rule" aria-hidden="true"></span>
-            <span class="plate-name">{source.name}</span>
-            <span class="plate-rule plate-rule--thin" aria-hidden="true"></span>
-            <span class="plate-line">
-              <span>{source.official ? "Official notices" : source.english ? "English" : "नेपाली"}</span>
-              <span class="plate-date num">{i % 2 === 0 ? dateline : bsDate}</span>
-            </span>
-          </li>
+            <span class="peg" aria-hidden="true"></span>
+            <div class="sheet">
+              <p class="masthead">{source.name}</p>
+              <p class="dateline">
+                <span>{source.official ? "सूचना" : source.english ? "English" : "नेपाली"}</span>
+                <span class="num">{i % 2 === 0 ? bsDate : dateline}</span>
+              </p>
+              <div class="page" aria-hidden="true">
+                <span class="photo"></span>
+                <span class="head"></span>
+                <span class="col"></span>
+                <span class="col"></span>
+              </div>
+              {source.official && <span class="seal" aria-hidden="true">सरकारी</span>}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <p class="news-foot reveal">
         <span class="num">{newsSources.length}</span> newsrooms ·
-        <span class="num">{newsItems}</span> headlines on the day this page was recorded
+        <span class="num">{newsItems}</span> headlines on the string the morning this page was recorded
       </p>
     </div>
 
@@ -95,77 +114,169 @@ const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepa
     color: var(--paper-3);
   }
 
-  /* A news stand: each newsroom as the nameplate off its own front page —
-     a heavy rule, the name in display type, a hairline, then the language and
-     the day's dateline in small caps. Government notices take the sindoor
-     rule, the way an official gazette is set apart. */
-  .stand {
+  /* A Kathmandu news stall: the day's papers pegged along a string, each
+     front page a masthead, a dateline, and grey blocks of type. They sway a
+     little, the way paper does in a doorway. Government notices get the
+     sindoor rule and a rubber stamp. */
+  .stall {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 14px;
-    margin-top: clamp(28px, 4vw, 44px);
+    grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+    gap: 30px 0;
+    margin-top: clamp(32px, 4.4vw, 52px);
   }
-  .plate {
-    display: grid;
-    gap: 7px;
-    align-content: start;
-    padding: 14px 16px 12px;
-    background: var(--ink-2);
-    border: 1px solid var(--line);
-    border-radius: 3px;
-    transition:
-      transform 0.35s var(--spring),
-      border-color 0.25s;
+  .paper {
+    position: relative;
+    padding: 16px 7px 0;
   }
-  .plate:hover {
-    transform: translateY(-3px);
-    border-color: var(--line-2);
+  /* Each paper carries its stretch of string, so a wrapped row keeps one. */
+  .paper::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, #8a7a62, #b9a582, #8a7a62);
+    box-shadow: 0 2px 3px rgb(0 0 0 / 0.5);
   }
-  .plate--wide {
-    grid-column: span 2;
+  .peg {
+    position: absolute;
+    z-index: 2;
+    top: 1px;
+    left: 50%;
+    width: 9px;
+    height: 26px;
+    margin-left: -4.5px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #a77b4c, #d3a877 45%, #9a6f41);
+    box-shadow: 0 3px 4px rgb(0 0 0 / 0.45);
   }
-  .plate-rule {
-    display: block;
-    height: 3px;
-    background: var(--paper);
+  .sheet {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    padding: 10px 10px 12px;
+    color: #1f1a14;
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.07), transparent 14%),
+      #ece3d0;
+    border-radius: 1px;
+    transform-origin: 50% 0;
+    transform: rotate(var(--tilt));
+    box-shadow: 0 18px 26px -14px rgb(0 0 0 / 0.8);
+    animation: sway 6s ease-in-out var(--d) infinite alternate;
+    transition: transform 0.4s var(--spring);
   }
-  .plate-rule--thin {
-    height: 1px;
-    background: var(--line-2);
+  .paper:nth-child(3n) .sheet {
+    background:
+      linear-gradient(180deg, rgb(0 0 0 / 0.07), transparent 14%),
+      #e6dcc4;
   }
-  .plate--official .plate-rule:not(.plate-rule--thin) {
-    background: var(--sindoor);
+  .paper:hover .sheet {
+    animation-play-state: paused;
+    transform: rotate(0deg) translateY(4px) scale(1.04);
   }
-  .plate-name {
+  @keyframes sway {
+    from {
+      transform: rotate(var(--tilt));
+    }
+    to {
+      transform: rotate(calc(var(--tilt) * -0.6));
+    }
+  }
+
+  .masthead {
+    padding-bottom: 5px;
+    border-bottom: 2.5px solid #1f1a14;
     font-family: var(--display);
     font-weight: 700;
-    font-size: clamp(22px, 2.2vw, 28px);
-    line-height: 1.05;
+    font-size: clamp(15px, 1.5vw, 19px);
+    line-height: 1.02;
     letter-spacing: -0.01em;
-    color: var(--paper);
+    text-align: center;
     text-wrap: balance;
   }
-  .plate--wide .plate-name {
-    font-size: clamp(28px, 3vw, 38px);
+  .official .masthead {
+    border-bottom-color: var(--sindoor);
   }
-  .plate-line {
+  .dateline {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    font-size: 11px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--paper-3);
-  }
-  .plate-line [lang] {
-    text-transform: none;
-  }
-  .plate-date {
-    text-align: right;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgb(31 26 20 / 0.35);
+    font-size: 8.5px;
+    letter-spacing: 0.04em;
+    color: rgb(31 26 20 / 0.6);
     white-space: nowrap;
+  }
+  .dateline .num {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* Type as texture: a photo block, a heavy headline bar, and two columns
+     of grey lines, arranged a little differently on each paper. */
+  .page {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 6px;
+    height: calc(100% - 52px);
+    margin-top: 7px;
+  }
+  .page > span {
+    display: block;
+    border-radius: 1px;
+  }
+  .photo {
+    background:
+      linear-gradient(135deg, rgb(31 26 20 / 0.28), rgb(31 26 20 / 0.12));
+    min-height: 38px;
+  }
+  .head {
+    height: 18px;
+    background:
+      linear-gradient(rgb(31 26 20 / 0.75) 0 6px, transparent 6px 10px, rgb(31 26 20 / 0.5) 10px 15px, transparent 15px);
+  }
+  .col {
+    background: repeating-linear-gradient(180deg, rgb(31 26 20 / 0.2) 0 2px, transparent 2px 5px);
+  }
+  .lead-left .photo {
+    grid-row: 1 / 3;
+  }
+  .lead-left .head {
+    grid-column: 2;
+  }
+  .lead-top .photo {
+    grid-column: 1 / -1;
+    min-height: 44px;
+  }
+  .lead-top .head {
+    grid-column: 1 / -1;
+  }
+  .lead-right .photo {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+  .lead-right .head {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .seal {
+    position: absolute;
+    right: 8px;
+    bottom: 14px;
+    padding: 2px 7px;
+    border: 2px solid rgb(228 71 47 / 0.8);
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgb(228 71 47 / 0.9);
+    background: rgb(236 227 208 / 0.7);
+    transform: rotate(-9deg);
+  }
+
   .news-foot {
     margin-top: clamp(20px, 3vw, 28px);
     font-size: 14px;
@@ -209,10 +320,9 @@ const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepa
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .plate,
-    .plate:hover {
+    .sheet {
+      animation: none;
       transition: none;
-      transform: none;
     }
   }
   @media (max-width: 860px) {
@@ -222,14 +332,6 @@ const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepa
     .news-stage {
       position: static;
       width: min(100%, 300px);
-    }
-  }
-  @media (max-width: 480px) {
-    .stand {
-      grid-template-columns: 1fr;
-    }
-    .plate--wide {
-      grid-column: auto;
     }
   }
 </style>

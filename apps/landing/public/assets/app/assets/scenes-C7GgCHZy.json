@@ -5787,7 +5787,7 @@
         },
         "freshness": {
           "fetchedAt": "2026-08-26T14:20:00Z",
-          "sourceTimestamp": "2016-12-15T00:00:00Z"
+          "sourceTimestamp": "2026-09-14T00:00:00Z"
         },
         "marketStatus": {
           "asOf": "2026-09-14T09:15:00Z",
@@ -26344,6 +26344,352 @@
       }
     ],
     "updater_enabled": false
+  },
+  "holidayYear": {
+    "months": [
+      {
+        "days": 31,
+        "firstWeekday": 1,
+        "holidays": [
+          {
+            "day": 12,
+            "daysAway": 2,
+            "gregorian": "2026-08-28",
+            "name": "ऋषितर्पणी, रक्षाबन्धन"
+          },
+          {
+            "day": 13,
+            "daysAway": 3,
+            "gregorian": "2026-08-29",
+            "name": "गाईजात्रा (सापारू)(काठमाडौं उपत्यकालाई र देशभरका नेवार समुदायका लागि मात्र बिदा)"
+          },
+          {
+            "day": 19,
+            "daysAway": 9,
+            "gregorian": "2026-09-04",
+            "name": "श्रीकृष्णजन्माष्टमी, गौरा पर्व"
+          },
+          {
+            "day": 20,
+            "daysAway": 10,
+            "gregorian": "2026-09-05",
+            "name": "मानव वेचविखन विरुद्धको राष्ट्रिय दिवस"
+          },
+          {
+            "day": 27,
+            "daysAway": 17,
+            "gregorian": "2026-09-12",
+            "name": "गुँलाधर्म समाप्ति"
+          }
+        ],
+        "month": 5,
+        "name": "भदौ",
+        "year": 2083
+      },
+      {
+        "days": 31,
+        "firstWeekday": 4,
+        "holidays": [
+          {
+            "day": 3,
+            "daysAway": 24,
+            "gregorian": "2026-09-19",
+            "name": "संविधान दिवस (राष्ट्रिय दिवस), काय  अष्टमी"
+          },
+          {
+            "day": 10,
+            "daysAway": 31,
+            "gregorian": "2026-09-26",
+            "name": "यँया पुन्हिः, चेपाङ चोनाम पर्व"
+          },
+          {
+            "day": 17,
+            "daysAway": 38,
+            "gregorian": "2026-10-03",
+            "name": "अष्टमीव्रत, अष्टमी श्राद्ध"
+          },
+          {
+            "day": 24,
+            "daysAway": 45,
+            "gregorian": "2026-10-10",
+            "name": "औंसी श्राद्ध, दर्शश्राद्ध"
+          },
+          {
+            "day": 25,
+            "daysAway": 46,
+            "gregorian": "2026-10-11",
+            "name": "घटस्थापना, नवरात्र आरम्भ"
+          },
+          {
+            "day": 31,
+            "daysAway": 52,
+            "gregorian": "2026-10-17",
+            "name": "नवपत्रिका प्रवेश, फूलपाती"
+          }
+        ],
+        "month": 6,
+        "name": "असोज",
+        "year": 2083
+      },
+      {
+        "days": 30,
+        "firstWeekday": 0,
+        "holidays": [
+          {
+            "day": 1,
+            "daysAway": 53,
+            "gregorian": "2026-10-18",
+            "name": "महाअष्टमी, कालरात्रि"
+          },
+          {
+            "day": 2,
+            "daysAway": 54,
+            "gregorian": "2026-10-19",
+            "name": "जनबहाः कुछि भ्वय्"
+          },
+          {
+            "day": 3,
+            "daysAway": 55,
+            "gregorian": "2026-10-20",
+            "name": "महानवमी, स्याक्वःत्याक्वः"
+          },
+          {
+            "day": 4,
+            "daysAway": 56,
+            "gregorian": "2026-10-21",
+            "name": "विजया दशमी, दशैको टिका"
+          },
+          {
+            "day": 5,
+            "daysAway": 57,
+            "gregorian": "2026-10-22",
+            "name": "पापाङकुशा एकादशी, अन्नपूर्णा  यात्रा"
+          },
+          {
+            "day": 6,
+            "daysAway": 58,
+            "gregorian": "2026-10-23",
+            "name": "द्वादशी"
+          },
+          {
+            "day": 21,
+            "daysAway": 73,
+            "gregorian": "2026-11-07",
+            "name": "काग तिहार, धन्वन्तरी जयन्ती"
+          },
+          {
+            "day": 22,
+            "daysAway": 74,
+            "gregorian": "2026-11-08",
+            "name": "कुकुर तिहार, नरक चतुर्दशी"
+          },
+          {
+            "day": 23,
+            "daysAway": 75,
+            "gregorian": "2026-11-09",
+            "name": "औंसी, गाई पूजा"
+          },
+          {
+            "day": 24,
+            "daysAway": 76,
+            "gregorian": "2026-11-10",
+            "name": "स्वःन्ति पारू, गोरू पूजा"
+          },
+          {
+            "day": 25,
+            "daysAway": 77,
+            "gregorian": "2026-11-11",
+            "name": "भाइटीका, किजा पूजा"
+          },
+          {
+            "day": 26,
+            "daysAway": 78,
+            "gregorian": "2026-11-12",
+            "name": "तृतीया"
+          },
+          {
+            "day": 29,
+            "daysAway": 81,
+            "gregorian": "2026-11-15",
+            "name": "छठपर्व, डाला पूजा"
+          }
+        ],
+        "month": 7,
+        "name": "कार्तिक",
+        "year": 2083
+      },
+      {
+        "days": 29,
+        "firstWeekday": 2,
+        "holidays": [
+          {
+            "day": 5,
+            "daysAway": 87,
+            "gregorian": "2026-11-21",
+            "name": "चाँगुनारायण अखण्डदीप दर्शन"
+          }
+        ],
+        "month": 8,
+        "name": "मंसिर",
+        "year": 2083
+      },
+      {
+        "days": 30,
+        "firstWeekday": 3,
+        "holidays": [
+          {
+            "day": 9,
+            "daysAway": 120,
+            "gregorian": "2026-12-24",
+            "name": "यमरीपुन्हीः, थिंला पुन्हीः"
+          },
+          {
+            "day": 10,
+            "daysAway": 121,
+            "gregorian": "2026-12-25",
+            "name": "क्रिसमस डे"
+          },
+          {
+            "day": 15,
+            "daysAway": 126,
+            "gregorian": "2026-12-30",
+            "name": "तमुल्होछार"
+          }
+        ],
+        "month": 9,
+        "name": "पुष",
+        "year": 2083
+      },
+      {
+        "days": 29,
+        "firstWeekday": 5,
+        "holidays": [
+          {
+            "day": 1,
+            "daysAway": 142,
+            "gregorian": "2027-01-15",
+            "name": "माघे संक्रान्ति, माघी पर्व"
+          },
+          {
+            "day": 2,
+            "daysAway": 143,
+            "gregorian": "2027-01-16",
+            "name": "अष्टमीव्रत, सेतो मच्छिन्द्रनाथ स्नान"
+          },
+          {
+            "day": 16,
+            "daysAway": 157,
+            "gregorian": "2027-01-30",
+            "name": "सहिद दिवस"
+          },
+          {
+            "day": 23,
+            "daysAway": 164,
+            "gregorian": "2027-02-06",
+            "name": "पशुपति क्षेत्रमा माधव नारायण मेला, त्रिवेणी मेला"
+          },
+          {
+            "day": 24,
+            "daysAway": 165,
+            "gregorian": "2027-02-07",
+            "name": "सोनाम ल्होसार, तामाङ ल्होछार"
+          }
+        ],
+        "month": 10,
+        "name": "माघ",
+        "year": 2083
+      },
+      {
+        "days": 30,
+        "firstWeekday": 6,
+        "holidays": [
+          {
+            "day": 1,
+            "daysAway": 171,
+            "gregorian": "2027-02-13",
+            "name": "विश्व रेडियो दिवस, अचला सप्तमी"
+          },
+          {
+            "day": 7,
+            "daysAway": 177,
+            "gregorian": "2027-02-19",
+            "name": "राष्ट्रिय प्रजातन्त्र दिवस, निर्वाचन दिवस"
+          },
+          {
+            "day": 8,
+            "daysAway": 178,
+            "gregorian": "2027-02-20",
+            "name": "श्रीस्वस्थानीव्रत समाप्ति, सि पुन्हिः"
+          },
+          {
+            "day": 22,
+            "daysAway": 192,
+            "gregorian": "2027-03-06",
+            "name": "महाशिवरात्रि, सिलाचह्रे:"
+          },
+          {
+            "day": 24,
+            "daysAway": 194,
+            "gregorian": "2027-03-08",
+            "name": "अन्तर्राष्ट्रिय महिला दिवस"
+          },
+          {
+            "day": 25,
+            "daysAway": 195,
+            "gregorian": "2027-03-09",
+            "name": "ग्याल्पो ल्होसार"
+          }
+        ],
+        "month": 11,
+        "name": "फागुन",
+        "year": 2083
+      },
+      {
+        "days": 30,
+        "firstWeekday": 1,
+        "holidays": [],
+        "month": 12,
+        "name": "चैत",
+        "year": 2083
+      },
+      {
+        "days": 31,
+        "firstWeekday": 3,
+        "holidays": [],
+        "month": 1,
+        "name": "बैशाख",
+        "year": 2084
+      },
+      {
+        "days": 31,
+        "firstWeekday": 6,
+        "holidays": [],
+        "month": 2,
+        "name": "जेठ",
+        "year": 2084
+      },
+      {
+        "days": 32,
+        "firstWeekday": 2,
+        "holidays": [],
+        "month": 3,
+        "name": "असार",
+        "year": 2084
+      },
+      {
+        "days": 31,
+        "firstWeekday": 6,
+        "holidays": [],
+        "month": 4,
+        "name": "साउन",
+        "year": 2084
+      }
+    ],
+    "today": {
+      "day": 10,
+      "month": 5,
+      "year": 2083
+    }
   },
   "recordedAt": "2026-08-26T14:20:00+00:00"
 }

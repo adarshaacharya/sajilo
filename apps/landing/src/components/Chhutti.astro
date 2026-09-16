@@ -1,0 +1,316 @@
+---
+// Festivals and public holidays, counted the way a class counts to Dashain: in
+// chalk tally marks on the blackboard. Below it, the year ahead as a strip of
+// days with every public holiday in red. All of it is the app's own bundled
+// calendar, recorded by apps/showcase-data (src/data/showcase.ts).
+import { chhath, dashain, holidayYear, holidaysAhead, tihar } from "../data/showcase";
+import { ne } from "../lib/format";
+
+const days = dashain?.daysAway ?? 0;
+const groups = Math.floor(days / 5);
+const rest = days % 5;
+const clean = (name: string) => name.replace(/\(.*?\)/g, "").split(",")[0].trim();
+const countdowns = [
+  { label: "तिहार", sub: "Bhai Tika", when: tihar },
+  { label: "छठ", sub: "Chhath", when: chhath },
+].filter((c) => c.when);
+// A little wobble per stroke, fixed so every build draws the same board.
+const wobble = (i: number) => [-4, 3, -2, 5, -3, 2, -5, 4][i % 8];
+---
+
+<section class="chhutti wrap" id="holidays" aria-labelledby="chhutti-title">
+  <div class="section-head reveal">
+    <p class="chhutti-mark">
+      <span lang="ne">चाडपर्व र बिदा</span>
+      <span class="chhutti-mark-en">Festivals &amp; holidays</span>
+    </p>
+    <h2 id="chhutti-title">Book the bus home for Dashain <em>before all of Kathmandu does.</em></h2>
+    <p class="lede">
+      {ne(holidaysAhead)} public holidays ahead, already in the app. See them coming, line them up with
+      Saturdays, and put in your leave while the office still has someone to approve it.
+    </p>
+  </div>
+
+  {dashain && (
+    <div class="board reveal">
+      <div class="board-count">
+        <p class="board-label" lang="ne">दशैंसम्म</p>
+        <p class="board-number" lang="ne">{ne(days)}</p>
+        <p class="board-unit">sleeps to Tika</p>
+      </div>
+      <div class="tally" role="img" aria-label={`${days} tally marks`}>
+        {Array.from({ length: groups }, (_, g) => (
+          <svg class="stroke-group" viewBox="0 0 52 44" style={`--d:${g * 45}ms`} aria-hidden="true">
+            {[0, 1, 2, 3].map((k) => (
+              <line x1={8 + k * 11} y1="4" x2={8 + k * 11 + wobble(g + k) * 0.3} y2="40" />
+            ))}
+            <line class="slash" x1="1" y1="34" x2="51" y2="9" />
+          </svg>
+        ))}
+        {rest > 0 && (
+          <svg class="stroke-group" viewBox="0 0 52 44" aria-hidden="true">
+            {Array.from({ length: rest }, (_, k) => (
+              <line x1={8 + k * 11} y1="4" x2={8 + k * 11 + wobble(k) * 0.3} y2="40" />
+            ))}
+          </svg>
+        )}
+      </div>
+      <ul class="board-more">
+        {countdowns.map((c) => (
+          <li>
+            <span lang="ne">{c.label}</span>
+            <span class="more-days" lang="ne">{ne(c.when!.daysAway)} दिन</span>
+            <span class="more-sub">{c.sub}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="board-chalk" aria-hidden="true">— monitor</p>
+    </div>
+  )}
+
+  <div class="strip reveal" role="list" aria-label="The year ahead, public holidays marked">
+    {holidayYear.map((month) => {
+      const names = new Map(month.holidays.map((h) => [h.day, h]));
+      return (
+        <div class="month" role="listitem">
+          <p class="month-name" lang="ne">{month.name}</p>
+          <div class="cells" aria-hidden="true">
+            {Array.from({ length: month.days }, (_, i) => {
+              const day = i + 1;
+              const holiday = names.get(day);
+              const saturday = (month.firstWeekday + i) % 7 === 6;
+              return (
+                <span
+                  class:list={[
+                    "cell",
+                    {
+                      saturday,
+                      holiday: holiday && holiday.daysAway >= 0,
+                      past: holiday && holiday.daysAway < 0,
+                      today: holiday?.daysAway === 0,
+                    },
+                  ]}
+                  title={holiday ? `${ne(day)} ${month.name} · ${clean(holiday.name)}` : undefined}
+                  style={day === 1 ? `grid-column-start:${month.firstWeekday + 1}` : undefined}
+                />
+              );
+            })}
+          </div>
+          <p class="month-count">
+            {month.holidays.length > 0 ? (
+              <span lang="ne">{ne(month.holidays.length)} बिदा</span>
+            ) : (
+              <span class="dry">no holiday. sorry.</span>
+            )}
+          </p>
+          <p class="month-top" lang="ne">
+            {month.holidays[0] && clean(month.holidays[0].name)}
+          </p>
+        </div>
+      );
+    })}
+  </div>
+  <p class="strip-key reveal">
+    <span class="key holiday"></span> public holiday
+    <span class="key saturday"></span> Saturday
+  </p>
+</section>
+
+<style>
+  .chhutti {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .chhutti-mark {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 14px;
+  }
+  .chhutti-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .chhutti-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  /* A classroom blackboard in a wooden frame: the big number, the tally
+     someone keeps adding to, and the other festivals chalked underneath. */
+  .board {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px clamp(24px, 4vw, 56px);
+    align-items: center;
+    margin-top: clamp(28px, 4vw, 48px);
+    padding: clamp(24px, 3.4vw, 40px);
+    color: #eeeae0;
+    background:
+      radial-gradient(90% 70% at 30% 20%, rgb(255 255 255 / 0.06), transparent 60%),
+      radial-gradient(60% 50% at 80% 90%, rgb(255 255 255 / 0.04), transparent 70%),
+      #243a2e;
+    border: 12px solid #6b4a2b;
+    border-radius: 6px;
+    box-shadow:
+      inset 0 0 40px rgb(0 0 0 / 0.45),
+      0 30px 60px -28px rgb(0 0 0 / 0.85);
+  }
+  .board-label {
+    font-family: var(--display);
+    font-size: 18px;
+    color: rgb(238 234 224 / 0.7);
+  }
+  .board-number {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(88px, 12vw, 150px);
+    line-height: 0.9;
+    color: #f4efe2;
+    text-shadow: 0 0 1px rgb(255 255 255 / 0.6);
+  }
+  .board-unit {
+    margin-top: 6px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(238 234 224 / 0.6);
+  }
+  .tally {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+  .stroke-group {
+    width: clamp(38px, 4.4vw, 52px);
+    overflow: visible;
+  }
+  .stroke-group line {
+    stroke: rgb(244 239 226 / 0.88);
+    stroke-width: 3.2;
+    stroke-linecap: round;
+  }
+  .stroke-group .slash {
+    stroke: #f0c66a;
+  }
+  .board-more {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 32px;
+    padding-top: 16px;
+    list-style: none;
+    margin: 0;
+    border-top: 1px dashed rgb(238 234 224 / 0.25);
+  }
+  .board-more li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .board-more [lang="ne"]:first-child {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+  }
+  .more-days {
+    font-family: var(--display);
+    font-size: 22px;
+    color: #f0c66a;
+  }
+  .more-sub {
+    font-size: 12px;
+    color: rgb(238 234 224 / 0.55);
+  }
+  .board-chalk {
+    position: absolute;
+    right: 22px;
+    bottom: 12px;
+    font-size: 13px;
+    font-style: italic;
+    color: rgb(238 234 224 / 0.35);
+  }
+
+  /* The year as a strip of days. Red is a holiday, the same rule the wall
+     patro keeps; Saturdays are the faint ones. */
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+    gap: 22px 16px;
+    margin-top: clamp(28px, 4vw, 44px);
+  }
+  .month-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--paper);
+  }
+  .cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    margin-top: 8px;
+  }
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--ink-3);
+  }
+  .cell.saturday {
+    background: rgb(228 71 47 / 0.18);
+  }
+  .cell.holiday {
+    background: var(--sindoor);
+    cursor: help;
+  }
+  .cell.past {
+    background: rgb(228 71 47 / 0.35);
+  }
+  .month-count {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--sindoor-2);
+  }
+  .dry {
+    color: var(--paper-4);
+  }
+  .month-top {
+    font-size: 12.5px;
+    color: var(--paper-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .strip-key {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 12.5px;
+    color: var(--paper-3);
+  }
+  .key {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+  }
+  .key.holiday {
+    background: var(--sindoor);
+  }
+  .key.saturday {
+    margin-left: 12px;
+    background: rgb(228 71 47 / 0.18);
+  }
+
+  @media (max-width: 640px) {
+    .board {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
