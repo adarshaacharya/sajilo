@@ -83,7 +83,14 @@ export const nepse = {
   listed: stocks.quotes.length,
   subIndices: stocks.subIndices.length,
   topGainer: stocks.movers.find((m) => m.board === "gainers")!,
+  turnover: stocks.nepse.turnover,
+  breadth: stocks.breadth,
+  closedAt: stocks.marketStatus.asOf,
+  gainers: stocks.movers.filter((m) => m.board === "gainers").slice(0, 3),
+  losers: stocks.movers.filter((m) => m.board === "losers").slice(0, 3),
 };
+/** The index through the recorded session, a sample a minute. */
+export const nepseIntraday = c.get_nepse_intraday.value.points;
 
 // ---------- Forex ----------
 

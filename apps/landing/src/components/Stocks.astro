@@ -1,0 +1,396 @@
+---
+// The recorded session, drawn. Every number and every point on the line is
+// the recording's (src/data/showcase.ts); the chart is the same minute-by-
+// minute series the app plots, laid out here as one wide stroke.
+import { nepse, nepseIntraday } from "../data/showcase";
+import { rs, signed, nepalClock, ne } from "../lib/format";
+
+const W = 800;
+const H = 260;
+const PAD = { top: 18, bottom: 26, left: 0, right: 0 };
+
+const values = nepseIntraday.map((p) => p.value);
+const previousClose = nepse.value - nepse.change;
+const lo = Math.min(...values, previousClose);
+const hi = Math.max(...values, previousClose);
+const span = hi - lo || 1;
+const x = (i: number) => PAD.left + (i / (values.length - 1)) * (W - PAD.left - PAD.right);
+const y = (v: number) => PAD.top + (1 - (v - lo) / span) * (H - PAD.top - PAD.bottom);
+
+const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+const area = `${line} L${x(values.length - 1).toFixed(1)} ${H} L${x(0).toFixed(1)} ${H} Z`;
+const closeY = y(previousClose).toFixed(1);
+const lastX = x(values.length - 1).toFixed(1);
+const lastY = y(values[values.length - 1]).toFixed(1);
+const up = nepse.change >= 0;
+
+const opened = nepseIntraday[0].time;
+const closed = nepseIntraday[nepseIntraday.length - 1].time;
+const high = Math.max(...values);
+const low = Math.min(...values);
+
+const { advanced, declined, unchanged } = nepse.breadth;
+const total = advanced + declined + unchanged;
+const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
+---
+
+<section class="stocks wrap" id="stocks" aria-labelledby="stocks-title">
+  <div class="section-head reveal">
+    <p class="stocks-mark">
+      <span lang="ne">नेप्से</span>
+      <span class="stocks-mark-en">Stocks</span>
+    </p>
+    <h2 id="stocks-title">Never open another tab for the share market.</h2>
+    <p class="lede">
+      NEPSE lives in your menu bar. While the exchange is open the index and every listed company move
+      with it, minute by minute; after the bell, the day's close stays put. Gainers, losers, turnover,
+      your own watchlist — one click from whatever you were doing.
+    </p>
+  </div>
+
+  <div class:list={["board", "reveal", { "is-down": !up }]}>
+    <div class="board-head">
+      <p class="board-name">NEPSE</p>
+      <p class="board-value num">{rs(nepse.value)}</p>
+      <p class:list={["board-change", "num", up ? "is-up" : "is-down"]}>
+        {signed(nepse.change, 2)} · {signed(nepse.changePercent, 2)}%
+      </p>
+      <p class="board-when num">Closed {nepalClock(nepse.closedAt)}</p>
+    </div>
+
+    <svg class="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`NEPSE through the session, from ${rs(values[0])} to ${rs(values[values.length - 1])}`}>
+      <defs>
+        <linearGradient id="stocks-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="currentColor" stop-opacity="0.22" />
+          <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <line class="chart-close" x1="0" x2={W} y1={closeY} y2={closeY} />
+      <path class="chart-area" d={area} fill="url(#stocks-fill)" />
+      <path class="chart-line" d={line} pathLength="1" />
+      <circle class="chart-dot" cx={lastX} cy={lastY} r="4" />
+    </svg>
+
+    <div class="chart-axis num">
+      <span>{nepalClock(opened)}</span>
+      <span class="axis-close">prev. close {rs(previousClose)}</span>
+      <span>{nepalClock(closed)}</span>
+    </div>
+
+    <dl class="board-facts">
+      <div><dt>High</dt><dd class="num">{rs(high)}</dd></div>
+      <div><dt>Low</dt><dd class="num">{rs(low)}</dd></div>
+      <div><dt>Turnover</dt><dd class="num">Rs {crore(nepse.turnover)}</dd></div>
+      <div><dt>Listed</dt><dd class="num">{nepse.listed}</dd></div>
+    </dl>
+  </div>
+
+  <div class="under reveal">
+    <div class="breadth">
+      <p class="eyebrow">{ne(total)} traded</p>
+      <div class="breadth-bar" role="img" aria-label={`${advanced} up, ${unchanged} flat, ${declined} down`}>
+        <span class="up" style={`flex:${advanced}`}></span>
+        <span class="flat" style={`flex:${unchanged}`}></span>
+        <span class="down" style={`flex:${declined}`}></span>
+      </div>
+      <p class="breadth-legend num">
+        <span class="t-up">{advanced} up</span>
+        <span>{unchanged} flat</span>
+        <span class="t-down">{declined} down</span>
+      </p>
+    </div>
+
+    <div class="movers">
+      <ol class="mover-list" aria-label="Top gainers">
+        {nepse.gainers.map((m) => (
+          <li><span class="sym">{m.symbol}</span><span class="num t-up">{signed(m.metric, 2)}%</span></li>
+        ))}
+      </ol>
+      <ol class="mover-list" aria-label="Top losers">
+        {nepse.losers.map((m) => (
+          <li><span class="sym">{m.symbol}</span><span class="num t-down">{signed(m.metric, 2)}%</span></li>
+        ))}
+      </ol>
+    </div>
+
+    <figure class="stocks-stage">
+      <div class="stocks-frame">
+        <div class="stocks-screen">
+          <iframe
+            class="stocks-app"
+            title="Sajilo stocks screen"
+            tabindex="-1"
+            scrolling="no"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2Fbazar%3Ftab%3Dstocks&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .stocks {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .stocks-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .stocks-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .stocks-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  /* The board: the index set like the patro's date, the line drawn edge to
+     edge beneath it. Green is the app's own colour for a rise; sindoor for
+     a fall, as on the calendar. */
+  .board {
+    margin-top: clamp(28px, 4vw, 48px);
+    color: var(--leaf);
+  }
+  .board.is-down {
+    color: var(--sindoor-2);
+  }
+  .board-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "name value" "when change";
+    column-gap: 20px;
+    align-items: baseline;
+    color: var(--paper);
+  }
+  .board-name {
+    grid-area: name;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--paper-3);
+  }
+  .board-value {
+    grid-area: value;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(56px, 9vw, 128px);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+  }
+  .board-change {
+    grid-area: change;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 500;
+    margin-top: 6px;
+  }
+  .board-change.is-up {
+    color: var(--leaf);
+  }
+  .board-change.is-down {
+    color: var(--sindoor-2);
+  }
+  .board-when {
+    grid-area: when;
+    font-size: 13px;
+    color: var(--paper-3);
+    margin-top: 6px;
+  }
+
+  .chart {
+    display: block;
+    width: 100%;
+    height: clamp(160px, 22vw, 260px);
+    margin-top: 12px;
+    overflow: visible;
+  }
+  .chart-close {
+    stroke: var(--paper-4);
+    stroke-width: 1;
+    stroke-dasharray: 3 5;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .reveal.in .chart-line,
+  .reveal.is-in .chart-line {
+    animation: draw 1.6s var(--ease) forwards;
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .chart-dot {
+    fill: currentColor;
+    stroke: var(--ink);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart-axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--paper-3);
+  }
+  .board-facts {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: start;
+    gap: 8px clamp(28px, 5vw, 64px);
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .board-facts dt {
+    font-size: 12px;
+    color: var(--paper-3);
+  }
+  .board-facts dd {
+    font-size: 17px;
+    color: var(--paper);
+    margin-top: 2px;
+  }
+
+  .under {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 300px);
+    gap: clamp(28px, 5vw, 64px);
+    align-items: start;
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .breadth-bar {
+    display: flex;
+    height: 10px;
+    gap: 2px;
+    margin-top: 12px;
+  }
+  .breadth-bar span {
+    display: block;
+    min-width: 2px;
+    border-radius: 2px;
+  }
+  .breadth-bar .up {
+    background: var(--leaf);
+  }
+  .breadth-bar .flat {
+    background: var(--paper-4);
+  }
+  .breadth-bar .down {
+    background: var(--sindoor);
+  }
+  .breadth-legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 13.5px;
+    color: var(--paper-3);
+  }
+  .t-up {
+    color: var(--leaf);
+  }
+  .t-down {
+    color: var(--sindoor-2);
+  }
+  .movers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .mover-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14.5px;
+  }
+  .mover-list li:first-child {
+    border-top: 1px solid var(--line-2);
+  }
+  .sym {
+    font-family: var(--display);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .stocks-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+  }
+  .stocks-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .stocks-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chart-line {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .board-head {
+      grid-template-columns: 1fr;
+      grid-template-areas: "name" "value" "change" "when";
+    }
+    .board-facts {
+      grid-template-columns: repeat(2, auto);
+    }
+    .under {
+      grid-template-columns: 1fr;
+    }
+    .stocks-stage {
+      width: min(100%, 300px);
+    }
+  }
+</style>
+
+<script>
+  const frame = document.querySelector<HTMLElement>(".stocks-frame");
+  const screen = document.querySelector<HTMLElement>(".stocks-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>

@@ -1,77 +1,69 @@
 ---
 // Keeper is the one screen with nothing recorded in it, on purpose: it holds
 // citizenship and passport numbers, so the showcase ships its empty state
-// (see apps/showcase-data). What this section shows instead is the rulebook —
-// which papers lapse, how, and when the app speaks up — read off
-// apps/desktop/src/features/keeper/_lib/documents.ts and templates.ts. It
-// never shows a document, a name or a date as if it were someone's.
-//
-// The form is a khata: the ruled household register, red margin line and
-// all, that this screen replaces.
+// (see apps/showcase-data). What this section shows is the drawer itself —
+// the papers and bills Keeper takes, as slips — read off
+// apps/desktop/src/features/keeper/_lib. No document, name or date is shown
+// as if it were someone's.
 
-interface Row {
-  paper: string;
+interface Slip {
   ne: string;
-  lapses: string;
-  told: string;
+  en: string;
+  /** Bills are smaller, receipt-cut slips; papers are full cards. */
+  bill?: boolean;
 }
 
-const rows: Row[] = [
-  { paper: "Citizenship, National ID, PAN", ne: "नागरिकता", lapses: "Never. Kept as a record.", told: "—" },
-  { paper: "Passport", ne: "राहदानी", lapses: "Expires. Ten years for an adult.", told: "A year, six months, a month before" },
-  { paper: "Driving licence", ne: "लाइसेन्स", lapses: "Expires. Ten years, five past sixty.", told: "A month, a week before" },
-  { paper: "Bluebook", ne: "ब्लुबुक", lapses: "Tax falls due every Ashad.", told: "A month, a week, the day before" },
-  { paper: "Vehicle, health, property insurance", ne: "बीमा", lapses: "Renews every year.", told: "A month, a week before" },
-  { paper: "Life insurance", ne: "जीवन बीमा", lapses: "Premium monthly, quarterly or yearly.", told: "Two weeks, three days before" },
-  { paper: "Warranty", ne: "वारेन्टी", lapses: "Ends.", told: "A month before" },
-  { paper: "Electricity, water, internet, telephone, rent, EMI, subscriptions", ne: "बिल", lapses: "Every month.", told: "Three days before" },
-  { paper: "Anything else", ne: "अरू", lapses: "Never, once, or on a cycle. Your fields.", told: "Your choice" },
+const slips: Slip[] = [
+  { ne: "नागरिकता", en: "Citizenship" },
+  { ne: "राहदानी", en: "Passport" },
+  { ne: "लाइसेन्स", en: "Driving licence" },
+  { ne: "ब्लुबुक", en: "Bluebook" },
+  { ne: "बीमा", en: "Insurance" },
+  { ne: "परिचयपत्र", en: "National ID" },
+  { ne: "PAN", en: "PAN" },
+  { ne: "वारेन्टी", en: "Warranty" },
+  { ne: "बिजुली", en: "Electricity", bill: true },
+  { ne: "पानी", en: "Water", bill: true },
+  { ne: "इन्टरनेट", en: "Internet", bill: true },
+  { ne: "फोन", en: "Telephone", bill: true },
+  { ne: "भाडा", en: "Rent", bill: true },
+  { ne: "EMI", en: "Loan EMI", bill: true },
+  { ne: "सदस्यता", en: "Subscription", bill: true },
+  { ne: "अरू", en: "Anything else" },
 ];
 ---
 
 <section class="keeper wrap" id="keeper" aria-labelledby="keeper-title">
-  <div class="section-head reveal">
-    <p class="keeper-mark">
-      <span lang="ne">सम्हाल</span>
-      <span class="keeper-mark-en">Keeper</span>
-    </p>
-    <h2 id="keeper-title">The household register.</h2>
-    <p class="lede">
-      Every paper the family holds, whose it is, and the day it lapses — with the app doing the
-      remembering. Kept on your computer, offline, with no account.
-    </p>
-  </div>
-
   <div class="keeper-grid">
-    <figure class="khata reveal" aria-label="What each kind of paper does, and when Keeper reminds you">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col"><span lang="ne">कागजात</span><span>Paper</span></th>
-            <th scope="col"><span lang="ne">म्याद</span><span>Lapses</span></th>
-            <th scope="col"><span lang="ne">सम्झाउने</span><span>You are told</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r, i) => (
-            <tr class="reveal" style={`--d:${i * 40}ms`}>
-              <th scope="row">
-                <span class="row-ne" lang="ne">{r.ne}</span>
-                <span class="row-paper">{r.paper}</span>
-              </th>
-              <td>{r.lapses}</td>
-              <td class="row-told">{r.told}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <figcaption>
-        Reminders arrive at nine in the morning, Nepal time, on those days and on the day itself; one more
-        comes the morning after, if it was missed. Every timing can be changed per paper.
-      </figcaption>
-    </figure>
+    <div class="keeper-main">
+      <div class="section-head reveal">
+        <p class="keeper-mark">
+          <span lang="ne">सम्हाल</span>
+          <span class="keeper-mark-en">Keeper</span>
+        </p>
+        <h2 id="keeper-title">One drawer for everything that lapses.</h2>
+        <p class="lede">
+          Say whose it is and when it runs out. Keeper nudges you at nine in the morning, Nepal time.
+          It lives on your computer — no account, nothing uploaded.
+        </p>
+      </div>
 
-    <aside class="keeper-side reveal">
+      <ul class="drawer reveal" aria-label="What Keeper holds">
+        {slips.map((s, i) => (
+          <li class:list={["slip", { "slip--bill": s.bill }]} style={`--tilt:${(((i * 37) % 11) - 5) * 0.55}deg`}>
+            <span class="slip-ne" lang={s.ne === "PAN" || s.ne === "EMI" ? undefined : "ne"}>{s.ne}</span>
+            <span class="slip-en">{s.en}</span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="keeper-foot reveal">
+        Papers for you and the family. Bills every month. Bluebook tax every Ashad, policies every year.
+        A missed one gets one more nudge the morning after.
+      </p>
+    </div>
+
+    <figure class="keeper-stage reveal">
       <div class="keeper-frame">
         <div class="keeper-screen">
           <iframe
@@ -84,21 +76,8 @@ const rows: Row[] = [
           ></iframe>
         </div>
       </div>
-      <p class="keeper-caption">The screen as it ships, before anything is written in it.</p>
-
-      <div class="keeper-prose">
-        <p>
-          Each paper belongs to you or to someone in the family, and a family member can be added from the
-          form itself. A vehicle policy is tied to its bluebook, and the bluebook says so when no policy is
-          linked or the policy runs out before the tax is due.
-        </p>
-        <p>
-          Passports, licences, bluebooks, policies and warranties carry what renewing takes: what to bring,
-          where to go, and the official site. Marking a bluebook's tax paid moves it to next Ashad; renewing
-          a passport asks only for the new date.
-        </p>
-      </div>
-    </aside>
+      <figcaption class="keeper-caption">The drawer as it ships, empty.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -107,6 +86,12 @@ const rows: Row[] = [
     position: relative;
     z-index: 1;
     padding-top: clamp(80px, 11vw, 160px);
+  }
+  .keeper-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
   }
   .keeper-mark {
     display: flex;
@@ -126,98 +111,90 @@ const rows: Row[] = [
     color: var(--paper-3);
   }
 
-  .keeper-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
-    gap: clamp(32px, 6vw, 88px);
-    align-items: start;
-    margin-top: clamp(28px, 4vw, 48px);
+  /* The drawer: paper slips tipped out on the ink, each at its own small
+     angle. Cream paper is the one place on the page the ground flips — these
+     are the papers, the page is the desk. */
+  .drawer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 12px;
+    margin-top: clamp(28px, 4vw, 44px);
+    padding: 6px 0 10px;
   }
-
-  /* The khata: ruled lines the width of the sheet, a sindoor margin down the
-     left, Devanagari in the margin. No card, no fill — a page. */
-  .khata {
+  .slip {
     position: relative;
-    padding-left: clamp(18px, 2.6vw, 30px);
+    display: grid;
+    gap: 2px;
+    padding: 14px 16px 12px;
+    min-width: 128px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 3px;
+    transform: rotate(var(--tilt));
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.35) inset,
+      0 10px 24px -14px rgb(0 0 0 / 0.9);
+    transition: transform 0.45s var(--spring), box-shadow 0.3s;
   }
-  .khata::before {
+  /* A stamp-red band along the top edge, like the header stripe of a form. */
+  .slip::before {
     content: "";
     position: absolute;
     top: 0;
-    bottom: 0;
-    left: 0;
-    width: 1px;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    border-radius: 0 0 2px 2px;
     background: var(--sindoor);
-    opacity: 0.85;
   }
-  .khata table {
-    width: 100%;
-    border-collapse: collapse;
+  .slip:hover {
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.35) inset,
+      0 18px 30px -14px rgb(0 0 0 / 0.9);
   }
-  .khata thead th {
-    text-align: left;
-    font-weight: 500;
-    padding: 0 12px 12px 0;
-    border-bottom: 1px solid var(--line-2);
-    vertical-align: bottom;
-  }
-  .khata thead th span {
-    display: block;
-  }
-  .khata thead th [lang="ne"] {
+  .slip-ne {
     font-family: var(--display);
     font-weight: 700;
+    font-size: 24px;
+    line-height: 1.05;
+  }
+  .slip-en {
+    font-size: 12px;
+    color: var(--paper-4);
+    letter-spacing: 0.01em;
+  }
+  /* Bills are narrower, cut like a till receipt, and take the gilt band. */
+  .slip--bill {
+    min-width: 104px;
+    padding: 12px 14px 10px;
+    background: #eadfc8;
+    clip-path: polygon(
+      0 0, 100% 0, 100% calc(100% - 5px), 92% 100%, 84% calc(100% - 5px), 76% 100%,
+      68% calc(100% - 5px), 60% 100%, 52% calc(100% - 5px), 44% 100%, 36% calc(100% - 5px),
+      28% 100%, 20% calc(100% - 5px), 12% 100%, 4% calc(100% - 5px), 0 100%
+    );
+    box-shadow: none;
+  }
+  .slip--bill::before {
+    background: var(--gilt);
+  }
+  .slip--bill .slip-ne {
     font-size: 20px;
-    line-height: 1.1;
-    color: var(--gilt-2);
   }
-  .khata thead th span:not([lang]) {
-    font-size: 12.5px;
-    color: var(--paper-3);
-    margin-top: 2px;
+  .slip--bill:hover {
+    box-shadow: none;
   }
-  .khata tbody tr {
-    border-bottom: 1px solid var(--line);
-  }
-  .khata tbody th,
-  .khata td {
-    padding: 16px 12px 16px 0;
-    vertical-align: top;
-    font-weight: 400;
-    text-align: left;
-    font-size: 15px;
+
+  .keeper-foot {
+    margin-top: clamp(22px, 3vw, 32px);
+    max-width: 58ch;
+    font-size: 15.5px;
     color: var(--paper-2);
     text-wrap: pretty;
   }
-  .khata tbody th {
-    width: 36%;
-    color: var(--paper);
-  }
-  .row-ne {
-    display: block;
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 21px;
-    line-height: 1.1;
-  }
-  .row-paper {
-    display: block;
-    font-size: 13.5px;
-    color: var(--paper-3);
-    margin-top: 3px;
-  }
-  .row-told {
-    color: var(--gilt-2);
-  }
-  .khata figcaption {
-    margin-top: 18px;
-    font-size: 13.5px;
-    color: var(--paper-3);
-    max-width: 62ch;
-    text-wrap: pretty;
-  }
 
-  .keeper-side {
+  .keeper-stage {
     position: sticky;
     top: 92px;
   }
@@ -254,64 +231,31 @@ const rows: Row[] = [
     font-size: 13px;
     color: var(--paper-3);
   }
-  .keeper-prose {
-    display: grid;
-    gap: 14px;
-    margin-top: 24px;
-    padding-top: 18px;
-    border-top: 1px solid var(--line);
-    font-size: 14.5px;
-    color: var(--paper-2);
-    text-wrap: pretty;
-  }
 
+  @media (prefers-reduced-motion: reduce) {
+    .slip,
+    .slip:hover {
+      transition: none;
+      transform: none;
+    }
+  }
   @media (max-width: 860px) {
     .keeper-grid {
       grid-template-columns: 1fr;
     }
-    .keeper-side {
+    .keeper-stage {
       position: static;
-      display: grid;
-      grid-template-columns: minmax(0, 260px) 1fr;
-      gap: 6px 24px;
-    }
-    .keeper-frame {
-      grid-row: 1 / 3;
-    }
-    .keeper-prose {
-      grid-column: 2;
-      margin-top: 0;
-      padding-top: 0;
-      border-top: 0;
-    }
-    .khata thead {
-      display: none;
-    }
-    .khata tbody tr {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 4px;
-      padding: 14px 0;
-    }
-    .khata tbody th,
-    .khata td {
-      padding: 0;
-      width: auto;
-    }
-  }
-  @media (max-width: 560px) {
-    .keeper-side {
-      grid-template-columns: 1fr;
-    }
-    .keeper-frame {
-      grid-row: auto;
       width: min(100%, 300px);
     }
-    .keeper-prose {
-      grid-column: 1;
-      margin-top: 20px;
-      padding-top: 18px;
-      border-top: 1px solid var(--line);
+    .slip {
+      min-width: 112px;
+      padding: 12px 14px 10px;
+    }
+    .slip-ne {
+      font-size: 21px;
+    }
+    .slip--bill {
+      min-width: 92px;
     }
   }
 </style>
