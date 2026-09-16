@@ -1,7 +1,13 @@
 import { Icon } from "../../../shared/components/icon";
-import type { KeeperPerson, KeeperRecord } from "../../../shared/lib/ipc";
+import {
+  api,
+  type KeeperAttachmentSummary,
+  type KeeperPerson,
+  type KeeperRecord,
+} from "../../../shared/lib/ipc";
 import { personName, recordName, recordSummary } from "../_lib/documents";
 import { daysUntil, type TFn } from "../_lib/shared";
+import { PhotoBadge, usePhotoSummaries } from "./photo-strip";
 import { RecordDue } from "./record-detail";
 import { DueTile, LetterTile } from "./rows";
 
@@ -22,6 +28,7 @@ export function GroupPage({
   onAddAnother: () => void;
   t: TFn;
 }) {
+  const photos = usePhotoSummaries("record");
   return (
     <div className="space-y-2.5">
       <section className="surface-card px-3">
@@ -33,32 +40,43 @@ export function GroupPage({
             .filter(Boolean)
             .join(" · ");
           return (
-            <button
+            <div
               key={record.id}
-              type="button"
-              onClick={() => onOpen(record.id)}
-              className="flex w-full items-center gap-2.5 border-b border-divider py-2.5 text-left last:border-0"
+              className="flex items-center gap-2.5 border-b border-divider py-2.5 last:border-0"
             >
-              {record.expiryDate ? (
-                <DueTile date={record.expiryDate} days={daysUntil(record.expiryDate.ad)} />
-              ) : (
-                <LetterTile text={personName(t, people, record.personId)} />
-              )}
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[12px] font-medium">
-                  {personName(t, people, record.personId)}
-                </span>
-                {detail && (
-                  <span className="mt-0.5 block truncate text-[10px] text-text-muted">
-                    {detail}
-                  </span>
+              <button
+                type="button"
+                onClick={() => onOpen(record.id)}
+                className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+              >
+                {record.expiryDate ? (
+                  <DueTile date={record.expiryDate} days={daysUntil(record.expiryDate.ad)} />
+                ) : (
+                  <LetterTile text={personName(t, people, record.personId)} />
                 )}
-              </span>
-              {record.links.length > 0 && (
-                <Icon name="link" className="size-3 shrink-0 text-text-muted" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[12px] font-medium">
+                    {personName(t, people, record.personId)}
+                  </span>
+                  {detail && (
+                    <span className="mt-0.5 block truncate text-[10px] text-text-muted">
+                      {detail}
+                    </span>
+                  )}
+                </span>
+                {record.links.length > 0 && (
+                  <Icon name="link" className="size-3 shrink-0 text-text-muted" />
+                )}
+                <RecordDue record={record} t={t} />
+              </button>
+              {photos.get(record.id) && (
+                <PhotoBadge
+                  summary={photos.get(record.id) as KeeperAttachmentSummary}
+                  onOpen={() => api.openKeeperViewer("record", record.id, 0).catch(() => {})}
+                  t={t}
+                />
               )}
-              <RecordDue record={record} t={t} />
-            </button>
+            </div>
           );
         })}
       </section>
