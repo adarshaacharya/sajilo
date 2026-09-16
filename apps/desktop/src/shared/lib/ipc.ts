@@ -153,6 +153,8 @@ export interface KeeperItem {
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
+  /** The template it was started from, if any; groups reminders of a kind. */
+  template: string | null;
 }
 
 export type KeeperDocumentType =

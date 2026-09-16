@@ -1,0 +1,458 @@
+---
+// The recorded day's rashifal, all twelve, on a dial. Every reading, colour
+// and number is the recording's; sign names and first syllables are the
+// app's own table (see src/data/showcase.ts).
+import { rashifal } from "../data/showcase";
+
+/** Swatches for the colour words the readings use. Unknown words just get no
+ * swatch — the word is still printed. */
+const SWATCH: Record<string, string> = {
+  "सेतो": "#f3ede0",
+  "गुलाबी": "#f29ac0",
+  "हरियो": "#4fb872",
+  "हल्का हरियो": "#9ad89a",
+  "रातो": "#e4472f",
+  "पहेलो": "#f0c64a",
+  "खैरो": "#8a5a3b",
+  "निलो": "#4d86e0",
+  "कालो": "#1a1a1a",
+  "सुन्तला": "#f08a2a",
+  "बैजनी": "#9a6ad0",
+  "आकाशे": "#7cc6f0",
+};
+
+const first = rashifal[0];
+const step = 360 / rashifal.length;
+---
+
+<section class="rashi wrap" id="rashifal" aria-labelledby="rashi-title">
+  <div class="section-head reveal">
+    <p class="rashi-mark">
+      <span lang="ne">राशिफल</span>
+      <span class="rashi-mark-en">Rashifal</span>
+    </p>
+    <h2 id="rashi-title">Your day, read before your tea.</h2>
+    <p class="lede">
+      All twelve signs, fresh every morning, in Nepali — with the day's lucky colour and number. Don't
+      know your rashi? Start from the first letter of your name.
+    </p>
+  </div>
+
+  <div class="rashi-grid reveal">
+    <div class="dial-wrap">
+      <div class="dial" style={`--turn:0deg`} data-step={step}>
+        {rashifal.map((s, i) => (
+          <button
+            type="button"
+            class:list={["dial-sign", { "is-on": i === 0 }]}
+            style={`--a:${i * step}deg`}
+            data-index={i}
+            aria-pressed={i === 0 ? "true" : "false"}
+            aria-label={`${s.en} (${s.western})`}
+          >
+            <span lang="ne">{s.ne}</span>
+          </button>
+        ))}
+        <div class="dial-core" aria-hidden="true">
+          <span class="core-ne" lang="ne" data-bind="ne">{first.ne}</span>
+          <span class="core-en" data-bind="western">{first.western}</span>
+        </div>
+      </div>
+
+      <label class="finder">
+        <span lang="ne">नामको पहिलो अक्षर</span>
+        <input
+          type="text"
+          lang="ne"
+          inputmode="text"
+          maxlength="3"
+          placeholder="का"
+          autocomplete="off"
+          aria-label="First syllable of your name, in Nepali"
+        />
+        <span class="finder-hint" data-bind="hint" aria-live="polite"></span>
+      </label>
+    </div>
+
+    <article class="reading" aria-live="polite">
+      <p class="reading-sign">
+        <span lang="ne" data-bind="ne">{first.ne}</span>
+        <span class="reading-en" data-bind="en">{first.en} · {first.western}</span>
+      </p>
+      <p class="reading-text" lang="ne" data-bind="reading">{first.reading}</p>
+
+      <div class="lucky" data-bind="lucky" hidden={!first.colour}>
+        <div class="lucky-item">
+          <span class="lucky-swatch" data-bind="swatch" style={`--swatch:${SWATCH[first.colour ?? ""] ?? "transparent"}`}></span>
+          <span class="lucky-label" lang="ne">शुभ रंग</span>
+          <span class="lucky-value" lang="ne" data-bind="colour">{first.colour}</span>
+        </div>
+        <div class="lucky-item">
+          <span class="lucky-number" lang="ne" data-bind="number">{first.number}</span>
+          <span class="lucky-label" lang="ne">शुभ अंक</span>
+        </div>
+      </div>
+
+      <p class="reading-syllables" lang="ne" data-bind="syllables">{first.syllables.join(" · ")}</p>
+    </article>
+  </div>
+
+  <script type="application/json" id="rashi-data" set:html={JSON.stringify({ signs: rashifal, swatch: SWATCH })} />
+</section>
+
+<style>
+  .rashi {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .rashi-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .rashi-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .rashi-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .rashi-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 440px) minmax(0, 1fr);
+    gap: clamp(36px, 7vw, 104px);
+    align-items: center;
+    margin-top: clamp(32px, 5vw, 64px);
+  }
+
+  /* The dial: twelve names on a ring, like the rashi chakra printed in a
+     patro. Picking one turns the ring so it sits at the top. */
+  .dial-wrap {
+    container-type: inline-size;
+    display: grid;
+    gap: 28px;
+    justify-items: center;
+  }
+  .dial {
+    /* Ring radius from the dial's own width (the wrap is exactly as wide). */
+    --r: 39cqi;
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid var(--line-2);
+    background:
+      radial-gradient(circle, transparent 47%, var(--line) 47.2%, transparent 47.5%),
+      radial-gradient(circle, var(--ink-2) 0 31%, transparent 31.2%);
+    transform: rotate(var(--turn));
+    transition: transform 0.9s var(--spring);
+  }
+  /* Twelve spokes, drawn once. */
+  .dial::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 15deg, var(--line) 0 0.25deg, transparent 0.25deg 30deg);
+    mask: radial-gradient(circle, transparent 31%, #000 31.5%, #000 64%, transparent 64.5%);
+    opacity: 0.9;
+  }
+  .dial-sign {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 17%;
+    aspect-ratio: 1;
+    margin: -8.5% 0 0 -8.5%;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    transform: rotate(var(--a)) translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a) - var(--turn)));
+    transition:
+      transform 0.9s var(--spring),
+      color 0.25s,
+      background-color 0.25s;
+    color: var(--paper-2);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(15px, 1.9vw, 21px);
+  }
+  .dial-sign:hover {
+    color: var(--paper);
+  }
+  .dial-sign.is-on {
+    color: var(--ink);
+    background: var(--gilt-2);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--gilt) 18%, transparent);
+  }
+  .dial-sign:focus-visible {
+    outline: 2px solid var(--gilt-2);
+    outline-offset: 3px;
+  }
+  .dial-core {
+    position: absolute;
+    inset: 31%;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    border-radius: 50%;
+    transform: rotate(calc(-1 * var(--turn)));
+    transition: transform 0.9s var(--spring);
+  }
+  .core-ne {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(34px, 4.6vw, 56px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .core-en {
+    margin-top: 6px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-3);
+  }
+
+  .finder {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--paper-2);
+  }
+  .finder input {
+    width: 3.2em;
+    padding: 6px 0 4px;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--paper);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--gilt);
+    outline: none;
+  }
+  .finder input::placeholder {
+    color: var(--paper-4);
+  }
+  .finder-hint {
+    min-width: 8ch;
+    font-size: 14px;
+    color: var(--gilt-2);
+  }
+
+  .reading-sign {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+  }
+  .reading-sign [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(48px, 7vw, 92px);
+    line-height: 0.95;
+  }
+  .reading-en {
+    font-size: 15px;
+    color: var(--paper-3);
+  }
+  .reading-text {
+    margin-top: clamp(18px, 2.4vw, 28px);
+    font-family: var(--deva);
+    font-size: clamp(19px, 1.9vw, 24px);
+    line-height: 1.7;
+    color: var(--paper);
+    max-width: 38ch;
+    text-wrap: pretty;
+  }
+  .lucky {
+    display: flex;
+    gap: clamp(28px, 5vw, 56px);
+    margin-top: clamp(24px, 3vw, 36px);
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .lucky[hidden] {
+    display: none;
+  }
+  .lucky-item {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas: "mark label" "mark value";
+    column-gap: 14px;
+    align-items: center;
+  }
+  .lucky-swatch {
+    grid-area: mark;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+    transition: background-color 0.4s;
+  }
+  .lucky-number {
+    grid-area: mark;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 52px;
+    line-height: 0.9;
+    color: var(--gilt-2);
+  }
+  .lucky-label {
+    grid-area: label;
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .lucky-value {
+    grid-area: value;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+  }
+  .lucky-item:last-child {
+    grid-template-areas: "mark label";
+  }
+  .reading-syllables {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--paper-3);
+    letter-spacing: 0.02em;
+  }
+
+  .reading.is-swapping .reading-text,
+  .reading.is-swapping .reading-sign,
+  .reading.is-swapping .lucky {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .reading-text,
+  .reading-sign,
+  .lucky {
+    transition:
+      opacity 0.25s var(--ease),
+      transform 0.35s var(--ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dial,
+    .dial-sign,
+    .dial-core,
+    .reading-text,
+    .reading-sign,
+    .lucky {
+      transition: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .rashi-grid {
+      grid-template-columns: 1fr;
+    }
+    .dial-wrap {
+      width: min(100%, 380px);
+      justify-self: center;
+    }
+    .dial-sign {
+      font-size: clamp(13px, 3.6vw, 18px);
+    }
+  }
+</style>
+
+<script>
+  type Sign = {
+    id: string;
+    ne: string;
+    en: string;
+    western: string;
+    syllables: string[];
+    reading: string;
+    colour: string | null;
+    number: string | null;
+  };
+
+  const root = document.getElementById("rashifal");
+  const raw = document.getElementById("rashi-data");
+  if (root && raw) {
+    const { signs, swatch } = JSON.parse(raw.textContent ?? "{}") as {
+      signs: Sign[];
+      swatch: Record<string, string>;
+    };
+    const dial = root.querySelector<HTMLElement>(".dial")!;
+    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>(".dial-sign"));
+    const reading = root.querySelector<HTMLElement>(".reading")!;
+    const input = root.querySelector<HTMLInputElement>(".finder input")!;
+    const bind = (name: string) => Array.from(root.querySelectorAll<HTMLElement>(`[data-bind="${name}"]`));
+    const step = Number(dial.dataset.step) || 30;
+    let current = 0;
+    let turn = 0;
+
+    function show(index: number) {
+      if (index === current) return;
+      const sign = signs[index];
+      // Turn the short way round so the chosen sign lands at the top.
+      let delta = -index * step - turn;
+      delta = ((((delta + 180) % 360) + 360) % 360) - 180;
+      turn += delta;
+      dial.style.setProperty("--turn", `${turn}deg`);
+      buttons.forEach((b, i) => {
+        b.classList.toggle("is-on", i === index);
+        b.setAttribute("aria-pressed", String(i === index));
+      });
+      current = index;
+
+      reading.classList.add("is-swapping");
+      window.setTimeout(() => {
+        bind("ne").forEach((el) => (el.textContent = sign.ne));
+        bind("western").forEach((el) => (el.textContent = sign.western));
+        bind("en").forEach((el) => (el.textContent = `${sign.en} · ${sign.western}`));
+        bind("reading").forEach((el) => (el.textContent = sign.reading));
+        bind("colour").forEach((el) => (el.textContent = sign.colour ?? ""));
+        bind("number").forEach((el) => (el.textContent = sign.number ?? ""));
+        bind("syllables").forEach((el) => (el.textContent = sign.syllables.join(" · ")));
+        bind("swatch").forEach((el) => el.style.setProperty("--swatch", swatch[sign.colour ?? ""] ?? "transparent"));
+        bind("lucky").forEach((el) => (el.hidden = !sign.colour));
+        reading.classList.remove("is-swapping");
+      }, 220);
+    }
+
+    buttons.forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.index))));
+
+    // The name lookup: the longest listed syllable the typed text starts with.
+    const hint = bind("hint")[0];
+    input.addEventListener("input", () => {
+      const typed = input.value.trim();
+      if (!typed) {
+        hint.textContent = "";
+        return;
+      }
+      let best = -1;
+      let bestLength = 0;
+      signs.forEach((sign, i) => {
+        for (const syllable of sign.syllables) {
+          if (typed.startsWith(syllable) && syllable.length > bestLength) {
+            best = i;
+            bestLength = syllable.length;
+          }
+        }
+      });
+      if (best < 0) {
+        hint.textContent = "—";
+        return;
+      }
+      hint.textContent = `→ ${signs[best].ne}`;
+      show(best);
+    });
+  }
+</script>

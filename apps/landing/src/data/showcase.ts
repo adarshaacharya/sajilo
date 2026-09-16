@@ -7,6 +7,7 @@
  * typed in by hand — refresh with `cd apps/showcase && bun run data`.
  */
 import scenes from "../../../showcase/src/data/scenes.json";
+import { SIGNS } from "../../../desktop/src/features/rashifal/_lib/signs";
 
 type Commands = typeof scenes.commands;
 const c: Commands = scenes.commands;
@@ -107,6 +108,30 @@ export const newsItems = c.get_news.value.items.length;
 
 export const stationCount = c.get_stations.value.stations.length;
 export const rashifalSigns = c.get_rashifal.value.readings.length;
+
+/**
+ * The recorded day's readings, one per sign, in the app's own sign order and
+ * with the app's own sign table (names, western names, first syllables) — the
+ * same file the Rashifal screen and its name lookup read. Each reading closes
+ * with "आजको शुभ रंग … हो भने शुभ अंक … रहेको छ।"; that sentence is split off
+ * so the page can set the colour and number apart. A reading that doesn't
+ * follow the pattern keeps its whole text and no lucky fields.
+ */
+export const rashifal = SIGNS.map((sign) => {
+  const reading = c.get_rashifal.value.readings.find((r) => r.sign === sign.id);
+  const text = reading?.prediction ?? "";
+  const lucky = text.match(/आजको शुभ रंग\s*(.+?)\s*हो भने शुभ अंक\s*(\S+?)\s*रहेको छ।?\s*$/);
+  return {
+    id: sign.id,
+    ne: sign.ne,
+    en: sign.en,
+    western: sign.western,
+    syllables: [...sign.syllables],
+    reading: lucky ? text.slice(0, lucky.index).trim() : text,
+    colour: lucky?.[1] ?? null,
+    number: lucky?.[2] ?? null,
+  };
+});
 
 // ---------- Tools ----------
 

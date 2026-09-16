@@ -7,10 +7,13 @@ import { REMINDER_TEMPLATES, type ReminderTemplate } from "../_lib/templates";
  * not "is this a record or a reminder?" — so they pick the thing, and the
  * app decides which it is. */
 export function AddPicker({
+  only,
   onDocument,
   onReminder,
   t,
 }: {
+  /** Just one half — from a tab that already says which it wants. */
+  only?: "documents" | "reminders";
   onDocument: (type: KeeperDocumentType) => void;
   /** `null` starts a blank reminder. */
   onReminder: (template: ReminderTemplate | null) => void;
@@ -18,17 +21,21 @@ export function AddPicker({
 }) {
   return (
     <div className="space-y-3">
-      <Group title={t("keeper.add.documents")} note={t("keeper.add.documents-note")}>
-        {DOCUMENT_TYPES.map((type) => (
-          <Tile key={type} label={docTypeLabel(t, type)} onClick={() => onDocument(type)} />
-        ))}
-      </Group>
-      <Group title={t("keeper.add.reminders")} note={t("keeper.add.reminders-note")}>
-        {REMINDER_TEMPLATES.map((template) => (
-          <Tile key={template.id} label={template.title} onClick={() => onReminder(template)} />
-        ))}
-        <Tile label={t("keeper.add.other")} onClick={() => onReminder(null)} muted />
-      </Group>
+      {only !== "reminders" && (
+        <Group title={t("keeper.add.documents")} note={t("keeper.add.documents-note")}>
+          {DOCUMENT_TYPES.map((type) => (
+            <Tile key={type} label={docTypeLabel(t, type)} onClick={() => onDocument(type)} />
+          ))}
+        </Group>
+      )}
+      {only !== "documents" && (
+        <Group title={t("keeper.add.reminders")} note={t("keeper.add.reminders-note")}>
+          {REMINDER_TEMPLATES.map((template) => (
+            <Tile key={template.id} label={template.title} onClick={() => onReminder(template)} />
+          ))}
+          <Tile label={t("keeper.add.other")} onClick={() => onReminder(null)} muted />
+        </Group>
+      )}
     </div>
   );
 }

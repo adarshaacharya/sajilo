@@ -83,6 +83,10 @@ pub struct KeeperItem {
     pub created_at: String,
     pub updated_at: String,
     pub completed_at: Option<String>,
+    /// The template it was started from ("electricity", "subscription"), if
+    /// any. Only used to group reminders of one kind.
+    #[serde(default)]
+    pub template: Option<String>,
 }
 
 /// A document the household holds. Some are only a record (citizenship, NID,
@@ -379,6 +383,7 @@ fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<KeeperItem> {
         created_at: row.get(18)?,
         updated_at: row.get(19)?,
         completed_at: row.get(20)?,
+        template: row.get(21)?,
     })
 }
 
@@ -457,7 +462,7 @@ fn items(app: &AppHandle<Wry>) -> Result<Vec<KeeperItem>> {
             "SELECT id, person_id, title, category, due_calendar, due_ad,
                 due_bs_year, due_bs_month, due_bs_day, status, recurrence,
                 remind_days, note, official_url, office_location, fee,
-                application_status, checklist, created_at, updated_at, completed_at
+                application_status, checklist, created_at, updated_at, completed_at, template
          FROM keeper_items ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, due_ad, title",
         )
         .map_err(|error| error.to_string())?;
@@ -549,20 +554,21 @@ pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperS
           (id, person_id, title, category, status, due_calendar, due_ad,
            due_bs_year, due_bs_month, due_bs_day, recurrence, remind_days, note,
            official_url, office_location, fee, application_status, checklist,
-           created_at, updated_at, completed_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21)
+           created_at, updated_at, completed_at, template)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
          ON CONFLICT(id) DO UPDATE SET person_id=excluded.person_id, title=excluded.title,
            category=excluded.category, status=excluded.status, due_calendar=excluded.due_calendar,
            due_ad=excluded.due_ad, due_bs_year=excluded.due_bs_year, due_bs_month=excluded.due_bs_month,
            due_bs_day=excluded.due_bs_day, recurrence=excluded.recurrence, remind_days=excluded.remind_days,
            note=excluded.note, official_url=excluded.official_url, office_location=excluded.office_location,
            fee=excluded.fee, application_status=excluded.application_status, checklist=excluded.checklist,
-           updated_at=excluded.updated_at, completed_at=excluded.completed_at",
+           updated_at=excluded.updated_at, completed_at=excluded.completed_at,
+           template=excluded.template",
         params![item.id, item.person_id, item.title.trim(), item.category, item.status,
             due_input.as_ref().map(|date| date.calendar.clone()), due.map(|(ad, _)| ad.to_string()),
             due.map(|(_, bs)| bs.year), due.map(|(_, bs)| bs.month), due.map(|(_, bs)| bs.day), item.recurrence, remind_days, item.note,
             item.official_url, item.office_location, item.fee, item.application_status, checklist,
-            created, updated, completed_at],
+            created, updated, completed_at, item.template],
     ).map_err(|error| error.to_string())?;
     keeper_snapshot(app)
 }
@@ -1030,6 +1036,7 @@ mod tests {
             created_at: String::new(),
             updated_at: String::new(),
             completed_at: None,
+            template: None,
         };
         let today = NaiveDate::from_ymd_opt(2026, 9, 16).unwrap();
         assert_eq!(next_due(&item, today), None);

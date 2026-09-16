@@ -14,10 +14,7 @@ import {
   fieldValue,
   isVehicleInsurance,
   NUMBER,
-  personName,
   RECURRENCE_LABELS,
-  recordName,
-  recordSummary,
 } from "../_lib/documents";
 import type { TFn } from "../_lib/shared";
 import { DateField } from "./date-picker";
@@ -185,8 +182,6 @@ export function RecordEditor({
         />
       )}
 
-      <LinkPicker record={record} records={records} people={people} onChange={onChange} t={t} />
-
       <textarea
         value={record.note}
         onChange={(event) => onChange({ ...record, note: event.target.value })}
@@ -205,75 +200,6 @@ export function RecordEditor({
         t={t}
       />
     </section>
-  );
-}
-
-/** Ties this document to others — a bluebook to its insurance policy, a
- * warranty to the bill's owner's passport if it matters. Collapsed until
- * wanted; most documents stand alone. */
-function LinkPicker({
-  record,
-  records,
-  people,
-  onChange,
-  t,
-}: {
-  record: KeeperRecordInput;
-  records: readonly KeeperRecord[];
-  people: readonly KeeperPerson[];
-  onChange: (record: KeeperRecordInput) => void;
-  t: TFn;
-}) {
-  const candidates = records.filter((other) => other.id !== record.id);
-  const [open, setOpen] = useState(record.links.length > 0);
-  if (candidates.length === 0) return null;
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex items-center gap-1 text-[10px] font-medium text-accent-mark hover:underline"
-      >
-        <Icon name="link" className="size-3" />
-        {t("keeper.link-documents")}
-        {record.links.length > 0 && ` · ${record.links.length}`}
-      </button>
-      {open && (
-        <div className="mt-1.5 max-h-40 overflow-y-auto rounded-md border border-divider p-1.5">
-          {candidates.map((other) => {
-            const linked = record.links.includes(other.id);
-            return (
-              <label
-                key={other.id}
-                className="flex items-center gap-1.5 rounded px-1 py-1 text-[10px] text-text-secondary hover:bg-surface-hover"
-              >
-                <input
-                  type="checkbox"
-                  checked={linked}
-                  onChange={() =>
-                    onChange({
-                      ...record,
-                      links: linked
-                        ? record.links.filter((link) => link !== other.id)
-                        : [...record.links, other.id],
-                    })
-                  }
-                  className="accent-[color:var(--color-accent-mark)]"
-                />
-                <span className="min-w-0 flex-1 truncate">
-                  <span className="text-text">{recordName(t, other)}</span>
-                  {" · "}
-                  {[personName(t, people, other.personId), recordSummary(other)]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
-              </label>
-            );
-          })}
-        </div>
-      )}
-    </div>
   );
 }
 

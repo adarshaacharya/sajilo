@@ -12,11 +12,12 @@ import {
   type KeeperSnapshot,
 } from "../../shared/lib/ipc";
 import { AddPicker } from "./_components/add-picker";
+import { GroupPage } from "./_components/group-page";
 import { ItemEditor } from "./_components/item-editor";
 import type { NewPerson } from "./_components/person-select";
 import { RecordDetail } from "./_components/record-detail";
 import { RecordEditor } from "./_components/record-editor";
-import { ItemRow, RecordRow } from "./_components/rows";
+import { GroupRow, ItemGroupRow, ItemRow } from "./_components/rows";
 import {
   blankRecord,
   docTypeLabel,
@@ -25,14 +26,19 @@ import {
   recordInput,
   recordName,
 } from "./_lib/documents";
+import { groupDocuments, groupItems, groupName, itemGroupName } from "./_lib/groups";
 import { dueLabel, dueTone, type I18nKey, id, type TFn, todayKeeperDate } from "./_lib/shared";
-import { applyTemplate, blankItem } from "./_lib/templates";
+import { applyTemplate, blankItem, REMINDER_TEMPLATES } from "./_lib/templates";
 import { upcomingOf } from "./_lib/upcoming";
 
 /** Keeper's own navigation: a small stack, so back always means "the screen I
  * came from" — the add picker, a document reached through a link, the list. */
 type Screen =
-  | { name: "add" }
+  | { name: "add"; only?: "documents" | "reminders" }
+  /** Every document of one kind; see `_lib/groups`. */
+  | { name: "group"; key: string }
+  /** Every reminder of one kind. */
+  | { name: "itemGroup"; key: string }
   | { name: "record"; id: string }
   | { name: "editRecord"; draft: KeeperRecordInput; newPerson: NewPerson | null }
   | { name: "editItem"; draft: KeeperItem; newPerson: NewPerson | null };
@@ -155,6 +161,21 @@ export function Keeper() {
   const current =
     screen?.name === "record" ? data.records.find((record) => record.id === screen.id) : undefined;
 
+  const matchesFilter = (personId: string | null) =>
+    person === null || (person === "" ? personId === null : personId === person);
+  const group =
+    screen?.name === "group"
+      ? groupDocuments(data.records.filter((record) => matchesFilter(record.personId))).find(
+          (entry) => entry.key === screen.key,
+        )
+      : undefined;
+  const itemGroup =
+    screen?.name === "itemGroup"
+      ? groupItems(data.items.filter((item) => matchesFilter(item.personId))).find(
+          (entry) => entry.key === screen.key,
+        )
+      : undefined;
+
   useHeaderInner(
     screen === null
       ? null
@@ -162,17 +183,25 @@ export function Keeper() {
           title:
             screen.name === "add"
               ? t("keeper.add.title")
-              : screen.name === "record"
-                ? current
-                  ? recordName(t, current)
+              : screen.name === "group"
+                ? group
+                  ? groupName(t, group)
                   : t("keeper.title")
-                : screen.name === "editRecord"
-                  ? screen.draft.createdAt
-                    ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
-                    : docTypeLabel(t, screen.draft.documentType)
-                  : screen.draft.createdAt
-                    ? t("keeper.edit-title")
-                    : t("keeper.new-title"),
+                : screen.name === "itemGroup"
+                  ? itemGroup
+                    ? itemGroupName(itemGroup)
+                    : t("keeper.title")
+                  : screen.name === "record"
+                    ? current
+                      ? recordName(t, current)
+                      : t("keeper.title")
+                    : screen.name === "editRecord"
+                      ? screen.draft.createdAt
+                        ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
+                        : docTypeLabel(t, screen.draft.documentType)
+                      : screen.draft.createdAt
+                        ? t("keeper.edit-title")
+                        : t("keeper.new-title"),
           onBack: back,
         },
   );
@@ -183,15 +212,35 @@ export function Keeper() {
     </p>
   ) : null;
 
-  const picker = (
+  /** A blank document of the same kind as `source` — for insurance or a
+   * custom document, the same kind within it too. */
+  const startAnother = (source: Pick<KeeperRecord, "documentType" | "details">) => {
+    const draft = blankRecord(source.documentType, defaultPerson);
+    for (const key of ["insuranceType", "customKind"]) {
+      if (source.details[key]) draft.details[key] = source.details[key];
+    }
+    const spec = documentSpec(draft);
+    push({
+      name: "editRecord",
+      draft: {
+        ...draft,
+        recurrence: spec.defaultRecurrence,
+        remindDays: [...spec.defaultRemindDays],
+      },
+      newPerson: null,
+    });
+  };
+
+  const pickerFor = (owner: string | null, only?: "documents" | "reminders") => (
     <AddPicker
+      only={only}
       onDocument={(type) =>
-        push({ name: "editRecord", draft: blankRecord(type, defaultPerson), newPerson: null })
+        push({ name: "editRecord", draft: blankRecord(type, owner), newPerson: null })
       }
       onReminder={async (template) => {
         const item = {
           ...blankItem(await todayKeeperDate().catch(() => null)),
-          personId: defaultPerson,
+          personId: owner,
         };
         push({
           name: "editItem",
@@ -203,9 +252,64 @@ export function Keeper() {
     />
   );
 
+  /** A new reminder of the same kind: from the same template, or for one made
+   * from scratch, under the same title. */
+  const startAnotherItem = async (source: KeeperItem) => {
+    const item = {
+      ...blankItem(await todayKeeperDate().catch(() => null)),
+      personId: defaultPerson,
+    };
+    const template = REMINDER_TEMPLATES.find((entry) => entry.id === source.template);
+    push({
+      name: "editItem",
+      draft: template
+        ? applyTemplate(item, template)
+        : { ...item, title: source.title, category: source.category },
+      newPerson: null,
+    });
+  };
+
   let body: ReactNode;
-  if (screen?.name === "add") {
-    body = picker;
+  if (screen?.name === "itemGroup" && itemGroup) {
+    const [sample] = itemGroup.items;
+    body = (
+      <div className="space-y-2.5">
+        <section className="surface-card px-3">
+          {itemGroup.items.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              personName={item.personId ? personName(t, data.people, item.personId) : undefined}
+              onOpen={() => push({ name: "editItem", draft: item, newPerson: null })}
+              onComplete={() => toggleItem(item)}
+              t={t}
+            />
+          ))}
+        </section>
+        <button
+          type="button"
+          onClick={() => sample && startAnotherItem(sample)}
+          className="flex items-center gap-1 px-0.5 text-[10px] font-medium text-accent-mark hover:underline"
+        >
+          <Icon name="plus" className="size-2.5" />
+          {t("keeper.add-another").replace("{type}", itemGroupName(itemGroup))}
+        </button>
+      </div>
+    );
+  } else if (screen?.name === "group" && group) {
+    const [sample] = group.records;
+    body = (
+      <GroupPage
+        name={groupName(t, group)}
+        records={group.records}
+        people={data.people}
+        onOpen={(recordId) => push({ name: "record", id: recordId })}
+        onAddAnother={() => sample && startAnother(sample)}
+        t={t}
+      />
+    );
+  } else if (screen?.name === "add") {
+    body = pickerFor(defaultPerson, screen.only);
   } else if (screen?.name === "editRecord") {
     body = (
       <RecordEditor
@@ -242,6 +346,8 @@ export function Keeper() {
         records={data.records}
         people={data.people}
         onEdit={() => push({ name: "editRecord", draft: recordInput(current), newPerson: null })}
+        onDelete={() => deleteRecord(recordInput(current))}
+        onAddAnother={() => startAnother(current)}
         onAdvance={() => run(api.advanceKeeperRecord(current.id), "keeper.error-save-record")}
         onRenew={(expiryDate) =>
           run(
@@ -259,7 +365,7 @@ export function Keeper() {
     body = (
       <>
         <p className="px-0.5 text-[11px] text-text-secondary">{t("keeper.tagline")}</p>
-        {picker}
+        {pickerFor(defaultPerson)}
         <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">
           {t("keeper.footer-note")}
         </p>
@@ -273,10 +379,12 @@ export function Keeper() {
         onView={setView}
         person={person}
         onPerson={setPerson}
-        onAdd={() => push({ name: "add" })}
+        onAdd={() => push({ name: "add", only: view })}
+        picker={(only) => pickerFor(defaultPerson, only)}
+        onOpenGroup={(key) => push({ name: "group", key })}
+        onOpenItemGroup={(key) => push({ name: "itemGroup", key })}
         onOpenRecord={(recordId) => push({ name: "record", id: recordId })}
         onOpenItem={(item) => push({ name: "editItem", draft: item, newPerson: null })}
-        onToggleItem={toggleItem}
         t={t}
       />
     );
@@ -297,9 +405,11 @@ function Home({
   person,
   onPerson,
   onAdd,
+  picker,
+  onOpenGroup,
+  onOpenItemGroup,
   onOpenRecord,
   onOpenItem,
-  onToggleItem,
   t,
 }: {
   data: KeeperSnapshot;
@@ -308,9 +418,12 @@ function Home({
   person: PersonFilter;
   onPerson: (person: PersonFilter) => void;
   onAdd: () => void;
+  /** The add choices for one tab, shown in place when that tab is empty. */
+  picker: (only: "documents" | "reminders") => ReactNode;
+  onOpenGroup: (key: string) => void;
+  onOpenItemGroup: (key: string) => void;
   onOpenRecord: (id: string) => void;
   onOpenItem: (item: KeeperItem) => void;
-  onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
   const [search, setSearch] = useState("");
@@ -325,21 +438,6 @@ function Home({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 px-0.5">
-        <p className="min-w-0 truncate text-[11px] text-text-secondary">
-          {upcoming.length > 0
-            ? `${upcoming.length} ${t("keeper.due-soon").toLowerCase()}`
-            : t("keeper.tagline")}
-        </p>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="settings-btn flex shrink-0 items-center gap-1 text-[11px]"
-        >
-          <Icon name="plus" className="size-3" /> {t("keeper.add")}
-        </button>
-      </div>
-
       {data.people.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {[
@@ -416,14 +514,22 @@ function Home({
       />
 
       {view === "documents" ? (
-        <DocumentList
-          records={records}
-          people={data.people}
-          grouped={person === null}
-          onOpen={onOpenRecord}
-          onAdd={onAdd}
-          t={t}
-        />
+        records.length === 0 ? (
+          // An empty tab offers its own choices, not a button to a screen
+          // that would.
+          picker("documents")
+        ) : (
+          <DocumentList
+            records={records}
+            people={data.people}
+            onOpen={onOpenRecord}
+            onOpenGroup={onOpenGroup}
+            onAdd={onAdd}
+            t={t}
+          />
+        )
+      ) : items.length === 0 ? (
+        picker("reminders")
       ) : (
         <>
           <div className="control-field flex min-w-0 items-center gap-1.5 rounded-md px-2">
@@ -440,10 +546,8 @@ function Home({
             items={items.filter((item) =>
               `${item.title} ${item.note}`.toLowerCase().includes(search.toLowerCase()),
             )}
-            hasAny={items.length > 0}
             nameOf={nameOf}
-            onOpen={onOpenItem}
-            onToggle={onToggleItem}
+            onOpenGroup={onOpenItemGroup}
             onAdd={onAdd}
             t={t}
           />
@@ -460,131 +564,112 @@ function Home({
 function DocumentList({
   records,
   people,
-  grouped,
   onOpen,
+  onOpenGroup,
   onAdd,
   t,
 }: {
   records: readonly KeeperRecord[];
   people: readonly KeeperPerson[];
-  /** Section by person when showing everyone; one person's list needs no
-   * headings. */
-  grouped: boolean;
   onOpen: (id: string) => void;
+  onOpenGroup: (key: string) => void;
   onAdd: () => void;
   t: TFn;
 }) {
-  if (records.length === 0) {
-    return (
-      <EmptyState
-        title={t("keeper.records-empty-title")}
-        body={t("keeper.records-empty-body")}
-        action={t("keeper.add-first-record")}
-        onAction={onAdd}
-      />
-    );
-  }
-  const groups =
-    grouped && people.length > 0
-      ? [null, ...people.map((entry) => entry.id)]
-          .map((personId) => ({
-            key: personId ?? "me",
-            heading: personName(t, people, personId),
-            records: records.filter((record) => record.personId === personId),
-          }))
-          .filter((group) => group.records.length > 0)
-      : [{ key: "all", heading: null, records }];
-
+  // One row per kind of paper. A kind with a single document opens it
+  // straight away; two or more open the kind's own page.
   return (
-    <div className="space-y-2">
-      {groups.map((group) => (
-        <section key={group.key} aria-label={group.heading ?? undefined} className="space-y-1">
-          {group.heading && (
-            <h2 className="px-0.5 text-[11px] font-medium text-text-secondary">{group.heading}</h2>
-          )}
-          <div className="surface-card px-3">
-            {group.records.map((record) => (
-              <RecordRow key={record.id} record={record} onOpen={() => onOpen(record.id)} t={t} />
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
+    <section className="surface-card px-3">
+      {groupDocuments(records).map((group) => {
+        const [only] = group.records;
+        return (
+          <GroupRow
+            key={group.key}
+            name={groupName(t, group)}
+            records={group.records}
+            owners={group.records.map((record) => personName(t, people, record.personId))}
+            onOpen={() =>
+              group.records.length === 1 && only ? onOpen(only.id) : onOpenGroup(group.key)
+            }
+            t={t}
+          />
+        );
+      })}
+      <AddRow label={t("keeper.add-document")} onClick={onAdd} />
+    </section>
+  );
+}
+
+/** The list's last row: adding sits with what it adds to, under the tab that
+ * says which kind. */
+function AddRow({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-2.5 py-2.5 text-left text-[11px] font-medium text-accent-mark"
+    >
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-[5px] border border-dashed border-[color:color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]">
+        <Icon name="plus" className="size-3" />
+      </span>
+      {label}
+    </button>
   );
 }
 
 function ReminderList({
   items,
-  hasAny,
   nameOf,
-  onOpen,
-  onToggle,
+  onOpenGroup,
   onAdd,
   t,
 }: {
   items: readonly KeeperItem[];
-  hasAny: boolean;
   nameOf: (personId: string | null) => string | undefined;
-  onOpen: (item: KeeperItem) => void;
-  onToggle: (item: KeeperItem) => void;
+  onOpenGroup: (key: string) => void;
   onAdd: () => void;
   t: TFn;
 }) {
-  const sorted = [...items].sort((a, b) => {
-    if (a.status !== b.status) return a.status === "completed" ? 1 : -1;
-    // Undated items (applications with no deadline) follow dated ones.
-    if (!a.dueDate || !b.dueDate) return a.dueDate ? -1 : b.dueDate ? 1 : 0;
-    return a.dueDate.ad.localeCompare(b.dueDate.ad);
-  });
-  if (sorted.length === 0) {
+  if (items.length === 0) {
     return (
-      <EmptyState
-        title={hasAny ? t("keeper.empty-search-title") : t("keeper.empty-title")}
-        body={hasAny ? t("keeper.empty-search-body") : t("keeper.empty-body")}
-        action={t("keeper.add-first")}
-        onAction={onAdd}
-      />
+      <EmptyState title={t("keeper.empty-search-title")} body={t("keeper.empty-search-body")} />
     );
   }
+  // One row per kind, each opening its page: that's where the tick boxes and
+  // "Add another" live, whether the kind holds one reminder or five.
   return (
     <section className="surface-card px-3">
-      {sorted.map((item) => (
-        <ItemRow
-          key={item.id}
-          item={item}
-          personName={nameOf(item.personId)}
-          onOpen={() => onOpen(item)}
-          onComplete={() => onToggle(item)}
-          t={t}
-        />
-      ))}
+      {groupItems(items).map((group) => {
+        const name = itemGroupName(group);
+        // Renamed members (Netflix, Spotify) say more than whose they are.
+        const titles = [...new Set(group.items.map((item) => item.title))].filter(
+          (title) => title !== name,
+        );
+        const owners = [
+          ...new Set(group.items.map((item) => nameOf(item.personId) ?? t("keeper.person.me"))),
+        ];
+        return (
+          <ItemGroupRow
+            key={group.key}
+            name={name}
+            items={group.items}
+            detail={(titles.length > 0 ? titles : owners).join(" · ")}
+            onOpen={() => onOpenGroup(group.key)}
+            t={t}
+          />
+        );
+      })}
+      <AddRow label={t("keeper.add-reminder")} onClick={onAdd} />
     </section>
   );
 }
 
-function EmptyState({
-  title,
-  body,
-  action,
-  onAction,
-}: {
-  title: string;
-  body: string;
-  action: string;
-  onAction: () => void;
-}) {
+function EmptyState({ title, body }: { title: string; body: string }) {
   return (
     <section className="surface-card px-4 py-8 text-center">
       <Icon name="keeper" className="mx-auto size-6 text-text-muted" />
       <p className="mt-2 text-[12px] font-medium">{title}</p>
       <p className="mt-1 text-[10px] text-text-muted">{body}</p>
-      <button
-        type="button"
-        onClick={onAction}
-        className="mt-3 text-[11px] text-accent-mark hover:underline"
-      >
-        {action}
-      </button>
     </section>
   );
 }

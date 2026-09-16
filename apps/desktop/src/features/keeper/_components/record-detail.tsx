@@ -3,6 +3,7 @@ import { Icon } from "../../../shared/components/icon";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperDate, KeeperPerson, KeeperRecord } from "../../../shared/lib/ipc";
 import {
+  docTypeLabel,
   documentSpec,
   fieldValue,
   isVehicleInsurance,
@@ -22,6 +23,8 @@ export function RecordDetail({
   records,
   people,
   onEdit,
+  onDelete,
+  onAddAnother,
   onAdvance,
   onRenew,
   onOpen,
@@ -31,6 +34,9 @@ export function RecordDetail({
   records: readonly KeeperRecord[];
   people: readonly KeeperPerson[];
   onEdit: () => void;
+  onDelete: () => void;
+  /** Starts a blank document of the same kind. */
+  onAddAnother: () => void;
   onAdvance: () => void;
   onRenew: (expiryDate: KeeperDate) => void;
   onOpen: (id: string) => void;
@@ -56,7 +62,9 @@ export function RecordDetail({
     [t(spec.issued), record.issuedDate ? formatDate(record.issuedDate.ad) : ""] as const,
     [spec.office ? t(spec.office) : "", record.office] as const,
     ...record.customFields.map((field) => [field.label || "—", field.value] as const),
-  ].filter(([label, value]) => label && value);
+  ]
+    .filter(([label, value]) => label && value)
+    .map(([label, value]) => [label.replace(/\s*\([^)]*\)\s*$/, ""), value] as const);
   const warning = record.documentType === "bluebook" ? insuranceWarning(record, linked) : null;
 
   return (
@@ -71,17 +79,24 @@ export function RecordDetail({
                 .join(" · ")}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={onEdit}
-            className="settings-btn flex shrink-0 items-center gap-1 text-[11px]"
-          >
-            {t("keeper.edit")}
-          </button>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label={t("keeper.delete")}
+              title={t("keeper.delete")}
+              className="icon-btn size-7 text-text-muted hover:text-holiday"
+            >
+              <Icon name="trash" className="size-3.5" />
+            </button>
+            <button type="button" onClick={onEdit} className="settings-btn text-[11px]">
+              {t("keeper.edit")}
+            </button>
+          </div>
         </div>
-        {spec.kind === "record" ? (
-          <p className="text-[11px] text-text-secondary">{t("keeper.no-expiry")}</p>
-        ) : (
+        {/* A paper that never lapses has no date to show — and nothing to say
+            about it either. */}
+        {spec.kind !== "record" && (
           <DueBlock record={record} onAdvance={onAdvance} onRenew={onRenew} onEdit={onEdit} t={t} />
         )}
         {warning && (
@@ -90,22 +105,31 @@ export function RecordDetail({
             {t(warning)}
           </p>
         )}
+        {/* What's on the paper sits in the same card: one document, one card. */}
+        {(facts.length > 0 || record.note) && (
+          <div className="border-t border-divider pt-0.5">
+            {facts.map(([label, value]) => (
+              <Fact key={label} label={label}>
+                {value}
+              </Fact>
+            ))}
+            {record.note && (
+              <p className="whitespace-pre-wrap border-t border-divider py-2 text-[11px] text-text-secondary first:border-0">
+                {record.note}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
-      {(facts.length > 0 || record.note) && (
-        <section className="surface-card px-3 py-1">
-          {facts.map(([label, value]) => (
-            <Fact key={label} label={label}>
-              {value}
-            </Fact>
-          ))}
-          {record.note && (
-            <p className="whitespace-pre-wrap border-t border-divider py-2 text-[11px] text-text-secondary first:border-0">
-              {record.note}
-            </p>
-          )}
-        </section>
-      )}
+      <button
+        type="button"
+        onClick={onAddAnother}
+        className="flex items-center gap-1 px-0.5 text-[10px] font-medium text-accent-mark hover:underline"
+      >
+        <Icon name="plus" className="size-2.5" />
+        {t("keeper.add-another").replace("{type}", docTypeLabel(t, record.documentType))}
+      </button>
 
       {linked.length > 0 && (
         <section className="surface-card px-3 py-1">
@@ -244,7 +268,7 @@ function DueBlock({
 export function RecordDue({ record, t }: { record: KeeperRecord; t: TFn }) {
   const spec = documentSpec(record);
   if (spec.kind === "record") {
-    return <span className="shrink-0 text-[10px] text-text-muted">{t("keeper.no-expiry")}</span>;
+    return null;
   }
   if (!record.expiryDate) {
     return <span className="shrink-0 text-[10px] text-text-muted">{t("keeper.not-set")}</span>;

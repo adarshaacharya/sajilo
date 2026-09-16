@@ -232,6 +232,7 @@ export function blankItem(dueDate: KeeperDate | null): KeeperItem {
     createdAt: "",
     updatedAt: "",
     completedAt: null,
+    template: null,
   };
 }
 
@@ -240,6 +241,7 @@ export function blankItem(dueDate: KeeperDate | null): KeeperItem {
 export function applyTemplate(item: KeeperItem, template: ReminderTemplate): KeeperItem {
   return {
     ...item,
+    template: template.id,
     title: template.title,
     category: template.category,
     recurrence: template.recurrence ?? item.recurrence,
