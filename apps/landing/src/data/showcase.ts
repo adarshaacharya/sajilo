@@ -127,6 +127,17 @@ export const nepse = {
   gainers: stocks.movers.filter((m) => m.board === "gainers").slice(0, 3),
   losers: stocks.movers.filter((m) => m.board === "losers").slice(0, 3),
 };
+/** The recorded IPO: the first issue open to the general public, with how
+ * many applied against how many units were on offer. */
+const ipoIssue = c.get_ipos.value.issues.find((issue) => issue.issueType === "IPO") ?? null;
+export const ipo = ipoIssue && {
+  name: ipoIssue.name,
+  symbol: ipoIssue.symbol,
+  closeDate: ipoIssue.closeDate,
+  units: Number(ipoIssue.issuedUnits),
+  applied: Number(ipoIssue.appliedUnits),
+  applications: Number(ipoIssue.applicationCount),
+};
 /** The index through the recorded session, a sample a minute. */
 export const nepseIntraday = c.get_nepse_intraday.value.points;
 

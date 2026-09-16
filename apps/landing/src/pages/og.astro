@@ -4,7 +4,18 @@
 // linked anywhere; `bun run og` renders it to public/assets/og-image.png at
 // exactly 1200×630.
 import "../styles/global.css";
-import { nepse, newsSources, radioDial, dashain, rashifal, stationCount, today, upcoming } from "../data/showcase";
+import {
+  dashain,
+  holidayYear,
+  ipo,
+  nepse,
+  newsSources,
+  radioDial,
+  rashifal,
+  stationCount,
+  today,
+  upcoming,
+} from "../data/showcase";
 import { ne, weekdayNe } from "../lib/format";
 
 const up = nepse.change >= 0;
@@ -15,10 +26,28 @@ const BAND = { from: 88, to: 108 };
 const at = (frequency: number) => 7 + ((frequency - BAND.from) / (BAND.to - BAND.from)) * 86;
 const tuned = radioDial[Math.floor(radioDial.length / 2)];
 const sign = rashifal[0];
-// Dashain, the festival everyone is waiting for; the next holiday if the
-// recording has no Dashain ahead.
-const nextHoliday = dashain ?? upcoming.find((event) => event.is_public_holiday);
-const holidayName = nextHoliday?.name.replace(/\(.*?\)/g, "").split(",")[0].trim();
+// The patro leaf is Dashain's own page — the one day every Nepali knows —
+// or the next public holiday if the recording has no Dashain ahead. Its BS
+// month comes from the recorded holiday year; the weekday from its AD date.
+const festival = dashain ?? upcoming.find((event) => event.is_public_holiday);
+const festivalMonth = holidayYear.find((month) =>
+  month.holidays.some((holiday) => holiday.gregorian === festival?.gregorian),
+);
+const leaf = festival && festivalMonth
+  ? {
+      month: festivalMonth.name,
+      year: festivalMonth.year,
+      day: festivalMonth.holidays.find((h) => h.gregorian === festival.gregorian)!.day,
+      weekday: new Date(`${festival.gregorian}T00:00:00Z`).getUTCDay(),
+      name: festival.name.replace(/\(.*?\)/g, "").split(",")[0].trim(),
+    }
+  : {
+      month: today.nepaliMonthName,
+      year: today.nepali.year,
+      day: today.nepali.day,
+      weekday: today.weekday,
+      name: null,
+    };
 // Keeper's own document kinds, as on the landing page's Keeper section — no
 // dates or numbers, so nothing reads as somebody's papers.
 const reminders = [
@@ -51,12 +80,12 @@ const reminders = [
 
       <div class="collage" aria-hidden="true">
         <div class="leaf">
-          <p class="leaf-month" lang="ne">{today.nepaliMonthName} {ne(today.nepali.year)}</p>
-          <p class="leaf-day" lang="ne">{ne(today.nepali.day)}</p>
-          <p class="leaf-week" lang="ne">{weekdayNe(today.weekday)}</p>
-          {holidayName && (
+          <p class="leaf-month" lang="ne">{leaf.month} {ne(leaf.year)}</p>
+          <p class="leaf-day" lang="ne">{ne(leaf.day)}</p>
+          <p class="leaf-week" lang="ne">{weekdayNe(leaf.weekday)}</p>
+          {leaf.name && (
             <p class="leaf-next" lang="ne">
-              <span>आउँदो चाड</span> {holidayName}
+              {leaf.name}
             </p>
           )}
         </div>
@@ -87,6 +116,12 @@ const reminders = [
           <p class:list={["nepse-change", up ? "up" : "down"]}>
             {up ? "▲" : "▼"} {Math.abs(nepse.changePercent).toFixed(2)}%
           </p>
+          {ipo && (
+            <p class="ipo-alert">
+              <span class="bell">IPO</span>
+              <span><b>{ipo.symbol}</b> खुला छ</span>
+            </p>
+          )}
         </div>
 
         <div class="paper">
@@ -210,9 +245,10 @@ const reminders = [
     transform: rotate(-4deg);
   }
   .leaf-month {
-    font-family: var(--display);
+    /* Eczar breaks the reph in कार्तिक; Anek shapes it properly. */
+    font-family: "Anek Devanagari", var(--sans);
     font-weight: 700;
-    font-size: 26px;
+    font-size: 27px;
   }
   .leaf-day {
     font-family: var(--display);
@@ -230,18 +266,15 @@ const reminders = [
     margin: 10px 16px 0;
     padding-top: 8px;
     border-top: 1px dashed rgb(34 28 20 / 0.3);
-    font-size: 16px;
-    font-weight: 600;
+    font-family: var(--display);
+    font-size: 21px;
+    font-weight: 700;
     color: #c0392b;
-  }
-  .leaf-next span {
-    font-weight: 500;
-    color: rgb(34 28 20 / 0.6);
   }
 
   /* Keeper: a to-do slip tucked against the patro. */
   .slip {
-    top: 236px;
+    top: 262px;
     left: 392px;
     z-index: 3;
     width: 230px;
@@ -288,14 +321,14 @@ const reminders = [
 
   /* A round sticker slapped on the patro's corner. */
   .sticker {
-    top: 22px;
-    left: 250px;
+    top: 168px;
+    left: 270px;
     z-index: 2;
     display: grid;
     place-content: center;
     justify-items: center;
-    width: 112px;
-    height: 112px;
+    width: 100px;
+    height: 100px;
     color: #2a1d10;
     background: radial-gradient(circle at 35% 30%, #f7d98a, #d4a84a 70%);
     border: 3px dashed rgb(42 29 16 / 0.35);
@@ -310,7 +343,7 @@ const reminders = [
   .sticker-sign {
     font-family: var(--display);
     font-weight: 800;
-    font-size: 32px;
+    font-size: 29px;
     line-height: 1.05;
   }
   .sticker-lucky {
@@ -328,6 +361,29 @@ const reminders = [
     border-radius: 14px;
     transform: rotate(3deg);
   }
+  .ipo-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line-2);
+    font-size: 17px;
+    color: var(--paper-2);
+  }
+  .ipo-alert b {
+    color: var(--paper);
+  }
+  .bell {
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fff4e0;
+    background: #c0392b;
+    border-radius: 4px;
+  }
+
   .nepse-label {
     font-size: 15px;
     letter-spacing: 0.12em;
@@ -410,7 +466,7 @@ const reminders = [
      window lit amber from behind, a knob and a pulled-out antenna. */
   .radio {
     z-index: 4;
-    top: 478px;
+    top: 488px;
     left: 346px;
     display: flex;
     align-items: center;

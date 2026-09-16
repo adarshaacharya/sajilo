@@ -2,7 +2,7 @@
 // The recorded session, drawn. Every number and every point on the line is
 // the recording's (src/data/showcase.ts); the chart is the same minute-by-
 // minute series the app plots, laid out here as one wide stroke.
-import { nepse, nepseIntraday } from "../data/showcase";
+import { ipo, nepse, nepseIntraday } from "../data/showcase";
 import { rs, signed, nepalClock, ne } from "../lib/format";
 
 const W = 800;
@@ -32,6 +32,7 @@ const low = Math.min(...values);
 const { advanced, declined, unchanged } = nepse.breadth;
 const total = advanced + declined + unchanged;
 const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
+const times = ipo && ipo.units > 0 ? Math.round(ipo.applied / ipo.units) : 0;
 ---
 
 <section class="stocks wrap" id="stocks" aria-labelledby="stocks-title">
@@ -128,6 +129,33 @@ const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
       </div>
     </figure>
   </div>
+
+  {ipo && (
+    <div class="ipo reveal">
+      <div class="ticket">
+        <div class="ticket-stub">
+          <span class="ticket-kind">IPO</span>
+          <span class="ticket-symbol">{ipo.symbol}</span>
+        </div>
+        <div class="ticket-body">
+          <p class="ticket-name">{ipo.name}</p>
+          <dl class="ticket-odds">
+            <div><dt>Units on offer</dt><dd class="num">{rs(ipo.units)}</dd></div>
+            <div><dt>People who applied</dt><dd class="num">{rs(ipo.applications)}</dd></div>
+            {times > 1 && <div><dt>Oversubscribed</dt><dd class="num t-up">{times}×</dd></div>}
+          </dl>
+        </div>
+      </div>
+      <div class="ipo-copy">
+        <h3>The IPO lottery. <em>Now with a reminder.</em></h3>
+        <p>
+          Every open issue shows up in Bazar with its closing date. Sajilo nudges you at 10am on the last
+          day, so you apply before MeroShare's queue does. Whether you get your 10 kitta is between you
+          and the draw.
+        </p>
+      </div>
+    </div>
+  )}
 </section>
 
 <style>
@@ -361,6 +389,98 @@ const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
     pointer-events: none;
   }
 
+  /* The IPO as a lottery ticket: a torn stub, a perforated edge, and the
+     odds printed on the face. */
+  .ipo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+    margin-top: clamp(40px, 6vw, 72px);
+  }
+  .ticket {
+    display: flex;
+    color: #1f1a14;
+    background: #f1e6c8;
+    border-radius: 8px;
+    transform: rotate(-1.2deg);
+    box-shadow: 0 30px 60px -28px rgb(0 0 0 / 0.85);
+  }
+  .ticket-stub {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 4px;
+    padding: 18px 20px;
+    color: #f1e6c8;
+    background: #a8281a;
+    border-radius: 8px 0 0 8px;
+    border-right: 3px dashed #f1e6c8;
+  }
+  .ticket-kind {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+  }
+  .ticket-symbol {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+  }
+  .ticket-body {
+    flex: 1;
+    min-width: 0;
+    padding: 16px 20px 18px;
+  }
+  .ticket-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(17px, 1.8vw, 21px);
+    line-height: 1.2;
+  }
+  .ticket-odds {
+    display: grid;
+    gap: 6px;
+    margin: 12px 0 0;
+  }
+  .ticket-odds > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted rgb(31 26 20 / 0.3);
+  }
+  .ticket-odds dt {
+    font-size: 13px;
+    color: rgb(31 26 20 / 0.6);
+  }
+  .ticket-odds dd {
+    margin: 0;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .ticket-odds .t-up {
+    color: #2f7a3e;
+  }
+  .ipo-copy h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(24px, 2.8vw, 34px);
+    line-height: 1.12;
+    color: var(--paper);
+  }
+  .ipo-copy h3 em {
+    font-style: normal;
+    color: var(--gilt-2);
+  }
+  .ipo-copy p {
+    margin-top: 12px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--paper-2);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .chart-line {
       stroke-dasharray: none;
@@ -369,6 +489,9 @@ const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
     }
   }
   @media (max-width: 860px) {
+    .ipo {
+      grid-template-columns: 1fr;
+    }
     .board-head {
       grid-template-columns: 1fr;
       grid-template-areas: "name" "value" "change" "when";
