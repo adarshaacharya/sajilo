@@ -17,14 +17,13 @@ import { FuelTab } from "./_components/fuel";
 import { MetalsTab } from "./_components/metals";
 import { Stocks } from "./_components/stocks";
 import { VegetablesTab } from "./_components/vegetables";
+import { LIVE_REFRESH_MS } from "./_lib/live";
 
 type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 
 /** Also the set `?tab=` accepts, so anything that links into this screen — the
  * tray, the landing page — can open it on the panel it means. */
 const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables"];
-/** How often an open Bazar re-asks for the board while NEPSE is trading. */
-const LIVE_REFRESH_MS = 60_000;
 
 function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadStatus {
   if (!state) return { status: "loading" };

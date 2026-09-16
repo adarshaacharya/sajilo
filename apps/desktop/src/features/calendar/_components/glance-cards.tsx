@@ -11,6 +11,7 @@ import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot
 import type { WeatherLocation } from "../../../types/api/WeatherLocation";
 import type { WeatherSnapshot } from "../../../types/api/WeatherSnapshot";
 import { money } from "../../bazar/_lib/format";
+import { LIVE_REFRESH_MS } from "../../bazar/_lib/live";
 import { changeTone } from "../../bazar/_lib/stock-tone";
 import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
 
@@ -56,13 +57,21 @@ export function GlanceCards() {
       .catch(() => {});
   }, [modules.weatherEnabled, modules.weatherLocation]);
 
+  const marketOpen = loadedValue(stocks)?.marketStatus?.isOpen ?? false;
   useEffect(() => {
     if (!modules.bazarEnabled) return;
-    api
-      .getStocks()
-      .then(setStocks)
-      .catch(() => {});
-  }, [modules.bazarEnabled]);
+    const load = () =>
+      api
+        .getStocks()
+        .then(setStocks)
+        .catch(() => {});
+    load();
+    // Follow the index while the exchange trades; once it closes the number
+    // stays put, so there is nothing to poll for.
+    if (!marketOpen) return;
+    const timer = window.setInterval(load, LIVE_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [modules.bazarEnabled, marketOpen]);
 
   const weatherSnap = loadedValue(weather);
   const stocksSnap = loadedValue(stocks);
