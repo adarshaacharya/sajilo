@@ -57,6 +57,7 @@ export const DOCUMENT_TYPES: readonly KeeperDocumentType[] = [
   "bluebook",
   "insurance",
   "warranty",
+  "custom",
 ];
 
 const ID_FIELDS: readonly RecordField[] = [
@@ -248,9 +249,60 @@ export function documentSpec(
         defaultRecurrence: "none",
         defaultRemindDays: [30, 0],
       };
+    case "custom":
+      return customSpec(record.details.customKind ?? "record");
     default:
       return RECORD_ONLY;
   }
+}
+
+export type CustomKind = DocumentKind;
+
+/** A document Keeper has no form for: the user names it and says how it
+ * behaves, and adds whatever fields their paper carries. */
+function customSpec(kind: string): DocumentSpec {
+  const fields: RecordField[] = [
+    { key: "name", label: "keeper.custom.name", wide: true },
+    { key: NUMBER, label: "keeper.custom.number", wide: true },
+  ];
+  const base = {
+    fields,
+    required: "name",
+    issued: "keeper.issued-date" as const,
+    office: null,
+  };
+  if (kind === "repeats") {
+    return {
+      ...base,
+      kind: "repeats",
+      due: "keeper.custom.due",
+      cycles: ["monthly", "quarterly", "halfYearly", "yearlyAd", "yearlyBs"],
+      defaultRecurrence: "yearlyAd",
+      defaultRemindDays: [7, 0],
+      action: "keeper.action.done",
+    };
+  }
+  if (kind === "expires") {
+    return {
+      ...base,
+      kind: "expires",
+      due: "keeper.expiry-date",
+      defaultRecurrence: "none",
+      defaultRemindDays: [30, 7, 0],
+      action: "keeper.action.renewed",
+    };
+  }
+  return { ...base, kind: "record", defaultRecurrence: "none", defaultRemindDays: [] };
+}
+
+/** Vehicle policies point at a vehicle; their bluebook is where lapsed cover
+ * actually bites. */
+export function isVehicleInsurance(record: Pick<KeeperRecordInput, "documentType" | "details">) {
+  return (
+    record.documentType === "insurance" &&
+    (record.details.insuranceType === "thirdParty" ||
+      record.details.insuranceType === "comprehensive")
+  );
 }
 
 export function docTypeLabel(t: TFn, type: KeeperDocumentType) {
@@ -271,6 +323,8 @@ export function docTypeLabel(t: TFn, type: KeeperDocumentType) {
       return t("keeper.doc.insurance");
     case "warranty":
       return t("keeper.doc.warranty");
+    case "custom":
+      return t("keeper.doc.custom");
     default:
       return type;
   }
@@ -294,6 +348,9 @@ export function recordName(t: TFn, record: KeeperRecord | KeeperRecordInput) {
   }
   if (record.documentType === "warranty" && record.details.product) {
     return record.details.product;
+  }
+  if (record.documentType === "custom" && record.details.name) {
+    return record.details.name;
   }
   return docTypeLabel(t, record.documentType);
 }
@@ -324,7 +381,11 @@ export function blankRecord(
   personId: string | null,
 ): KeeperRecordInput {
   const details: Record<string, string> =
-    documentType === "insurance" ? { insuranceType: "thirdParty" } : {};
+    documentType === "insurance"
+      ? { insuranceType: "thirdParty" }
+      : documentType === "custom"
+        ? { customKind: "record" }
+        : {};
   const spec = documentSpec({ documentType, details });
   return {
     id: id(),
@@ -339,6 +400,7 @@ export function blankRecord(
     note: "",
     details,
     links: [],
+    customFields: [],
     createdAt: "",
   };
 }
@@ -357,6 +419,7 @@ export function recordInput(record: KeeperRecord): KeeperRecordInput {
     note: record.note,
     details: record.details,
     links: record.links,
+    customFields: record.customFields,
     createdAt: record.createdAt,
   };
 }

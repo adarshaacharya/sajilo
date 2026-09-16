@@ -163,7 +163,14 @@ export type KeeperDocumentType =
   | "pan"
   | "bluebook"
   | "insurance"
-  | "warranty";
+  | "warranty"
+  | "custom";
+
+/** A label/value pair the user added to a custom document. */
+export interface KeeperField {
+  label: string;
+  value: string;
+}
 
 export type KeeperRecurrence =
   | "none"
@@ -193,6 +200,7 @@ export interface KeeperRecord {
   details: Record<string, string>;
   /** Ids of records this one points at. Stored one way. */
   links: string[];
+  customFields: KeeperField[];
   createdAt: string;
   updatedAt: string;
 }
@@ -212,6 +220,7 @@ export interface KeeperRecordInput {
   note: string;
   details: Record<string, string>;
   links: string[];
+  customFields: KeeperField[];
   createdAt: string;
 }
 

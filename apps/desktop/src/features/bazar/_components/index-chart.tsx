@@ -36,7 +36,7 @@ function readPalette(): Palette {
   const style = getComputedStyle(document.documentElement);
   const token = (name: string) => style.getPropertyValue(name).trim();
   return {
-    up: token("--color-accent-mark"),
+    up: token("--color-positive"),
     down: token("--color-holiday"),
     muted: token("--color-text-muted"),
   };

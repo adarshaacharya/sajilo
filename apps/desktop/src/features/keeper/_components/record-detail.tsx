@@ -5,6 +5,7 @@ import type { KeeperDate, KeeperPerson, KeeperRecord } from "../../../shared/lib
 import {
   documentSpec,
   fieldValue,
+  isVehicleInsurance,
   personName,
   RECURRENCE_LABELS,
   recordName,
@@ -54,7 +55,9 @@ export function RecordDetail({
       }),
     [t(spec.issued), record.issuedDate ? formatDate(record.issuedDate.ad) : ""] as const,
     [spec.office ? t(spec.office) : "", record.office] as const,
+    ...record.customFields.map((field) => [field.label || "—", field.value] as const),
   ].filter(([label, value]) => label && value);
+  const warning = record.documentType === "bluebook" ? insuranceWarning(record, linked) : null;
 
   return (
     <div className="space-y-2.5">
@@ -80,6 +83,12 @@ export function RecordDetail({
           <p className="text-[11px] text-text-secondary">{t("keeper.no-expiry")}</p>
         ) : (
           <DueBlock record={record} onAdvance={onAdvance} onRenew={onRenew} onEdit={onEdit} t={t} />
+        )}
+        {warning && (
+          <p className="flex items-start gap-1.5 text-[10px] leading-relaxed text-accent-mark">
+            <Icon name="warning" className="mt-px size-3 shrink-0" />
+            {t(warning)}
+          </p>
         )}
       </section>
 
@@ -255,4 +264,16 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
       <span className="min-w-0 truncate text-right text-[11px]">{children}</span>
     </div>
   );
+}
+
+/** Renewing a bluebook needs a valid policy, so the bluebook is where a missing
+ * or lapsing vehicle policy should surface. */
+function insuranceWarning(bluebook: KeeperRecord, linked: readonly KeeperRecord[]) {
+  const policies = linked.filter(isVehicleInsurance);
+  if (policies.length === 0) return "keeper.bluebook.no-insurance" as const;
+  const taxDue = bluebook.expiryDate?.ad;
+  if (!taxDue) return null;
+  // Covered if any linked policy is still running on the day the tax is due.
+  const covered = policies.some((policy) => !policy.expiryDate || policy.expiryDate.ad >= taxDue);
+  return covered ? null : ("keeper.bluebook.insurance-lapses" as const);
 }

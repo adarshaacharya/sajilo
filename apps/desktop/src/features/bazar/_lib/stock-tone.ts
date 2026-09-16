@@ -25,7 +25,7 @@ export function searchQuotes(snapshot: StockMarketSnapshot, query: string): Stoc
 
 export function changeTone(change: number): string {
   if (Math.abs(change) < 0.005) return "text-text-muted";
-  return change > 0 ? "text-[color:var(--color-accent-mark)]" : "text-holiday";
+  return change > 0 ? "text-positive" : "text-holiday";
 }
 
 export function percentText(change: number, percent: number): string {

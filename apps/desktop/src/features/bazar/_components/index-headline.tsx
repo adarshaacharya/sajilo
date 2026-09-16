@@ -104,10 +104,7 @@ function BreadthBar({ breadth, t }: { breadth: MarketBreadth; t: TFn }) {
     <div className="mt-2.5">
       <div role="img" aria-label={summary} className="flex h-1 gap-px overflow-hidden rounded-full">
         {advanced > 0 && (
-          <span
-            className="min-w-[2px] basis-0 bg-[color:var(--color-accent-mark)]"
-            style={{ flexGrow: advanced }}
-          />
+          <span className="min-w-[2px] basis-0 bg-positive" style={{ flexGrow: advanced }} />
         )}
         {unchanged > 0 && (
           <span className="min-w-[2px] basis-0 bg-text-muted/40" style={{ flexGrow: unchanged }} />
@@ -120,9 +117,7 @@ function BreadthBar({ breadth, t }: { breadth: MarketBreadth; t: TFn }) {
         aria-hidden="true"
         className="mt-1 flex items-center justify-between gap-2 text-[10px] font-medium tabular-nums"
       >
-        <span className="text-[color:var(--color-accent-mark)]">
-          {count("stocks.breadth-up", advanced)}
-        </span>
+        <span className="text-positive">{count("stocks.breadth-up", advanced)}</span>
         <span className="text-text-muted">{count("stocks.breadth-flat", unchanged)}</span>
         <span className="text-holiday">{count("stocks.breadth-down", declined)}</span>
       </div>

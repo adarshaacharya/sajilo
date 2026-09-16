@@ -55,7 +55,7 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
                         priceChange(headline.price, headline.previousPrice),
                         headline.previousPrice,
                       ) >= 0
-                        ? "text-[color:var(--color-accent-mark)]"
+                        ? "text-positive"
                         : "text-holiday"
                     }
                   />

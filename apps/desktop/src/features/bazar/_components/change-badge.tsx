@@ -21,11 +21,7 @@ export function ChangeBadge({
       ? "No change"
       : `${up ? "+" : ""}${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(change)}`;
 
-  const tint = flat
-    ? "text-text-muted"
-    : up
-      ? "text-[color:var(--color-accent-mark)]"
-      : "text-holiday";
+  const tint = flat ? "text-text-muted" : up ? "text-positive" : "text-holiday";
 
   return (
     <span
@@ -33,7 +29,7 @@ export function ChangeBadge({
         flat
           ? ""
           : up
-            ? "bg-[color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)]"
+            ? "bg-[color-mix(in_srgb,var(--color-positive)_12%,transparent)]"
             : "bg-[color-mix(in_srgb,var(--color-holiday)_12%,transparent)]"
       }`}
     >

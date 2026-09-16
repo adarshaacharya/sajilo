@@ -5,11 +5,7 @@ export function MoverRow({ mover, onOpen }: { mover: MarketMover; onOpen: () => 
   const isPercent = mover.board === "gainers" || mover.board === "losers";
   const up = mover.metric > 0;
   const flat = Math.abs(mover.metric) < 0.005;
-  const tone = flat
-    ? "text-text-muted"
-    : up
-      ? "text-[color:var(--color-accent-mark)]"
-      : "text-holiday";
+  const tone = flat ? "text-text-muted" : up ? "text-positive" : "text-holiday";
 
   return (
     <button
