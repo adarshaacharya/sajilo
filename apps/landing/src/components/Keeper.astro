@@ -29,6 +29,7 @@ const slips: Slip[] = [
   { ne: "भाडा", en: "Rent", bill: true },
   { ne: "EMI", en: "Loan EMI", bill: true },
   { ne: "सदस्यता", en: "Subscription", bill: true },
+  { ne: "स्कुल", en: "School fee", bill: true },
   { ne: "अरू", en: "Anything else" },
 ];
 ---
@@ -58,12 +59,13 @@ const slips: Slip[] = [
       </ul>
 
       <p class="keeper-foot reveal">
-        Papers for you and the family. Bills every month. Bluebook tax every Ashad, policies every year.
-        A missed one gets one more nudge the morning after.
+        File each paper under whoever it belongs to, with a photo of every page. Tick a bill paid and it
+        rolls to next month; bluebook tax comes back every Ashad. A nudge before each, and one more if
+        it slips by.
       </p>
     </div>
 
-    <figure class="keeper-stage reveal">
+    <div class="keeper-stage reveal">
       <div class="keeper-frame">
         <div class="keeper-screen">
           <iframe
@@ -76,8 +78,7 @@ const slips: Slip[] = [
           ></iframe>
         </div>
       </div>
-      <figcaption class="keeper-caption">The drawer as it ships, empty.</figcaption>
-    </figure>
+    </div>
   </div>
 </section>
 
@@ -225,11 +226,6 @@ const slips: Slip[] = [
     border: 0;
     background: #1c1c1e;
     pointer-events: none;
-  }
-  .keeper-caption {
-    margin-top: 12px;
-    font-size: 13px;
-    color: var(--paper-3);
   }
 
   @media (prefers-reduced-motion: reduce) {

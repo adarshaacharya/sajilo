@@ -9,8 +9,6 @@ const ISSUES_URL = `${REPO_URL}/issues`;
 const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
 const WEBSITE_URL = "https://sajilo.fyi";
 const CONTACT_EMAIL = "contact@sajilo.fyi";
-/** Lightweight Charts' licence asks for this credit where its logo is hidden. */
-const TRADINGVIEW_URL = "https://www.tradingview.com/";
 
 function QuietLink({ label, href }: { label: string; href: string }) {
   return (
@@ -143,14 +141,6 @@ export function AboutTab() {
           className="hover:text-text-secondary hover:underline"
         >
           {t("about.rights")}
-        </button>
-        <br />
-        <button
-          type="button"
-          onClick={() => openExternalLink(TRADINGVIEW_URL)}
-          className="hover:text-text-secondary hover:underline"
-        >
-          {t("about.charts-by")}
         </button>
       </p>
     </div>
