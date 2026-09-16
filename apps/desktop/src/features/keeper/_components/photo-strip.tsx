@@ -10,6 +10,10 @@ const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "bmp", "tif", "ti
 /** Fired by the viewer window after a delete or rotate, so strips refresh. */
 export const PHOTOS_CHANGED = "keeper-photos-changed";
 
+/** A 56px-tall tile as wide as the photo's shape asks, within reason. */
+const tileWidth = (photo: KeeperAttachment) =>
+  Math.round(Math.min(Math.max((56 * photo.width) / photo.height, 42), 100));
+
 const isImagePath = (path: string) =>
   IMAGE_EXTENSIONS.includes(path.split(".").pop()?.toLowerCase() ?? "");
 
@@ -191,53 +195,62 @@ export function PhotoStrip({
           </span>
         </button>
       ) : (
-        <div
-          className={`flex flex-wrap gap-1.5 rounded-lg p-1 transition-colors ${
-            dragging
-              ? "bg-[color:color-mix(in_srgb,var(--color-accent-mark)_10%,transparent)] outline outline-1 outline-dashed outline-[color:var(--color-accent-mark)]"
-              : ""
-          }`}
-        >
-          {photos.map((photo, index) => (
-            <div key={photo.id} className="group relative">
+        <div className="space-y-1.5">
+          {/* Same caption style as the details above it. */}
+          <p className="text-[10px] text-text-muted">
+            {t("keeper.photos.title")} · {photos.length}
+          </p>
+          <div
+            className={`-m-1 flex flex-wrap gap-1.5 rounded-lg p-1 transition-colors ${
+              dragging
+                ? "bg-[color:color-mix(in_srgb,var(--color-accent-mark)_10%,transparent)] outline outline-1 outline-dashed outline-[color:var(--color-accent-mark)]"
+                : ""
+            }`}
+          >
+            {photos.map((photo, index) => (
+              <div key={photo.id} className="group relative">
+                <button
+                  type="button"
+                  onClick={() => api.openKeeperViewer(ownerKind, ownerId, index).catch(() => {})}
+                  aria-label={t("keeper.photos.open").replace("{n}", String(index + 1))}
+                  // Tiles follow the photo's shape, so a landscape ID card shows
+                  // edge to edge instead of being cropped to a square.
+                  style={{ width: tileWidth(photo) }}
+                  className="block h-14 overflow-hidden rounded-[7px] border border-divider bg-surface-hover transition-transform duration-150 hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-mark"
+                >
+                  <img
+                    src={photo.thumbnail}
+                    alt=""
+                    draggable={false}
+                    className="size-full object-cover"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(photo)}
+                  aria-label={t("keeper.photos.delete-title")}
+                  className="absolute -top-1 -right-1 hidden size-4 items-center justify-center rounded-full border border-divider bg-[color:var(--color-surface)] text-[11px] leading-none text-holiday shadow-sm group-hover:flex focus-visible:flex"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            {adding > 0 && (
+              <span className="flex size-14 items-center justify-center rounded-[7px] border border-divider bg-surface-hover">
+                <Icon name="refresh" className="size-3.5 animate-spin text-text-muted" />
+              </span>
+            )}
+            {room > 0 && (
               <button
                 type="button"
-                onClick={() => api.openKeeperViewer(ownerKind, ownerId, index).catch(() => {})}
-                aria-label={t("keeper.photos.open").replace("{n}", String(index + 1))}
-                className="block size-14 overflow-hidden rounded-[7px] border border-divider bg-surface-hover transition-transform duration-150 hover:scale-[1.03] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-mark"
+                onClick={choose}
+                aria-label={t("keeper.photos.add")}
+                className="flex size-14 items-center justify-center rounded-[7px] border border-dashed border-control-border text-accent-mark transition-colors hover:border-[color:var(--color-accent-mark)] hover:bg-[color:color-mix(in_srgb,var(--color-accent-mark)_8%,transparent)]"
               >
-                <img
-                  src={photo.thumbnail}
-                  alt=""
-                  draggable={false}
-                  className="size-full object-cover"
-                />
+                <Icon name="plus" className="size-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => remove(photo)}
-                aria-label={t("keeper.photos.delete-title")}
-                className="absolute -top-1 -right-1 hidden size-4 items-center justify-center rounded-full border border-divider bg-[color:var(--color-surface)] text-[11px] leading-none text-holiday shadow-sm group-hover:flex focus-visible:flex"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-          {adding > 0 && (
-            <span className="flex size-14 items-center justify-center rounded-[7px] border border-divider bg-surface-hover">
-              <Icon name="refresh" className="size-3.5 animate-spin text-text-muted" />
-            </span>
-          )}
-          {room > 0 && (
-            <button
-              type="button"
-              onClick={choose}
-              aria-label={t("keeper.photos.add")}
-              className="flex size-14 items-center justify-center rounded-[7px] border border-dashed border-control-border text-accent-mark transition-colors hover:border-[color:var(--color-accent-mark)] hover:bg-[color:color-mix(in_srgb,var(--color-accent-mark)_8%,transparent)]"
-            >
-              <Icon name="plus" className="size-4" />
-            </button>
-          )}
+            )}
+          </div>
         </div>
       )}
       {error && <p className="px-0.5 text-[10px] text-holiday">{error}</p>}

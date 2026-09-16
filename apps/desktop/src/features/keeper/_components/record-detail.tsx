@@ -129,7 +129,7 @@ export function RecordDetail({
             )}
           </div>
         )}
-        <div className="border-t border-divider pt-2.5">
+        <div className="-mt-1 border-t border-divider pt-2">
           <PhotoStrip ownerKind="record" ownerId={record.id} t={t} />
         </div>
       </section>
