@@ -43,6 +43,20 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
     remindDays: [3, 0],
   },
   {
+    id: "water",
+    title: "Water bill",
+    category: "home",
+    tips: [
+      "Have your KUKL customer number ready",
+      "Pay on eSewa, Khalti, the KUKL app, or at the counter",
+      "KUKL gives a rebate for paying early",
+      "Old arrears must be cleared before online payment is accepted",
+    ],
+    url: "https://www.kukl.org.np/",
+    recurrence: "monthly",
+    remindDays: [3, 0],
+  },
+  {
     id: "internet",
     title: "Internet bill",
     category: "home",
@@ -51,6 +65,19 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
       "Pay in the provider's app, eSewa, Khalti, or at the counter",
     ],
     url: "",
+    recurrence: "monthly",
+    remindDays: [3, 0],
+  },
+  {
+    id: "telephone",
+    title: "Telephone bill",
+    category: "home",
+    tips: [
+      "NTC landlines run on an advance deposit; top it up before it runs out",
+      "Check the balance: dial 1606, or SMS CB*<number> to 1415",
+      "Pay on eSewa, Khalti, or with an NTC recharge card",
+    ],
+    url: "https://www.ntc.net.np/",
     recurrence: "monthly",
     remindDays: [3, 0],
   },
@@ -68,7 +95,7 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
   },
   {
     id: "loan",
-    title: "Loan instalment",
+    title: "Loan EMI",
     category: "money",
     tips: [
       "Have your loan account number ready",
@@ -93,6 +120,20 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
     category: "health",
     tips: ["Take the prescription", "Note the medicine name and dose"],
     url: "",
+    remindDays: [3, 0],
+  },
+  {
+    // One per service: the title is meant to be edited to the service's name.
+    id: "subscription",
+    title: "Subscription",
+    category: "money",
+    tips: [
+      "Rename this to the service: Netflix, YouTube Premium, iCloud, gym…",
+      "Add one reminder per subscription",
+      "Cards are charged automatically; cancel before the date to stop it",
+    ],
+    url: "",
+    recurrence: "monthly",
     remindDays: [3, 0],
   },
 ];

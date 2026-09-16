@@ -26,6 +26,8 @@ pub const BAZAR_METALS_KEY: &str = "bazar.metals.v1";
 pub const BAZAR_FUEL_KEY: &str = "bazar.fuel.v1";
 pub const BAZAR_VEGETABLES_KEY: &str = "bazar.vegetables.v1";
 pub const STOCKS_KEY: &str = "stocks.v1";
+/// ShareHub's live board, overlaid on the ShareSansar snapshot in session.
+pub const STOCKS_LIVE_KEY: &str = "stocksLive.v1";
 pub const IPOS_KEY: &str = "ipos.v1";
 pub const DIVIDENDS_KEY: &str = "dividends.v1";
 pub const NEPSE_INTRADAY_KEY: &str = "nepseIntraday.v1";

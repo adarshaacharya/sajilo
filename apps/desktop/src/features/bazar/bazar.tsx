@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
@@ -23,6 +23,8 @@ type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 /** Also the set `?tab=` accepts, so anything that links into this screen — the
  * tray, the landing page — can open it on the panel it means. */
 const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables"];
+/** How often an open Bazar re-asks for the board while NEPSE is trading. */
+const LIVE_REFRESH_MS = 60_000;
 
 function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadStatus {
   if (!state) return { status: "loading" };
@@ -68,11 +70,18 @@ export function Bazar() {
     isValidating: loadingFeeds,
     mutate: mutateFeeds,
   } = useSWR("bazar-feeds", () => fetchFeeds(false));
+  // While NEPSE is trading the board moves every minute; a screen left open
+  // follows it. Closed, nothing changes until the next session.
+  const [marketOpen, setMarketOpen] = useState(false);
+  const inSession = marketOpen ? { refreshInterval: LIVE_REFRESH_MS } : {};
   const {
     data: stocks,
     isValidating: loadingStocks,
     mutate: mutateStocks,
-  } = useSWR("bazar-stocks", () => catchAsFailed(api.getStocks(false)));
+  } = useSWR("bazar-stocks", () => catchAsFailed(api.getStocks(false)), inSession);
+  useEffect(() => {
+    setMarketOpen(loadedValue(stocks)?.marketStatus?.isOpen ?? false);
+  }, [stocks]);
   // CDSC is only asked while the stocks tab is showing; its cache answers
   // everything else.
   const {
@@ -89,7 +98,11 @@ export function Bazar() {
     data: intraday,
     isValidating: loadingIntraday,
     mutate: mutateIntraday,
-  } = useSWR(tab === "stocks" ? "bazar-nepse-intraday" : null, () => fetchIntraday(false));
+  } = useSWR(
+    tab === "stocks" ? "bazar-nepse-intraday" : null,
+    () => fetchIntraday(false),
+    inSession,
+  );
 
   const retryIpos = useCallback(
     () => void mutateIpos(fetchIpos(true), { revalidate: false }),

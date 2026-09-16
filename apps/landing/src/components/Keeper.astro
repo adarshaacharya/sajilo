@@ -1,0 +1,328 @@
+---
+// Keeper is the one screen with nothing recorded in it, on purpose: it holds
+// citizenship and passport numbers, so the showcase ships its empty state
+// (see apps/showcase-data). What this section shows instead is the rulebook —
+// which papers lapse, how, and when the app speaks up — read off
+// apps/desktop/src/features/keeper/_lib/documents.ts and templates.ts. It
+// never shows a document, a name or a date as if it were someone's.
+//
+// The form is a khata: the ruled household register, red margin line and
+// all, that this screen replaces.
+
+interface Row {
+  paper: string;
+  ne: string;
+  lapses: string;
+  told: string;
+}
+
+const rows: Row[] = [
+  { paper: "Citizenship, National ID, PAN", ne: "नागरिकता", lapses: "Never. Kept as a record.", told: "—" },
+  { paper: "Passport", ne: "राहदानी", lapses: "Expires. Ten years for an adult.", told: "A year, six months, a month before" },
+  { paper: "Driving licence", ne: "लाइसेन्स", lapses: "Expires. Ten years, five past sixty.", told: "A month, a week before" },
+  { paper: "Bluebook", ne: "ब्लुबुक", lapses: "Tax falls due every Ashad.", told: "A month, a week, the day before" },
+  { paper: "Vehicle, health, property insurance", ne: "बीमा", lapses: "Renews every year.", told: "A month, a week before" },
+  { paper: "Life insurance", ne: "जीवन बीमा", lapses: "Premium monthly, quarterly or yearly.", told: "Two weeks, three days before" },
+  { paper: "Warranty", ne: "वारेन्टी", lapses: "Ends.", told: "A month before" },
+  { paper: "Electricity, water, internet, telephone, rent, EMI, subscriptions", ne: "बिल", lapses: "Every month.", told: "Three days before" },
+  { paper: "Anything else", ne: "अरू", lapses: "Never, once, or on a cycle. Your fields.", told: "Your choice" },
+];
+---
+
+<section class="keeper wrap" id="keeper" aria-labelledby="keeper-title">
+  <div class="section-head reveal">
+    <p class="keeper-mark">
+      <span lang="ne">सम्हाल</span>
+      <span class="keeper-mark-en">Keeper</span>
+    </p>
+    <h2 id="keeper-title">The household register.</h2>
+    <p class="lede">
+      Every paper the family holds, whose it is, and the day it lapses — with the app doing the
+      remembering. Kept on your computer, offline, with no account.
+    </p>
+  </div>
+
+  <div class="keeper-grid">
+    <figure class="khata reveal" aria-label="What each kind of paper does, and when Keeper reminds you">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"><span lang="ne">कागजात</span><span>Paper</span></th>
+            <th scope="col"><span lang="ne">म्याद</span><span>Lapses</span></th>
+            <th scope="col"><span lang="ne">सम्झाउने</span><span>You are told</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr class="reveal" style={`--d:${i * 40}ms`}>
+              <th scope="row">
+                <span class="row-ne" lang="ne">{r.ne}</span>
+                <span class="row-paper">{r.paper}</span>
+              </th>
+              <td>{r.lapses}</td>
+              <td class="row-told">{r.told}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <figcaption>
+        Reminders arrive at nine in the morning, Nepal time, on those days and on the day itself; one more
+        comes the morning after, if it was missed. Every timing can be changed per paper.
+      </figcaption>
+    </figure>
+
+    <aside class="keeper-side reveal">
+      <div class="keeper-frame">
+        <div class="keeper-screen">
+          <iframe
+            class="keeper-app"
+            title="Sajilo Keeper screen"
+            tabindex="-1"
+            scrolling="no"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2Fkeeper&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+      <p class="keeper-caption">The screen as it ships, before anything is written in it.</p>
+
+      <div class="keeper-prose">
+        <p>
+          Each paper belongs to you or to someone in the family, and a family member can be added from the
+          form itself. A vehicle policy is tied to its bluebook, and the bluebook says so when no policy is
+          linked or the policy runs out before the tax is due.
+        </p>
+        <p>
+          Passports, licences, bluebooks, policies and warranties carry what renewing takes: what to bring,
+          where to go, and the official site. Marking a bluebook's tax paid moves it to next Ashad; renewing
+          a passport asks only for the new date.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .keeper {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .keeper-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .keeper-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .keeper-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .keeper-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+    margin-top: clamp(28px, 4vw, 48px);
+  }
+
+  /* The khata: ruled lines the width of the sheet, a sindoor margin down the
+     left, Devanagari in the margin. No card, no fill — a page. */
+  .khata {
+    position: relative;
+    padding-left: clamp(18px, 2.6vw, 30px);
+  }
+  .khata::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background: var(--sindoor);
+    opacity: 0.85;
+  }
+  .khata table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .khata thead th {
+    text-align: left;
+    font-weight: 500;
+    padding: 0 12px 12px 0;
+    border-bottom: 1px solid var(--line-2);
+    vertical-align: bottom;
+  }
+  .khata thead th span {
+    display: block;
+  }
+  .khata thead th [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.1;
+    color: var(--gilt-2);
+  }
+  .khata thead th span:not([lang]) {
+    font-size: 12.5px;
+    color: var(--paper-3);
+    margin-top: 2px;
+  }
+  .khata tbody tr {
+    border-bottom: 1px solid var(--line);
+  }
+  .khata tbody th,
+  .khata td {
+    padding: 16px 12px 16px 0;
+    vertical-align: top;
+    font-weight: 400;
+    text-align: left;
+    font-size: 15px;
+    color: var(--paper-2);
+    text-wrap: pretty;
+  }
+  .khata tbody th {
+    width: 36%;
+    color: var(--paper);
+  }
+  .row-ne {
+    display: block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.1;
+  }
+  .row-paper {
+    display: block;
+    font-size: 13.5px;
+    color: var(--paper-3);
+    margin-top: 3px;
+  }
+  .row-told {
+    color: var(--gilt-2);
+  }
+  .khata figcaption {
+    margin-top: 18px;
+    font-size: 13.5px;
+    color: var(--paper-3);
+    max-width: 62ch;
+    text-wrap: pretty;
+  }
+
+  .keeper-side {
+    position: sticky;
+    top: 92px;
+  }
+  /* Same frame as the tour: the app at its real popover size, scaled down. */
+  .keeper-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+  }
+  .keeper-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .keeper-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+  .keeper-caption {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .keeper-prose {
+    display: grid;
+    gap: 14px;
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 14.5px;
+    color: var(--paper-2);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 860px) {
+    .keeper-grid {
+      grid-template-columns: 1fr;
+    }
+    .keeper-side {
+      position: static;
+      display: grid;
+      grid-template-columns: minmax(0, 260px) 1fr;
+      gap: 6px 24px;
+    }
+    .keeper-frame {
+      grid-row: 1 / 3;
+    }
+    .keeper-prose {
+      grid-column: 2;
+      margin-top: 0;
+      padding-top: 0;
+      border-top: 0;
+    }
+    .khata thead {
+      display: none;
+    }
+    .khata tbody tr {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 14px 0;
+    }
+    .khata tbody th,
+    .khata td {
+      padding: 0;
+      width: auto;
+    }
+  }
+  @media (max-width: 560px) {
+    .keeper-side {
+      grid-template-columns: 1fr;
+    }
+    .keeper-frame {
+      grid-row: auto;
+      width: min(100%, 300px);
+    }
+    .keeper-prose {
+      grid-column: 1;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+    }
+  }
+</style>
+
+<script>
+  // Scale the 380px screen to whatever width the frame has.
+  const frame = document.querySelector<HTMLElement>(".keeper-frame");
+  const screen = document.querySelector<HTMLElement>(".keeper-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>

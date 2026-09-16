@@ -25,6 +25,7 @@ pub mod nrb;
 pub mod open_meteo;
 pub mod ratopati;
 pub mod rss;
+pub mod sharehub_live;
 pub mod sharesansar;
 
 pub use error::{ProviderError, Result};

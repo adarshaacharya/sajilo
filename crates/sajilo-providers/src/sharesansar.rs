@@ -68,7 +68,7 @@ pub fn parse(
 /// Every traded company counted by which way it closed. Counted from the price
 /// table rather than read from another source, so the bar can never disagree
 /// with the rows beneath it.
-fn breadth(quotes: &[StockQuote]) -> MarketBreadth {
+pub(crate) fn breadth(quotes: &[StockQuote]) -> MarketBreadth {
     let mut breadth = MarketBreadth {
         advanced: 0,
         declined: 0,
@@ -291,7 +291,18 @@ fn company_names(html: &str) -> HashMap<String, String> {
 }
 
 fn published_date(html: &str) -> Option<DateTime<Utc>> {
-    // yyyy-MM-dd somewhere on the page ("As of : 2026-08-14").
+    // The date picker above the table holds the trading day being shown. The
+    // page head also carries dates (an `article:published_time` from 2016),
+    // so the first date on the page is not a safe guess on its own.
+    if let Some(picked) = html
+        .split_once("id=\"fromdate\"")
+        .and_then(|(_, rest)| rest.split_once("value=\""))
+        .and_then(|(_, rest)| rest.get(..10))
+        .and_then(|text| NaiveDate::parse_from_str(text, "%Y-%m-%d").ok())
+    {
+        return Some(Utc.from_utc_datetime(&picked.and_time(NaiveTime::MIN)));
+    }
+    // Otherwise yyyy-MM-dd somewhere on the page ("As of : 2026-08-14").
     let bytes = html.as_bytes();
     let mut i = 0;
     while i + 10 <= bytes.len() {
@@ -364,7 +375,10 @@ mod tests {
                 .map(|q| q.ltp),
             Some(532.0)
         );
-        assert!(snapshot.freshness.source_timestamp.is_some());
+        assert_eq!(
+            snapshot.freshness.source_timestamp,
+            "2026-08-14T00:00:00Z".parse().ok()
+        );
         assert_eq!(
             snapshot.breadth,
             Some(MarketBreadth {
@@ -372,6 +386,19 @@ mod tests {
                 declined: 1,
                 unchanged: 0,
             })
+        );
+    }
+
+    #[test]
+    fn dates_the_snapshot_by_the_trading_day_shown() {
+        // The real page head carries a 2016 `article:published_time`; the
+        // date picker above the table is the day the prices belong to.
+        let prices = include_str!("../../../fixtures/sharesansar/prices.html");
+        let market = include_str!("../../../fixtures/sharesansar/market.html");
+        let snapshot = parse(market, prices, Utc::now()).unwrap();
+        assert_eq!(
+            snapshot.freshness.source_timestamp,
+            "2026-09-14T00:00:00Z".parse().ok()
         );
     }
 
