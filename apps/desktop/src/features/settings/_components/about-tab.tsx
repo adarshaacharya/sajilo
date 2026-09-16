@@ -8,6 +8,7 @@ const REPO_URL = "https://github.com/adarshaacharya/sajilo";
 const ISSUES_URL = `${REPO_URL}/issues`;
 const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
 const WEBSITE_URL = "https://sajilo.fyi";
+const PRIVACY_URL = `${WEBSITE_URL}/privacy.html`;
 const CONTACT_EMAIL = "contact@sajilo.fyi";
 
 function QuietLink({ label, href }: { label: string; href: string }) {
@@ -141,6 +142,14 @@ export function AboutTab() {
           className="hover:text-text-secondary hover:underline"
         >
           {t("about.rights")}
+        </button>
+        {" · "}
+        <button
+          type="button"
+          onClick={() => openExternalLink(PRIVACY_URL)}
+          className="hover:text-text-secondary hover:underline"
+        >
+          {t("about.privacy")}
         </button>
       </p>
     </div>

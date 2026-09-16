@@ -9,7 +9,7 @@
 Bikram Sambat calendar, festivals, markets, news, weather, and everyday Nepali tools,
 in a small tray app for macOS, Windows, and Linux.
 
-[Website](https://sajilo.fyi) · [Download](#download) · [Releases](https://github.com/adarshaacharya/sajilo/releases) · [Privacy](#privacy)
+[Website](https://sajilo.fyi) · [Download](#download) · [Releases](https://github.com/adarshaacharya/sajilo/releases) · [Privacy](https://sajilo.fyi/privacy.html)
 
 [![Latest release](https://img.shields.io/github/v/release/adarshaacharya/sajilo?label=release)](https://github.com/adarshaacharya/sajilo/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -120,7 +120,8 @@ totals, with no account, device identifier, IP address, or in-app activity. It i
 by default and can be switched off in **Settings › System › Privacy**, after which
 nothing is sent.
 
-See [SECURITY.md](SECURITY.md) for the full details.
+The same text is on [sajilo.fyi/privacy.html](https://sajilo.fyi/privacy.html).
+See [SECURITY.md](SECURITY.md) for engineering notes.
 
 ## Data sources
 

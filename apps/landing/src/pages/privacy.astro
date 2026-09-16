@@ -1,0 +1,135 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Privacy policy: Sajilo"
+  description="Sajilo stores your data on your device. There is no account. An optional anonymous daily count can be switched off."
+  path="/privacy.html"
+>
+  <main class="wrap policy" id="main">
+    <h1 class="display policy-h1">Privacy policy</h1>
+    <p class="lede">
+      Sajilo is a menu-bar app with no account. What you write stays on your computer. This page is
+      the whole policy.
+    </p>
+    <p class="policy-updated">Last updated 16 September 2026.</p>
+
+    <section class="policy-block">
+      <h2>On your device</h2>
+      <p>
+        Day plans, Keeper reminders and documents, photos you attach, watchlists, settings, and
+        backups you export live in a database on your computer. Sajilo does not upload them. There
+        is no sign-in and no cloud copy of that data.
+      </p>
+    </section>
+
+    <section class="policy-block">
+      <h2>Anonymous daily count</h2>
+      <p>
+        To know how many people use the app, Sajilo can send at most one count per UTC day. It is
+        on by default. Switching it off in Settings › System › Privacy stops it; nothing is sent
+        after that.
+      </p>
+      <p>Each count includes:</p>
+      <ul>
+        <li>the app version, and the previous version when you have just updated</li>
+        <li>operating system and CPU architecture</li>
+        <li>the UTC day, and days since the last count (capped at 45)</li>
+      </ul>
+      <p>
+        Cloudflare derives an approximate country from the connection. The service stores only
+        running totals. It does not store an account, device or installation identifier, IP
+        address, exact request time, or anything you do in the app.
+      </p>
+    </section>
+
+    <section class="policy-block">
+      <h2>Public sources</h2>
+      <p>
+        News, weather, markets, forex, rashifal, radio and similar screens fetch public pages and
+        keyless APIs. Weather uses the city you picked, not GPS. Those requests go to the publisher,
+        not to Sajilo. Failed or stale fetches stay on the device and are labelled as such.
+      </p>
+    </section>
+
+    <section class="policy-block">
+      <h2>Notifications</h2>
+      <p>
+        Festival, holiday, IPO and Keeper reminders use the operating system’s notification
+        permission. Sajilo asks for it when you turn those reminders on. The text of a reminder is
+        not sent to Sajilo.
+      </p>
+    </section>
+
+    <section class="policy-block">
+      <h2>This website</h2>
+      <p>
+        Download links on sajilo.fyi go through a counted redirect, then to GitHub. The count is a
+        total per hour, platform, approximate country, and referring site. There is no row per
+        person: no address, user agent, or identifier.
+      </p>
+    </section>
+
+    <section class="policy-block">
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy: <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a>.
+        The app is open source at
+        <a href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">GitHub</a>.
+      </p>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .policy {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 40px;
+    max-width: 680px;
+  }
+  .policy-h1 {
+    font-size: clamp(48px, 8vw, 84px);
+    margin-bottom: 22px;
+  }
+  .policy-updated {
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .policy-block {
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .policy-block h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .policy-block p,
+  .policy-block li {
+    color: var(--paper-2);
+    font-size: 17px;
+    max-width: 58ch;
+  }
+  .policy-block p + p,
+  .policy-block ul {
+    margin-top: 12px;
+  }
+  .policy-block ul {
+    padding-left: 1.2em;
+    display: grid;
+    gap: 8px;
+  }
+  .policy-block a {
+    color: var(--gilt);
+  }
+  .policy-block a:hover {
+    color: var(--gilt-2);
+  }
+</style>
