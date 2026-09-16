@@ -1,0 +1,428 @@
+---
+// A transistor radio, because that is what FM in Nepal still looks like in
+// most kitchens. Every stop on the dial is a recorded station at its real
+// frequency (src/data/showcase.ts); the jokes are ours.
+import { radioDial, stationCount } from "../data/showcase";
+
+const MIN = 87.5;
+const MAX = 108;
+const pos = (frequency: number) => ((frequency - MIN) / (MAX - MIN)) * 100;
+const labels = [88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108];
+const start = radioDial.findIndex((stop) => stop.frequency >= 96);
+const first = radioDial[Math.max(0, start)];
+
+/** Said while the needle sits between stations. */
+const STATIC = [
+  "ssshhhhkrrrr…",
+  "…khhrrzzz…",
+  "(a faint bhajan, then nothing)",
+  "tsssss — was that the news?",
+  "krrrk. Try slapping the side.",
+];
+---
+
+<section class="radio wrap" id="radio" aria-labelledby="radio-title">
+  <div class="section-head reveal">
+    <p class="radio-mark">
+      <span lang="ne">रेडियो</span>
+      <span class="radio-mark-en">Radio</span>
+    </p>
+    <h2 id="radio-title">FM, without the antenna yoga.</h2>
+    <p class="lede">
+      {stationCount} stations from across Nepal. No holding the set up to the window, no rubber band on
+      the aerial, no hushing everyone for the news. It keeps playing while you check NEPSE.
+    </p>
+  </div>
+
+  <div class="set reveal" data-stops={JSON.stringify(radioDial)} data-static={JSON.stringify(STATIC)}>
+    <div class="set-top" aria-hidden="true">
+      <span class="set-handle"></span>
+    </div>
+
+    <div class="set-body">
+      <div class="grille" aria-hidden="true">
+        <span class="grille-badge">सजिलो</span>
+      </div>
+
+      <div class="panel">
+        <div class="display" aria-live="polite">
+          <span class="display-band">FM</span>
+          <span class="display-freq num" data-bind="freq">{first.frequency.toFixed(1)}</span>
+          <span class="display-name" lang="ne" data-bind="name">{first.names[0]}</span>
+          <span class="display-more" data-bind="more">
+            {first.names.length > 1 ? `+${first.names.length - 1} more on this frequency elsewhere` : ""}
+          </span>
+        </div>
+
+        <div
+          class="dial"
+          role="slider"
+          tabindex="0"
+          aria-label="Tuning dial"
+          aria-valuemin={MIN}
+          aria-valuemax={MAX}
+          aria-valuenow={first.frequency}
+          aria-valuetext={`${first.frequency} MHz`}
+          style={`--needle:${pos(first.frequency)}%`}
+        >
+          <div class="dial-scale" aria-hidden="true">
+            {radioDial.map((stop) => (
+              <span class="dial-stop" style={`left:${pos(stop.frequency)}%`}></span>
+            ))}
+            {labels.map((label) => (
+              <span class="dial-label num" style={`left:${pos(label)}%`}>{label}</span>
+            ))}
+          </div>
+          <span class="needle" aria-hidden="true"></span>
+        </div>
+
+        <div class="controls">
+          <button type="button" class="knob" data-seek="-1" aria-label="Previous station">
+            <span aria-hidden="true">◀◀</span>
+          </button>
+          <p class="controls-hint">Drag the dial, or use ← →</p>
+          <button type="button" class="knob" data-seek="1" aria-label="Next station">
+            <span aria-hidden="true">▶▶</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="radio-foot reveal">
+    The app plays the stream itself; this dial just finds the stations. Batteries not included, or needed.
+  </p>
+</section>
+
+<style>
+  .radio {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .radio-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .radio-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .radio-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  /* The set: a leatherette transistor with a carrying handle, a speaker
+     grille, and a lit dial window. */
+  .set {
+    margin-top: clamp(32px, 5vw, 56px);
+    max-width: 920px;
+  }
+  .set-top {
+    display: flex;
+    justify-content: center;
+    height: 34px;
+  }
+  .set-handle {
+    width: 46%;
+    height: 34px;
+    border: 7px solid var(--ink-4);
+    border-bottom: 0;
+    border-radius: 30px 30px 0 0;
+  }
+  .set-body {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+    gap: clamp(18px, 3vw, 32px);
+    padding: clamp(18px, 3vw, 30px);
+    border-radius: 22px;
+    background:
+      radial-gradient(120% 90% at 20% 0%, rgb(255 255 255 / 0.05), transparent 60%),
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.012) 0 2px, transparent 2px 5px),
+      var(--ink-3);
+    border: 1px solid var(--line-2);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 40px 80px -30px rgb(0 0 0 / 0.8);
+  }
+
+  .grille {
+    position: relative;
+    border-radius: 14px;
+    min-height: 180px;
+    background:
+      radial-gradient(circle, var(--ink) 1.6px, transparent 2.1px) 0 0 / 11px 11px,
+      var(--ink-4);
+    box-shadow: inset 0 2px 10px rgb(0 0 0 / 0.5);
+  }
+  .grille-badge {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    translate: -50% 0;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--gilt-2), var(--gilt));
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.3) inset;
+  }
+
+  .panel {
+    display: grid;
+    gap: 16px;
+    align-content: center;
+  }
+  .display {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "band freq" "name name" "more more";
+    align-items: baseline;
+    column-gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: #1b1406;
+    box-shadow:
+      inset 0 0 0 1px rgb(240 198 106 / 0.18),
+      inset 0 0 32px rgb(240 198 106 / 0.08);
+    color: var(--gilt-2);
+    text-shadow: 0 0 12px rgb(240 198 106 / 0.35);
+    min-height: 118px;
+  }
+  .display-band {
+    grid-area: band;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+  }
+  .display-freq {
+    grid-area: freq;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(34px, 4.4vw, 52px);
+    line-height: 1;
+  }
+  .display-name {
+    grid-area: name;
+    margin-top: 6px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(18px, 2vw, 24px);
+    line-height: 1.2;
+    min-height: 1.2em;
+  }
+  .display.is-static .display-name {
+    font-family: var(--sans);
+    font-weight: 400;
+    font-style: italic;
+    opacity: 0.6;
+  }
+  .display-more {
+    grid-area: more;
+    font-size: 12px;
+    opacity: 0.6;
+    min-height: 1.3em;
+  }
+
+  .dial {
+    position: relative;
+    height: 64px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #221a0c, #17120a);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    cursor: ew-resize;
+    touch-action: none;
+    outline: none;
+  }
+  .dial:focus-visible {
+    box-shadow:
+      inset 0 0 0 1px var(--line-2),
+      0 0 0 2px var(--gilt-2);
+  }
+  .dial-scale {
+    position: absolute;
+    inset: 10px 18px;
+  }
+  .dial-stop {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 16px;
+    background: var(--gilt);
+    opacity: 0.55;
+  }
+  .dial-label {
+    position: absolute;
+    bottom: 0;
+    translate: -50% 0;
+    font-size: 11px;
+    color: var(--paper-3);
+  }
+  .needle {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: calc(18px + (100% - 36px) * var(--needle) / 100);
+    width: 2px;
+    border-radius: 2px;
+    background: var(--sindoor-2);
+    box-shadow: 0 0 10px rgb(255 106 82 / 0.7);
+    translate: -1px 0;
+    transition: left 0.25s var(--ease);
+  }
+  .dial.is-dragging .needle {
+    transition: none;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .knob {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    font-size: 13px;
+    letter-spacing: -0.12em;
+    color: var(--paper-2);
+    background:
+      repeating-conic-gradient(rgb(255 255 255 / 0.05) 0 6deg, transparent 6deg 12deg),
+      radial-gradient(circle at 35% 30%, var(--ink-4), var(--ink-2));
+    border: 1px solid var(--line-2);
+    box-shadow: 0 6px 14px -6px rgb(0 0 0 / 0.8);
+    transition: transform 0.35s var(--spring), color 0.2s;
+  }
+  .knob:hover {
+    color: var(--gilt-2);
+    transform: rotate(-24deg);
+  }
+  .knob:active {
+    transform: rotate(-40deg) scale(0.96);
+  }
+  .controls-hint {
+    font-size: 13px;
+    color: var(--paper-3);
+    text-align: center;
+  }
+
+  .radio-foot {
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .needle,
+    .knob {
+      transition: none;
+    }
+  }
+  @media (max-width: 760px) {
+    .set-body {
+      grid-template-columns: 1fr;
+    }
+    .grille {
+      min-height: 70px;
+    }
+    .dial-label:nth-child(even) {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  type Stop = { frequency: number; names: string[] };
+  const MIN = 87.5;
+  const MAX = 108;
+  /** How close, in MHz, the needle must be to a station to lock on. */
+  const LOCK = 0.15;
+
+  const set = document.querySelector<HTMLElement>(".set");
+  if (set) {
+    const stops = JSON.parse(set.dataset.stops ?? "[]") as Stop[];
+    const noise = JSON.parse(set.dataset.static ?? "[]") as string[];
+    const dial = set.querySelector<HTMLElement>(".dial")!;
+    const display = set.querySelector<HTMLElement>(".display")!;
+    const bind = (name: string) => set.querySelector<HTMLElement>(`[data-bind="${name}"]`)!;
+    let frequency = Number(dial.getAttribute("aria-valuenow")) || 96;
+
+    const nearest = (value: number) =>
+      stops.reduce((best, stop) =>
+        Math.abs(stop.frequency - value) < Math.abs(best.frequency - value) ? stop : best,
+      );
+
+    function tune(value: number, snap: boolean) {
+      frequency = Math.min(MAX, Math.max(MIN, value));
+      const near = stops.length ? nearest(frequency) : null;
+      const locked = near && Math.abs(near.frequency - frequency) <= LOCK ? near : null;
+      if (snap && locked) frequency = locked.frequency;
+      dial.style.setProperty("--needle", String(((frequency - MIN) / (MAX - MIN)) * 100));
+      dial.setAttribute("aria-valuenow", frequency.toFixed(1));
+      dial.setAttribute("aria-valuetext", `${frequency.toFixed(1)} MHz`);
+      bind("freq").textContent = frequency.toFixed(1);
+      display.classList.toggle("is-static", !locked);
+      if (locked) {
+        bind("name").textContent = locked.names[0];
+        bind("name").setAttribute("lang", "ne");
+        bind("more").textContent =
+          locked.names.length > 1 ? `+${locked.names.length - 1} more on this frequency elsewhere` : "";
+      } else {
+        bind("name").textContent = noise[Math.floor(frequency * 10) % noise.length] ?? "…";
+        bind("name").removeAttribute("lang");
+        bind("more").textContent = "";
+      }
+    }
+
+    function seek(direction: number) {
+      const next =
+        direction > 0
+          ? stops.find((stop) => stop.frequency > frequency + 0.05)
+          : [...stops].reverse().find((stop) => stop.frequency < frequency - 0.05);
+      if (next) tune(next.frequency, true);
+    }
+
+    const fromPointer = (clientX: number) => {
+      const box = dial.getBoundingClientRect();
+      const inner = box.width - 36;
+      const ratio = Math.min(1, Math.max(0, (clientX - box.left - 18) / inner));
+      return MIN + ratio * (MAX - MIN);
+    };
+
+    dial.addEventListener("pointerdown", (event) => {
+      dial.setPointerCapture(event.pointerId);
+      dial.classList.add("is-dragging");
+      tune(fromPointer(event.clientX), false);
+    });
+    dial.addEventListener("pointermove", (event) => {
+      if (dial.hasPointerCapture(event.pointerId)) tune(fromPointer(event.clientX), false);
+    });
+    const release = () => {
+      dial.classList.remove("is-dragging");
+      tune(frequency, true);
+    };
+    dial.addEventListener("pointerup", release);
+    dial.addEventListener("pointercancel", release);
+
+    dial.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "ArrowUp") seek(1);
+      else if (event.key === "ArrowLeft" || event.key === "ArrowDown") seek(-1);
+      else return;
+      event.preventDefault();
+    });
+    set.querySelectorAll<HTMLButtonElement>("[data-seek]").forEach((button) =>
+      button.addEventListener("click", () => seek(Number(button.dataset.seek))),
+    );
+  }
+</script>

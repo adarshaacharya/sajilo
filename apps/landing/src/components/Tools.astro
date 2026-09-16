@@ -1,0 +1,260 @@
+---
+// Nepal's everyday arithmetic, worked on a page of an exercise book. Every
+// figure is an answer the app's own tools gave when the page was recorded
+// (src/data/showcase.ts); only the red ticks are ours.
+import {
+  convertedDate,
+  interestExample,
+  landBreakdown,
+  tolaInGrams,
+  vatExample,
+} from "../data/showcase";
+import { longDate, ne, rs } from "../lib/format";
+
+const vatRate = Math.round((vatExample.vat / vatExample.base) * 100);
+const terai = landBreakdown.terai;
+
+const sums = [
+  {
+    topic: "Land · hill",
+    left: `${ne(landBreakdown.hill.ropani)} रोपनी`,
+    right: `${rs(landBreakdown.squareFeet)} ft²`,
+    aside: `${landBreakdown.squareMetres.toFixed(2)} m²`,
+  },
+  {
+    topic: "Land · Terai",
+    left: `${ne(landBreakdown.hill.ropani)} रोपनी`,
+    right: `${ne(terai.kattha)} कट्ठा ${ne(terai.dhur.toFixed(2))} धुर`,
+    aside: "same plot, other system",
+  },
+  {
+    topic: "Gold",
+    left: "१ तोला",
+    right: `${tolaInGrams.toFixed(2)} g`,
+    aside: "every jeweller's first question",
+  },
+  {
+    topic: "VAT",
+    left: `Rs ${rs(vatExample.base)} + ${vatRate}%`,
+    right: `Rs ${rs(vatExample.total)}`,
+    aside: `Rs ${rs(vatExample.vat)} of it is VAT`,
+  },
+  {
+    topic: "Interest",
+    // Not an equality: the loan grows into this.
+    eq: "→",
+    left: `Rs ${rs(interestExample.principal)}`,
+    right: `Rs ${rs(interestExample.total)}`,
+    aside: `Rs ${rs(interestExample.interest)} simple interest`,
+  },
+  {
+    topic: "Date",
+    left: `${ne(convertedDate.nepali.day)} ${convertedDate.nepaliMonthName} ${ne(convertedDate.nepali.year)}`,
+    right: longDate(convertedDate.gregorian).replace(/^\w+, /, ""),
+    aside: "BS ⇄ AD, either way",
+  },
+];
+---
+
+<section class="tools wrap" id="tools" aria-labelledby="tools-title">
+  <div class="section-head reveal">
+    <p class="tools-mark">
+      <span lang="ne">औजार</span>
+      <span class="tools-mark-en">Tools</span>
+    </p>
+    <h2 id="tools-title">The sums sir set, finally useful.</h2>
+    <p class="lede">
+      Ropani to square feet, tola to grams, VAT on a bill, interest on a loan, BS to AD — plus a second
+      clock and the emergency numbers. The homework, done for you.
+    </p>
+  </div>
+
+  <div class="tools-grid">
+    <div class="copybook reveal" role="list" aria-label="Worked examples from the app's tools">
+      <span class="copybook-margin" aria-hidden="true"></span>
+      {sums.map((sum, i) => (
+        <div class="sum" role="listitem" style={`--d:${i * 70}ms`}>
+          <p class="sum-topic">{sum.topic}</p>
+          <p class="sum-line">
+            <span class="sum-left">{sum.left}</span>
+            <span class="sum-eq" aria-hidden="true">{"eq" in sum ? sum.eq : "="}</span>
+            <span class="sum-right">{sum.right}</span>
+            <span class="sum-tick" aria-hidden="true">✓</span>
+          </p>
+          <p class="sum-aside">{sum.aside}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="tools-stage reveal">
+      <div class="tools-frame">
+        <div class="tools-screen">
+          <iframe
+            class="tools-app"
+            title="Sajilo tools screen"
+            tabindex="-1"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2Ftools&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tools {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .tools-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .tools-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .tools-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+    margin-top: clamp(28px, 4vw, 48px);
+  }
+
+  /* A page from a school copy: cream paper ruled in faint blue, the red
+     margin down the left, each answer ticked in red pen. */
+  .copybook {
+    position: relative;
+    padding: 20px clamp(18px, 3vw, 32px) 20px clamp(52px, 7vw, 84px);
+    color: #221c14;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0 35px,
+        rgb(76 118 168 / 0.22) 35px 36px
+      ),
+      #f2ead9;
+    border-radius: 4px;
+    transform: rotate(-0.6deg);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.4) inset,
+      0 30px 60px -28px rgb(0 0 0 / 0.85);
+  }
+  .copybook-margin {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: clamp(38px, 5.4vw, 64px);
+    width: 1.5px;
+    background: rgb(214 60 44 / 0.55);
+  }
+  .sum {
+    padding: 12px 0 10px;
+  }
+  .sum + .sum {
+    border-top: 1px dashed rgb(34 28 20 / 0.12);
+  }
+  .sum-topic {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(34 28 20 / 0.5);
+  }
+  .sum-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    margin-top: 2px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 2.6vw, 32px);
+    line-height: 1.15;
+  }
+  .sum-eq {
+    color: rgb(34 28 20 / 0.4);
+  }
+  .sum-right {
+    color: #1d3f6e;
+  }
+  .sum-tick {
+    margin-left: 4px;
+    font-family: var(--sans);
+    font-size: 0.85em;
+    color: #d63c2c;
+    transform: rotate(-8deg);
+  }
+  .sum-aside {
+    margin-top: 2px;
+    font-size: 13.5px;
+    color: rgb(34 28 20 / 0.6);
+  }
+
+  .tools-stage {
+    position: sticky;
+    top: 92px;
+  }
+  .tools-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+  }
+  .tools-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .tools-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+
+  @media (max-width: 860px) {
+    .tools-grid {
+      grid-template-columns: 1fr;
+    }
+    .copybook {
+      transform: none;
+    }
+    .tools-stage {
+      position: static;
+      width: min(100%, 300px);
+    }
+  }
+</style>
+
+<script>
+  const frame = document.querySelector<HTMLElement>(".tools-frame");
+  const screen = document.querySelector<HTMLElement>(".tools-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>

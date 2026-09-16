@@ -1,0 +1,245 @@
+---
+// Every newsroom the app reads, set as a wall of front-page nameplates. The
+// names, which are official and which write in English, and the dateline all
+// come from the recording (src/data/showcase.ts). The recorded headlines
+// themselves are left to the live screen: a marketing page is the wrong place
+// to set someone's tragedy in display type.
+import { newsItems, newsSources, today } from "../data/showcase";
+import { longDate, ne } from "../lib/format";
+
+const dateline = longDate(today.gregorian);
+const bsDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepali.year)}`;
+---
+
+<section class="news wrap" id="news" aria-labelledby="news-title">
+  <div class="news-grid">
+    <div class="news-main">
+      <div class="section-head reveal">
+        <p class="news-mark">
+          <span lang="ne">समाचार</span>
+          <span class="news-mark-en">News</span>
+        </p>
+        <h2 id="news-title">Every front page, before breakfast.</h2>
+        <p class="lede">
+          Nepali and English newsrooms and government notices, merged into one list by time. Skim all of
+          it from the menu bar; open a story when one is worth it.
+        </p>
+      </div>
+
+      <ul class="stand reveal" aria-label="Newsrooms Sajilo reads">
+        {newsSources.map((source, i) => (
+          <li
+            class:list={["plate", { "plate--wide": i % 5 === 0, "plate--official": source.official }]}
+            style={`--d:${i * 50}ms`}
+          >
+            <span class="plate-rule" aria-hidden="true"></span>
+            <span class="plate-name">{source.name}</span>
+            <span class="plate-rule plate-rule--thin" aria-hidden="true"></span>
+            <span class="plate-line">
+              <span>{source.official ? "Official notices" : source.english ? "English" : "नेपाली"}</span>
+              <span class="plate-date num">{i % 2 === 0 ? dateline : bsDate}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p class="news-foot reveal">
+        <span class="num">{newsSources.length}</span> newsrooms ·
+        <span class="num">{newsItems}</span> headlines on the day this page was recorded
+      </p>
+    </div>
+
+    <div class="news-stage reveal">
+      <div class="news-frame">
+        <div class="news-screen">
+          <iframe
+            class="news-app"
+            title="Sajilo news screen"
+            tabindex="-1"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2Fnews&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .news {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .news-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+  }
+  .news-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .news-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .news-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  /* A news stand: each newsroom as the nameplate off its own front page —
+     a heavy rule, the name in display type, a hairline, then the language and
+     the day's dateline in small caps. Government notices take the sindoor
+     rule, the way an official gazette is set apart. */
+  .stand {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+    margin-top: clamp(28px, 4vw, 44px);
+  }
+  .plate {
+    display: grid;
+    gap: 7px;
+    align-content: start;
+    padding: 14px 16px 12px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    transition:
+      transform 0.35s var(--spring),
+      border-color 0.25s;
+  }
+  .plate:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-2);
+  }
+  .plate--wide {
+    grid-column: span 2;
+  }
+  .plate-rule {
+    display: block;
+    height: 3px;
+    background: var(--paper);
+  }
+  .plate-rule--thin {
+    height: 1px;
+    background: var(--line-2);
+  }
+  .plate--official .plate-rule:not(.plate-rule--thin) {
+    background: var(--sindoor);
+  }
+  .plate-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 2.2vw, 28px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    text-wrap: balance;
+  }
+  .plate--wide .plate-name {
+    font-size: clamp(28px, 3vw, 38px);
+  }
+  .plate-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--paper-3);
+  }
+  .plate-line [lang] {
+    text-transform: none;
+  }
+  .plate-date {
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .news-foot {
+    margin-top: clamp(20px, 3vw, 28px);
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .news-foot .num {
+    color: var(--gilt-2);
+    font-weight: 600;
+  }
+
+  .news-stage {
+    position: sticky;
+    top: 92px;
+  }
+  .news-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+  }
+  .news-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .news-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plate,
+    .plate:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .news-grid {
+      grid-template-columns: 1fr;
+    }
+    .news-stage {
+      position: static;
+      width: min(100%, 300px);
+    }
+  }
+  @media (max-width: 480px) {
+    .stand {
+      grid-template-columns: 1fr;
+    }
+    .plate--wide {
+      grid-column: auto;
+    }
+  }
+</style>
+
+<script>
+  const frame = document.querySelector<HTMLElement>(".news-frame");
+  const screen = document.querySelector<HTMLElement>(".news-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>

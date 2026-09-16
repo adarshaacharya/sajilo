@@ -107,6 +107,33 @@ export const newsItems = c.get_news.value.items.length;
 // ---------- Radio, rashifal ----------
 
 export const stationCount = c.get_stations.value.stations.length;
+
+/**
+ * The recorded stations placed on an FM dial. Frequencies arrive as the
+ * directory typed them ("95.2 MHz, 91 MHz", "१०४.४ MHz", "90.8Mhz", or not at
+ * all), so each station's first number is read — Devanagari digits included —
+ * and kept only if it is a real FM frequency. Stations sharing a frequency
+ * (the same number in different towns) share a stop on the dial.
+ */
+const DEVANAGARI = "०१२३४५६७८९";
+function firstFrequency(raw: string | null): number | null {
+  if (!raw) return null;
+  const latin = raw.replace(/[०-९]/g, (digit) => String(DEVANAGARI.indexOf(digit)));
+  const match = latin.match(/\d{2,3}(?:\.\d)?/);
+  const value = match ? Number(match[0]) : Number.NaN;
+  return value >= 87.5 && value <= 108 ? Math.round(value * 10) / 10 : null;
+}
+export const radioDial = (() => {
+  const stops = new Map<number, string[]>();
+  for (const station of c.get_stations.value.stations) {
+    const frequency = firstFrequency(station.frequency);
+    if (frequency === null) continue;
+    stops.set(frequency, [...(stops.get(frequency) ?? []), station.name]);
+  }
+  return [...stops.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([frequency, names]) => ({ frequency, names }));
+})();
 export const rashifalSigns = c.get_rashifal.value.readings.length;
 
 /**
@@ -137,3 +164,9 @@ export const rashifal = SIGNS.map((sign) => {
 
 export const ropaniInSqFt = c.convert_land;
 export const tolaInGrams = c.convert_weight;
+/** One ropani broken into both systems, as the Land tool shows it. */
+export const landBreakdown = c.land_breakdown;
+export const vatExample = c.compute_vat;
+export const interestExample = c.compute_interest;
+/** The date converter's answer for the recorded day. */
+export const convertedDate = c.bs_to_ad;
