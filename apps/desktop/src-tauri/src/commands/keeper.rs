@@ -51,6 +51,10 @@ pub struct KeeperBsDate {
     pub year: i32,
     pub month: u32,
     pub day: u32,
+    /// `भदौ` — from the calendar engine, so the UI never names a BS month
+    /// itself. Ignored on the way in.
+    #[serde(default)]
+    pub month_name: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -220,6 +224,7 @@ fn output_date(calendar: &str, ad: NaiveDate, bs: sajilo_core::NepaliDate) -> Ke
             year: bs.year,
             month: bs.month,
             day: bs.day,
+            month_name: bs.nepali_month_name().to_owned(),
         },
     }
 }
@@ -684,6 +689,39 @@ pub fn save_keeper_record(
             ],
         )
         .map_err(|error| error.to_string())?;
+    keeper_snapshot(app)
+}
+
+/// Ticks a reminder off. A repeating one (a monthly bill) is not finished —
+/// this cycle is — so its due date moves on one period and it stays active;
+/// only a one-off reminder, or one with no date, becomes completed.
+#[tauri::command]
+pub fn complete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
+    let item = items(&app)?
+        .into_iter()
+        .find(|item| item.id == id)
+        .ok_or_else(|| "That reminder no longer exists.".to_owned())?;
+    let connection = db::open(&app)?;
+    if let Some(due) = item.due_date.as_ref().filter(|_| item.recurrence != "none") {
+        let bs = sajilo_core::NepaliDate::new(due.bs.year, due.bs.month, due.bs.day);
+        let (ad, bs) = advance_date(parse_ad(&due.ad)?, bs, &item.recurrence)?;
+        connection
+            .execute(
+                "UPDATE keeper_items SET due_ad = ?1, due_bs_year = ?2, due_bs_month = ?3,
+                   due_bs_day = ?4, updated_at = ?5 WHERE id = ?6",
+                params![ad.to_string(), bs.year, bs.month, bs.day, now(), id],
+            )
+            .map_err(|error| error.to_string())?;
+    } else {
+        let stamp = now();
+        connection
+            .execute(
+                "UPDATE keeper_items SET status = 'completed', completed_at = ?1,
+                   updated_at = ?1 WHERE id = ?2",
+                params![stamp, id],
+            )
+            .map_err(|error| error.to_string())?;
+    }
     keeper_snapshot(app)
 }
 

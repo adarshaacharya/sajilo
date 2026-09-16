@@ -29,6 +29,7 @@ import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
 import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
 import { SFNewspaper } from "sf-symbols-lib/monochrome/SFNewspaper";
 import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
+import { SFPencil } from "sf-symbols-lib/monochrome/SFPencil";
 import { SFPercent } from "sf-symbols-lib/monochrome/SFPercent";
 import { SFPin } from "sf-symbols-lib/monochrome/SFPin";
 import { SFPinFill } from "sf-symbols-lib/monochrome/SFPinFill";
@@ -106,6 +107,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   trash: SFTrash,
   info: SFInfoCircle,
   link: SFLink,
+  pencil: SFPencil,
   mail: SFEnvelope,
 };
 
@@ -159,6 +161,7 @@ export type IconName =
   | "trash"
   | "info"
   | "link"
+  | "pencil"
   | "mail";
 
 function sizeFromClass(className: string | undefined): number | undefined {

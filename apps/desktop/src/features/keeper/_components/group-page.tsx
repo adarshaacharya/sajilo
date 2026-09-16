@@ -1,8 +1,9 @@
 import { Icon } from "../../../shared/components/icon";
 import type { KeeperPerson, KeeperRecord } from "../../../shared/lib/ipc";
 import { personName, recordName, recordSummary } from "../_lib/documents";
-import type { TFn } from "../_lib/shared";
+import { daysUntil, type TFn } from "../_lib/shared";
 import { RecordDue } from "./record-detail";
+import { DueTile, LetterTile } from "./rows";
 
 /** Every copy of one kind of paper — each citizenship in the family — led by
  * whose it is, since that is what tells them apart. */
@@ -36,8 +37,13 @@ export function GroupPage({
               key={record.id}
               type="button"
               onClick={() => onOpen(record.id)}
-              className="flex w-full items-center gap-2 border-b border-divider py-2.5 text-left last:border-0"
+              className="flex w-full items-center gap-2.5 border-b border-divider py-2.5 text-left last:border-0"
             >
+              {record.expiryDate ? (
+                <DueTile date={record.expiryDate} days={daysUntil(record.expiryDate.ad)} />
+              ) : (
+                <LetterTile text={personName(t, people, record.personId)} />
+              )}
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12px] font-medium">
                   {personName(t, people, record.personId)}

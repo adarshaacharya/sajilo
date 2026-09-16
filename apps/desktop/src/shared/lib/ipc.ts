@@ -124,7 +124,8 @@ export interface KeeperDateInput {
 
 export interface KeeperDate extends KeeperDateInput {
   ad: string;
-  bs: { year: number; month: number; day: number };
+  /** `monthName` is the engine's Nepali month name, e.g. भदौ. */
+  bs: { year: number; month: number; day: number; monthName: string };
 }
 
 export interface KeeperChecklistItem {
@@ -322,6 +323,7 @@ export const api = {
     invoke<KeeperSnapshot>("save_keeper_record", { record }),
   deleteKeeperRecord: (id: string) => invoke<KeeperSnapshot>("delete_keeper_record", { id }),
   advanceKeeperRecord: (id: string) => invoke<KeeperSnapshot>("advance_keeper_record", { id }),
+  completeKeeperItem: (id: string) => invoke<KeeperSnapshot>("complete_keeper_item", { id }),
 
   getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
   setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),

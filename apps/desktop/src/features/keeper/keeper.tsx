@@ -5,6 +5,7 @@ import { Segmented } from "../../shared/components/segmented";
 import { useSettings } from "../../shared/context/settings-context";
 import {
   api,
+  type KeeperDate,
   type KeeperItem,
   type KeeperPerson,
   type KeeperRecord,
@@ -17,7 +18,7 @@ import { ItemEditor } from "./_components/item-editor";
 import type { NewPerson } from "./_components/person-select";
 import { RecordDetail } from "./_components/record-detail";
 import { RecordEditor } from "./_components/record-editor";
-import { GroupRow, ItemGroupRow, ItemRow } from "./_components/rows";
+import { DueTile, GroupRow, ItemGroupRow, ItemRow, TickButton } from "./_components/rows";
 import {
   blankRecord,
   docTypeLabel,
@@ -152,9 +153,13 @@ export function Keeper() {
     if (ok && (await run(api.deleteKeeperItem(item.id), "keeper.error-save"))) setStack([]);
   };
 
+  /** Ticking a repeating reminder rolls it to its next date; ticking a
+   * one-off finishes it; unticking a finished one reopens it. */
   const toggleItem = (item: KeeperItem) =>
     run(
-      api.saveKeeperItem({ ...item, status: item.status === "completed" ? "active" : "completed" }),
+      item.status === "completed"
+        ? api.saveKeeperItem({ ...item, status: "active" })
+        : api.completeKeeperItem(item.id),
       "keeper.error-save",
     );
 
@@ -385,6 +390,7 @@ export function Keeper() {
         onOpenItemGroup={(key) => push({ name: "itemGroup", key })}
         onOpenRecord={(recordId) => push({ name: "record", id: recordId })}
         onOpenItem={(item) => push({ name: "editItem", draft: item, newPerson: null })}
+        onToggleItem={toggleItem}
         t={t}
       />
     );
@@ -410,6 +416,7 @@ function Home({
   onOpenItemGroup,
   onOpenRecord,
   onOpenItem,
+  onToggleItem,
   t,
 }: {
   data: KeeperSnapshot;
@@ -424,6 +431,7 @@ function Home({
   onOpenItemGroup: (key: string) => void;
   onOpenRecord: (id: string) => void;
   onOpenItem: (item: KeeperItem) => void;
+  onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
   const [search, setSearch] = useState("");
@@ -466,36 +474,43 @@ function Home({
           <div className="surface-card px-3">
             {upcoming.map((entry) => {
               const personId = entry.record?.personId ?? entry.item?.personId ?? null;
+              const item = entry.item;
               return (
-                <button
+                <div
                   key={entry.key}
-                  type="button"
-                  onClick={() =>
-                    entry.record
-                      ? onOpenRecord(entry.record.id)
-                      : entry.item && onOpenItem(entry.item)
-                  }
-                  className="flex w-full items-center gap-2 border-b border-divider py-2 text-left last:border-0"
+                  className="flex items-center gap-2.5 border-b border-divider py-2 last:border-0"
                 >
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[12px] font-medium">
-                      {entry.record ? recordName(t, entry.record) : entry.item?.title}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[10px] text-text-muted">
-                      {[
-                        nameOf(personId),
-                        entry.record ? t("keeper.kind.document") : t("keeper.kind.reminder"),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </span>
-                  <span
-                    className={`shrink-0 text-[10px] font-medium tabular-nums ${dueTone(entry.days)}`}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      entry.record ? onOpenRecord(entry.record.id) : item && onOpenItem(item)
+                    }
+                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    {dueLabel(t, entry.days)}
-                  </span>
-                </button>
+                    {(entry.record?.expiryDate ?? item?.dueDate) && (
+                      <DueTile
+                        date={(entry.record?.expiryDate ?? item?.dueDate) as KeeperDate}
+                        days={entry.days}
+                      />
+                    )}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[12px] font-medium">
+                        {entry.record ? recordName(t, entry.record) : item?.title}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[10px] text-text-muted">
+                        {[
+                          nameOf(personId),
+                          entry.record ? t("keeper.kind.document") : t("keeper.kind.reminder"),
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                        {" · "}
+                        <span className={dueTone(entry.days)}>{dueLabel(t, entry.days)}</span>
+                      </span>
+                    </span>
+                  </button>
+                  {item && <TickButton item={item} onToggle={() => onToggleItem(item)} t={t} />}
+                </div>
               );
             })}
           </div>

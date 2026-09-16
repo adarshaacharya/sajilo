@@ -33,7 +33,7 @@ export function AddPicker({
           {REMINDER_TEMPLATES.map((template) => (
             <Tile key={template.id} label={template.title} onClick={() => onReminder(template)} />
           ))}
-          <Tile label={t("keeper.add.other")} onClick={() => onReminder(null)} muted />
+          <Tile label={t("keeper.add.other")} onClick={() => onReminder(null)} />
         </Group>
       )}
     </div>
@@ -60,12 +60,12 @@ function Group({
   );
 }
 
-function Tile({ label, onClick, muted }: { label: string; onClick: () => void; muted?: boolean }) {
+function Tile({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`surface-card truncate px-2.5 py-2 text-left text-[11px] font-medium transition-colors hover:bg-surface-hover ${muted ? "text-text-secondary" : ""}`}
+      className={`surface-card truncate px-2.5 py-2 text-left text-[11px] font-medium transition-colors hover:bg-surface-hover`}
     >
       {label}
     </button>

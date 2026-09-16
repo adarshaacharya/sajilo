@@ -62,6 +62,7 @@ const WRITES = new Set([
   "delete_keeper_person",
   "save_keeper_record",
   "advance_keeper_record",
+  "complete_keeper_item",
   "delete_keeper_record",
   "set_notification_options",
   "set_autostart",

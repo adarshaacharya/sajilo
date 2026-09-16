@@ -85,12 +85,20 @@ export function RecordDetail({
               onClick={onDelete}
               aria-label={t("keeper.delete")}
               title={t("keeper.delete")}
-              className="icon-btn size-7 text-text-muted hover:text-holiday"
+              className="icon-btn size-7 hover:bg-[color:color-mix(in_srgb,var(--color-holiday)_12%,transparent)]"
             >
-              <Icon name="trash" className="size-3.5" />
+              {/* On the icon itself: `.icon-btn` sets its own text colour,
+                  which a utility on the button can't override. */}
+              <Icon name="trash" className="size-3.5 text-holiday" />
             </button>
-            <button type="button" onClick={onEdit} className="settings-btn text-[11px]">
-              {t("keeper.edit")}
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={t("keeper.edit")}
+              title={t("keeper.edit")}
+              className="icon-btn size-7 text-text-secondary hover:text-text"
+            >
+              <Icon name="pencil" className="size-3.5" />
             </button>
           </div>
         </div>

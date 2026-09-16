@@ -163,10 +163,11 @@ export function EditorActions({
         <button
           type="button"
           onClick={onDelete}
-          className="btn-ghost flex items-center gap-1 text-[11px] text-text-muted hover:text-holiday"
+          className="btn-ghost flex items-center gap-1 text-[11px]"
         >
-          <Icon name="trash" className="size-3" />
-          {t("keeper.delete")}
+          {/* Colour on the children: `.btn-ghost` sets its own. */}
+          <Icon name="trash" className="size-3 text-holiday" />
+          <span className="text-holiday">{t("keeper.delete")}</span>
         </button>
       )}
       <span className="flex-1" />
