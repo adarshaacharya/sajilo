@@ -15,11 +15,14 @@ import {
   isVehicleInsurance,
   NUMBER,
   RECURRENCE_LABELS,
+  recordName,
 } from "../_lib/documents";
+import { DOCUMENT_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
 import { DateField } from "./date-picker";
-import { EditorActions } from "./item-editor";
+import { EditorActions, FormHeader } from "./item-editor";
 import { type NewPerson, PersonSelect } from "./person-select";
+import { PhotoStrip } from "./photo-strip";
 import { RemindDays } from "./remind-days";
 
 export function RecordEditor({
@@ -67,6 +70,21 @@ export function RecordEditor({
 
   return (
     <section className="surface-card space-y-2.5 p-3">
+      <FormHeader
+        icon={DOCUMENT_ICONS[record.documentType]}
+        title={recordName(t, record)}
+        hint={
+          spec.kind === "repeats"
+            ? t(
+                RECURRENCE_LABELS[
+                  record.recurrence === "none" ? spec.defaultRecurrence : record.recurrence
+                ],
+              )
+            : spec.kind === "expires"
+              ? t("keeper.hint.renews")
+              : t("keeper.hint.on-file")
+        }
+      />
       <PersonSelect
         value={record.personId}
         people={people}
@@ -181,6 +199,8 @@ export function RecordEditor({
           className={`${CONTROL} w-full`}
         />
       )}
+
+      <PhotoStrip ownerKind="record" ownerId={record.id} t={t} />
 
       <textarea
         value={record.note}

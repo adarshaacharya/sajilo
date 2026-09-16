@@ -26,3 +26,13 @@ pub fn hide_popover(app: AppHandle<Wry>) {
         crate::window::hide(&window);
     }
 }
+
+/// Keeps the popover open while it shows a dialog of its own, and hands focus
+/// back to it when the dialog closes.
+#[tauri::command]
+pub fn pin_popover(app: AppHandle<Wry>, pinned: bool) {
+    crate::window::set_pinned(pinned);
+    if !pinned && let Some(window) = crate::window::main_window(&app) {
+        let _ = window.set_focus();
+    }
+}

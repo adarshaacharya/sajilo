@@ -12,20 +12,55 @@ import { WeightTab } from "./_components/weight-tab";
 
 type Tab = "date" | "land" | "weight" | "vat" | "interest" | "clock" | "emergency";
 
-type Tool = { id: Tab; label: string; icon: IconName };
+type Tool = { id: Tab; label: string; hint: string; icon: IconName };
 
 export function Tools() {
   const { t } = useSettings();
   const [tab, setTab] = useState<Tab | null>(null);
 
   const tools: readonly Tool[] = [
-    { id: "emergency" as const, label: t("tools.directory"), icon: "directory" as const },
-    { id: "clock" as const, label: t("tools.clock"), icon: "clock" as const },
-    { id: "date" as const, label: t("tools.date"), icon: "upcoming" as const },
-    { id: "land" as const, label: t("tools.land"), icon: "land" as const },
-    { id: "weight" as const, label: t("tools.weight"), icon: "weight" as const },
-    { id: "vat" as const, label: t("tools.vat"), icon: "percent" as const },
-    { id: "interest" as const, label: t("tools.interest"), icon: "interest" as const },
+    {
+      id: "emergency" as const,
+      label: t("tools.directory"),
+      hint: t("tools.directory-hint-short"),
+      icon: "directory" as const,
+    },
+    {
+      id: "clock" as const,
+      label: t("tools.clock"),
+      hint: t("tools.clock-hint-short"),
+      icon: "clock" as const,
+    },
+    {
+      id: "date" as const,
+      label: t("tools.date"),
+      hint: t("tools.date-hint-short"),
+      icon: "upcoming" as const,
+    },
+    {
+      id: "land" as const,
+      label: t("tools.land"),
+      hint: t("tools.land-hint-short"),
+      icon: "land" as const,
+    },
+    {
+      id: "weight" as const,
+      label: t("tools.weight"),
+      hint: t("tools.weight-hint-short"),
+      icon: "weight" as const,
+    },
+    {
+      id: "vat" as const,
+      label: t("tools.vat"),
+      hint: t("tools.vat-hint-short"),
+      icon: "percent" as const,
+    },
+    {
+      id: "interest" as const,
+      label: t("tools.interest"),
+      hint: t("tools.interest-hint-short"),
+      icon: "interest" as const,
+    },
   ];
   const essentialTools = tools.slice(0, 3);
   const calculatorTools = tools.slice(3);
@@ -65,19 +100,22 @@ function ToolGroup({
 }) {
   return (
     <section aria-label={title} className="space-y-1.5">
-      <h2 className="px-0.5 text-[12px] font-medium text-text-secondary">{title}</h2>
+      <h2 className="px-0.5 text-[12px] font-semibold">{title}</h2>
       <div className="grid grid-cols-2 gap-1.5">
         {tools.map((tool) => (
           <button
             key={tool.id}
             type="button"
             onClick={() => onSelect(tool.id)}
-            className="surface-card flex min-w-0 cursor-pointer items-center gap-2 p-2 text-left transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-mark"
+            className="surface-card group flex min-w-0 cursor-pointer items-center gap-2.5 p-2 text-left transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-mark"
           >
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-hover text-text-secondary">
-              <Icon name={tool.icon} className="size-3.5" />
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-[7px] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] text-accent-mark transition-colors group-hover:bg-[color:color-mix(in_srgb,var(--color-accent-mark)_22%,transparent)]">
+              <Icon name={tool.icon} className="size-4" />
             </span>
-            <span className="min-w-0 truncate text-[12px] font-medium">{tool.label}</span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[12px] font-medium">{tool.label}</span>
+              <span className="mt-px block truncate text-[10px] text-text-muted">{tool.hint}</span>
+            </span>
           </button>
         ))}
       </div>

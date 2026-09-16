@@ -123,6 +123,19 @@ const KEEPER_TABLES: &str = "
                 links TEXT NOT NULL DEFAULT '[]',
                 custom_fields TEXT NOT NULL DEFAULT '[]'
             );
+            CREATE TABLE IF NOT EXISTS keeper_attachments (
+                id TEXT PRIMARY KEY NOT NULL,
+                owner_kind TEXT NOT NULL,
+                owner_id TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                width INTEGER NOT NULL,
+                height INTEGER NOT NULL,
+                image BLOB NOT NULL,
+                thumbnail BLOB NOT NULL,
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS keeper_attachments_owner_idx
+                ON keeper_attachments (owner_kind, owner_id);
 ";
 
 fn migrate(connection: &Connection) -> Result<()> {
@@ -158,6 +171,7 @@ fn upgrade(connection: &Connection, from: i64) -> Result<()> {
                 "BEGIN;
                 DROP TABLE IF EXISTS keeper_items;
                 DROP TABLE IF EXISTS keeper_records;
+                DROP TABLE IF EXISTS keeper_attachments;
                 {KEEPER_TABLES}
                 COMMIT;"
             ))

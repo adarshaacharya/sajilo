@@ -200,6 +200,15 @@ pub fn run() {
             commands::keeper::save_keeper_record,
             commands::keeper::advance_keeper_record,
             commands::keeper::complete_keeper_item,
+            commands::attachments::list_keeper_attachments,
+            commands::attachments::add_keeper_attachments_from_paths,
+            commands::attachments::add_keeper_attachment_bytes,
+            commands::attachments::get_keeper_attachment,
+            commands::attachments::delete_keeper_attachment,
+            commands::attachments::rotate_keeper_attachment,
+            commands::attachments::export_keeper_attachment,
+            commands::attachments::discard_keeper_attachments,
+            commands::attachments::open_keeper_viewer,
             commands::keeper::delete_keeper_record,
             commands::storage::get_setting,
             commands::storage::set_setting,
@@ -226,6 +235,7 @@ pub fn run() {
             commands::tray::refresh_tray,
             commands::tray::quit_app,
             commands::tray::hide_popover,
+            commands::tray::pin_popover,
             updater_enabled,
         ])
         .run(tauri::generate_context!())

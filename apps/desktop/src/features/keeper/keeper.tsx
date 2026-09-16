@@ -12,6 +12,7 @@ import {
   type KeeperRecordInput,
   type KeeperSnapshot,
 } from "../../shared/lib/ipc";
+import { withPopoverPinned } from "../../shared/lib/popover-dialog";
 import { AddPicker } from "./_components/add-picker";
 import { GroupPage } from "./_components/group-page";
 import { ItemEditor } from "./_components/item-editor";
@@ -65,7 +66,18 @@ export function Keeper() {
 
   const screen = stack.at(-1) ?? null;
   const push = (next: Screen) => setStack((current) => [...current, next]);
-  const back = () => setStack((current) => current.slice(0, -1));
+  const back = () =>
+    setStack((current) => {
+      // Leaving a form that was never saved: its photos have nothing to
+      // belong to.
+      const top = current.at(-1);
+      if (top?.name === "editRecord" && !top.draft.createdAt) {
+        api.discardKeeperAttachments("record", top.draft.id).catch(() => {});
+      } else if (top?.name === "editItem" && !top.draft.createdAt) {
+        api.discardKeeperAttachments("item", top.draft.id).catch(() => {});
+      }
+      return current.slice(0, -1);
+    });
   /** Swap the top screen — an editor's draft changing in place. */
   const replace = (next: Screen) => setStack((current) => [...current.slice(0, -1), next]);
 
@@ -85,7 +97,7 @@ export function Keeper() {
 
   const confirm = async (title: string, body: string) => {
     const { ask } = await import("@tauri-apps/plugin-dialog");
-    return ask(body, { title, kind: "warning" });
+    return withPopoverPinned(() => ask(body, { title, kind: "warning" }));
   };
 
   /** The person a form is saved for: a family member typed in on the form is

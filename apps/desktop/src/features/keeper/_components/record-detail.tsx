@@ -15,6 +15,7 @@ import {
 import { daysUntil, dueLabel, dueTone, formatBs, formatDate, type TFn } from "../_lib/shared";
 import { RENEWAL_GUIDES } from "../_lib/templates";
 import { DateField } from "./date-picker";
+import { PhotoStrip } from "./photo-strip";
 
 /** One document: when it next needs you and what to do about it first, then
  * what's on the paper, what it's tied to, and how renewal works. */
@@ -128,6 +129,9 @@ export function RecordDetail({
             )}
           </div>
         )}
+        <div className="border-t border-divider pt-2.5">
+          <PhotoStrip ownerKind="record" ownerId={record.id} t={t} />
+        </div>
       </section>
 
       <button

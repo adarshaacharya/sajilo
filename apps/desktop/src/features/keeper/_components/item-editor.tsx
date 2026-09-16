@@ -1,11 +1,13 @@
 import { CONTROL } from "../../../shared/components/control";
-import { Icon } from "../../../shared/components/icon";
+import { Icon, type IconName } from "../../../shared/components/icon";
 import { Select } from "../../../shared/components/select";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperItem, KeeperPerson } from "../../../shared/lib/ipc";
+import { REMINDER_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
 import { DateField } from "./date-picker";
 import { type NewPerson, PersonSelect } from "./person-select";
+import { PhotoStrip } from "./photo-strip";
 import { RemindDays } from "./remind-days";
 
 /**
@@ -39,6 +41,11 @@ export function ItemEditor({
   return (
     <div className="space-y-2.5">
       <section className="surface-card space-y-2.5 p-3">
+        <FormHeader
+          icon={(item.template && REMINDER_ICONS[item.template]) || "keeper"}
+          title={item.title.trim() || t("keeper.new-title")}
+          hint={item.recurrence !== "none" ? t(`keeper.recurrence.${item.recurrence}`) : undefined}
+        />
         <input
           value={item.title}
           onChange={(event) => onChange({ ...item, title: event.target.value })}
@@ -93,6 +100,8 @@ export function ItemEditor({
             t={t}
           />
         )}
+
+        <PhotoStrip ownerKind="item" ownerId={item.id} t={t} />
 
         <textarea
           value={item.note}
@@ -182,6 +191,30 @@ export function EditorActions({
       >
         {saveLabel}
       </button>
+    </div>
+  );
+}
+
+/** The form's masthead: which kind of thing this is, in the same icon tile
+ * the add screen showed. */
+export function FormHeader({
+  icon,
+  title,
+  hint,
+}: {
+  icon: IconName;
+  title: string;
+  hint?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2.5 border-b border-divider pb-2.5">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-[7px] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] text-accent-mark">
+        <Icon name={icon} className="size-4" />
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-[13px] font-semibold">{title}</span>
+        {hint && <span className="block truncate text-[10px] text-text-muted">{hint}</span>}
+      </span>
     </div>
   );
 }

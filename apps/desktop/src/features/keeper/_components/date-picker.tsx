@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { MonthGrid } from "../../../shared/components/month-grid";
 import { api, type CalendarMonth, type KeeperDate } from "../../../shared/lib/ipc";
-import { formatBs, formatDate, type TFn } from "../_lib/shared";
+import { formatDate, type TFn } from "../_lib/shared";
 
 /**
  * One row per date: the label, and the date itself as the control. Tapping it
@@ -43,9 +43,13 @@ export function DateField({
           className={`flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-right text-[11px] transition-colors hover:bg-surface-hover ${value ? "" : "font-medium text-accent-mark"}`}
         >
           {value ? (
-            <span className="tabular-nums">
-              {formatDate(value.ad)}
-              <span className="ml-1.5 text-[10px] text-text-muted">{formatBs(value)}</span>
+            // BS leads, as it does across the app; AD sits under it rather
+            // than squeezed beside it.
+            <span className="flex flex-col items-end leading-tight tabular-nums">
+              <span>
+                {value.bs.day} {value.bs.monthName} {value.bs.year}
+              </span>
+              <span className="text-[9px] text-text-muted">{formatDate(value.ad)}</span>
             </span>
           ) : (
             t("keeper.add-date")

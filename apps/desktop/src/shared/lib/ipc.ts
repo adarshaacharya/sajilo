@@ -227,6 +227,20 @@ export interface KeeperRecordInput {
   createdAt: string;
 }
 
+export type KeeperOwnerKind = "record" | "item";
+
+/** A photo on a document or reminder. The full image is fetched separately. */
+export interface KeeperAttachment {
+  id: string;
+  ownerKind: KeeperOwnerKind;
+  ownerId: string;
+  width: number;
+  height: number;
+  /** A small JPEG as a data URL, ready for an `<img>`. */
+  thumbnail: string;
+  createdAt: string;
+}
+
 export interface KeeperSnapshot {
   people: KeeperPerson[];
   items: KeeperItem[];
@@ -324,6 +338,26 @@ export const api = {
   deleteKeeperRecord: (id: string) => invoke<KeeperSnapshot>("delete_keeper_record", { id }),
   advanceKeeperRecord: (id: string) => invoke<KeeperSnapshot>("advance_keeper_record", { id }),
   completeKeeperItem: (id: string) => invoke<KeeperSnapshot>("complete_keeper_item", { id }),
+  listKeeperAttachments: (ownerKind: KeeperOwnerKind, ownerId: string) =>
+    invoke<KeeperAttachment[]>("list_keeper_attachments", { ownerKind, ownerId }),
+  addKeeperAttachmentsFromPaths: (ownerKind: KeeperOwnerKind, ownerId: string, paths: string[]) =>
+    invoke<KeeperAttachment[]>("add_keeper_attachments_from_paths", { ownerKind, ownerId, paths }),
+  /** Raw bytes as the body — a pasted screenshot, without a JSON number array. */
+  addKeeperAttachmentBytes: (ownerKind: KeeperOwnerKind, ownerId: string, bytes: Uint8Array) =>
+    invoke<KeeperAttachment>("add_keeper_attachment_bytes", bytes, {
+      headers: { "x-owner-kind": ownerKind, "x-owner-id": ownerId },
+    }),
+  /** The stored JPEG. */
+  getKeeperAttachment: (id: string) => invoke<ArrayBuffer>("get_keeper_attachment", { id }),
+  deleteKeeperAttachment: (id: string) => invoke<void>("delete_keeper_attachment", { id }),
+  rotateKeeperAttachment: (id: string) =>
+    invoke<KeeperAttachment>("rotate_keeper_attachment", { id }),
+  exportKeeperAttachment: (id: string, destination: string) =>
+    invoke<void>("export_keeper_attachment", { id, destination }),
+  discardKeeperAttachments: (ownerKind: KeeperOwnerKind, ownerId: string) =>
+    invoke<void>("discard_keeper_attachments", { ownerKind, ownerId }),
+  openKeeperViewer: (ownerKind: KeeperOwnerKind, ownerId: string, index: number) =>
+    invoke<void>("open_keeper_viewer", { ownerKind, ownerId, index }),
 
   getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
   setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),
@@ -403,4 +437,5 @@ export const api = {
   /** The popover is alwaysOnTop, so it must dismiss itself after opening an
    * external link or it buries the newly opened browser window. */
   hidePopover: () => invoke<void>("hide_popover"),
+  pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
 };

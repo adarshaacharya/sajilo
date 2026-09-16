@@ -8,6 +8,7 @@ import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
 import { Forex } from "./features/forex/forex";
 import { Keeper } from "./features/keeper/keeper";
+import { PhotoViewer } from "./features/keeper/photo-viewer";
 import { GovernmentUpdateDetail } from "./features/news/government-update-detail";
 import { News } from "./features/news/news";
 import { Radio } from "./features/radio/radio";
@@ -131,7 +132,19 @@ function Shell() {
  * layer. The popover itself never passes it and opens on "/" as always.
  */
 export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
-  const isUpdateWindow = new URLSearchParams(window.location.search).get("surface") === "update";
+  const surface = new URLSearchParams(window.location.search).get("surface");
+  const isUpdateWindow = surface === "update";
+
+  // Keeper's photo viewer runs in its own window; see `open_keeper_viewer`.
+  if (surface === "viewer") {
+    return (
+      <ErrorBoundary>
+        <SettingsProvider>
+          <PhotoViewer />
+        </SettingsProvider>
+      </ErrorBoundary>
+    );
+  }
 
   if (isUpdateWindow) {
     return (

@@ -5,7 +5,18 @@
 //! feed, every scroll position, the radio stream mid-play — and makes the next
 //! tray click pay a cold start. Hiding keeps all of it.
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use tauri::{AppHandle, Manager, WebviewWindow};
+
+/// Set while the popover has opened a dialog of its own (a file picker, a
+/// "delete this?" prompt). The dialog takes focus, and a focus-out is
+/// otherwise read as "the user clicked away".
+static PINNED: AtomicBool = AtomicBool::new(false);
+
+pub fn set_pinned(pinned: bool) {
+    PINNED.store(pinned, Ordering::SeqCst);
+}
 
 pub const MAIN: &str = "main";
 pub const UPDATE: &str = "update";
@@ -151,7 +162,10 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
 
     #[cfg(not(target_os = "linux"))]
     {
-        if focused || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
+        if focused
+            || PINNED.load(Ordering::SeqCst)
+            || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some()
+        {
             return;
         }
         hide(window);

@@ -4,13 +4,15 @@
   "description": "The minimum the popover needs. Anything not listed here is unreachable from the web layer by design.",
   "windows": [
     "main",
-    "update"
+    "update",
+    "viewer"
   ],
   "permissions": [
     "core:default",
     "core:window:allow-hide",
     "core:window:allow-show",
     "core:window:allow-set-focus",
+    "core:window:allow-close",
     "core:window:allow-start-dragging",
     "core:event:default",
     "notification:default",

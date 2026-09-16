@@ -480,6 +480,9 @@ fn items(app: &AppHandle<Wry>) -> Result<Vec<KeeperItem>> {
 
 #[tauri::command]
 pub fn keeper_snapshot(app: AppHandle<Wry>) -> Result<KeeperSnapshot> {
+    // Cheap, and the one moment Keeper is opened: tidy photos left behind by
+    // a form that was closed without saving.
+    let _ = crate::commands::attachments::prune_orphans(&app);
     Ok(KeeperSnapshot {
         people: people(&app)?,
         items: items(&app)?,
@@ -580,6 +583,7 @@ pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperS
 
 #[tauri::command]
 pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
+    crate::commands::attachments::delete_for_owner(&app, "item", &id)?;
     let connection = db::open(&app)?;
     connection
         .execute("DELETE FROM keeper_items WHERE id = ?1", [id])
@@ -752,6 +756,7 @@ pub fn advance_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSn
 
 #[tauri::command]
 pub fn delete_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
+    crate::commands::attachments::delete_for_owner(&app, "record", &id)?;
     let connection = db::open(&app)?;
     // Links are stored one way, so drop this id from whichever records point
     // at it rather than leave a dangling reference.
