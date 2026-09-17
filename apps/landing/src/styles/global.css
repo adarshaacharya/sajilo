@@ -188,7 +188,7 @@ button {
   font-size: clamp(34px, 5vw, 60px);
   line-height: 1;
   letter-spacing: -0.01em;
-  max-width: 18ch;
+  max-width: 26ch;
   text-wrap: balance;
 }
 .section-head h2 em {
