@@ -95,7 +95,16 @@ const recorded = new Date(recordedAt).toLocaleDateString("en-GB", { day: "numeri
     font-size: 13px;
   }
   .footer-bottom a {
-    color: var(--paper-2);
+    font-weight: 500;
+    color: var(--gilt-2);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.2s;
+  }
+  .footer-bottom a:hover {
+    text-decoration-color: currentColor;
   }
   @media (max-width: 720px) {
     .footer-grid {

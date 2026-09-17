@@ -125,9 +125,11 @@ button {
   border-radius: 4px;
 }
 
+/* Gold, the site's accent: a highlight, not a warning. Dark text keeps it
+   readable on the dark page and on the cream paper cards alike. */
 ::selection {
-  background: var(--sindoor);
-  color: var(--paper);
+  background: var(--gilt);
+  color: var(--ink);
 }
 
 [lang="ne"] {
