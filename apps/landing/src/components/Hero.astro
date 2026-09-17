@@ -53,6 +53,18 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
           </details>
         </div>
       </div>
+      <!-- Unsigned builds: macOS blocks the first open. Said here, where people
+           click Download, not only in the Install section at the bottom. -->
+      <p class="mac-note" id="mac-note" hidden aria-live="polite">
+        <span class="mac-note-before">
+          macOS will ask once: open <b>Privacy &amp; Security → Open Anyway</b>.
+          <a href="/install.html">How ↗</a>
+        </span>
+        <span class="mac-note-after" hidden>
+          Downloading… Drag Sajilo to Applications, open it, then <b>Open Anyway</b> in Privacy &amp;
+          Security. <a href="/install.html">Screenshots ↗</a>
+        </span>
+      </p>
     </div>
 
     <div class="hero-stage" aria-hidden="true">
@@ -163,6 +175,28 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
   }
   .platforms {
     position: relative;
+  }
+  .mac-note {
+    max-width: 46ch;
+    margin-top: 16px;
+    padding-left: 12px;
+    border-left: 2px solid var(--line-2);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--paper-3);
+    animation: rise 1s var(--ease) 0.32s both;
+  }
+  .mac-note b {
+    font-weight: 600;
+    color: var(--paper-2);
+  }
+  .mac-note a {
+    color: var(--gilt-2);
+    white-space: nowrap;
+  }
+  .mac-note.is-after {
+    border-left-color: var(--gilt);
+    color: var(--paper-2);
   }
   .platforms summary {
     cursor: pointer;
@@ -366,6 +400,25 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
     } catch {}
     set(arm ? "macos-arm64" : "macos-x64", arm ? "Download for macOS" : "Download for macOS (Intel)");
   } else set("macos-arm64", "Download for macOS");
+
+  // Mac visitors get the Gatekeeper note under the button, and the next steps
+  // once they have actually started a macOS download.
+  const macNote = document.getElementById("mac-note");
+  if (macNote) {
+    const showAfter = () => {
+      macNote.hidden = false;
+      macNote.querySelector<HTMLElement>(".mac-note-before")!.hidden = true;
+      macNote.querySelector<HTMLElement>(".mac-note-after")!.hidden = false;
+      macNote.classList.add("is-after");
+    };
+    if (/Macintosh/.test(ua)) macNote.hidden = false;
+    const isMacLink = (a: HTMLAnchorElement) => /\/dl\/macos-/.test(a.getAttribute("href") ?? "");
+    [btn, ...document.querySelectorAll<HTMLAnchorElement>(".platforms a")].forEach((a) =>
+      a.addEventListener("click", () => {
+        if (isMacLink(a)) showAfter();
+      }),
+    );
+  }
 
   // A menu, not a disclosure: it closes on a click elsewhere, on Escape, and
   // once a platform is picked.

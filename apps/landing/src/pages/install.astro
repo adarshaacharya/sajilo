@@ -54,7 +54,19 @@ const steps: { text: string; images: Shot[] }[] = [
     </ol>
 
     <div class="done reveal">
-      <img src="/assets/install/5-running.png" alt="Sajilo open in the menu bar, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index" loading="lazy" />
+      <!-- The app itself, not a screenshot of it, so this never shows an old UI. -->
+      <div class="done-frame">
+        <div class="done-screen">
+          <iframe
+            class="done-app"
+            title="Sajilo open in the menu bar, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index"
+            tabindex="-1"
+            scrolling="no"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2F&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
       <div>
         <p class="done-ne" lang="ne">भयो।</p>
         <p>
@@ -131,9 +143,28 @@ const steps: { text: string; images: Shot[] }[] = [
     border-radius: 16px;
     background: var(--ink-2);
   }
-  .done img {
+  .done-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    overflow: hidden;
     border-radius: 14px;
     border: 1px solid var(--line-2);
+    background: #1c1c1e;
+  }
+  .done-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .done-app {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
   }
   .done div {
     display: grid;
@@ -170,3 +201,13 @@ const steps: { text: string; images: Shot[] }[] = [
     }
   }
 </style>
+
+<script>
+  const frame = document.querySelector<HTMLElement>(".done-frame");
+  const screen = document.querySelector<HTMLElement>(".done-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>
