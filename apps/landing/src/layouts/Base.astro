@@ -13,6 +13,9 @@ interface Props {
 
 const { title, description, path = "/", noindex = false, ogTitle = title } = Astro.props;
 const canonical = new URL(path, Astro.site).href;
+const ogImage = new URL("/assets/og-image.png", Astro.site).href;
+const ogImageAlt =
+  "Sajilo: Nepal, in your menu bar. A Nepali calendar page, NEPSE with an IPO alert, a reminders slip, a newspaper and a radio.";
 ---
 
 <!doctype html>
@@ -30,10 +33,19 @@ const canonical = new URL(path, Astro.site).href;
 
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL("/assets/og-image.png", Astro.site).href} />
+    <meta property="og:site_name" content="Sajilo" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
