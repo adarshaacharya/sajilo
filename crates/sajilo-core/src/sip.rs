@@ -15,9 +15,13 @@ use crate::calendar::nepali_date::{NepaliDate, NepaliMonth};
 /// schedule moves on to next month's.
 pub const GRACE_DAYS: i64 = 2;
 
-/// How far ahead a payment starts to show as close: the countdown chip, the
-/// home screen line, and the first reminder.
-pub const HEADS_UP_DAYS: i64 = 3;
+/// Existing schedules keep the original reminder timing when the configurable
+/// field is first introduced.
+pub const DEFAULT_REMIND_DAYS: [u32; 2] = [3, 0];
+
+fn default_remind_days() -> Vec<u32> {
+    DEFAULT_REMIND_DAYS.to_vec()
+}
 
 /// What the user set up for one fund. Stored on the device and read only by
 /// Rust, so it has no TypeScript binding: the UI sees `SipStatus`.
@@ -33,6 +37,9 @@ pub struct SipPlan {
     /// Rupees a month, when the user gave it.
     #[serde(default)]
     pub amount: Option<f64>,
+    /// Days before the payment to notify. Zero means the payment day itself.
+    #[serde(default = "default_remind_days")]
+    pub remind_days: Vec<u32>,
     /// `YYYY-MM` of the latest payment marked paid.
     #[serde(default)]
     pub paid_month: Option<String>,
@@ -65,12 +72,13 @@ pub struct SipStatus {
     pub due_bs_month_ne: Option<String>,
     /// Days from today to `due`. Negative once it has been missed.
     pub days: i32,
+    pub remind_days: Vec<u32>,
 }
 
 impl SipStatus {
-    /// Close enough to show: within the heads-up window, or missed and still owed.
+    /// Close enough to show: inside the earliest chosen warning, or already due.
     pub fn is_close(&self) -> bool {
-        i64::from(self.days) <= HEADS_UP_DAYS
+        self.days <= self.remind_days.iter().copied().max().unwrap_or(0) as i32
     }
 }
 
@@ -116,6 +124,7 @@ pub fn status(plan: &SipPlan, today: NaiveDate) -> Option<SipStatus> {
         due_bs_month: month.map(|month| month.english_name().to_owned()),
         due_bs_month_ne: month.map(|month| month.nepali_name().to_owned()),
         days: (due - today).num_days() as i32,
+        remind_days: plan.remind_days.clone(),
     })
 }
 
@@ -147,6 +156,7 @@ mod tests {
             name: "NIBL Sahabhagita Fund".into(),
             day,
             amount: Some(5_000.0),
+            remind_days: DEFAULT_REMIND_DAYS.to_vec(),
             paid_month: None,
             remind_on: None,
         }
@@ -172,6 +182,26 @@ mod tests {
         assert!(status.is_close());
         assert_eq!(status.due_bs_month.as_deref(), Some("Bhadra"));
         assert_eq!(status.due_bs_month_ne.as_deref(), Some("भदौ"));
+    }
+
+    #[test]
+    fn existing_plans_keep_the_original_reminder_days() {
+        let saved = serde_json::json!({
+            "symbol": "NIBLSF",
+            "name": "NIBL Sahabhagita Fund",
+            "day": 15,
+            "amount": 5000
+        });
+        let plan: SipPlan = serde_json::from_value(saved).unwrap();
+        assert_eq!(plan.remind_days, DEFAULT_REMIND_DAYS);
+    }
+
+    #[test]
+    fn the_earliest_chosen_reminder_controls_when_a_payment_is_close() {
+        let mut sip = plan(15);
+        sip.remind_days = vec![7, 0];
+        assert!(status(&sip, date("2026-09-08")).unwrap().is_close());
+        assert!(!status(&sip, date("2026-09-07")).unwrap().is_close());
     }
 
     #[test]

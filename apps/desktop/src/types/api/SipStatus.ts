@@ -25,4 +25,4 @@ dueBsMonthNe: string | null,
 /**
  * Days from today to `due`. Negative once it has been missed.
  */
-days: number, };
+days: number, remindDays: Array<number>, };

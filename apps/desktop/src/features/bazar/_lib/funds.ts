@@ -190,17 +190,17 @@ export function useSips() {
   return {
     sips,
     of: (symbol: string) => sips.find((sip) => sip.symbol === symbol),
-    set: (symbol: string, name: string, day: number, amount: number | null) =>
-      apply(api.setSip(symbol, name, day, amount)),
+    set: (symbol: string, name: string, day: number, amount: number | null, remindDays: number[]) =>
+      apply(api.setSip(symbol, name, day, amount, remindDays)),
     remove: (symbol: string) => apply(api.removeSip(symbol)),
     markPaid: (symbol: string) => apply(api.markSipPaid(symbol)),
     remindTomorrow: (symbol: string) => apply(api.remindSipTomorrow(symbol)),
   };
 }
 
-/** Close enough to count down: three days out, or missed and still owed. */
+/** Close enough to count down: inside the earliest selected reminder, or due. */
 export function sipIsClose(sip: SipStatus): boolean {
-  return sip.days <= 3;
+  return sip.days <= Math.max(0, ...sip.remindDays);
 }
 
 type SipKey =

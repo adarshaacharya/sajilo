@@ -45,6 +45,7 @@ resvg = { version = "0.44", default-features = false }
 # orientation, scale, and re-encode as JPEG. Codecs limited to those formats.
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp", "tiff"] }
 base64 = "0.22"
+url = "2"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-autostart = "2"

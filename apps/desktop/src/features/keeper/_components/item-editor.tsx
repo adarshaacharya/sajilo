@@ -1,5 +1,6 @@
 import { CONTROL } from "../../../shared/components/control";
 import { Icon, type IconName } from "../../../shared/components/icon";
+import { RemindDays } from "../../../shared/components/remind-days";
 import { Select } from "../../../shared/components/select";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperItem, KeeperPerson } from "../../../shared/lib/ipc";
@@ -8,7 +9,6 @@ import type { TFn } from "../_lib/shared";
 import { DateField } from "./date-picker";
 import { type NewPerson, PersonSelect } from "./person-select";
 import { PhotoStrip } from "./photo-strip";
-import { RemindDays } from "./remind-days";
 
 /**
  * A thing to do or pay: what, for whom, when, how often, and when to be told.
@@ -97,7 +97,8 @@ export function ItemEditor({
             value={item.remindDays}
             onChange={(remindDays) => onChange({ ...item, remindDays })}
             span={item.recurrence === "monthly" ? 14 : 90}
-            t={t}
+            label={t("keeper.remind-before")}
+            onDayLabel={t("keeper.on-the-day")}
           />
         )}
 

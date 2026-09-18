@@ -19,6 +19,12 @@ interface Recording {
   commands: Record<string, unknown>;
 }
 
+/** The showcase is an ordinary browser page, even though it implements the
+ * subset of IPC needed to render the real desktop UI. */
+export function isTauri() {
+  return false;
+}
+
 /* Fetched rather than imported so the recording stays a separate, cacheable
  * asset instead of a megabyte of JSON inlined into the JavaScript bundle. Every
  * caller is already async, so nothing has to wait synchronously for it. */

@@ -32,7 +32,7 @@ export function HeadlineRow({
     <button
       type="button"
       onClick={onOpen}
-      className="surface-card group w-full cursor-pointer p-2 text-left transition-colors hover:bg-surface-hover"
+      className="surface-card group w-full cursor-pointer p-2 text-left transition-[background-color,border-color,transform] hover:border-control-border hover:bg-surface-hover active:scale-[0.99]"
     >
       <p className="text-[13px] leading-snug">{item.title}</p>
       <div className="mt-1 flex items-center gap-1 text-[10px]">
@@ -49,7 +49,7 @@ export function HeadlineRow({
         )}
         <Icon
           name="openExternal"
-          className="ml-auto size-2.5 shrink-0 text-text-muted opacity-0 transition-opacity group-hover:opacity-100"
+          className="ml-auto size-2.5 shrink-0 -translate-x-0.5 text-text-muted opacity-0 transition-[opacity,transform] group-hover:translate-x-0 group-hover:opacity-100"
         />
       </div>
     </button>

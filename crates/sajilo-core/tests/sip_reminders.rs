@@ -3,7 +3,7 @@
 use chrono::{TimeZone, Utc};
 use sajilo_core::nepal_time;
 use sajilo_core::notify::{NotificationOptions, SIP_REMINDER_HOUR, plan_sip_payments};
-use sajilo_core::sip::{SipPlan, mark_paid};
+use sajilo_core::sip::{DEFAULT_REMIND_DAYS, SipPlan, mark_paid};
 
 fn nepal(month: u32, day: u32, hour: u32) -> chrono::DateTime<Utc> {
     nepal_time::offset()
@@ -18,13 +18,14 @@ fn sip(day: u32) -> SipPlan {
         name: "NIBL Sahabhagita Fund".into(),
         day,
         amount: Some(5_000.0),
+        remind_days: DEFAULT_REMIND_DAYS.to_vec(),
         paid_month: None,
         remind_on: None,
     }
 }
 
 #[test]
-fn reminds_three_days_ahead_and_on_the_day_in_the_morning() {
+fn reminds_on_each_chosen_day_in_the_morning() {
     let planned = plan_sip_payments(&[sip(15)], NotificationOptions::default(), nepal(9, 10, 8));
     let fires: Vec<_> = planned.iter().map(|n| n.fire_at).collect();
     assert_eq!(
@@ -48,6 +49,22 @@ fn ids_are_per_fund_per_month_so_a_replan_replaces_rather_than_repeats() {
     let again = plan_sip_payments(&[sip(15)], NotificationOptions::default(), nepal(9, 11, 8));
     assert_eq!(first, again);
     assert_eq!(first[1].id, "sajilo.sip.NIBLSF.2026-09.due");
+}
+
+#[test]
+fn reminder_days_are_configurable() {
+    let mut plan = sip(15);
+    plan.remind_days = vec![7, 1];
+    let planned = plan_sip_payments(&[plan], NotificationOptions::default(), nepal(9, 7, 8));
+    assert_eq!(
+        planned.iter().map(|item| item.fire_at).collect::<Vec<_>>(),
+        [
+            nepal(9, 8, SIP_REMINDER_HOUR),
+            nepal(9, 14, SIP_REMINDER_HOUR)
+        ]
+    );
+    assert_eq!(planned[0].title, "SIP due in 7 days");
+    assert_eq!(planned[1].title, "SIP due tomorrow");
 }
 
 #[test]

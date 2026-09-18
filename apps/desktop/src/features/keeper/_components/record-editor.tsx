@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CONTROL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
+import { RemindDays } from "../../../shared/components/remind-days";
 import { Segmented } from "../../../shared/components/segmented";
 import { Select } from "../../../shared/components/select";
 import type {
@@ -23,7 +24,6 @@ import { DateField } from "./date-picker";
 import { EditorActions, FormHeader } from "./item-editor";
 import { type NewPerson, PersonSelect } from "./person-select";
 import { PhotoStrip } from "./photo-strip";
-import { RemindDays } from "./remind-days";
 
 export function RecordEditor({
   record,
@@ -185,7 +185,8 @@ export function RecordEditor({
             value={record.remindDays}
             onChange={(remindDays) => onChange({ ...record, remindDays })}
             span={record.recurrence === "monthly" ? 14 : 365}
-            t={t}
+            label={t("keeper.remind-before")}
+            onDayLabel={t("keeper.on-the-day")}
           />
         </div>
       )}

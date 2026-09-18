@@ -428,8 +428,13 @@ export const api = {
   /** Every fund's SIP payment schedule, soonest first. Each change below
    * answers with the same list, already updated. */
   sipStatuses: () => invoke<SipStatus[]>("sip_statuses"),
-  setSip: (symbol: string, name: string, day: number, amount: number | null) =>
-    invoke<SipStatus[]>("set_sip", { symbol, name, day, amount }),
+  setSip: (
+    symbol: string,
+    name: string,
+    day: number,
+    amount: number | null,
+    remindDays: number[],
+  ) => invoke<SipStatus[]>("set_sip", { symbol, name, day, amount, remindDays }),
   removeSip: (symbol: string) => invoke<SipStatus[]>("remove_sip", { symbol }),
   markSipPaid: (symbol: string) => invoke<SipStatus[]>("mark_sip_paid", { symbol }),
   remindSipTomorrow: (symbol: string) => invoke<SipStatus[]>("remind_sip_tomorrow", { symbol }),
@@ -463,6 +468,7 @@ export const api = {
 
   /** The popover is alwaysOnTop, so it must dismiss itself after opening an
    * external link or it buries the newly opened browser window. */
+  openExternalUrl: (url: string) => invoke<void>("open_external_url", { url }),
   hidePopover: () => invoke<void>("hide_popover"),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
 };

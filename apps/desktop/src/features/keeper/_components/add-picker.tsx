@@ -13,6 +13,7 @@ export function AddPicker({
   only,
   onDocument,
   onReminder,
+  onSip,
   t,
 }: {
   /** Just one half — from a tab that already says which it wants. */
@@ -20,6 +21,8 @@ export function AddPicker({
   onDocument: (type: KeeperDocumentType) => void;
   /** `null` starts a blank reminder. */
   onReminder: (template: ReminderTemplate | null) => void;
+  /** SIP schedules belong to Bazar; Keeper links to that single source. */
+  onSip: () => void;
   t: TFn;
 }) {
   /** A few words on how each kind of paper behaves, so the choice says what
@@ -61,6 +64,12 @@ export function AddPicker({
               onClick={() => onReminder(template)}
             />
           ))}
+          <Tile
+            icon={REMINDER_ICONS.sip ?? "banknote"}
+            label={t("keeper.sip.add")}
+            hint={t("keeper.sip.add-hint")}
+            onClick={onSip}
+          />
           <Tile
             icon="ellipsis"
             label={t("keeper.add.other")}

@@ -222,6 +222,7 @@ pub fn run() {
             commands::storage::get_setting,
             commands::storage::set_setting,
             commands::storage::delete_setting,
+            commands::external::open_external_url,
             commands::tools::convert_land,
             commands::tools::land_breakdown,
             commands::tools::convert_weight,

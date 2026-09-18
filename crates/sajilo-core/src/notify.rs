@@ -231,15 +231,15 @@ pub fn plan_ipo_closing(
 /// When SIP reminders go out, Nepal time: early enough to pay the same day.
 pub const SIP_REMINDER_HOUR: u32 = 9;
 
-/// Two reminders per payment, three days ahead and on the day, plus one on the
-/// day the user asked to be reminded again. A payment marked paid has moved on
-/// to next month in `sip::current_due`, so nothing is planned for it.
+/// The reminders chosen for each payment, plus one on the day the user asked
+/// to be reminded again. A payment marked paid has moved on to next month in
+/// `sip::current_due`, so nothing is planned for it.
 pub fn plan_sip_payments(
     plans: &[crate::sip::SipPlan],
     options: NotificationOptions,
     now: DateTime<Utc>,
 ) -> Vec<PlannedNotification> {
-    use crate::sip::{HEADS_UP_DAYS, current_due, month_key};
+    use crate::sip::{current_due, month_key};
     use crate::tools::units::grouped_decimal;
 
     if !options.sip_payment {
@@ -271,12 +271,14 @@ pub fn plan_sip_payments(
                 });
             }
         };
-        remind(
-            due - Duration::days(HEADS_UP_DAYS),
-            "ahead",
-            format!("SIP due in {HEADS_UP_DAYS} days"),
-        );
-        remind(due, "due", "SIP due today".to_owned());
+        for days in &plan.remind_days {
+            let (suffix, title) = match days {
+                0 => ("due".to_owned(), "SIP due today".to_owned()),
+                1 => ("ahead.1".to_owned(), "SIP due tomorrow".to_owned()),
+                days => (format!("ahead.{days}"), format!("SIP due in {days} days")),
+            };
+            remind(due - Duration::days(i64::from(*days)), &suffix, title);
+        }
         if let Some(again) = plan
             .remind_on
             .as_deref()

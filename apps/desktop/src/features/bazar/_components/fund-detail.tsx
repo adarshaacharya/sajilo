@@ -205,10 +205,10 @@ export function FundDetail({
         {fund.kind === "openEnd" && (
           <SipSetup
             sip={sips.of(fund.symbol)}
-            onSet={(day, amount) => {
+            onSet={(day, amount, remindDays) => {
               // A SIP belongs with the funds you keep, where its countdown shows.
               if (!followed) onToggle();
-              sips.set(fund.symbol, fund.name, day, amount);
+              sips.set(fund.symbol, fund.name, day, amount, remindDays);
             }}
             onRemove={() => sips.remove(fund.symbol)}
           />

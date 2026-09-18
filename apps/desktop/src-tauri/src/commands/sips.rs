@@ -54,23 +54,29 @@ pub fn set_sip(
     name: String,
     day: u32,
     amount: Option<f64>,
+    remind_days: Vec<u32>,
 ) -> Result<Vec<SipStatus>> {
     if !(1..=31).contains(&day) {
         return Err(format!("day {day} is not a day of the month"));
     }
     let amount = amount.filter(|amount| amount.is_finite() && *amount > 0.0);
+    let mut remind_days: Vec<u32> = remind_days.into_iter().filter(|days| *days <= 31).collect();
+    remind_days.sort_unstable_by(|a, b| b.cmp(a));
+    remind_days.dedup();
     let mut all = plans(&app);
     match all.iter_mut().find(|plan| plan.symbol == symbol) {
         Some(plan) => {
             plan.name = name;
             plan.day = day;
             plan.amount = amount;
+            plan.remind_days = remind_days;
         }
         None => all.push(SipPlan {
             symbol,
             name,
             day,
             amount,
+            remind_days,
             paid_month: None,
             remind_on: None,
         }),

@@ -233,7 +233,14 @@ export function Bazar() {
         />
       )}
 
-      {tab === "stocks" && view === "funds" && <MutualFunds state={funds} onRetry={retryFunds} />}
+      {tab === "stocks" && view === "funds" && (
+        <MutualFunds
+          state={funds}
+          onRetry={retryFunds}
+          linkedFund={linked.get("fund")}
+          settingUpSip={linked.get("setup") === "sip"}
+        />
+      )}
 
       {tab === "stocks" && view === "nepse" && (
         <Stocks

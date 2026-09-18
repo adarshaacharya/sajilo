@@ -23,4 +23,5 @@ export const REMINDER_ICONS: Record<string, IconName> = {
   school: "graduation",
   medicine: "pills",
   subscription: "refresh",
+  sip: "banknote",
 };

@@ -1,4 +1,5 @@
 import { type ReactNode, useMemo, useState } from "react";
+import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
@@ -46,13 +47,6 @@ const ORDER: Record<FundKind, (a: MutualFund, b: MutualFund) => number> = {
   matured: byMaturity,
 };
 
-/** What the right-hand figures in each tab are, said once above the rows. */
-const COLUMN = {
-  openEnd: "funds.col-week",
-  closedEnd: "funds.col-market",
-  matured: "funds.col-refund",
-} as const;
-
 function banner(state: LoadState<MutualFundSnapshot> | undefined): LoadStatus {
   if (!state) return { status: "loading" };
   switch (state.status) {
@@ -76,9 +70,13 @@ function banner(state: LoadState<MutualFundSnapshot> | undefined): LoadStatus {
 export function MutualFunds({
   state,
   onRetry,
+  linkedFund,
+  settingUpSip = false,
 }: {
   state: LoadState<MutualFundSnapshot> | undefined;
   onRetry: () => void;
+  linkedFund?: string | null;
+  settingUpSip?: boolean;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
@@ -86,7 +84,7 @@ export function MutualFunds({
   const { holdings, toggle, setUnits } = useFundHoldings();
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<FundKind>("openEnd");
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(linkedFund ?? null);
   const today = nepalToday();
 
   const funds = snapshot?.funds ?? [];
@@ -132,6 +130,12 @@ export function MutualFunds({
     <StateBanner state={banner(state)} onRetry={onRetry}>
       {snapshot && (
         <div className="space-y-2.5">
+          {settingUpSip && (
+            <div className="flex items-start gap-2 rounded-md bg-[color:color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] px-2.5 py-2 text-[11px] text-text-secondary">
+              <Icon name="banknote" className="mt-px size-3.5 shrink-0 text-accent-mark" />
+              <span>{t("keeper.sip.choose-fund")}</span>
+            </div>
+          )}
           <SearchField value={query} onChange={setQuery} placeholder={t("funds.search")} />
 
           {query.trim() ? (
@@ -169,12 +173,7 @@ export function MutualFunds({
                     {listed.length}
                   </span>
                 </div>
-                {/* The right label sits over the figures, clear of the star column. */}
-                <div className="mt-2 flex items-end justify-between gap-2 border-b border-[color:var(--color-divider)] pr-[34px] pb-1.5 pl-2 text-[10px] text-text-muted">
-                  <span>{t("funds.col-fund")}</span>
-                  <span className="text-right">{t(COLUMN[shownKind])}</span>
-                </div>
-                <div role={kinds.length > 1 ? "tabpanel" : undefined}>
+                <div className="mt-1" role={kinds.length > 1 ? "tabpanel" : undefined}>
                   {listed.map((fund) => row(fund))}
                 </div>
               </section>

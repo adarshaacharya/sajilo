@@ -1,4 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
+import useSWR from "swr";
 import { useHeaderInner } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
@@ -13,6 +15,7 @@ import {
   type KeeperSnapshot,
 } from "../../shared/lib/ipc";
 import { withPopoverPinned } from "../../shared/lib/popover-dialog";
+import type { SipStatus } from "../../types/api/SipStatus";
 import { AddPicker } from "./_components/add-picker";
 import { GroupPage } from "./_components/group-page";
 import { ItemEditor } from "./_components/item-editor";
@@ -21,6 +24,7 @@ import { usePhotoSummaries } from "./_components/photo-strip";
 import { RecordDetail } from "./_components/record-detail";
 import { RecordEditor } from "./_components/record-editor";
 import { DueTile, GroupRow, ItemGroupRow, ItemRow, TickButton } from "./_components/rows";
+import { SipGroupRow, SipReminders } from "./_components/sip-reminders";
 import {
   blankRecord,
   docTypeLabel,
@@ -42,6 +46,7 @@ type Screen =
   | { name: "group"; key: string }
   /** Every reminder of one kind. */
   | { name: "itemGroup"; key: string }
+  | { name: "sips" }
   | { name: "record"; id: string }
   | { name: "editRecord"; draft: KeeperRecordInput; newPerson: NewPerson | null }
   | { name: "editItem"; draft: KeeperItem; newPerson: NewPerson | null };
@@ -52,9 +57,16 @@ type PersonFilter = string | null;
 
 export function Keeper() {
   const { t } = useSettings();
+  const navigate = useNavigate();
+  const { search: linkedSearch } = useLocation();
+  const linked = new URLSearchParams(linkedSearch);
   const [data, setData] = useState<KeeperSnapshot>({ people: [], items: [], records: [] });
-  const [stack, setStack] = useState<Screen[]>([]);
-  const [view, setView] = useState<View>("documents");
+  const [stack, setStack] = useState<Screen[]>(() =>
+    linked.get("section") === "sips" ? [{ name: "sips" }] : [],
+  );
+  const [view, setView] = useState<View>(() =>
+    linked.get("view") === "reminders" ? "reminders" : "documents",
+  );
   const [person, setPerson] = useState<PersonFilter>(null);
   const [error, setError] = useState("");
 
@@ -64,6 +76,8 @@ export function Keeper() {
       .then(setData)
       .catch(() => setError(t("keeper.error-load")));
   }, [t]);
+  const { data: sipData } = useSWR("sip-statuses", () => api.sipStatuses());
+  const sips = sipData ?? [];
 
   const screen = stack.at(-1) ?? null;
   const itemPhotos = usePhotoSummaries("item");
@@ -210,17 +224,19 @@ export function Keeper() {
                   ? itemGroup
                     ? itemGroupName(itemGroup)
                     : t("keeper.title")
-                  : screen.name === "record"
-                    ? current
-                      ? recordName(t, current)
-                      : t("keeper.title")
-                    : screen.name === "editRecord"
-                      ? screen.draft.createdAt
-                        ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
-                        : docTypeLabel(t, screen.draft.documentType)
-                      : screen.draft.createdAt
-                        ? t("keeper.edit-title")
-                        : t("keeper.new-title"),
+                  : screen.name === "sips"
+                    ? t("keeper.sip.title")
+                    : screen.name === "record"
+                      ? current
+                        ? recordName(t, current)
+                        : t("keeper.title")
+                      : screen.name === "editRecord"
+                        ? screen.draft.createdAt
+                          ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
+                          : docTypeLabel(t, screen.draft.documentType)
+                        : screen.draft.createdAt
+                          ? t("keeper.edit-title")
+                          : t("keeper.new-title"),
           onBack: back,
         },
   );
@@ -267,6 +283,7 @@ export function Keeper() {
           newPerson: null,
         });
       }}
+      onSip={() => navigate("/bazar?tab=stocks&view=funds&setup=sip")}
       t={t}
     />
   );
@@ -315,6 +332,17 @@ export function Keeper() {
           {t("keeper.add-another").replace("{type}", itemGroupName(itemGroup))}
         </button>
       </div>
+    );
+  } else if (screen?.name === "sips") {
+    body = (
+      <SipReminders
+        sips={sips}
+        onOpen={(symbol) =>
+          navigate(`/bazar?tab=stocks&view=funds&fund=${encodeURIComponent(symbol)}`)
+        }
+        onAdd={() => navigate("/bazar?tab=stocks&view=funds&setup=sip")}
+        t={t}
+      />
     );
   } else if (screen?.name === "group" && group) {
     const [sample] = group.records;
@@ -379,7 +407,7 @@ export function Keeper() {
         t={t}
       />
     );
-  } else if (data.records.length === 0 && data.items.length === 0) {
+  } else if (data.records.length === 0 && data.items.length === 0 && sips.length === 0) {
     // Nothing kept yet: the choices are the screen. A list, tabs, and an
     // empty card would only point at this same picker three different ways.
     body = (
@@ -395,6 +423,7 @@ export function Keeper() {
     body = (
       <Home
         data={data}
+        sips={sips}
         view={view}
         onView={setView}
         person={person}
@@ -405,6 +434,7 @@ export function Keeper() {
         onOpenItemGroup={(key) => push({ name: "itemGroup", key })}
         onOpenRecord={(recordId) => push({ name: "record", id: recordId })}
         onOpenItem={(item) => push({ name: "editItem", draft: item, newPerson: null })}
+        onOpenSips={() => push({ name: "sips" })}
         onToggleItem={toggleItem}
         t={t}
       />
@@ -421,6 +451,7 @@ export function Keeper() {
 
 function Home({
   data,
+  sips,
   view,
   onView,
   person,
@@ -431,10 +462,12 @@ function Home({
   onOpenItemGroup,
   onOpenRecord,
   onOpenItem,
+  onOpenSips,
   onToggleItem,
   t,
 }: {
   data: KeeperSnapshot;
+  sips: readonly SipStatus[];
   view: View;
   onView: (view: View) => void;
   person: PersonFilter;
@@ -446,6 +479,7 @@ function Home({
   onOpenItemGroup: (key: string) => void;
   onOpenRecord: (id: string) => void;
   onOpenItem: (item: KeeperItem) => void;
+  onOpenSips: () => void;
   onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
@@ -457,6 +491,7 @@ function Home({
 
   const records = data.records.filter((record) => matchesPerson(record.personId));
   const items = data.items.filter((item) => matchesPerson(item.personId));
+  const visibleSips = person === null || person === "" ? sips : [];
   const upcoming = upcomingOf(records, items).slice(0, 6);
 
   return (
@@ -558,7 +593,7 @@ function Home({
             t={t}
           />
         )
-      ) : items.length === 0 ? (
+      ) : items.length === 0 && visibleSips.length === 0 ? (
         picker("reminders")
       ) : (
         <>
@@ -576,8 +611,12 @@ function Home({
             items={items.filter((item) =>
               `${item.title} ${item.note}`.toLowerCase().includes(search.toLowerCase()),
             )}
+            sips={visibleSips.filter((sip) =>
+              `${sip.name} ${sip.symbol}`.toLowerCase().includes(search.toLowerCase()),
+            )}
             nameOf={nameOf}
             onOpenGroup={onOpenItemGroup}
+            onOpenSips={onOpenSips}
             onAdd={onAdd}
             t={t}
           />
@@ -649,18 +688,22 @@ function AddRow({ label, onClick }: { label: string; onClick: () => void }) {
 
 function ReminderList({
   items,
+  sips,
   nameOf,
   onOpenGroup,
+  onOpenSips,
   onAdd,
   t,
 }: {
   items: readonly KeeperItem[];
+  sips: readonly SipStatus[];
   nameOf: (personId: string | null) => string | undefined;
   onOpenGroup: (key: string) => void;
+  onOpenSips: () => void;
   onAdd: () => void;
   t: TFn;
 }) {
-  if (items.length === 0) {
+  if (items.length === 0 && sips.length === 0) {
     return (
       <EmptyState title={t("keeper.empty-search-title")} body={t("keeper.empty-search-body")} />
     );
@@ -669,6 +712,7 @@ function ReminderList({
   // "Add another" live, whether the kind holds one reminder or five.
   return (
     <section className="surface-card px-3">
+      {sips.length > 0 && <SipGroupRow sips={sips} onOpen={onOpenSips} t={t} />}
       {groupItems(items).map((group) => {
         const name = itemGroupName(group);
         // Renamed members (Netflix, Spotify) say more than whose they are.
