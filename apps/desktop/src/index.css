@@ -29,6 +29,7 @@
   /* Hairlines — label-derived, never a bright white stroke. */
   --color-border: #38383a;
   --color-divider: #2f2f31;
+  --logo-brightness: 0.9;
 
   /* Ink. Ratios are against --color-surface (#2c2c2e), the worst case.
      text 12.80:1 · secondary 6.30:1 · muted 4.85:1 */
@@ -86,6 +87,7 @@
     --color-surface-hover: #e8e8ed;
     --color-border: #d8d8dd;
     --color-divider: #e3e3e8;
+    --logo-brightness: 1;
     --color-text: #1d1d1f;
     --color-text-secondary: #545458;
     --color-text-muted: #6e6e73;
@@ -115,6 +117,7 @@
   --color-surface-hover: #e8e8ed;
   --color-border: #d8d8dd;
   --color-divider: #e3e3e8;
+  --logo-brightness: 1;
   --color-text: #1d1d1f;
   --color-text-secondary: #545458;
   --color-text-muted: #6e6e73;
@@ -819,6 +822,84 @@ button.row-line + button.row-line::before {
 
 .weather-glass-btn:disabled {
   opacity: 0.6;
+}
+
+/* Station logos — most sit on white, so a hairline and (on dark) a slight
+   dim keep them from out-shining the controls around them. */
+.station-art {
+  outline: 1px solid var(--color-divider);
+  outline-offset: -1px;
+  filter: brightness(var(--logo-brightness));
+}
+
+/* Radio screen — the now-playing card stays pinned while stations scroll
+   under it. The 10px here is the route's <main> padding (p-2.5): sticky
+   honours scroll-container padding, so the bar reaches up into it and paints
+   canvas there, or rows would show through above the card. */
+.radio-now-bar {
+  position: sticky;
+  top: -10px;
+  z-index: 10;
+  margin: -10px -10px 0;
+  padding: 10px;
+  background: var(--color-canvas);
+  transition: box-shadow 0.15s ease;
+}
+
+.radio-now-bar[data-stuck] {
+  box-shadow: 0 1px 0 var(--color-divider);
+}
+
+/* Radio mini player — sits between content and the tab bar. */
+.radio-mini {
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-surface);
+}
+
+.radio-volume-slider {
+  width: 52px;
+  height: 14px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.radio-volume-slider:focus-visible {
+  outline: none;
+}
+
+.radio-volume-slider::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-control-border);
+}
+
+.radio-volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3.5px;
+  border-radius: 999px;
+  border: 1px solid var(--color-control-border);
+  background: var(--color-text-secondary);
+  box-shadow: var(--color-control-inset);
+}
+
+.radio-volume-slider::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--color-control-border);
+  border: none;
+}
+
+.radio-volume-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-control-border);
+  background: var(--color-text-secondary);
+  box-shadow: var(--color-control-inset);
 }
 
 /* Tab bar — flat chrome, hairline rule. */

@@ -13,6 +13,7 @@ import { SFCar } from "sf-symbols-lib/monochrome/SFCar";
 import { SFChartLineUptrendXyaxis } from "sf-symbols-lib/monochrome/SFChartLineUptrendXyaxis";
 import { SFCheckmark } from "sf-symbols-lib/monochrome/SFCheckmark";
 import { SFCheckmarkShield } from "sf-symbols-lib/monochrome/SFCheckmarkShield";
+import { SFChevronDown } from "sf-symbols-lib/monochrome/SFChevronDown";
 import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
 import { SFCircleHexagongridFill } from "sf-symbols-lib/monochrome/SFCircleHexagongridFill";
 import { SFClock } from "sf-symbols-lib/monochrome/SFClock";
@@ -50,6 +51,8 @@ import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
 import { SFRotateRight } from "sf-symbols-lib/monochrome/SFRotateRight";
+import { SFSpeakerSlash } from "sf-symbols-lib/monochrome/SFSpeakerSlash";
+import { SFSpeakerWave2 } from "sf-symbols-lib/monochrome/SFSpeakerWave2";
 import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
 import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
@@ -103,6 +106,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   forex: SFBanknote,
   refresh: SFArrowClockwise,
   swap: SFArrowLeftArrowRight,
+  chevronDown: SFChevronDown,
   chevronLeft: SFChevronLeft,
   copy: SFSquareOnSquare,
   checkmark: SFCheckmark,
@@ -112,6 +116,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   pin: SFPin,
   pinFill: SFPinFill,
   stop: SFStopFill,
+  speaker: SFSpeakerWave2,
+  speakerMute: SFSpeakerSlash,
   star: SFStar,
   starFill: SFStarFill,
   export: SFSquareAndArrowUp,
@@ -177,6 +183,7 @@ export type IconName =
   | "forex"
   | "refresh"
   | "swap"
+  | "chevronDown"
   | "chevronLeft"
   | "copy"
   | "checkmark"
@@ -186,6 +193,8 @@ export type IconName =
   | "pin"
   | "pinFill"
   | "stop"
+  | "speaker"
+  | "speakerMute"
   | "star"
   | "starFill"
   | "export"

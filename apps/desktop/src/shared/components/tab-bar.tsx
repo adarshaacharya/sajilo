@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import { useSettings } from "../context/settings-context";
 import * as player from "../lib/audio";
 import { spring } from "../lib/motion";
@@ -32,14 +32,18 @@ export const TABS: readonly {
 
 export function TabBar() {
   const { t, modules } = useSettings();
-  const [radioActive, setRadioActive] = useState(false);
+  const { pathname } = useLocation();
   const [radioPlaying, setRadioPlaying] = useState(false);
+  const [radioMinimized, setRadioMinimized] = useState(false);
+  // With the mini player tucked away, the tab is the only sign a station is
+  // loaded — so it takes over the equalizer. Still bars mean paused.
+  const radioInTab = radioMinimized && pathname !== "/radio";
 
   useEffect(
     () =>
       player.subscribe((state) => {
-        setRadioActive(Boolean(state.nowPlaying));
         setRadioPlaying(Boolean(state.nowPlaying && state.isPlaying));
+        setRadioMinimized(Boolean(state.nowPlaying && state.miniPlayerMinimized));
       }),
     [],
   );
@@ -68,13 +72,13 @@ export function TabBar() {
                 className={`relative z-[1] flex flex-col items-center gap-0.5 transition-colors duration-200 ${
                   isActive
                     ? "text-[color:var(--color-accent-mark)]"
-                    : radioActive && tab.to === "/radio"
-                      ? "text-[color:var(--color-accent-mark)]"
-                      : "text-text-muted hover:text-text-secondary"
+                    : "text-text-muted hover:text-text-secondary"
                 }`}
               >
-                {radioActive && tab.to === "/radio" ? (
-                  <Equalizer isPlaying={radioPlaying} />
+                {tab.to === "/radio" && radioInTab ? (
+                  <span className="flex size-4 items-center justify-center">
+                    <Equalizer isPlaying={radioPlaying} />
+                  </span>
                 ) : (
                   <Icon name={tab.icon} />
                 )}

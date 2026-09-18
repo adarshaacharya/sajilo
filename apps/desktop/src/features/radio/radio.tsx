@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { Equalizer } from "../../shared/components/equalizer";
 import { useHeaderSlot } from "../../shared/components/header-slot";
@@ -13,6 +13,8 @@ import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RadioStation } from "../../types/api/RadioStation";
 import { BazarSearch } from "../bazar/_components/bazar-search";
+import { RadioVolumeControl } from "./_components/radio-volume-control";
+import { StationArt } from "./_components/station-art";
 
 const PIN_KEY = "radioFavourites";
 
@@ -26,30 +28,6 @@ function banner(state: LoadState<RadioDirectory> | undefined): LoadStatus {
     default:
       return { status: state.status };
   }
-}
-
-function StationArt({
-  station,
-  isPlaying,
-}: {
-  station: Pick<RadioStation, "logoUrl" | "name">;
-  isPlaying: boolean;
-}) {
-  if (station.logoUrl) {
-    return (
-      <img
-        src={station.logoUrl}
-        alt=""
-        className="size-[30px] shrink-0 rounded-[6px] bg-surface-raised object-cover"
-      />
-    );
-  }
-
-  return (
-    <span className="flex size-[30px] shrink-0 items-center justify-center rounded-[6px] bg-[color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] text-[color:var(--color-accent-mark)]">
-      {isPlaying ? <Equalizer isPlaying /> : <Icon name="radio" className="size-3.5" />}
-    </span>
-  );
 }
 
 function StationRow({
@@ -150,7 +128,7 @@ function StationList({
           const isCurrent = state.nowPlaying?.slug === station.slug;
           const isPlaying = isCurrent && state.isPlaying;
           return (
-            <li key={station.slug}>
+            <li key={station.slug} data-station={station.slug}>
               <StationRow
                 station={station}
                 pinned={pins.includes(station.slug)}
@@ -190,6 +168,29 @@ export function Radio() {
 
   useEffect(() => player.subscribe(setState), []);
 
+  // Arriving on the tab with a station already playing, bring its row into
+  // view once. Captured at mount so tapping a station here never jumps the list.
+  const [arrivedPlaying] = useState(() => player.getState().nowPlaying?.slug ?? null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const revealed = useRef(false);
+
+  // The now-playing bar is sticky and already sits at its pinned spot at
+  // rest, so "stuck" just means the list has scrolled at all. The hairline
+  // shows only then.
+  const [stuck, setStuck] = useState(false);
+  const nowBarRef = useCallback((node: HTMLDivElement) => {
+    let scroller = node.parentElement;
+    while (scroller && !/(auto|scroll)/.test(getComputedStyle(scroller).overflowY)) {
+      scroller = scroller.parentElement;
+    }
+    if (!scroller) return;
+    const target = scroller;
+    const sync = () => setStuck(target.scrollTop > 0);
+    sync();
+    target.addEventListener("scroll", sync, { passive: true });
+    return () => target.removeEventListener("scroll", sync);
+  }, []);
+
   const loading = isValidating;
 
   const refreshButton = useMemo(
@@ -218,7 +219,12 @@ export function Radio() {
 
     if (station.streamUrl) {
       player.play(
-        { slug: station.slug, name: station.name, frequency: station.frequency },
+        {
+          slug: station.slug,
+          name: station.name,
+          frequency: station.frequency,
+          logoUrl: station.logoUrl,
+        },
         station.streamUrl,
       );
       return;
@@ -228,7 +234,15 @@ export function Radio() {
     setUnplayable(null);
     try {
       const url = await api.stationStream(station.slug);
-      player.play({ slug: station.slug, name: station.name, frequency: station.frequency }, url);
+      player.play(
+        {
+          slug: station.slug,
+          name: station.name,
+          frequency: station.frequency,
+          logoUrl: station.logoUrl,
+        },
+        url,
+      );
     } catch {
       setUnplayable(station.slug);
     } finally {
@@ -259,6 +273,14 @@ export function Radio() {
     );
   };
 
+  useEffect(() => {
+    if (revealed.current || !arrivedPlaying || stations.length === 0) return;
+    revealed.current = true;
+    rootRef.current
+      ?.querySelector(`[data-station="${CSS.escape(arrivedPlaying)}"]`)
+      ?.scrollIntoView({ block: "center" });
+  }, [arrivedPlaying, stations.length]);
+
   const current = state.nowPlaying
     ? (stations.find((s) => s.slug === state.nowPlaying?.slug) ?? {
         slug: state.nowPlaying.slug,
@@ -270,45 +292,48 @@ export function Radio() {
     : null;
 
   return (
-    <div className="space-y-2.5">
+    <div ref={rootRef} className="space-y-2.5">
       {current && (
-        <section className="surface-card p-2.5">
-          <div className="flex items-center gap-2.5">
-            <StationArt station={current} isPlaying={state.isPlaying} />
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-semibold text-text-secondary">
-                {t("radio.now-playing")}
-              </p>
-              <p className="truncate text-[14px] font-semibold leading-tight">{current.name}</p>
-              {current.frequency && (
-                <p className="text-[11px] text-text-muted">{current.frequency}</p>
-              )}
+        <div ref={nowBarRef} className="radio-now-bar" data-stuck={stuck || undefined}>
+          <section className="surface-card p-2.5">
+            <div className="flex items-center gap-2.5">
+              <StationArt station={current} isPlaying={state.isPlaying} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-semibold text-text-secondary">
+                  {t("radio.now-playing")}
+                </p>
+                <p className="truncate text-[14px] font-semibold leading-tight">{current.name}</p>
+                {current.frequency && (
+                  <p className="text-[11px] text-text-muted">{current.frequency}</p>
+                )}
+              </div>
+              <RadioVolumeControl className="shrink-0" />
+              <button
+                type="button"
+                aria-label={state.isPlaying ? "Pause" : "Play"}
+                disabled={state.isLoading || resolving === current.slug}
+                onClick={() => player.togglePlayback()}
+                className="icon-btn shrink-0"
+              >
+                {state.isLoading || resolving === current.slug ? (
+                  <Icon name="refresh" className="size-3.5 animate-spin" />
+                ) : state.isPlaying ? (
+                  <Icon name="pause" className="size-3.5" />
+                ) : (
+                  <Icon name="play" className="size-3.5" />
+                )}
+              </button>
+              <button
+                type="button"
+                aria-label={t("radio.stop")}
+                onClick={() => player.stop()}
+                className="icon-btn shrink-0"
+              >
+                <Icon name="stop" className="size-3.5" />
+              </button>
             </div>
-            <button
-              type="button"
-              aria-label={state.isPlaying ? "Pause" : "Play"}
-              disabled={state.isLoading || resolving === current.slug}
-              onClick={() => player.togglePlayback()}
-              className="icon-btn shrink-0"
-            >
-              {state.isLoading || resolving === current.slug ? (
-                <Icon name="refresh" className="size-3.5 animate-spin" />
-              ) : state.isPlaying ? (
-                <Icon name="pause" className="size-3.5" />
-              ) : (
-                <Icon name="play" className="size-3.5" />
-              )}
-            </button>
-            <button
-              type="button"
-              aria-label={t("radio.stop")}
-              onClick={() => player.stop()}
-              className="icon-btn shrink-0"
-            >
-              <Icon name="stop" className="size-3.5" />
-            </button>
-          </div>
-        </section>
+          </section>
+        </div>
       )}
 
       {state.error && <p className="px-0.5 text-[11px] text-holiday">{state.error}</p>}

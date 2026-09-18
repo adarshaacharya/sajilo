@@ -18,6 +18,7 @@ export interface NowPlaying {
   slug: string;
   name: string;
   frequency?: string | null;
+  logoUrl?: string | null;
 }
 
 type Listener = (state: PlayerState) => void;
@@ -29,13 +30,52 @@ export interface PlayerState {
   /** True when audio is actively playing (not paused / stopped). */
   isPlaying: boolean;
   error: string | null;
+  /** Output level, 0–1. Persisted in the webview. */
+  volume: number;
+  /**
+   * The listener tucked the mini player away but kept the stream playing.
+   * Cleared by stop and by tuning to a different station, so the bar comes
+   * back whenever there is something new to show. Not persisted: radio never
+   * auto-plays on launch, so there is nothing to restore it against.
+   */
+  miniPlayerMinimized: boolean;
 }
 
 type AudioBag = {
   element: HTMLAudioElement | null;
   state: PlayerState;
   listeners: Set<Listener>;
+  volumeBeforeMute: number;
 };
+
+const VOLUME_KEY = "sajiloRadioVolume";
+const DEFAULT_VOLUME = 1;
+
+function readStoredVolume(): number {
+  try {
+    const raw = localStorage.getItem(VOLUME_KEY);
+    if (raw == null) return DEFAULT_VOLUME;
+    const value = Number(raw);
+    if (!Number.isFinite(value)) return DEFAULT_VOLUME;
+    return Math.min(1, Math.max(0, value));
+  } catch {
+    return DEFAULT_VOLUME;
+  }
+}
+
+function writeStoredVolume(volume: number) {
+  try {
+    localStorage.setItem(VOLUME_KEY, String(volume));
+  } catch {
+    // Ignore quota / private-mode failures.
+  }
+}
+
+function applyVolume(volume: number) {
+  const clamped = Math.min(1, Math.max(0, volume));
+  if (bag.element) bag.element.volume = clamped;
+  return clamped;
+}
 
 const bag: AudioBag = (() => {
   const key = "__sajiloRadio";
@@ -43,10 +83,19 @@ const bag: AudioBag = (() => {
   const existing = g[key];
   if (existing) return existing;
 
+  const volume = readStoredVolume();
   const created: AudioBag = {
     element: null,
-    state: { nowPlaying: null, isLoading: false, isPlaying: false, error: null },
+    state: {
+      nowPlaying: null,
+      isLoading: false,
+      isPlaying: false,
+      error: null,
+      volume,
+      miniPlayerMinimized: false,
+    },
     listeners: new Set(),
+    volumeBeforeMute: volume > 0 ? volume : DEFAULT_VOLUME,
   };
   g[key] = created;
   return created;
@@ -82,6 +131,7 @@ function audio(): HTMLAudioElement {
   el.addEventListener("error", () =>
     publish({ isLoading: false, isPlaying: false, error: "Could not play this station" }),
   );
+  el.volume = bag.state.volume;
   bag.element = el;
   return el;
 }
@@ -108,7 +158,14 @@ export function play(station: NowPlaying, streamUrl: string) {
   if (el.src !== streamUrl) {
     el.src = streamUrl;
   }
-  publish({ nowPlaying: station, isLoading: true, isPlaying: false, error: null });
+  const retuned = bag.state.nowPlaying?.slug !== station.slug;
+  publish({
+    nowPlaying: station,
+    isLoading: true,
+    isPlaying: false,
+    error: null,
+    miniPlayerMinimized: retuned ? false : bag.state.miniPlayerMinimized,
+  });
   el.play().catch(() =>
     publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }),
   );
@@ -139,7 +196,13 @@ export function stop() {
   el.pause();
   el.removeAttribute("src");
   el.load();
-  publish({ nowPlaying: null, isLoading: false, isPlaying: false, error: null });
+  publish({
+    nowPlaying: null,
+    isLoading: false,
+    isPlaying: false,
+    error: null,
+    miniPlayerMinimized: false,
+  });
 }
 
 export function isPaused(): boolean {
@@ -150,4 +213,26 @@ export function togglePlayback() {
   if (!bag.state.nowPlaying) return;
   if (isPaused()) resume();
   else pause();
+}
+
+export function setVolume(volume: number) {
+  const clamped = applyVolume(volume);
+  writeStoredVolume(clamped);
+  if (clamped > 0) bag.volumeBeforeMute = clamped;
+  publish({ volume: clamped });
+}
+
+export function toggleMute() {
+  if (bag.state.volume > 0) {
+    bag.volumeBeforeMute = bag.state.volume;
+    setVolume(0);
+    return;
+  }
+  setVolume(bag.volumeBeforeMute > 0 ? bag.volumeBeforeMute : DEFAULT_VOLUME);
+}
+
+/** Hides the mini player without touching playback. */
+export function minimizeMiniPlayer() {
+  if (!bag.state.nowPlaying) return;
+  publish({ miniPlayerMinimized: true });
 }
