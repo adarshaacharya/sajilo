@@ -1,47 +1,48 @@
-//! Open-Meteo forecast and air quality for the selected city.
+//! Open-Meteo forecast and air quality for any place in `sajilo_core::places`.
+
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::weather::{WeatherLocation, WeatherSnapshot};
+use sajilo_api::weather::WeatherSnapshot;
+use sajilo_core::places::{self, Place};
 use sajilo_providers::{HttpClient, open_meteo};
 use tauri::{AppHandle, Manager, Wry};
 
 use crate::feed::Feed;
-use crate::prefs::{
-    WEATHER_KATHMANDU_KEY, WEATHER_LALITPUR_KEY, WEATHER_POKHARA_KEY, weather_location,
-};
+use crate::prefs::{weather_cache_key, weather_location};
 
 const MAX_AGE_SECS: i64 = 30 * 60;
 const REFETCH_AFTER_SECS: i64 = 10 * 60;
 
+/// One feed per place, made the first time that place is asked for. A user
+/// pins a handful at most, so the map stays small.
+#[derive(Default)]
 pub struct WeatherCache {
-    kathmandu: Feed<WeatherSnapshot>,
-    pokhara: Feed<WeatherSnapshot>,
-    lalitpur: Feed<WeatherSnapshot>,
+    feeds: Mutex<HashMap<&'static str, Arc<Feed<WeatherSnapshot>>>>,
     client: HttpClient,
 }
 
-impl Default for WeatherCache {
-    fn default() -> Self {
-        Self {
-            kathmandu: Feed::new(WEATHER_KATHMANDU_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
-            pokhara: Feed::new(WEATHER_POKHARA_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
-            lalitpur: Feed::new(WEATHER_LALITPUR_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
-            client: HttpClient::new(),
-        }
-    }
-}
-
 impl WeatherCache {
-    fn feed(&self, location: WeatherLocation) -> &Feed<WeatherSnapshot> {
-        match location {
-            WeatherLocation::Kathmandu => &self.kathmandu,
-            WeatherLocation::Pokhara => &self.pokhara,
-            WeatherLocation::Lalitpur => &self.lalitpur,
-        }
+    fn feed(&self, place: &'static Place) -> Arc<Feed<WeatherSnapshot>> {
+        self.feeds
+            .lock()
+            .expect("weather feeds mutex poisoned")
+            .entry(place.id.as_str())
+            .or_insert_with(|| {
+                Arc::new(Feed::keyed(
+                    weather_cache_key(&place.id).into(),
+                    MAX_AGE_SECS,
+                    REFETCH_AFTER_SECS,
+                ))
+            })
+            .clone()
     }
 }
 
+/// Weather for `location` (a place id), or for the home place when it is
+/// absent or not a place this build knows.
 #[tauri::command]
 pub async fn get_weather(
     app: AppHandle<Wry>,
@@ -53,7 +54,7 @@ pub async fn get_weather(
     let now = Utc::now();
     let place = location
         .as_deref()
-        .and_then(WeatherLocation::from_key)
+        .and_then(places::find)
         .unwrap_or_else(|| weather_location(&app));
 
     cache
@@ -62,4 +63,11 @@ pub async fn get_weather(
             open_meteo::fetch(client, place, now)
         })
         .await
+}
+
+/// Every place the weather can be shown for, for the picker. Bundled, so this
+/// never waits on the network.
+#[tauri::command]
+pub fn list_places() -> &'static [Place] {
+    places::all()
 }

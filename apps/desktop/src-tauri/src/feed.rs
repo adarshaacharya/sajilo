@@ -9,6 +9,7 @@
 //! server is deployed and `client.rs` lands, the `fetch` closures change and
 //! everything here stays.
 
+use std::borrow::Cow;
 use std::future::Future;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -36,7 +37,7 @@ struct Cached<T> {
 pub struct Feed<T> {
     /// Where this feed lives in the store, so each survives a restart on its
     /// own rather than as one all-or-nothing blob.
-    key: &'static str,
+    key: Cow<'static, str>,
     /// How long a value counts as fresh. Past this it is still shown, labelled.
     max_age_secs: i64,
     /// How long before another fetch is attempted at all. Opening the popover
@@ -48,6 +49,12 @@ pub struct Feed<T> {
 
 impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
     pub const fn new(key: &'static str, max_age_secs: i64, refetch_after_secs: i64) -> Self {
+        Self::keyed(Cow::Borrowed(key), max_age_secs, refetch_after_secs)
+    }
+
+    /// For feeds made at runtime, one per something the user picks — a
+    /// weather place — so the key is built rather than written down.
+    pub const fn keyed(key: Cow<'static, str>, max_age_secs: i64, refetch_after_secs: i64) -> Self {
         Self {
             key,
             max_age_secs,
@@ -119,7 +126,7 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
         if self.hydrated.swap(true, Ordering::SeqCst) {
             return;
         }
-        let Ok(Some(raw)) = db::get_json(app, self.key) else {
+        let Ok(Some(raw)) = db::get_json(app, &self.key) else {
             return;
         };
         if let Ok(cached) = serde_json::from_value::<Cached<T>>(raw) {
@@ -138,7 +145,7 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
             value,
             fetched_at: now,
         }) {
-            let _ = db::set_json(app, self.key, &raw);
+            let _ = db::set_json(app, &self.key, &raw);
         }
     }
 }

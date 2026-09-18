@@ -10,11 +10,11 @@ import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
+import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
-import type { WeatherLocation } from "../../types/api/WeatherLocation";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 
 /** Mirrors `commands::bazar::Bazar`. */
@@ -429,8 +429,11 @@ export const api = {
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),
 
-  getWeather: (refresh = false, location?: WeatherLocation) =>
+  /** Weather for a place id; the home place when `location` is left out. */
+  getWeather: (refresh = false, location?: string) =>
     invoke<LoadState<WeatherSnapshot>>("get_weather", { refresh, location }),
+  /** Every place weather can be shown for, bundled in the app. */
+  listPlaces: () => invoke<Place[]>("list_places"),
 
   getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
 

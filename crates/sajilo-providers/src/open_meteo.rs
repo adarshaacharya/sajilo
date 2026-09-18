@@ -7,9 +7,8 @@
 
 use chrono::{DateTime, NaiveDate, NaiveDateTime, TimeZone, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::weather::{
-    AirQuality, DailyForecast, WeatherCondition, WeatherLocation, WeatherSnapshot,
-};
+use sajilo_api::weather::{AirQuality, DailyForecast, WeatherCondition, WeatherSnapshot};
+use sajilo_core::Place;
 use serde::Deserialize;
 
 use crate::error::{ProviderError, Result};
@@ -20,43 +19,38 @@ pub const SOURCE_NAME: &str = "Open-Meteo";
 /// Six days: today plus the five-day outlook PRD §5.4 shows.
 const FORECAST_DAYS: u8 = 6;
 
-pub fn forecast_url(location: WeatherLocation) -> String {
+pub fn forecast_url(place: &Place) -> String {
     format!(
         "https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}\
          &current=temperature_2m,apparent_temperature,weather_code\
          &daily=weather_code,temperature_2m_max,temperature_2m_min,\
          precipitation_probability_max,sunrise,sunset\
          &timezone=Asia%2FKathmandu&forecast_days={FORECAST_DAYS}",
-        lat = location.latitude(),
-        lon = location.longitude(),
+        lat = place.latitude,
+        lon = place.longitude,
     )
 }
 
-pub fn air_quality_url(location: WeatherLocation) -> String {
+pub fn air_quality_url(place: &Place) -> String {
     format!(
         "https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}\
          &current=us_aqi,pm2_5,pm10&timezone=Asia%2FKathmandu",
-        lat = location.latitude(),
-        lon = location.longitude(),
+        lat = place.latitude,
+        lon = place.longitude,
     )
 }
 
 pub async fn fetch(
     client: &HttpClient,
-    location: WeatherLocation,
+    place: &Place,
     now: DateTime<Utc>,
 ) -> Result<WeatherSnapshot> {
-    let body = client
-        .get_text(SOURCE_NAME, &forecast_url(location))
-        .await?;
-    let mut snapshot = parse_forecast(&body, location, now)?;
+    let body = client.get_text(SOURCE_NAME, &forecast_url(place)).await?;
+    let mut snapshot = parse_forecast(&body, &place.id, now)?;
 
     // Air quality is a separate endpoint, and a forecast is still worth showing
     // when only that one is unreachable.
-    if let Ok(air) = client
-        .get_text(SOURCE_NAME, &air_quality_url(location))
-        .await
-    {
+    if let Ok(air) = client.get_text(SOURCE_NAME, &air_quality_url(place)).await {
         snapshot.air_quality = parse_air_quality(&air);
     }
     Ok(snapshot)
@@ -89,11 +83,7 @@ struct Daily {
     sunset: Vec<String>,
 }
 
-pub fn parse_forecast(
-    body: &str,
-    location: WeatherLocation,
-    now: DateTime<Utc>,
-) -> Result<WeatherSnapshot> {
+pub fn parse_forecast(body: &str, place_id: &str, now: DateTime<Utc>) -> Result<WeatherSnapshot> {
     let response: ForecastResponse = serde_json::from_str(body)
         .map_err(|error| ProviderError::parse(SOURCE_NAME, error.to_string()))?;
 
@@ -137,7 +127,7 @@ pub fn parse_forecast(
         .ok_or_else(|| ProviderError::parse(SOURCE_NAME, "no usable day in the forecast"))?;
 
     Ok(WeatherSnapshot {
-        location,
+        place_id: place_id.to_owned(),
         temperature_celsius: response.current.temperature_2m,
         apparent_temperature_celsius: response.current.apparent_temperature,
         precipitation_chance: today.precipitation_chance,

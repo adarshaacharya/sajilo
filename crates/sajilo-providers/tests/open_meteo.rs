@@ -1,7 +1,8 @@
 //! Reads only from `fixtures/open-meteo/`.
 
 use chrono::{TimeZone, Timelike, Utc};
-use sajilo_api::weather::{AqiCategory, WeatherLocation};
+use sajilo_api::weather::AqiCategory;
+use sajilo_core::places;
 use sajilo_providers::open_meteo;
 
 const FORECAST: &str = include_str!("../../../fixtures/open-meteo/forecast.json");
@@ -10,7 +11,7 @@ const AIR_QUALITY: &str = include_str!("../../../fixtures/open-meteo/air-quality
 fn parsed() -> sajilo_api::weather::WeatherSnapshot {
     open_meteo::parse_forecast(
         FORECAST,
-        WeatherLocation::Kathmandu,
+        "kathmandu",
         Utc.timestamp_opt(1_800_000_000, 0).unwrap(),
     )
     .expect("fixture parses")
@@ -19,7 +20,7 @@ fn parsed() -> sajilo_api::weather::WeatherSnapshot {
 #[test]
 fn decodes_the_recorded_forecast() {
     let snapshot = parsed();
-    assert_eq!(snapshot.location, WeatherLocation::Kathmandu);
+    assert_eq!(snapshot.place_id, "kathmandu");
     assert!((-20.0..50.0).contains(&snapshot.temperature_celsius));
     assert!(snapshot.high_celsius >= snapshot.low_celsius);
     assert!(snapshot.precipitation_chance <= 100);
@@ -98,7 +99,7 @@ fn air_quality_degrades_instead_of_failing() {
 #[test]
 fn rejects_a_forecast_it_cannot_read() {
     let now = Utc.timestamp_opt(0, 0).unwrap();
-    let location = WeatherLocation::Kathmandu;
+    let location = "kathmandu";
     assert!(open_meteo::parse_forecast("not json", location, now).is_err());
 
     let empty = r#"{"current":{"time":"2026-08-17T10:30","interval":900,
@@ -119,23 +120,21 @@ fn truncates_to_the_shortest_column() {
         "weather_code":[0,1],"temperature_2m_max":[30.0,31.0],
         "temperature_2m_min":[20.0,21.0],"precipitation_probability_max":[10],
         "sunrise":["2026-08-17T05:20"],"sunset":["2026-08-17T18:30"]}}"#;
-    let snapshot = open_meteo::parse_forecast(
-        ragged,
-        WeatherLocation::Kathmandu,
-        Utc.timestamp_opt(0, 0).unwrap(),
-    )
-    .expect("ragged but usable");
+    let snapshot =
+        open_meteo::parse_forecast(ragged, "kathmandu", Utc.timestamp_opt(0, 0).unwrap())
+            .expect("ragged but usable");
     assert_eq!(snapshot.daily.len(), 2);
     // The missing probability defaults rather than shifting the column.
     assert_eq!(snapshot.daily[1].precipitation_chance, 0);
 }
 
 #[test]
-fn builds_a_url_per_location() {
-    for location in WeatherLocation::ALL {
-        let url = open_meteo::forecast_url(location);
-        assert!(url.contains(&location.latitude().to_string()), "{url}");
+fn builds_a_url_for_every_place() {
+    for place in places::all() {
+        let url = open_meteo::forecast_url(place);
+        assert!(url.contains(&place.latitude.to_string()), "{url}");
+        assert!(url.contains(&place.longitude.to_string()), "{url}");
         assert!(url.contains("timezone=Asia%2FKathmandu"), "{url}");
-        assert!(open_meteo::air_quality_url(location).contains("us_aqi"));
+        assert!(open_meteo::air_quality_url(place).contains("us_aqi"));
     }
 }

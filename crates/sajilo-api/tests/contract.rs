@@ -9,7 +9,7 @@ use sajilo_api::bazar::{
 use sajilo_api::bundle::{BundleRequest, ModuleKey};
 use sajilo_api::forex::{ForexRate, ForexSnapshot};
 use sajilo_api::load_state::{Freshness, LoadState};
-use sajilo_api::weather::{AqiCategory, WeatherCondition, WeatherLocation};
+use sajilo_api::weather::{AqiCategory, WeatherCondition};
 
 fn at(secs: i64) -> chrono::DateTime<Utc> {
     Utc.timestamp_opt(secs, 0).unwrap()
@@ -283,17 +283,6 @@ fn bands_the_us_aqi_at_its_published_breakpoints() {
     );
     assert_eq!(AqiCategory::from_us_aqi(201), AqiCategory::VeryUnhealthy);
     assert_eq!(AqiCategory::from_us_aqi(500), AqiCategory::Hazardous);
-}
-
-#[test]
-fn weather_locations_round_trip_through_their_key() {
-    for location in WeatherLocation::ALL {
-        assert_eq!(WeatherLocation::from_key(location.key()), Some(location));
-        assert!(!location.display_name().is_empty());
-        assert!(!location.nepali_name().is_empty());
-    }
-    assert_eq!(WeatherLocation::from_key("biratnagar"), None);
-    assert_eq!(WeatherLocation::default(), WeatherLocation::Kathmandu);
 }
 
 // --------------------------------------------------------------- bundle

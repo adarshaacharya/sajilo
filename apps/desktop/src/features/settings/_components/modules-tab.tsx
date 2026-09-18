@@ -1,10 +1,12 @@
 import { Select } from "../../../shared/components/select";
 import { useSettings } from "../../../shared/context/settings-context";
+import { placeLabel, usePlaces } from "../../../shared/lib/places";
 import { CurrencyPicker } from "./currency-picker";
 import { ModuleRow } from "./module-row";
 
 export function ModulesTab() {
-  const { t, modules, setModules } = useSettings();
+  const { t, language, modules, setModules } = useSettings();
+  const places = usePlaces();
 
   const toggleForex = (code: string) => {
     setModules((current) => ({
@@ -32,21 +34,23 @@ export function ModulesTab() {
         checked={modules.weatherEnabled}
         onChange={(value) => setModules((current) => ({ ...current, weatherEnabled: value }))}
       >
+        {/* Pinning happens on the weather screen; here the home place is
+            picked from what is already pinned. */}
         <Select
           label={t("settings.city")}
           value={modules.weatherLocation}
           onChange={(next) =>
             setModules((current) => ({
               ...current,
-              weatherLocation: next as typeof modules.weatherLocation,
+              weatherPins: [next, ...current.weatherPins.filter((id) => id !== next)],
             }))
           }
-          options={[
-            { id: "kathmandu", label: "Kathmandu · काठमाडौं" },
-            { id: "pokhara", label: "Pokhara · पोखरा" },
-            { id: "lalitpur", label: "Lalitpur · ललितपुर" },
-          ]}
+          options={modules.weatherPins.map((id) => ({
+            id,
+            label: placeLabel(places, id, language),
+          }))}
         />
+        <p className="mt-1 text-[10px] text-text-muted">{t("settings.city-pins-hint")}</p>
       </ModuleRow>
 
       <ModuleRow

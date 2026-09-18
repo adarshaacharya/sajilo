@@ -5,8 +5,8 @@
 
 use crate::db;
 use crate::tray::title::{CustomMenuBar, MenuBarFormat};
-use sajilo_api::weather::WeatherLocation;
 use sajilo_core::numerals::NumeralStyle;
+use sajilo_core::places::{self, Place};
 use tauri::{AppHandle, Wry};
 
 pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
@@ -34,9 +34,11 @@ pub const MUTUAL_FUNDS_KEY: &str = "mutualFunds.v1";
 pub const NEPSE_INTRADAY_KEY: &str = "nepseIntraday.v1";
 pub const RASHIFAL_KEY: &str = "rashifal.v1";
 pub const RADIO_KEY: &str = "radio.v1";
-pub const WEATHER_KATHMANDU_KEY: &str = "weather.kathmandu.v1";
-pub const WEATHER_POKHARA_KEY: &str = "weather.pokhara.v1";
-pub const WEATHER_LALITPUR_KEY: &str = "weather.lalitpur.v1";
+/// One cache entry per place: `weather.kathmandu.v1`. The three cities that
+/// came before the place list used the same spelling.
+pub fn weather_cache_key(place_id: &str) -> String {
+    format!("weather.{place_id}.v1")
+}
 pub const FOREX_KEY: &str = "forex.v1";
 pub const NEWS_KEY: &str = "news.v1";
 pub const ANNOUNCEMENT_KEY: &str = "announcement.v1";
@@ -44,7 +46,11 @@ pub const ANNOUNCEMENT_KEY: &str = "announcement.v1";
 /// re-fetched here after a migration.
 pub const ARTICLE_DATES_KEY: &str = "articleDates.v1";
 
+/// The home place: the first pin, shown on the home screen and in the tray.
+/// Kept under its original name so backups and older exports still carry it.
 pub const WEATHER_LOCATION: &str = "weatherLocation";
+/// Every pinned place, the home place first. Written by the weather screen.
+pub const WEATHER_PINS: &str = "weatherPins";
 pub const WEATHER_ENABLED: &str = "weatherEnabled";
 pub const FOREX_ENABLED: &str = "forexEnabled";
 pub const NEWS_ENABLED: &str = "newsEnabled";
@@ -105,12 +111,12 @@ pub fn tray_preferences(
     )
 }
 
-/// Which city the weather module fetches for. Kept stable for backups.
-pub fn weather_location(app: &AppHandle<Wry>) -> WeatherLocation {
-    db::get_json(app, WEATHER_LOCATION)
+/// The home place. An id this build does not know falls back to Kathmandu.
+pub fn weather_location(app: &AppHandle<Wry>) -> &'static Place {
+    let id = db::get_json(app, WEATHER_LOCATION)
         .ok()
         .flatten()
         .and_then(|value| value.as_str().map(str::to_owned))
-        .and_then(|key| WeatherLocation::from_key(&key))
-        .unwrap_or_default()
+        .unwrap_or_default();
+    places::find_or_default(&id)
 }

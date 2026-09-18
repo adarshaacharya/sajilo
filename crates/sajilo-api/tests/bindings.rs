@@ -23,7 +23,7 @@ use sajilo_api::radio::{RadioDirectory, RadioStation};
 use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalSnapshot};
 use sajilo_api::stocks::{MarketIndex, MarketMover, MoverBoard, StockMarketSnapshot, StockQuote};
 use sajilo_api::weather::{
-    AirQuality, AqiCategory, DailyForecast, WeatherCondition, WeatherLocation, WeatherSnapshot,
+    AirQuality, AqiCategory, DailyForecast, WeatherCondition, WeatherSnapshot,
 };
 
 /// Exporting a type is what writes its `.ts` file, so every DTO must be listed
@@ -31,6 +31,7 @@ use sajilo_api::weather::{
 #[test]
 fn exports_every_dto() {
     sajilo_core::NepaliDate::export_all().unwrap();
+    sajilo_core::Place::export_all().unwrap();
 
     Freshness::export_all().unwrap();
     LoadState::<()>::export_all().unwrap();
@@ -52,7 +53,6 @@ fn exports_every_dto() {
     VegetablePrice::export_all().unwrap();
     VegetableMarketSnapshot::export_all().unwrap();
 
-    WeatherLocation::export_all().unwrap();
     WeatherCondition::export_all().unwrap();
     AqiCategory::export_all().unwrap();
     AirQuality::export_all().unwrap();

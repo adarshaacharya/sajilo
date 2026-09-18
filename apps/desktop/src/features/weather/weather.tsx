@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { useGoBack } from "../../shared/components/back-button";
 import { Icon } from "../../shared/components/icon";
@@ -10,9 +10,12 @@ import {
   loadBanner,
   loadedValue,
 } from "../../shared/lib/load-state";
+import { placeLabel, usePlaces } from "../../shared/lib/places";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 import { AirQualityPanel } from "./_components/air-quality-panel";
 import { ForecastRow } from "./_components/forecast-row";
+import { PinnedPlaces } from "./_components/pinned-places";
+import { PlacePicker } from "./_components/place-picker";
 import { WeatherAtmosphere } from "./_components/weather-atmosphere";
 import { WeatherIcon } from "./_components/weather-icon";
 import {
@@ -42,36 +45,55 @@ const AQI_ADVICE = {
   hazardous: "aqi.advice.hazardous",
 } as const;
 
-function locationLabel(location: WeatherSnapshot["location"], language: "en" | "ne"): string {
-  const names: Record<WeatherSnapshot["location"], { en: string; ne: string }> = {
-    kathmandu: { en: "Kathmandu", ne: "काठमाडौं" },
-    pokhara: { en: "Pokhara", ne: "पोखरा" },
-    lalitpur: { en: "Lalitpur", ne: "ललितपुर" },
-  };
-  return names[location]?.[language] ?? location;
-}
-
 export function Weather() {
-  const { t, language, modules } = useSettings();
+  const { t, language, modules, setModules } = useSettings();
   const goBack = useGoBack();
+  const places = usePlaces();
+  // The home place until another is picked; a place looked at from the
+  // picker stays on screen without having to be pinned.
+  const [picked, setPicked] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
+  const viewing = picked ?? modules.weatherLocation;
   const {
     data: state,
     isValidating,
     mutate,
-  } = useSWR(`weather:${modules.weatherLocation}`, () =>
-    catchAsFailed(api.getWeather(false, modules.weatherLocation)),
-  );
+  } = useSWR(`weather:${viewing}`, () => catchAsFailed(api.getWeather(false, viewing)));
   const load = useCallback(
     (refresh = false) =>
-      mutate(catchAsFailed<WeatherSnapshot>(api.getWeather(refresh, modules.weatherLocation)), {
+      mutate(catchAsFailed<WeatherSnapshot>(api.getWeather(refresh, viewing)), {
         revalidate: false,
       }),
-    [mutate, modules.weatherLocation],
+    [mutate, viewing],
+  );
+
+  const togglePin = useCallback(
+    (id: string) =>
+      setModules((current) => ({
+        ...current,
+        weatherPins: current.weatherPins.includes(id)
+          ? current.weatherPins.length > 1
+            ? current.weatherPins.filter((pin) => pin !== id)
+            : current.weatherPins
+          : [...current.weatherPins, id],
+      })),
+    [setModules],
+  );
+  const makeHome = useCallback(
+    (id: string) =>
+      setModules((current) => ({
+        ...current,
+        weatherPins: [id, ...current.weatherPins.filter((pin) => pin !== id)],
+      })),
+    [setModules],
   );
 
   const loading = isValidating;
 
-  const snapshot = loadedValue(state);
+  // A reading for another place (a stale cache entry, or a recording that has
+  // only the one) is never drawn under this place's name.
+  const loaded = loadedValue(state);
+  const snapshot = loaded?.placeId === viewing ? loaded : undefined;
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
   const phase = currentSkyPhase(snapshot?.sunrise ?? null, snapshot?.sunset ?? null);
   const tomorrow = snapshot && snapshot.daily.length > 1 ? snapshot.daily[1] : null;
@@ -87,9 +109,15 @@ export function Weather() {
         >
           <Icon name="chevronLeft" className="size-3.5" />
         </button>
-        <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-white">
-          {snapshot ? locationLabel(snapshot.location, language) : t("feature.weather")}
-        </span>
+        <button
+          type="button"
+          onClick={() => setPicking(true)}
+          aria-label={t("weather.places")}
+          className="flex min-w-0 flex-1 items-center gap-1 text-left text-[13px] font-semibold text-white"
+        >
+          <span className="truncate">{placeLabel(places, viewing, language)}</span>
+          <Icon name="chevronDown" className="size-3 shrink-0 opacity-80" />
+        </button>
         <button
           type="button"
           onClick={() => load(true)}
@@ -101,8 +129,22 @@ export function Weather() {
         </button>
       </div>
     ),
-    [snapshot, language, t, goBack, load, loading],
+    [places, viewing, language, t, goBack, load, loading],
   );
+
+  if (picking) {
+    return (
+      <PlacePicker
+        pins={modules.weatherPins}
+        onPick={(id) => {
+          setPicked(id);
+          setPicking(false);
+        }}
+        onTogglePin={togglePin}
+        onBack={() => setPicking(false)}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-full flex-col">
@@ -135,17 +177,17 @@ export function Weather() {
                 </p>
               </>
             ) : loading ? (
-              <p className="text-[34px] font-semibold leading-none">Loading…</p>
+              <p className="text-[34px] font-semibold leading-none">{t("state.loading")}</p>
             ) : (
               <>
-                <p className="text-[34px] font-semibold leading-none">Unavailable</p>
+                <p className="text-[34px] font-semibold leading-none">{t("state.unavailable")}</p>
                 <p className="mt-1 text-[11px] opacity-85">
                   {banner.status === "failed" ? banner.message : t("state.not-yet")}
                 </p>
                 <button
                   type="button"
                   onClick={() => load(true)}
-                  className="weather-glass-btn mt-2 w-auto px-2 text-[11px]"
+                  className="weather-glass-btn mt-2 min-w-max whitespace-nowrap px-2 text-[11px]"
                 >
                   {t("action.retry")}
                 </button>
@@ -156,6 +198,15 @@ export function Weather() {
       </section>
 
       <div className="flex-1 space-y-2.5 p-2.5">
+        <PinnedPlaces
+          pins={modules.weatherPins}
+          viewing={viewing}
+          onView={setPicked}
+          onAdd={() => setPicking(true)}
+          onPin={togglePin}
+          onMakeHome={makeHome}
+        />
+
         {snapshot?.airQuality && (
           <AirQualityPanel
             airQuality={snapshot.airQuality}

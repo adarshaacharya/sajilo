@@ -55,6 +55,12 @@ fn main() {
     tools(&mut commands);
     system(&mut commands);
     grouped_numbers(&mut commands);
+    // After the grouping pass: coordinates and elevations are never written
+    // through `group_number`, so they must not add hundreds of entries to it.
+    commands.insert(
+        "list_places".to_owned(),
+        serde_json::to_value(sajilo_core::places::all()).expect("places serialise"),
+    );
 
     let document = json!({
         "recordedAt": now.to_rfc3339(),
@@ -371,11 +377,7 @@ fn weather(
     air_quality: &str,
     now: DateTime<Utc>,
 ) -> sajilo_providers::Result<sajilo_api::weather::WeatherSnapshot> {
-    let mut snapshot = open_meteo::parse_forecast(
-        forecast,
-        sajilo_api::weather::WeatherLocation::Kathmandu,
-        now,
-    )?;
+    let mut snapshot = open_meteo::parse_forecast(forecast, "kathmandu", now)?;
     snapshot.air_quality = open_meteo::parse_air_quality(air_quality);
     Ok(snapshot)
 }

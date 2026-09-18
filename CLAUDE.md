@@ -42,6 +42,7 @@ Linux.
 | `apps/showcase/` | The landing page's carousel. Mounts `apps/desktop/src` in a browser with the Tauri IPC layer stubbed, so the site embeds the real app rather than screenshots of it. |
 | `apps/showcase-data/` | Records what that stub answers, by running the real engine and parsers over `fixtures/`. Regenerate with `cargo run -p sajilo-showcase-data`. |
 | `data/calendar-events/` | Bundled BS calendar events (2066–2083), embedded into `sajilo-core` at build time. |
+| `data/places/` | Every district headquarters plus major towns (English/Nepali names, coordinates, elevation) that weather can be shown for, embedded into `sajilo-core`. |
 | `fixtures/` | Recorded upstream HTML/JSON so provider parser tests never touch the network. |
 
 ## Commands

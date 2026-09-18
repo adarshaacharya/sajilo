@@ -1,19 +1,11 @@
-//! Open-Meteo forecast and air quality. Ported from `WeatherSnapshot.swift`,
-//! `AirQuality.swift` and `WeatherLocation.swift`.
+//! Open-Meteo forecast and air quality. Ported from `WeatherSnapshot.swift` and
+//! `AirQuality.swift`. Places are `sajilo_core::places`, addressed by id.
 
 use chrono::{DateTime, NaiveDate, Utc};
 
 use crate::load_state::Freshness;
 
 dto_enum! {
-    #[derive(Default)]
-    pub enum WeatherLocation {
-        #[default]
-        Kathmandu,
-        Pokhara,
-        Lalitpur,
-    }
-
     pub enum WeatherCondition {
         Clear,
         PartlyCloudy,
@@ -57,9 +49,10 @@ dto! {
     }
 
     pub struct WeatherSnapshot {
-        /// Which place this reading describes. Without it a cached Kathmandu
-        /// reading could be rendered under a Pokhara heading.
-        pub location: WeatherLocation,
+        /// Which place this reading describes, by `sajilo_core::places` id.
+        /// Without it a cached Kathmandu reading could be rendered under a
+        /// Pokhara heading.
+        pub place_id: String,
         pub temperature_celsius: f64,
         pub apparent_temperature_celsius: f64,
         pub precipitation_chance: u8,
@@ -79,55 +72,6 @@ dto! {
         /// Sajilo retrieved it; this is what the user is told.
         pub observed_at: DateTime<Utc>,
         pub freshness: Freshness,
-    }
-}
-
-impl WeatherLocation {
-    pub const ALL: [Self; 3] = [Self::Kathmandu, Self::Pokhara, Self::Lalitpur];
-
-    pub fn display_name(self) -> &'static str {
-        match self {
-            Self::Kathmandu => "Kathmandu",
-            Self::Pokhara => "Pokhara",
-            Self::Lalitpur => "Lalitpur",
-        }
-    }
-
-    pub fn nepali_name(self) -> &'static str {
-        match self {
-            Self::Kathmandu => "काठमाडौं",
-            Self::Pokhara => "पोखरा",
-            Self::Lalitpur => "ललितपुर",
-        }
-    }
-
-    pub fn latitude(self) -> f64 {
-        match self {
-            Self::Kathmandu => 27.7172,
-            Self::Pokhara => 28.2096,
-            Self::Lalitpur => 27.6588,
-        }
-    }
-
-    pub fn longitude(self) -> f64 {
-        match self {
-            Self::Kathmandu => 85.3240,
-            Self::Pokhara => 83.9856,
-            Self::Lalitpur => 85.3247,
-        }
-    }
-
-    /// The stable key a cache slot and an API query string are built from.
-    pub fn key(self) -> &'static str {
-        match self {
-            Self::Kathmandu => "kathmandu",
-            Self::Pokhara => "pokhara",
-            Self::Lalitpur => "lalitpur",
-        }
-    }
-
-    pub fn from_key(key: &str) -> Option<Self> {
-        Self::ALL.into_iter().find(|location| location.key() == key)
     }
 }
 

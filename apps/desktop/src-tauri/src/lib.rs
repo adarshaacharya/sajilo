@@ -174,6 +174,7 @@ pub fn run() {
             commands::radio::get_stations,
             commands::radio::station_stream,
             commands::weather::get_weather,
+            commands::weather::list_places,
             commands::forex::get_forex,
             commands::news::get_news,
             commands::news::news_sources,

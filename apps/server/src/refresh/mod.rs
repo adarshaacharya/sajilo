@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 use chrono::{DateTime, Utc};
 use sajilo_api::bundle::ModuleKey;
-use sajilo_api::weather::WeatherLocation;
+use sajilo_core::places::{self, Place};
 use sajilo_providers::HttpClient;
 use serde_json::Value;
 
@@ -33,16 +33,16 @@ pub trait FeedSource: Send + Sync + 'static {
 /// The real thing: every provider from `sajilo-providers`.
 pub struct LiveFeeds {
     client: HttpClient,
-    /// Weather is fetched per city, and only for cities actually in use — the
+    /// Weather is fetched per place, and only for places actually in use — the
     /// server has no reason to warm Pokhara if nobody is asking for it.
-    weather_location: WeatherLocation,
+    weather_place: &'static Place,
 }
 
 impl LiveFeeds {
     pub fn new() -> Self {
         Self {
             client: HttpClient::new(),
-            weather_location: WeatherLocation::default(),
+            weather_place: places::find_or_default(places::DEFAULT_PLACE),
         }
     }
 }
@@ -65,7 +65,7 @@ impl FeedSource for LiveFeeds {
             let client = &self.client;
             match module {
                 ModuleKey::Weather => encode(
-                    sajilo_providers::open_meteo::fetch(client, self.weather_location, now)
+                    sajilo_providers::open_meteo::fetch(client, self.weather_place, now)
                         .await
                         .map_err(|e| e.to_string())?,
                 ),

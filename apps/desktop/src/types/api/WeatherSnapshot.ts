@@ -3,14 +3,14 @@ import type { AirQuality } from "./AirQuality";
 import type { DailyForecast } from "./DailyForecast";
 import type { Freshness } from "./Freshness";
 import type { WeatherCondition } from "./WeatherCondition";
-import type { WeatherLocation } from "./WeatherLocation";
 
 export type WeatherSnapshot = { 
 /**
- * Which place this reading describes. Without it a cached Kathmandu
- * reading could be rendered under a Pokhara heading.
+ * Which place this reading describes, by `sajilo_core::places` id.
+ * Without it a cached Kathmandu reading could be rendered under a
+ * Pokhara heading.
  */
-location: WeatherLocation, temperatureCelsius: number, apparentTemperatureCelsius: number, precipitationChance: number, highCelsius: number, lowCelsius: number, condition: WeatherCondition, 
+placeId: string, temperatureCelsius: number, apparentTemperatureCelsius: number, precipitationChance: number, highCelsius: number, lowCelsius: number, condition: WeatherCondition, 
 /**
  * Today's sunrise and sunset at the selected location, used to place
  * the sky phase against the real day rather than fixed clock hours.

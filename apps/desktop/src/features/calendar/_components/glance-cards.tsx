@@ -6,20 +6,14 @@ import { SkeletonBlock } from "../../../shared/components/skeleton";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
+import { placeLabel, usePlaces } from "../../../shared/lib/places";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
-import type { WeatherLocation } from "../../../types/api/WeatherLocation";
 import type { WeatherSnapshot } from "../../../types/api/WeatherSnapshot";
 import { money } from "../../bazar/_lib/format";
 import { LIVE_REFRESH_MS } from "../../bazar/_lib/live";
 import { changeTone } from "../../bazar/_lib/stock-tone";
 import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
-
-const CITY: Record<WeatherLocation, { en: string; ne: string }> = {
-  kathmandu: { en: "Kathmandu", ne: "काठमाडौं" },
-  pokhara: { en: "Pokhara", ne: "पोखरा" },
-  lalitpur: { en: "Lalitpur", ne: "ललितपुर" },
-};
 
 function relativeFreshness(
   iso: string | undefined,
@@ -46,6 +40,7 @@ function relativeFreshness(
 export function GlanceCards() {
   const { language, modules, t } = useSettings();
   const navigate = useNavigate();
+  const places = usePlaces();
   const [weather, setWeather] = useState<LoadState<WeatherSnapshot>>();
   const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
 
@@ -73,7 +68,11 @@ export function GlanceCards() {
     return () => window.clearInterval(timer);
   }, [modules.bazarEnabled, marketOpen]);
 
-  const weatherSnap = loadedValue(weather);
+  // A reading for another place (the home place just changed) is not drawn
+  // under this one's name.
+  const weatherLoaded = loadedValue(weather);
+  const weatherSnap =
+    weatherLoaded?.placeId === modules.weatherLocation ? weatherLoaded : undefined;
   const stocksSnap = loadedValue(stocks);
   const nepse = stocksSnap?.nepse ?? null;
   const freshness = relativeFreshness(
@@ -96,9 +95,7 @@ export function GlanceCards() {
               <div className="flex items-center gap-1 text-text-muted">
                 <Icon name="weather" className="size-3 text-[color:var(--color-weather-tint)]" />
                 <span className="text-[10px]">
-                  {weatherSnap
-                    ? CITY[weatherSnap.location][language]
-                    : CITY[modules.weatherLocation][language]}
+                  {placeLabel(places, modules.weatherLocation, language)}
                 </span>
               </div>
               <p className="mt-0.5 text-[20px] font-semibold leading-none">

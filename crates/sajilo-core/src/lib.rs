@@ -10,8 +10,10 @@ pub mod error;
 pub mod nepal_time;
 pub mod notify;
 pub mod numerals;
+pub mod places;
 pub mod planner;
 pub mod tools;
 
 pub use calendar::nepali_date::{NepaliDate, NepaliMonth};
 pub use error::{ConversionError, Result};
+pub use places::Place;

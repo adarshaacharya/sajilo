@@ -29,6 +29,7 @@ export function BackgroundFeedRefresh() {
     if (modules.weatherEnabled) {
       refreshes.push(
         mutate(
+          // The home place: the one the home screen and tray show.
           `weather:${modules.weatherLocation}`,
           catchAsFailed(api.getWeather(false, modules.weatherLocation)),
           { revalidate: false },

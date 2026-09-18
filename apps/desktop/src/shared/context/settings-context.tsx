@@ -1,5 +1,4 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import type { WeatherLocation } from "../../types/api/WeatherLocation";
 import type { Language } from "../lib/i18n";
 import { setActiveLanguage, translate } from "../lib/i18n";
 import { api } from "../lib/ipc";
@@ -14,7 +13,12 @@ export interface ModulePrefs {
   bazarEnabled: boolean;
   rashifalEnabled: boolean;
   radioEnabled: boolean;
-  weatherLocation: WeatherLocation;
+  /** The home place (a place id): shown on the home screen and in the tray.
+   * Always the first of `weatherPins`; kept on its own for what reads it
+   * without knowing about pins — the tray, backups. */
+  weatherLocation: string;
+  /** Every pinned place, home first. */
+  weatherPins: string[];
   forexFavourites: string[];
   clocksEnabled: boolean;
   /** IANA timezones, in the order they were added — the dashboard preview
@@ -31,11 +35,19 @@ const DEFAULT_MODULES: ModulePrefs = {
   rashifalEnabled: true,
   radioEnabled: true,
   weatherLocation: "kathmandu",
+  weatherPins: ["kathmandu"],
   forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
   clocksEnabled: false,
   clocks: [],
   keeperEnabled: true,
 };
+
+/** Keeps the home place and the pin list agreeing: the home place is the first
+ * pin, and there is always at least one. */
+function withHomePlace(modules: ModulePrefs): ModulePrefs {
+  const pins = modules.weatherPins.length > 0 ? modules.weatherPins : [modules.weatherLocation];
+  return { ...modules, weatherPins: pins, weatherLocation: pins[0] ?? "kathmandu" };
+}
 
 const FOREX_OPTIONS = ["USD", "AUD", "GBP", "EUR", "JPY", "INR", "CNY", "SAR", "QAR", "SGD"];
 
@@ -86,7 +98,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<boolean>("bazarEnabled"),
       api.getSetting<boolean>("rashifalEnabled"),
       api.getSetting<boolean>("radioEnabled"),
-      api.getSetting<WeatherLocation>("weatherLocation"),
+      api.getSetting<string>("weatherLocation"),
+      api.getSetting<string[]>("weatherPins"),
       api.getSetting<string[]>("forexFavourites"),
       api.getSetting<boolean>("clocksEnabled"),
       api.getSetting<string[]>("clocks"),
@@ -104,6 +117,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           rashifalEnabled,
           radioEnabled,
           weatherLocation,
+          weatherPins,
           forexFavourites,
           clocksEnabled,
           clocks,
@@ -115,27 +129,31 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
             setThemeState(storedTheme);
           }
-          setModulesState((current) => ({
-            ...current,
-            ...(weatherEnabled !== null && { weatherEnabled }),
-            ...(forexEnabled !== null && { forexEnabled }),
-            ...(newsEnabled !== null && { newsEnabled }),
-            ...(bazarEnabled !== null && { bazarEnabled }),
-            ...(rashifalEnabled !== null && { rashifalEnabled }),
-            ...(radioEnabled !== null && { radioEnabled }),
-            ...(weatherLocation && { weatherLocation }),
-            ...(forexFavourites && { forexFavourites }),
-            // Cities saved before the module switch existed: having picked one
-            // is the opt-in. Only an explicitly stored `false` keeps the row
-            // hidden, so turning it off in Settings still sticks.
-            ...(clocksEnabled !== null
-              ? { clocksEnabled }
-              : clocks && clocks.length > 0
-                ? { clocksEnabled: true }
-                : {}),
-            ...(clocks && { clocks }),
-            ...(keeperEnabled !== null && { keeperEnabled }),
-          }));
+          setModulesState((current) =>
+            withHomePlace({
+              ...current,
+              ...(weatherEnabled !== null && { weatherEnabled }),
+              ...(forexEnabled !== null && { forexEnabled }),
+              ...(newsEnabled !== null && { newsEnabled }),
+              ...(bazarEnabled !== null && { bazarEnabled }),
+              ...(rashifalEnabled !== null && { rashifalEnabled }),
+              ...(radioEnabled !== null && { radioEnabled }),
+              // A city picked before pins existed becomes the only pin.
+              ...(weatherLocation && { weatherLocation, weatherPins: [weatherLocation] }),
+              ...(Array.isArray(weatherPins) && weatherPins.length > 0 && { weatherPins }),
+              ...(forexFavourites && { forexFavourites }),
+              // Cities saved before the module switch existed: having picked one
+              // is the opt-in. Only an explicitly stored `false` keeps the row
+              // hidden, so turning it off in Settings still sticks.
+              ...(clocksEnabled !== null
+                ? { clocksEnabled }
+                : clocks && clocks.length > 0
+                  ? { clocksEnabled: true }
+                  : {}),
+              ...(clocks && { clocks }),
+              ...(keeperEnabled !== null && { keeperEnabled }),
+            }),
+          );
         },
       )
       .catch(() => {
@@ -156,7 +174,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setModules = useCallback(
     (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => {
       setModulesState((current) => {
-        const next = typeof value === "function" ? value(current) : value;
+        const next = withHomePlace(typeof value === "function" ? value(current) : value);
         persist("weatherEnabled", next.weatherEnabled);
         persist("forexEnabled", next.forexEnabled);
         persist("newsEnabled", next.newsEnabled);
@@ -164,6 +182,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("rashifalEnabled", next.rashifalEnabled);
         persist("radioEnabled", next.radioEnabled);
         persist("weatherLocation", next.weatherLocation);
+        persist("weatherPins", next.weatherPins);
         persist("forexFavourites", next.forexFavourites);
         persist("clocksEnabled", next.clocksEnabled);
         persist("clocks", next.clocks);

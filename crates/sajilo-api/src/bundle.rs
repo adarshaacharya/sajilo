@@ -9,7 +9,7 @@ use crate::load_state::LoadState;
 use crate::news::NewsDigest;
 use crate::radio::RadioDirectory;
 use crate::rashifal::RashifalSnapshot;
-use crate::weather::{WeatherLocation, WeatherSnapshot};
+use crate::weather::WeatherSnapshot;
 
 dto_enum! {
     pub enum ModuleKey {
@@ -29,10 +29,11 @@ dto! {
     pub struct BundleRequest {
         #[serde(default)]
         pub modules: Vec<ModuleKey>,
-        /// Weather is fetched per city, so the server only warms the ones
-        /// clients actually ask for.
+        /// Weather is fetched per place (a `sajilo_core::places` id), so the
+        /// server only warms the ones clients actually ask for. The wire name
+        /// predates the place list; its values (`"kathmandu"`) are unchanged.
         #[serde(default)]
-        pub weather_location: Option<WeatherLocation>,
+        pub weather_location: Option<String>,
     }
 
     /// Only the requested modules are populated; the rest stay `None` so a
