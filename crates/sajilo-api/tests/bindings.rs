@@ -32,6 +32,7 @@ use sajilo_api::weather::{
 fn exports_every_dto() {
     sajilo_core::NepaliDate::export_all().unwrap();
     sajilo_core::Place::export_all().unwrap();
+    sajilo_core::sip::SipStatus::export_all().unwrap();
 
     Freshness::export_all().unwrap();
     LoadState::<()>::export_all().unwrap();

@@ -36,6 +36,7 @@ fn enabled() -> NotificationOptions {
         eve_of_festival: true,
         hour: 19,
         ipo_closing_day: false,
+        sip_payment: false,
     }
 }
 
@@ -79,6 +80,7 @@ fn the_two_toggles_are_independent() {
         eve_of_festival: false,
         hour: 19,
         ipo_closing_day: false,
+        sip_payment: false,
     };
     let planned = plan_festivals(&events, holidays_only, now);
     assert_eq!(planned.len(), 1);
@@ -89,6 +91,7 @@ fn the_two_toggles_are_independent() {
         eve_of_festival: true,
         hour: 19,
         ipo_closing_day: false,
+        sip_payment: false,
     };
     let planned = plan_festivals(&events, festivals_only, now);
     assert_eq!(planned.len(), 1);

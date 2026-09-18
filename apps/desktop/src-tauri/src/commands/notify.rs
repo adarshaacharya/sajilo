@@ -12,7 +12,7 @@ use sajilo_core::calendar::upcoming;
 use sajilo_core::nepal_time;
 use sajilo_core::notify::{
     IpoDeadline, LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans,
-    plan_festivals, plan_ipo_closing, should_fire_late,
+    plan_festivals, plan_ipo_closing, plan_sip_payments, should_fire_late,
 };
 use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::{NotificationExt, PermissionState};
@@ -76,6 +76,14 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
         all.extend(crate::commands::keeper::pending_notifications(app, now));
     }
     all.extend(ipo_closing(app, options, now));
+    // Bazar hidden in Settings silences SIP reminders too, as it does IPO ones.
+    if crate::background_refresh::enabled(app, prefs::BAZAR_ENABLED) {
+        all.extend(plan_sip_payments(
+            &crate::commands::sips::plans(app),
+            options,
+            now,
+        ));
+    }
 
     // Festivals need the event list, which is only available inside the bundled
     // calendar range.

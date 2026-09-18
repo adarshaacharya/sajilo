@@ -12,6 +12,7 @@ pub mod notify;
 pub mod numerals;
 pub mod places;
 pub mod planner;
+pub mod sip;
 pub mod tools;
 
 pub use calendar::nepali_date::{NepaliDate, NepaliMonth};

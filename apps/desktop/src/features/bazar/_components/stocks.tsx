@@ -1,4 +1,5 @@
 import { type ReactNode, useMemo, useState } from "react";
+import { SearchField } from "../../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
@@ -18,7 +19,6 @@ import {
   searchQuotes,
   shortSectorName,
 } from "../_lib/stock-tone";
-import { BazarSearch } from "./bazar-search";
 import { CompanyDetail } from "./company-detail";
 import { DividendCard } from "./dividend-card";
 import { FollowButton } from "./follow-button";
@@ -166,7 +166,7 @@ export function Stocks({
   return (
     <StateBanner state={banner(state)} onRetry={onRetry}>
       <div className="space-y-2.5">
-        <BazarSearch
+        <SearchField
           value={query}
           onChange={(value) => {
             setQuery(value);

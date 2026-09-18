@@ -8,6 +8,8 @@ import { spring, useMotionEnabled } from "../../../shared/lib/motion";
 import { digits } from "../../../shared/lib/numerals";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
+import { money } from "../../bazar/_lib/format";
+import { sipIsClose, sipWhen, useSips } from "../../bazar/_lib/funds";
 import {
   companyName,
   groupIssues,
@@ -64,6 +66,7 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
   const [ipos, setIpos] = useState<LoadState<IpoSnapshot>>();
   const [held, setHeld] = useState(false);
   const [keeper, setKeeper] = useState<KeeperSnapshot>();
+  const { sips } = useSips();
 
   useEffect(() => {
     if (!modules.keeperEnabled) return;
@@ -154,6 +157,29 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
     };
   }
 
+  // A SIP payment three days out or less, from the same schedule the funds
+  // screen counts down. Due today, or missed and still owed, leads the row.
+  const sipDue = modules.bazarEnabled ? sips.filter(sipIsClose) : [];
+  let sipSlide: Slide | null = null;
+  const nextSip = sipDue[0];
+  if (nextSip) {
+    const urgent = nextSip.days <= 0;
+    sipSlide = {
+      id: `sip:${sipDue.map((sip) => `${sip.symbol}:${sip.due}`).join("|")}`,
+      icon: "banknote",
+      title:
+        sipDue.length === 1
+          ? t("dashboard.sip-title").replace("{name}", nextSip.name)
+          : t("funds.sip-chip-many").replace("{n}", count(sipDue.length)),
+      detail: sipDue.length === 1 && nextSip.amount ? `Rs ${money.format(nextSip.amount)}` : null,
+      when: sipWhen(t, nextSip.days),
+      urgent,
+      hold: urgent ? URGENT_HOLD_MS : HOLD_MS,
+      open: () => navigate("/bazar?tab=stocks&view=funds"),
+    };
+  }
+
+  if (sipSlide?.urgent) slides.push(sipSlide);
   if (keeperSlide?.urgent) slides.push(keeperSlide);
   if (ipoSlide?.urgent) slides.push(ipoSlide);
   for (const event of events) {
@@ -170,6 +196,7 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
   }
   if (ipoSlide && !ipoSlide.urgent) slides.push(ipoSlide);
   if (keeperSlide && !keeperSlide.urgent) slides.push(keeperSlide);
+  if (sipSlide && !sipSlide.urgent) slides.push(sipSlide);
 
   // A different set of slides starts over on the first, most urgent one.
   const signature = slides.map((slide) => slide.id).join("\n");

@@ -1,4 +1,5 @@
 import { type ReactNode, useMemo, useState } from "react";
+import { SearchField } from "../../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
@@ -7,6 +8,7 @@ import type { FundKind } from "../../../types/api/FundKind";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { MutualFund } from "../../../types/api/MutualFund";
 import type { MutualFundSnapshot } from "../../../types/api/MutualFundSnapshot";
+import type { SipStatus } from "../../../types/api/SipStatus";
 import { money, sourceStamp } from "../_lib/format";
 import {
   byDiscount,
@@ -14,11 +16,14 @@ import {
   byWeeklyMove,
   navMove,
   searchFunds,
+  sipDueDate,
+  sipIsClose,
+  sipWhen,
   unitValue,
   useFundHoldings,
+  useSips,
 } from "../_lib/funds";
 import { nepalToday } from "../_lib/ipo";
-import { BazarSearch } from "./bazar-search";
 import { FundDetail } from "./fund-detail";
 import { FundRow } from "./fund-row";
 import { SourceLink, SourceNote } from "./source-note";
@@ -77,6 +82,7 @@ export function MutualFunds({
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
+  const sips = useSips();
   const { holdings, toggle, setUnits } = useFundHoldings();
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<FundKind>("openEnd");
@@ -110,12 +116,13 @@ export function MutualFunds({
     );
   }
 
-  const row = (fund: MutualFund) => (
+  const row = (fund: MutualFund, sip?: SipStatus) => (
     <FundRow
       key={fund.symbol}
       fund={fund}
       today={today}
       followed={fund.symbol in holdings}
+      sip={sip}
       onOpen={() => setOpen(fund.symbol)}
       onToggle={() => toggle(fund.symbol)}
     />
@@ -125,14 +132,14 @@ export function MutualFunds({
     <StateBanner state={banner(state)} onRetry={onRetry}>
       {snapshot && (
         <div className="space-y-2.5">
-          <BazarSearch value={query} onChange={setQuery} placeholder={t("funds.search")} />
+          <SearchField value={query} onChange={setQuery} placeholder={t("funds.search")} />
 
           {query.trim() ? (
             <section className="surface-card p-2.5">
               {matches.length === 0 ? (
                 <p className="text-[11px] text-text-secondary">{t("funds.no-match")}</p>
               ) : (
-                matches.map(row)
+                matches.map((fund) => row(fund))
               )}
             </section>
           ) : (
@@ -142,7 +149,9 @@ export function MutualFunds({
                   .map((symbol) => bySymbol.get(symbol))
                   .filter((fund): fund is MutualFund => Boolean(fund))}
                 holdings={holdings}
+                sips={sips}
                 row={row}
+                onOpen={setOpen}
               />
 
               <section className="surface-card p-2.5 pt-2">
@@ -165,7 +174,9 @@ export function MutualFunds({
                   <span>{t("funds.col-fund")}</span>
                   <span className="text-right">{t(COLUMN[shownKind])}</span>
                 </div>
-                <div role={kinds.length > 1 ? "tabpanel" : undefined}>{listed.map(row)}</div>
+                <div role={kinds.length > 1 ? "tabpanel" : undefined}>
+                  {listed.map((fund) => row(fund))}
+                </div>
               </section>
             </>
           )}
@@ -184,13 +195,21 @@ export function MutualFunds({
 function YourFunds({
   funds,
   holdings,
+  sips,
   row,
+  onOpen,
 }: {
   funds: MutualFund[];
   holdings: Record<string, number>;
-  row: (fund: MutualFund) => ReactNode;
+  sips: ReturnType<typeof useSips>;
+  row: (fund: MutualFund, sip?: SipStatus) => ReactNode;
+  onOpen: (symbol: string) => void;
 }) {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
+  // Soonest first from Rust, so the first close one is what the chip is about.
+  const close = sips.sips.filter(sipIsClose);
+  const next = close[0];
+  const dueNow = sips.sips.filter((sip) => sip.days <= 0);
 
   const held = funds.filter((fund) => (holdings[fund.symbol] ?? 0) > 0);
   const total = held.reduce((sum, fund) => sum + (holdings[fund.symbol] ?? 0) * unitValue(fund), 0);
@@ -203,7 +222,20 @@ function YourFunds({
 
   return (
     <section className="surface-card p-2.5" aria-label={t("funds.yours")}>
-      <p className="text-[11px] font-semibold text-text-secondary">{t("funds.yours")}</p>
+      <div className="flex min-h-[20px] items-center justify-between gap-2">
+        <p className="text-[11px] font-semibold text-text-secondary">{t("funds.yours")}</p>
+        {next && (
+          <button
+            type="button"
+            onClick={() => onOpen(next.symbol)}
+            className="shrink-0 rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_16%,transparent)] px-1.5 text-[10px] font-semibold leading-5 text-[color:var(--color-accent-mark)]"
+          >
+            {close.length > 1
+              ? t("funds.sip-chip-many").replace("{n}", String(close.length))
+              : `${t("funds.sip-short")} ${sipWhen(t, next.days)}`}
+          </button>
+        )}
+      </div>
       {funds.length === 0 ? (
         <p className="mt-1 text-[11px] text-text-secondary">{t("funds.empty-yours")}</p>
       ) : (
@@ -220,9 +252,68 @@ function YourFunds({
               )}
             </div>
           )}
-          <div className="mt-0.5">{funds.map(row)}</div>
+          <div className="mt-0.5">{funds.map((fund) => row(fund, sips.of(fund.symbol)))}</div>
         </>
       )}
+      {dueNow.map((sip) => (
+        <SipDueCard
+          key={sip.symbol}
+          sip={sip}
+          language={language}
+          onPaid={() => sips.markPaid(sip.symbol)}
+          onLater={() => sips.remindTomorrow(sip.symbol)}
+        />
+      ))}
     </section>
+  );
+}
+
+/**
+ * On the day, and for the two days after if it is still unpaid: the payment
+ * with the two things to do about it. Marking it paid clears it until next
+ * month; "tomorrow" sends one more reminder in the morning.
+ */
+function SipDueCard({
+  sip,
+  language,
+  onPaid,
+  onLater,
+}: {
+  sip: SipStatus;
+  language: "en" | "ne";
+  onPaid: () => void;
+  onLater: () => void;
+}) {
+  const { t } = useSettings();
+  const amount = sip.amount ? `Rs ${money.format(sip.amount)} · ` : "";
+  return (
+    <div className="mt-2 rounded-lg border border-[color:color-mix(in_srgb,var(--color-accent-mark)_45%,var(--color-border))] p-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 truncate text-[12px] font-semibold">{sip.name}</p>
+        <span className="shrink-0 text-[10px] font-semibold text-[color:var(--color-accent-mark)]">
+          {sipWhen(t, sip.days)}
+        </span>
+      </div>
+      <p className="mt-0.5 text-[11px] text-text-muted tabular-nums">
+        {amount}
+        {sipDueDate(sip, language)}
+      </p>
+      <div className="mt-2 flex gap-1.5">
+        <button
+          type="button"
+          onClick={onPaid}
+          className="flex h-7 flex-1 items-center justify-center rounded-lg bg-accent-fill text-[11px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 active:opacity-80"
+        >
+          {t("funds.sip-mark-paid")}
+        </button>
+        <button
+          type="button"
+          onClick={onLater}
+          className="flex h-7 flex-1 items-center justify-center rounded-lg border border-[color:var(--color-control-border)] text-[11px] font-medium text-text-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-text"
+        >
+          {t("funds.sip-remind-tomorrow")}
+        </button>
+      </div>
+    </div>
   );
 }

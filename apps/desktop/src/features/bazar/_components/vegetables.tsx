@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
+import { SearchField } from "../../../shared/components/search-field";
 import { useSettings } from "../../../shared/context/settings-context";
 import { usePersistedList } from "../../../shared/lib/persisted";
 import type { VegetableMarketSnapshot } from "../../../types/api/VegetableMarketSnapshot";
 import { formatNepaliDate } from "../_lib/format";
-import { BazarSearch } from "./bazar-search";
 import { ProduceList } from "./produce-list";
 import { SourceLink, SourceNote } from "./source-note";
 
@@ -37,7 +37,7 @@ export function VegetablesTab({ snapshot }: { snapshot: VegetableMarketSnapshot 
 
   return (
     <div className="space-y-2.5">
-      <BazarSearch value={query} onChange={setQuery} placeholder={t("bazar.search-produce")} />
+      <SearchField value={query} onChange={setQuery} placeholder={t("bazar.search-produce")} />
 
       {matches.length === 0 ? (
         <section className="surface-card p-2.5">

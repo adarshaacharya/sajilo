@@ -13,6 +13,7 @@ import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
+import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
@@ -297,6 +298,8 @@ export interface NotificationOptions {
   eveOfFestival: boolean;
   hour: number;
   ipoClosingDay: boolean;
+  /** Master switch for SIP payment reminders; each fund's is opt-in. */
+  sipPayment: boolean;
 }
 
 export interface PlannedNotification {
@@ -422,6 +425,14 @@ export const api = {
   /** Every mutual fund's latest NAV, from ShareHub or ShareSansar; `refresh` forces a live pull. */
   getMutualFunds: (refresh = false) =>
     invoke<LoadState<MutualFundSnapshot>>("get_mutual_funds", { refresh }),
+  /** Every fund's SIP payment schedule, soonest first. Each change below
+   * answers with the same list, already updated. */
+  sipStatuses: () => invoke<SipStatus[]>("sip_statuses"),
+  setSip: (symbol: string, name: string, day: number, amount: number | null) =>
+    invoke<SipStatus[]>("set_sip", { symbol, name, day, amount }),
+  removeSip: (symbol: string) => invoke<SipStatus[]>("remove_sip", { symbol }),
+  markSipPaid: (symbol: string) => invoke<SipStatus[]>("mark_sip_paid", { symbol }),
+  remindSipTomorrow: (symbol: string) => invoke<SipStatus[]>("remind_sip_tomorrow", { symbol }),
   /** NEPSE a minute at a time through its latest session, from ShareHub. */
   getNepseIntraday: (refresh = false) =>
     invoke<LoadState<IndexIntraday>>("get_nepse_intraday", { refresh }),

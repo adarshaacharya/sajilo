@@ -7,7 +7,12 @@ import { api, type NotificationOptions, type PermissionState } from "../../../sh
 import { SettingsSection } from "./settings-section";
 
 function anyReminder(options: NotificationOptions): boolean {
-  return options.eveOfFestival || options.eveOfPublicHoliday || options.ipoClosingDay;
+  return (
+    options.eveOfFestival ||
+    options.eveOfPublicHoliday ||
+    options.ipoClosingDay ||
+    options.sipPayment
+  );
 }
 
 export function SystemTab() {
@@ -26,6 +31,7 @@ export function SystemTab() {
     eveOfFestival: true,
     hour: 19,
     ipoClosingDay: true,
+    sipPayment: true,
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
@@ -170,6 +176,11 @@ export function SystemTab() {
           label={t("reminder.ipo-closing-day")}
           checked={options.ipoClosingDay}
           onChange={(value) => updateOptions({ ...options, ipoClosingDay: value })}
+        />
+        <Toggle
+          label={t("reminder.sip-payment")}
+          checked={options.sipPayment}
+          onChange={(value) => updateOptions({ ...options, sipPayment: value })}
         />
       </SettingsSection>
 

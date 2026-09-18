@@ -1000,3 +1000,11 @@ button.row-line + button.row-line::before {
     transform: scaleY(0.7);
   }
 }
+
+/* WebKit draws its own clear button inside search fields. `SearchField` has
+   one of its own, so the native one would be a second ✕ beside it. */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}

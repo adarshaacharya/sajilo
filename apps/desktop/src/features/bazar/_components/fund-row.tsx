@@ -1,6 +1,18 @@
 import { useSettings } from "../../../shared/context/settings-context";
 import type { MutualFund } from "../../../types/api/MutualFund";
-import { headlineNav, isLate, monthYear, navAgeDays, navFormat, navMove } from "../_lib/funds";
+import type { SipStatus } from "../../../types/api/SipStatus";
+import { money } from "../_lib/format";
+import {
+  headlineNav,
+  isLate,
+  monthYear,
+  navAgeDays,
+  navFormat,
+  navMove,
+  sipDueDate,
+  sipIsClose,
+  sipWhen,
+} from "../_lib/funds";
 import { issueDate } from "../_lib/ipo";
 import { ChangeBadge } from "./change-badge";
 import { FollowButton } from "./follow-button";
@@ -74,16 +86,34 @@ export function FundBadge({ fund }: { fund: MutualFund }) {
   }
 }
 
+/** The row's second line for a fund with a SIP: when it is paid next, amber
+ * once the payment is close. */
+function SipLine({ sip }: { sip: SipStatus }) {
+  const { t, language } = useSettings();
+  const close = sipIsClose(sip);
+  const amount = sip.amount ? ` Rs ${money.format(sip.amount)}` : "";
+  return (
+    <span className={close ? "text-[color:var(--color-accent-mark)]" : undefined}>
+      {t("funds.sip-short")}
+      {amount} · {sipDueDate(sip, language)}
+      {close && ` · ${sipWhen(t, sip.days)}`}
+    </span>
+  );
+}
+
 export function FundRow({
   fund,
   today,
   followed,
+  sip,
   onOpen,
   onToggle,
 }: {
   fund: MutualFund;
   today: number;
   followed: boolean;
+  /** Shown instead of the NAV date, in "Your funds". */
+  sip?: SipStatus;
   onOpen: () => void;
   onToggle: () => void;
 }) {
@@ -98,7 +128,13 @@ export function FundRow({
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13px] font-medium">{fund.name}</span>
           <span className="block truncate text-[10px] text-text-muted tabular-nums">
-            {fund.symbol} · <NavDate fund={fund} today={today} labelled />
+            {sip ? (
+              <SipLine sip={sip} />
+            ) : (
+              <>
+                {fund.symbol} · <NavDate fund={fund} today={today} labelled />
+              </>
+            )}
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-0.5">

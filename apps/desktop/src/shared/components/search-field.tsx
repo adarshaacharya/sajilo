@@ -1,7 +1,12 @@
-import { CONTROL } from "../../../shared/components/control";
-import { Icon } from "../../../shared/components/icon";
+import { CONTROL } from "./control";
+import { Icon } from "./icon";
 
-export function BazarSearch({
+/**
+ * The search box every list uses: a magnifier, and one clear button of our own.
+ * WebKit's built-in clear button is hidden in `index.css`, and autofill is off
+ * so the webview does not offer earlier searches as a bubble under the field.
+ */
+export function SearchField({
   value,
   onChange,
   placeholder,
@@ -18,9 +23,13 @@ export function BazarSearch({
       />
       <input
         type="search"
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className={`${CONTROL} w-full pl-7 pr-7 text-[12px]`}
       />
       {value && (

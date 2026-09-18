@@ -3,6 +3,7 @@ import useSWR from "swr";
 import { Equalizer } from "../../shared/components/equalizer";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
+import { SearchField } from "../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import * as player from "../../shared/lib/audio";
@@ -12,7 +13,6 @@ import { usePersistedList } from "../../shared/lib/persisted";
 import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RadioStation } from "../../types/api/RadioStation";
-import { BazarSearch } from "../bazar/_components/bazar-search";
 import { RadioVolumeControl } from "./_components/radio-volume-control";
 import { StationArt } from "./_components/station-art";
 
@@ -339,7 +339,7 @@ export function Radio() {
       {state.error && <p className="px-0.5 text-[11px] text-holiday">{state.error}</p>}
 
       <StateBanner state={banner(directory)} onRetry={() => load(true)}>
-        <BazarSearch value={query} onChange={setQuery} placeholder={t("radio.search")} />
+        <SearchField value={query} onChange={setQuery} placeholder={t("radio.search")} />
 
         {matches.length === 0 ? (
           <p className="py-6 text-center text-[12px] text-text-secondary">

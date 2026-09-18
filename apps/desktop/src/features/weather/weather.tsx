@@ -79,6 +79,26 @@ export function Weather() {
       })),
     [setModules],
   );
+  const addPin = useCallback(
+    (id: string) =>
+      setModules((current) =>
+        current.weatherPins.includes(id)
+          ? current
+          : { ...current, weatherPins: [...current.weatherPins, id] },
+      ),
+    [setModules],
+  );
+  const removePin = useCallback(
+    (id: string) => {
+      setModules((current) => ({
+        ...current,
+        weatherPins: current.weatherPins.filter((pin) => pin !== id),
+      }));
+      // Closing the tab on screen goes back to the home place.
+      setPicked((shown) => (shown === id ? null : shown));
+    },
+    [setModules],
+  );
   const makeHome = useCallback(
     (id: string) =>
       setModules((current) => ({
@@ -97,6 +117,25 @@ export function Weather() {
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
   const phase = currentSkyPhase(snapshot?.sunrise ?? null, snapshot?.sunset ?? null);
   const tomorrow = snapshot && snapshot.daily.length > 1 ? snapshot.daily[1] : null;
+
+  // The place on screen, and whether it is the one the home screen shows:
+  // a labelled pill beside the temperature it is about, not an icon to decode.
+  const isHome = viewing === modules.weatherLocation;
+  const homePill = isHome ? (
+    <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-white/80">
+      <Icon name="house" className="size-3" />
+      {t("weather.home-place")}
+    </span>
+  ) : (
+    <button
+      type="button"
+      onClick={() => makeHome(viewing)}
+      className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm transition-colors duration-150 hover:bg-white/25 active:scale-[0.98]"
+    >
+      <Icon name="house" className="size-3" />
+      {t("weather.make-home")}
+    </button>
+  );
 
   const heroToolbar = useMemo(
     () => (
@@ -137,6 +176,8 @@ export function Weather() {
       <PlacePicker
         pins={modules.weatherPins}
         onPick={(id) => {
+          // Picking a place adds it as a tab: that is what "Add" promises.
+          addPin(id);
           setPicked(id);
           setPicking(false);
         }}
@@ -166,9 +207,17 @@ export function Weather() {
                 <p className="text-[54px] font-semibold leading-none tracking-tight">
                   {formatCelsius(snapshot.temperatureCelsius)}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 text-[13px] font-medium">
-                  <WeatherIcon condition={snapshot.condition} className="size-4 opacity-90" />
-                  {conditionTitle(snapshot.condition)}
+                {/* The pill shares the condition's line, low in the hero where
+                    the eye finishes reading; the line below is too long to share. */}
+                <div className="mt-1 flex items-center justify-between gap-2">
+                  <span className="flex min-w-0 items-center gap-1.5 text-[13px] font-medium">
+                    <WeatherIcon
+                      condition={snapshot.condition}
+                      className="size-4 shrink-0 opacity-90"
+                    />
+                    <span className="truncate">{conditionTitle(snapshot.condition)}</span>
+                  </span>
+                  {homePill}
                 </div>
                 <p className="mt-0.5 text-[11px] opacity-85">
                   Feels like {formatCelsius(snapshot.apparentTemperatureCelsius)} · H{" "}
@@ -184,13 +233,16 @@ export function Weather() {
                 <p className="mt-1 text-[11px] opacity-85">
                   {banner.status === "failed" ? banner.message : t("state.not-yet")}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => load(true)}
-                  className="weather-glass-btn mt-2 min-w-max whitespace-nowrap px-2 text-[11px]"
-                >
-                  {t("action.retry")}
-                </button>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => load(true)}
+                    className="weather-glass-btn min-w-max whitespace-nowrap px-2 text-[11px]"
+                  >
+                    {t("action.retry")}
+                  </button>
+                  {homePill}
+                </div>
               </>
             )}
           </div>
@@ -203,8 +255,7 @@ export function Weather() {
           viewing={viewing}
           onView={setPicked}
           onAdd={() => setPicking(true)}
-          onPin={togglePin}
-          onMakeHome={makeHome}
+          onRemove={removePin}
         />
 
         {snapshot?.airQuality && (

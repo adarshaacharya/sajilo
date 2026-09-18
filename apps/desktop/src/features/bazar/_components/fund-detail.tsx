@@ -12,10 +12,12 @@ import {
   navMove,
   rupeesCompact,
   unitValue,
+  useSips,
 } from "../_lib/funds";
 import { issueDate } from "../_lib/ipo";
 import { FollowButton } from "./follow-button";
 import { FundBadge, NavDate } from "./fund-row";
+import { SipSetup } from "./sip-setup";
 
 /** Shares are counted whole, grouped the Nepali way: 78,73,248. */
 const shareCount = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
@@ -38,6 +40,7 @@ export function FundDetail({
   onUnits: (units: number) => void;
 }) {
   const { t, language } = useSettings();
+  const sips = useSips();
   const move = navMove(fund);
   const closed = fund.kind === "closedEnd";
   const matured = fund.kind === "matured";
@@ -198,6 +201,17 @@ export function FundDetail({
           >
             {weekly > 0 ? "+" : "−"}Rs {money.format(Math.abs(weekly))} {t("funds.this-week")}
           </p>
+        )}
+        {fund.kind === "openEnd" && (
+          <SipSetup
+            sip={sips.of(fund.symbol)}
+            onSet={(day, amount) => {
+              // A SIP belongs with the funds you keep, where its countdown shows.
+              if (!followed) onToggle();
+              sips.set(fund.symbol, fund.name, day, amount);
+            }}
+            onRemove={() => sips.remove(fund.symbol)}
+          />
         )}
         <p className="mt-2 text-[10px] text-text-muted">{t("funds.on-device")}</p>
       </section>

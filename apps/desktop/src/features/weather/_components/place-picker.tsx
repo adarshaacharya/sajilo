@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { BackButton } from "../../../shared/components/back-button";
-import { CONTROL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
+import { SearchField } from "../../../shared/components/search-field";
 import { useSettings } from "../../../shared/context/settings-context";
 import { districtName, placeName, searchPlaces, usePlaces } from "../../../shared/lib/places";
 import type { Place } from "../../../types/api/Place";
@@ -53,20 +53,7 @@ export function PlacePicker({
         <p className="flex-1 text-[13px] font-semibold">{t("weather.places")}</p>
       </div>
 
-      <div className="relative">
-        <Icon
-          name="search"
-          className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-text-muted"
-        />
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder={t("weather.search-places")}
-          aria-label={t("weather.search-places")}
-          className={`${CONTROL} w-full pl-7 text-[12px]`}
-        />
-      </div>
+      <SearchField value={query} onChange={setQuery} placeholder={t("weather.search-places")} />
 
       <section className="surface-card p-2.5">
         {empty && <p className="text-[11px] text-text-secondary">{t("weather.no-place")}</p>}

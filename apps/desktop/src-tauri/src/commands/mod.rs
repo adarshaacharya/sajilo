@@ -14,6 +14,7 @@ pub mod notify;
 pub mod plans;
 pub mod radio;
 pub mod rashifal;
+pub mod sips;
 pub mod stocks;
 pub mod storage;
 pub mod telemetry;

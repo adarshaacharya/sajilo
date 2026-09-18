@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import type { MutualFund } from "../../../types/api/MutualFund";
+import type { SipStatus } from "../../../types/api/SipStatus";
 import { daysUntil } from "./ipo";
 
 /**
@@ -171,4 +173,72 @@ export function useFundHoldings() {
     }));
 
   return { holdings, toggle, setUnits };
+}
+
+/**
+ * Every fund's SIP schedule, soonest payment first, with the setters that
+ * change it. Each setter's answer is the whole updated list, so the countdown
+ * everywhere redraws from one reply. Due dates and their BS days are worked out
+ * in Rust; this only holds what came back.
+ */
+export function useSips() {
+  const { data, mutate } = useSWR("sip-statuses", () => api.sipStatuses());
+  const sips = data ?? [];
+  const apply = (request: Promise<SipStatus[]>) =>
+    mutate(request, { revalidate: false }).catch(() => {});
+
+  return {
+    sips,
+    of: (symbol: string) => sips.find((sip) => sip.symbol === symbol),
+    set: (symbol: string, name: string, day: number, amount: number | null) =>
+      apply(api.setSip(symbol, name, day, amount)),
+    remove: (symbol: string) => apply(api.removeSip(symbol)),
+    markPaid: (symbol: string) => apply(api.markSipPaid(symbol)),
+    remindTomorrow: (symbol: string) => apply(api.remindSipTomorrow(symbol)),
+  };
+}
+
+/** Close enough to count down: three days out, or missed and still owed. */
+export function sipIsClose(sip: SipStatus): boolean {
+  return sip.days <= 3;
+}
+
+type SipKey =
+  | "funds.sip-today"
+  | "funds.sip-tomorrow"
+  | "funds.sip-in-days"
+  | "funds.sip-missed-yesterday"
+  | "funds.sip-missed-days";
+
+/** "in 3 days", "tomorrow", "today", "yesterday", "2 days ago". */
+export function sipWhen(t: (key: SipKey) => string, days: number): string {
+  if (days === 0) return t("funds.sip-today");
+  if (days === 1) return t("funds.sip-tomorrow");
+  if (days > 1) return t("funds.sip-in-days").replace("{n}", String(days));
+  if (days === -1) return t("funds.sip-missed-yesterday");
+  return t("funds.sip-missed-days").replace("{n}", String(-days));
+}
+
+/** `15th` in English; Nepali says the number alone, with तारिख after it. */
+export function dayOfMonth(day: number, language: Language): string {
+  if (language === "ne") return String(day);
+  const tens = day % 100;
+  const suffix = tens >= 11 && tens <= 13 ? "th" : (["th", "st", "nd", "rd"][day % 10] ?? "th");
+  return `${day}${suffix}`;
+}
+
+/** `Thu, Oct 15` for the payment's AD date. */
+export function sipDueDate(sip: SipStatus, language: Language): string {
+  return new Intl.DateTimeFormat(language === "ne" ? "ne-NP-u-nu-latn" : "en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${sip.due}T00:00:00Z`));
+}
+
+/** `Asoj 29` / `असोज 29`, from the BS day Rust sent. */
+export function sipDueBs(sip: SipStatus, language: Language): string | null {
+  const month = language === "ne" ? sip.dueBsMonthNe : sip.dueBsMonth;
+  return sip.dueBs && month ? `${month} ${sip.dueBs.day}` : null;
 }

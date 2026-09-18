@@ -36,6 +36,11 @@ pub struct NotificationOptions {
     /// The morning an IPO the user can still apply to closes.
     #[serde(default = "enabled_by_default")]
     pub ipo_closing_day: bool,
+    /// SIP payments the user set a reminder for, three days ahead and on the
+    /// day. On by default: each fund's reminder is itself opt-in, so this is
+    /// only the switch that silences them all at once.
+    #[serde(default = "enabled_by_default")]
+    pub sip_payment: bool,
 }
 
 fn default_hour() -> u32 {
@@ -55,13 +60,14 @@ impl Default for NotificationOptions {
             eve_of_festival: enabled_by_default(),
             hour: default_hour(),
             ipo_closing_day: enabled_by_default(),
+            sip_payment: enabled_by_default(),
         }
     }
 }
 
 impl NotificationOptions {
     pub fn is_any_enabled(&self) -> bool {
-        self.festivals_enabled() || self.ipo_closing_day
+        self.festivals_enabled() || self.ipo_closing_day || self.sip_payment
     }
 
     fn festivals_enabled(self) -> bool {
@@ -220,6 +226,73 @@ pub fn plan_ipo_closing(
         })
         .take(LIMIT)
         .collect()
+}
+
+/// When SIP reminders go out, Nepal time: early enough to pay the same day.
+pub const SIP_REMINDER_HOUR: u32 = 9;
+
+/// Two reminders per payment, three days ahead and on the day, plus one on the
+/// day the user asked to be reminded again. A payment marked paid has moved on
+/// to next month in `sip::current_due`, so nothing is planned for it.
+pub fn plan_sip_payments(
+    plans: &[crate::sip::SipPlan],
+    options: NotificationOptions,
+    now: DateTime<Utc>,
+) -> Vec<PlannedNotification> {
+    use crate::sip::{HEADS_UP_DAYS, current_due, month_key};
+    use crate::tools::units::grouped_decimal;
+
+    if !options.sip_payment {
+        return Vec::new();
+    }
+    let today = now.with_timezone(&nepal_time::offset()).date_naive();
+    let mut all = Vec::new();
+    for plan in plans {
+        let Some(due) = current_due(plan, today) else {
+            continue;
+        };
+        let amount = plan
+            .amount
+            .filter(|amount| *amount > 0.0)
+            .map(|amount| format!(" · Rs {}", grouped_decimal(amount, 0)))
+            .unwrap_or_default();
+        let on = due.format("%a, %b %-d");
+        let key = format!("sajilo.sip.{}.{}", plan.symbol, month_key(due));
+
+        let mut remind = |date: NaiveDate, suffix: &str, title: String| {
+            if let Some(fire_at) = at_nepal_time(date, SIP_REMINDER_HOUR, 0)
+                && still_deliverable(fire_at, now)
+            {
+                all.push(PlannedNotification {
+                    id: format!("{key}.{suffix}"),
+                    title,
+                    body: format!("{}{amount} on {on}", plan.name),
+                    fire_at,
+                });
+            }
+        };
+        remind(
+            due - Duration::days(HEADS_UP_DAYS),
+            "ahead",
+            format!("SIP due in {HEADS_UP_DAYS} days"),
+        );
+        remind(due, "due", "SIP due today".to_owned());
+        if let Some(again) = plan
+            .remind_on
+            .as_deref()
+            .and_then(|raw| NaiveDate::parse_from_str(raw, "%Y-%m-%d").ok())
+            .filter(|again| *again > due)
+        {
+            remind(
+                again,
+                &format!("again.{again}"),
+                "SIP still to pay".to_owned(),
+            );
+        }
+    }
+    all.sort_by_key(|notification| notification.fire_at);
+    all.truncate(LIMIT);
+    all
 }
 
 /// One id per closing date, so a replan after the list refreshes replaces the
