@@ -18,6 +18,7 @@ pub mod http;
 pub mod kalimati;
 pub mod kantipur;
 pub mod market_status;
+pub mod mutual_funds;
 pub mod nepalipatro;
 pub mod nepse_intraday;
 pub mod noc;

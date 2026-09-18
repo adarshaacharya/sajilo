@@ -5,16 +5,21 @@ import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
+import { TabStrip } from "../../shared/components/tab-strip";
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
+import { usePersistedString } from "../../shared/lib/persisted";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
+import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import { FuelTab } from "./_components/fuel";
+import { FundsLink } from "./_components/funds-link";
 import { MetalsTab } from "./_components/metals";
+import { MutualFunds } from "./_components/mutual-funds";
 import { Stocks } from "./_components/stocks";
 import { VegetablesTab } from "./_components/vegetables";
 import { LIVE_REFRESH_MS } from "./_lib/live";
@@ -24,6 +29,11 @@ type Tab = "stocks" | "metals" | "fuel" | "vegetables";
 /** Also the set `?tab=` accepts, so anything that links into this screen — the
  * tray, the landing page — can open it on the panel it means. */
 const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables"];
+
+/** The stocks tab's two halves; `?view=` opens either, and the last one used is remembered. */
+type StocksView = "nepse" | "funds";
+const STOCKS_VIEWS: StocksView[] = ["nepse", "funds"];
+const STOCKS_VIEW_KEY = "stocksView";
 
 function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadStatus {
   if (!state) return { status: "loading" };
@@ -45,6 +55,10 @@ function fetchDividends(refresh = false): Promise<LoadState<DividendSnapshot>> {
   return catchAsFailed(api.getDividends(refresh));
 }
 
+function fetchMutualFunds(refresh = false): Promise<LoadState<MutualFundSnapshot>> {
+  return catchAsFailed(api.getMutualFunds(refresh));
+}
+
 function fetchIntraday(refresh = false): Promise<LoadState<IndexIntraday>> {
   return catchAsFailed(api.getNepseIntraday(refresh));
 }
@@ -64,6 +78,18 @@ export function Bazar() {
     const requested = new URLSearchParams(search).get("tab");
     return TABS.includes(requested as Tab) ? (requested as Tab) : "stocks";
   });
+  const linkedView = linked.get("view") as StocksView | null;
+  const [savedView, saveView] = usePersistedString(STOCKS_VIEW_KEY);
+  const [pickedView, setPickedView] = useState<StocksView | null>(
+    linkedView && STOCKS_VIEWS.includes(linkedView) ? linkedView : null,
+  );
+  const view: StocksView =
+    pickedView ??
+    (STOCKS_VIEWS.includes(savedView as StocksView) ? (savedView as StocksView) : "nepse");
+  const pickView = (next: StocksView) => {
+    setPickedView(next);
+    saveView(next);
+  };
   const {
     data: feeds,
     isValidating: loadingFeeds,
@@ -103,6 +129,17 @@ export function Bazar() {
     inSession,
   );
 
+  // Asked for on the NEPSE view too: its footer link says how fresh the NAVs are.
+  const {
+    data: funds,
+    isValidating: loadingFunds,
+    mutate: mutateFunds,
+  } = useSWR(tab === "stocks" ? "bazar-mutual-funds" : null, () => fetchMutualFunds(false));
+
+  const retryFunds = useCallback(
+    () => void mutateFunds(fetchMutualFunds(true), { revalidate: false }),
+    [mutateFunds],
+  );
   const retryIpos = useCallback(
     () => void mutateIpos(fetchIpos(true), { revalidate: false }),
     [mutateIpos],
@@ -118,7 +155,9 @@ export function Bazar() {
 
   const loading =
     tab === "stocks"
-      ? loadingStocks || loadingIpos || loadingDividends || loadingIntraday
+      ? view === "funds"
+        ? loadingFunds
+        : loadingStocks || loadingIpos || loadingDividends || loadingIntraday
       : loadingFeeds;
 
   const load = useCallback(
@@ -132,6 +171,7 @@ export function Bazar() {
           mutateIpos(fetchIpos(true), { revalidate: false });
           mutateDividends(fetchDividends(true), { revalidate: false });
           mutateIntraday(fetchIntraday(true), { revalidate: false });
+          mutateFunds(fetchMutualFunds(true), { revalidate: false });
         }
       } else {
         mutateFeeds();
@@ -139,9 +179,10 @@ export function Bazar() {
         mutateIpos();
         mutateDividends();
         mutateIntraday();
+        mutateFunds();
       }
     },
-    [mutateDividends, mutateFeeds, mutateIntraday, mutateIpos, mutateStocks, tab],
+    [mutateDividends, mutateFeeds, mutateFunds, mutateIntraday, mutateIpos, mutateStocks, tab],
   );
 
   const metals = loadedValue(feeds?.metals);
@@ -181,6 +222,20 @@ export function Bazar() {
       />
 
       {tab === "stocks" && (
+        <TabStrip
+          label={t("stocks.view")}
+          value={view}
+          onChange={pickView}
+          tabs={[
+            { id: "nepse" as const, label: t("stocks.view-nepse") },
+            { id: "funds" as const, label: t("stocks.view-funds") },
+          ]}
+        />
+      )}
+
+      {tab === "stocks" && view === "funds" && <MutualFunds state={funds} onRetry={retryFunds} />}
+
+      {tab === "stocks" && view === "nepse" && (
         <Stocks
           state={stocks}
           ipoState={ipos}
@@ -192,6 +247,7 @@ export function Bazar() {
           onRetryIntraday={retryIntraday}
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
+          footer={<FundsLink state={funds} onOpen={() => pickView("funds")} />}
         />
       )}
 

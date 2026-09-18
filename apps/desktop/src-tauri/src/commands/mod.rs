@@ -7,6 +7,7 @@ pub mod dividends;
 pub mod forex;
 pub mod ipos;
 pub mod keeper;
+pub mod mutual_funds;
 pub mod nepse_intraday;
 pub mod news;
 pub mod notify;

@@ -101,6 +101,7 @@ pub fn run() {
             app.manage(commands::stocks::StocksCache::default());
             app.manage(commands::ipos::IposCache::default());
             app.manage(commands::dividends::DividendsCache::default());
+            app.manage(commands::mutual_funds::MutualFundsCache::default());
             app.manage(commands::nepse_intraday::NepseIntradayCache::default());
             app.manage(commands::rashifal::RashifalCache::default());
             app.manage(commands::radio::RadioCache::default());
@@ -167,6 +168,7 @@ pub fn run() {
             commands::stocks::get_stocks,
             commands::ipos::get_ipos,
             commands::dividends::get_dividends,
+            commands::mutual_funds::get_mutual_funds,
             commands::nepse_intraday::get_nepse_intraday,
             commands::rashifal::get_rashifal,
             commands::radio::get_stations,

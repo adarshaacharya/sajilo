@@ -40,15 +40,28 @@ impl HttpClient {
     /// Fetches a URL as text, mapping transport and status failures onto the
     /// named source so a caller can report which feed went dark.
     pub async fn get_text(&self, source_name: &'static str, url: &str) -> Result<String> {
-        let response =
-            self.inner
-                .get(url)
-                .send()
-                .await
-                .map_err(|error| ProviderError::Transport {
-                    source_name,
-                    message: error.to_string(),
-                })?;
+        self.get_text_with_headers(source_name, url, &[]).await
+    }
+
+    /// The same, with extra request headers — for endpoints that answer their
+    /// own page's script with JSON and a plain request with the page's HTML.
+    pub async fn get_text_with_headers(
+        &self,
+        source_name: &'static str,
+        url: &str,
+        headers: &[(&str, &str)],
+    ) -> Result<String> {
+        let mut request = self.inner.get(url);
+        for (name, value) in headers {
+            request = request.header(*name, *value);
+        }
+        let response = request
+            .send()
+            .await
+            .map_err(|error| ProviderError::Transport {
+                source_name,
+                message: error.to_string(),
+            })?;
 
         let status = response.status();
         if !status.is_success() {

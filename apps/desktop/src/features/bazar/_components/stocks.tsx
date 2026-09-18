@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
@@ -66,6 +66,7 @@ export function Stocks({
   onRetryIntraday,
   linkedIpo = null,
   linkedIpoList = false,
+  footer = null,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
   ipoState: LoadState<IpoSnapshot> | undefined;
@@ -78,6 +79,8 @@ export function Stocks({
   /** An issue key to open on arrival, e.g. from the home screen's up-next row. */
   linkedIpo?: string | null;
   linkedIpoList?: boolean;
+  /** Drawn under the market view only, never under a drilled-in panel. */
+  footer?: ReactNode;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
@@ -308,6 +311,8 @@ export function Stocks({
                 </div>
               </section>
             )}
+
+            {footer}
           </>
         )}
       </div>

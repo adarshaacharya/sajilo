@@ -7,6 +7,7 @@ import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
+import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
@@ -418,6 +419,9 @@ export const api = {
   /** ShareHub's upcoming book closures; cached for an hour, `refresh` forces a live pull. */
   getDividends: (refresh = false) =>
     invoke<LoadState<DividendSnapshot>>("get_dividends", { refresh }),
+  /** Every mutual fund's latest NAV, from ShareHub or ShareSansar; `refresh` forces a live pull. */
+  getMutualFunds: (refresh = false) =>
+    invoke<LoadState<MutualFundSnapshot>>("get_mutual_funds", { refresh }),
   /** NEPSE a minute at a time through its latest session, from ShareHub. */
   getNepseIntraday: (refresh = false) =>
     invoke<LoadState<IndexIntraday>>("get_nepse_intraday", { refresh }),

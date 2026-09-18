@@ -30,6 +30,7 @@ pub const STOCKS_KEY: &str = "stocks.v1";
 pub const STOCKS_LIVE_KEY: &str = "stocksLive.v1";
 pub const IPOS_KEY: &str = "ipos.v1";
 pub const DIVIDENDS_KEY: &str = "dividends.v1";
+pub const MUTUAL_FUNDS_KEY: &str = "mutualFunds.v1";
 pub const NEPSE_INTRADAY_KEY: &str = "nepseIntraday.v1";
 pub const RASHIFAL_KEY: &str = "rashifal.v1";
 pub const RADIO_KEY: &str = "radio.v1";
