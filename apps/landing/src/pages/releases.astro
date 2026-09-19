@@ -1,0 +1,217 @@
+---
+import { marked } from "marked";
+import Base from "../layouts/Base.astro";
+import releasesData from "../data/releases.json";
+
+interface Release {
+  version: string;
+  name: string;
+  publishedAt: string;
+  body: string;
+  prerelease: boolean;
+  htmlUrl: string;
+}
+
+const releases = (releasesData as Release[]).map((r) => ({
+  ...r,
+  bodyHtml: marked.parse(r.body || "_No notes for this release._", { async: false }) as string,
+  date: new Date(r.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+}));
+---
+
+<Base
+  title="Release notes: Sajilo"
+  description="What changed in every recent Sajilo release, straight from the source, without going through GitHub."
+  path="/releases.html"
+>
+  <main class="wrap releases" id="main">
+    <h1 class="display releases-h1">Release notes</h1>
+    <p class="lede">
+      Every recent build, newest first. The app checks for these itself and offers to update.
+    </p>
+
+    <ol class="release-list">
+      {releases.map((r) => (
+        <li class="release" id={r.version}>
+          <div class="release-head">
+            <a class="release-version num" href={`#${r.version}`}>{r.version}</a>
+            <p class="release-date">{r.date}</p>
+            {r.prerelease && <span class="release-tag">Pre-release</span>}
+          </div>
+          <div class="release-body" set:html={r.bodyHtml} />
+          <a class="release-gh" href={r.htmlUrl} target="_blank" rel="noopener">
+            View {r.version} on GitHub
+          </a>
+        </li>
+      ))}
+    </ol>
+
+    <p class="releases-foot">
+      Older releases and raw build artifacts are on
+      <a href="https://github.com/adarshaacharya/sajilo/releases" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .releases {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 60px;
+    max-width: 720px;
+  }
+  .releases-h1 {
+    font-size: clamp(40px, 7vw, 68px);
+    margin-bottom: 16px;
+  }
+  .releases .lede {
+    max-width: none;
+  }
+
+  .release-list {
+    display: grid;
+    gap: 8px;
+    margin-top: clamp(36px, 5vw, 52px);
+  }
+
+  .release {
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    /* So a deep link (e.g. from the app's update prompt) doesn't land the
+       heading under the sticky nav. */
+    scroll-margin-top: 84px;
+  }
+  .release:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .release-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .release-version {
+    display: inline-block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--gilt-2);
+    transition: color 0.15s;
+  }
+  .release-version:hover {
+    color: var(--gilt);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.4);
+    text-underline-offset: 3px;
+  }
+  .release:target {
+    background: color-mix(in srgb, var(--gilt) 6%, transparent);
+    margin-inline: -20px;
+    padding-inline: 20px;
+    border-radius: 12px;
+  }
+  .release-date {
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .release-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sindoor-2);
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+  }
+
+  .release-body {
+    color: var(--paper-2);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .release-body :global(h2) {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--paper);
+    margin: 20px 0 8px;
+  }
+  .release-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .release-body :global(p) {
+    margin: 10px 0;
+  }
+  .release-body :global(ul) {
+    list-style: disc;
+    padding-left: 22px;
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .release-body :global(li) {
+    margin: 0;
+  }
+  .release-body :global(strong) {
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .release-body :global(code) {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--ink-3);
+  }
+  .release-body :global(blockquote) {
+    margin: 14px 0;
+    padding: 10px 16px;
+    border-left: 3px solid var(--gilt);
+    background: var(--ink-2);
+    border-radius: 0 8px 8px 0;
+    color: var(--paper-3);
+    font-size: 14px;
+  }
+  .release-body :global(blockquote p) {
+    margin: 0;
+  }
+  .release-body :global(a) {
+    color: var(--gilt-2);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+
+  .release-gh {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 16px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--paper-3);
+    transition: color 0.15s;
+  }
+  .release-gh:hover {
+    color: var(--paper-2);
+  }
+
+  .releases-foot {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .releases-foot a {
+    color: var(--gilt-2);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+</style>

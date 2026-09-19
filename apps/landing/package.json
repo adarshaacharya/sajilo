@@ -5,15 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "bun run scripts/fetch-releases.mjs --soft && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "deploy": "wrangler deploy",
-    "og": "./scripts/og.sh"
+    "og": "./scripts/og.sh",
+    "releases": "bun run scripts/fetch-releases.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.6.2",
     "astro": "^5.13.0",
+    "marked": "^18.0.13",
     "typescript": "^5.9.0",
     "wrangler": "^4.30.0"
   },

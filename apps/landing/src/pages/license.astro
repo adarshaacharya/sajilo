@@ -1,0 +1,84 @@
+---
+import { readFileSync } from "node:fs";
+import Base from "../layouts/Base.astro";
+
+// The one true copy lives at the repo root; this page just shows it instead
+// of sending visitors to GitHub for it. Read at build time, so there is
+// nothing to keep in sync by hand — a wrong copy here would fail the build,
+// not just be stale.
+const licenseText = readFileSync(new URL("../../../../LICENSE", import.meta.url), "utf-8").trim();
+const [licenseTitle, ...licenseRest] = licenseText.split("\n\n");
+---
+
+<Base
+  title="Licence: Sajilo"
+  description="Sajilo is MIT licensed. Read the full text here, or in the repository."
+  path="/license.html"
+>
+  <main class="wrap license" id="main">
+    <h1 class="display license-h1">Licence</h1>
+    <p class="lede">
+      Sajilo is free and open source software, under the MIT licence reproduced below.
+    </p>
+
+    <div class="license-card">
+      <p class="license-title">{licenseTitle}</p>
+      {licenseRest.map((para) => <p>{para}</p>)}
+    </div>
+
+    <p class="license-foot">
+      Same text, straight from the repository:
+      <a href="https://github.com/adarshaacharya/sajilo/blob/main/LICENSE" target="_blank" rel="noopener">LICENSE</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .license {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 60px;
+    max-width: 680px;
+  }
+  .license-h1 {
+    font-size: clamp(48px, 8vw, 84px);
+    margin-bottom: 16px;
+  }
+  .license .lede {
+    max-width: none;
+  }
+
+  .license-card {
+    margin-top: clamp(36px, 5vw, 52px);
+    padding: 28px 30px;
+    border: 1px solid var(--line-2);
+    border-radius: 14px;
+    background: var(--ink-2);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--paper-2);
+  }
+  .license-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--paper);
+    margin-bottom: 16px;
+  }
+  .license-card p + p {
+    margin-top: 14px;
+  }
+
+  .license-foot {
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .license-foot a {
+    color: var(--gilt-2);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+</style>
