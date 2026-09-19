@@ -96,6 +96,8 @@ pub fn run() {
             // Create and migrate the single local database before any tray or
             // notification code reads user-owned state.
             db::open(app.handle()).map_err(std::io::Error::other)?;
+            // Before the webview asks which language to draw in.
+            prefs::keep_language_for_existing_install(app.handle());
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::stocks::StocksCache::default());
@@ -245,6 +247,7 @@ pub fn run() {
             commands::tray::refresh_tray,
             commands::tray::quit_app,
             commands::tray::hide_popover,
+            commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,
         ])

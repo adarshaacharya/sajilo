@@ -3,6 +3,7 @@ import appIconUrl from "../../../src-tauri/icons/128x128@2x.png";
 import { useSettings } from "../context/settings-context";
 import { useUpdater } from "../context/updater-context";
 import { openExternalLink } from "../lib/external-link";
+import { api } from "../lib/ipc";
 import { Icon } from "./icon";
 
 const SNOOZE_KEY = "sajilo.updater.windowSnooze.v1";
@@ -54,6 +55,17 @@ export function UpdateWindow() {
       })
       .catch(() => {});
   }, [visible]);
+
+  // The tray menu is where a menu-bar app is looked at most, so an installed
+  // update waiting on a restart is offered there too — past "Later" and after
+  // this window is gone. Only this window sets it: it owns the updater.
+  const trayLabel =
+    enabled && state === "installed" && version
+      ? t("tray.update-restart").replace("{version}", version)
+      : null;
+  useEffect(() => {
+    api.setTrayUpdate(trayLabel).catch(() => {});
+  }, [trayLabel]);
 
   if (!version) return null;
 

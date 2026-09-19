@@ -439,6 +439,32 @@ button.row-line + button.row-line::before {
     color 0.15s ease;
 }
 
+/* One soft ring of gilt when the pill appears, and again each time the popover
+   is opened. Once, never looping: a pill that keeps pulsing is one people
+   learn to stop seeing. */
+.update-header-btn--glow {
+  animation: update-glow 1.6s ease-out 0.3s 1 both;
+}
+
+@keyframes update-glow {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent-mark) 0%, transparent);
+    background: color-mix(in srgb, var(--color-accent-mark) 26%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-header-btn--glow {
+    animation: none;
+  }
+}
+
 .update-header-btn:hover {
   background: color-mix(in srgb, var(--color-accent-mark) 20%, transparent);
   border-color: color-mix(in srgb, var(--color-accent-mark) 60%, transparent);

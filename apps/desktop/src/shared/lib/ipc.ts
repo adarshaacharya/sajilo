@@ -465,6 +465,8 @@ export const api = {
 
   /** Redraws the menu-bar label after a preference it reads has changed. */
   refreshTray: () => invoke<void>("refresh_tray"),
+  /** Shows "Restart to update" in the tray menu, or removes it with `null`. */
+  setTrayUpdate: (label: string | null) => invoke<void>("set_tray_update", { label }),
 
   /** The popover is alwaysOnTop, so it must dismiss itself after opening an
    * external link or it buries the newly opened browser window. */

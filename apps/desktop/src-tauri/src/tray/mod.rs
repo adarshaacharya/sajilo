@@ -51,6 +51,55 @@ pub fn set_popover_shown(app: &AppHandle, shown: bool) {
 /// label instead.
 struct DateItem(MenuItem<Wry>);
 
+/// "Restart to update", which sits in the menu only while an installed update
+/// is waiting for a restart. Menu items cannot be hidden, so it is inserted and
+/// removed; `shown` records which of the two it last was.
+struct UpdateEntry {
+    menu: Menu<Wry>,
+    item: MenuItem<Wry>,
+    #[cfg(not(target_os = "linux"))]
+    separator: PredefinedMenuItem<Wry>,
+    shown: std::sync::Mutex<bool>,
+}
+
+/// Shows the restart item with `label`, or takes it away with `None`.
+///
+/// The words come from the frontend, which knows the chosen language; Rust
+/// only places them. Placed right under the date on macOS and Windows, where
+/// the eye lands first, and after the open item on Linux.
+pub fn set_update_ready(app: &AppHandle, label: Option<&str>) {
+    let Some(entry) = app.try_state::<UpdateEntry>() else {
+        return;
+    };
+    let Ok(mut shown) = entry.shown.lock() else {
+        return;
+    };
+    match label {
+        Some(label) => {
+            let _ = entry.item.set_text(label);
+            if !*shown {
+                // After the date row and its separator; after the one open
+                // item on Linux.
+                #[cfg(not(target_os = "linux"))]
+                {
+                    let _ = entry.menu.insert(&entry.item, 2);
+                    let _ = entry.menu.insert(&entry.separator, 3);
+                }
+                #[cfg(target_os = "linux")]
+                let _ = entry.menu.insert(&entry.item, 1);
+                *shown = true;
+            }
+        }
+        None if *shown => {
+            let _ = entry.menu.remove(&entry.item);
+            #[cfg(not(target_os = "linux"))]
+            let _ = entry.menu.remove(&entry.separator);
+            *shown = false;
+        }
+        None => {}
+    }
+}
+
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let date = MenuItem::with_id(
@@ -101,6 +150,19 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     )?;
     #[cfg(not(target_os = "linux"))]
     app.manage(DateItem(date));
+    app.manage(UpdateEntry {
+        menu: menu.clone(),
+        item: MenuItem::with_id(
+            app,
+            "update-restart",
+            "Restart to update",
+            true,
+            None::<&str>,
+        )?,
+        #[cfg(not(target_os = "linux"))]
+        separator: PredefinedMenuItem::separator(app)?,
+        shown: std::sync::Mutex::new(false),
+    });
 
     #[cfg_attr(target_os = "macos", allow(unused_mut))]
     let mut builder = TrayIconBuilder::with_id("main");
@@ -131,6 +193,8 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             // standing in for the tray click that platform never delivers.
             "open" => window::toggle(app),
             "settings" => open_settings(app),
+            // The update is already installed; a restart is all that is left.
+            "update-restart" => app.restart(),
             "quit" => app.exit(0),
             _ => {}
         })

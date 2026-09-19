@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import type { Language } from "../lib/i18n";
-import { setActiveLanguage, translate } from "../lib/i18n";
+import { setActiveLanguage, systemLanguage, translate } from "../lib/i18n";
 import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
@@ -75,7 +75,7 @@ function applyTheme(theme: ThemeMode) {
  * since almost every surface renders a date.
  */
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>("ne");
+  const [language, setLanguage] = useState<Language>(systemLanguage);
   const [numerals, setNumerals] = useState<NumeralStyle>("devanagari");
   const [theme, setThemeState] = useState<ThemeMode>("system");
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);

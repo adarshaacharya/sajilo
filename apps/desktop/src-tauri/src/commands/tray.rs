@@ -36,3 +36,10 @@ pub fn pin_popover(app: AppHandle<Wry>, pinned: bool) {
         let _ = window.set_focus();
     }
 }
+
+/// Puts "Restart to update" in the tray menu while an installed update waits,
+/// in the user's language; `None` takes it out again.
+#[tauri::command]
+pub fn set_tray_update(app: AppHandle<Wry>, label: Option<String>) {
+    crate::tray::set_update_ready(&app, label.as_deref());
+}

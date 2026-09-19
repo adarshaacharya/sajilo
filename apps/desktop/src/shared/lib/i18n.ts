@@ -15,6 +15,16 @@ export function translate(key: Key, language: Language): string {
 }
 
 /**
+ * The language to start in before anyone has picked one: Nepali on a computer
+ * set to Nepali, English everywhere else. Installs from before this default
+ * are kept on Nepali by the desktop shell, which stores it for them.
+ */
+export function systemLanguage(): Language {
+  const preferred = typeof navigator === "undefined" ? [] : (navigator.languages ?? []);
+  return preferred.some((tag) => tag.toLowerCase().startsWith("ne")) ? "ne" : "en";
+}
+
+/**
  * The chosen language, mirrored outside React.
  *
  * `useSettings` throws when it is called outside the provider, and the
@@ -23,7 +33,7 @@ export function translate(key: Key, language: Language): string {
  * user's language, so the setting is mirrored here and read directly. Anything
  * that can reach the context should keep using `t` from `useSettings`.
  */
-let activeLanguage: Language = "ne";
+let activeLanguage: Language = systemLanguage();
 
 export function setActiveLanguage(language: Language): void {
   activeLanguage = language;
