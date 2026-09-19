@@ -30406,6 +30406,24 @@
         "official": false
       },
       {
+        "english": false,
+        "id": "arthaSansar",
+        "name": "Artha Sansar",
+        "official": false
+      },
+      {
+        "english": false,
+        "id": "techPana",
+        "name": "TechPana",
+        "official": false
+      },
+      {
+        "english": false,
+        "id": "hamroKhelkud",
+        "name": "Hamro Khelkud",
+        "official": false
+      },
+      {
         "english": true,
         "id": "kathmanduPost",
         "name": "The Kathmandu Post",
