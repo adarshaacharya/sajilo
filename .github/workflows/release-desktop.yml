@@ -42,6 +42,18 @@ jobs:
           # Without one of the two present at *runtime*, that dlopen panics and
           # the tray never appears — hence `bundle.linux.deb.depends`.
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          # GStreamer plugins for `bundle.linux.appimage.bundleMediaFramework`,
+          # which copies whatever is installed here into the AppImage. The
+          # AppImage already carries GStreamer's core from this runner; without
+          # matching plugins it fell back to the host's, and a 1.24 core
+          # refuses every plugin newer than itself — on Arch (1.26+) that left
+          # WebKit with no decoder or audio sink, and pressing play froze the
+          # app. Radio needs: MP3 (good), HLS for BBC Nepali (good/bad), AAC
+          # (libav), and an audio sink that reaches PulseAudio or PipeWire's
+          # pulse server (pulseaudio).
+          sudo apt-get install -y \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+            gstreamer1.0-libav gstreamer1.0-pulseaudio
       - name: Set up bun
         uses: oven-sh/setup-bun@v2
       - name: Add the Rust target
@@ -90,10 +102,15 @@ jobs:
       # Tauri 2.11's AppImage bundler includes libwayland from the Ubuntu build
       # host. On rolling-release Wayland systems (including current Arch), that
       # library can conflict with the host Mesa EGL driver and prevent WebKitGTK
-      # from creating a window. It also points GStreamer at a bundled plugin
-      # directory that does not exist, which disables WebKitGTK audio codecs.
-      # Keep Wayland and GStreamer plugin discovery system-provided.
+      # from creating a window, so it is removed here.
       # See https://github.com/tauri-apps/tauri/issues/15665.
+      #
+      # GStreamer is the opposite case: it stays bundled, core *and* plugins
+      # (`bundleMediaFramework`), because a bundled core paired with the host's
+      # plugins is what froze radio playback on Arch. This step used to delete
+      # the GStreamer plugin path to fall back to the host; it now checks the
+      # bundled plugins are really there, and fails the release if not rather
+      # than shipping an AppImage whose radio cannot make a sound.
       - name: Repair AppImage Wayland compatibility
         if: matrix.target == 'linux-x64'
         env:
@@ -109,13 +126,26 @@ jobs:
           trap 'rm -rf "$WORK"' EXIT
           (cd "$WORK" && "$APPIMAGE" --appimage-extract >/dev/null)
 
+          # What radio needs from the bundled GStreamer: core elements, the
+          # playback bin, appsrc/appsink, an automatic audio sink, the
+          # PulseAudio sink and an MP3 decoder.
+          for plugin in coreelements playback app autodetect pulseaudio mpg123; do
+            if ! find "$WORK/squashfs-root" -name "libgst${plugin}.so" -print -quit | grep -q .; then
+              echo "::error::AppImage is missing the bundled GStreamer plugin libgst${plugin}.so"
+              exit 1
+            fi
+          done
+          if ! grep -rqs "GST_PLUGIN_SYSTEM_PATH" "$WORK/squashfs-root/AppRun" "$WORK/squashfs-root/apprun-hooks"; then
+            echo "::error::AppImage does not point GStreamer at its bundled plugins"
+            exit 1
+          fi
+
           if ! compgen -G "$WORK/squashfs-root/usr/lib/libwayland-*" > /dev/null; then
             echo "No bundled Wayland libraries found; leaving AppImage unchanged."
             exit 0
           fi
 
           rm -f "$WORK/squashfs-root/usr/lib/"libwayland-*
-          sed -i '/GST_PLUGIN_SYSTEM_PATH/d' "$WORK/squashfs-root/AppRun"
           curl -fsSL -o "$WORK/appimagetool" \
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  $WORK/appimagetool" | sha256sum -c -

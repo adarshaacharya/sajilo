@@ -34,6 +34,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+          # Bundled into the AppImage by `bundleMediaFramework`; see release-desktop.yml.
+          sudo apt-get install -y \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad \
+            gstreamer1.0-libav gstreamer1.0-pulseaudio
       - name: Set up bun
         uses: oven-sh/setup-bun@v2
       - name: Add the Rust target

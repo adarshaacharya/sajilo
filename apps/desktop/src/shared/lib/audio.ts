@@ -51,6 +51,40 @@ type AudioBag = {
 const VOLUME_KEY = "sajiloRadioVolume";
 const DEFAULT_VOLUME = 1;
 
+/**
+ * How long a station gets to produce sound before it is given up on.
+ *
+ * A stream that never starts — a dead server, or a media pipeline that
+ * stalls instead of failing — otherwise leaves the player spinning with no
+ * way out but Stop. This turns it into the same error a broken stream gives.
+ * It cannot help if the webview itself has crashed; that is the AppImage's
+ * bundled GStreamer's job to prevent (see release-desktop.yml).
+ */
+const START_TIMEOUT_MS = 20_000;
+let startTimer: ReturnType<typeof setTimeout> | undefined;
+
+function clearStartTimer() {
+  if (startTimer !== undefined) {
+    clearTimeout(startTimer);
+    startTimer = undefined;
+  }
+}
+
+function armStartTimer() {
+  clearStartTimer();
+  startTimer = setTimeout(() => {
+    startTimer = undefined;
+    const el = bag.element;
+    if (!el || !bag.state.isLoading || bag.state.isPlaying) return;
+    // Reset the element to drop a stalled connection. `src` stays, and with
+    // `preload = "none"` nothing is fetched again until Play is pressed —
+    // which is how the listener retries.
+    el.pause();
+    el.load();
+    publish({ isLoading: false, isPlaying: false, error: "This station is not responding" });
+  }, START_TIMEOUT_MS);
+}
+
 function readStoredVolume(): number {
   try {
     const raw = localStorage.getItem(VOLUME_KEY);
@@ -125,12 +159,16 @@ function audio(): HTMLAudioElement {
   // Streams are live; there is nothing to seek and nothing worth buffering
   // ahead of the listener.
   el.preload = "none";
-  el.addEventListener("playing", () => publish({ isLoading: false, isPlaying: true, error: null }));
+  el.addEventListener("playing", () => {
+    clearStartTimer();
+    publish({ isLoading: false, isPlaying: true, error: null });
+  });
   el.addEventListener("pause", () => publish({ isPlaying: false, isLoading: false }));
   el.addEventListener("waiting", () => publish({ isLoading: true }));
-  el.addEventListener("error", () =>
-    publish({ isLoading: false, isPlaying: false, error: "Could not play this station" }),
-  );
+  el.addEventListener("error", () => {
+    clearStartTimer();
+    publish({ isLoading: false, isPlaying: false, error: "Could not play this station" });
+  });
   el.volume = bag.state.volume;
   bag.element = el;
   return el;
@@ -166,12 +204,15 @@ export function play(station: NowPlaying, streamUrl: string) {
     error: null,
     miniPlayerMinimized: retuned ? false : bag.state.miniPlayerMinimized,
   });
-  el.play().catch(() =>
-    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }),
-  );
+  armStartTimer();
+  el.play().catch(() => {
+    clearStartTimer();
+    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" });
+  });
 }
 
 export function pause() {
+  clearStartTimer();
   audio().pause();
   publish({ isLoading: false, isPlaying: false });
 }
@@ -179,10 +220,12 @@ export function pause() {
 export function resume() {
   const el = audio();
   if (!el.src) return;
-  publish({ isLoading: true });
-  el.play().catch(() =>
-    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" }),
-  );
+  publish({ isLoading: true, error: null });
+  armStartTimer();
+  el.play().catch(() => {
+    clearStartTimer();
+    publish({ isLoading: false, isPlaying: false, error: "Playback was blocked" });
+  });
 }
 
 /**
@@ -192,6 +235,7 @@ export function resume() {
  * open and go on consuming data the listener is not hearing.
  */
 export function stop() {
+  clearStartTimer();
   const el = audio();
   el.pause();
   el.removeAttribute("src");

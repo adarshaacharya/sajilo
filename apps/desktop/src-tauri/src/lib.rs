@@ -66,11 +66,30 @@ fn prefer_x11_backend() {
     unsafe { std::env::set_var("GDK_BACKEND", "x11") };
 }
 
+/// Lets WebKitGTK play HLS (`.m3u8`) radio streams, which BBC Nepali uses.
+///
+/// Since WebKitGTK 2.38.4 native HLS playback is off unless this is set, so on
+/// every Linux build that station failed while it played on macOS, where the
+/// system player handles HLS itself. Respects an explicit value like
+/// [`prefer_x11_backend`]. Must run before the webview starts.
+#[cfg(target_os = "linux")]
+fn enable_hls_playback() {
+    const KEY: &str = "WEBKIT_GST_ENABLE_HLS_SUPPORT";
+    if std::env::var_os(KEY).is_some() {
+        return;
+    }
+    // SAFETY: as in `prefer_x11_backend` — still before any thread exists.
+    unsafe { std::env::set_var(KEY, "1") };
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[allow(clippy::too_many_lines)]
 pub fn run() {
     #[cfg(target_os = "linux")]
-    prefer_x11_backend();
+    {
+        prefer_x11_backend();
+        enable_hls_playback();
+    }
 
     let mut builder = tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
