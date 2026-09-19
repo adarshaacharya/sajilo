@@ -14,7 +14,7 @@ const { release: r, full = false, isLatest = false } = Astro.props;
 <li class="release" id={r.version}>
   <div class="release-head">
     {full ? (
-      <p class="release-version num">{r.version}</p>
+      <h1 class="release-version num">{r.version}</h1>
     ) : (
       <a class="release-version num" href={`/releases/${r.version}.html`}>{r.version}</a>
     )}

@@ -11,6 +11,18 @@ const { version } = Astro.params;
 const release = findRelease(version!);
 if (!release) return Astro.redirect("/releases.html", 302);
 const { newer, older } = neighborsOf(version!);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  headline: `Sajilo ${release.version} release notes`,
+  datePublished: release.publishedAt,
+  dateModified: release.publishedAt,
+  url: `https://sajilo.fyi/releases/${release.version}.html`,
+  author: { "@type": "Person", name: "Adarsha Acharya", url: "https://adarsha.dev" },
+  about: { "@type": "SoftwareApplication", name: "Sajilo", applicationCategory: "UtilitiesApplication" },
+  isPartOf: { "@type": "WebSite", name: "Sajilo", url: "https://sajilo.fyi/" },
+};
 ---
 
 <Base
@@ -18,6 +30,7 @@ const { newer, older } = neighborsOf(version!);
   description={release.excerpt}
   path={`/releases/${release.version}.html`}
 >
+  <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <main class="wrap release-page" id="main">
     <a class="back-link" href="/releases.html">← All release notes</a>
 

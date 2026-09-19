@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "bun run scripts/fetch-releases.mjs --soft && astro build",
+    "build": "bun run scripts/fetch-releases.mjs --soft && astro build && bun run scripts/generate-sitemap.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "deploy": "wrangler deploy",
