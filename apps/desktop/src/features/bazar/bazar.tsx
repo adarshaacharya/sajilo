@@ -11,11 +11,13 @@ import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
+import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
+import { ForexRates } from "../forex/forex";
 import { FuelTab } from "./_components/fuel";
 import { FundsLink } from "./_components/funds-link";
 import { MetalsTab } from "./_components/metals";
@@ -24,11 +26,11 @@ import { Stocks } from "./_components/stocks";
 import { VegetablesTab } from "./_components/vegetables";
 import { LIVE_REFRESH_MS } from "./_lib/live";
 
-type Tab = "stocks" | "metals" | "fuel" | "vegetables";
+type Tab = "stocks" | "metals" | "fuel" | "vegetables" | "forex";
 
 /** Also the set `?tab=` accepts, so anything that links into this screen — the
  * tray, the landing page — can open it on the panel it means. */
-const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables"];
+const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables", "forex"];
 
 /** The stocks tab's two halves; `?view=` opens either, and the last one used is remembered. */
 type StocksView = "nepse" | "funds";
@@ -59,6 +61,10 @@ function fetchMutualFunds(refresh = false): Promise<LoadState<MutualFundSnapshot
   return catchAsFailed(api.getMutualFunds(refresh));
 }
 
+function fetchForex(refresh = false): Promise<LoadState<ForexSnapshot>> {
+  return catchAsFailed(api.getForex(refresh));
+}
+
 function fetchIntraday(refresh = false): Promise<LoadState<IndexIntraday>> {
   return catchAsFailed(api.getNepseIntraday(refresh));
 }
@@ -71,13 +77,17 @@ function fetchFeeds(refresh = false): Promise<BazarFeeds> {
 }
 
 export function Bazar() {
-  const { t } = useSettings();
+  const { t, modules } = useSettings();
   const { search } = useLocation();
   const linked = useMemo(() => new URLSearchParams(search), [search]);
   const [tab, setTab] = useState<Tab>(() => {
     const requested = new URLSearchParams(search).get("tab");
     return TABS.includes(requested as Tab) ? (requested as Tab) : "stocks";
   });
+  // A link to the Forex tab while Forex is switched off lands on Stocks.
+  useEffect(() => {
+    if (tab === "forex" && !modules.forexEnabled) setTab("stocks");
+  }, [tab, modules.forexEnabled]);
   const linkedView = linked.get("view") as StocksView | null;
   const [savedView, saveView] = usePersistedString(STOCKS_VIEW_KEY);
   const [pickedView, setPickedView] = useState<StocksView | null>(
@@ -148,6 +158,16 @@ export function Bazar() {
     () => void mutateDividends(fetchDividends(true), { revalidate: false }),
     [mutateDividends],
   );
+  // Same key the background refresh warms, so the tab opens on a fresh copy.
+  const {
+    data: forex,
+    isValidating: loadingForex,
+    mutate: mutateForex,
+  } = useSWR(tab === "forex" ? "forex" : null, () => fetchForex(false));
+  const retryForex = useCallback(
+    () => void mutateForex(fetchForex(true), { revalidate: false }),
+    [mutateForex],
+  );
   const retryIntraday = useCallback(
     () => void mutateIntraday(fetchIntraday(true), { revalidate: false }),
     [mutateIntraday],
@@ -158,7 +178,9 @@ export function Bazar() {
       ? view === "funds"
         ? loadingFunds
         : loadingStocks || loadingIpos || loadingDividends || loadingIntraday
-      : loadingFeeds;
+      : tab === "forex"
+        ? loadingForex
+        : loadingFeeds;
 
   const load = useCallback(
     (refresh = false) => {
@@ -173,6 +195,7 @@ export function Bazar() {
           mutateIntraday(fetchIntraday(true), { revalidate: false });
           mutateFunds(fetchMutualFunds(true), { revalidate: false });
         }
+        if (tab === "forex") mutateForex(fetchForex(true), { revalidate: false });
       } else {
         mutateFeeds();
         mutateStocks();
@@ -180,9 +203,19 @@ export function Bazar() {
         mutateDividends();
         mutateIntraday();
         mutateFunds();
+        mutateForex();
       }
     },
-    [mutateDividends, mutateFeeds, mutateFunds, mutateIntraday, mutateIpos, mutateStocks, tab],
+    [
+      mutateDividends,
+      mutateFeeds,
+      mutateForex,
+      mutateFunds,
+      mutateIntraday,
+      mutateIpos,
+      mutateStocks,
+      tab,
+    ],
   );
 
   const metals = loadedValue(feeds?.metals);
@@ -217,8 +250,12 @@ export function Bazar() {
           { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
           { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
           { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
+          // Hidden with the module: a Settings switch that turns Forex off
+          // should leave nothing of it behind.
+          ...(modules.forexEnabled
+            ? [{ id: "forex" as const, label: t("feature.forex"), icon: "forex" as const }]
+            : []),
         ]}
-        scrollable={false}
       />
 
       {tab === "stocks" && (
@@ -275,6 +312,8 @@ export function Bazar() {
           {fuel && <FuelTab snapshot={fuel} />}
         </StateBanner>
       )}
+
+      {tab === "forex" && <ForexRates state={forex} onRetry={retryForex} />}
 
       {tab === "vegetables" && (
         <StateBanner

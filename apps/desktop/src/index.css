@@ -154,6 +154,16 @@ html {
   color-scheme: light dark;
 }
 
+/* Tailwind v4 leaves buttons on the platform cursor. In this desktop webview,
+   every enabled button should advertise that it is clickable consistently. */
+:where(button:not(:disabled):not([aria-disabled="true"]), [role="button"]:not([aria-disabled="true"])) {
+  cursor: pointer;
+}
+
+:where(button:disabled, [role="button"][aria-disabled="true"]) {
+  cursor: default;
+}
+
 /*
  * The shell. One solid colour, one hairline, one radius — no ambient wash.
  *

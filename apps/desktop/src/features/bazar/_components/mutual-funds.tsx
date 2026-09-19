@@ -223,7 +223,7 @@ function YourFunds({
     <section className="surface-card p-2.5" aria-label={t("funds.yours")}>
       <div className="flex min-h-[20px] items-center justify-between gap-2">
         <p className="text-[11px] font-semibold text-text-secondary">{t("funds.yours")}</p>
-        {next && (
+        {next && dueNow.length === 0 && (
           <button
             type="button"
             onClick={() => onOpen(next.symbol)}
@@ -236,7 +236,9 @@ function YourFunds({
         )}
       </div>
       {funds.length === 0 ? (
-        <p className="mt-1 text-[11px] text-text-secondary">{t("funds.empty-yours")}</p>
+        dueNow.length === 0 && (
+          <p className="mt-1 text-[11px] text-text-secondary">{t("funds.empty-yours")}</p>
+        )
       ) : (
         <>
           {held.length > 0 && (
@@ -254,15 +256,19 @@ function YourFunds({
           <div className="mt-0.5">{funds.map((fund) => row(fund, sips.of(fund.symbol)))}</div>
         </>
       )}
-      {dueNow.map((sip) => (
-        <SipDueCard
-          key={sip.symbol}
-          sip={sip}
-          language={language}
-          onPaid={() => sips.markPaid(sip.symbol)}
-          onLater={() => sips.remindTomorrow(sip.symbol)}
-        />
-      ))}
+      {dueNow.length > 0 && (
+        <div className="mt-1.5 border-t border-divider">
+          {dueNow.map((sip) => (
+            <SipDueRow
+              key={sip.symbol}
+              sip={sip}
+              language={language}
+              onPaid={() => sips.markPaid(sip.symbol)}
+              onLater={() => sips.remindTomorrow(sip.symbol)}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
@@ -272,7 +278,7 @@ function YourFunds({
  * with the two things to do about it. Marking it paid clears it until next
  * month; "tomorrow" sends one more reminder in the morning.
  */
-function SipDueCard({
+function SipDueRow({
   sip,
   language,
   onPaid,
@@ -286,29 +292,30 @@ function SipDueCard({
   const { t } = useSettings();
   const amount = sip.amount ? `Rs ${money.format(sip.amount)} · ` : "";
   return (
-    <div className="mt-2 rounded-lg border border-[color:color-mix(in_srgb,var(--color-accent-mark)_45%,var(--color-border))] p-2">
+    <div className="border-b border-divider py-2 last:border-0 last:pb-0">
       <div className="flex items-center justify-between gap-2">
         <p className="min-w-0 truncate text-[12px] font-semibold">{sip.name}</p>
         <span className="shrink-0 text-[10px] font-semibold text-[color:var(--color-accent-mark)]">
           {sipWhen(t, sip.days)}
         </span>
       </div>
-      <p className="mt-0.5 text-[11px] text-text-muted tabular-nums">
-        {amount}
-        {sipDueDate(sip, language)}
-      </p>
-      <div className="mt-2 flex gap-1.5">
+      <div className="mt-1 flex items-center gap-1.5">
+        <p className="min-w-0 flex-1 truncate text-[10px] text-text-muted tabular-nums">
+          {amount}
+          {sipDueDate(sip, language)}
+        </p>
         <button
           type="button"
           onClick={onPaid}
-          className="flex h-7 flex-1 items-center justify-center rounded-lg bg-accent-fill text-[11px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 active:opacity-80"
+          className="shrink-0 rounded-md bg-accent-fill px-2 py-1 text-[10px] font-semibold text-accent-ink transition-opacity duration-150 hover:opacity-90 active:opacity-80"
         >
           {t("funds.sip-mark-paid")}
         </button>
         <button
           type="button"
           onClick={onLater}
-          className="flex h-7 flex-1 items-center justify-center rounded-lg border border-[color:var(--color-control-border)] text-[11px] font-medium text-text-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-text"
+          aria-label={t("funds.sip-remind-tomorrow")}
+          className="shrink-0 rounded-md border border-control-border px-2 py-1 text-[10px] font-medium text-text-secondary transition-colors duration-150 hover:bg-surface-hover hover:text-text"
         >
           {t("funds.sip-remind-tomorrow")}
         </button>

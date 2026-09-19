@@ -118,11 +118,11 @@ export function FundRow({
   onToggle: () => void;
 }) {
   return (
-    <div className="row-line flex items-center gap-1 py-1">
+    <div className="row-line flex items-center gap-1 rounded-md py-1 transition-colors hover:bg-surface-hover focus-within:bg-surface-hover">
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-left transition-colors hover:bg-surface-hover"
+        className="flex min-w-0 flex-1 items-center gap-2 px-2 py-1 text-left"
       >
         <FundLogo url={fund.logoUrl} symbol={fund.symbol} />
         <span className="min-w-0 flex-1">

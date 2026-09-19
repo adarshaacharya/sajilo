@@ -1,42 +1,33 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 import { CONTROL } from "../../shared/components/control";
-import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { Select } from "../../shared/components/select";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
-import { api } from "../../shared/lib/ipc";
-import {
-  catchAsFailed,
-  fetchedAtLabel,
-  loadBanner,
-  loadedValue,
-} from "../../shared/lib/load-state";
+import { fetchedAtLabel, loadBanner, loadedValue } from "../../shared/lib/load-state";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
+import type { LoadState } from "../../types/api/LoadState";
 import { ForexRateRow } from "./_components/forex-rate-row";
 import { conversionText, rateFootnote, sourceTimestamp } from "./_lib/format";
 
 const NRB_URL = "https://www.nrb.org.np/";
 
-export function Forex() {
+/**
+ * NRB's exchange rates: a converter, the user's favourite currencies, then the
+ * rest. Bazar's Forex tab; the tab owns fetching and the header's refresh.
+ */
+export function ForexRates({
+  state,
+  onRetry,
+}: {
+  state: LoadState<ForexSnapshot> | undefined;
+  onRetry: () => void;
+}) {
   const { t, modules } = useSettings();
-  const {
-    data: state,
-    isValidating,
-    mutate,
-  } = useSWR("forex", () => catchAsFailed(api.getForex(false)));
-  const load = useCallback(
-    (refresh = false) =>
-      mutate(catchAsFailed<ForexSnapshot>(api.getForex(refresh)), { revalidate: false }),
-    [mutate],
-  );
   const [amount, setAmount] = useState(1);
   const [code, setCode] = useState("USD");
   const [reversed, setReversed] = useState(false);
-
-  const loading = isValidating;
 
   useEffect(() => {
     if (modules.forexFavourites[0]) setCode(modules.forexFavourites[0]);
@@ -50,30 +41,13 @@ export function Forex() {
   const others =
     snapshot?.rates.filter((rate) => !modules.forexFavourites.includes(rate.currencyCode)) ?? [];
 
-  const refreshButton = useMemo(
-    () => (
-      <button
-        type="button"
-        onClick={() => load(true)}
-        disabled={loading}
-        aria-label={t("action.refresh")}
-        className="icon-btn shrink-0"
-      >
-        <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
-      </button>
-    ),
-    [load, loading, t],
-  );
-
-  useHeaderSlot(refreshButton);
-
   const conversion =
     selected && Number.isFinite(amount) ? conversionText(selected, amount, reversed) : null;
 
   return (
     <div className="space-y-2.5">
       <section className="surface-card p-2.5">
-        <StateBanner state={banner} onRetry={() => load(true)}>
+        <StateBanner state={banner} onRetry={onRetry}>
           {snapshot && selected ? (
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
@@ -85,9 +59,9 @@ export function Forex() {
                   step="any"
                   aria-label="Amount"
                   onChange={(event) => setAmount(Number(event.target.value))}
-                  className={`${CONTROL} w-24 shrink-0`}
+                  className={`${CONTROL} min-w-0 flex-1`}
                 />
-                <div className="w-20 shrink-0">
+                <div className="w-24 shrink-0">
                   <Select
                     value={selected.currencyCode}
                     onChange={setCode}
