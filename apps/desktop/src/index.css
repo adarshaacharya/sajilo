@@ -25,6 +25,9 @@
   --color-surface: #2c2c2e;
   --color-surface-raised: #2c2c2e;
   --color-surface-hover: #3a3a3c;
+  /* An off switch's track. Its own step: the hover grey sits one shade off the
+     card, which left an off switch nearly invisible. */
+  --color-switch-off: #5b5b60;
 
   /* Hairlines — label-derived, never a bright white stroke. */
   --color-border: #38383a;
@@ -85,6 +88,7 @@
     --color-surface: #ffffff;
     --color-surface-raised: #ffffff;
     --color-surface-hover: #e8e8ed;
+    --color-switch-off: #d6d6db;
     --color-border: #d8d8dd;
     --color-divider: #e3e3e8;
     --logo-brightness: 1;
@@ -115,6 +119,7 @@
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
   --color-surface-hover: #e8e8ed;
+  --color-switch-off: #d6d6db;
   --color-border: #d8d8dd;
   --color-divider: #e3e3e8;
   --logo-brightness: 1;
@@ -853,8 +858,7 @@ button.row-line + button.row-line::before {
   width: 28px;
   height: 16px;
   border-radius: 999px;
-  background: var(--color-surface-hover);
-  box-shadow: inset 0 0 0 1px var(--color-border);
+  background: var(--color-switch-off);
   transition: background 0.2s ease;
 }
 
@@ -881,6 +885,11 @@ button.row-line + button.row-line::before {
 
 /* Today date plate — flat card. The gilt gradient plate was decoration; the
    date is already the largest type on the screen. */
+/* Date details: sunrise to sunset as one soft gilt bar, Rahu Kaal marked on it. */
+.day-arc {
+  background: color-mix(in srgb, var(--color-accent-mark) 55%, var(--color-surface-hover));
+}
+
 .date-plate {
   border-color: var(--color-border);
   background: var(--color-surface-raised);

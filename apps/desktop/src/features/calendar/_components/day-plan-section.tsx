@@ -231,8 +231,16 @@ export function DayPlanSection({
 
   return (
     <section className="surface-card p-3">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold text-text-secondary">{t("planner.title")}</p>
+      <div
+        className={`flex items-center justify-between gap-2 ${items.length > 0 || draft ? "mb-2" : ""}`}
+      >
+        <p className="text-[11px] font-semibold text-text-secondary">
+          {t("planner.title")}
+          {/* Empty, the section is one line rather than a card saying so. */}
+          {items.length === 0 && !draft && (
+            <span className="font-normal text-text-muted"> · {t("planner.empty-short")}</span>
+          )}
+        </p>
         {!draft && (
           <button
             type="button"
@@ -244,10 +252,6 @@ export function DayPlanSection({
           </button>
         )}
       </div>
-
-      {items.length === 0 && !draft && (
-        <p className="text-[12px] text-text-secondary">{t("planner.empty")}</p>
-      )}
 
       {items.length > 0 && (
         <ul className="divide-y divide-divider">

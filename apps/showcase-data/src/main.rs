@@ -27,6 +27,7 @@ use sajilo_core::NepaliDate;
 use sajilo_core::calendar::bikram_sambat as bs;
 use sajilo_core::calendar::events::{FIRST_EVENT_YEAR, LAST_EVENT_YEAR, events};
 use sajilo_core::calendar::month::month;
+use sajilo_core::calendar::weekly_holiday::weekly_holiday;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
     cdsc, dividends, fenegosida, hamropatro, kalimati, kantipur, market_status, mutual_funds,
@@ -240,6 +241,7 @@ fn calendar(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
         "nepaliMonthName": today.nepali_month_name(),
         "englishMonthName": today.english_month_name(),
         "weekday": gregorian.weekday().num_days_from_sunday(),
+        "weeklyHoliday": weekly_holiday(gregorian),
     });
     insert(commands, "bs_to_ad", &conversion);
     insert(commands, "ad_to_bs", &conversion);

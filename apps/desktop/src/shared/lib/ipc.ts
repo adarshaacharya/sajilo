@@ -76,6 +76,8 @@ export interface Conversion {
   nepaliMonthName: string;
   englishMonthName: string;
   weekday: number;
+  /** Saturday, or Sunday while that rule lasts. Decided in Rust. */
+  weeklyHoliday?: "saturday" | "sunday" | null;
 }
 
 export interface SupportedRange {
@@ -86,12 +88,51 @@ export interface SupportedRange {
 }
 
 /** Mirrors `sajilo_core::calendar::panchanga::Panchanga`. Computed for Kathmandu. */
+/** A panchang element in both languages, and when it gives way to the next. */
+export interface AlmanacName {
+  index: number;
+  en: string;
+  ne: string;
+  ends: string | null;
+}
+
+export interface Almanac {
+  tithi: AlmanacName;
+  paksha: AlmanacName;
+  nakshatra: AlmanacName;
+  yoga: AlmanacName;
+  karana: AlmanacName;
+  moon: {
+    phase: AlmanacName;
+    /** Share of the disc lit, 0–1. */
+    illumination: number;
+    waxing: boolean;
+    rashi: AlmanacName;
+    rise: string | null;
+    set: string | null;
+  };
+  ritu: AlmanacName;
+  ayan: AlmanacName;
+  nepalSambat: string;
+}
+
+export interface Chaughadiya {
+  start: string;
+  end: string;
+  name: AlmanacName;
+  quality: "good" | "neutral" | "bad";
+}
+
 export interface Panchanga {
   sunrise: string;
   sunset: string;
   rahuKaalStart: string | null;
   rahuKaalEnd: string | null;
   daylightSeconds: number;
+  /** Absent outside the bundled calendar, and in recordings made before it. */
+  almanac?: Almanac | null;
+  chaughadiyaDay?: Chaughadiya[];
+  chaughadiyaNight?: Chaughadiya[];
 }
 
 export interface PlanTime {

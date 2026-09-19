@@ -9,6 +9,7 @@ use sajilo_core::calendar::events::{CalendarEvent, events};
 use sajilo_core::calendar::month::{CalendarMonth, month};
 use sajilo_core::calendar::panchanga::{self, Panchanga};
 use sajilo_core::calendar::upcoming::{self, UpcomingEvent};
+use sajilo_core::calendar::weekly_holiday::{WeeklyHoliday, weekly_holiday};
 use sajilo_core::{NepaliDate, nepal_time};
 use serde::Serialize;
 
@@ -71,6 +72,8 @@ pub struct Conversion {
     pub nepali_month_name: String,
     pub english_month_name: String,
     pub weekday: u32,
+    /// Saturday, or Sunday while that rule lasts; decided in `sajilo-core`.
+    pub weekly_holiday: Option<WeeklyHoliday>,
 }
 
 /// Bikram Sambat to Gregorian.
@@ -98,6 +101,7 @@ fn conversion(nepali: NepaliDate, gregorian: chrono::NaiveDate) -> Conversion {
         nepali_month_name: nepali.nepali_month_name().to_owned(),
         english_month_name: nepali.english_month_name().to_owned(),
         weekday: gregorian.weekday().num_days_from_sunday(),
+        weekly_holiday: weekly_holiday(gregorian),
     }
 }
 

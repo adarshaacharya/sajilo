@@ -1,6 +1,9 @@
+pub mod almanac;
+pub mod astronomy;
 pub mod bikram_sambat;
 pub mod events;
 pub mod month;
 pub mod nepali_date;
 pub mod panchanga;
 pub mod upcoming;
+pub mod weekly_holiday;

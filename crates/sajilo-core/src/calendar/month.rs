@@ -1,12 +1,13 @@
 //! Month grid for the calendar UI. Ported from `CalendarMonth.swift` and
 //! `BikramSambatCalendar.month(containing:today:)`.
 
-use chrono::{Datelike, Weekday};
+use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 
 use crate::calendar::bikram_sambat::{days_in_month, gregorian_date_from};
 use crate::calendar::events;
 use crate::calendar::nepali_date::NepaliDate;
+use crate::calendar::weekly_holiday::weekly_holiday;
 use crate::error::{ConversionError, Result};
 use crate::numerals::devanagari;
 
@@ -66,8 +67,9 @@ pub fn month(date: NepaliDate, today: NepaliDate) -> Result<CalendarMonth> {
             date: Some(bs_date),
             ad_day: ad_date.map(|d| d.day()),
             is_today: bs_date == today,
-            // Saturday is Nepal's weekly holiday; the source data flags the rest.
-            is_holiday: ad_date.is_some_and(|d| d.weekday() == Weekday::Sat)
+            // The weekly holidays (Saturday, and Sunday while that rule
+            // lasts); the source data flags the rest.
+            is_holiday: ad_date.is_some_and(|d| weekly_holiday(d).is_some())
                 || event.is_some_and(|e| e.is_public_holiday),
             event_name: event.and_then(|e| e.name.clone()),
             tithi: event.and_then(|e| e.tithi.clone()),

@@ -12,6 +12,8 @@
 use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Utc, Weekday};
 use serde::{Deserialize, Serialize};
 
+use crate::calendar::almanac::{Almanac, Chaughadiya, almanac, chaughadiya, nepal_day_bounds};
+use crate::calendar::bikram_sambat::nepali_date_from;
 use crate::nepal_time;
 
 const KATHMANDU_LATITUDE: f64 = 27.7172;
@@ -65,7 +67,11 @@ pub fn solar_times(day: NaiveDate, latitude: f64, longitude: f64) -> Option<Sola
     let noon = day.and_hms_opt(12, 0, 0)?.and_utc();
     let julian = julian_day(noon);
 
-    let day_number = (julian - 2_451_545.0 - 0.0009 - west_longitude / 360.0).ceil();
+    // `julian` is this day's UTC noon, a whole number of days from J2000, so
+    // that is the day. The published form rounds `julian + longitude/360` up,
+    // which east of Greenwich lands on tomorrow — it gave Kathmandu the next
+    // day's sunrise, a minute off, and Rahu Kaal the next weekday's slot.
+    let day_number = (julian - 2_451_545.0).round();
     let mean_solar_noon = 2_451_545.0 + 0.0009 + west_longitude / 360.0 + day_number;
 
     let mean_anomaly =
@@ -152,12 +158,32 @@ pub struct Panchanga {
     pub rahu_kaal_start: Option<DateTime<Utc>>,
     pub rahu_kaal_end: Option<DateTime<Utc>>,
     pub daylight_seconds: i64,
+    /// Tithi, nakshatra, yoga, karana, the moon, season and Nepal Sambat.
+    /// Absent only outside the bundled BS calendar.
+    pub almanac: Option<Almanac>,
+    pub chaughadiya_day: Vec<Chaughadiya>,
+    /// Sunset to the next sunrise.
+    pub chaughadiya_night: Vec<Chaughadiya>,
 }
 
 pub fn panchanga_for(day: NaiveDate) -> Option<Panchanga> {
     let times = solar_times(day, KATHMANDU_LATITUDE, KATHMANDU_LONGITUDE)?;
+    let next = solar_times(day.succ_opt()?, KATHMANDU_LATITUDE, KATHMANDU_LONGITUDE)?;
     let weekday = times.sunrise.with_timezone(&nepal_time::offset()).weekday();
     let rahu = rahu_kaal_window(times.sunrise, times.sunset, weekday);
+    let (chaughadiya_day, chaughadiya_night) =
+        chaughadiya(weekday, times.sunrise, times.sunset, next.sunrise);
+    let (day_start, day_end) = nepal_day_bounds(day);
+    let almanac = nepali_date_from(day).ok().map(|bs| {
+        almanac(
+            bs,
+            times.sunrise,
+            day_start,
+            day_end,
+            KATHMANDU_LATITUDE,
+            KATHMANDU_LONGITUDE,
+        )
+    });
 
     Some(Panchanga {
         sunrise: times.sunrise,
@@ -165,6 +191,9 @@ pub fn panchanga_for(day: NaiveDate) -> Option<Panchanga> {
         rahu_kaal_start: rahu.map(|w| w.start),
         rahu_kaal_end: rahu.map(|w| w.end),
         daylight_seconds: times.daylight_seconds(),
+        almanac,
+        chaughadiya_day,
+        chaughadiya_night,
     })
 }
 
@@ -260,6 +289,29 @@ mod tests {
         assert!(june_hours > december_hours);
         assert!(june_hours > 13.5 && june_hours < 14.5);
         assert!(december_hours > 10.0 && december_hours < 10.8);
+    }
+
+    /// The sunrise is the given day's, not a neighbour's.
+    #[test]
+    fn sunrise_falls_on_the_day_asked_for() {
+        for month in 1..=12u32 {
+            let day = NaiveDate::from_ymd_opt(2026, month, 15).unwrap();
+            let times = solar_times(day, KATHMANDU.0, KATHMANDU.1).unwrap();
+            let local = times.sunrise.with_timezone(&nepal_time::offset());
+            assert_eq!(local.date_naive(), day, "month {month}");
+        }
+    }
+
+    /// Wednesday 26 August 2026: the fifth part of daylight.
+    #[test]
+    fn rahu_kaal_uses_the_day_s_own_weekday() {
+        let day = NaiveDate::from_ymd_opt(2026, 8, 26).unwrap();
+        let reading = panchanga_for(day).unwrap();
+        let start = reading
+            .rahu_kaal_start
+            .unwrap()
+            .with_timezone(&nepal_time::offset());
+        assert_eq!((start.hour(), start.minute() / 10), (12, 0), "{start}");
     }
 
     #[test]
