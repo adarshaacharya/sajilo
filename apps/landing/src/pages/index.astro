@@ -7,6 +7,7 @@ import Tour from "../components/Tour.astro";
 import Stocks from "../components/Stocks.astro";
 import Bazar from "../components/Bazar.astro";
 import Chhutti from "../components/Chhutti.astro";
+import Weather from "../components/Weather.astro";
 import Rashifal from "../components/Rashifal.astro";
 import Radio from "../components/Radio.astro";
 import Tools from "../components/Tools.astro";
@@ -35,12 +36,13 @@ const jsonLd = {
 };
 ---
 
-<Base title="Sajilo: Bikram Sambat calendar and Nepali daily information" ogTitle="Sajilo: Nepal in your menu bar" description={description}>
+<Base title="Sajilo: Nepal in your menu bar" description={description}>
   <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <Hero />
   <Ticker />
   <PatroLeaf />
   <Chhutti />
+  <Weather />
   <Tour />
   <Stocks />
   <Bazar />

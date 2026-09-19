@@ -71,6 +71,11 @@ export const kathmandu = {
   days: weather.daily.length,
 };
 
+const places = c.list_places as { name: string; district: string; elevation: number }[];
+export const placeCount = places.length;
+export const highestPlace = places.reduce((a, b) => (b.elevation > a.elevation ? b : a));
+export const lowestPlace = places.reduce((a, b) => (b.elevation < a.elevation ? b : a));
+
 // ---------- Bazar ----------
 
 const metals = c.get_bazar.metals.value.rates;

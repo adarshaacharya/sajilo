@@ -1,0 +1,234 @@
+---
+// Kathmandu's own numbers, recorded like everything else on this page
+// (src/data/showcase.ts). The AQI caption is the one piece of "writing" here,
+// and it's picked from the real recorded band, not typed in for the day.
+import { kathmandu, placeCount, highestPlace, lowestPlace } from "../data/showcase";
+import { ne, nepalClock } from "../lib/format";
+
+const CONDITION_NE: Record<string, string> = {
+  clear: "खुला",
+  "partly-cloudy": "आंशिक बादल",
+  cloudy: "बादल",
+  overcast: "घमाइलो छैन",
+  fog: "कुहिरो",
+  drizzle: "सिमसिम",
+  rain: "पानी",
+  "heavy-rain": "मुसलधारे पानी",
+  thunderstorm: "चट्याङ",
+  snow: "हिउँ",
+};
+
+// The US EPA bands or app itself uses, each with the honest, slightly
+// weary caption a Kathmandu resident actually gives that number.
+function aqiCaption(aqi: number): { label: string; note: string } {
+  if (aqi <= 50) return { label: "Good", note: "Open the windows. Rare, take the photo." };
+  if (aqi <= 100) return { label: "Moderate", note: "Fine for most. The usual haze is still there." };
+  if (aqi <= 150) return { label: "Unhealthy for sensitive groups", note: "Skip the run if your lungs have opinions." };
+  if (aqi <= 200) return { label: "Unhealthy", note: "Mask up. This is a normal Tuesday, not an emergency." };
+  if (aqi <= 300) return { label: "Very unhealthy", note: "Stay in. Kathmandu is doing its Kathmandu thing." };
+  return { label: "Hazardous", note: "The valley has become the smog it always threatened to be." };
+}
+
+const aqi = aqiCaption(kathmandu.aqi);
+const conditionNe = CONDITION_NE[kathmandu.condition] ?? kathmandu.condition;
+---
+
+<section class="weather wrap" id="weather" aria-labelledby="weather-title">
+  <div class="section-head reveal">
+    <p class="weather-mark">
+      <span lang="ne">मौसम</span>
+      <span class="weather-mark-en">Weather</span>
+    </p>
+    <h2 id="weather-title">
+      Your weather app says clear sky. <em>Your eyes disagree.</em>
+    </h2>
+    <p class="lede">
+      Forecasts and honest air quality for {ne(placeCount)} places, from {highestPlace.name} at
+      {ne(Math.round(highestPlace.elevation))} m down to {lowestPlace.name} at
+      {ne(Math.round(lowestPlace.elevation))} m. Not just Kathmandu.
+    </p>
+  </div>
+
+  <div class="panel reveal">
+    <div class="panel-now">
+      <p class="now-place">काठमाडौं <span class="now-place-en">Kathmandu</span></p>
+      <p class="now-temp num">{kathmandu.temperature}°</p>
+      <p class="now-condition" lang="ne">{conditionNe}</p>
+      <p class="now-sun">
+        <span>सूर्योदय {nepalClock(kathmandu.sunrise)}</span>
+        <span>सूर्यास्त {nepalClock(kathmandu.sunset)}</span>
+      </p>
+    </div>
+
+    <div class="panel-aqi" class:list={[`aqi-${Math.min(5, Math.floor(kathmandu.aqi / 50))}`]}>
+      <p class="aqi-eyebrow">Air quality, honestly</p>
+      <p class="aqi-number num">{ne(kathmandu.aqi)}</p>
+      <p class="aqi-label">{aqi.label}</p>
+      <p class="aqi-note">{aqi.note}</p>
+      <p class="aqi-pm">PM2.5: {kathmandu.pm25} µg/m³</p>
+    </div>
+
+    <p class="panel-foot">
+      {ne(kathmandu.days)}-day forecast, offline-cached the moment it loads — a dead signal on a bus
+      to Pokhara doesn't mean losing the forecast you already had.
+    </p>
+  </div>
+</section>
+
+<style>
+  .weather {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .weather-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .weather-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .weather-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .panel {
+    margin-top: clamp(32px, 4.4vw, 52px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px -30px rgb(0 0 0 / 0.7);
+  }
+
+  .panel-now,
+  .panel-aqi {
+    padding: clamp(24px, 3.2vw, 36px);
+    background: var(--ink-2);
+  }
+
+  .now-place {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: var(--deva);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--paper);
+  }
+  .now-place-en {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .now-temp {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(64px, 8vw, 96px);
+    line-height: 1;
+    margin-top: 8px;
+    color: var(--gilt-2);
+  }
+  .now-condition {
+    font-family: var(--deva);
+    font-size: 16px;
+    color: var(--paper-2);
+    margin-top: 4px;
+  }
+  .now-sun {
+    display: flex;
+    gap: 18px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-family: var(--deva);
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+
+  .panel-aqi {
+    display: flex;
+    flex-direction: column;
+  }
+  .aqi-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--paper-3);
+  }
+  .aqi-number {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(48px, 6vw, 68px);
+    line-height: 1;
+    margin-top: 6px;
+  }
+  .aqi-label {
+    font-weight: 600;
+    font-size: 15px;
+    margin-top: 2px;
+  }
+  .aqi-note {
+    margin-top: 10px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--paper-3);
+  }
+  .aqi-pm {
+    margin-top: auto;
+    padding-top: 14px;
+    font-size: 12px;
+    color: var(--paper-4);
+  }
+
+  /* AQI bands — 0:good (leaf), 1:moderate (gilt), 2+:worse (sindoor, rising
+     intensity). The same red/gilt/green vocabulary the rest of the page
+     already spends on holiday/accent/positive, not a new palette. */
+  .aqi-0 .aqi-number,
+  .aqi-0 .aqi-label {
+    color: var(--leaf);
+  }
+  .aqi-1 .aqi-number,
+  .aqi-1 .aqi-label {
+    color: var(--gilt-2);
+  }
+  .aqi-2 .aqi-number,
+  .aqi-2 .aqi-label,
+  .aqi-3 .aqi-number,
+  .aqi-3 .aqi-label,
+  .aqi-4 .aqi-number,
+  .aqi-4 .aqi-label,
+  .aqi-5 .aqi-number,
+  .aqi-5 .aqi-label {
+    color: var(--sindoor-2);
+  }
+
+  .panel-foot {
+    grid-column: 1 / -1;
+    padding: 16px clamp(24px, 3.2vw, 36px);
+    background: var(--ink-3);
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+
+  @media (max-width: 640px) {
+    .panel {
+      grid-template-columns: 1fr;
+    }
+    .now-sun {
+      flex-wrap: wrap;
+      gap: 6px 18px;
+    }
+  }
+</style>
