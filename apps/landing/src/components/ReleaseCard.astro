@@ -1,0 +1,198 @@
+---
+import type { RenderedRelease } from "../lib/releases";
+
+interface Props {
+  release: RenderedRelease;
+  /** List view links to the detail page and shows an excerpt; the detail page shows everything in full. */
+  full?: boolean;
+  /** `/dl/*` always serves the newest release, so a download button only ever belongs on this one. */
+  isLatest?: boolean;
+}
+const { release: r, full = false, isLatest = false } = Astro.props;
+---
+
+<li class="release" id={r.version}>
+  <div class="release-head">
+    {full ? (
+      <p class="release-version num">{r.version}</p>
+    ) : (
+      <a class="release-version num" href={`/releases/${r.version}.html`}>{r.version}</a>
+    )}
+    <p class="release-date">{r.date}</p>
+    {r.prerelease && <span class="release-tag">Pre-release</span>}
+    {isLatest && <span class="release-latest">Latest</span>}
+    {isLatest && <a class="btn btn--accent btn--sm release-dl" href="/#download">Download {r.version}</a>}
+  </div>
+
+  {full ? (
+    <div class="release-body" set:html={r.bodyHtml} />
+  ) : (
+    <p class="release-excerpt">{r.excerpt}</p>
+  )}
+
+  <div class="release-links">
+    {!full && <a class="release-more" href={`/releases/${r.version}.html`}>Full release notes →</a>}
+    <a class="release-gh" href={r.htmlUrl} target="_blank" rel="noopener">View {r.version} on GitHub</a>
+  </div>
+</li>
+
+<style>
+  .release {
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 84px;
+  }
+  .release:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+  .release:target {
+    background: color-mix(in srgb, var(--gilt) 6%, transparent);
+    margin-inline: -20px;
+    padding-inline: 20px;
+    border-radius: 12px;
+  }
+
+  .release-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .release-version {
+    display: inline-block;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--gilt-2);
+    transition: color 0.15s;
+  }
+  a.release-version:hover {
+    color: var(--gilt);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.4);
+    text-underline-offset: 3px;
+  }
+  .release-date {
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .release-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sindoor-2);
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+  }
+  .release-latest {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--leaf);
+    padding: 3px 8px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+  }
+  .release-dl {
+    height: 34px;
+    padding: 0 16px;
+    font-size: 13px;
+    margin-left: auto;
+  }
+
+  .release-excerpt {
+    color: var(--paper-2);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  .release-body {
+    color: var(--paper-2);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+  .release-body :global(h2) {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--paper);
+    margin: 20px 0 8px;
+  }
+  .release-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .release-body :global(p) {
+    margin: 10px 0;
+  }
+  .release-body :global(ul) {
+    list-style: disc;
+    padding-left: 22px;
+    display: grid;
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .release-body :global(li) {
+    margin: 0;
+  }
+  .release-body :global(strong) {
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .release-body :global(code) {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--ink-3);
+  }
+  .release-body :global(blockquote) {
+    margin: 14px 0;
+    padding: 10px 16px;
+    border-left: 3px solid var(--gilt);
+    background: var(--ink-2);
+    border-radius: 0 8px 8px 0;
+    color: var(--paper-3);
+    font-size: 14px;
+  }
+  .release-body :global(blockquote p) {
+    margin: 0;
+  }
+  .release-body :global(a) {
+    color: var(--gilt-2);
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+
+  .release-links {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .release-more {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gilt-2);
+  }
+  .release-more:hover {
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+  .release-gh {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--paper-3);
+    transition: color 0.15s;
+  }
+  .release-gh:hover {
+    color: var(--paper-2);
+  }
+</style>

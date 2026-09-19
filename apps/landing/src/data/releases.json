@@ -158,5 +158,181 @@
     "body": "",
     "prerelease": false,
     "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.7"
+  },
+  {
+    "version": "v0.1.6",
+    "name": "Sajilo v0.1.6",
+    "publishedAt": "2026-08-22T17:24:10Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.6"
+  },
+  {
+    "version": "v0.1.5",
+    "name": "Sajilo v0.1.5",
+    "publishedAt": "2026-08-22T10:56:19Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.5"
+  },
+  {
+    "version": "v0.1.4",
+    "name": "Sajilo v0.1.4",
+    "publishedAt": "2026-08-21T07:44:43Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.4"
+  },
+  {
+    "version": "v0.1.3",
+    "name": "Sajilo v0.1.3",
+    "publishedAt": "2026-08-20T16:15:59Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.3"
+  },
+  {
+    "version": "v0.1.2",
+    "name": "Sajilo v0.1.2",
+    "publishedAt": "2026-08-20T15:17:45Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.2"
+  },
+  {
+    "version": "v0.1.1-beta.4",
+    "name": "Sajilo v0.1.1-beta.4",
+    "publishedAt": "2026-08-20T15:02:42Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.4"
+  },
+  {
+    "version": "v0.1.1-beta.3",
+    "name": "Sajilo v0.1.1-beta.3",
+    "publishedAt": "2026-08-20T15:06:32Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.3"
+  },
+  {
+    "version": "v0.1.1-beta.2",
+    "name": "Sajilo v0.1.1-beta.2",
+    "publishedAt": "2026-08-20T14:45:57Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.2"
+  },
+  {
+    "version": "v0.1.1-beta.1",
+    "name": "Sajilo v0.1.1-beta.1",
+    "publishedAt": "2026-08-20T14:32:31Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.1"
+  },
+  {
+    "version": "v0.1.0-beta.14",
+    "name": "Sajilo v0.1.0-beta.14",
+    "publishedAt": "2026-08-20T13:58:38Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.14"
+  },
+  {
+    "version": "v0.1.0-beta.13",
+    "name": "Sajilo v0.1.0-beta.13",
+    "publishedAt": "2026-08-20T13:12:05Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.13"
+  },
+  {
+    "version": "v0.1.0-beta.12",
+    "name": "Sajilo v0.1.0-beta.12",
+    "publishedAt": "2026-08-20T12:56:18Z",
+    "body": "",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.12"
+  },
+  {
+    "version": "v0.1.0-beta.9",
+    "name": "Sajilo v0.1.0-beta.9",
+    "publishedAt": "2026-08-20T10:10:16Z",
+    "body": "",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.9"
+  },
+  {
+    "version": "v0.1.0-beta.11",
+    "name": "Sajilo v0.1.0-beta.11",
+    "publishedAt": "2026-08-20T12:43:13Z",
+    "body": "",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.11"
+  },
+  {
+    "version": "v0.1.0-beta.10",
+    "name": "Sajilo v0.1.0-beta.10",
+    "publishedAt": "2026-08-20T12:19:43Z",
+    "body": "",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.10"
+  },
+  {
+    "version": "v0.1.0-beta.8",
+    "name": "Sajilo v0.1.0-beta.8",
+    "publishedAt": "2026-08-19T17:41:05Z",
+    "body": "- Application got re-written from swift to tauri for cross platform support.",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.8"
+  },
+  {
+    "version": "v0.1.0-beta.6",
+    "name": "Sajilo 0.1.0-beta.6",
+    "publishedAt": "2026-08-19T13:00:51Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.4...v0.1.0-beta.6",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.6"
+  },
+  {
+    "version": "v0.1.0-beta.5",
+    "name": "Sajilo 0.1.0-beta.5",
+    "publishedAt": "2026-08-17T11:48:30Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.4...v0.1.0-beta.5",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.5"
+  },
+  {
+    "version": "v0.1.0-beta.4",
+    "name": "Sajilo 0.1.0-beta.4",
+    "publishedAt": "2026-08-17T04:09:13Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.3...v0.1.0-beta.4",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.4"
+  },
+  {
+    "version": "v0.1.0-beta.3",
+    "name": "Sajilo 0.1.0-beta.3",
+    "publishedAt": "2026-08-16T19:46:05Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.1...v0.1.0-beta.3",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.3"
+  },
+  {
+    "version": "v0.1.0-beta.2",
+    "name": "Sajilo 0.1.0-beta.2",
+    "publishedAt": "2026-08-16T09:35:02Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.1...v0.1.0-beta.2",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.2"
+  },
+  {
+    "version": "v0.1.0-beta.1",
+    "name": "Sajilo 0.1.0-beta.1",
+    "publishedAt": "2026-08-16T09:21:25Z",
+    "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/commits/v0.1.0-beta.1",
+    "prerelease": true,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.1"
   }
 ]

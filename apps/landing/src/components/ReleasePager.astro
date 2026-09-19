@@ -1,0 +1,55 @@
+---
+interface Props {
+  page: number;
+  pageCount: number;
+}
+const { page, pageCount } = Astro.props;
+
+const hrefFor = (p: number) => (p === 1 ? "/releases.html" : `/releases/page/${p}.html`);
+---
+
+{pageCount > 1 && (
+  <nav class="pager" aria-label="Release pages">
+    {page > 1 ? (
+      <a class="pager-link" href={hrefFor(page - 1)}>← Newer</a>
+    ) : (
+      <span class="pager-link pager-link--disabled">← Newer</span>
+    )}
+    <p class="pager-status">Page {page} of {pageCount}</p>
+    {page < pageCount ? (
+      <a class="pager-link" href={hrefFor(page + 1)}>Older →</a>
+    ) : (
+      <span class="pager-link pager-link--disabled">Older →</span>
+    )}
+  </nav>
+)}
+
+<style>
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .pager-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gilt-2);
+  }
+  .pager-link:hover {
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+  .pager-link--disabled {
+    color: var(--paper-4);
+    pointer-events: none;
+  }
+  .pager-status {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+</style>

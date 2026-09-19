@@ -1,0 +1,91 @@
+---
+import Base from "../../layouts/Base.astro";
+import ReleaseCard from "../../components/ReleaseCard.astro";
+import { allReleases, findRelease, neighborsOf, latestVersion } from "../../lib/releases";
+
+export function getStaticPaths() {
+  return allReleases().map((r) => ({ params: { version: r.version } }));
+}
+
+const { version } = Astro.params;
+const release = findRelease(version!);
+if (!release) return Astro.redirect("/releases.html", 302);
+const { newer, older } = neighborsOf(version!);
+---
+
+<Base
+  title={`${release.version}: Sajilo release notes`}
+  description={release.excerpt}
+  path={`/releases/${release.version}.html`}
+>
+  <main class="wrap release-page" id="main">
+    <a class="back-link" href="/releases.html">← All release notes</a>
+
+    <ol class="release-list">
+      <ReleaseCard release={release} full isLatest={release.version === latestVersion()} />
+    </ol>
+
+    <nav class="release-nav" aria-label="Adjacent releases">
+      {older ? (
+        <a class="release-nav-link" href={`/releases/${older.version}.html`}>← {older.version}</a>
+      ) : (
+        <span class="release-nav-link release-nav-link--disabled">← Older</span>
+      )}
+      {newer ? (
+        <a class="release-nav-link" href={`/releases/${newer.version}.html`}>{newer.version} →</a>
+      ) : (
+        <span class="release-nav-link release-nav-link--disabled">Newer →</span>
+      )}
+    </nav>
+  </main>
+</Base>
+
+<style>
+  .release-page {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 60px;
+    max-width: 720px;
+  }
+  .back-link {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--paper-3);
+    margin-bottom: clamp(24px, 4vw, 40px);
+    transition: color 0.15s;
+  }
+  .back-link:hover {
+    color: var(--gilt-2);
+  }
+
+  .release-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .release-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .release-nav-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gilt-2);
+  }
+  .release-nav-link:hover {
+    text-decoration: underline;
+    text-decoration-color: rgb(240 198 106 / 0.45);
+    text-underline-offset: 2px;
+  }
+  .release-nav-link--disabled {
+    color: var(--paper-4);
+    pointer-events: none;
+  }
+</style>

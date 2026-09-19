@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Records the last 20 GitHub releases into src/data/releases.json, so
+ * Records the last 100 GitHub releases into src/data/releases.json, so
  * /releases.html reads its own site instead of sending visitors to GitHub.
  * No token: the GitHub REST API serves public releases unauthenticated, at a
  * rate limit far above what one build needs.
@@ -19,7 +19,7 @@ const OWNER_REPO = "adarshaacharya/sajilo";
 const OUT_FILE = new URL("../src/data/releases.json", import.meta.url);
 
 async function main() {
-  const res = await fetch(`https://api.github.com/repos/${OWNER_REPO}/releases?per_page=20`, {
+  const res = await fetch(`https://api.github.com/repos/${OWNER_REPO}/releases?per_page=100`, {
     headers: { Accept: "application/vnd.github+json", "User-Agent": "sajilo-landing" },
   });
 

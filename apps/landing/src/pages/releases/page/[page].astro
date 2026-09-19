@@ -1,17 +1,26 @@
 ---
-import Base from "../layouts/Base.astro";
-import ReleaseCard from "../components/ReleaseCard.astro";
-import ReleasePager from "../components/ReleasePager.astro";
-import { releasesForPage, pageCount } from "../lib/releases";
+import Base from "../../../layouts/Base.astro";
+import ReleaseCard from "../../../components/ReleaseCard.astro";
+import ReleasePager from "../../../components/ReleasePager.astro";
+import { releasesForPage, pageCount } from "../../../lib/releases";
 
-const page = 1;
+export function getStaticPaths() {
+  // Page 1 lives at /releases.html; this route only needs to cover the rest.
+  const total = pageCount();
+  return Array.from({ length: Math.max(0, total - 1) }, (_, i) => ({
+    params: { page: String(i + 2) },
+  }));
+}
+
+const page = Number(Astro.params.page);
 const releases = releasesForPage(page);
 ---
 
 <Base
-  title="Release notes: Sajilo"
+  title={`Release notes, page ${page}: Sajilo`}
   description="What changed in every recent Sajilo release, straight from the source, without going through GitHub."
-  path="/releases.html"
+  path={`/releases/page/${page}.html`}
+  noindex
 >
   <main class="wrap releases" id="main">
     <h1 class="display releases-h1">Release notes</h1>
@@ -20,7 +29,7 @@ const releases = releasesForPage(page);
     </p>
 
     <ol class="release-list">
-      {releases.map((r, i) => <ReleaseCard release={r} isLatest={page === 1 && i === 0} />)}
+      {releases.map((r) => <ReleaseCard release={r} />)}
     </ol>
 
     <ReleasePager page={page} pageCount={pageCount()} />

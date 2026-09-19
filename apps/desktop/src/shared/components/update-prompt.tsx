@@ -139,7 +139,7 @@ export function UpdateWindow() {
 
       <button
         type="button"
-        onClick={() => openExternalLink(`https://sajilo.fyi/releases.html#v${version}`)}
+        onClick={() => openExternalLink(`https://sajilo.fyi/releases/v${version}.html`)}
         className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-accent hover:underline"
       >
         {t("updater.whats-new")}
