@@ -138,6 +138,25 @@ export const ipo = ipoIssue && {
   applied: Number(ipoIssue.appliedUnits),
   applications: Number(ipoIssue.applicationCount),
 };
+/** Mutual funds: how many of each kind, and the largest open-ended funds —
+ * the ones a SIP goes into — with their latest NAV against the one before. */
+const funds = c.get_mutual_funds.value.funds;
+export const mutualFunds = {
+  total: funds.length,
+  openEnd: funds.filter((fund) => fund.kind === "openEnd").length,
+  closedEnd: funds.filter((fund) => fund.kind === "closedEnd").length,
+  largest: funds
+    .filter((fund) => fund.kind === "openEnd" && fund.latest && fund.previous)
+    .sort((a, b) => (b.fundSize ?? 0) - (a.fundSize ?? 0))
+    .slice(0, 4)
+    .map((fund) => ({
+      symbol: fund.symbol,
+      name: fund.name,
+      nav: fund.latest!.nav,
+      navDate: fund.latest!.date,
+      change: fund.latest!.nav - fund.previous!.nav,
+    })),
+};
 /** The index through the recorded session, a sample a minute. */
 export const nepseIntraday = c.get_nepse_intraday.value.points;
 

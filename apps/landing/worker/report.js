@@ -8,7 +8,7 @@
  */
 
 import { EmailMessage } from "cloudflare:email";
-import { createMimeMessage } from "mimetext";
+import { createMimeMessage, Mailbox } from "mimetext";
 
 const KINDS = new Set(["Something is broken", "Data looks wrong", "The app crashed", "A feature idea", "Something else"]);
 const MAX_LEN = 4000;
@@ -71,7 +71,7 @@ export async function handleReport(request, env) {
   msg.setSender({ name: "Sajilo report form", addr: "reports@sajilo.fyi" });
   msg.setRecipient("contact@sajilo.fyi");
   msg.setSubject(`[Sajilo] ${kind}: ${summary}`);
-  if (replyEmail) msg.setHeader("Reply-To", { addr: replyEmail });
+  if (replyEmail) msg.setHeader("Reply-To", new Mailbox({ addr: replyEmail }));
   msg.addMessage({
     contentType: "text/plain",
     data: [
