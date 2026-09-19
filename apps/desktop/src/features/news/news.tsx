@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
@@ -110,6 +110,39 @@ export function News() {
 
   const emptyMessage = selected === ALL ? t("state.not-yet") : t("news.none-from-source");
 
+  // Infinite scroll: a sentinel just past the last row loads the next page
+  // once it comes near view. It only exists in the DOM while there is more
+  // to load, so the observer disconnects itself the moment the list is
+  // fully shown — nothing left dangling once every headline is on screen.
+  const hasMore = visible < filtered.length;
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setLoadingMore(true);
+          setVisible((count) => count + PAGE);
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore]);
+
+  // The next 20 rows are already in memory — this isn't a fetch, it's the
+  // stagger-in animation for 20 rows at once. Holding the loading state
+  // through that keeps the transition from reading as a dead pause between
+  // the indicator vanishing and the rows actually finishing their entrance.
+  useEffect(() => {
+    if (!loadingMore) return;
+    const id = setTimeout(() => setLoadingMore(false), 450);
+    return () => clearTimeout(id);
+  }, [loadingMore]);
+
   return (
     <StateBanner state={banner} onRetry={() => load(true)}>
       <div className="mb-2">
@@ -164,14 +197,21 @@ export function News() {
         </Stagger>
       )}
 
-      {visible < filtered.length && (
-        <button
-          type="button"
-          onClick={() => setVisible((count) => count + PAGE)}
-          className="mt-2 w-full py-1.5 text-center text-[11px] text-text-muted hover:text-text-secondary"
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="flex items-center justify-center gap-1.5 py-3 text-[10px] text-text-muted"
+          aria-hidden
         >
-          {filtered.length - visible} more
-        </button>
+          {loadingMore ? (
+            <>
+              <Icon name="refresh" className="size-3 animate-spin" />
+              {t("state.loading")}
+            </>
+          ) : (
+            <span className="size-1.5 animate-pulse rounded-full bg-text-muted" />
+          )}
+        </div>
       )}
 
       {failed.length > 0 && (
