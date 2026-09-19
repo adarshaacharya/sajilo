@@ -10,18 +10,14 @@ const TABLES: Record<Language, Record<string, string>> = { en, ne };
  * Falls back to English, then to the key itself. A missing translation should
  * show an English word, never a blank space where a label belongs.
  */
+/**
+ * The language until someone picks one in Settings. Only that pick is ever
+ * stored, so a stored Nepali is always a choice someone made, and it wins.
+ */
+export const DEFAULT_LANGUAGE: Language = "en";
+
 export function translate(key: Key, language: Language): string {
   return TABLES[language][key] ?? en[key] ?? key;
-}
-
-/**
- * The language to start in before anyone has picked one: Nepali on a computer
- * set to Nepali, English everywhere else. Installs from before this default
- * are kept on Nepali by the desktop shell, which stores it for them.
- */
-export function systemLanguage(): Language {
-  const preferred = typeof navigator === "undefined" ? [] : (navigator.languages ?? []);
-  return preferred.some((tag) => tag.toLowerCase().startsWith("ne")) ? "ne" : "en";
 }
 
 /**
@@ -33,7 +29,7 @@ export function systemLanguage(): Language {
  * user's language, so the setting is mirrored here and read directly. Anything
  * that can reach the context should keep using `t` from `useSettings`.
  */
-let activeLanguage: Language = systemLanguage();
+let activeLanguage: Language = DEFAULT_LANGUAGE;
 
 export function setActiveLanguage(language: Language): void {
   activeLanguage = language;

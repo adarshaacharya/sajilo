@@ -122,19 +122,3 @@ pub fn weather_location(app: &AppHandle<Wry>) -> &'static Place {
         .unwrap_or_default();
     places::find_or_default(&id)
 }
-
-/// Keeps Nepali for installs from before the default became the system
-/// language. The UI used to start in Nepali and only stored a language once
-/// someone picked one, so an install that has run before but has no stored
-/// language has been reading Nepali all along; an update must not switch it to
-/// English underneath them. A brand-new install stores nothing here and gets
-/// the system language.
-///
-/// Runs before `autostart::apply_first_run_default`, whose flag is what tells
-/// an earlier run apart from this being the first.
-pub fn keep_language_for_existing_install(app: &AppHandle<Wry>) {
-    let has = |key| db::get_json(app, key).ok().flatten().is_some();
-    if has(AUTOSTART_DEFAULTED) && !has(LANGUAGE) {
-        let _ = db::set_json(app, LANGUAGE, &serde_json::Value::from("ne"));
-    }
-}

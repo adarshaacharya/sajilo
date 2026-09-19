@@ -439,23 +439,22 @@ button.row-line + button.row-line::before {
     color 0.15s ease;
 }
 
-/* One soft ring of gilt when the pill appears, and again each time the popover
-   is opened. Once, never looping: a pill that keeps pulsing is one people
-   learn to stop seeing. */
+/* An update waiting on a click glows: a steady gilt halo, breathing slowly.
+   Slow and soft enough to sit in the corner of the eye rather than tug at it,
+   and only ever while there is something to click. Reduced motion keeps the
+   halo and drops the breathing. */
 .update-header-btn--glow {
-  animation: update-glow 1.6s ease-out 0.3s 1 both;
+  box-shadow: 0 0 5px 0 color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+  animation: update-breathe 3s ease-in-out infinite;
 }
 
-@keyframes update-glow {
-  0% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
-  }
-  70% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-accent-mark) 0%, transparent);
-    background: color-mix(in srgb, var(--color-accent-mark) 26%, transparent);
-  }
+@keyframes update-breathe {
+  0%,
   100% {
-    box-shadow: 0 0 0 0 transparent;
+    box-shadow: 0 0 5px 0 color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 7px 0 color-mix(in srgb, var(--color-accent-mark) 18%, transparent);
   }
 }
 
