@@ -160,8 +160,18 @@ fn migrate(connection: &Connection) -> Result<()> {
     Ok(())
 }
 
+/// Brings a database from `from` up to `SCHEMA_VERSION`, one step per version.
+///
+/// Every step after 7 must carry existing rows forward: `ALTER TABLE … ADD
+/// COLUMN` with a default, or create the new table, copy rows across, then
+/// drop the old one — never a bare `DROP TABLE`. An app update is not
+/// supposed to cost anyone their Keeper documents, photos or day plans, and
+/// people skip releases, so a step also runs for someone jumping several
+/// versions at once. Add a test beside the existing ones that opens a
+/// database at the old version with rows in it and checks those rows survive.
 fn upgrade(connection: &Connection, from: i64) -> Result<()> {
-    // Keeper was reshaped before anyone kept anything in it (optional due
+    // The one exception, and it stays the only one. Keeper was reshaped
+    // before anyone kept anything in it (optional due
     // dates, document owners and cycles, custom fields, reminder templates),
     // so its two changed tables are rebuilt rather than migrated column by
     // column. Family profiles kept their shape and are left alone.
