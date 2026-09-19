@@ -201,6 +201,7 @@ export function Dashboard() {
       name: event.name,
       when: relativeText(event.days_away, t, numerals),
       holiday: event.is_public_holiday,
+      date: event.date,
     }));
 
   return (

@@ -206,30 +206,6 @@ html {
   --text-size-lg: 21px;
 }
 
-:root[data-text-size="extraLarge"] {
-  --text-size-8: 10px;
-  --text-size-9: 11px;
-  --text-size-9-5: 12px;
-  --text-size-10: 13px;
-  --text-size-11: 14px;
-  --text-size-12: 16px;
-  --text-size-13: 17px;
-  --text-size-14: 18px;
-  --text-size-15: 19px;
-  --text-size-16: 21px;
-  --text-size-17: 22px;
-  --text-size-18: 23px;
-  --text-size-19: 25px;
-  --text-size-20: 26px;
-  --text-size-22: 29px;
-  --text-size-28: 36px;
-  --text-size-30: 39px;
-  --text-size-32: 42px;
-  --text-size-34: 44px;
-  --text-size-54: 70px;
-  --text-size-lg: 24px;
-}
-
 :root[data-text-size] :is(.app-window, .update-window) {
   font-size: var(--text-size-12);
 }

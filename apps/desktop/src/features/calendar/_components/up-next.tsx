@@ -1,10 +1,8 @@
-import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
-import { api, type KeeperSnapshot } from "../../../shared/lib/ipc";
-import { spring, useMotionEnabled } from "../../../shared/lib/motion";
+import { api, type KeeperSnapshot, type NepaliDate } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
@@ -24,47 +22,44 @@ import { personName, recordName } from "../../keeper/_lib/documents";
 import { dueLabel } from "../../keeper/_lib/shared";
 import { upcomingOf } from "../../keeper/_lib/upcoming";
 
-/** Home is a glance: only what's due within a week earns a slide. Keeper's own
+/** Home is a glance: only what's due within a week earns a row. Keeper's own
  * list looks further ahead. */
 const KEEPER_HORIZON_DAYS = 7;
 
-/** Short enough to show the next slide in a tray glance, long enough to read. */
-const HOLD_MS = 2800;
-/** A deadline that runs out today stays up long enough to be read twice. */
-const URGENT_HOLD_MS = 5000;
+/** Enough to glance over without the card crowding the home screen; the
+ * rest lives on each item's own screen. */
+const MAX_ROWS = 4;
 
-type Slide = {
+type Row = {
   id: string;
   icon: IconName;
   title: string;
   detail: string | null;
   when: string;
   urgent: boolean;
-  hold: number;
   open: () => void;
 };
 
 /**
- * The home screen's one "what's coming" row.
+ * The home screen's "what's coming" list.
  *
- * It holds the next observances by name, the IPO you can still apply to
- * while one is open, and whatever Keeper has due this week — taking turns in the same slot rather than adding a
- * card. The first calendar slide is whatever is next (often a tithi); the
- * next public holiday follows so a glance still sees a day off, not only a
- * lunar date. Each opens the full list. The tray panel is opened for a
- * glance, so the row always opens on the most urgent thing: an issue closing
- * today goes first, otherwise the nearest observance does. It stops while the
- * pointer or focus is on it, so a click never lands on the slide that just
- * arrived, and with reduced motion it never moves on its own. The trailing
- * chevron is the cue that the row opens a fuller screen.
+ * The next observances by name, the IPO you can still apply to while one is
+ * open, whatever Keeper has due this week, and a SIP payment close at hand —
+ * each a row, all visible at once. It used to be one row taking turns, which
+ * hid most of them most of the time and made the events screen, reachable
+ * only through it, a wait. Anything due today leads, in gold; then the next
+ * observance, the next public holiday, and the rest. "All events" is always
+ * in the header.
  */
-export function UpNext({ events }: { events: { name: string; when: string; holiday: boolean }[] }) {
+export function UpNext({
+  events,
+}: {
+  events: { name: string; when: string; holiday: boolean; date: NepaliDate }[];
+}) {
   const { t, numerals, modules } = useSettings();
   const navigate = useNavigate();
-  const motionEnabled = useMotionEnabled();
   const { applied, loaded } = useAppliedIpos();
   const [ipos, setIpos] = useState<LoadState<IpoSnapshot>>();
-  const [held, setHeld] = useState(false);
   const [keeper, setKeeper] = useState<KeeperSnapshot>();
   const { sips } = useSips();
 
@@ -96,37 +91,34 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
   }, [applied, ipos, loaded, modules.bazarEnabled, today]);
 
   const count = (n: number) => digits(n, numerals);
-  const slides: Slide[] = [];
+  const upcoming: Row[] = [];
   const soonest = open[0];
-  let ipoSlide: Slide | null = null;
+  let ipoRow: Row | null = null;
 
   if (soonest) {
     const urgent = soonest.phase.kind === "open" && soonest.phase.daysLeft === 0;
     const name = soonest.issue.symbol ?? shortCompanyName(companyName(soonest.issue));
     const when = phaseLabel(soonest.phase, t, count) ?? "";
-    const hold = urgent ? URGENT_HOLD_MS : HOLD_MS;
 
     if (open.length === 1) {
       const ratio = subscriptionRatio(soonest.issue);
-      ipoSlide = {
+      ipoRow = {
         id: `ipo:${soonest.key}`,
         icon: "interest",
         title: t("dashboard.ipo-title").replace("{name}", name),
         detail: ratio != null ? t("stocks.ipo-subscribed").replace("{x}", ratioText(ratio)) : null,
         when,
         urgent,
-        hold,
         open: () => navigate(`/bazar?tab=stocks&ipo=${encodeURIComponent(soonest.key)}`),
       };
     } else {
-      ipoSlide = {
+      ipoRow = {
         id: `ipos:${open.map((entry) => entry.key).join("|")}`,
         icon: "interest",
         title: t("dashboard.ipos-open").replace("{n}", count(open.length)),
         detail: name,
         when,
         urgent,
-        hold,
         open: () => navigate("/bazar?tab=stocks&ipos=1"),
       };
     }
@@ -138,12 +130,12 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
           (entry) => entry.days <= KEEPER_HORIZON_DAYS,
         )
       : [];
-  let keeperSlide: Slide | null = null;
+  let keeperRow: Row | null = null;
   const first = due[0];
   if (first) {
     const name = first.record ? recordName(t, first.record) : (first.item?.title ?? "");
     const personId = first.record?.personId ?? first.item?.personId ?? null;
-    keeperSlide = {
+    keeperRow = {
       id: `keeper:${due.map((entry) => `${entry.key}:${entry.days}`).join("|")}`,
       icon: "keeper",
       title: due.length === 1 ? name : t("dashboard.keeper-due").replace("{n}", count(due.length)),
@@ -152,7 +144,6 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
       when: dueLabel(t, first.days),
       // Today, tomorrow, or already late: lead with it.
       urgent: first.days <= 1,
-      hold: first.days <= 1 ? URGENT_HOLD_MS : HOLD_MS,
       open: () => navigate("/keeper"),
     };
   }
@@ -160,11 +151,11 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
   // A SIP payment three days out or less, from the same schedule the funds
   // screen counts down. Due today, or missed and still owed, leads the row.
   const sipDue = modules.bazarEnabled ? sips.filter(sipIsClose) : [];
-  let sipSlide: Slide | null = null;
+  let sipRow: Row | null = null;
   const nextSip = sipDue[0];
   if (nextSip) {
     const urgent = nextSip.days <= 0;
-    sipSlide = {
+    sipRow = {
       id: `sip:${sipDue.map((sip) => `${sip.symbol}:${sip.due}`).join("|")}`,
       icon: "banknote",
       title:
@@ -174,99 +165,80 @@ export function UpNext({ events }: { events: { name: string; when: string; holid
       detail: sipDue.length === 1 && nextSip.amount ? `Rs ${money.format(nextSip.amount)}` : null,
       when: sipWhen(t, nextSip.days),
       urgent,
-      hold: urgent ? URGENT_HOLD_MS : HOLD_MS,
       open: () => navigate("/bazar?tab=stocks&view=funds"),
     };
   }
 
-  if (sipSlide?.urgent) slides.push(sipSlide);
-  if (keeperSlide?.urgent) slides.push(keeperSlide);
-  if (ipoSlide?.urgent) slides.push(ipoSlide);
+  if (sipRow?.urgent) upcoming.push(sipRow);
+  if (keeperRow?.urgent) upcoming.push(keeperRow);
+  if (ipoRow?.urgent) upcoming.push(ipoRow);
   for (const event of events) {
-    slides.push({
+    upcoming.push({
       id: `event:${event.holiday ? "holiday" : "day"}:${event.name}:${event.when}`,
       icon: event.holiday ? "holiday" : "festival",
       title: event.name,
-      detail: null,
+      detail: event.holiday ? t("calendar.public-holiday") : null,
       when: event.when,
       urgent: false,
-      hold: HOLD_MS,
-      open: () => navigate("/events"),
+      open: () => navigate(`/day?y=${event.date.year}&m=${event.date.month}&d=${event.date.day}`),
     });
   }
-  if (ipoSlide && !ipoSlide.urgent) slides.push(ipoSlide);
-  if (keeperSlide && !keeperSlide.urgent) slides.push(keeperSlide);
-  if (sipSlide && !sipSlide.urgent) slides.push(sipSlide);
+  if (ipoRow && !ipoRow.urgent) upcoming.push(ipoRow);
+  if (keeperRow && !keeperRow.urgent) upcoming.push(keeperRow);
+  if (sipRow && !sipRow.urgent) upcoming.push(sipRow);
 
-  // A different set of slides starts over on the first, most urgent one.
-  const signature = slides.map((slide) => slide.id).join("\n");
-  const [shown, setShown] = useState({ signature, index: 0 });
-  if (shown.signature !== signature) setShown({ signature, index: 0 });
-
-  const total = slides.length;
-  const index = shown.signature === signature ? Math.min(shown.index, total - 1) : 0;
-  const current = slides[index];
-  const hold = current?.hold ?? HOLD_MS;
-  const rotates = total > 1 && motionEnabled && !held;
-
-  useEffect(() => {
-    if (!rotates) return;
-    const next = (index + 1) % total;
-    const timer = window.setTimeout(() => setShown({ signature, index: next }), hold);
-    return () => window.clearTimeout(timer);
-  }, [hold, index, rotates, signature, total]);
-
-  if (!current) return null;
+  const rows = upcoming.slice(0, MAX_ROWS);
+  if (rows.length === 0) return null;
 
   return (
-    <section
-      aria-label={t("dashboard.up-next")}
-      aria-roledescription="carousel"
-      className="surface-card flex items-stretch overflow-hidden"
-      onMouseEnter={() => setHeld(true)}
-      onMouseLeave={() => setHeld(false)}
-      onFocus={() => setHeld(true)}
-      onBlur={(focus) => {
-        if (!focus.currentTarget.contains(focus.relatedTarget as Node | null)) setHeld(false);
-      }}
-    >
-      <div className="relative h-9 min-w-0 flex-1" aria-live={rotates ? "off" : "polite"}>
-        <AnimatePresence initial={false}>
-          <motion.button
-            key={current.id}
-            type="button"
-            onClick={current.open}
-            initial={motionEnabled ? { y: "100%", opacity: 0 } : false}
-            animate={{ y: 0, opacity: 1 }}
-            exit={motionEnabled ? { y: "-100%", opacity: 0 } : { opacity: 0 }}
-            transition={motionEnabled ? spring.snappy : { duration: 0 }}
-            className="absolute inset-0 flex w-full cursor-pointer items-center gap-2 px-2.5 text-left active:scale-[0.99]"
-          >
-            <Icon
-              name={current.icon}
-              className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
-            />
-            <span className="min-w-0 flex-1 truncate text-[12px]">
-              {current.title}
-              {current.detail && (
-                <span className="ml-1.5 text-[10px] text-text-muted">{current.detail}</span>
-              )}
-            </span>
-            <span
-              className={`flex shrink-0 items-center gap-1 text-[11px] ${
-                current.urgent
-                  ? "font-medium text-[color:var(--color-accent-mark)]"
-                  : "text-text-muted"
-              }`}
-            >
-              {current.when}
-              <span aria-hidden className="text-[13px] leading-none">
-                ›
-              </span>
-            </span>
-          </motion.button>
-        </AnimatePresence>
+    <section aria-label={t("dashboard.up-next")} className="surface-card overflow-hidden">
+      <div className="flex items-center justify-between gap-2 px-2.5 pt-2 pb-1.5">
+        <h2 className="text-[10px] font-normal text-text-muted">{t("dashboard.up-next")}</h2>
+        <button
+          type="button"
+          onClick={() => navigate("/events")}
+          className="flex items-center gap-1 text-[10px] text-text-secondary hover:text-text"
+        >
+          {t("dashboard.all-events")}
+          <span aria-hidden className="text-[12px] leading-none">
+            ›
+          </span>
+        </button>
       </div>
+      <ul>
+        {rows.map((row) => (
+          <li key={row.id} className="section-divider">
+            <button
+              type="button"
+              onClick={row.open}
+              className="flex h-8 w-full cursor-pointer items-center gap-2 px-2.5 text-left transition-colors hover:bg-surface-hover active:bg-surface-hover"
+            >
+              <Icon
+                name={row.icon}
+                className="size-3.5 shrink-0 text-[color:var(--color-accent-mark)]"
+              />
+              <span className="min-w-0 flex-1 truncate text-[12px]">
+                {row.title}
+                {row.detail && (
+                  <span className="ml-1.5 text-[10px] text-text-muted">{row.detail}</span>
+                )}
+              </span>
+              <span
+                className={`flex shrink-0 items-center gap-1 text-[11px] ${
+                  row.urgent
+                    ? "font-medium text-[color:var(--color-accent-mark)]"
+                    : "text-text-muted"
+                }`}
+              >
+                {row.when}
+                <span aria-hidden className="text-[13px] leading-none">
+                  ›
+                </span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

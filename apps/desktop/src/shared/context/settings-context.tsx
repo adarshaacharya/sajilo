@@ -5,7 +5,7 @@ import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
 export type ThemeMode = "system" | "light" | "dark";
-export type TextSize = "small" | "default" | "large" | "extraLarge";
+export type TextSize = "small" | "default" | "large";
 
 export interface ModulePrefs {
   weatherEnabled: boolean;
@@ -144,8 +144,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           if (
             storedTextSize === "small" ||
             storedTextSize === "default" ||
-            storedTextSize === "large" ||
-            storedTextSize === "extraLarge"
+            storedTextSize === "large"
           ) {
             setTextSizeState(storedTextSize);
           }

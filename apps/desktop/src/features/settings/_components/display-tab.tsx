@@ -111,7 +111,6 @@ export function DisplayTab({
             { id: "small", label: t("settings.text-size-small") },
             { id: "default", label: t("settings.text-size-default") },
             { id: "large", label: t("settings.text-size-large") },
-            { id: "extraLarge", label: t("settings.text-size-extra-large") },
           ]}
         />
         <Select
