@@ -60,6 +60,9 @@ export interface CalendarEvent {
   name: string | null;
   tithi: string | null;
   is_public_holiday: boolean;
+  /** Auspicious days (saait) from the official calendar. */
+  marriage?: boolean;
+  bratabandha?: boolean;
 }
 
 export interface UpcomingEvent {

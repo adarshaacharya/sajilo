@@ -16,5 +16,8 @@
     "astro": "^5.13.0",
     "typescript": "^5.9.0",
     "wrangler": "^4.30.0"
+  },
+  "dependencies": {
+    "mimetext": "^3.0.28"
   }
 }

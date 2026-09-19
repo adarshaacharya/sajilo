@@ -115,6 +115,21 @@ export function DateSummaryPanel({
         </p>
       )}
 
+      {(event?.marriage || event?.bratabandha) && (
+        <p className="mt-2 flex items-center gap-1.5 text-[10px]">
+          <span className="size-1.5 shrink-0 rounded-full bg-[color:var(--color-accent-mark)]" />
+          <span className="text-text-muted">{t("calendar.saait")}</span>
+          <span className="font-medium text-[color:var(--color-accent-mark)]">
+            {[
+              event.marriage && t("calendar.saait-marriage"),
+              event.bratabandha && t("calendar.saait-bratabandha"),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </span>
+        </p>
+      )}
+
       <div className="section-divider mt-2.5 pt-2">
         <CompactCopyRow conversion={conversion} />
       </div>

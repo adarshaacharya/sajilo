@@ -14,6 +14,8 @@
  * describes who downloaded, only how many did.
  */
 
+import { handleReport } from "./report.js";
+
 const OWNER_REPO = "adarshaacharya/sajilo";
 const RELEASES_LATEST = `https://github.com/${OWNER_REPO}/releases/latest`;
 
@@ -33,6 +35,11 @@ function assetUrl(name) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/report") {
+      return handleReport(request, env);
+    }
+
     const platform = url.pathname.startsWith("/dl/")
       ? url.pathname.slice("/dl/".length)
       : null;

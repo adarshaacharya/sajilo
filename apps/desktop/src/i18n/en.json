@@ -669,5 +669,8 @@
   "panchang.next-morning": "next morning",
   "panchang.chaughadiya": "Chaughadiya",
   "panchang.day": "Day",
-  "panchang.night": "Night"
+  "panchang.night": "Night",
+  "calendar.saait": "Saait",
+  "calendar.saait-marriage": "Wedding",
+  "calendar.saait-bratabandha": "Bratabandha"
 }

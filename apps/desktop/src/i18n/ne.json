@@ -669,5 +669,8 @@
   "panchang.next-morning": "भोलि बिहान",
   "panchang.chaughadiya": "चौघडिया",
   "panchang.day": "दिन",
-  "panchang.night": "रात"
+  "panchang.night": "रात",
+  "calendar.saait": "साइत",
+  "calendar.saait-marriage": "विवाह",
+  "calendar.saait-bratabandha": "ब्रतबन्ध"
 }

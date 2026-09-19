@@ -37,462 +37,646 @@
     "convert_land": 5476.0,
     "convert_weight": 11.6638038,
     "events_for:2083:4:1": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "साउन संक्रान्ती, लुतो फाल्ने एवं राँको बाल्ने",
       "tithi": "तृतीया"
     },
     "events_for:2083:4:10": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "द्वादशी"
     },
     "events_for:2083:4:11": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "त्रयोदशी"
     },
     "events_for:2083:4:12": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "चतुर्दशी"
     },
     "events_for:2083:4:13": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "गुरू पूर्णिमा, पूर्णिमाव्रत",
       "tithi": "पुर्णिमा"
     },
     "events_for:2083:4:14": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:4:15": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "खिर खाने दिन",
       "tithi": "द्दितीया"
     },
     "events_for:2083:4:16": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": null,
       "tithi": "तृतीया"
     },
     "events_for:2083:4:17": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "चतुर्थी"
     },
     "events_for:2083:4:18": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "पञ्चमी"
     },
     "events_for:2083:4:19": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "षष्ठी"
     },
     "events_for:2083:4:2": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": null,
       "tithi": "चतुर्थी"
     },
     "events_for:2083:4:20": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "अष्टमीव्रत",
       "tithi": "सप्तमी"
     },
     "events_for:2083:4:21": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "अष्टमी"
     },
     "events_for:2083:4:22": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "नवमी"
     },
     "events_for:2083:4:23": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": null,
       "tithi": "दशमी"
     },
     "events_for:2083:4:24": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "कामिका एकादशी",
       "tithi": "एकादशी"
     },
     "events_for:2083:4:25": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "द्वादशी"
     },
     "events_for:2083:4:26": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "घण्टाकर्ण चतुर्दशी, गथामुग चःह्रे:",
       "tithi": "चतुर्दशी"
     },
     "events_for:2083:4:27": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "औशी"
     },
     "events_for:2083:4:28": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "गुँलाधर्म आरम्भ",
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:4:29": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "चन्द्रोदय",
       "tithi": "द्दितीया"
     },
     "events_for:2083:4:3": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "पञ्चमी"
     },
     "events_for:2083:4:30": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "वराह जयन्ती",
       "tithi": "तृतीया"
     },
     "events_for:2083:4:4": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "षष्ठी"
     },
     "events_for:2083:4:5": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "सप्तमी"
     },
     "events_for:2083:4:6": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "अष्टमीव्रत",
       "tithi": "अष्टमी"
     },
     "events_for:2083:4:7": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "नवमी"
     },
     "events_for:2083:4:8": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "नवमी"
     },
     "events_for:2083:4:9": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "हरिशयनी एकादशी, तुलसी रोप्ने",
       "tithi": "एकादशी"
     },
     "events_for:2083:5:1": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "नाग पञ्चमी (नाग टाँस्ने)",
       "tithi": "पञ्चमी"
     },
     "events_for:2083:5:10": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "त्रयोदशी"
     },
     "events_for:2083:5:11": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "पूर्णिमाव्रत, बाजुरा बडिमालिका मेला",
       "tithi": "चतुर्दशी"
     },
     "events_for:2083:5:12": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "ऋषितर्पणी, रक्षाबन्धन",
       "tithi": "पुर्णिमा"
     },
     "events_for:2083:5:13": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "गाईजात्रा (सापारू)(काठमाडौं उपत्यकालाई र देशभरका नेवार समुदायका लागि मात्र बिदा)",
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:5:14": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "रोपाइँ जात्रा, यल मत्या",
       "tithi": "द्दितीया"
     },
     "events_for:2083:5:15": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "तृतीया"
     },
     "events_for:2083:5:16": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "मंगल चौथी, ललितपुर नृसिंह यात्रा",
       "tithi": "चतुर्थी"
     },
     "events_for:2083:5:17": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "षष्ठी"
     },
     "events_for:2083:5:18": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "सप्तमी"
     },
     "events_for:2083:5:19": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "श्रीकृष्णजन्माष्टमी, गौरा पर्व",
       "tithi": "अष्टमी"
     },
     "events_for:2083:5:2": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "कल्की जयन्ती",
       "tithi": "षष्ठी"
     },
     "events_for:2083:5:20": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "मानव वेचविखन विरुद्धको राष्ट्रिय दिवस",
       "tithi": "नवमी"
     },
     "events_for:2083:5:21": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "दशमी"
     },
     "events_for:2083:5:22": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "अजा एकादशी, निजामती सेवा दिवस",
       "tithi": "एकादशी"
     },
     "events_for:2083:5:23": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "स्वयम्भूको छायाँ दर्शन, जेनजी सहिद दिवस",
       "tithi": "द्वादशी"
     },
     "events_for:2083:5:24": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "यें पञ्चदान, जुगःचह्रे: पुजा",
       "tithi": "त्रयोदशी"
     },
     "events_for:2083:5:25": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "चतुर्दशी"
     },
     "events_for:2083:5:26": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "कुशे औँसी, बाबुको मुख हेर्ने दिन",
       "tithi": "औशी"
     },
     "events_for:2083:5:27": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "गुँलाधर्म समाप्ति",
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:5:28": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "दरखाने दिन",
       "tithi": "द्दितीया"
     },
     "events_for:2083:5:29": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "हरितालिका व्रत, तीज(महिला कर्मचारीहरूको लागि मात्र बिदा)",
       "tithi": "तृतीया"
     },
     "events_for:2083:5:3": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "गोश्वामी तुलसीदास जयन्ती, राष्ट्रिय सूचना दिवस",
       "tithi": "सप्तमी"
     },
     "events_for:2083:5:30": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "मंगल चौथी, ऋषिपञ्चमीव्रत",
       "tithi": "चतुर्थी"
     },
     "events_for:2083:5:31": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "विरूडा पञ्चमी",
       "tithi": "पञ्चमी"
     },
     "events_for:2083:5:4": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "अष्टमीव्रत, यल पञ्चदान",
       "tithi": "अष्टमी"
     },
     "events_for:2083:5:5": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "नवमी"
     },
     "events_for:2083:5:6": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": null,
       "tithi": "दशमी"
     },
     "events_for:2083:5:7": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "पुत्रदा एकादशी",
       "tithi": "एकादशी"
     },
     "events_for:2083:5:8": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "द्वादशी"
     },
     "events_for:2083:5:9": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "द्वादशी"
     },
     "events_for:2083:6:1": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "विश्वकर्मा पूजा, वास्तु दिवस",
       "tithi": "षष्ठी"
     },
     "events_for:2083:6:10": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "यँया पुन्हिः, चेपाङ चोनाम पर्व",
       "tithi": "पुर्णिमा"
     },
     "events_for:2083:6:11": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "सोह्रश्राद्ध आरम्भ, प्रतिपदा श्राद्ध",
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:6:12": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "द्वितीया श्राद्ध",
       "tithi": "द्दितीया"
     },
     "events_for:2083:6:13": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "तृतीया श्राद्ध",
       "tithi": "तृतीया"
     },
     "events_for:2083:6:14": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "चतुर्थी श्राद्ध, इन्द्रध्वजपातन",
       "tithi": "चतुर्थी"
     },
     "events_for:2083:6:15": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "पञ्चमी तथा षष्ठी श्राद्ध, राष्ट्रिय चलचित्र दिवस",
       "tithi": "पञ्चमी"
     },
     "events_for:2083:6:16": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "सप्तमी श्राद्ध",
       "tithi": "षष्ठी"
     },
     "events_for:2083:6:17": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "अष्टमीव्रत, अष्टमी श्राद्ध",
       "tithi": "सप्तमी"
     },
     "events_for:2083:6:18": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "जितिया पर्व,(जितिया पर्व मनाउने महिला कर्मचारीहरुका लागि मात्र बिदा)",
       "tithi": "अष्टमी"
     },
     "events_for:2083:6:19": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "दशमी श्राद्ध",
       "tithi": "दशमी"
     },
     "events_for:2083:6:2": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "सप्तमी"
     },
     "events_for:2083:6:20": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "एकादशी श्राद्ध, इन्दिरा एकादशी",
       "tithi": "एकादशी"
     },
     "events_for:2083:6:21": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "द्वादशी श्राद्ध",
       "tithi": "द्वादशी"
     },
     "events_for:2083:6:22": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "त्रयोदशी श्राद्ध, जुम्ला खलङ्गामा चन्दननाथको लिङ्गो ठड्याउने",
       "tithi": "त्रयोदशी"
     },
     "events_for:2083:6:23": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "चतुर्दशी श्राद्ध, नःलास्वाँ चःह्रे",
       "tithi": "चतुर्दशी"
     },
     "events_for:2083:6:24": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "औंसी श्राद्ध, दर्शश्राद्ध",
       "tithi": "औशी"
     },
     "events_for:2083:6:25": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "घटस्थापना, नवरात्र आरम्भ",
       "tithi": "प्रतिपदा"
     },
     "events_for:2083:6:26": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "द्दितीया"
     },
     "events_for:2083:6:27": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "तृतीया"
     },
     "events_for:2083:6:28": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "चतुर्थी"
     },
     "events_for:2083:6:29": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "पचली भैरव यात्रा",
       "tithi": "पञ्चमी"
     },
     "events_for:2083:6:3": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "संविधान दिवस (राष्ट्रिय दिवस), काय  अष्टमी",
       "tithi": "अष्टमी"
     },
     "events_for:2083:6:30": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "षष्ठी"
     },
     "events_for:2083:6:31": {
+      "bratabandha": false,
       "is_public_holiday": true,
+      "marriage": false,
       "name": "नवपत्रिका प्रवेश, फूलपाती",
       "tithi": "सप्तमी"
     },
     "events_for:2083:6:4": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "नवमी"
     },
     "events_for:2083:6:5": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "दशमी"
     },
     "events_for:2083:6:6": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "हरिपरिवर्तिनी एकादशी",
       "tithi": "एकादशी"
     },
     "events_for:2083:6:7": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "इन्द्रध्वजोत्थान, वामन द्वादशी",
       "tithi": "द्वादशी"
     },
     "events_for:2083:6:8": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": null,
       "tithi": "त्रयोदशी"
     },
     "events_for:2083:6:9": {
+      "bratabandha": false,
       "is_public_holiday": false,
+      "marriage": false,
       "name": "कुमारी ईन्द्रजात्रा(काठमाडौं उपत्यका मात्र विदा), अनन्त चतुर्दशी",
       "tithi": "चतुर्दशी"
     },

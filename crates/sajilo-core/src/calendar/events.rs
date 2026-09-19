@@ -20,11 +20,38 @@ pub struct CalendarEvent {
     pub name: Option<String>,
     pub tithi: Option<String>,
     pub is_public_holiday: bool,
+    /// An auspicious day (saait) for a wedding, per the official calendar.
+    #[serde(default)]
+    pub marriage: bool,
+    /// An auspicious day for a bratabandha.
+    #[serde(default)]
+    pub bratabandha: bool,
 }
 
 #[derive(Deserialize)]
 struct MonthPayload {
     days: Vec<SourceDay>,
+    /// The month's saait, as the almanac prints it: "९, १०, १६ र २६ गते",
+    /// or a sentence saying there is none.
+    #[serde(default)]
+    marriage: Vec<String>,
+    #[serde(default)]
+    bratabandha: Vec<String>,
+}
+
+/// The days of the month a saait line names. Every form in the bundled data
+/// is either a list of day numbers or a sentence with none in it, so the
+/// numbers are all there is to read.
+fn saait_days(lines: &[String]) -> Vec<u32> {
+    lines
+        .iter()
+        .flat_map(|line| {
+            line.split(|c: char| !c.is_numeric())
+                .filter_map(|part| to_ascii_digits(part).parse::<u32>().ok())
+                .collect::<Vec<_>>()
+        })
+        .filter(|day| (1..=32).contains(day))
+        .collect()
 }
 
 #[derive(Deserialize)]
@@ -60,6 +87,8 @@ pub fn events(year: i32, month: u32) -> BTreeMap<u32, CalendarEvent> {
         return BTreeMap::new();
     };
 
+    let marriage = saait_days(&payload.marriage);
+    let bratabandha = saait_days(&payload.bratabandha);
     let mut result = BTreeMap::new();
     // Source months open with trailing days of the previous month; skip until
     // day 1 appears so those never overwrite this month's entries.
@@ -83,8 +112,38 @@ pub fn events(year: i32, month: u32) -> BTreeMap<u32, CalendarEvent> {
                 name: (!name.is_empty()).then(|| name.to_owned()),
                 tithi: (!tithi.is_empty()).then(|| tithi.to_owned()),
                 is_public_holiday: source.is_holiday,
+                marriage: marriage.contains(&day),
+                bratabandha: bratabandha.contains(&day),
             },
         );
     }
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn lines(text: &str) -> Vec<String> {
+        vec![text.to_owned()]
+    }
+
+    #[test]
+    fn reads_the_days_a_saait_line_names() {
+        assert_eq!(
+            saait_days(&lines("९, १०, १६, १७, १९, २४, २५ र  २६ गते")),
+            [9, 10, 16, 17, 19, 24, 25, 26]
+        );
+        assert_eq!(saait_days(&lines("३ ,७ र १२  गते")), [3, 7, 12]);
+        assert!(saait_days(&lines("यो महिना को लागी विवाह मुर्हुत छैन ।")).is_empty());
+    }
+
+    /// Mangsir 2083 has weddings on the 9th and none for a bratabandha.
+    #[test]
+    fn marks_the_bundled_saait_on_its_days() {
+        let month = events(2083, 8);
+        assert!(month[&9].marriage);
+        assert!(!month[&8].marriage);
+        assert!(month.values().all(|day| !day.bratabandha));
+    }
 }

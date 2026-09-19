@@ -115,11 +115,11 @@ export function DayDetail() {
         </p>
       )}
 
+      {panchanga && <PanchangaPanel panchanga={panchanga} isToday={offset === 0} />}
+
       {panchanga?.almanac && (
         <AlmanacPanel almanac={panchanga.almanac} date={conversion.gregorian} />
       )}
-
-      {panchanga && <PanchangaPanel panchanga={panchanga} isToday={offset === 0} />}
 
       <DayPlanSection date={date} plans={plans} startAdding={params.get("add") === "1"} />
     </div>

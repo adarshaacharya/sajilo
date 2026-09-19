@@ -1,0 +1,316 @@
+---
+import Base from "../layouts/Base.astro";
+
+const kinds = [
+  "Something is broken",
+  "Data looks wrong",
+  "The app crashed",
+  "A feature idea",
+  "Something else",
+];
+---
+
+<Base
+  title="Report an issue: Sajilo"
+  description="Tell us what went wrong with Sajilo. No account, no ticket number — it goes straight to us."
+  path="/report.html"
+>
+  <main class="wrap report" id="main">
+    <h1 class="display report-h1">Report an issue</h1>
+    <p class="lede">
+      Fill this in and it sends straight to us. Nothing is stored on this site, no account needed.
+    </p>
+
+    <form class="report-form" id="report-form">
+      <!-- Honeypot: invisible to a person, irresistible to a bot filling every field. -->
+      <div class="field field--trap" aria-hidden="true">
+        <label for="website">Leave this blank</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <div class="field">
+        <label for="kind">What kind of issue?</label>
+        <select id="kind" name="kind">
+          {kinds.map((k) => <option value={k}>{k}</option>)}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="summary">One line describing it</label>
+        <input id="summary" name="summary" type="text" placeholder="e.g. NEPSE tab shows yesterday's prices" required />
+      </div>
+
+      <div class="field">
+        <label for="details">What happened, and what you expected instead</label>
+        <textarea id="details" name="details" rows="6" placeholder="The more detail, the faster it gets fixed." required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="screenshot">Screenshot <span class="field-optional">(optional, up to 5 MB)</span></label>
+        <input id="screenshot" name="screenshot" type="file" accept="image/*" />
+        <p class="field-hint" id="screenshot-hint"></p>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="version">App version</label>
+          <input id="version" name="version" type="text" placeholder="Settings › About" />
+        </div>
+        <div class="field">
+          <label for="os">OS</label>
+          <input id="os" name="os" type="text" placeholder="e.g. macOS 15, Windows 11" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="email">Your email <span class="field-optional">(optional, only if you want a reply)</span></label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" />
+      </div>
+
+      <div class="report-actions">
+        <button class="btn btn--accent" type="submit" id="send-btn">Send report</button>
+        <button class="btn btn--ghost" type="button" id="copy-report">Copy instead</button>
+      </div>
+      <p class="report-note" id="report-note" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="report-alt">
+      <p class="report-alt-title">Prefer GitHub?</p>
+      <p>
+        If you already have a GitHub account, filing it there means it's tracked in the open, and
+        other people can find it before reporting the same thing twice.
+      </p>
+      <a class="btn btn--ghost btn--sm" href="https://github.com/adarshaacharya/sajilo/issues" target="_blank" rel="noopener">
+        Open a GitHub issue
+      </a>
+    </div>
+  </main>
+</Base>
+
+<script is:inline>
+  const form = document.getElementById("report-form");
+  const sendBtn = document.getElementById("send-btn");
+  const copyBtn = document.getElementById("copy-report");
+  const note = document.getElementById("report-note");
+  const screenshotInput = document.getElementById("screenshot");
+  const screenshotHint = document.getElementById("screenshot-hint");
+
+  const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+
+  screenshotInput?.addEventListener("change", () => {
+    const file = screenshotInput.files?.[0];
+    if (!file) {
+      screenshotHint.textContent = "";
+      return;
+    }
+    if (file.size > MAX_SCREENSHOT_BYTES) {
+      screenshotHint.textContent = `That's ${(file.size / 1024 / 1024).toFixed(1)} MB — pick something under 5 MB.`;
+      screenshotInput.value = "";
+      return;
+    }
+    screenshotHint.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+  });
+
+  function readAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.toString().split(",")[1] ?? "");
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function collect() {
+    const data = new FormData(form);
+    const fields = {
+      website: (data.get("website") || "").toString(), // honeypot
+      kind: (data.get("kind") || "").toString(),
+      summary: (data.get("summary") || "").toString().trim(),
+      details: (data.get("details") || "").toString().trim(),
+      version: (data.get("version") || "").toString().trim(),
+      os: (data.get("os") || "").toString().trim(),
+      email: (data.get("email") || "").toString().trim(),
+    };
+    const file = screenshotInput?.files?.[0];
+    if (file && file.size <= MAX_SCREENSHOT_BYTES) {
+      fields.screenshot = {
+        filename: file.name,
+        contentType: file.type || "image/png",
+        data: await readAsBase64(file),
+      };
+    }
+    return fields;
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fields = await collect();
+    if (!fields.summary || !fields.details) {
+      note.textContent = "Fill in a one-line summary and what happened first.";
+      return;
+    }
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending…";
+    note.textContent = "";
+
+    try {
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+      if (!res.ok) throw new Error(`status ${res.status}`);
+      form.reset();
+      screenshotHint.textContent = "";
+      note.textContent = "Sent. Thanks — it goes straight to the person who reads these.";
+    } catch {
+      note.textContent = "Couldn't send that just now. Try “Copy instead” and email it to contact@sajilo.fyi.";
+    } finally {
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Send report";
+    }
+  });
+
+  copyBtn?.addEventListener("click", async () => {
+    const fields = await collect();
+    const subject = `[Sajilo] ${fields.kind || "Something else"}: ${fields.summary || "(no summary)"}`;
+    const text = [
+      `Subject: ${subject}`,
+      "",
+      fields.details || "(nothing written)",
+      "",
+      "---",
+      `App version: ${fields.version || "not given"}`,
+      `OS: ${fields.os || "not given"}`,
+      `Reply to: ${fields.email || "not given"}`,
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(text);
+      note.textContent = "Copied. Paste it wherever works for you — email, GitHub, anywhere.";
+    } catch {
+      note.textContent = "Couldn't copy automatically. Select the fields above and copy them by hand.";
+    }
+  });
+</script>
+
+<style>
+  .report {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 60px;
+    max-width: 640px;
+  }
+  .report-h1 {
+    font-size: clamp(40px, 7vw, 68px);
+    margin-bottom: 16px;
+  }
+  .report .lede {
+    max-width: none;
+  }
+
+  .report-form {
+    display: grid;
+    gap: 20px;
+    margin-top: clamp(36px, 5vw, 52px);
+  }
+
+  .field {
+    display: grid;
+    gap: 8px;
+  }
+  .field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--paper-2);
+  }
+  .field-optional {
+    font-weight: 400;
+    color: var(--paper-4);
+  }
+  .field-hint {
+    font-size: 13px;
+    color: var(--gilt-2);
+    min-height: 1.2em;
+  }
+  .field--trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .field input,
+  .field select,
+  .field textarea {
+    font: inherit;
+    color: var(--paper);
+    background: var(--ink-2);
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    width: 100%;
+    resize: vertical;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--paper-4);
+  }
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--gilt);
+    background: var(--ink-3);
+  }
+  .field select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%238e8474' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .report-note {
+    font-size: 13.5px;
+    color: var(--gilt-2);
+    min-height: 1.2em;
+  }
+
+  .report-alt {
+    margin-top: 48px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+  }
+  .report-alt-title {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .report-alt p {
+    color: var(--paper-2);
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 560px) {
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

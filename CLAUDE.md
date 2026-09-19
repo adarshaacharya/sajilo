@@ -14,9 +14,9 @@ Guidance for Claude Code working in this repository.
 
 A Nepal-focused desktop utility that lives in the menu bar / tray: Bikram Sambat
 calendar and date converter, day plans, festival and holiday reminders, weather
-and air quality, NRB forex, news from 9 Nepali/English sources, Bazar (gold and
-silver, fuel, Kalimati vegetables), rashifal, FM radio, world clocks, and Nepali
-unit tools.
+and air quality, NRB forex, news from 10 Nepali/English newsrooms plus the
+government's notices, Bazar (gold and silver, fuel, Kalimati vegetables),
+rashifal, FM radio, world clocks, and Nepali unit tools.
 
 Everything calendar-related must work offline. Remote modules must never silently
 show nothing — they show fresh data, clearly labelled stale data, or an explicit

@@ -1,36 +1,324 @@
 ---
 import Base from "../layouts/Base.astro";
+
+// The complaint desk's replies. None of them help; that is the point. The first
+// renders with the page; the button walks the rest.
+const replies = [
+  "Complaint registered. It will be ignored in the order it was received.",
+  "The officer is in a meeting. The meeting is about lunch.",
+  "Your file has moved to another desk. The desk has also moved.",
+  "Please bring two photocopies of the correct URL, attested.",
+  "A committee has been formed to look into it. The committee is currently looking for a vehicle.",
+  "Approved in principle. Rejected in practice.",
+  "Budget for this page was allocated. Budget for this page was spent. The page was not built.",
+  "We have taken your concern seriously. That is all we have taken.",
+  "The server is down until after Dashain. Which Dashain was not specified.",
+  "Your file was forwarded upward. Upward forwarded it back down.",
+];
 ---
 
 <Base title="Page not found: Sajilo" description="This page does not exist." path="/404.html" noindex>
   <main class="wrap lost" id="main">
-    <p class="lost-num display" lang="ne">४०४</p>
-    <h1 class="display">Page not found</h1>
-    <p class="lede">The link may be old or mistyped.</p>
-    <a class="btn" href="/">Back to Sajilo</a>
+    <div class="lost-copy">
+      <p class="lost-eyebrow"><span class="num">Error 404</span> · <span lang="ne">पेज भेटिएन</span></p>
+      <h1 class="display">Your request has been forwarded to the relevant authority.</h1>
+      <p class="lede">It will be looked at shortly. Shortly is not a unit of time here.</p>
+
+      <div class="desk" aria-live="polite">
+        <p class="desk-label">
+          Complaint desk · reply <span class="num" data-count>1</span>
+        </p>
+        <p class="desk-text" data-reply>{replies[0]}</p>
+      </div>
+
+      <div class="lost-actions">
+        <a class="btn btn--accent" href="/">Go back to the homepage</a>
+        <button class="btn btn--ghost" type="button" data-next>File another complaint</button>
+      </div>
+    </div>
+
+    <div class="notice" aria-hidden="true">
+      <div class="notice-card">
+        <p class="notice-no">Ref. no. <span lang="ne">४०४/०८३-८४</span></p>
+        <p class="notice-head" lang="ne">सूचना</p>
+        <p class="notice-dept">Department of Pages That Should Be Here</p>
+
+        <p class="notice-subject"><b>Subject:</b> the page you asked for</p>
+        <p class="notice-body">
+          The requested page <code data-path>/this-page</code> could not be located. The matter has
+          been sent to the ministry for further study.
+        </p>
+
+        <div class="notice-docs">
+          <p class="notice-docs-title">To reapply, bring</p>
+          <ol>
+            <li>Citizenship certificate, two copies</li>
+            <li>Two passport photos, white background</li>
+            <li>Recommendation from your ward office</li>
+            <li>A URL that exists</li>
+          </ol>
+        </div>
+
+        <div class="notice-token">
+          <span>Your token <b lang="ne">४०४</b></span>
+          <span>Now serving <b lang="ne">३</b></span>
+        </div>
+
+        <p class="notice-sign">
+          <svg class="notice-scrawl" viewBox="0 0 120 36" fill="none">
+            <path d="M4 26c8-14 14-20 18-14s-6 16 2 12 10-20 16-16-4 14 4 12 8-12 14-10 0 10 8 8 12-10 20-8 8 6 14 4 10-4 14-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Signature illegible. Officer on leave.
+        </p>
+
+        <p class="stamp" data-stamp><span lang="ne">प्रक्रियामा</span><small>in process</small></p>
+      </div>
+    </div>
   </main>
 </Base>
+
+<script is:inline define:vars={{ replies }}>
+  // The notice names whatever path the visitor actually asked for.
+  const path = decodeURIComponent(location.pathname);
+  const name = document.querySelector("[data-path]");
+  if (name && path !== "/404" && path !== "/404.html") name.textContent = path;
+
+  const text = document.querySelector("[data-reply]");
+  const count = document.querySelector("[data-count]");
+  const stamp = document.querySelector("[data-stamp]");
+  let i = 0;
+  document.querySelector("[data-next]")?.addEventListener("click", () => {
+    i = (i + 1) % replies.length;
+    text.textContent = replies[i];
+    count.textContent = String(i + 1);
+    // Re-trigger the thud: drop the class, force a reflow, add it back.
+    stamp.classList.remove("thud");
+    void stamp.offsetWidth;
+    stamp.classList.add("thud");
+  });
+</script>
 
 <style>
   .lost {
     position: relative;
     z-index: 1;
-    min-height: 60vh;
+    min-height: 72vh;
     display: grid;
-    justify-items: start;
-    align-content: center;
-    gap: 16px;
-    padding-block: 80px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: clamp(40px, 6vw, 88px);
+    padding-block: clamp(48px, 8vw, 104px);
   }
-  .lost-num {
-    font-size: clamp(120px, 20vw, 220px);
-    color: var(--sindoor);
-    line-height: 0.9;
+
+  .lost-copy {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+  .lost-eyebrow {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sindoor-2);
   }
   .lost h1 {
-    font-size: clamp(32px, 5vw, 52px);
+    font-size: clamp(36px, 5.2vw, 64px);
+    max-width: 16ch;
+    text-wrap: balance;
   }
-  .lost .btn {
-    margin-top: 12px;
+
+  .desk {
+    width: 100%;
+    max-width: 52ch;
+    margin-top: 6px;
+    padding: 18px 20px;
+    border: 1px solid var(--line-2);
+    border-left: 3px solid var(--gilt);
+    border-radius: 10px;
+    background: var(--ink-2);
+  }
+  .desk-label {
+    font-size: 13px;
+    color: var(--paper-3);
+    margin-bottom: 6px;
+  }
+  .desk-text {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--paper);
+    min-height: 3em;
+    text-wrap: pretty;
+  }
+
+  .lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  /* ---------- The notice pinned to the office wall ---------- */
+
+  .notice {
+    justify-self: center;
+    width: min(100%, 380px);
+    transform: rotate(1.5deg);
+  }
+  .notice-card {
+    position: relative;
+    padding: 24px 26px 22px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 3px;
+    box-shadow:
+      0 30px 60px -20px rgb(0 0 0 / 0.7),
+      0 0 0 1px rgb(0 0 0 / 0.1);
+  }
+  .notice-no {
+    font-size: 11.5px;
+    color: #7a6f5f;
+    text-align: right;
+  }
+  .notice-head {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 44px;
+    line-height: 1;
+    text-align: center;
+    color: var(--sindoor);
+    margin-top: 6px;
+  }
+  .notice-dept {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #7a6f5f;
+    margin-top: 6px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #d8ccb4;
+  }
+
+  .notice-subject {
+    font-size: 14px;
+    margin-top: 14px;
+  }
+  .notice-body {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+  }
+  .notice-body code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    font-weight: 600;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: #e9dcc3;
+  }
+
+  .notice-docs {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: #e9dcc3;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .notice-docs-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a5a1e;
+    margin-bottom: 4px;
+  }
+  .notice-docs ol {
+    list-style: decimal;
+    padding-left: 18px;
+  }
+  .notice-docs li:last-child {
+    font-weight: 700;
+  }
+
+  .notice-token {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    padding: 10px 0;
+    border-block: 1px dashed #c9b89a;
+    font-size: 13px;
+    color: #6b6153;
+  }
+  .notice-token b {
+    font-size: 17px;
+    color: var(--ink);
+    margin-left: 4px;
+  }
+
+  .notice-sign {
+    margin-top: 14px;
+    font-size: 12.5px;
+    font-style: italic;
+    color: #7a6f5f;
+    text-align: right;
+  }
+  .notice-scrawl {
+    width: 110px;
+    height: 34px;
+    margin: 0 0 4px auto;
+    color: #2a4a8a;
+    transform: rotate(-5deg);
+  }
+
+  .stamp {
+    position: absolute;
+    left: 22px;
+    bottom: 22px;
+    display: grid;
+    justify-items: center;
+    padding: 6px 12px 5px;
+    border: 3px solid var(--sindoor);
+    border-radius: 8px;
+    color: var(--sindoor);
+    font-family: var(--deva);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.1;
+    transform: rotate(-12deg);
+    opacity: 0.82;
+    mix-blend-mode: multiply;
+    animation: thud 0.5s var(--spring) 0.6s both;
+  }
+  .stamp small {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .stamp.thud {
+    animation: thud 0.45s var(--spring) both;
+  }
+
+  @keyframes thud {
+    from {
+      opacity: 0;
+      transform: rotate(-2deg) scale(2.2);
+    }
+    to {
+      opacity: 0.82;
+      transform: rotate(-12deg) scale(1);
+    }
+  }
+
+  @media (max-width: 820px) {
+    .lost {
+      grid-template-columns: 1fr;
+    }
+    .notice {
+      width: min(100%, 340px);
+    }
   }
 </style>

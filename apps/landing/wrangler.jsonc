@@ -13,11 +13,11 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    // Assets are served before the Worker runs, so `/dl/…` — which matches no
-    // file — was answered with 404.html and the redirect never happened. These
-    // routes have to reach the Worker first; every other path keeps the
-    // assets-first behaviour.
-    "run_worker_first": ["/dl/*"]
+    // Assets are served before the Worker runs, so `/dl/…` and `/api/…` —
+    // which match no file — were answered with 404.html and never reached the
+    // Worker. These routes have to reach the Worker first; every other path
+    // keeps the assets-first behaviour.
+    "run_worker_first": ["/dl/*", "/api/*"]
   },
   "d1_databases": [
     {
@@ -25,5 +25,28 @@
       "database_name": "sajilo-downloads",
       "database_id": "57dc714f-c9b0-4ea5-b14b-238bdc643e97"
     }
-  ]
+  ],
+  "send_email": [
+    {
+      // Lets the Worker send exactly one place: the address the report form
+      // is for. `contact@sajilo.fyi` must be verified as a destination
+      // address in the Cloudflare dashboard under Email Routing first, or
+      // sends fail with a permission error.
+      "name": "REPORT_EMAIL",
+      "destination_address": "contact@sajilo.fyi",
+    },
+  ],
+  "ratelimits": [
+    {
+      // Caps how often one visitor can hit /api/report, so filling it in by
+      // hand a few times works fine but a script hammering it — or a flood of
+      // spam — can't turn into an inbox full of email or a Cloudflare Email
+      // Workers suspension. `namespace_id` just needs to be unique to this
+      // binding within the Worker; it is not a resource that is created
+      // anywhere.
+      "name": "REPORT_LIMITER",
+      "namespace_id": "1",
+      "simple": { "limit": 5, "period": 60 },
+    },
+  ],
 }
