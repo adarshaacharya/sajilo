@@ -154,6 +154,119 @@ html {
   color-scheme: light dark;
 }
 
+/* Text size is an accessibility preference, not browser zoom: it changes type
+   while leaving the tray window and its controls at a dependable size. Most
+   compact copy uses Tailwind's explicit pixel utilities, so each shipped type
+   step maps to the selected scale here instead of relying on inheritance. */
+:root[data-text-size="small"] {
+  --text-size-8: 7px;
+  --text-size-9: 8px;
+  --text-size-9-5: 8.5px;
+  --text-size-10: 9px;
+  --text-size-11: 10px;
+  --text-size-12: 11px;
+  --text-size-13: 12px;
+  --text-size-14: 13px;
+  --text-size-15: 13.5px;
+  --text-size-16: 14px;
+  --text-size-17: 15px;
+  --text-size-18: 16px;
+  --text-size-19: 17px;
+  --text-size-20: 18px;
+  --text-size-22: 20px;
+  --text-size-28: 25px;
+  --text-size-30: 27px;
+  --text-size-32: 29px;
+  --text-size-34: 31px;
+  --text-size-54: 49px;
+  --text-size-lg: 16px;
+}
+
+:root[data-text-size="large"] {
+  --text-size-8: 9px;
+  --text-size-9: 10px;
+  --text-size-9-5: 11px;
+  --text-size-10: 11.5px;
+  --text-size-11: 12.5px;
+  --text-size-12: 14px;
+  --text-size-13: 15px;
+  --text-size-14: 16px;
+  --text-size-15: 17px;
+  --text-size-16: 18px;
+  --text-size-17: 19.5px;
+  --text-size-18: 21px;
+  --text-size-19: 22px;
+  --text-size-20: 23px;
+  --text-size-22: 25px;
+  --text-size-28: 32px;
+  --text-size-30: 34.5px;
+  --text-size-32: 37px;
+  --text-size-34: 39px;
+  --text-size-54: 62px;
+  --text-size-lg: 21px;
+}
+
+:root[data-text-size="extraLarge"] {
+  --text-size-8: 10px;
+  --text-size-9: 11px;
+  --text-size-9-5: 12px;
+  --text-size-10: 13px;
+  --text-size-11: 14px;
+  --text-size-12: 16px;
+  --text-size-13: 17px;
+  --text-size-14: 18px;
+  --text-size-15: 19px;
+  --text-size-16: 21px;
+  --text-size-17: 22px;
+  --text-size-18: 23px;
+  --text-size-19: 25px;
+  --text-size-20: 26px;
+  --text-size-22: 29px;
+  --text-size-28: 36px;
+  --text-size-30: 39px;
+  --text-size-32: 42px;
+  --text-size-34: 44px;
+  --text-size-54: 70px;
+  --text-size-lg: 24px;
+}
+
+:root[data-text-size] :is(.app-window, .update-window) {
+  font-size: var(--text-size-12);
+}
+
+:root[data-text-size] .text-\[8px\] { font-size: var(--text-size-8); }
+:root[data-text-size] .text-\[9px\] { font-size: var(--text-size-9); }
+:root[data-text-size] .text-\[9\.5px\] { font-size: var(--text-size-9-5); }
+:root[data-text-size] .text-\[10px\] { font-size: var(--text-size-10); }
+:root[data-text-size] .text-\[11px\] { font-size: var(--text-size-11); }
+:root[data-text-size] .text-\[12px\] { font-size: var(--text-size-12); }
+:root[data-text-size] .text-\[13px\] { font-size: var(--text-size-13); }
+:root[data-text-size] .text-\[14px\] { font-size: var(--text-size-14); }
+:root[data-text-size] .text-\[15px\] { font-size: var(--text-size-15); }
+:root[data-text-size] .text-\[16px\] { font-size: var(--text-size-16); }
+:root[data-text-size] .text-\[17px\] { font-size: var(--text-size-17); }
+:root[data-text-size] .text-\[18px\] { font-size: var(--text-size-18); }
+:root[data-text-size] .text-\[19px\] { font-size: var(--text-size-19); }
+:root[data-text-size] .text-\[20px\] { font-size: var(--text-size-20); }
+:root[data-text-size] .text-\[22px\] { font-size: var(--text-size-22); }
+:root[data-text-size] .text-\[28px\] { font-size: var(--text-size-28); }
+:root[data-text-size] .text-\[30px\] { font-size: var(--text-size-30); }
+:root[data-text-size] .text-\[32px\] { font-size: var(--text-size-32); }
+:root[data-text-size] .text-\[34px\] { font-size: var(--text-size-34); }
+:root[data-text-size] .text-\[54px\] { font-size: var(--text-size-54); }
+:root[data-text-size] .text-lg { font-size: var(--text-size-lg); }
+
+:root[data-text-size] :is(
+  .update-header-btn,
+  .copy-chip,
+  .toggle-chip,
+  .rashifal-sign-cell,
+  .settings-btn,
+  .update-window__automatic
+) { font-size: var(--text-size-11); }
+
+:root[data-text-size] .update-window__close { font-size: var(--text-size-18); }
+
 /* Tailwind v4 leaves buttons on the platform cursor. In this desktop webview,
    every enabled button should advertise that it is clickable consistently. */
 :where(button:not(:disabled):not([aria-disabled="true"]), [role="button"]:not([aria-disabled="true"])) {

@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Select } from "../../../shared/components/select";
 import { Toggle } from "../../../shared/components/toggle";
-import { type ThemeMode, useSettings } from "../../../shared/context/settings-context";
+import {
+  type TextSize,
+  type ThemeMode,
+  useSettings,
+} from "../../../shared/context/settings-context";
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
@@ -36,7 +40,7 @@ export function DisplayTab({
   numerals: NumeralStyle;
   setNumerals: (value: NumeralStyle) => void;
 }) {
-  const { t, theme, setTheme } = useSettings();
+  const { t, theme, setTheme, textSize, setTextSize } = useSettings();
   const [format, setFormat] = useState<string>("nepaliLong");
   const [showFlag, setShowFlag] = useState(true);
   const [showYear, setShowYear] = useState(true);
@@ -97,6 +101,17 @@ export function DisplayTab({
             { id: "system", label: t("theme.system") },
             { id: "light", label: t("theme.light") },
             { id: "dark", label: t("theme.dark") },
+          ]}
+        />
+        <Select
+          label={t("settings.text-size")}
+          value={textSize}
+          onChange={(value) => setTextSize(value as TextSize)}
+          options={[
+            { id: "small", label: t("settings.text-size-small") },
+            { id: "default", label: t("settings.text-size-default") },
+            { id: "large", label: t("settings.text-size-large") },
+            { id: "extraLarge", label: t("settings.text-size-extra-large") },
           ]}
         />
         <Select

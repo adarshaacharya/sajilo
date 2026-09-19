@@ -5,6 +5,7 @@ import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
 export type ThemeMode = "system" | "light" | "dark";
+export type TextSize = "small" | "default" | "large" | "extraLarge";
 
 export interface ModulePrefs {
   weatherEnabled: boolean;
@@ -55,10 +56,12 @@ interface Settings {
   language: Language;
   numerals: NumeralStyle;
   theme: ThemeMode;
+  textSize: TextSize;
   modules: ModulePrefs;
   setLanguage: (value: Language) => void;
   setNumerals: (value: NumeralStyle) => void;
   setTheme: (value: ThemeMode) => void;
+  setTextSize: (value: TextSize) => void;
   setModules: (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => void;
   t: (key: Parameters<typeof translate>[0]) => string;
 }
@@ -70,6 +73,11 @@ function applyTheme(theme: ThemeMode) {
   else document.documentElement.dataset.theme = theme;
 }
 
+function applyTextSize(textSize: TextSize) {
+  if (textSize === "default") delete document.documentElement.dataset.textSize;
+  else document.documentElement.dataset.textSize = textSize;
+}
+
 /**
  * Injected once at the popover root rather than threaded through every screen,
  * since almost every surface renders a date.
@@ -78,9 +86,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [numerals, setNumerals] = useState<NumeralStyle>("devanagari");
   const [theme, setThemeState] = useState<ThemeMode>("system");
+  const [textSize, setTextSizeState] = useState<TextSize>("default");
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
 
   useEffect(() => applyTheme(theme), [theme]);
+  useEffect(() => applyTextSize(textSize), [textSize]);
 
   // Mirrored for the outermost error boundary, which renders above this
   // provider and so cannot read the context.
@@ -92,6 +102,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<Language>("language"),
       api.getSetting<NumeralStyle>("numeralStyle"),
       api.getSetting<ThemeMode>("theme"),
+      api.getSetting<TextSize>("textSize"),
       api.getSetting<boolean>("weatherEnabled"),
       api.getSetting<boolean>("forexEnabled"),
       api.getSetting<boolean>("newsEnabled"),
@@ -110,6 +121,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           storedLanguage,
           storedNumerals,
           storedTheme,
+          storedTextSize,
           weatherEnabled,
           forexEnabled,
           newsEnabled,
@@ -128,6 +140,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           if (storedNumerals) setNumerals(storedNumerals);
           if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
             setThemeState(storedTheme);
+          }
+          if (
+            storedTextSize === "small" ||
+            storedTextSize === "default" ||
+            storedTextSize === "large" ||
+            storedTextSize === "extraLarge"
+          ) {
+            setTextSizeState(storedTextSize);
           }
           setModulesState((current) =>
             withHomePlace({
@@ -197,6 +217,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     language,
     numerals,
     theme,
+    textSize,
     modules,
     setLanguage: (next) => {
       setLanguage(next);
@@ -209,6 +230,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setTheme: (next) => {
       setThemeState(next);
       persist("theme", next);
+    },
+    setTextSize: (next) => {
+      setTextSizeState(next);
+      persist("textSize", next);
     },
     setModules,
     t: (key) => translate(key, language),
