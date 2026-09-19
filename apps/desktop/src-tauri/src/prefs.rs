@@ -40,7 +40,10 @@ pub fn weather_cache_key(place_id: &str) -> String {
     format!("weather.{place_id}.v1")
 }
 pub const FOREX_KEY: &str = "forex.v1";
-pub const NEWS_KEY: &str = "news.v1";
+/// v3 invalidates digests written before the technology and sports sources
+/// joined the publisher catalog. Otherwise their picker options can filter an
+/// older cached digest to zero headlines until its normal refresh window.
+pub const NEWS_KEY: &str = "news.v3";
 pub const ANNOUNCEMENT_KEY: &str = "announcement.v1";
 /// Same key the Swift app used, so a story resolved once there is not
 /// re-fetched here after a migration.

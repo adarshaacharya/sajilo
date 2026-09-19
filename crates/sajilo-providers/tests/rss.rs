@@ -7,6 +7,9 @@ use sajilo_providers::rss::{self, parser};
 const KATHMANDU_POST: &str = include_str!("../../../fixtures/rss/kathmandupost.xml");
 const ONLINE_KHABAR: &str = include_str!("../../../fixtures/rss/onlinekhabar.xml");
 const GORKHAPATRA: &str = include_str!("../../../fixtures/rss/gorkhapatra.xml");
+const ARTHA_SANSAR: &str = include_str!("../../../fixtures/rss/arthasansar.xml");
+const TECH_PANA: &str = include_str!("../../../fixtures/rss/techpana.xml");
+const HAMRO_KHELKUD: &str = include_str!("../../../fixtures/rss/hamrokhelkud.xml");
 /// Recorded from The Himalayan Times before it went behind a bot challenge.
 /// The paper is no longer a source; the fixture stays because it is the only
 /// real-world example of a feed escaping HTML entities inside CDATA, which the
@@ -77,6 +80,70 @@ fn decodes_the_gorkhapatra_feed() {
             .iter()
             .all(|item| item.published.is_some() && item.precision == DatePrecision::Exact),
         "the feed ships pubDate on every item"
+    );
+}
+
+/// Artha Sansar is the market-oriented addition: its publisher feed carries
+/// share and economy reporting with exact timestamps and direct article URLs.
+#[test]
+fn decodes_the_artha_sansar_feed() {
+    let items = parser::parse(ARTHA_SANSAR, NewsSource::ArthaSansar, 100);
+    assert_eq!(items.len(), 3);
+    assert!(items.iter().all(|item| !item.title.is_empty()));
+    assert!(
+        items
+            .iter()
+            .all(|item| item.link.starts_with("https://arthasansar.com/news/"))
+    );
+    assert!(
+        items
+            .iter()
+            .all(|item| item.source == NewsSource::ArthaSansar)
+    );
+    assert!(
+        items
+            .iter()
+            .all(|item| { item.published.is_some() && item.precision == DatePrecision::Exact })
+    );
+    assert!(items.iter().any(|item| item.title.contains("सेयर")));
+}
+
+#[test]
+fn decodes_the_techpana_feed() {
+    let items = parser::parse(TECH_PANA, NewsSource::TechPana, 100);
+    assert_eq!(items.len(), 3);
+    assert!(items.iter().all(|item| !item.title.is_empty()));
+    assert!(
+        items
+            .iter()
+            .all(|item| item.link.starts_with("https://techpana.com/2026/"))
+    );
+    assert!(items.iter().all(|item| item.source == NewsSource::TechPana));
+    assert!(
+        items
+            .iter()
+            .all(|item| { item.published.is_some() && item.precision == DatePrecision::Exact })
+    );
+}
+
+#[test]
+fn decodes_the_hamro_khelkud_feed() {
+    let items = parser::parse(HAMRO_KHELKUD, NewsSource::HamroKhelkud, 100);
+    assert_eq!(items.len(), 3);
+    assert!(items.iter().all(|item| !item.title.is_empty()));
+    assert!(items.iter().all(|item| {
+        item.link
+            .starts_with("https://www.hamrokhelkud.com/detail/")
+    }));
+    assert!(
+        items
+            .iter()
+            .all(|item| item.source == NewsSource::HamroKhelkud)
+    );
+    assert!(
+        items
+            .iter()
+            .all(|item| { item.published.is_some() && item.precision == DatePrecision::Exact })
     );
 }
 

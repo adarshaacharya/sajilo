@@ -30,7 +30,7 @@ type Tab = "stocks" | "metals" | "fuel" | "vegetables" | "forex";
 
 /** Also the set `?tab=` accepts, so anything that links into this screen — the
  * tray, the landing page — can open it on the panel it means. */
-const TABS: Tab[] = ["stocks", "metals", "fuel", "vegetables", "forex"];
+const TABS: Tab[] = ["stocks", "forex", "metals", "fuel", "vegetables"];
 
 /** The stocks tab's two halves; `?view=` opens either, and the last one used is remembered. */
 type StocksView = "nepse" | "funds";
@@ -247,14 +247,14 @@ export function Bazar() {
         onChange={setTab}
         options={[
           { id: "stocks", label: t("bazar.stocks"), icon: "interest" as const },
-          { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
-          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
-          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
           // Hidden with the module: a Settings switch that turns Forex off
           // should leave nothing of it behind.
           ...(modules.forexEnabled
             ? [{ id: "forex" as const, label: t("feature.forex"), icon: "forex" as const }]
             : []),
+          { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
+          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
+          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
         ]}
       />
 

@@ -234,11 +234,25 @@ function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;
   const bracket = className.match(/(?:^|\s)size-\[(\d+(?:\.\d+)?)px?\]/);
   if (bracket) return Number(bracket[1]);
+  // Tailwind's own scale (1 unit = 4px, .5 steps = 2px) — kept complete so an
+  // icon's rendered stroke weight always matches the box its className sizes
+  // it to, whichever step gets used next.
   const preset: Record<string, number> = {
+    "size-1": 4,
+    "size-1.5": 6,
+    "size-2": 8,
+    "size-2.5": 10,
     "size-3": 12,
     "size-3.5": 14,
     "size-4": 16,
     "size-5": 20,
+    "size-6": 24,
+    "size-7": 28,
+    "size-8": 32,
+    "size-10": 40,
+    "size-11": 44,
+    "size-14": 56,
+    "size-16": 64,
   };
   for (const [token, px] of Object.entries(preset)) {
     if (className.split(/\s+/).includes(token)) return px;

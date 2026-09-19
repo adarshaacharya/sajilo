@@ -39,6 +39,9 @@ dto_enum! {
         AnnapurnaPost,
         Ratopati,
         Bizkhabar,
+        ArthaSansar,
+        TechPana,
+        HamroKhelkud,
         KathmanduPost,
         Khabarhub,
         RatopatiEnglish,
@@ -135,13 +138,16 @@ impl NewsSourceInfo {
 }
 
 impl NewsSource {
-    pub const ALL: [Self; 11] = [
+    pub const ALL: [Self; 14] = [
         Self::NepalGovernment,
         Self::OnlineKhabar,
         Self::OnlineKhabarEnglish,
         Self::AnnapurnaPost,
         Self::Ratopati,
         Self::Bizkhabar,
+        Self::ArthaSansar,
+        Self::TechPana,
+        Self::HamroKhelkud,
         Self::KathmanduPost,
         Self::Khabarhub,
         Self::RatopatiEnglish,
@@ -157,6 +163,9 @@ impl NewsSource {
             Self::AnnapurnaPost => "Annapurna Post",
             Self::Ratopati => "Ratopati",
             Self::Bizkhabar => "Bizkhabar",
+            Self::ArthaSansar => "Artha Sansar",
+            Self::TechPana => "TechPana",
+            Self::HamroKhelkud => "Hamro Khelkud",
             Self::KathmanduPost => "The Kathmandu Post",
             Self::Khabarhub => "Khabarhub",
             Self::RatopatiEnglish => "Ratopati English",
@@ -179,6 +188,9 @@ impl NewsSource {
             Self::AnnapurnaPost => &["https://annapurnapost.com/rss/"],
             Self::Ratopati => &["https://www.ratopati.com/feed"],
             Self::Bizkhabar => &["https://www.bizkhabar.com/feed"],
+            Self::ArthaSansar => &["https://arthasansar.com/feed/"],
+            Self::TechPana => &["https://techpana.com/feed/"],
+            Self::HamroKhelkud => &["https://www.hamrokhelkud.com/feed/"],
             Self::KathmanduPost => &["https://kathmandupost.com/rss"],
             // Trailing slash: without it the site answers 301 to exactly this
             // URL, costing a round trip on every refresh.

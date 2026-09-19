@@ -51,6 +51,7 @@ export function Segmented<T extends string>({
             {selected && (
               <motion.span
                 layoutId={`seg-thumb-${label}`}
+                layout="position"
                 className={`seg-thumb absolute inset-0 ${small ? "rounded-[4px]" : "rounded-[6px]"}`}
                 transition={spring.tab}
               />

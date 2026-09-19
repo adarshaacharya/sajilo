@@ -21,16 +21,44 @@ function formatSize(size: number): string {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function AttachmentRow({ attachment }: { attachment: NewsAttachment }) {
+/** Government portal filenames are opaque upload IDs, not something worth
+ * showing a reader — the extension is the only part of the name that means
+ * anything to them. */
+function extensionOf(filename: string): string {
+  const dot = filename.lastIndexOf(".");
+  return dot === -1 ? "" : filename.slice(dot + 1).toUpperCase();
+}
+
+function AttachmentRow({
+  attachment,
+  index,
+  t,
+}: {
+  attachment: NewsAttachment;
+  index: number;
+  t: ReturnType<typeof useSettings>["t"];
+}) {
+  const ext = extensionOf(attachment.filename);
   return (
     <button
       type="button"
       onClick={() => openExternalLink(attachment.url)}
-      className="row-line flex w-full items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-surface-hover"
+      title={attachment.filename}
+      className="row-line flex w-full items-center gap-2.5 px-2 py-2 text-left transition-colors hover:bg-surface-hover"
     >
-      <Icon name="link" className="size-3.5 shrink-0 text-text-secondary" />
-      <span className="min-w-0 flex-1 truncate text-[11px] font-medium">{attachment.filename}</span>
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-surface">
+        <Icon name="documentBlank" className="size-3.5 text-text-secondary" />
+      </span>
+      <span className="min-w-0 flex-1 truncate text-[11px] font-medium">
+        {t("news.attachment-n").replace("{n}", String(index + 1))}
+      </span>
+      {ext && (
+        <span className="shrink-0 rounded-md bg-surface px-1.5 text-[9px] font-semibold tracking-wide text-text-muted">
+          {ext}
+        </span>
+      )}
       <span className="shrink-0 text-[10px] text-text-muted">{formatSize(attachment.size)}</span>
+      <Icon name="openExternal" className="size-2.5 shrink-0 text-text-muted" />
     </button>
   );
 }
@@ -59,16 +87,20 @@ export function GovernmentUpdateDetail() {
         </div>
       ) : (
         <article className="px-0.5 pb-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-[color:var(--color-accent-mark)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface py-0.5 pr-2.5 pl-1.5 text-[10px] font-semibold text-text-secondary">
+            <Icon name="shield" className="size-3 text-text-muted" />
             {t("news.government-source")}
-          </p>
-          <h2 className="mt-1 text-[15px] font-semibold leading-snug text-text">{update.title}</h2>
+          </span>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[10px] text-text-muted">
-            {update.department && <span>{update.department}</span>}
-            {update.department && update.published && <span>·</span>}
+          <h2 className="mt-2.5 text-[16px] font-semibold leading-snug text-text">
+            {update.title}
+          </h2>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px] text-text-secondary">
+            {update.department && <span className="font-medium">{update.department}</span>}
+            {update.department && update.published && <span className="text-text-muted">·</span>}
             {update.published && (
-              <time dateTime={update.published}>
+              <time dateTime={update.published} className="text-text-muted tabular-nums">
                 {new Date(update.published).toLocaleString(language === "ne" ? "ne-NP" : "en-GB", {
                   day: "numeric",
                   month: "short",
@@ -81,9 +113,16 @@ export function GovernmentUpdateDetail() {
           </div>
 
           {update.tags.length > 0 && (
-            <p className="mt-1 text-[10px] text-text-secondary">
-              {update.tags.map(formatTag).join(" · ")}
-            </p>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {update.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-surface px-2 py-0.5 text-[10px] text-text-secondary"
+                >
+                  {formatTag(tag)}
+                </span>
+              ))}
+            </div>
           )}
 
           <div className="section-divider mt-3 space-y-2.5 pt-3 text-[12px] leading-relaxed text-text-secondary select-text">
@@ -103,8 +142,8 @@ export function GovernmentUpdateDetail() {
                 {t("news.attachments")}
               </h3>
               <div className="surface-card list-rows overflow-hidden">
-                {update.attachments.map((attachment) => (
-                  <AttachmentRow key={attachment.id} attachment={attachment} />
+                {update.attachments.map((attachment, index) => (
+                  <AttachmentRow key={attachment.id} attachment={attachment} index={index} t={t} />
                 ))}
               </div>
             </section>

@@ -33,10 +33,11 @@ export function FundsLink({
     >
       <span className="min-w-0 flex-1">
         <span className="block text-[12px] font-medium">{t("stocks.view-funds")}</span>
-        <span className="block truncate text-[10px] text-text-muted tabular-nums">
-          {t("funds.summary")
-            .replace("{n}", String(snapshot.funds.length))
-            .replace("{date}", issueDate(newest, language) ?? newest)}
+        <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] text-text-muted tabular-nums">
+          <span className="rounded-md bg-surface px-1.5 text-[10px] font-medium leading-4 text-text-secondary">
+            {snapshot.funds.length}
+          </span>
+          {t("funds.summary").replace("{date}", issueDate(newest, language) ?? newest)}
         </span>
       </span>
       <span aria-hidden className="text-text-muted">

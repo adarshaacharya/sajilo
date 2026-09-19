@@ -332,6 +332,18 @@ html {
     border-color 0.15s ease;
 }
 
+/* A card is already lit against the canvas, so the same background-color
+   step `--color-surface-hover` gives a flat row (nothing → filled) reads as
+   barely anything here (already-filled → slightly-more-filled). Mix toward
+   the theme's own text colour instead of a shared token, so the step stays
+   visible — and correct — in both light and dark without touching
+   `--color-surface-hover` used everywhere else. No shadow: cards still do
+   not lift on hover in macOS. */
+.headline-card:hover {
+  background: color-mix(in srgb, var(--color-text) 6%, var(--color-surface-raised));
+  border-color: color-mix(in srgb, var(--color-text) 22%, var(--color-border));
+}
+
 /* A quiet broadcast indicator for time-sensitive links. The ring breathes
    instead of flashing so it reads as current without turning the whole row
    into an alarm. */

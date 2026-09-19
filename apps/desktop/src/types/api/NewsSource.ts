@@ -28,4 +28,4 @@
  * spam under the paper's old title. Gorkhapatra, its Nepali sibling from
  * the same publisher, is read in its place and answers fine.
  */
-export type NewsSource = "nepalGovernment" | "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "kathmanduPost" | "khabarhub" | "ratopatiEnglish" | "kantipur" | "gorkhapatra";
+export type NewsSource = "nepalGovernment" | "onlineKhabar" | "onlineKhabarEnglish" | "annapurnaPost" | "ratopati" | "bizkhabar" | "arthaSansar" | "techPana" | "hamroKhelkud" | "kathmanduPost" | "khabarhub" | "ratopatiEnglish" | "kantipur" | "gorkhapatra";
