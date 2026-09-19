@@ -163,7 +163,7 @@ const LAYOUTS = ["lead-left", "lead-top", "lead-right"] as const;
     transform: rotate(var(--tilt));
     box-shadow: 0 18px 26px -14px rgb(0 0 0 / 0.8);
     animation: sway 6s ease-in-out var(--d) infinite alternate;
-    transition: transform 0.4s var(--spring);
+    transition: transform 0.4s var(--spring), filter 0.25s;
   }
   .paper:nth-child(3n) .sheet {
     background:
@@ -173,6 +173,7 @@ const LAYOUTS = ["lead-left", "lead-top", "lead-right"] as const;
   .paper:hover .sheet {
     animation-play-state: paused;
     transform: rotate(0deg) translateY(4px) scale(1.04);
+    filter: brightness(1.08);
   }
   @keyframes sway {
     from {

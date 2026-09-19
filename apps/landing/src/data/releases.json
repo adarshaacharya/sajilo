@@ -5,7 +5,44 @@
     "publishedAt": "2026-09-16T17:26:19Z",
     "body": "## Keeper, rebuilt\n\n- **Documents for the whole family.** Save papers for yourself or family members, and keep more than one of the same kind: two citizenships, three bluebooks.\n- **Knows what each paper does.** Citizenship and NID are kept as records. Licence, passport and insurance have expiry dates. Bluebook tax and EMIs repeat on a schedule.\n- **Photos.** Add scans or phone photos by picking, dragging or pasting. Open them in a viewer to zoom, rotate or save.\n- **Bluebook ↔ vehicle insurance.** A bluebook warns you when the vehicle has no policy, or when the policy runs out before tax is due.\n- **Custom documents** with your own fields.\n- **Reminders** for water, telephone, subscriptions, Loan EMI and more. Tick one off and a repeating reminder moves to its next date.\n- **Coming up** on the Keeper home and in Today's Up next. Notifications arrive on the day and when something is overdue.\n\n## Stocks\n\n- NEPSE updates live every minute while the market is open, in Bazar and on the Today card.\n- Gains now show in green.\n\n## Fixes\n\n- The back button goes back to the previous screen, including on Weather.\n- Stock data is now dated by the correct trading day.\n\n> Keeper data saved in earlier versions is reset once when you update.\n",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.26"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.26",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.26/Sajilo-macos-arm64.dmg",
+        "size": 9449533
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.26/Sajilo-macos-x64.dmg",
+        "size": 10003727
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.26/Sajilo-windows-x64.exe",
+        "size": 6991635
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.26/Sajilo-linux-amd64.deb",
+        "size": 11746692
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.26/Sajilo-linux-x86_64.AppImage",
+        "size": 85895672
+      }
+    ]
   },
   {
     "version": "v0.1.25",
@@ -13,7 +50,44 @@
     "publishedAt": "2026-09-15T04:06:42Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.25"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.25",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.25/Sajilo-macos-arm64.dmg",
+        "size": 8624062
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.25/Sajilo-macos-x64.dmg",
+        "size": 9123488
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.25/Sajilo-windows-x64.exe",
+        "size": 6353735
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.25/Sajilo-linux-amd64.deb",
+        "size": 10801122
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.25/Sajilo-linux-x86_64.AppImage",
+        "size": 85064184
+      }
+    ]
   },
   {
     "version": "v0.1.24",
@@ -21,7 +95,44 @@
     "publishedAt": "2026-09-14T18:37:53Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.24"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.24",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.24/Sajilo-macos-arm64.dmg",
+        "size": 8616872
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.24/Sajilo-macos-x64.dmg",
+        "size": 9119257
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.24/Sajilo-windows-x64.exe",
+        "size": 6364825
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.24/Sajilo-linux-amd64.deb",
+        "size": 10795540
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.24/Sajilo-linux-x86_64.AppImage",
+        "size": 85080568
+      }
+    ]
   },
   {
     "version": "v0.1.23",
@@ -29,7 +140,44 @@
     "publishedAt": "2026-09-14T10:37:24Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.23"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.23",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.23/Sajilo-macos-arm64.dmg",
+        "size": 8503051
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.23/Sajilo-macos-x64.dmg",
+        "size": 8993229
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.23/Sajilo-windows-x64.exe",
+        "size": 6253323
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.23/Sajilo-linux-amd64.deb",
+        "size": 10663668
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.23/Sajilo-linux-x86_64.AppImage",
+        "size": 84953592
+      }
+    ]
   },
   {
     "version": "v0.1.22",
@@ -37,7 +185,44 @@
     "publishedAt": "2026-09-14T06:07:25Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.22"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.22",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.22/Sajilo-macos-arm64.dmg",
+        "size": 8470248
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.22/Sajilo-macos-x64.dmg",
+        "size": 8955803
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.22/Sajilo-windows-x64.exe",
+        "size": 6237658
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.22/Sajilo-linux-amd64.deb",
+        "size": 10630670
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.22/Sajilo-linux-x86_64.AppImage",
+        "size": 84908536
+      }
+    ]
   },
   {
     "version": "v0.1.21",
@@ -45,7 +230,44 @@
     "publishedAt": "2026-09-12T17:52:37Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.21"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.21",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.21/Sajilo-macos-arm64.dmg",
+        "size": 8413207
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.21/Sajilo-macos-x64.dmg",
+        "size": 8909096
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.21/Sajilo-windows-x64.exe",
+        "size": 6205555
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.21/Sajilo-linux-amd64.deb",
+        "size": 10580332
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.21/Sajilo-linux-x86_64.AppImage",
+        "size": 84883960
+      }
+    ]
   },
   {
     "version": "v0.1.20",
@@ -53,7 +275,44 @@
     "publishedAt": "2026-09-02T15:03:59Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.20"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.20",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.20/Sajilo-macos-arm64.dmg",
+        "size": 8379308
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.20/Sajilo-macos-x64.dmg",
+        "size": 8865395
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.20/Sajilo-windows-x64.exe",
+        "size": 6178094
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.20/Sajilo-linux-amd64.deb",
+        "size": 10534144
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.20/Sajilo-linux-x86_64.AppImage",
+        "size": 84822520
+      }
+    ]
   },
   {
     "version": "v0.1.19",
@@ -61,7 +320,44 @@
     "publishedAt": "2026-08-28T18:27:18Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.19"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.19",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.19/Sajilo-macos-arm64.dmg",
+        "size": 8336069
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.19/Sajilo-macos-x64.dmg",
+        "size": 8810944
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.19/Sajilo-windows-x64.exe",
+        "size": 6145664
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.19/Sajilo-linux-amd64.deb",
+        "size": 10476630
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.19/Sajilo-linux-x86_64.AppImage",
+        "size": 84306424
+      }
+    ]
   },
   {
     "version": "v0.1.18",
@@ -69,7 +365,44 @@
     "publishedAt": "2026-08-28T17:00:25Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.18"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.18",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.18/Sajilo-macos-arm64.dmg",
+        "size": 8322825
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.18/Sajilo-macos-x64.dmg",
+        "size": 8799809
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.18/Sajilo-windows-x64.exe",
+        "size": 6135306
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.18/Sajilo-linux-amd64.deb",
+        "size": 10462868
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.18/Sajilo-linux-x86_64.AppImage",
+        "size": 84290040
+      }
+    ]
   },
   {
     "version": "v0.1.17",
@@ -77,7 +410,37 @@
     "publishedAt": "2026-08-27T15:58:56Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.17"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.17",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.17/Sajilo-macos-arm64.dmg",
+        "size": 8319415
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.17/Sajilo-macos-x64.dmg",
+        "size": 8795530
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.17/Sajilo-linux-amd64.deb",
+        "size": 10456386
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.17/Sajilo-linux-x86_64.AppImage",
+        "size": 84265464
+      }
+    ]
   },
   {
     "version": "v0.1.16",
@@ -85,7 +448,44 @@
     "publishedAt": "2026-08-27T14:46:15Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.16"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.16",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.16/Sajilo-macos-arm64.dmg",
+        "size": 8270779
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.16/Sajilo-macos-x64.dmg",
+        "size": 8749442
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.16/Sajilo-windows-x64.exe",
+        "size": 6101025
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.16/Sajilo-linux-amd64.deb",
+        "size": 10425238
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.16/Sajilo-linux-x86_64.AppImage",
+        "size": 84253176
+      }
+    ]
   },
   {
     "version": "v0.1.15",
@@ -93,7 +493,37 @@
     "publishedAt": "2026-08-25T21:56:03Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.15"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.15",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.15/Sajilo-macos-arm64.dmg",
+        "size": 8269929
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.15/Sajilo-windows-x64.exe",
+        "size": 6103345
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.15/Sajilo-linux-amd64.deb",
+        "size": 10424786
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.15/Sajilo-linux-x86_64.AppImage",
+        "size": 84257272
+      }
+    ]
   },
   {
     "version": "v0.1.14",
@@ -101,7 +531,44 @@
     "publishedAt": "2026-08-24T19:29:08Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.14"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.14",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.14/Sajilo-macos-arm64.dmg",
+        "size": 8268268
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.14/Sajilo-macos-x64.dmg",
+        "size": 8748326
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.14/Sajilo-windows-x64.exe",
+        "size": 6100518
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.14/Sajilo-linux-amd64.deb",
+        "size": 10424148
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.14/Sajilo-linux-x86_64.AppImage",
+        "size": 84257272
+      }
+    ]
   },
   {
     "version": "v0.1.13",
@@ -109,7 +576,44 @@
     "publishedAt": "2026-08-24T16:56:30Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.13"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.13",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.13/Sajilo-macos-arm64.dmg",
+        "size": 8266333
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.13/Sajilo-macos-x64.dmg",
+        "size": 8747566
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.13/Sajilo-windows-x64.exe",
+        "size": 6097738
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.13/Sajilo-linux-amd64.deb",
+        "size": 10424234
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.13/Sajilo-linux-x86_64.AppImage",
+        "size": 84257272
+      }
+    ]
   },
   {
     "version": "v0.1.12",
@@ -117,7 +621,44 @@
     "publishedAt": "2026-08-24T15:27:17Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.12"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.12",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.12/Sajilo-macos-arm64.dmg",
+        "size": 8266171
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.12/Sajilo-macos-x64.dmg",
+        "size": 8747455
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.12/Sajilo-windows-x64.exe",
+        "size": 6101726
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.12/Sajilo-linux-amd64.deb",
+        "size": 10424474
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.12/Sajilo-linux-x86_64.AppImage",
+        "size": 84261368
+      }
+    ]
   },
   {
     "version": "v0.1.11",
@@ -125,7 +666,44 @@
     "publishedAt": "2026-08-23T21:31:53Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.11"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.11",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.11/Sajilo-macos-arm64.dmg",
+        "size": 8270518
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.11/Sajilo-macos-x64.dmg",
+        "size": 8744112
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.11/Sajilo-windows-x64.exe",
+        "size": 6098603
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.11/Sajilo-linux-amd64.deb",
+        "size": 10428028
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.11/Sajilo-linux-x86_64.AppImage",
+        "size": 84249080
+      }
+    ]
   },
   {
     "version": "v0.1.10",
@@ -133,7 +711,44 @@
     "publishedAt": "2026-08-23T21:07:25Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.10"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.10",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.10/Sajilo-macos-arm64.dmg",
+        "size": 8270778
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.10/Sajilo-macos-x64.dmg",
+        "size": 8743784
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.10/Sajilo-windows-x64.exe",
+        "size": 6095963
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.10/Sajilo-linux-amd64.deb",
+        "size": 10438416
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.10/Sajilo-linux-x86_64.AppImage",
+        "size": 84257272
+      }
+    ]
   },
   {
     "version": "v0.1.9",
@@ -141,7 +756,44 @@
     "publishedAt": "2026-08-23T17:21:30Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.9"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.9",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.9/Sajilo-macos-arm64.dmg",
+        "size": 8282004
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.9/Sajilo-macos-x64.dmg",
+        "size": 8743936
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.9/Sajilo-windows-x64.exe",
+        "size": 6088757
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.9/Sajilo-linux-amd64.deb",
+        "size": 10427714
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.9/Sajilo-linux-x86_64.AppImage",
+        "size": 84249080
+      }
+    ]
   },
   {
     "version": "v0.1.8",
@@ -149,7 +801,44 @@
     "publishedAt": "2026-08-23T06:43:29Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.8"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.8",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.8/Sajilo-macos-arm64.dmg",
+        "size": 8278877
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.8/Sajilo-macos-x64.dmg",
+        "size": 8743208
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.8/Sajilo-windows-x64.exe",
+        "size": 6086402
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.8/Sajilo-linux-amd64.deb",
+        "size": 10408254
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.8/Sajilo-linux-x86_64.AppImage",
+        "size": 84240888
+      }
+    ]
   },
   {
     "version": "v0.1.7",
@@ -157,7 +846,44 @@
     "publishedAt": "2026-08-22T20:43:22Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.7"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.7",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.7/Sajilo-macos-arm64.dmg",
+        "size": 8804068
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.7/Sajilo-macos-x64.dmg",
+        "size": 9268203
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.7/Sajilo-windows-x64.exe",
+        "size": 6103802
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.7/Sajilo-linux-amd64.deb",
+        "size": 10420014
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.7/Sajilo-linux-x86_64.AppImage",
+        "size": 84253176
+      }
+    ]
   },
   {
     "version": "v0.1.6",
@@ -165,7 +891,44 @@
     "publishedAt": "2026-08-22T17:24:10Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.6"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.6",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.6/Sajilo-macos-arm64.dmg",
+        "size": 8794261
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.6/Sajilo-macos-x64.dmg",
+        "size": 9263390
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.6/Sajilo-windows-x64.exe",
+        "size": 6630680
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.6/Sajilo-linux-amd64.deb",
+        "size": 10428626
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.6/Sajilo-linux-x86_64.AppImage",
+        "size": 84253176
+      }
+    ]
   },
   {
     "version": "v0.1.5",
@@ -173,7 +936,44 @@
     "publishedAt": "2026-08-22T10:56:19Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.5"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.5",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.5/Sajilo-macos-arm64.dmg",
+        "size": 8777540
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.5/Sajilo-macos-x64.dmg",
+        "size": 9254747
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.5/Sajilo-windows-x64.exe",
+        "size": 6610401
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.5/Sajilo-linux-amd64.deb",
+        "size": 11807104
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.5/Sajilo-linux-x86_64.AppImage",
+        "size": 85445112
+      }
+    ]
   },
   {
     "version": "v0.1.4",
@@ -181,7 +981,8 @@
     "publishedAt": "2026-08-21T07:44:43Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.4"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.4",
+    "assets": []
   },
   {
     "version": "v0.1.3",
@@ -189,7 +990,8 @@
     "publishedAt": "2026-08-20T16:15:59Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.3"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.3",
+    "assets": []
   },
   {
     "version": "v0.1.2",
@@ -197,7 +999,8 @@
     "publishedAt": "2026-08-20T15:17:45Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.2"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.2",
+    "assets": []
   },
   {
     "version": "v0.1.1-beta.4",
@@ -205,7 +1008,8 @@
     "publishedAt": "2026-08-20T15:02:42Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.4"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.4",
+    "assets": []
   },
   {
     "version": "v0.1.1-beta.3",
@@ -213,7 +1017,8 @@
     "publishedAt": "2026-08-20T15:06:32Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.3"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.3",
+    "assets": []
   },
   {
     "version": "v0.1.1-beta.2",
@@ -221,7 +1026,8 @@
     "publishedAt": "2026-08-20T14:45:57Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.2"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.2",
+    "assets": []
   },
   {
     "version": "v0.1.1-beta.1",
@@ -229,7 +1035,8 @@
     "publishedAt": "2026-08-20T14:32:31Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.1"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.1-beta.1",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.14",
@@ -237,7 +1044,8 @@
     "publishedAt": "2026-08-20T13:58:38Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.14"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.14",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.13",
@@ -245,7 +1053,8 @@
     "publishedAt": "2026-08-20T13:12:05Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.13"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.13",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.12",
@@ -253,7 +1062,8 @@
     "publishedAt": "2026-08-20T12:56:18Z",
     "body": "",
     "prerelease": false,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.12"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.12",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.9",
@@ -261,7 +1071,8 @@
     "publishedAt": "2026-08-20T10:10:16Z",
     "body": "",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.9"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.9",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.11",
@@ -269,7 +1080,8 @@
     "publishedAt": "2026-08-20T12:43:13Z",
     "body": "",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.11"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.11",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.10",
@@ -277,7 +1089,8 @@
     "publishedAt": "2026-08-20T12:19:43Z",
     "body": "",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.10"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.10",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.8",
@@ -285,7 +1098,8 @@
     "publishedAt": "2026-08-19T17:41:05Z",
     "body": "- Application got re-written from swift to tauri for cross platform support.",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.8"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.8",
+    "assets": []
   },
   {
     "version": "v0.1.0-beta.6",
@@ -293,7 +1107,16 @@
     "publishedAt": "2026-08-19T13:00:51Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.4...v0.1.0-beta.6",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.6"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.6",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.6/Sajilo-macos-arm64.dmg",
+        "size": 3455990
+      }
+    ]
   },
   {
     "version": "v0.1.0-beta.5",
@@ -301,7 +1124,16 @@
     "publishedAt": "2026-08-17T11:48:30Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.4...v0.1.0-beta.5",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.5"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.5",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.5/Sajilo-macos-arm64.dmg",
+        "size": 3455970
+      }
+    ]
   },
   {
     "version": "v0.1.0-beta.4",
@@ -309,7 +1141,16 @@
     "publishedAt": "2026-08-17T04:09:13Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.3...v0.1.0-beta.4",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.4"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.4",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.4/Sajilo-macos-arm64.dmg",
+        "size": 3404299
+      }
+    ]
   },
   {
     "version": "v0.1.0-beta.3",
@@ -317,7 +1158,16 @@
     "publishedAt": "2026-08-16T19:46:05Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.1...v0.1.0-beta.3",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.3"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.3",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.3/Sajilo-macos-arm64.dmg",
+        "size": 3171794
+      }
+    ]
   },
   {
     "version": "v0.1.0-beta.2",
@@ -325,7 +1175,16 @@
     "publishedAt": "2026-08-16T09:35:02Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/compare/v0.1.0-beta.1...v0.1.0-beta.2",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.2"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.2",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.2/Sajilo-macos-arm64.dmg",
+        "size": 2907101
+      }
+    ]
   },
   {
     "version": "v0.1.0-beta.1",
@@ -333,6 +1192,15 @@
     "publishedAt": "2026-08-16T09:21:25Z",
     "body": "**Full Changelog**: https://github.com/adarshaacharya/sajilo/commits/v0.1.0-beta.1",
     "prerelease": true,
-    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.1"
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.0-beta.1",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.0-beta.1/Sajilo-macos-arm64.dmg",
+        "size": 2512359
+      }
+    ]
   }
 ]

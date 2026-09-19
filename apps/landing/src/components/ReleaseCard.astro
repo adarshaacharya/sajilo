@@ -1,11 +1,11 @@
 ---
 import type { RenderedRelease } from "../lib/releases";
+import { formatSize } from "../lib/releases";
 
 interface Props {
   release: RenderedRelease;
-  /** List view links to the detail page and shows an excerpt; the detail page shows everything in full. */
+  /** List view links to the detail page and shows an excerpt; the detail page shows everything in full, including the build table. */
   full?: boolean;
-  /** `/dl/*` always serves the newest release, so a download button only ever belongs on this one. */
   isLatest?: boolean;
 }
 const { release: r, full = false, isLatest = false } = Astro.props;
@@ -21,13 +21,43 @@ const { release: r, full = false, isLatest = false } = Astro.props;
     <p class="release-date">{r.date}</p>
     {r.prerelease && <span class="release-tag">Pre-release</span>}
     {isLatest && <span class="release-latest">Latest</span>}
-    {isLatest && <a class="btn btn--accent btn--sm release-dl" href="/#download">Download {r.version}</a>}
   </div>
 
   {full ? (
     <div class="release-body" set:html={r.bodyHtml} />
   ) : (
     <p class="release-excerpt">{r.excerpt}</p>
+  )}
+
+  {full && r.assets.length > 0 && (
+    <div class="release-assets-scroll">
+    <table class="release-assets">
+      <caption>Builds for {r.version}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Platform</th>
+          <th scope="col">File</th>
+          <th scope="col">Size</th>
+          <th scope="col"><span class="sr-only">Download</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {r.assets.map((a) => (
+          <tr>
+            <td>{a.label}</td>
+            <td class="release-assets-file"><code>{a.filename}</code></td>
+            <td class="num">{formatSize(a.size)}</td>
+            <td>
+              <a class="release-assets-dl" href={a.url}>
+                Download
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
+              </a>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    </div>
   )}
 
   <div class="release-links">
@@ -98,11 +128,79 @@ const { release: r, full = false, isLatest = false } = Astro.props;
     border: 1px solid currentColor;
     border-radius: 999px;
   }
-  .release-dl {
-    height: 34px;
-    padding: 0 16px;
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .release-assets-scroll {
+    margin-top: 20px;
+    overflow-x: auto;
+  }
+  .release-assets {
+    width: 100%;
+    min-width: 480px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .release-assets caption {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-3);
+    margin-bottom: 10px;
+  }
+  .release-assets th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--paper-3);
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .release-assets td {
+    padding: 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--paper-2);
+    vertical-align: middle;
+  }
+  .release-assets tr:last-child td {
+    border-bottom: none;
+  }
+  .release-assets th:first-child,
+  .release-assets td:first-child {
+    padding-left: 0;
+  }
+  .release-assets th:last-child,
+  .release-assets td:last-child {
+    padding-right: 0;
+  }
+  .release-assets-file code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    color: var(--paper-3);
+  }
+  .release-assets-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13px;
-    margin-left: auto;
+    font-weight: 600;
+    color: var(--gilt-2);
+    white-space: nowrap;
+  }
+  .release-assets-dl:hover {
+    color: var(--gilt);
+  }
+  .release-assets-dl svg {
+    width: 13px;
+    height: 13px;
   }
 
   .release-excerpt {

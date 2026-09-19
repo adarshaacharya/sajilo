@@ -1,6 +1,14 @@
 import { marked } from "marked";
 import releasesData from "../data/releases.json";
 
+export interface ReleaseAsset {
+  platform: string;
+  label: string;
+  filename: string;
+  url: string;
+  size: number;
+}
+
 export interface Release {
   version: string;
   name: string;
@@ -8,6 +16,7 @@ export interface Release {
   body: string;
   prerelease: boolean;
   htmlUrl: string;
+  assets: ReleaseAsset[];
 }
 
 export interface RenderedRelease extends Release {
@@ -22,6 +31,10 @@ const releases = releasesData as Release[];
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+export function formatSize(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /** A one-line taste of the notes, markdown syntax stripped, for the list view. */
