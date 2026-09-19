@@ -1,10 +1,10 @@
 /**
  * The report form on /report.html posts here. It sends one plain-text email
- * to contact@sajilo.fyi via Cloudflare's Email Workers binding — no
- * third-party service, no API key, and no address on this side stored
- * anywhere. Cloudflare requires the destination to already be a verified
- * address for the account (see wrangler.jsonc), which is the only setup this
- * needs beyond the binding itself.
+ * via Cloudflare's Email Workers binding — no third-party service, no API
+ * key, and no address on this side stored anywhere. Cloudflare requires the
+ * recipient to already be a verified destination address for the account
+ * (see wrangler.jsonc); only adarshaofficial@gmail.com is, so that's where
+ * this goes rather than contact@sajilo.fyi.
  */
 
 import { EmailMessage } from "cloudflare:email";
@@ -72,7 +72,7 @@ export async function handleReport(request, env) {
 
   const msg = createMimeMessage();
   msg.setSender({ name: "Sajilo report form", addr: "reports@sajilo.fyi" });
-  msg.setRecipient("contact@sajilo.fyi");
+  msg.setRecipient("adarshaofficial@gmail.com");
   msg.setSubject(`[Sajilo] ${kind}: ${summary}`);
   msg.setHeader("Reply-To", new Mailbox({ addr: replyEmail }));
   msg.addMessage({
@@ -96,13 +96,11 @@ export async function handleReport(request, env) {
     });
   }
 
-  const email = new EmailMessage("reports@sajilo.fyi", "contact@sajilo.fyi", msg.asRaw());
+  const email = new EmailMessage("reports@sajilo.fyi", "adarshaofficial@gmail.com", msg.asRaw());
 
   try {
     await env.REPORT_EMAIL.send(email);
   } catch (err) {
-    // Most likely cause: contact@sajilo.fyi is not yet a verified
-    // destination address in the Cloudflare account.
     console.error("report email failed", err);
     return new Response("Could not send", { status: 502 });
   }

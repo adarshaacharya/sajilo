@@ -1,5 +1,50 @@
 [
   {
+    "version": "v0.1.27",
+    "name": "Sajilo v0.1.27",
+    "publishedAt": "2026-09-19T07:41:44Z",
+    "body": "## Mutual funds, in Stocks\r\n\r\nStocks now has NEPSE | Mutual Funds sub-tabs.\r\n\r\n- Every scheme's latest NAV, across SIP (open-end), Listed (closed-end) and Matured funds — fund logos, per-fund NAV dates (late ones flagged), weekly change, discount to NAV and refund NAV.\r\n- Star the funds you hold and set up SIP payment reminders, with linked-fund setup and reminder days you control.\r\n- Upcoming SIP payments show alongside your other reminders.\r\n- Adjusted type sizes across the funds list and detail screens for better readability.\r\n\r\n## Forex\r\n\r\n- Forex moved out on its own into a Bazar tab, right after Stocks — fetch, display, and refresh all live there now.\r\n\r\n## Weather\r\n\r\n- No longer limited to Kathmandu, Pokhara and Lalitpur — every district headquarters and larger town is covered, 89 places in total, in English and Nepali, and it still works offline.\r\n\r\n## Calendar\r\n\r\n- The date page is redesigned: month, AD date and tithi, a tinted festival band, day arrows, and \"Today / In N days\".\r\n- Full panchang on the date page.\r\n- Sunday holidays are recognised.\r\n\r\n## News\r\n\r\n- The headline list now loads more as you scroll — no more \"40 more\" button.\r\n- Nepal Government notices get a cleaner detail page: a proper source badge, tags as chips, and attachments labelled \"Attachment 1\", \"Attachment 2\" with file type and size, instead of the portal's raw upload filename.\r\n- Fixed several icons across the app rendering heavier than intended.\r\n\r\n## Radio\r\n\r\n- Volume control, and station art (logos, with a fallback icon when a station has none).\r\n\r\n## Settings\r\n\r\n- Text size is now adjustable: small, default, or large.\r\n\r\n## Updates\r\n\r\n- The update button now animates to draw attention when one's available, and the tray shows \"Restart to update\" once it's installed and waiting.\r\n\r\n## Fixes\r\n\r\n- The stock range bar's track is visible again.\r\n- Hovering a headline card now gives clear visual feedback.",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.27",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.27/Sajilo-macos-arm64.dmg",
+        "size": 9629829
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.27/Sajilo-macos-x64.dmg",
+        "size": 10203819
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.27/Sajilo-windows-x64.exe",
+        "size": 7118347
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.27/Sajilo-linux-amd64.deb",
+        "size": 11945754
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.27/Sajilo-linux-x86_64.AppImage",
+        "size": 86051320
+      }
+    ]
+  },
+  {
     "version": "v0.1.26",
     "name": "Sajilo v0.1.26",
     "publishedAt": "2026-09-16T17:26:19Z",

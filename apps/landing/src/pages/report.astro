@@ -77,14 +77,26 @@ const kinds = [
     </form>
 
     <div class="report-alt">
-      <p class="report-alt-title">Prefer GitHub?</p>
-      <p>
-        If you already have a GitHub account, filing it there means it's tracked in the open, and
-        other people can find it before reporting the same thing twice.
-      </p>
-      <a class="btn btn--ghost btn--sm" href="https://github.com/adarshaacharya/sajilo/issues" target="_blank" rel="noopener">
-        Open a GitHub issue
-      </a>
+      <p class="report-alt-title">Prefer another way?</p>
+
+      <div class="report-alt-option">
+        <p class="report-alt-option-title">More comfortable emailing directly</p>
+        <p>
+          Skip the form and write to <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a>
+          yourself — same inbox this form sends to.
+        </p>
+      </div>
+
+      <div class="report-alt-option">
+        <p class="report-alt-option-title">Already have a GitHub account</p>
+        <p>
+          Filing it there means it's tracked in the open, and other people can find it before
+          reporting the same thing twice.
+        </p>
+        <a class="btn btn--ghost btn--sm" href="https://github.com/adarshaacharya/sajilo/issues" target="_blank" rel="noopener">
+          Open a GitHub issue
+        </a>
+      </div>
     </div>
   </main>
 </Base>
@@ -332,6 +344,16 @@ const kinds = [
   .report-alt p {
     color: var(--paper-2);
     margin-bottom: 16px;
+  }
+  .report-alt-option + .report-alt-option {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .report-alt-option-title {
+    font-weight: 600;
+    color: var(--paper);
+    margin-bottom: 6px;
   }
 
   @media (max-width: 560px) {

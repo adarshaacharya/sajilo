@@ -28,12 +28,12 @@
   ],
   "send_email": [
     {
-      // Lets the Worker send exactly one place: the address the report form
-      // is for. `contact@sajilo.fyi` must be verified as a destination
-      // address in the Cloudflare dashboard under Email Routing first, or
-      // sends fail with a permission error.
+      // Lets the Worker send exactly one place. Cloudflare requires this
+      // destination to already be a verified address for the account —
+      // `contact@sajilo.fyi` itself was never verified there, only
+      // adarshaofficial@gmail.com was, so sends were failing silently.
       "name": "REPORT_EMAIL",
-      "destination_address": "contact@sajilo.fyi",
+      "destination_address": "adarshaofficial@gmail.com",
     },
   ],
   "ratelimits": [
