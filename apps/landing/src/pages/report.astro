@@ -18,7 +18,8 @@ const kinds = [
   <main class="wrap report" id="main">
     <h1 class="display report-h1">Report an issue</h1>
     <p class="lede">
-      Fill this in and it sends straight to us. Nothing is stored on this site, no account needed.
+      Fill this in and it sends straight to us. We'll follow up by email once it's fixed — you'll
+      be the first to try it.
     </p>
 
     <form class="report-form" id="report-form">
@@ -63,8 +64,9 @@ const kinds = [
       </div>
 
       <div class="field">
-        <label for="email">Your email <span class="field-optional">(optional, only if you want a reply)</span></label>
-        <input id="email" name="email" type="email" placeholder="you@example.com" />
+        <label for="email">Your email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required />
+        <p class="field-hint">We'll follow up once it's fixed, and you'll be first to try it.</p>
       </div>
 
       <div class="report-actions">
@@ -147,6 +149,10 @@ const kinds = [
     const fields = await collect();
     if (!fields.summary || !fields.details) {
       note.textContent = "Fill in a one-line summary and what happened first.";
+      return;
+    }
+    if (!fields.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
+      note.textContent = "Add your email so we can follow up once it's fixed.";
       return;
     }
 
@@ -265,6 +271,26 @@ const kinds = [
     outline: none;
     border-color: var(--gilt);
     background: var(--ink-3);
+  }
+  .field input[type="file"] {
+    padding: 9px 14px;
+    color: var(--paper-2);
+    font-size: 14px;
+  }
+  .field input[type="file"]::file-selector-button {
+    font: inherit;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--paper-2);
+    border: 0;
+    border-radius: 999px;
+    padding: 7px 14px;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .field input[type="file"]::file-selector-button:hover {
+    background: var(--paper);
   }
   .field select {
     appearance: none;

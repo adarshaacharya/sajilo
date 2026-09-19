@@ -61,6 +61,9 @@ export async function handleReport(request, env) {
   if (!summary || !details) {
     return new Response("Missing summary or details", { status: 400 });
   }
+  if (!replyEmail) {
+    return new Response("A valid email is required", { status: 400 });
+  }
 
   const screenshot = validScreenshot(body.screenshot);
   if (body.screenshot && !screenshot) {
@@ -71,7 +74,7 @@ export async function handleReport(request, env) {
   msg.setSender({ name: "Sajilo report form", addr: "reports@sajilo.fyi" });
   msg.setRecipient("contact@sajilo.fyi");
   msg.setSubject(`[Sajilo] ${kind}: ${summary}`);
-  if (replyEmail) msg.setHeader("Reply-To", new Mailbox({ addr: replyEmail }));
+  msg.setHeader("Reply-To", new Mailbox({ addr: replyEmail }));
   msg.addMessage({
     contentType: "text/plain",
     data: [
@@ -80,7 +83,7 @@ export async function handleReport(request, env) {
       "---",
       `App version: ${version}`,
       `OS: ${os}`,
-      `Reporter email: ${replyEmail || "not given"}`,
+      `Reporter email: ${replyEmail}`,
       `Sent from: ${request.headers.get("Referer") ?? "unknown page"}`,
     ].join("\n"),
   });
