@@ -21,6 +21,9 @@ sajilo-core.workspace = true
 sajilo-providers.workspace = true
 chrono.workspace = true
 futures-util = "0.3"
+# The random usage id, and nothing else. `v4` only: no node id, no MAC address,
+# no timestamp — a v1 uuid would embed both and stop being anonymous.
+uuid = { version = "1", default-features = false, features = ["v4", "std"] }
 serde.workspace = true
 serde_json.workspace = true
 rusqlite.workspace = true

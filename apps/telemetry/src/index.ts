@@ -3,6 +3,12 @@ type Environment = {
 };
 
 type Ping = {
+  /**
+   * The install's own random v4 uuid, sent from 0.1.28. Optional forever:
+   * every build before that sends none and still has to be counted, and an
+   * install whose owner switched the count off never had one to send.
+   */
+  installId?: string;
   version: string;
   platform: (typeof PLATFORMS)[number];
   architecture: (typeof ARCHITECTURES)[number];
@@ -23,6 +29,10 @@ const MAX_BODY_BYTES = 1_024;
 const MAX_GAP_DAYS = 45;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// v4 specifically: the version nibble and variant bits are pinned, so a v1
+// uuid — which would carry the sender's MAC address and a timestamp — is
+// rejected rather than stored, whatever the app happens to send.
+const INSTALL_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 // "other" is a real answer, not a malformed one: a build for a target nobody
 // planned for should still be counted rather than retry a rejection forever.
 const PLATFORMS = ["macos", "windows", "linux", "other"] as const;
@@ -55,6 +65,8 @@ function isPing(value: unknown): value is Ping {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
   const ping = value as Record<string, unknown>;
   return (
+    (ping.installId === undefined ||
+      (typeof ping.installId === "string" && INSTALL_ID_PATTERN.test(ping.installId))) &&
     typeof ping.version === "string" &&
     VERSION_PATTERN.test(ping.version) &&
     PLATFORMS.some((platform) => platform === ping.platform) &&
@@ -96,23 +108,60 @@ export default {
 
     const country = request.cf?.country ?? "XX";
     const upgradedFromVersion = payload.upgradedFromVersion ?? "";
-    await env.DB.prepare(
-      `INSERT INTO app_pings
+    // When this ping arrived, to the second.
+    //
+    // Taken here rather than from the payload because the app sends a day and
+    // no clock time. It is the app's background refresh that reaches the
+    // endpoint — 15 seconds after launch and hourly after that — so this marks
+    // when the app was running, not when anyone opened a screen. Precise enough
+    // to order two pings; not a record of when Sajilo was used.
+    const seenAt = new Date().toISOString();
+
+    // One table or the other, never both, so no install is counted twice.
+    //
+    // A ping carrying an id (0.1.28 and later) goes to `app_usage`, which keys
+    // on that id and is the table everything moves to. A ping without one
+    // (0.1.27 and earlier) can only be counted in aggregate, so it keeps
+    // writing `app_pings` exactly as it always has. As installs update, traffic
+    // moves from the second to the first on its own; once little enough is
+    // left, `app_pings` can be dropped and `app_usage` is the whole picture.
+    const write =
+      payload.installId !== undefined
+        ? // A row is inserted and never updated: it records what was true that
+          // day. Re-pinging a day already recorded collides on the primary key
+          // and is dropped, so a retry or a clock nudged backwards cannot count
+          // a day twice.
+          env.DB.prepare(
+            `INSERT INTO app_usage
+              (install_id, day, seen_at, version, platform, architecture, country)
+             VALUES (?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(install_id, day) DO NOTHING`,
+          ).bind(
+            payload.installId,
+            dayStartedAtUtc(payload),
+            seenAt,
+            payload.version,
+            payload.platform,
+            payload.architecture,
+            country,
+          )
+        : env.DB.prepare(
+            `INSERT INTO app_pings
         (day_started_at_utc, version, platform, architecture, country, gap_days, upgraded_from_version, pings)
        VALUES (?, ?, ?, ?, ?, ?, ?, 1)
        ON CONFLICT(day_started_at_utc, version, platform, architecture, country, gap_days, upgraded_from_version)
        DO UPDATE SET pings = pings + 1`,
-    )
-      .bind(
-        dayStartedAtUtc(payload),
-        payload.version,
-        payload.platform,
-        payload.architecture,
-        country,
-        payload.gapDays,
-        upgradedFromVersion,
-      )
-      .run();
+          ).bind(
+            dayStartedAtUtc(payload),
+            payload.version,
+            payload.platform,
+            payload.architecture,
+            country,
+            payload.gapDays,
+            upgradedFromVersion,
+          );
+
+    await write.run();
 
     return empty(204, { "cache-control": "no-store" });
   },

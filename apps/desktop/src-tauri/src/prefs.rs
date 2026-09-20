@@ -85,6 +85,15 @@ pub const NOTIFICATION_OPTIONS: &str = "notificationOptions";
 pub const USAGE_INSIGHTS_ENABLED: &str = "usageInsightsEnabled";
 pub const USAGE_INSIGHTS_LAST_PING_DAY: &str = "usageInsightsLastPingDay";
 pub const USAGE_INSIGHTS_LAST_PING_VERSION: &str = "usageInsightsLastPingVersion";
+/// A random v4 uuid, minted on the first ping that carries one, so the daily
+/// counts can tell one install returning for a month from thirty installs
+/// arriving once. Nothing about the machine or the user goes into it, and
+/// switching the count off in Settings stops it being sent at all — it stays on
+/// disk, unsent, so switching back on is the same install rather than a new
+/// one. Cleared on backup import — see
+/// `commands::backup` — so restoring a backup onto a second machine makes two
+/// installs, not one counted twice.
+pub const USAGE_INSIGHTS_INSTALL_ID: &str = "usageInsightsInstallId";
 
 /// Falls back to the defaults rather than failing: an unreadable preference
 /// should cost the user their choice for one launch, not the tray label.

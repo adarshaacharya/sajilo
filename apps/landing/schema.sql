@@ -37,3 +37,23 @@ CREATE TABLE IF NOT EXISTS app_pings (
   pings INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (day_started_at_utc, version, platform, architecture, country, gap_days, upgraded_from_version)
 );
+
+-- Usage from 0.1.28 on, one row per install per UTC day, added in migration
+-- 0004. The successor to `app_pings`: builds that send an id write here and
+-- nowhere else, builds too old to send one keep writing `app_pings`, so nothing
+-- is counted twice and `app_pings` can be dropped once few enough of those are
+-- left. A row per day rather than per install, because this is now the only
+-- record of history — `MIN(day)` per install is when it was first seen. The id
+-- is a random v4 uuid the app generates for itself.
+CREATE TABLE IF NOT EXISTS app_usage (
+  install_id TEXT NOT NULL,
+  day TEXT NOT NULL, -- 2026-09-20T00:00:00Z
+  seen_at TEXT NOT NULL, -- 2026-09-20T16:17:18.266Z
+  version TEXT NOT NULL,
+  platform TEXT NOT NULL,
+  architecture TEXT NOT NULL,
+  country TEXT NOT NULL,
+  PRIMARY KEY (install_id, day)
+);
+
+CREATE INDEX IF NOT EXISTS app_usage_day ON app_usage (day);

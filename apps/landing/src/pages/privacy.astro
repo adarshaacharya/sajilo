@@ -36,11 +36,30 @@ import Base from "../layouts/Base.astro";
         <li>the app version, and the previous version when you have just updated</li>
         <li>operating system and CPU architecture</li>
         <li>the UTC day, and days since the last count (capped at 45)</li>
+        <li>
+          a random id the app generates for itself, so that one person opening Sajilo for a month
+          is not counted as thirty new people
+        </li>
       </ul>
       <p>
-        Cloudflare derives an approximate country from the connection. The service stores only
-        running totals. It does not store an account, device or installation identifier, IP
-        address, exact request time, or anything you do in the app.
+        That id is a random number. It is not derived from your device, your name, your network or
+        anything else about you, and it is not shared with anyone. Switching the count off in
+        Settings › System › Privacy stops anything being sent at all; the id stays on your computer
+        unused, so turning the count back on later does not make you look like a new person.
+        Restoring a backup onto another computer generates a new id rather than reusing the one from
+        the computer the backup came from.
+      </p>
+      <p>
+        Alongside the id, the service records the day each count was for and the time it arrived, so
+        it can tell an install still in use from one that stopped. The count is sent by Sajilo’s
+        hourly background refresh, not by anything you do, so that time says the app was running —
+        not when you opened a screen or what you opened. There is at most one record per day.
+      </p>
+      <p>
+        Cloudflare derives an approximate country from the connection. The service does not store an
+        account, your name, an email address, an IP address, anything identifying your device, or
+        anything you do inside the app — which screens you open, what you search for, and what you
+        save are never sent anywhere.
       </p>
     </section>
 

@@ -1,9 +1,15 @@
-//! Anonymous, aggregate-only daily count.
+//! Anonymous daily count.
 //!
 //! On by default; switching it off in Settings stops it entirely. The desktop
-//! app owns that switch and daily de-duplication. The endpoint only receives a
-//! small aggregate bucket; it never sees an account, installation identifier,
-//! local data, or usage events.
+//! app owns that switch and daily de-duplication. The endpoint receives a small
+//! bucket — version, platform, architecture, day — plus a random id this
+//! install generates for itself, so returning installs can be told apart from
+//! new ones. It never sees an account, a name, anything about the machine, any
+//! local data, or any record of what was used inside the app.
+//!
+//! The id is a v4 uuid: random, not derived from hardware, and never sent once
+//! the count is switched off. Builds before 0.1.28 send no id at all and are
+//! still counted, so the endpoint must keep treating it as optional.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -11,6 +17,7 @@ use chrono::{NaiveDate, Utc};
 use serde::Serialize;
 use serde_json::{Value, json};
 use tauri::{AppHandle, Wry};
+use uuid::Uuid;
 
 use crate::{db, prefs};
 
@@ -22,6 +29,8 @@ static USAGE_PING_IN_FLIGHT: AtomicBool = AtomicBool::new(false);
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct UsagePing {
+    /// This install's random id. See `prefs::USAGE_INSIGHTS_INSTALL_ID`.
+    install_id: String,
     version: String,
     platform: &'static str,
     architecture: &'static str,
@@ -103,6 +112,37 @@ fn read_string(app: &AppHandle<Wry>, key: &str) -> Option<String> {
     read(app, key).and_then(|value| value.as_str().map(str::to_owned))
 }
 
+/// A stored id that this build is willing to send.
+///
+/// Anything that is not a plain v4 uuid — a hand-edited preference, a value
+/// from some future format — is discarded rather than forwarded, so the only
+/// thing that can ever leave here is a random number this app generated.
+fn valid_install_id(stored: Option<String>) -> Option<String> {
+    stored.filter(|id| {
+        Uuid::try_parse(id).is_ok_and(|uuid| uuid.get_version_num() == 4) && id.len() == 36
+    })
+}
+
+/// This install's id, minted on first use and then kept.
+///
+/// Deliberately called from the send path and nowhere else, so an install whose
+/// owner switched the count off before it ever ran never generates one at all.
+///
+/// Kept — not deleted — when the count is switched off. While it is off nothing
+/// is sent, so the id tracks nothing; it simply waits in the local database. A
+/// fresh one on every switch-back-on would file the same person as a new
+/// install each time, which makes someone toggling the setting look like
+/// several users. Nothing else replaces it: the switch is the control, and a
+/// second one that silently forks the counts would only blur them.
+fn install_id(app: &AppHandle<Wry>) -> String {
+    if let Some(existing) = valid_install_id(read_string(app, prefs::USAGE_INSIGHTS_INSTALL_ID)) {
+        return existing;
+    }
+    let minted = Uuid::new_v4().to_string();
+    let _ = db::set_json(app, prefs::USAGE_INSIGHTS_INSTALL_ID, &json!(minted));
+    minted
+}
+
 /// Sends at most one event per UTC day, unless switched off. Failed
 /// requests leave the local marker untouched so the next hourly background
 /// refresh can try again.
@@ -140,6 +180,7 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
     let version = app.package_info().version.to_string();
     let previous_version = read_string(&app, prefs::USAGE_INSIGHTS_LAST_PING_VERSION);
     let payload = UsagePing {
+        install_id: install_id(&app),
         version: version.clone(),
         platform: platform(),
         architecture: architecture(),
@@ -177,6 +218,10 @@ pub fn usage_insights_enabled(app: AppHandle<Wry>) -> bool {
 #[tauri::command]
 pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> db::Result<bool> {
     db::set_json(&app, prefs::USAGE_INSIGHTS_ENABLED, &json!(enabled))?;
+    // The id is left alone. Switching off already stops everything being sent;
+    // deleting it as well would only mean that switching back on reports a new
+    // install, counting one undecided person several times. `install_id` has
+    // the reasoning.
     Ok(enabled && send_usage_ping(app).await)
 }
 
@@ -184,7 +229,24 @@ pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> d
 mod tests {
     use chrono::NaiveDate;
 
-    use super::{UsagePing, already_counted, gap_days, is_enabled, upgraded_from};
+    use super::{
+        UsagePing, already_counted, gap_days, is_enabled, upgraded_from, valid_install_id,
+    };
+
+    #[test]
+    fn only_forwards_a_random_v4_id() {
+        let generated = uuid::Uuid::new_v4().to_string();
+        assert_eq!(valid_install_id(Some(generated.clone())), Some(generated));
+        assert_eq!(valid_install_id(None), None);
+        assert_eq!(valid_install_id(Some(String::new())), None);
+        assert_eq!(valid_install_id(Some("adarshaofficial".to_owned())), None);
+        // A v1 uuid carries a MAC address and a timestamp. Never forwarded,
+        // however it got into the preference.
+        assert_eq!(
+            valid_install_id(Some("2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d".to_owned())),
+            None
+        );
+    }
 
     #[test]
     fn counts_each_utc_day_once_across_the_switch_from_nepal_days() {
@@ -232,6 +294,7 @@ mod tests {
     #[test]
     fn omits_an_unknown_previous_version_from_the_payload() {
         let payload = UsagePing {
+            install_id: "3f8c1b60-2a9d-4c7e-9f01-5b6d8e2a4c13".to_owned(),
             version: "0.1.23".to_owned(),
             platform: "macos",
             architecture: "arm64",

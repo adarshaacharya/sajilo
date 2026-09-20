@@ -54,9 +54,20 @@ pub fn export_backup(app: AppHandle<Wry>, destination: String) -> Result<()> {
     }
     let connection = db::open(&app)?;
     connection
-        .execute("VACUUM INTO ?1", [destination])
-        .map(|_| ())
-        .map_err(|error| error.to_string())
+        .execute("VACUUM INTO ?1", [&destination])
+        .map_err(|error| error.to_string())?;
+    // The snapshot is the whole database, which would otherwise carry this
+    // machine's usage id into a file people mail around and post in issues. It
+    // identifies nothing on its own, but a backup is not the place for it, and
+    // an import mints a fresh one anyway.
+    let exported = Connection::open(destination_path).map_err(|error| error.to_string())?;
+    exported
+        .execute(
+            "DELETE FROM settings WHERE key = ?1",
+            [crate::prefs::USAGE_INSIGHTS_INSTALL_ID],
+        )
+        .map_err(|error| error.to_string())?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -71,6 +82,11 @@ pub fn import_backup(app: AppHandle<Wry>, source: String) -> Result<ImportSummar
     fs::copy(source_path, &temporary).map_err(|error| error.to_string())?;
     fs::rename(&temporary, &destination).map_err(|error| error.to_string())?;
     db::open(&app)?;
+    // A backup is a whole-database snapshot, so it carries the usage id of the
+    // machine it was taken on. Restoring one onto a second machine would make
+    // two installs report as one. Dropped here; the next daily count mints a
+    // fresh id, and a restore onto the same machine simply gets a new one.
+    let _ = db::delete_json(&app, crate::prefs::USAGE_INSIGHTS_INSTALL_ID);
     crate::tray::refresh_title(&app);
     Ok(ImportSummary { database: true })
 }

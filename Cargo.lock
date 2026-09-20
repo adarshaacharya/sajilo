@@ -4067,6 +4067,7 @@ dependencies = [
  "tiny-skia",
  "tokio",
  "url",
+ "uuid",
  "window-vibrancy",
 ]
 
