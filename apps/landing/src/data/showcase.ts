@@ -35,6 +35,28 @@ export const todayIsHoliday = todayEvents?.is_public_holiday ?? false;
 
 export const supportedRange = c.supported_range;
 
+// ---------- Panchang ----------
+
+interface PanchangaField {
+  en: string;
+  ne: string;
+}
+interface Chaughadiya {
+  name: PanchangaField;
+  quality: "good" | "neutral" | "bad";
+  start: string;
+  end: string;
+}
+interface Panchanga {
+  almanac: { tithi: PanchangaField; nakshatra: PanchangaField; yoga: PanchangaField; karana: PanchangaField };
+  chaughadiyaDay: Chaughadiya[];
+  rahuKaalStart: string | null;
+  rahuKaalEnd: string | null;
+}
+
+const panchangaKey = `panchanga_for:${today.gregorian}`;
+export const panchang = (c as unknown as Record<string, Panchanga | undefined>)[panchangaKey] ?? null;
+
 // ---------- Holidays ----------
 
 export interface HolidayMonth {

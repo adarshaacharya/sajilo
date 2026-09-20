@@ -1,6 +1,8 @@
 ---
-import { today, todayTithi, todayIsHoliday, upcoming, kathmandu, supportedRange } from "../data/showcase";
+import { today, todayTithi, todayIsHoliday, upcoming, kathmandu, supportedRange, panchang } from "../data/showcase";
 import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
+
+const goodWindow = panchang?.chaughadiyaDay.find((c) => c.quality === "good");
 ---
 
 <section class="leaf-section wrap" id="today">
@@ -57,6 +59,23 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
       </ol>
     </div>
 
+    {panchang && (
+      <div class="leaf-panchang">
+        <p class="leaf-panchang-title">Panchang, not just tithi</p>
+        <p>
+          Nakshatra <strong lang="ne">{panchang.almanac.nakshatra.ne}</strong>, yoga
+          <strong lang="ne"> {panchang.almanac.yoga.ne}</strong>. It also knows the one window a wall
+          calendar has warned about for centuries:
+          {panchang.rahuKaalStart && panchang.rahuKaalEnd && (
+            <> Rahu Kaal runs <strong class="num">{nepalClock(panchang.rahuKaalStart)}–{nepalClock(panchang.rahuKaalEnd)}</strong> today — reschedule that call.</>
+          )}
+          {goodWindow && (
+            <> If you're starting something instead, <strong lang="ne">{goodWindow.name.ne}</strong> opens at <strong class="num">{nepalClock(goodWindow.start)}</strong>.</>
+          )}
+        </p>
+      </div>
+    )}
+
     <p class="leaf-foot">
       You can add a note to any day, get a reminder the evening before a festival, and convert dates between
       BS and AD.
@@ -76,6 +95,7 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     grid-template-areas:
       "date next"
       "facts next"
+      "panchang panchang"
       "foot foot";
     gap: 0 clamp(28px, 5vw, 72px);
     padding: clamp(28px, 4vw, 52px);
@@ -201,6 +221,30 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
     font-weight: 600;
     letter-spacing: 0.04em;
   }
+  .leaf-panchang {
+    grid-area: panchang;
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: rgb(20 17 14 / 0.05);
+    border-radius: 4px;
+    border-left: 3px solid var(--sindoor);
+  }
+  .leaf-panchang-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--paper-4);
+    margin-bottom: 6px;
+  }
+  .leaf-panchang p {
+    font-size: 15px;
+    line-height: 1.55;
+    max-width: 68ch;
+  }
+  .leaf-panchang strong {
+    font-weight: 700;
+  }
   .leaf-foot {
     grid-area: foot;
     margin-top: 28px;
@@ -213,7 +257,7 @@ import { ne, weekdayNe, longDate, nepalClock, daysAway } from "../lib/format";
   @media (max-width: 760px) {
     .leaf {
       grid-template-columns: 1fr;
-      grid-template-areas: "date" "facts" "next" "foot";
+      grid-template-areas: "date" "facts" "next" "panchang" "foot";
     }
     .leaf-next {
       border-left: 0;
