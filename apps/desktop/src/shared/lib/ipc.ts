@@ -14,7 +14,12 @@ import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { SipStatus } from "../../types/api/SipStatus";
+import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
+import type { StockPortfolio } from "../../types/api/StockPortfolio";
+import type { StockPrice } from "../../types/api/StockPrice";
+import type { StockTradeEstimate } from "../../types/api/StockTradeEstimate";
+import type { StockTransactionKind } from "../../types/api/StockTransactionKind";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 
@@ -461,6 +466,43 @@ export const api = {
   getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),
 
   getStocks: (refresh = false) => invoke<LoadState<StockMarketSnapshot>>("get_stocks", { refresh }),
+  stockPortfolio: (prices: StockPrice[]) => invoke<StockPortfolio>("stock_portfolio", { prices }),
+  estimateStockTrade: (
+    id: string | null,
+    symbol: string,
+    kind: StockTransactionKind,
+    source: StockAcquisitionSource | null,
+    tradeDate: string,
+    quantity: number,
+    price: number,
+    fees: number | null,
+  ) =>
+    invoke<StockTradeEstimate>("estimate_stock_trade", {
+      id,
+      symbol,
+      kind,
+      source,
+      tradeDate,
+      quantity,
+      price,
+      fees,
+    }),
+  saveStockTransaction: (
+    input: {
+      id: string;
+      symbol: string;
+      kind: StockTransactionKind;
+      source: StockAcquisitionSource | null;
+      tradeDate: string;
+      quantity: number;
+      price: number;
+      fees: number | null;
+      note: string;
+    },
+    prices: StockPrice[],
+  ) => invoke<StockPortfolio>("save_stock_transaction", { ...input, prices }),
+  deleteStockTransaction: (id: string, prices: StockPrice[]) =>
+    invoke<StockPortfolio>("delete_stock_transaction", { id, prices }),
   /** CDSC's current-issue list; cached for half an hour, `refresh` forces a live pull. */
   getIpos: (refresh = false) => invoke<LoadState<IpoSnapshot>>("get_ipos", { refresh }),
   /** ShareHub's upcoming book closures; cached for an hour, `refresh` forces a live pull. */

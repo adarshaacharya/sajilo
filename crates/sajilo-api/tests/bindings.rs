@@ -33,6 +33,14 @@ fn exports_every_dto() {
     sajilo_core::NepaliDate::export_all().unwrap();
     sajilo_core::Place::export_all().unwrap();
     sajilo_core::sip::SipStatus::export_all().unwrap();
+    sajilo_core::portfolio::StockTransactionKind::export_all().unwrap();
+    sajilo_core::portfolio::StockAcquisitionSource::export_all().unwrap();
+    sajilo_core::portfolio::StockTransaction::export_all().unwrap();
+    sajilo_core::portfolio::StockTradeCharges::export_all().unwrap();
+    sajilo_core::portfolio::StockTradeEstimate::export_all().unwrap();
+    sajilo_core::portfolio::StockPrice::export_all().unwrap();
+    sajilo_core::portfolio::StockPosition::export_all().unwrap();
+    sajilo_core::portfolio::StockPortfolio::export_all().unwrap();
 
     Freshness::export_all().unwrap();
     LoadState::<()>::export_all().unwrap();

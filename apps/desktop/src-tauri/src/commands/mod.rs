@@ -13,6 +13,7 @@ pub mod nepse_intraday;
 pub mod news;
 pub mod notify;
 pub mod plans;
+pub mod portfolio;
 pub mod radio;
 pub mod rashifal;
 pub mod sips;

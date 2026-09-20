@@ -185,6 +185,10 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
             commands::stocks::get_stocks,
+            commands::portfolio::stock_portfolio,
+            commands::portfolio::estimate_stock_trade,
+            commands::portfolio::save_stock_transaction,
+            commands::portfolio::delete_stock_transaction,
             commands::ipos::get_ipos,
             commands::dividends::get_dividends,
             commands::mutual_funds::get_mutual_funds,

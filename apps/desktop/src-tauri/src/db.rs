@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, Wry};
 
 const DATABASE_FILE: &str = "sajilo.db";
-const SCHEMA_VERSION: i64 = 7;
+pub const SCHEMA_VERSION: i64 = 8;
 
 pub type Result<T> = std::result::Result<T, String>;
 
@@ -138,10 +138,32 @@ const KEEPER_TABLES: &str = "
                 ON keeper_attachments (owner_kind, owner_id);
 ";
 
+/// Personal NEPSE activity. Integer paisa avoids cumulative rounding drift;
+/// derived WACC and P/L are rebuilt from these rows whenever they are read.
+const STOCK_PORTFOLIO_TABLES: &str = "
+            CREATE TABLE IF NOT EXISTS stock_transactions (
+                id TEXT PRIMARY KEY NOT NULL,
+                symbol TEXT NOT NULL,
+                kind TEXT NOT NULL CHECK (kind IN ('purchase', 'sale')),
+                trade_date TEXT NOT NULL,
+                quantity INTEGER NOT NULL CHECK (quantity > 0),
+                price_paisa INTEGER NOT NULL CHECK (price_paisa >= 0),
+                fees_paisa INTEGER NOT NULL CHECK (fees_paisa >= 0),
+                tax_paisa INTEGER NOT NULL CHECK (tax_paisa >= 0),
+                fees_estimated INTEGER NOT NULL,
+                tax_estimated INTEGER NOT NULL,
+                source TEXT,
+                note TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS stock_transactions_symbol_date_idx
+                ON stock_transactions (symbol, trade_date, created_at);
+";
+
 fn migrate(connection: &Connection) -> Result<()> {
     connection
         .execute_batch(&format!(
-            "{BASE_TABLES}{KEEPER_TABLES}
+            "{BASE_TABLES}{KEEPER_TABLES}{STOCK_PORTFOLIO_TABLES}
             INSERT INTO schema_meta (key, value)
                 VALUES ('schema_version', 1)
                 ON CONFLICT(key) DO NOTHING;"
@@ -185,6 +207,11 @@ fn upgrade(connection: &Connection, from: i64) -> Result<()> {
                 {KEEPER_TABLES}
                 COMMIT;"
             ))
+            .map_err(|error| error.to_string())?;
+    }
+    if from < 8 {
+        connection
+            .execute_batch(STOCK_PORTFOLIO_TABLES)
             .map_err(|error| error.to_string())?;
     }
     bump_schema_version(connection, SCHEMA_VERSION)
@@ -305,5 +332,28 @@ mod tests {
         migrate(&connection).unwrap();
         assert_eq!(schema_version(&connection).unwrap(), SCHEMA_VERSION);
         assert!(columns(&connection, "keeper_items").contains(&"template".to_owned()));
+        assert!(columns(&connection, "stock_transactions").contains(&"price_paisa".to_owned()));
+    }
+
+    #[test]
+    fn version_seven_gains_portfolio_storage_without_touching_existing_data() {
+        let connection = Connection::open_in_memory().unwrap();
+        connection
+            .execute_batch(
+                "CREATE TABLE schema_meta (key TEXT PRIMARY KEY NOT NULL, value INTEGER NOT NULL);
+                INSERT INTO schema_meta VALUES ('schema_version', 7);
+                CREATE TABLE keeper_people (
+                    id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL,
+                    relationship TEXT NOT NULL, created_at TEXT NOT NULL
+                );
+                INSERT INTO keeper_people VALUES ('p', 'Aama', 'mother', 'c');",
+            )
+            .unwrap();
+        migrate(&connection).unwrap();
+        let people: i64 = connection
+            .query_row("SELECT COUNT(*) FROM keeper_people", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(people, 1);
+        assert!(columns(&connection, "stock_transactions").contains(&"symbol".to_owned()));
     }
 }

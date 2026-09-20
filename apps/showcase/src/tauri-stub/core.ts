@@ -116,6 +116,21 @@ function shift(value: unknown, drift: number): unknown {
 }
 
 export async function invoke<T>(command: string, args?: Args): Promise<T> {
+  // Personal portfolio rows are intentionally absent from the public showcase.
+  // Return the real command's empty-state shape rather than inventing holdings.
+  if (
+    command === "stock_portfolio" ||
+    command === "save_stock_transaction" ||
+    command === "delete_stock_transaction"
+  ) {
+    return {
+      invested: 0,
+      marketValue: 0,
+      unrealisedProfitLoss: 0,
+      realisedProfitLoss: 0,
+      positions: [],
+    } as T;
+  }
   if (WRITES.has(command)) return undefined as T;
 
   const { recordedAt, commands } = await loaded;

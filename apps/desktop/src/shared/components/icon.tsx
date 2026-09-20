@@ -93,6 +93,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   modules: SFSquareGrid2x2,
   system: SFCpu,
   upcoming: SFCalendar,
+  calendar: SFCalendar,
   festival: SFCalendar,
   holiday: SFCalendarBadgeCheckmark,
   gold: SFCircleHexagongridFill,
@@ -170,6 +171,7 @@ export type IconName =
   | "modules"
   | "system"
   | "upcoming"
+  | "calendar"
   | "festival"
   | "holiday"
   | "gold"

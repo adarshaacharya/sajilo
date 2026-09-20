@@ -36,7 +36,7 @@ fn validate_database(path: &Path) -> Result<()> {
             |row| row.get(0),
         )
         .ok();
-    if !matches!(version, Some(1 | 2)) {
+    if !matches!(version, Some(value) if (1..=db::SCHEMA_VERSION).contains(&value)) {
         return Err("This file is not a compatible Sajilo database backup.".to_owned());
     }
     Ok(())
