@@ -1,5 +1,50 @@
 [
   {
+    "version": "v0.1.28",
+    "name": "Sajilo v0.1.28",
+    "publishedAt": "2026-09-20T17:26:29Z",
+    "body": "## Radio plays on Linux again\r\n\r\nStarting a station froze the whole window on Arch and other rolling distros. The AppImage shipped GStreamer's core but none of its plugins, so it fell back to whatever the host had — and its older core refuses to load newer plugins, leaving the audio pipeline with no decoder and no output. The web process died with it, which is why the entire app appeared to hang rather than just the radio.\r\n\r\nThe AppImage now bundles those plugins alongside the core it already carried, so the two always match whatever distro you run it on. The release itself now fails to build if they are missing, so this cannot quietly regress.\r\n\r\n- BBC Nepali plays on Linux. Its stream is HLS, which WebKitGTK disables unless an option is set that Sajilo never set, so it had failed on every Linux build since it was added.\r\n- A station that produces no sound within 20 seconds now says so and lets you retry, instead of spinning forever with only Stop as a way out.\r\n\r\nmacOS and Windows were never affected — neither uses GStreamer.\r\n\r\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.28",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.28/Sajilo-macos-arm64.dmg",
+        "size": 9639529
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.28/Sajilo-macos-x64.dmg",
+        "size": 10201386
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.28/Sajilo-windows-x64.exe",
+        "size": 7086389
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.28/Sajilo-linux-amd64.deb",
+        "size": 11944500
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.28/Sajilo-linux-x86_64.AppImage",
+        "size": 171751928
+      }
+    ]
+  },
+  {
     "version": "v0.1.27",
     "name": "Sajilo v0.1.27",
     "publishedAt": "2026-09-19T07:41:44Z",
