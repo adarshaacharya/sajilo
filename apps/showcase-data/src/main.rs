@@ -81,6 +81,58 @@ fn main() {
     );
 }
 
+/// Drops the precision that makes the almanac unreproducible across machines.
+///
+/// The almanac is the one recorded payload computed from trigonometry rather
+/// than read from a fixture: moon illumination, the instant a tithi ends,
+/// moonrise. `sin`, `cos` and `atan2` may disagree in their last bit between
+/// one libm and another, so macOS and Linux produce figures that differ around
+/// the seventeenth decimal and instants that differ by nanoseconds. That alone
+/// failed CI's drift check on every push, however often the file was
+/// regenerated — the recording was never stale, just unrepeatable.
+///
+/// None of those bits reach a person: the app shows an illumination percentage
+/// and a clock time. Six decimals and whole seconds keep everything the UI
+/// displays, while a real change to the engine — which moves figures, not
+/// final bits — stays exactly as visible as before. Applied to the almanac
+/// alone, so fixture-derived values are still recorded verbatim.
+fn settle(value: Value) -> Value {
+    match value {
+        Value::Number(number) => match number.as_f64() {
+            Some(float) if !number.is_i64() && !number.is_u64() => {
+                let rounded = (float * 1e6).round() / 1e6;
+                serde_json::Number::from_f64(rounded).map_or(Value::Null, Value::Number)
+            }
+            _ => Value::Number(number),
+        },
+        Value::String(text) => Value::String(whole_seconds(&text)),
+        Value::Array(items) => Value::Array(items.into_iter().map(settle).collect()),
+        Value::Object(fields) => Value::Object(
+            fields
+                .into_iter()
+                .map(|(key, held)| (key, settle(held)))
+                .collect(),
+        ),
+        other => other,
+    }
+}
+
+/// `2026-08-17T11:30:20.648437500Z` -> `2026-08-17T11:30:20Z`. Anything that is
+/// not an RFC 3339 instant with a fractional part is handed back untouched.
+fn whole_seconds(text: &str) -> String {
+    let Some(dot) = text.find('.') else {
+        return text.to_owned();
+    };
+    let tail_at = text[dot + 1..]
+        .find(|character: char| !character.is_ascii_digit())
+        .map_or(text.len(), |offset| dot + 1 + offset);
+    let trimmed = format!("{}{}", &text[..dot], &text[tail_at..]);
+    match DateTime::parse_from_rfc3339(&trimmed) {
+        Ok(_) => trimmed,
+        Err(_) => text.to_owned(),
+    }
+}
+
 /// `CARGO_MANIFEST_DIR` is `apps/showcase-data`; the fixtures are two levels up.
 fn repo_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -230,6 +282,8 @@ fn calendar(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
             continue;
         };
         if let Some(reading) = panchanga::panchanga_for(ad) {
+            let reading =
+                settle(serde_json::to_value(&reading).expect("the almanac is a serde type"));
             insert(commands, &format!("panchanga_for:{ad}"), &reading);
         }
     }
