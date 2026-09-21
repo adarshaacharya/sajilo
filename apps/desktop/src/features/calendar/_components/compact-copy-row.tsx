@@ -25,7 +25,6 @@ export function CompactCopyRow({ conversion }: { conversion: Conversion }) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className="text-[10px] text-text-muted">{t("action.copy")}</span>
       {COPY_FORMATS.map((format) => {
         const isCopied = copied === format;
         const value = copyText(format, conversion);

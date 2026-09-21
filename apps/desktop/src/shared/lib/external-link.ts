@@ -22,9 +22,12 @@ export async function openExternalLink(url: string) {
     // the article itself had opened.
     console.error("Could not open external link", error);
     const { message } = await import("@tauri-apps/plugin-dialog");
-    await message(
-      "Could not open this link in your default browser.\n\nडिफल्ट ब्राउजरमा यो लिङ्क खोल्न सकिएन।",
-      { title: "Couldn’t open link / लिङ्क खुलेन", kind: "error" },
-    ).catch(() => {});
+    // Worded for any link: a web page goes to the browser, an email address
+    // to the mail app, and naming the wrong one sends people looking for the
+    // wrong problem.
+    await message("Could not open this link.\n\nयो लिङ्क खोल्न सकिएन।", {
+      title: "Couldn’t open link / लिङ्क खुलेन",
+      kind: "error",
+    }).catch(() => {});
   }
 }
