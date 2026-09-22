@@ -1,57 +1,156 @@
 ---
 import Base from "../layouts/Base.astro";
+// The same file the Windows tray draws, so the picture matches the taskbar.
+import nepalFlag from "../../../desktop/src-tauri/assets/nepal-flag.svg?url";
 
 interface Shot { src: string; alt: string; wide?: boolean }
-const steps: { text: string; images: Shot[] }[] = [
+interface Step {
+  text: string;
+  images?: Shot[];
+  /** A command to paste into a terminal. */
+  code?: string;
+  /** The ^-overflow-to-taskbar drag, drawn rather than photographed. */
+  trayDiagram?: boolean;
+}
+interface Platform { id: string; name: string; intro: string; steps: Step[] }
+
+const platforms: Platform[] = [
   {
-    text: "Open the downloaded .dmg and drag Sajilo onto the Applications shortcut.",
-    images: [{ src: "/assets/install/0-drag-to-applications.png", alt: "Dragging Sajilo.app onto the Applications shortcut", wide: true }],
+    id: "macos",
+    name: "macOS",
+    intro:
+      "Beta builds are not signed with an Apple certificate yet, so macOS blocks the first launch. These steps are needed once per update.",
+    steps: [
+      {
+        text: "Open the downloaded .dmg and drag Sajilo onto the Applications shortcut.",
+        images: [{ src: "/assets/install/0-drag-to-applications.png", alt: "Dragging Sajilo.app onto the Applications shortcut", wide: true }],
+      },
+      {
+        text: "Open Sajilo from Applications, Launchpad or Spotlight. macOS says “Sajilo” Not Opened. Click Done, not Move to Trash.",
+        images: [{ src: "/assets/install/1-not-opened.png", alt: "“Sajilo” Not Opened dialog" }],
+      },
+      {
+        text: "Open System Settings, then Privacy & Security, and scroll to Security. Next to “Sajilo” was blocked to protect your Mac, click Open Anyway.",
+        images: [{ src: "/assets/install/2-open-anyway.png", alt: "Security section showing the Open Anyway button", wide: true }],
+      },
+      {
+        text: "Confirm Open Anyway once more, then authenticate with Touch ID or your password.",
+        images: [
+          { src: "/assets/install/3-confirm-open.png", alt: "Open Sajilo confirmation dialog" },
+          { src: "/assets/install/4-authenticate.png", alt: "Touch ID or admin password prompt" },
+        ],
+      },
+    ],
   },
   {
-    text: "Open Sajilo from Applications, Launchpad or Spotlight. macOS says “Sajilo” Not Opened. Click Done, not Move to Trash.",
-    images: [{ src: "/assets/install/1-not-opened.png", alt: "“Sajilo” Not Opened dialog" }],
+    id: "windows",
+    name: "Windows",
+    intro:
+      "Windows 10 or 11, 64-bit. Beta builds are not code-signed yet, so SmartScreen warns you the first time.",
+    steps: [
+      { text: "Run the downloaded installer, Sajilo-windows-x64.exe." },
+      {
+        text: "SmartScreen shows “Windows protected your PC”. Click More info, then Run anyway. Only do this for a file downloaded from this site or Sajilo’s GitHub releases.",
+      },
+      {
+        text: "Follow the installer. It installs for your account only, so it normally doesn’t ask for an administrator password. On Windows 10 it may download Microsoft Edge WebView2 first, so stay online.",
+      },
+      {
+        text: "Windows hides every new tray icon behind the ^ arrow next to the clock. Click ^, then drag the Nepal flag out and drop it on the taskbar beside the clock. Click it to open Sajilo; hover over it to see today’s date.",
+        trayDiagram: true,
+      },
+    ],
   },
   {
-    text: "Open System Settings, then Privacy & Security, and scroll to Security. Next to “Sajilo” was blocked to protect your Mac, click Open Anyway.",
-    images: [{ src: "/assets/install/2-open-anyway.png", alt: "Security section showing the Open Anyway button", wide: true }],
-  },
-  {
-    text: "Confirm Open Anyway once more, then authenticate with Touch ID or your password.",
-    images: [
-      { src: "/assets/install/3-confirm-open.png", alt: "Open Sajilo confirmation dialog" },
-      { src: "/assets/install/4-authenticate.png", alt: "Touch ID or admin password prompt" },
+    id: "linux",
+    name: "Linux",
+    intro: "64-bit (x86_64) systems. Use the .deb on Ubuntu, Debian, Linux Mint or Pop!_OS, and the AppImage anywhere else.",
+    steps: [
+      {
+        text: "With the .deb, install it from the folder you downloaded it to. apt also installs what Sajilo needs.",
+        code: "sudo apt install ./Sajilo-linux-amd64.deb",
+      },
+      {
+        text: "With the AppImage, make it executable and run it. If it complains about FUSE, install libfuse2 (libfuse2t64 on Ubuntu 24.04).",
+        code: "chmod +x Sajilo-linux-x86_64.AppImage\n./Sajilo-linux-x86_64.AppImage",
+      },
+      {
+        text: "Sajilo shows the Nepali date in your top bar. KDE, Cinnamon, XFCE, MATE and Budgie show it out of the box. On GNOME, install the AppIndicator and KStatusNotifierItem Support extension; Ubuntu already has it on.",
+      },
+      {
+        text: "Linux trays don’t pass clicks through to apps, so click the date and choose Open Sajilo from its menu.",
+      },
     ],
   },
 ];
+
+const digits = "०१२३४५६७८९";
 ---
 
 <Base
-  title="Installing Sajilo on macOS"
-  description="Sajilo's beta builds are not code-signed yet. Four steps, with screenshots, to open it the first time on macOS."
+  title="Installing Sajilo"
+  description="How to install Sajilo on macOS, Windows and Linux, and get past the warnings that unsigned beta builds show on first launch."
   path="/install.html"
 >
   <main class="wrap guide" id="main">
-    <h1 class="display guide-h1">Installing on macOS</h1>
+    <h1 class="display guide-h1">Installing Sajilo</h1>
     <p class="lede">
-      Beta builds are not signed with an Apple certificate yet, so macOS blocks the first launch. These
-      steps are needed once per update.
+      Beta builds are not code-signed yet, so each system asks for confirmation the first time. After that
+      Sajilo updates itself and starts with your computer.
     </p>
 
-    <ol class="steps">
-      {steps.map((s, i) => (
-        <li class="step reveal">
-          <span class="step-num" lang="ne">{"०१२३४५६७८९"[i + 1]}</span>
-          <div class="step-body">
-            <p>{s.text}</p>
-            <div class="step-images">
-              {s.images.map((img) => (
-                <img src={img.src} alt={img.alt} loading="lazy" class:list={{ wide: img.wide }} />
-              ))}
-            </div>
-          </div>
-        </li>
+    <nav class="os-nav" aria-label="Choose your system">
+      {platforms.map((p) => (
+        <a class="btn btn--ghost btn--sm" href={`#${p.id}`} data-os={p.id}>{p.name}</a>
       ))}
-    </ol>
+    </nav>
+
+    {platforms.map((p) => (
+      <section class="os" id={p.id} aria-labelledby={`${p.id}-title`}>
+        <h2 class="os-title display" id={`${p.id}-title`}>{p.name}</h2>
+        <p class="os-intro">{p.intro}</p>
+        <ol class="steps">
+          {p.steps.map((s, i) => (
+            <li class="step reveal">
+              <span class="step-num" lang="ne">{digits[i + 1]}</span>
+              <div class="step-body">
+                <p>{s.text}</p>
+                {s.code && <pre class="step-code"><code>{s.code}</code></pre>}
+                {s.trayDiagram && (
+                  <div class="tray" role="img" aria-label="Drag the Nepal flag from the hidden icons panel onto the taskbar next to the clock">
+                    <div class="tray-panel">
+                      <div class="tray-pop">
+                        <img src={nepalFlag} alt="" />
+                        <span class="tray-slot"></span>
+                        <span class="tray-slot"></span>
+                      </div>
+                      <span class="tray-caret">^</span>
+                    </div>
+                    <svg class="tray-arrow" viewBox="0 0 64 24" aria-hidden="true">
+                      <path d="M4 18 Q 32 0 56 12" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
+                      <path d="M51 6 L57 12 L50 16" fill="none" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                    <div class="tray-bar">
+                      <span>^</span>
+                      <img src={nepalFlag} alt="" />
+                      <span>ENG</span>
+                      <span>4:34 PM</span>
+                    </div>
+                  </div>
+                )}
+                {s.images && (
+                  <div class="step-images">
+                    {s.images.map((img) => (
+                      <img src={img.src} alt={img.alt} loading="lazy" class:list={{ wide: img.wide }} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
 
     <div class="done reveal">
       <!-- The app itself, not a screenshot of it, so this never shows an old UI. -->
@@ -59,7 +158,7 @@ const steps: { text: string; images: Shot[] }[] = [
         <div class="done-screen">
           <iframe
             class="done-app"
-            title="Sajilo open in the menu bar, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index"
+            title="Sajilo open, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index"
             tabindex="-1"
             scrolling="no"
             loading="lazy"
@@ -70,8 +169,8 @@ const steps: { text: string; images: Shot[] }[] = [
       <div>
         <p class="done-ne" lang="ne">भयो।</p>
         <p>
-          Sajilo now opens normally from Launchpad or Spotlight and starts with your Mac. It runs in the menu
-          bar with no Dock icon unless you turn one on in Settings.
+          Sajilo now starts with your computer. It lives in the menu bar on a Mac, in the system tray on
+          Windows, and in the top bar on Linux. Turn off launch at login in Settings if you’d rather not.
         </p>
         <p class="done-help">Problems: <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a></p>
         <a class="btn btn--sm" href="/#download">Back to downloads</a>
@@ -200,6 +299,93 @@ const steps: { text: string; images: Shot[] }[] = [
       grid-template-columns: 1fr;
     }
   }
+
+  .os-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .os-nav a[aria-current="true"] {
+    border-color: var(--gilt);
+    color: var(--gilt-2);
+  }
+  .os {
+    margin-top: clamp(56px, 8vw, 96px);
+    scroll-margin-top: 96px;
+  }
+  .os-title {
+    font-size: clamp(34px, 5vw, 52px);
+  }
+  .os-intro {
+    margin-top: 10px;
+    color: var(--paper-2);
+    max-width: 60ch;
+  }
+  .os .steps {
+    margin-top: 24px;
+  }
+  .step-code {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    background: var(--ink-2);
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--paper);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .tray {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    max-width: 460px;
+  }
+  .tray img {
+    height: 16px;
+    width: auto;
+  }
+  .tray-panel {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+  .tray-pop,
+  .tray-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    background: var(--ink-2);
+  }
+  .tray-slot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--line-2);
+  }
+  .tray-caret {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .tray-arrow {
+    width: 64px;
+    height: 24px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+    color: var(--gilt);
+  }
+  .tray-bar {
+    flex: 1;
+    justify-content: flex-end;
+    font-size: 13px;
+    color: var(--paper-3);
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 
 <script>
@@ -210,4 +396,10 @@ const steps: { text: string; images: Shot[] }[] = [
     fit();
     new ResizeObserver(fit).observe(frame);
   }
+
+  // Marks the visitor's own system in the switcher. The page still lists all
+  // three, so a guess that is wrong costs nothing.
+  const ua = navigator.userAgent;
+  const os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "macos" : /Linux/.test(ua) ? "linux" : null;
+  if (os) document.querySelector(`.os-nav [data-os="${os}"]`)?.setAttribute("aria-current", "true");
 </script>

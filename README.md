@@ -105,6 +105,11 @@ operating system asks for confirmation the first time Sajilo opens.
   [installation guide](INSTALLATION_INSTRUCTIONS.md) walks through each step with
   screenshots.
 - **Windows**: if SmartScreen appears, choose **More info**, then **Run anyway**.
+  Windows then hides the new tray icon behind the **^** arrow; the
+  [Windows guide](INSTALLATION_INSTRUCTIONS.md#windows) shows how to keep it on
+  the taskbar.
+- **Linux**: see the [Linux guide](INSTALLATION_INSTRUCTIONS.md#linux) for the
+  `.deb` and AppImage, and for showing the tray icon on GNOME.
 
 Choose the Apple Silicon build for M-series Macs and the Intel build for older Macs.
 

@@ -727,5 +727,9 @@
   "panchang.night": "Night",
   "calendar.saait": "Saait",
   "calendar.saait-marriage": "Wedding",
-  "calendar.saait-bratabandha": "Bratabandha"
+  "calendar.saait-bratabandha": "Bratabandha",
+  "tray-pin.title": "Keep Sajilo on your taskbar",
+  "tray-pin.body": "Windows hides new icons under the ^ arrow. Drag the Nepal flag next to the clock so the date is one click away.",
+  "tray-pin.dismiss": "Got it",
+  "tray-pin.help": "Can’t find the tray icon?"
 }

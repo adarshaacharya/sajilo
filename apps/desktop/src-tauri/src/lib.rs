@@ -158,6 +158,11 @@ pub fn run() {
                 }
             }
 
+            // Windows hides new tray icons behind the ^ arrow, so tell the user
+            // where Sajilo went. Once per install; see `system::tray_pin`.
+            #[cfg(target_os = "windows")]
+            system::tray_pin::notify_once(app.handle());
+
             Ok(())
         })
         .on_window_event(|window, event| match event {

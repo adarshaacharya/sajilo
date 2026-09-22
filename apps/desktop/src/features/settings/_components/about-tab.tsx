@@ -1,8 +1,10 @@
 import { type ReactNode, useEffect, useState } from "react";
 import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
+import { TrayPinTip } from "../../../shared/components/tray-pin-tip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
+import { isWindows } from "../../../shared/lib/platform";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
 const ISSUES_URL = `${REPO_URL}/issues`;
@@ -91,6 +93,7 @@ function AboutUpdate() {
 export function AboutTab() {
   const { t } = useSettings();
   const [version, setVersion] = useState<string | null>(null);
+  const [pinHelp, setPinHelp] = useState(false);
 
   useEffect(() => {
     import("@tauri-apps/api/app")
@@ -124,6 +127,23 @@ export function AboutTab() {
         <span className="text-[10px] text-text-muted">·</span>
         <QuietLink label={CONTACT_EMAIL} href={`mailto:${CONTACT_EMAIL}`} />
       </div>
+
+      {/* The first-launch card, on demand — for anyone who pressed "Got it"
+          before actually moving the icon. */}
+      {isWindows &&
+        (pinHelp ? (
+          <div className="mt-4 w-full text-left">
+            <TrayPinTip onDismiss={() => setPinHelp(false)} />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPinHelp(true)}
+            className="mt-3 text-[11px] text-[color:var(--color-accent-mark)] hover:underline"
+          >
+            {t("tray-pin.help")}
+          </button>
+        ))}
 
       <p className="mt-6 text-[10px] leading-relaxed text-text-muted">
         {t("about.made-in-nepal")}

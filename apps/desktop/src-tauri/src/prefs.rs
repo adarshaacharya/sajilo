@@ -68,6 +68,11 @@ pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";
 /// the user. Its presence — not its value — is what stops that from happening
 /// twice, so switching the toggle off stays switched off.
 pub const AUTOSTART_DEFAULTED: &str = "autostartDefaulted";
+/// Set once the "keep Sajilo on your taskbar" card is dismissed. Written by the
+/// frontend; Windows only.
+pub const TRAY_PIN_TIP_DISMISSED: &str = "trayPinTipDismissed";
+/// Set once the matching one-time Windows notification has been sent.
+pub const TRAY_PIN_NOTIFIED: &str = "trayPinNotified";
 pub const VEGETABLE_FAVOURITES: &str = "vegetableFavourites";
 pub const STOCK_WATCHLIST: &str = "stockWatchlist";
 /// Monthly SIP payment schedules, per fund. Written by `commands::sips`.

@@ -727,5 +727,9 @@
   "panchang.night": "रात",
   "calendar.saait": "साइत",
   "calendar.saait-marriage": "विवाह",
-  "calendar.saait-bratabandha": "ब्रतबन्ध"
+  "calendar.saait-bratabandha": "ब्रतबन्ध",
+  "tray-pin.title": "साजिलोलाई टास्कबारमा राख्नुहोस्",
+  "tray-pin.body": "Windows ले नयाँ आइकनहरू ^ तीरभित्र लुकाउँछ। नेपालको झण्डालाई घडीको छेउमा तानेर राख्नुहोस्, अनि मिति एक क्लिकमै देखिन्छ।",
+  "tray-pin.dismiss": "बुझेँ",
+  "tray-pin.help": "ट्रे आइकन भेटिएन?"
 }

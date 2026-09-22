@@ -4,6 +4,7 @@ import { Card } from "../../shared/components/card";
 import { MonthGrid } from "../../shared/components/month-grid";
 import { SkeletonBlock } from "../../shared/components/skeleton";
 import { StateBanner } from "../../shared/components/state-banner";
+import { TrayPinTip, useTrayPinTip } from "../../shared/components/tray-pin-tip";
 import { useSettings } from "../../shared/context/settings-context";
 import {
   api,
@@ -113,6 +114,7 @@ export function Dashboard() {
   const { numerals, t, modules } = useSettings();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const trayPin = useTrayPinTip();
 
   const [today, setToday] = useState<Today | null>(null);
   const [month, setMonth] = useState<CalendarMonth | null>(null);
@@ -206,6 +208,9 @@ export function Dashboard() {
 
   return (
     <div className="space-y-2.5">
+      {/* Above the date, once: a Windows user who cannot find the tray icon
+          will not come back to read it anywhere lower. */}
+      {trayPin.visible && <TrayPinTip onDismiss={trayPin.dismiss} />}
       <DateHeader today={today} />
 
       <HomeAnnouncement />
