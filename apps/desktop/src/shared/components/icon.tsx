@@ -29,6 +29,7 @@ import { SFEnvelope } from "sf-symbols-lib/monochrome/SFEnvelope";
 import { SFExclamationmarkCircle } from "sf-symbols-lib/monochrome/SFExclamationmarkCircle";
 import { SFEye } from "sf-symbols-lib/monochrome/SFEye";
 import { SFFigureWalk } from "sf-symbols-lib/monochrome/SFFigureWalk";
+import { SFForkKnife } from "sf-symbols-lib/monochrome/SFForkKnife";
 import { SFFuelpump } from "sf-symbols-lib/monochrome/SFFuelpump";
 import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
 import { SFGraduationcap } from "sf-symbols-lib/monochrome/SFGraduationcap";
@@ -40,6 +41,7 @@ import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
 import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
 import { SFMinus } from "sf-symbols-lib/monochrome/SFMinus";
 import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
+import { SFMoonZzz } from "sf-symbols-lib/monochrome/SFMoonZzz";
 import { SFNewspaper } from "sf-symbols-lib/monochrome/SFNewspaper";
 import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
 import { SFPencil } from "sf-symbols-lib/monochrome/SFPencil";
@@ -93,6 +95,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   focus: SFCupAndSaucer,
   eye: SFEye,
   walk: SFFigureWalk,
+  meal: SFForkKnife,
+  sleep: SFMoonZzz,
   settings: SFGearshape,
   power: SFPower,
   search: SFMagnifyingglass,
@@ -174,6 +178,8 @@ export type IconName =
   | "focus"
   | "eye"
   | "walk"
+  | "meal"
+  | "sleep"
   | "settings"
   | "power"
   | "search"

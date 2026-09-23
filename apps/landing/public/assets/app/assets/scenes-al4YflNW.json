@@ -687,7 +687,7 @@
           "enabled": false,
           "everyMinutes": 20,
           "kind": "eyes",
-          "maxMinutes": 120,
+          "maxMinutes": 480,
           "minMinutes": 5,
           "minutesLeft": null
         },
@@ -695,16 +695,16 @@
           "enabled": false,
           "everyMinutes": 60,
           "kind": "move",
-          "maxMinutes": 240,
-          "minMinutes": 15,
+          "maxMinutes": 480,
+          "minMinutes": 5,
           "minutesLeft": null
         },
         {
           "enabled": false,
           "everyMinutes": 60,
           "kind": "water",
-          "maxMinutes": 240,
-          "minMinutes": 15,
+          "maxMinutes": 480,
+          "minMinutes": 5,
           "minutesLeft": null
         },
         {
@@ -735,6 +735,37 @@
           "enabled": false,
           "everyMinutes": 60
         },
+        "routine": {
+          "bedtime": {
+            "at": {
+              "hour": 23,
+              "minute": 0
+            },
+            "enabled": false
+          },
+          "breakfast": {
+            "at": {
+              "hour": 8,
+              "minute": 0
+            },
+            "enabled": false
+          },
+          "dinner": {
+            "at": {
+              "hour": 19,
+              "minute": 30
+            },
+            "enabled": false
+          },
+          "lunch": {
+            "at": {
+              "hour": 13,
+              "minute": 0
+            },
+            "enabled": false
+          }
+        },
+        "routineAsked": false,
         "skipPublicHolidays": true,
         "style": "card",
         "water": {

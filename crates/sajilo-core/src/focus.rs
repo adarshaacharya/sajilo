@@ -59,6 +59,11 @@ pub enum BreakKind {
     Custom,
     /// Once, when work hours end: time to stop. Not on an interval.
     EndOfDay,
+    /// Meals and bedtime: once a day at the user's own time.
+    Breakfast,
+    Lunch,
+    Dinner,
+    Bedtime,
 }
 
 /// How many kinds repeat on an interval, and so keep a timer.
@@ -76,7 +81,7 @@ impl BreakKind {
             Self::Move => Some(1),
             Self::Water => Some(2),
             Self::Custom => Some(3),
-            Self::EndOfDay => None,
+            Self::EndOfDay | Self::Breakfast | Self::Lunch | Self::Dinner | Self::Bedtime => None,
         }
     }
 
@@ -86,7 +91,7 @@ impl BreakKind {
         match self {
             Self::Eyes => Some(20),
             Self::Move => Some(2 * 60),
-            Self::Water | Self::Custom | Self::EndOfDay => None,
+            _ => None,
         }
     }
 
@@ -95,7 +100,7 @@ impl BreakKind {
     fn answer_window(self) -> Duration {
         match self {
             Self::Eyes => Duration::minutes(3),
-            Self::Move | Self::Water | Self::Custom | Self::EndOfDay => Duration::minutes(15),
+            _ => Duration::minutes(15),
         }
     }
 
@@ -104,18 +109,19 @@ impl BreakKind {
         match self {
             Self::Eyes => 20,
             Self::Move => 2 * 60,
-            Self::Water | Self::Custom | Self::EndOfDay => 0,
+            _ => 0,
         }
     }
 
-    /// The interval, in minutes, the editor accepts: typed freely, and
-    /// kept within what still makes sense for this kind of break.
+    /// The interval, in minutes, the editor accepts: typed freely, from five
+    /// minutes to eight hours. Timers count only time at the computer in work
+    /// hours and restart each morning, so anything longer could never come
+    /// due. The end-of-work nudge has no interval.
     pub fn interval_range(self) -> (u32, u32) {
-        match self {
-            Self::Eyes => (5, 120),
-            Self::Move | Self::Water => (15, 240),
-            Self::Custom => (5, 480),
-            Self::EndOfDay => (0, 0),
+        if self.slot().is_some() {
+            (5, 480)
+        } else {
+            (0, 0)
         }
     }
 }
@@ -168,7 +174,71 @@ pub struct FocusSettings {
     pub custom: CustomBreak,
     /// One card when work hours end, if still at the computer.
     pub end_of_day: bool,
+    /// Meals and bedtime, each at the user's own time.
+    pub routine: Routine,
+    /// Whether "when do you eat and sleep?" has been asked: once, right after
+    /// reminders are first turned on.
+    pub routine_asked: bool,
 }
+
+/// A reminder at a time of day rather than on an interval.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TimedRule {
+    pub enabled: bool,
+    pub at: PlanTime,
+}
+
+impl TimedRule {
+    const fn off(hour: u32, minute: u32) -> Self {
+        Self {
+            enabled: false,
+            at: PlanTime { hour, minute },
+        }
+    }
+}
+
+/// When the user eats and sleeps. Every one starts off and is asked about
+/// once; the defaults are only a starting point for that question.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct Routine {
+    pub breakfast: TimedRule,
+    pub lunch: TimedRule,
+    pub dinner: TimedRule,
+    pub bedtime: TimedRule,
+}
+
+impl Default for Routine {
+    fn default() -> Self {
+        Self {
+            breakfast: TimedRule::off(8, 0),
+            lunch: TimedRule::off(13, 0),
+            dinner: TimedRule::off(19, 30),
+            bedtime: TimedRule::off(23, 0),
+        }
+    }
+}
+
+impl Routine {
+    /// The four, with the kind each one shows as.
+    fn each(&self) -> [(BreakKind, TimedRule); 4] {
+        [
+            (BreakKind::Breakfast, self.breakfast),
+            (BreakKind::Lunch, self.lunch),
+            (BreakKind::Dinner, self.dinner),
+            (BreakKind::Bedtime, self.bedtime),
+        ]
+    }
+
+    fn any_enabled(&self) -> bool {
+        self.each().iter().any(|(_, rule)| rule.enabled)
+    }
+}
+
+/// A meal or bedtime card still goes out this long after its time, for
+/// someone who sat down a little late; after that the moment has passed.
+const ROUTINE_WINDOW: i64 = 60;
 
 /// A reminder the user writes: "Stretch your wrists", every two hours.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -221,6 +291,8 @@ impl Default for FocusSettings {
             jokes: true,
             custom: CustomBreak::default(),
             end_of_day: true,
+            routine: Routine::default(),
+            routine_asked: false,
         }
     }
 }
@@ -237,12 +309,12 @@ impl FocusSettings {
                 enabled: self.custom.enabled && !self.custom.label.trim().is_empty(),
                 every_minutes: self.custom.every_minutes,
             },
-            BreakKind::EndOfDay => BreakRule::off(0),
+            _ => BreakRule::off(0),
         }
     }
 
     pub fn any_enabled(&self) -> bool {
-        BreakKind::ALL.iter().any(|kind| self.rule(*kind).enabled)
+        BreakKind::ALL.iter().any(|kind| self.rule(*kind).enabled) || self.routine.any_enabled()
     }
 
     /// The recommended set, switched on from the Focus screen's first card.
@@ -263,6 +335,10 @@ impl FocusSettings {
         self.move_break.enabled = false;
         self.water.enabled = false;
         self.custom.enabled = false;
+        self.routine.breakfast.enabled = false;
+        self.routine.lunch.enabled = false;
+        self.routine.dinner.enabled = false;
+        self.routine.bedtime.enabled = false;
         self
     }
 
@@ -276,7 +352,7 @@ impl FocusSettings {
                 BreakKind::Move => &mut self.move_break.every_minutes,
                 BreakKind::Water => &mut self.water.every_minutes,
                 BreakKind::Custom => &mut self.custom.every_minutes,
-                BreakKind::EndOfDay => continue,
+                _ => continue,
             };
             let (min, max) = kind.interval_range();
             *every = (*every).clamp(min, max);
@@ -290,6 +366,14 @@ impl FocusSettings {
             .collect();
         let rounded = (self.water_goal_ml + 25) / 50 * 50;
         self.water_goal_ml = rounded.clamp(WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML);
+        for rule in [
+            &mut self.routine.breakfast,
+            &mut self.routine.lunch,
+            &mut self.routine.dinner,
+            &mut self.routine.bedtime,
+        ] {
+            rule.at = clamp_time(rule.at);
+        }
         self.work_start = clamp_time(self.work_start);
         self.work_end = clamp_time(self.work_end);
         self
@@ -379,7 +463,7 @@ impl FocusDay {
         match kind {
             BreakKind::Eyes => Some(&mut self.eyes),
             BreakKind::Move => Some(&mut self.move_break),
-            BreakKind::Water | BreakKind::Custom | BreakKind::EndOfDay => None,
+            _ => None,
         }
     }
 }
@@ -406,6 +490,9 @@ pub struct FocusState {
     pub end_of_day_sent: Option<NaiveDate>,
     /// Put off with "Remind in 5 min": not again before this.
     pub end_of_day_after: Option<DateTime<Utc>>,
+    /// The day each meal or bedtime card last went out, and when a put-off
+    /// one may come back.
+    pub routine: [RoutineSent; 4],
     pub paused_until: Option<DateTime<Utc>>,
     /// Idle seconds at the latest tick; `None` where the platform cannot say.
     pub last_idle: Option<u32>,
@@ -440,6 +527,23 @@ impl FocusState {
         let answer = public_holiday(date);
         self.holiday = Some((date, answer));
         answer
+    }
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct RoutineSent {
+    pub on: Option<NaiveDate>,
+    pub after: Option<DateTime<Utc>>,
+}
+
+fn routine_slot(kind: BreakKind) -> Option<usize> {
+    match kind {
+        BreakKind::Breakfast => Some(0),
+        BreakKind::Lunch => Some(1),
+        BreakKind::Dinner => Some(2),
+        BreakKind::Bedtime => Some(3),
+        _ => None,
     }
 }
 
@@ -594,6 +698,10 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         state.since_break[1] = 0;
     }
 
+    if let Some(kind) = routine_due(state, settings, tick, idle) {
+        return vec![kind];
+    }
+
     if end_of_day_due(state, settings, tick, idle) {
         state.end_of_day_sent = Some(date);
         open_card(state, settings, BreakKind::EndOfDay, tick.now);
@@ -661,11 +769,54 @@ fn open_card(
     }
 }
 
+/// A card is up, so a once-a-day card waits its turn instead of being
+/// marked sent without ever being seen.
+fn card_showing(state: &FocusState, settings: &FocusSettings) -> bool {
+    settings.style == ReminderStyle::Card && state.active_break.is_some()
+}
+
+/// A meal or bedtime whose time has come today: within the hour after it, to
+/// someone at the computer, and not yet sent. Work hours do not apply —
+/// bedtime is meant to come after work — but a pause does.
+fn routine_due(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    tick: Tick,
+    idle: u32,
+) -> Option<BreakKind> {
+    if idle > ACTIVE_WINDOW_SECONDS
+        || state.paused_until.is_some_and(|until| tick.now < until)
+        || card_showing(state, settings)
+    {
+        return None;
+    }
+    let date = tick.local.date();
+    let time = tick.local.time();
+    let (kind, _) = settings.routine.each().into_iter().find(|(kind, rule)| {
+        let Some(slot) = routine_slot(*kind) else {
+            return false;
+        };
+        let sent = state.routine[slot];
+        let since = time.signed_duration_since(as_time(rule.at));
+        rule.enabled
+            && sent.on != Some(date)
+            && sent.after.is_none_or(|after| tick.now >= after)
+            && since >= Duration::zero()
+            && since < Duration::minutes(ROUTINE_WINDOW)
+    })?;
+    if let Some(slot) = routine_slot(kind) {
+        state.routine[slot].on = Some(date);
+    }
+    open_card(state, settings, kind, tick.now);
+    Some(kind)
+}
+
 /// Once a work day, in the hours after work ends, and only to someone still
 /// at the computer: a nudge to someone who has already left is noise.
 fn end_of_day_due(state: &mut FocusState, settings: &FocusSettings, tick: Tick, idle: u32) -> bool {
     let date = tick.local.date();
     settings.end_of_day
+        && !card_showing(state, settings)
         && settings.any_enabled()
         && state.end_of_day_sent != Some(date)
         && state.end_of_day_after.is_none_or(|after| tick.now >= after)
@@ -702,12 +853,16 @@ pub fn finish_break(
     }
     let date = local.date();
     let Some(index) = card.kind.slot() else {
-        // The end-of-work nudge keeps no timer. Put off, it asks again in
-        // five minutes; otherwise it is done for the day.
+        // Timed cards keep no timer. Put off, they ask again in five
+        // minutes; otherwise they are done for the day.
         if outcome == BreakOutcome::Snooze {
-            state.end_of_day_sent = None;
-            state.end_of_day_after =
-                Some(card.started_at + Duration::minutes(i64::from(SNOOZE_MINUTES)));
+            let after = Some(card.started_at + Duration::minutes(i64::from(SNOOZE_MINUTES)));
+            if let Some(slot) = routine_slot(card.kind) {
+                state.routine[slot] = RoutineSent { on: None, after };
+            } else {
+                state.end_of_day_sent = None;
+                state.end_of_day_after = after;
+            }
         }
         return;
     };
@@ -936,6 +1091,22 @@ pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (
         BreakKind::Custom => (
             settings.custom.label.clone(),
             "Your own reminder, from Sajilo.".to_owned(),
+        ),
+        BreakKind::Breakfast => (
+            "Breakfast time".to_owned(),
+            "Food first, laptop later.".to_owned(),
+        ),
+        BreakKind::Lunch => (
+            "Lunch time".to_owned(),
+            "Go and eat. Not later, now.".to_owned(),
+        ),
+        BreakKind::Dinner => (
+            "Dinner time".to_owned(),
+            "Step away from the screen and eat.".to_owned(),
+        ),
+        BreakKind::Bedtime => (
+            "Bedtime".to_owned(),
+            "Laptop off. The internet will still be there tomorrow.".to_owned(),
         ),
         BreakKind::EndOfDay => (
             "Work hours are over".to_owned(),

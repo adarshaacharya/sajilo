@@ -5,6 +5,7 @@ import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
 import { Intro } from "./_components/intro";
 import { Overview } from "./_components/overview";
+import { RoutineAsk, routineOn } from "./_components/routine";
 import { SettingsPanel } from "./_components/settings-panel";
 import { useFocus } from "./_lib/use-focus";
 
@@ -55,7 +56,9 @@ export function Focus() {
     );
   }
 
-  if (!snapshot.breaks.some((item) => item.enabled)) {
+  const anyOn =
+    snapshot.breaks.some((item) => item.enabled) || routineOn(snapshot.settings.routine);
+  if (!anyOn) {
     return (
       <Intro
         snapshot={snapshot}
@@ -63,6 +66,11 @@ export function Focus() {
         onExample={(kind) => act(() => api.previewFocusBreak(kind))}
       />
     );
+  }
+
+  // One question, once, right after turning on: when do you eat and sleep?
+  if (!snapshot.settings.routineAsked) {
+    return <RoutineAsk settings={snapshot.settings} onSave={save} />;
   }
 
   return (

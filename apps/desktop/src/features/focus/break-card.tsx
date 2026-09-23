@@ -11,6 +11,10 @@ const TITLES = {
   move: "break.move.title",
   water: "break.water.title",
   endOfDay: "break.endOfDay.title",
+  breakfast: "break.breakfast.title",
+  lunch: "break.lunch.title",
+  dinner: "break.dinner.title",
+  bedtime: "break.bedtime.title",
 } as const;
 
 /** The plain line under the title, when jokes are off or a kind has none. */
@@ -19,6 +23,10 @@ const BODIES = {
   move: "break.move.body",
   custom: "break.custom.body",
   endOfDay: "break.endOfDay.body",
+  breakfast: "break.breakfast.body",
+  lunch: "break.lunch.body",
+  dinner: "break.dinner.body",
+  bedtime: "break.bedtime.body",
 } as const;
 
 const RING = 2 * Math.PI * 17;

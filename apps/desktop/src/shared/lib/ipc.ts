@@ -161,7 +161,16 @@ export interface DayPlan {
   createdAt: string;
 }
 
-export type BreakKind = "eyes" | "move" | "water" | "custom" | "endOfDay";
+export type BreakKind =
+  | "eyes"
+  | "move"
+  | "water"
+  | "custom"
+  | "endOfDay"
+  | "breakfast"
+  | "lunch"
+  | "dinner"
+  | "bedtime";
 
 export interface BreakRule {
   enabled: boolean;
@@ -187,6 +196,22 @@ export interface FocusSettings {
   custom: CustomBreak;
   /** One card when work hours end, if still at the computer. */
   endOfDay: boolean;
+  /** Meals and bedtime, each at the user's own time. */
+  routine: Routine;
+  /** Whether "when do you eat and sleep?" has been asked yet. */
+  routineAsked: boolean;
+}
+
+export interface TimedRule {
+  enabled: boolean;
+  at: PlanTime;
+}
+
+export interface Routine {
+  breakfast: TimedRule;
+  lunch: TimedRule;
+  dinner: TimedRule;
+  bedtime: TimedRule;
 }
 
 export interface CustomBreak {

@@ -11,6 +11,7 @@ import type {
   ReminderStyle,
 } from "../../../shared/lib/ipc";
 import { litres } from "../_lib/format";
+import { RoutineRows } from "./routine";
 import { ScheduleCard } from "./schedule-card";
 
 const OFTEN_LABELS = {
@@ -217,6 +218,17 @@ export function SettingsPanel({
             onCommit={(value) => onSettings({ ...settings, waterGoalMl: Math.round(value * 1000) })}
           />
         </div>
+      </section>
+
+      <section className="surface-card px-3 pt-3 pb-1">
+        <h3 className="text-[11px] font-semibold text-text-secondary">
+          {t("focus.routine.title")}
+        </h3>
+        <p className="mt-0.5 text-[10px] text-text-muted">{t("focus.routine.note")}</p>
+        <RoutineRows
+          routine={settings.routine}
+          onChange={(routine) => onSettings({ ...settings, routine })}
+        />
       </section>
 
       <CustomReminder snapshot={snapshot} onSettings={onSettings} />

@@ -38,6 +38,10 @@ export const KIND_LABELS: Record<BreakKind, I18nKey> = {
   water: "focus.kind.water",
   custom: "focus.kind.custom",
   endOfDay: "focus.kind.endOfDay",
+  breakfast: "focus.kind.breakfast",
+  lunch: "focus.kind.lunch",
+  dinner: "focus.kind.dinner",
+  bedtime: "focus.kind.bedtime",
 };
 
 /** What a break is called: the user's own words for their reminder. */
@@ -52,6 +56,10 @@ export const KIND_ICONS = {
   water: "drop",
   custom: "star",
   endOfDay: "sunset",
+  breakfast: "sunrise",
+  lunch: "meal",
+  dinner: "meal",
+  bedtime: "sleep",
 } as const;
 
 export const KIND_TINTS: Record<BreakKind, string> = {
@@ -60,6 +68,10 @@ export const KIND_TINTS: Record<BreakKind, string> = {
   water: "var(--color-weather-tint)",
   custom: "var(--color-forex-tint)",
   endOfDay: "var(--color-holiday)",
+  breakfast: "var(--color-accent-mark)",
+  lunch: "var(--color-positive)",
+  dinner: "var(--color-positive)",
+  bedtime: "var(--color-weather-tint)",
 };
 
 /** `HH:MM` for a time input. */

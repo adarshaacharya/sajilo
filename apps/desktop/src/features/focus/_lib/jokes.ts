@@ -50,6 +50,25 @@ export const JOKES = {
     "break.joke.endOfDay.5",
     "break.joke.endOfDay.6",
   ],
+  breakfast: [
+    "break.joke.breakfast.1",
+    "break.joke.breakfast.2",
+    "break.joke.breakfast.3",
+    "break.joke.breakfast.4",
+  ],
+  lunch: ["break.joke.lunch.1", "break.joke.lunch.2", "break.joke.lunch.3", "break.joke.lunch.4"],
+  dinner: [
+    "break.joke.dinner.1",
+    "break.joke.dinner.2",
+    "break.joke.dinner.3",
+    "break.joke.dinner.4",
+  ],
+  bedtime: [
+    "break.joke.bedtime.1",
+    "break.joke.bedtime.2",
+    "break.joke.bedtime.3",
+    "break.joke.bedtime.4",
+  ],
   done: [
     "break.joke.done.1",
     "break.joke.done.2",

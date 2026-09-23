@@ -693,3 +693,121 @@ fn turning_breaks_off_keeps_the_setup() {
     assert_eq!(off.custom.label, "Stretch your wrists");
     assert!(off.with_recommended_breaks().any_enabled());
 }
+
+/// Every kind takes five minutes to eight hours: longer could never come due
+/// in a work day.
+#[test]
+fn every_interval_runs_from_five_minutes_to_eight_hours() {
+    for kind in BreakKind::ALL {
+        assert_eq!(kind.interval_range(), (5, 480), "{kind:?}");
+    }
+    let mut settings = FocusSettings::default();
+    settings.water.every_minutes = 1_440;
+    assert_eq!(settings.normalised().water.every_minutes, 480);
+}
+
+// ------------------------------------------------------ meals and bedtime
+
+fn with_lunch() -> FocusSettings {
+    let mut settings = FocusSettings::default();
+    settings.routine.lunch.enabled = true;
+    settings.routine.lunch.at = sajilo_core::planner::PlanTime {
+        hour: 13,
+        minute: 0,
+    };
+    settings
+}
+
+#[test]
+fn lunch_comes_once_at_its_time() {
+    let mut state = FocusState::default();
+    let due = run(&mut state, &with_lunch(), monday_at(12), 120, busy);
+    assert_eq!(due, [(monday_at(13), BreakKind::Lunch)]);
+}
+
+/// Bedtime is after work by design: work hours do not silence it.
+#[test]
+fn bedtime_comes_outside_work_hours() {
+    let mut settings = FocusSettings::default();
+    settings.routine.bedtime.enabled = true;
+    let mut state = FocusState::default();
+    let due = run(
+        &mut state,
+        &settings,
+        monday_at(22) + Duration::minutes(50),
+        20,
+        busy,
+    );
+    assert_eq!(due, [(monday_at(23), BreakKind::Bedtime)]);
+}
+
+/// Sitting down an hour and a half after lunch time is too late to nag.
+#[test]
+fn a_meal_missed_by_over_an_hour_is_let_go() {
+    let mut state = FocusState::default();
+    let away = |now: DateTime<Utc>| {
+        if now < monday_at(14) + Duration::minutes(30) {
+            9_999
+        } else {
+            5
+        }
+    };
+    let due = run(&mut state, &with_lunch(), monday_at(12), 180, away);
+    assert!(due.is_empty());
+}
+
+#[test]
+fn a_put_off_meal_comes_back_in_five_minutes() {
+    let settings = with_lunch();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(13), 0, busy);
+    assert_eq!(
+        state.active_break.map(|card| card.kind),
+        Some(BreakKind::Lunch)
+    );
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Snooze,
+        monday_at(13).naive_utc(),
+    );
+    let due = run(
+        &mut state,
+        &settings,
+        monday_at(13) + Duration::minutes(1),
+        10,
+        busy,
+    );
+    assert_eq!(
+        due,
+        [(monday_at(13) + Duration::minutes(5), BreakKind::Lunch)]
+    );
+}
+
+/// Another card on screen: lunch waits its turn rather than being lost.
+#[test]
+fn a_meal_waits_for_the_card_on_screen() {
+    let mut settings = with_lunch();
+    settings.eyes.enabled = true;
+    let mut state = FocusState::default();
+    // The eye card comes at 12:59 and is still up at 13:00.
+    let start = monday_at(12) + Duration::minutes(39);
+    run(&mut state, &settings, start, 20, busy);
+    assert_eq!(
+        state.active_break.map(|card| card.kind),
+        Some(BreakKind::Eyes)
+    );
+    let due = run(&mut state, &settings, monday_at(13), 5, busy);
+    let lunch = due.iter().find(|(_, kind)| *kind == BreakKind::Lunch);
+    assert!(
+        lunch.is_some_and(|(time, _)| *time > monday_at(13)),
+        "lunch comes once the eye card has gone, got {due:?}"
+    );
+}
+
+#[test]
+fn turning_everything_off_includes_meals() {
+    let settings = with_lunch();
+    assert!(settings.any_enabled(), "meals alone count as on");
+    assert!(!settings.with_breaks_off().any_enabled());
+}
