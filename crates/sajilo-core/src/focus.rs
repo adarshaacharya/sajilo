@@ -31,6 +31,20 @@ pub const AWAY_RESET_SECONDS: u32 = 5 * 60;
 pub const MAX_TICK_GAP_SECONDS: u32 = 3 * 60;
 /// How many past days the week view keeps, besides today.
 pub const HISTORY_DAYS: usize = 6;
+/// What one tap on + logs. Water is counted in litres, and a quarter litre is
+/// the smallest amount anyone bothers to log.
+pub const WATER_STEP_ML: u32 = 250;
+/// The daily goal is typed in litres, kept within what a person might sanely
+/// drink and rounded to 50 ml.
+pub const WATER_GOAL_MIN_ML: u32 = 500;
+pub const WATER_GOAL_MAX_ML: u32 = 8000;
+const DEFAULT_WATER_GOAL_ML: u32 = 2500;
+/// "In 5 min" on a break card: the reminder comes back after this much more
+/// use.
+pub const SNOOZE_MINUTES: u32 = 5;
+/// A card left alone this long past its countdown was ignored; it goes away
+/// on its own rather than sitting on screen all afternoon.
+const CARD_TIMEOUT_SECONDS: i64 = 120;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -41,26 +55,38 @@ pub enum BreakKind {
     /// Stand up and walk for a couple of minutes.
     Move,
     Water,
+    /// The user's own reminder, with their own words and interval.
+    Custom,
+    /// Once, when work hours end: time to stop. Not on an interval.
+    EndOfDay,
 }
 
-impl BreakKind {
-    pub const ALL: [Self; 3] = [Self::Eyes, Self::Move, Self::Water];
+/// How many kinds repeat on an interval, and so keep a timer.
+const TIMED: usize = 4;
 
-    fn index(self) -> usize {
+impl BreakKind {
+    /// Every kind that repeats on an interval, in the order they are shown.
+    pub const ALL: [Self; TIMED] = [Self::Eyes, Self::Move, Self::Water, Self::Custom];
+
+    /// This kind's slot in the per-kind timers; `None` for the end-of-day
+    /// nudge, which keeps no timer.
+    fn slot(self) -> Option<usize> {
         match self {
-            Self::Eyes => 0,
-            Self::Move => 1,
-            Self::Water => 2,
+            Self::Eyes => Some(0),
+            Self::Move => Some(1),
+            Self::Water => Some(2),
+            Self::Custom => Some(3),
+            Self::EndOfDay => None,
         }
     }
 
     /// Idle this long after a reminder means the break was taken. Water has no
-    /// such signal; glasses are logged by hand.
+    /// such signal; it is logged by hand.
     fn rest_seconds(self) -> Option<u32> {
         match self {
             Self::Eyes => Some(20),
             Self::Move => Some(2 * 60),
-            Self::Water => None,
+            Self::Water | Self::Custom | Self::EndOfDay => None,
         }
     }
 
@@ -69,16 +95,27 @@ impl BreakKind {
     fn answer_window(self) -> Duration {
         match self {
             Self::Eyes => Duration::minutes(3),
-            Self::Move | Self::Water => Duration::minutes(15),
+            Self::Move | Self::Water | Self::Custom | Self::EndOfDay => Duration::minutes(15),
         }
     }
 
-    /// The intervals offered in the editor, in minutes.
-    pub fn interval_choices(self) -> &'static [u32] {
+    /// How long the break card counts down. The others wait for a button.
+    pub fn break_seconds(self) -> u32 {
         match self {
-            Self::Eyes => &[20, 30, 45, 60],
-            Self::Move => &[30, 45, 60, 90, 120],
-            Self::Water => &[30, 45, 60, 90, 120],
+            Self::Eyes => 20,
+            Self::Move => 2 * 60,
+            Self::Water | Self::Custom | Self::EndOfDay => 0,
+        }
+    }
+
+    /// The interval, in minutes, the editor accepts: typed freely, and
+    /// kept within what still makes sense for this kind of break.
+    pub fn interval_range(self) -> (u32, u32) {
+        match self {
+            Self::Eyes => (5, 120),
+            Self::Move | Self::Water => (15, 240),
+            Self::Custom => (5, 480),
+            Self::EndOfDay => (0, 0),
         }
     }
 }
@@ -113,14 +150,56 @@ pub struct FocusSettings {
     #[serde(rename = "move")]
     pub move_break: BreakRule,
     pub water: BreakRule,
-    /// Glasses a day. Water reminders stop once it is reached.
-    pub water_goal: u32,
+    /// Millilitres a day. Water reminders stop once it is reached.
+    pub water_goal_ml: u32,
     pub work_start: PlanTime,
     pub work_end: PlanTime,
     /// Sunday first. Saturday is the one day off everyone shares.
     pub work_days: [bool; 7],
     /// Quiet on the public holidays in the bundled calendar.
     pub skip_public_holidays: bool,
+    pub style: ReminderStyle,
+    /// A soft sound with each reminder, whichever style it takes.
+    pub chime: bool,
+    /// A rotating joke on the card instead of the plain instruction. Off for
+    /// offices where a card about kidneys would not go down well.
+    pub jokes: bool,
+    /// The user's own reminder.
+    pub custom: CustomBreak,
+    /// One card when work hours end, if still at the computer.
+    pub end_of_day: bool,
+}
+
+/// A reminder the user writes: "Stretch your wrists", every two hours.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct CustomBreak {
+    pub enabled: bool,
+    pub every_minutes: u32,
+    pub label: String,
+}
+
+impl Default for CustomBreak {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            every_minutes: 120,
+            label: String::new(),
+        }
+    }
+}
+
+/// Longest custom label kept; the card has one line for a title.
+const CUSTOM_LABEL_MAX: usize = 60;
+
+/// How a due break is announced. A corner notification is easy to miss, so
+/// the default is a small card that stays until it is dealt with.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ReminderStyle {
+    #[default]
+    Card,
+    Notification,
 }
 
 impl Default for FocusSettings {
@@ -129,7 +208,7 @@ impl Default for FocusSettings {
             eyes: BreakRule::off(20),
             move_break: BreakRule::off(60),
             water: BreakRule::off(60),
-            water_goal: 8,
+            water_goal_ml: DEFAULT_WATER_GOAL_ML,
             work_start: PlanTime { hour: 9, minute: 0 },
             work_end: PlanTime {
                 hour: 18,
@@ -137,16 +216,28 @@ impl Default for FocusSettings {
             },
             work_days: [true, true, true, true, true, true, false],
             skip_public_holidays: true,
+            style: ReminderStyle::Card,
+            chime: true,
+            jokes: true,
+            custom: CustomBreak::default(),
+            end_of_day: true,
         }
     }
 }
 
 impl FocusSettings {
+    /// The interval rule for `kind`. A custom reminder with no words is off:
+    /// a card that says nothing is not a reminder.
     pub fn rule(&self, kind: BreakKind) -> BreakRule {
         match kind {
             BreakKind::Eyes => self.eyes,
             BreakKind::Move => self.move_break,
             BreakKind::Water => self.water,
+            BreakKind::Custom => BreakRule {
+                enabled: self.custom.enabled && !self.custom.label.trim().is_empty(),
+                every_minutes: self.custom.every_minutes,
+            },
+            BreakKind::EndOfDay => BreakRule::off(0),
         }
     }
 
@@ -163,21 +254,42 @@ impl FocusSettings {
         self
     }
 
+    /// Every reminder off, the user's own included, for "Turn off break
+    /// reminders". Intervals, the water goal and work hours are kept, so
+    /// turning them back on picks up where they were.
+    #[must_use]
+    pub fn with_breaks_off(mut self) -> Self {
+        self.eyes.enabled = false;
+        self.move_break.enabled = false;
+        self.water.enabled = false;
+        self.custom.enabled = false;
+        self
+    }
+
     /// Keeps values from an older or hand-edited store within what the editor
     /// can show.
     #[must_use]
     pub fn normalised(mut self) -> Self {
         for kind in BreakKind::ALL {
-            let rule = match kind {
-                BreakKind::Eyes => &mut self.eyes,
-                BreakKind::Move => &mut self.move_break,
-                BreakKind::Water => &mut self.water,
+            let every = match kind {
+                BreakKind::Eyes => &mut self.eyes.every_minutes,
+                BreakKind::Move => &mut self.move_break.every_minutes,
+                BreakKind::Water => &mut self.water.every_minutes,
+                BreakKind::Custom => &mut self.custom.every_minutes,
+                BreakKind::EndOfDay => continue,
             };
-            if !kind.interval_choices().contains(&rule.every_minutes) {
-                rule.every_minutes = kind.interval_choices()[0];
-            }
+            let (min, max) = kind.interval_range();
+            *every = (*every).clamp(min, max);
         }
-        self.water_goal = self.water_goal.clamp(1, 20);
+        self.custom.label = self
+            .custom
+            .label
+            .trim()
+            .chars()
+            .take(CUSTOM_LABEL_MAX)
+            .collect();
+        let rounded = (self.water_goal_ml + 25) / 50 * 50;
+        self.water_goal_ml = rounded.clamp(WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML);
         self.work_start = clamp_time(self.work_start);
         self.work_end = clamp_time(self.work_end);
         self
@@ -197,6 +309,25 @@ impl FocusSettings {
             std::cmp::Ordering::Greater => time >= start || time < end,
             std::cmp::Ordering::Equal => true,
         }
+    }
+}
+
+impl FocusSettings {
+    /// Whether `time` is in the three hours after work ends, when a nudge to
+    /// stop still means something. Never when work hours are all day.
+    fn just_after_work(&self, time: NaiveTime) -> bool {
+        let start = as_time(self.work_start);
+        let end = as_time(self.work_end);
+        if start == end {
+            return false;
+        }
+        let since_end = time.signed_duration_since(end);
+        let since_end = if since_end < Duration::zero() {
+            since_end + Duration::days(1)
+        } else {
+            since_end
+        };
+        since_end < Duration::hours(3)
     }
 }
 
@@ -226,7 +357,8 @@ pub struct BreakCount {
 pub struct FocusDay {
     pub date: NaiveDate,
     pub screen_seconds: u32,
-    pub water_glasses: u32,
+    #[serde(default)]
+    pub water_ml: u32,
     pub eyes: BreakCount,
     #[serde(rename = "move")]
     pub move_break: BreakCount,
@@ -237,7 +369,7 @@ impl FocusDay {
         Self {
             date,
             screen_seconds: 0,
-            water_glasses: 0,
+            water_ml: 0,
             eyes: BreakCount::default(),
             move_break: BreakCount::default(),
         }
@@ -247,7 +379,7 @@ impl FocusDay {
         match kind {
             BreakKind::Eyes => Some(&mut self.eyes),
             BreakKind::Move => Some(&mut self.move_break),
-            BreakKind::Water => None,
+            BreakKind::Water | BreakKind::Custom | BreakKind::EndOfDay => None,
         }
     }
 }
@@ -262,14 +394,23 @@ pub struct FocusState {
     pub history: Vec<FocusDay>,
     pub last_tick: Option<DateTime<Utc>>,
     /// Seconds at the computer since each kind's last break, by
-    /// [`BreakKind::index`].
-    pub since_break: [u32; 3],
+    /// [`BreakKind::slot`]. Padded when read, so a store written before a
+    /// kind existed still loads.
+    #[serde(deserialize_with = "padded")]
+    pub since_break: [u32; TIMED],
     /// When each kind's latest reminder went out, while it waits to see the
     /// break taken.
-    pub awaiting: [Option<DateTime<Utc>>; 3],
+    #[serde(deserialize_with = "padded")]
+    pub awaiting: [Option<DateTime<Utc>>; TIMED],
+    /// The day the end-of-work nudge went out, so it goes out once.
+    pub end_of_day_sent: Option<NaiveDate>,
+    /// Put off with "Remind in 5 min": not again before this.
+    pub end_of_day_after: Option<DateTime<Utc>>,
     pub paused_until: Option<DateTime<Utc>>,
     /// Idle seconds at the latest tick; `None` where the platform cannot say.
     pub last_idle: Option<u32>,
+    /// The break card on screen, if any.
+    pub active_break: Option<ActiveBreak>,
     /// The public-holiday answer for one day, so the bundled calendar is not
     /// consulted every few seconds.
     #[serde(skip)]
@@ -284,8 +425,8 @@ impl FocusState {
             self.history.truncate(HISTORY_DAYS);
             // A new day starts fresh; yesterday's half-finished timers do not
             // carry over into the morning.
-            self.since_break = [0; 3];
-            self.awaiting = [None; 3];
+            self.since_break = [0; TIMED];
+            self.awaiting = [None; TIMED];
         }
         self.today.get_or_insert_with(|| FocusDay::new(date))
     }
@@ -302,12 +443,53 @@ impl FocusState {
     }
 }
 
+/// Reads a per-kind array however long it was stored, filling kinds added
+/// since with their defaults.
+fn padded<'de, D, T>(deserializer: D) -> Result<[T; TIMED], D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Deserialize<'de> + Default + Copy,
+{
+    let stored = Vec::<T>::deserialize(deserializer)?;
+    let mut out = [T::default(); TIMED];
+    for (slot, value) in out.iter_mut().zip(stored) {
+        *slot = value;
+    }
+    Ok(out)
+}
+
 fn public_holiday(date: NaiveDate) -> bool {
     nepali_date_from(date).is_ok_and(|bs| {
         events::events(bs.year, bs.month)
             .get(&bs.day)
             .is_some_and(|event| event.is_public_holiday)
     })
+}
+
+/// A break card showing now.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveBreak {
+    pub kind: BreakKind,
+    pub started_at: DateTime<Utc>,
+    /// Length of its countdown; 0 for water, which waits for a button.
+    pub seconds: u32,
+    /// Opened from "Show me an example": closing it counts for nothing.
+    #[serde(default)]
+    pub preview: bool,
+}
+
+/// How a break card was closed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum BreakOutcome {
+    /// The countdown ran out: the break was taken.
+    Done,
+    Skip,
+    /// Ask again after [`SNOOZE_MINUTES`] more of use.
+    Snooze,
+    /// Water logged from the card.
+    Drank,
 }
 
 /// One measurement from the shell.
@@ -384,6 +566,12 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     if state.paused_until.is_some_and(|until| tick.now >= until) {
         state.paused_until = None;
     }
+    if state.active_break.is_some_and(|card| {
+        tick.now - card.started_at
+            > Duration::seconds(i64::from(card.seconds) + CARD_TIMEOUT_SECONDS)
+    }) {
+        state.active_break = None;
+    }
 
     // Asleep, shut, or not running: the gap itself was time away.
     let idle = if elapsed > MAX_TICK_GAP_SECONDS {
@@ -402,8 +590,14 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
 
     settle_reminders(state, date, idle, tick.now);
     if idle >= AWAY_RESET_SECONDS {
-        state.since_break[BreakKind::Eyes.index()] = 0;
-        state.since_break[BreakKind::Move.index()] = 0;
+        state.since_break[0] = 0;
+        state.since_break[1] = 0;
+    }
+
+    if end_of_day_due(state, settings, tick, idle) {
+        state.end_of_day_sent = Some(date);
+        open_card(state, settings, BreakKind::EndOfDay, tick.now);
+        return vec![BreakKind::EndOfDay];
     }
 
     if quiet_reason(state, settings, tick.now, tick.local).is_some() {
@@ -413,17 +607,19 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     let mut due = Vec::new();
     for kind in BreakKind::ALL {
         let rule = settings.rule(kind);
+        let Some(index) = kind.slot() else {
+            continue;
+        };
         if !rule.enabled {
             continue;
         }
-        let index = kind.index();
         state.since_break[index] = state.since_break[index].saturating_add(active);
         if state.since_break[index] < rule.every_seconds() || state.awaiting[index].is_some() {
             continue;
         }
         state.since_break[index] = 0;
         let today = state.day_mut(date);
-        if kind == BreakKind::Water && today.water_glasses >= settings.water_goal {
+        if kind == BreakKind::Water && today.water_ml >= settings.water_goal_ml {
             continue;
         }
         if let Some(count) = today.count_mut(kind) {
@@ -432,14 +628,121 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         state.awaiting[index] = Some(tick.now);
         due.push(kind);
     }
+
+    // Standing up rests the eyes too: when both come due together, the
+    // movement break is the one asked for.
+    if due.contains(&BreakKind::Move) && due.contains(&BreakKind::Eyes) {
+        due.retain(|kind| *kind != BreakKind::Eyes);
+        state.awaiting[0] = None;
+        let today = state.day_mut(date);
+        today.eyes.reminded = today.eyes.reminded.saturating_sub(1);
+    }
+
+    if let Some(kind) = due.first().copied() {
+        open_card(state, settings, kind, tick.now);
+    }
     due
+}
+
+/// Shows `kind` as the break card, in the card style, unless one is up.
+fn open_card(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    kind: BreakKind,
+    now: DateTime<Utc>,
+) {
+    if settings.style == ReminderStyle::Card && state.active_break.is_none() {
+        state.active_break = Some(ActiveBreak {
+            kind,
+            started_at: now,
+            seconds: kind.break_seconds(),
+            preview: false,
+        });
+    }
+}
+
+/// Once a work day, in the hours after work ends, and only to someone still
+/// at the computer: a nudge to someone who has already left is noise.
+fn end_of_day_due(state: &mut FocusState, settings: &FocusSettings, tick: Tick, idle: u32) -> bool {
+    let date = tick.local.date();
+    settings.end_of_day
+        && settings.any_enabled()
+        && state.end_of_day_sent != Some(date)
+        && state.end_of_day_after.is_none_or(|after| tick.now >= after)
+        && state.paused_until.is_none_or(|until| tick.now >= until)
+        && idle <= ACTIVE_WINDOW_SECONDS
+        && settings.is_work_day(date)
+        && !(settings.skip_public_holidays && state.is_public_holiday(date))
+        && settings.just_after_work(tick.local.time())
+}
+
+/// Opens an example card, so someone deciding whether to turn reminders on
+/// sees exactly what they would get. It changes no count and no timer.
+pub fn preview_break(state: &mut FocusState, kind: BreakKind, now: DateTime<Utc>) {
+    state.active_break = Some(ActiveBreak {
+        kind,
+        started_at: now,
+        seconds: kind.break_seconds(),
+        preview: true,
+    });
+}
+
+/// Closes the break card the way the user closed it.
+pub fn finish_break(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    outcome: BreakOutcome,
+    local: NaiveDateTime,
+) {
+    let Some(card) = state.active_break.take() else {
+        return;
+    };
+    if card.preview {
+        return;
+    }
+    let date = local.date();
+    let Some(index) = card.kind.slot() else {
+        // The end-of-work nudge keeps no timer. Put off, it asks again in
+        // five minutes; otherwise it is done for the day.
+        if outcome == BreakOutcome::Snooze {
+            state.end_of_day_sent = None;
+            state.end_of_day_after =
+                Some(card.started_at + Duration::minutes(i64::from(SNOOZE_MINUTES)));
+        }
+        return;
+    };
+    match outcome {
+        BreakOutcome::Done => {
+            // Already counted if the computer went quiet during the countdown.
+            if state.awaiting[index].take().is_some()
+                && let Some(count) = state.day_mut(date).count_mut(card.kind)
+            {
+                count.taken += 1;
+            }
+        }
+        BreakOutcome::Skip => state.awaiting[index] = None,
+        BreakOutcome::Snooze => {
+            state.awaiting[index] = None;
+            state.since_break[index] = settings
+                .rule(card.kind)
+                .every_seconds()
+                .saturating_sub(SNOOZE_MINUTES * 60);
+            // Put off, not missed: the reminder that comes back is this one.
+            if let Some(count) = state.day_mut(date).count_mut(card.kind) {
+                count.reminded = count.reminded.saturating_sub(1);
+            }
+        }
+        BreakOutcome::Drank => log_water(state, local, 1),
+    }
 }
 
 /// Resolves reminders waiting for an answer: a quiet computer soon after means
 /// the break was taken; silence past the window means it was skipped.
 fn settle_reminders(state: &mut FocusState, date: NaiveDate, idle: u32, now: DateTime<Utc>) {
     for kind in BreakKind::ALL {
-        let index = kind.index();
+        let Some(index) = kind.slot() else {
+            continue;
+        };
         let Some(sent) = state.awaiting[index] else {
             continue;
         };
@@ -454,14 +757,16 @@ fn settle_reminders(state: &mut FocusState, date: NaiveDate, idle: u32, now: Dat
     }
 }
 
-/// Logs (or, with a negative `delta`, takes back) glasses of water today.
-pub fn log_water(state: &mut FocusState, local: NaiveDateTime, delta: i32) {
+/// Logs `steps` of [`WATER_STEP_ML`] today, or with a negative count takes
+/// them back.
+pub fn log_water(state: &mut FocusState, local: NaiveDateTime, steps: i32) {
     let today = state.day_mut(local.date());
-    today.water_glasses = today.water_glasses.saturating_add_signed(delta).min(99);
+    let change = steps.saturating_mul(WATER_STEP_ML as i32);
+    today.water_ml = today.water_ml.saturating_add_signed(change).min(10_000);
     // Drinking answers a pending water reminder, and restarts its timer.
-    if delta > 0 {
-        state.awaiting[BreakKind::Water.index()] = None;
-        state.since_break[BreakKind::Water.index()] = 0;
+    if steps > 0 {
+        state.awaiting[2] = None;
+        state.since_break[2] = 0;
     }
 }
 
@@ -493,6 +798,9 @@ pub fn pause(
         }
         PauseChoice::Resume => None,
     };
+    if choice != PauseChoice::Resume {
+        state.active_break = None;
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -501,8 +809,9 @@ pub struct NextBreak {
     pub kind: BreakKind,
     pub enabled: bool,
     pub every_minutes: u32,
-    /// The intervals the editor offers, so the screen never keeps its own list.
-    pub choices: Vec<u32>,
+    /// The interval the editor accepts, so the screen never keeps its own.
+    pub min_minutes: u32,
+    pub max_minutes: u32,
     /// Minutes of computer use until it is due; `None` while nothing counts
     /// down, or once today's water goal is met.
     pub minutes_left: Option<u32>,
@@ -517,6 +826,14 @@ pub struct FocusSnapshot {
     pub today: FocusDay,
     pub breaks: Vec<NextBreak>,
     pub paused_until: Option<DateTime<Utc>>,
+    /// What one tap on + logs, and the goal's limits, in ml.
+    pub water_step_ml: u32,
+    pub water_goal_min_ml: u32,
+    pub water_goal_max_ml: u32,
+    /// What "later" on a break card means, in minutes of use.
+    pub snooze_minutes: u32,
+    /// The break card showing now, for the card window to draw.
+    pub active_break: Option<ActiveBreak>,
     /// False where the platform cannot report idle time, so the screen can say
     /// that all time counts.
     pub idle_supported: bool,
@@ -550,13 +867,14 @@ pub fn snapshot(
         .into_iter()
         .map(|kind| {
             let rule = settings.rule(kind);
-            let goal_met = kind == BreakKind::Water && today.water_glasses >= settings.water_goal;
-            let used = state.since_break[kind.index()];
+            let goal_met = kind == BreakKind::Water && today.water_ml >= settings.water_goal_ml;
+            let used = kind.slot().map_or(0, |slot| state.since_break[slot]);
             NextBreak {
                 kind,
                 enabled: rule.enabled,
                 every_minutes: rule.every_minutes,
-                choices: kind.interval_choices().to_vec(),
+                min_minutes: kind.interval_range().0,
+                max_minutes: kind.interval_range().1,
                 minutes_left: (rule.enabled && counting && !goal_met)
                     .then(|| rule.every_seconds().saturating_sub(used).div_ceil(60)),
             }
@@ -570,6 +888,11 @@ pub fn snapshot(
         breaks,
         paused_until: state.paused_until.filter(|until| now < *until),
         idle_supported: state.last_idle.is_some() || state.last_tick.is_none(),
+        water_step_ml: WATER_STEP_ML,
+        water_goal_min_ml: WATER_GOAL_MIN_ML,
+        water_goal_max_ml: WATER_GOAL_MAX_ML,
+        snooze_minutes: SNOOZE_MINUTES,
+        active_break: state.active_break,
     }
 }
 
@@ -590,6 +913,12 @@ fn week(history: &[FocusDay], today: &FocusDay) -> Vec<FocusDay> {
         .collect()
 }
 
+/// Millilitres as litres, without trailing zeros: 1250 → "1.25", 2000 → "2".
+pub fn litres(ml: u32) -> String {
+    let text = format!("{:.2}", f64::from(ml) / 1000.0);
+    text.trim_end_matches('0').trim_end_matches('.').to_owned()
+}
+
 /// The notification for a break. English, like every other Sajilo reminder.
 pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (String, String) {
     match kind {
@@ -604,11 +933,20 @@ pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (
                 settings.move_break.every_minutes
             ),
         ),
+        BreakKind::Custom => (
+            settings.custom.label.clone(),
+            "Your own reminder, from Sajilo.".to_owned(),
+        ),
+        BreakKind::EndOfDay => (
+            "Work hours are over".to_owned(),
+            "Time to wrap up. Tomorrow's problems can wait until tomorrow.".to_owned(),
+        ),
         BreakKind::Water => (
             "Drink some water".to_owned(),
             format!(
-                "{} of {} glasses today. Log it in Sajilo's Focus tab.",
-                today.water_glasses, settings.water_goal
+                "{} of {} L today. Log it in Sajilo's Breaks tab.",
+                litres(today.water_ml),
+                litres(settings.water_goal_ml)
             ),
         ),
     }

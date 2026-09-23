@@ -181,6 +181,26 @@ fn migrate(connection: &Connection) -> Result<()> {
     if version < SCHEMA_VERSION {
         upgrade(connection, version)?;
     }
+    ensure_repeat_day(connection)
+}
+
+/// The day a repeating Keeper date was set for, so a bill on the 30th that
+/// lands on a 29-day month goes back to the 30th after it.
+///
+/// Checked on every open rather than as a version step: development builds
+/// marked some databases version 9 before this column existed, and a version
+/// check alone would leave those without it. Adding a missing nullable column
+/// is safe to repeat, and the check is one PRAGMA per table.
+fn ensure_repeat_day(connection: &Connection) -> Result<()> {
+    for table in ["keeper_items", "keeper_records"] {
+        if !has_column(connection, table, "repeat_day")? {
+            connection
+                .execute_batch(&format!(
+                    "ALTER TABLE {table} ADD COLUMN repeat_day INTEGER;"
+                ))
+                .map_err(|error| error.to_string())?;
+        }
+    }
     Ok(())
 }
 
@@ -215,20 +235,6 @@ fn upgrade(connection: &Connection, from: i64) -> Result<()> {
         connection
             .execute_batch(STOCK_PORTFOLIO_TABLES)
             .map_err(|error| error.to_string())?;
-    }
-    // The day a repeating Keeper date was set for, so a bill on the 30th that
-    // lands on a 29-day month goes back to the 30th after it. Tables rebuilt
-    // above already have it, hence the check.
-    if from < 9 {
-        for table in ["keeper_items", "keeper_records"] {
-            if !has_column(connection, table, "repeat_day")? {
-                connection
-                    .execute_batch(&format!(
-                        "ALTER TABLE {table} ADD COLUMN repeat_day INTEGER;"
-                    ))
-                    .map_err(|error| error.to_string())?;
-            }
-        }
     }
     bump_schema_version(connection, SCHEMA_VERSION)
 }
@@ -383,6 +389,26 @@ mod tests {
             .unwrap();
         assert_eq!(people, 1);
         assert!(columns(&connection, "stock_transactions").contains(&"symbol".to_owned()));
+    }
+
+    /// A database already stamped version 9 before `repeat_day` existed still
+    /// gets the column, instead of failing every Keeper query.
+    #[test]
+    fn a_version_nine_database_missing_repeat_day_gains_it() {
+        let connection = Connection::open_in_memory().unwrap();
+        let old_shape = KEEPER_TABLES.replace(",\n                repeat_day INTEGER", "");
+        connection
+            .execute_batch(&format!(
+                "CREATE TABLE schema_meta (key TEXT PRIMARY KEY NOT NULL, value INTEGER NOT NULL);
+                INSERT INTO schema_meta VALUES ('schema_version', 9);
+                {old_shape}"
+            ))
+            .unwrap();
+
+        migrate(&connection).unwrap();
+
+        assert!(columns(&connection, "keeper_items").contains(&"repeat_day".to_owned()));
+        assert!(columns(&connection, "keeper_records").contains(&"repeat_day".to_owned()));
     }
 
     #[test]

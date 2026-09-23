@@ -77,6 +77,13 @@ export function ScheduleCard({
       </div>
 
       <Toggle
+        label={t("focus.end-of-day")}
+        note={t("focus.end-of-day-note")}
+        checked={settings.endOfDay}
+        onChange={(endOfDay) => onSettings({ ...settings, endOfDay })}
+      />
+
+      <Toggle
         label={t("focus.skip-holidays")}
         note={t("focus.skip-holidays-note")}
         checked={settings.skipPublicHolidays}

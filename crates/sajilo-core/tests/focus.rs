@@ -2,8 +2,8 @@
 
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
-    BreakKind, FocusSettings, FocusState, FocusStatus, PauseChoice, Tick, log_water, pause,
-    snapshot, tick,
+    BreakKind, BreakOutcome, FocusSettings, FocusState, FocusStatus, PauseChoice, ReminderStyle,
+    SNOOZE_MINUTES, Tick, finish_break, litres, log_water, pause, preview_break, snapshot, tick,
 };
 
 const STEP: i64 = 15;
@@ -128,12 +128,14 @@ fn a_reminder_ignored_past_its_window_is_not_taken() {
 
 #[test]
 fn nothing_is_due_outside_work_hours_but_screen_time_counts() {
+    let mut settings = eyes_only();
+    settings.end_of_day = false;
     let mut state = FocusState::default();
     let evening = monday_at(19);
-    assert!(run(&mut state, &eyes_only(), evening, 60, busy).is_empty());
+    assert!(run(&mut state, &settings, evening, 60, busy).is_empty());
     assert!(state.today.as_ref().unwrap().screen_seconds >= 59 * 60);
 
-    let view = snapshot(&mut state, &eyes_only(), evening, evening.naive_utc());
+    let view = snapshot(&mut state, &settings, evening, evening.naive_utc());
     assert_eq!(view.status, FocusStatus::OutsideHours);
     assert_eq!(view.breaks[0].minutes_left, None);
 }
@@ -207,10 +209,10 @@ fn only_the_minutes_before_going_quiet_count() {
 fn water_reminders_stop_at_the_daily_goal() {
     let mut settings = FocusSettings::default();
     settings.water.enabled = true;
-    settings.water_goal = 2;
+    settings.water_goal_ml = 1500;
     let mut state = FocusState::default();
     let start = monday_at(9);
-    log_water(&mut state, start.naive_utc(), 2);
+    log_water(&mut state, start.naive_utc(), 6);
 
     assert!(run(&mut state, &settings, start, 180, busy).is_empty());
     let view = snapshot(&mut state, &settings, start, start.naive_utc());
@@ -322,11 +324,26 @@ fn stored_settings_fill_in_and_stay_within_the_editor() {
     assert!(!settings.any_enabled());
 
     let odd: FocusSettings =
-        serde_json::from_str(r#"{"eyes":{"enabled":true,"everyMinutes":7},"waterGoal":0}"#)
+        serde_json::from_str(r#"{"eyes":{"enabled":true,"everyMinutes":7},"waterGoalMl":1234}"#)
             .unwrap();
     let odd = odd.normalised();
-    assert_eq!(odd.eyes.every_minutes, 20);
-    assert_eq!(odd.water_goal, 1);
+    assert_eq!(odd.eyes.every_minutes, 7, "any interval in range is kept");
+
+    let silly: FocusSettings =
+        serde_json::from_str(r#"{"eyes":{"enabled":true,"everyMinutes":2}}"#).unwrap();
+    assert_eq!(
+        silly.normalised().eyes.every_minutes,
+        5,
+        "clamped to the range"
+    );
+    assert_eq!(odd.water_goal_ml, 1250, "rounded to 50 ml");
+
+    let greedy: FocusSettings = serde_json::from_str(r#"{"waterGoalMl":40000}"#).unwrap();
+    assert_eq!(
+        greedy.normalised().water_goal_ml,
+        8000,
+        "within the sane range"
+    );
 }
 
 #[test]
@@ -341,4 +358,338 @@ fn an_overnight_shift_wraps_past_midnight() {
     assert_eq!(run(&mut state, &settings, monday_at(23), 25, busy).len(), 1);
     let mut state = FocusState::default();
     assert!(run(&mut state, &settings, monday_at(12), 25, busy).is_empty());
+}
+
+/// Each tap is a quarter litre, it never goes below nothing, and the
+/// notification reads in litres without trailing zeros.
+#[test]
+fn water_is_counted_in_litres() {
+    let mut state = FocusState::default();
+    let now = monday_at(10).naive_utc();
+    log_water(&mut state, now, 5);
+    assert_eq!(state.today.as_ref().unwrap().water_ml, 1250);
+    log_water(&mut state, now, -10);
+    assert_eq!(state.today.as_ref().unwrap().water_ml, 0);
+
+    assert_eq!(litres(1250), "1.25");
+    assert_eq!(litres(2500), "2.5");
+    assert_eq!(litres(2000), "2");
+    assert_eq!(litres(0), "0");
+}
+
+// ------------------------------------------------------------ break card
+
+#[test]
+fn a_due_break_opens_a_card_with_its_countdown() {
+    let mut state = FocusState::default();
+    run(&mut state, &eyes_only(), monday_at(10), 20, busy);
+    let card = state.active_break.expect("a card is showing");
+    assert_eq!(card.kind, BreakKind::Eyes);
+    assert_eq!(card.seconds, 20);
+
+    let mut quiet = eyes_only();
+    quiet.style = ReminderStyle::Notification;
+    let mut state = FocusState::default();
+    run(&mut state, &quiet, monday_at(10), 20, busy);
+    assert_eq!(state.active_break, None, "notification style opens no card");
+}
+
+/// Letting the countdown run out takes the break, once, even if the quiet
+/// computer had already counted it.
+#[test]
+fn finishing_the_countdown_counts_the_break_once() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 20, busy);
+    let local = (monday_at(10) + Duration::minutes(21)).naive_utc();
+    finish_break(&mut state, &settings, BreakOutcome::Done, local);
+    finish_break(&mut state, &settings, BreakOutcome::Done, local);
+
+    let today = state.today.as_ref().unwrap();
+    assert_eq!((today.eyes.reminded, today.eyes.taken), (1, 1));
+    assert_eq!(state.active_break, None);
+}
+
+#[test]
+fn skipping_leaves_the_break_untaken() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 20, busy);
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Skip,
+        monday_at(11).naive_utc(),
+    );
+    let today = state.today.as_ref().unwrap();
+    assert_eq!((today.eyes.reminded, today.eyes.taken), (1, 0));
+}
+
+/// "In 5 min" brings the same reminder back after five more minutes of use,
+/// and it is not counted as a second reminder.
+#[test]
+fn snoozing_asks_again_after_five_minutes_of_use() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    let start = monday_at(10);
+    run(&mut state, &settings, start, 20, busy);
+    let snoozed_at = start + Duration::seconds(20 * 60 + 15);
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Snooze,
+        snoozed_at.naive_utc(),
+    );
+
+    let due = run(&mut state, &settings, snoozed_at, 10, busy);
+    let back = due.first().expect("it comes back").0 - snoozed_at;
+    assert!(
+        back <= Duration::minutes(i64::from(SNOOZE_MINUTES)),
+        "got {back}"
+    );
+    assert_eq!(state.today.as_ref().unwrap().eyes.reminded, 1);
+}
+
+#[test]
+fn drinking_from_the_card_logs_a_step_of_water() {
+    let mut settings = FocusSettings::default();
+    settings.water.enabled = true;
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 60, busy);
+    assert_eq!(
+        state.active_break.map(|card| card.kind),
+        Some(BreakKind::Water)
+    );
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Drank,
+        monday_at(11).naive_utc(),
+    );
+    assert_eq!(state.today.as_ref().unwrap().water_ml, 250);
+}
+
+/// Standing up rests the eyes as well, so one card, not two.
+#[test]
+fn a_movement_break_stands_in_for_an_eye_break_due_at_once() {
+    let mut settings = eyes_only();
+    settings.move_break.enabled = true;
+    let mut state = FocusState::default();
+    let due = run(&mut state, &settings, monday_at(10), 60, busy);
+    let at_the_hour: Vec<_> = due
+        .iter()
+        .filter(|(time, _)| *time - monday_at(10) == Duration::minutes(60))
+        .map(|(_, kind)| *kind)
+        .collect();
+    assert_eq!(at_the_hour, [BreakKind::Move]);
+    assert_eq!(
+        state.today.as_ref().unwrap().eyes.reminded,
+        2,
+        "only the 20 and 40"
+    );
+}
+
+#[test]
+fn an_ignored_card_goes_away_on_its_own() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 20, busy);
+    assert!(state.active_break.is_some());
+    run(
+        &mut state,
+        &settings,
+        monday_at(10) + Duration::minutes(20),
+        3,
+        busy,
+    );
+    assert_eq!(state.active_break, None);
+}
+
+#[test]
+fn pausing_puts_the_card_away() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 20, busy);
+    let now = monday_at(10) + Duration::minutes(21);
+    pause(&mut state, PauseChoice::Hour, now, now.naive_utc());
+    assert_eq!(state.active_break, None);
+}
+
+/// "Show me an example" opens a real card that counts for nothing.
+#[test]
+fn an_example_card_changes_no_count_or_timer() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 10, busy);
+    let before = state.clone();
+    preview_break(&mut state, BreakKind::Eyes, monday_at(11));
+    assert!(state.active_break.is_some_and(|card| card.preview));
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Done,
+        monday_at(11).naive_utc(),
+    );
+    assert_eq!(state, before);
+}
+
+// ---------------------------------------------------------- custom break
+
+fn custom(label: &str, every: u32) -> FocusSettings {
+    let mut settings = FocusSettings::default();
+    settings.custom.enabled = true;
+    label.clone_into(&mut settings.custom.label);
+    settings.custom.every_minutes = every;
+    settings.end_of_day = false;
+    settings
+}
+
+#[test]
+fn a_custom_break_comes_on_its_own_interval() {
+    let settings = custom("Stretch your wrists", 30);
+    let mut state = FocusState::default();
+    let due = run(&mut state, &settings, monday_at(10), 65, busy);
+    let times: Vec<_> = due
+        .iter()
+        .map(|(time, kind)| (*time - monday_at(10), *kind))
+        .collect();
+    assert_eq!(
+        times,
+        [
+            (Duration::minutes(30), BreakKind::Custom),
+            (Duration::minutes(60), BreakKind::Custom)
+        ]
+    );
+
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 30, busy);
+    let card = state.active_break.expect("a card when it comes due");
+    assert_eq!((card.kind, card.seconds), (BreakKind::Custom, 0));
+}
+
+/// A reminder with no words is not a reminder.
+#[test]
+fn a_custom_break_without_words_never_comes() {
+    let settings = custom("   ", 30);
+    let mut state = FocusState::default();
+    assert!(run(&mut state, &settings, monday_at(10), 90, busy).is_empty());
+    assert!(!settings.any_enabled());
+}
+
+#[test]
+fn a_custom_label_is_trimmed_and_kept_short() {
+    let long = format!("  {}  ", "x".repeat(200));
+    let settings = custom(&long, 7).normalised();
+    assert_eq!(settings.custom.label.len(), 60);
+    assert_eq!(
+        settings.custom.every_minutes, 7,
+        "a typed interval in range is kept"
+    );
+}
+
+// ------------------------------------------------------ end of work day
+
+fn working() -> FocusSettings {
+    let mut settings = eyes_only();
+    settings.end_of_day = true;
+    settings
+}
+
+#[test]
+fn the_end_of_work_nudge_comes_once_when_work_ends() {
+    let settings = working();
+    let mut state = FocusState::default();
+    // Work ends at 18:00; still at the computer from 17:50 to 19:00.
+    let due = run(
+        &mut state,
+        &settings,
+        monday_at(17) + Duration::minutes(50),
+        70,
+        busy,
+    );
+    let ends: Vec<_> = due
+        .iter()
+        .filter(|(_, kind)| *kind == BreakKind::EndOfDay)
+        .map(|(time, _)| *time)
+        .collect();
+    assert_eq!(ends, [monday_at(18)]);
+}
+
+#[test]
+fn nobody_at_the_computer_gets_no_end_of_work_nudge() {
+    let settings = working();
+    let mut state = FocusState::default();
+    let gone = |_: DateTime<Utc>| 3_600;
+    let due = run(&mut state, &settings, monday_at(18), 60, gone);
+    assert!(due.iter().all(|(_, kind)| *kind != BreakKind::EndOfDay));
+}
+
+#[test]
+fn no_end_of_work_nudge_on_a_day_off_or_with_reminders_off() {
+    let saturday = Utc.with_ymd_and_hms(2026, 9, 26, 18, 0, 0).unwrap();
+    let mut state = FocusState::default();
+    assert!(run(&mut state, &working(), saturday, 30, busy).is_empty());
+
+    // Every reminder off, so there is no work day to end.
+    let off = FocusSettings {
+        end_of_day: true,
+        ..FocusSettings::default()
+    };
+    let mut state = FocusState::default();
+    assert!(run(&mut state, &off, monday_at(18), 30, busy).is_empty());
+}
+
+#[test]
+fn putting_off_the_end_of_work_nudge_brings_it_back() {
+    let settings = working();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(18), 1, busy);
+    assert_eq!(
+        state.active_break.map(|card| card.kind),
+        Some(BreakKind::EndOfDay)
+    );
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Snooze,
+        monday_at(18).naive_utc(),
+    );
+
+    let due = run(
+        &mut state,
+        &settings,
+        monday_at(18) + Duration::minutes(1),
+        10,
+        busy,
+    );
+    let back = due
+        .iter()
+        .find(|(_, kind)| *kind == BreakKind::EndOfDay)
+        .expect("it comes back")
+        .0;
+    assert_eq!(
+        back,
+        monday_at(18) + Duration::minutes(i64::from(SNOOZE_MINUTES))
+    );
+}
+
+/// State saved before the custom break existed had three timers, not four.
+#[test]
+fn state_saved_with_fewer_timers_still_loads() {
+    let raw = r#"{"sinceBreak":[100,200,300],"awaiting":[null,null,null]}"#;
+    let state: FocusState = serde_json::from_str(raw).expect("still loads");
+    assert_eq!(state.since_break, [100, 200, 300, 0]);
+}
+
+/// Turning everything off keeps what was set up, so turning it back on
+/// needs no setting up again.
+#[test]
+fn turning_breaks_off_keeps_the_setup() {
+    let mut settings = custom("Stretch your wrists", 45).with_recommended_breaks();
+    settings.eyes.every_minutes = 25;
+    let off = settings.clone().with_breaks_off();
+    assert!(!off.any_enabled());
+    assert_eq!(off.eyes.every_minutes, 25);
+    assert_eq!(off.custom.label, "Stretch your wrists");
+    assert!(off.with_recommended_breaks().any_enabled());
 }

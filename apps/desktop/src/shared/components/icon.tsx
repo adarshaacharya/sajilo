@@ -19,6 +19,7 @@ import { SFCircleHexagongridFill } from "sf-symbols-lib/monochrome/SFCircleHexag
 import { SFClock } from "sf-symbols-lib/monochrome/SFClock";
 import { SFCloudSun } from "sf-symbols-lib/monochrome/SFCloudSun";
 import { SFCpu } from "sf-symbols-lib/monochrome/SFCpu";
+import { SFCupAndSaucer } from "sf-symbols-lib/monochrome/SFCupAndSaucer";
 import { SFDesktopcomputer } from "sf-symbols-lib/monochrome/SFDesktopcomputer";
 import { SFDocument } from "sf-symbols-lib/monochrome/SFDocument";
 import { SFDotRadiowavesLeftAndRight } from "sf-symbols-lib/monochrome/SFDotRadiowavesLeftAndRight";
@@ -66,7 +67,6 @@ import { SFStopFill } from "sf-symbols-lib/monochrome/SFStopFill";
 import { SFStorefront } from "sf-symbols-lib/monochrome/SFStorefront";
 import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
 import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
-import { SFTarget } from "sf-symbols-lib/monochrome/SFTarget";
 import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
 import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
 import { SFWifi } from "sf-symbols-lib/monochrome/SFWifi";
@@ -89,7 +89,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   tools: SFWrenchAndScrewdriver,
   directory: SFBook,
   keeper: SFCalendarBadgeCheckmark,
-  focus: SFTarget,
+  // A chiya cup: "take a break" is "chiya break" in Nepal.
+  focus: SFCupAndSaucer,
   eye: SFEye,
   walk: SFFigureWalk,
   settings: SFGearshape,

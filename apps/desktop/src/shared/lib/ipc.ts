@@ -161,7 +161,7 @@ export interface DayPlan {
   createdAt: string;
 }
 
-export type BreakKind = "eyes" | "move" | "water";
+export type BreakKind = "eyes" | "move" | "water" | "custom" | "endOfDay";
 
 export interface BreakRule {
   enabled: boolean;
@@ -172,13 +172,41 @@ export interface FocusSettings {
   eyes: BreakRule;
   move: BreakRule;
   water: BreakRule;
-  waterGoal: number;
+  /** Millilitres a day. */
+  waterGoalMl: number;
   workStart: PlanTime;
   workEnd: PlanTime;
   /** Sunday first. */
   workDays: boolean[];
   skipPublicHolidays: boolean;
+  style: ReminderStyle;
+  chime: boolean;
+  /** A rotating joke on the break card instead of the plain instruction. */
+  jokes: boolean;
+  /** The user's own reminder; off while it has no words. */
+  custom: CustomBreak;
+  /** One card when work hours end, if still at the computer. */
+  endOfDay: boolean;
 }
+
+export interface CustomBreak {
+  enabled: boolean;
+  everyMinutes: number;
+  label: string;
+}
+
+export type ReminderStyle = "card" | "notification";
+
+export interface ActiveBreak {
+  kind: BreakKind;
+  startedAt: string;
+  /** Countdown length; 0 for water, which waits for a button. */
+  seconds: number;
+  /** An example opened from the Breaks tab; closing it counts for nothing. */
+  preview: boolean;
+}
+
+export type BreakOutcome = "done" | "skip" | "snooze" | "drank";
 
 export interface BreakCount {
   reminded: number;
@@ -189,7 +217,7 @@ export interface FocusDay {
   /** The computer's own calendar day, `YYYY-MM-DD`. */
   date: string;
   screenSeconds: number;
-  waterGlasses: number;
+  waterMl: number;
   eyes: BreakCount;
   move: BreakCount;
 }
@@ -207,8 +235,9 @@ export interface NextBreak {
   kind: BreakKind;
   enabled: boolean;
   everyMinutes: number;
-  /** The intervals the editor offers, in minutes. */
-  choices: number[];
+  /** The interval the editor accepts, in minutes. */
+  minMinutes: number;
+  maxMinutes: number;
   /** Minutes of computer use until due; null while nothing counts down. */
   minutesLeft: number | null;
 }
@@ -220,6 +249,13 @@ export interface FocusSnapshot {
   breaks: NextBreak[];
   pausedUntil: string | null;
   idleSupported: boolean;
+  /** What one tap on + logs, and the goal's limits, in millilitres. */
+  waterStepMl: number;
+  waterGoalMinMl: number;
+  waterGoalMaxMl: number;
+  /** What "later" on a break card means, in minutes of use. */
+  snoozeMinutes: number;
+  activeBreak: ActiveBreak | null;
   /** The last seven days, oldest first, ending today; unrecorded days are empty. */
   week: FocusDay[];
 }
@@ -459,8 +495,12 @@ export const api = {
   setFocusSettings: (settings: FocusSettings) =>
     invoke<FocusSnapshot>("set_focus_settings", { settings }),
   enableRecommendedBreaks: () => invoke<FocusSnapshot>("enable_recommended_breaks"),
+  disableBreaks: () => invoke<FocusSnapshot>("disable_breaks"),
   logFocusWater: (delta: 1 | -1) => invoke<FocusSnapshot>("log_focus_water", { delta }),
   pauseFocus: (choice: PauseChoice) => invoke<FocusSnapshot>("pause_focus", { choice }),
+  previewFocusBreak: (kind: BreakKind) => invoke<FocusSnapshot>("preview_focus_break", { kind }),
+  finishFocusBreak: (outcome: BreakOutcome) =>
+    invoke<FocusSnapshot>("finish_focus_break", { outcome }),
 
   keeperSnapshot: () => invoke<KeeperSnapshot>("keeper_snapshot"),
   resolveKeeperDate: (input: KeeperDateInput) =>

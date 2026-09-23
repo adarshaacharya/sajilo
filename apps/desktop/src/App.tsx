@@ -6,6 +6,7 @@ import { Converter } from "./features/calendar/converter";
 import { Dashboard } from "./features/calendar/dashboard";
 import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
+import { BreakCard } from "./features/focus/break-card";
 import { Focus } from "./features/focus/focus";
 import { Keeper } from "./features/keeper/keeper";
 import { PhotoViewer } from "./features/keeper/photo-viewer";
@@ -134,6 +135,17 @@ function Shell() {
 export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
   const surface = new URLSearchParams(window.location.search).get("surface");
   const isUpdateWindow = surface === "update";
+
+  // Focus's break card runs in its own small window; see `commands::focus`.
+  if (surface === "break") {
+    return (
+      <ErrorBoundary>
+        <SettingsProvider>
+          <BreakCard />
+        </SettingsProvider>
+      </ErrorBoundary>
+    );
+  }
 
   // Keeper's photo viewer runs in its own window; see `open_keeper_viewer`.
   if (surface === "viewer") {

@@ -274,7 +274,8 @@ export const focus = {
   eyesEvery: focusSettings.eyes.everyMinutes,
   moveEvery: focusSettings.move.everyMinutes,
   waterEvery: focusSettings.water.everyMinutes,
-  waterGoal: focusSettings.waterGoal,
+  /** Litres a day. */
+  waterGoal: focusSettings.waterGoalMl / 1000,
   workStart: focusSettings.workStart,
   workEnd: focusSettings.workEnd,
 };

@@ -1,18 +1,25 @@
-import type { useSettings } from "../../../shared/context/settings-context";
-import type { BreakKind, FocusStatus } from "../../../shared/lib/ipc";
+import { useSettings } from "../../../shared/context/settings-context";
+import type { BreakKind, FocusSettings, FocusStatus } from "../../../shared/lib/ipc";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
 
 export type TFn = ReturnType<typeof useSettings>["t"];
 export type I18nKey = Parameters<TFn>[0];
 
-/** "4h 20m", or "20m" under an hour, in the user's numerals. */
-export function screenTime(seconds: number, t: TFn, numerals: NumeralStyle): string {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (hours === 0) return t("focus.duration-minutes").replace("{m}", digits(minutes, numerals));
-  return t("focus.duration")
-    .replace("{h}", digits(hours, numerals))
-    .replace("{m}", digits(minutes, numerals));
+/**
+ * The Breaks feature's numbers follow the language, not the numeral setting.
+ * That setting is for the calendar, where २६ गते belongs in Devanagari even
+ * in English; here the numbers sit inside sentences, and "In ५ min" reads as
+ * a mistake.
+ */
+export function useSentenceNumerals(): NumeralStyle {
+  const { language } = useSettings();
+  return language === "ne" ? "devanagari" : "latin";
+}
+
+/** Millilitres as litres in the user's numerals: 1250 → "1.25". */
+export function litres(ml: number, numerals: NumeralStyle): string {
+  const text = (ml / 1000).toFixed(2).replace(/\.?0+$/, "");
+  return text.replace(/\d/g, (digit) => digits(Number(digit), numerals));
 }
 
 export const STATUS_LABELS: Record<FocusStatus, I18nKey> = {
@@ -29,15 +36,31 @@ export const KIND_LABELS: Record<BreakKind, I18nKey> = {
   eyes: "focus.kind.eyes",
   move: "focus.kind.move",
   water: "focus.kind.water",
+  custom: "focus.kind.custom",
+  endOfDay: "focus.kind.endOfDay",
 };
 
-export const KIND_NOTES: Record<BreakKind, I18nKey> = {
-  eyes: "focus.note.eyes",
-  move: "focus.note.move",
-  water: "focus.note.water",
-};
+/** What a break is called: the user's own words for their reminder. */
+export function kindLabel(kind: BreakKind, settings: FocusSettings, t: TFn): string {
+  if (kind === "custom" && settings.custom.label.trim()) return settings.custom.label;
+  return t(KIND_LABELS[kind]);
+}
 
-export const KIND_ICONS = { eyes: "eye", move: "walk", water: "drop" } as const;
+export const KIND_ICONS = {
+  eyes: "eye",
+  move: "walk",
+  water: "drop",
+  custom: "star",
+  endOfDay: "sunset",
+} as const;
+
+export const KIND_TINTS: Record<BreakKind, string> = {
+  eyes: "var(--color-accent-mark)",
+  move: "var(--color-positive)",
+  water: "var(--color-weather-tint)",
+  custom: "var(--color-forex-tint)",
+  endOfDay: "var(--color-holiday)",
+};
 
 /** `HH:MM` for a time input. */
 export function clock(time: { hour: number; minute: number }): string {
