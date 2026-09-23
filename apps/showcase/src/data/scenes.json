@@ -680,6 +680,190 @@
       "name": "कुमारी ईन्द्रजात्रा(काठमाडौं उपत्यका मात्र विदा), अनन्त चतुर्दशी",
       "tithi": "चतुर्दशी"
     },
+    "focus_snapshot": {
+      "breaks": [
+        {
+          "choices": [
+            20,
+            30,
+            45,
+            60
+          ],
+          "enabled": false,
+          "everyMinutes": 20,
+          "kind": "eyes",
+          "minutesLeft": null
+        },
+        {
+          "choices": [
+            30,
+            45,
+            60,
+            90,
+            120
+          ],
+          "enabled": false,
+          "everyMinutes": 60,
+          "kind": "move",
+          "minutesLeft": null
+        },
+        {
+          "choices": [
+            30,
+            45,
+            60,
+            90,
+            120
+          ],
+          "enabled": false,
+          "everyMinutes": 60,
+          "kind": "water",
+          "minutesLeft": null
+        }
+      ],
+      "idleSupported": true,
+      "pausedUntil": null,
+      "settings": {
+        "eyes": {
+          "enabled": false,
+          "everyMinutes": 20
+        },
+        "move": {
+          "enabled": false,
+          "everyMinutes": 60
+        },
+        "skipPublicHolidays": true,
+        "water": {
+          "enabled": false,
+          "everyMinutes": 60
+        },
+        "waterGoal": 8,
+        "workDays": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "workEnd": {
+          "hour": 18,
+          "minute": 0
+        },
+        "workStart": {
+          "hour": 9,
+          "minute": 0
+        }
+      },
+      "status": "off",
+      "today": {
+        "date": "2026-08-26",
+        "eyes": {
+          "reminded": 0,
+          "taken": 0
+        },
+        "move": {
+          "reminded": 0,
+          "taken": 0
+        },
+        "screenSeconds": 0,
+        "waterGlasses": 0
+      },
+      "week": [
+        {
+          "date": "2026-08-20",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-21",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-22",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-23",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-24",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-25",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        },
+        {
+          "date": "2026-08-26",
+          "eyes": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "move": {
+            "reminded": 0,
+            "taken": 0
+          },
+          "screenSeconds": 0,
+          "waterGlasses": 0
+        }
+      ]
+    },
     "get_bazar": {
       "fuel": {
         "status": "fresh",
@@ -38206,6 +38390,7 @@
       "sunset": "2026-09-16T12:24:48Z"
     },
     "pending_notifications": [],
+    "plan_days": [],
     "plans_for_day": [],
     "request_notification_permission": "unknown",
     "shift_month:2083:5:-1": {

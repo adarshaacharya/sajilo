@@ -6,6 +6,7 @@ import { Converter } from "./features/calendar/converter";
 import { Dashboard } from "./features/calendar/dashboard";
 import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
+import { Focus } from "./features/focus/focus";
 import { Keeper } from "./features/keeper/keeper";
 import { PhotoViewer } from "./features/keeper/photo-viewer";
 import { GovernmentUpdateDetail } from "./features/news/government-update-detail";
@@ -46,6 +47,7 @@ const ROUTES = [
   { path: "/rashifal", titleKey: "screen.rashifal", element: <Rashifal /> },
   { path: "/radio", titleKey: "screen.radio", element: <Radio /> },
   { path: "/tools", titleKey: "screen.tools", element: <Tools /> },
+  { path: "/focus", titleKey: "screen.focus", element: <Focus /> },
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];

@@ -4,7 +4,7 @@ import { Icon } from "../../../shared/components/icon";
 import { Select } from "../../../shared/components/select";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
-import { api, type DayPlan, type NepaliDate } from "../../../shared/lib/ipc";
+import { api, type DayPlan, type NepaliDate, type PlanRecurrence } from "../../../shared/lib/ipc";
 
 const REMINDERS = [
   { id: "", labelKey: "planner.no-reminder" as const },
@@ -16,26 +16,39 @@ const REMINDERS = [
   { id: "60", labelKey: "planner.reminder.one-hour" as const },
 ];
 
+const REPEATS = [
+  { id: "none", labelKey: "planner.repeat.none" as const },
+  { id: "monthlyBikramSambat", labelKey: "planner.repeat.monthly" as const },
+  { id: "yearlyBikramSambat", labelKey: "planner.repeat.yearly" as const },
+] satisfies readonly { id: PlanRecurrence; labelKey: string }[];
+
+/** The shortest BS month has 29 days; a monthly plan past that is clamped. */
+const SHORTEST_MONTH = 29;
+
 interface PlanDraft {
   id: string;
+  /** The plan's own date. A repeating plan opened from a later occurrence
+   * keeps it, so editing from a clamped day never moves the plan. */
+  date: NepaliDate;
   title: string;
   note: string;
   hasTime: boolean;
   time: string;
   reminder: string;
-  yearly: boolean;
+  recurrence: PlanRecurrence;
   createdAt: string;
 }
 
-function emptyDraft(): PlanDraft {
+function emptyDraft(date: NepaliDate): PlanDraft {
   return {
     id: crypto.randomUUID(),
+    date,
     title: "",
     note: "",
     hasTime: false,
     time: "09:00",
     reminder: "",
-    yearly: false,
+    recurrence: "none",
     createdAt: new Date().toISOString(),
   };
 }
@@ -43,6 +56,7 @@ function emptyDraft(): PlanDraft {
 function draftFromPlan(plan: DayPlan): PlanDraft {
   return {
     id: plan.id,
+    date: plan.date,
     title: plan.title,
     note: plan.note,
     hasTime: plan.time !== null,
@@ -50,7 +64,7 @@ function draftFromPlan(plan: DayPlan): PlanDraft {
       ? `${String(plan.time.hour).padStart(2, "0")}:${String(plan.time.minute).padStart(2, "0")}`
       : "09:00",
     reminder: plan.reminder !== null ? String(plan.reminder) : "",
-    yearly: plan.recurrence === "yearlyBikramSambat",
+    recurrence: plan.recurrence,
     createdAt: plan.createdAt,
   };
 }
@@ -94,12 +108,6 @@ function PlanEditor({
         onChange={(hasTime) => onChange({ ...draft, hasTime })}
       />
 
-      <Toggle
-        label={t("planner.repeats-yearly")}
-        checked={draft.yearly}
-        onChange={(yearly) => onChange({ ...draft, yearly })}
-      />
-
       {draft.hasTime && (
         <div className="grid grid-cols-2 gap-2">
           <label className="block min-w-0">
@@ -119,6 +127,18 @@ function PlanEditor({
           />
         </div>
       )}
+
+      <div>
+        <Select
+          label={t("planner.repeat")}
+          value={draft.recurrence}
+          onChange={(recurrence) => onChange({ ...draft, recurrence })}
+          options={REPEATS.map((item) => ({ id: item.id, label: t(item.labelKey) }))}
+        />
+        {draft.recurrence === "monthlyBikramSambat" && draft.date.day > SHORTEST_MONTH && (
+          <p className="mt-1 text-[10px] text-text-muted">{t("planner.repeat.short-months")}</p>
+        )}
+      </div>
 
       <input
         value={draft.note}
@@ -168,8 +188,14 @@ function PlanRow({
         {plan.note && (
           <p className="mt-0.5 line-clamp-2 text-[11px] text-text-muted">{plan.note}</p>
         )}
-        {plan.recurrence === "yearlyBikramSambat" && (
-          <p className="mt-0.5 text-[10px] text-text-muted">{t("planner.repeats-yearly")}</p>
+        {plan.recurrence !== "none" && (
+          <p className="mt-0.5 text-[10px] text-text-muted">
+            {t(
+              plan.recurrence === "monthlyBikramSambat"
+                ? "planner.repeats-monthly"
+                : "planner.repeats-yearly",
+            )}
+          </p>
         )}
       </button>
       <button
@@ -200,8 +226,8 @@ export function DayPlanSection({
   useEffect(() => setItems(plans), [plans]);
 
   useEffect(() => {
-    if (startAdding && !draft) setDraft(emptyDraft());
-  }, [startAdding, draft]);
+    if (startAdding && !draft) setDraft(emptyDraft(date));
+  }, [startAdding, draft, date]);
 
   const refresh = async () => {
     setItems(await api.plansForDay(date.year, date.month, date.day));
@@ -212,12 +238,12 @@ export function DayPlanSection({
     const [hour, minute] = draft.time.split(":").map(Number);
     await api.savePlan({
       id: draft.id,
-      date,
+      date: draft.date,
       title: draft.title.trim(),
       time: draft.hasTime ? { hour: hour ?? 9, minute: minute ?? 0 } : null,
       reminder: draft.hasTime && draft.reminder !== "" ? Number(draft.reminder) : null,
       note: draft.note.trim(),
-      recurrence: draft.yearly ? "yearlyBikramSambat" : "none",
+      recurrence: draft.recurrence,
       createdAt: draft.createdAt,
     });
     setDraft(null);
@@ -244,7 +270,7 @@ export function DayPlanSection({
         {!draft && (
           <button
             type="button"
-            onClick={() => setDraft(emptyDraft())}
+            onClick={() => setDraft(emptyDraft(date))}
             className="btn-ghost flex items-center gap-1 text-[11px]"
           >
             <Icon name="plus" className="size-3" />

@@ -6,8 +6,10 @@
 use std::collections::BTreeMap;
 
 use chrono::{Datelike, Duration, Months, NaiveDate, TimeZone, Utc};
-use rusqlite::params;
-use sajilo_core::calendar::bikram_sambat::{gregorian_date_from, nepali_date_from};
+use rusqlite::{OptionalExtension, params};
+use sajilo_core::calendar::bikram_sambat::{
+    day_months_later, gregorian_date_from, nepali_date_from,
+};
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Wry};
 
@@ -91,6 +93,9 @@ pub struct KeeperItem {
     /// any. Only used to group reminders of one kind.
     #[serde(default)]
     pub template: Option<String>,
+    /// See [`KeeperRecord::repeat_day`].
+    #[serde(skip)]
+    pub repeat_day: Option<u32>,
 }
 
 /// A document the household holds. Some are only a record (citizenship, NID,
@@ -116,7 +121,8 @@ pub struct KeeperRecord {
     /// the day a warranty ends. `None` for documents that never expire.
     pub expiry_date: Option<KeeperDate>,
     /// How `expiry_date` moves when the user marks it paid or renewed:
-    /// "none" | "monthly" | "quarterly" | "halfYearly" | "yearlyAd" | "yearlyBs".
+    /// "none" | "monthly" | "monthlyBs" | "quarterly" | "halfYearly" |
+    /// "yearlyAd" | "yearlyBs". Plain "monthly" is AD months.
     pub recurrence: String,
     /// Days before `expiry_date` to notify.
     pub remind_days: Vec<u32>,
@@ -132,6 +138,12 @@ pub struct KeeperRecord {
     pub custom_fields: Vec<KeeperField>,
     pub created_at: String,
     pub updated_at: String,
+    /// The day of the month a repeating date was set for, in the repeat's own
+    /// calendar. Kept apart from the date itself, which is clamped whenever a
+    /// month is too short: a bill on the 30th due in a 29-day month is due on
+    /// the 29th, and the one after is due on the 30th again. Backend-only.
+    #[serde(skip)]
+    pub repeat_day: Option<u32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -258,9 +270,10 @@ fn output_opt_date(
     Ok(Some(output_date(&calendar, ad, bs)))
 }
 
-const RECORD_RECURRENCES: [&str; 6] = [
+const RECORD_RECURRENCES: [&str; 7] = [
     "none",
     "monthly",
+    "monthlyBs",
     "quarterly",
     "halfYearly",
     "yearlyAd",
@@ -311,33 +324,57 @@ fn record_title(record: &KeeperRecord) -> String {
     }
 }
 
-/// Moves a record's date forward one period, as when the tax is paid or the
-/// policy renewed. A BS yearly date keeps its month and day, stepping the day
-/// back when the next year's month is shorter (Ashad has 31 or 32 days).
+/// Whether a repeat counts Bikram Sambat months rather than AD ones.
+fn repeats_in_bs(recurrence: &str) -> bool {
+    matches!(recurrence, "monthlyBs" | "yearlyBs")
+}
+
+/// The day of the month a repeat keeps coming back to: the one it was set
+/// for, or the date's own day for rows saved before that was stored.
+fn anchor_day(
+    ad: NaiveDate,
+    bs: sajilo_core::NepaliDate,
+    recurrence: &str,
+    stored: Option<u32>,
+) -> u32 {
+    stored.unwrap_or_else(|| {
+        if repeats_in_bs(recurrence) {
+            bs.day
+        } else {
+            ad.day()
+        }
+    })
+}
+
+/// Moves a date forward one period, as when the tax is paid or the bill
+/// settled. The day returns to `repeat_day` in each new month, clamped to that
+/// month's length, so one short month (a 29-day Poush, a 28-day February)
+/// never pulls every later date back with it.
 fn advance_date(
     ad: NaiveDate,
     bs: sajilo_core::NepaliDate,
     recurrence: &str,
+    repeat_day: Option<u32>,
 ) -> Result<(NaiveDate, sajilo_core::NepaliDate)> {
     let months = match recurrence {
-        "monthly" => 1,
+        "monthly" | "monthlyBs" => 1,
         "quarterly" => 3,
         "halfYearly" => 6,
-        "yearlyAd" => 12,
-        "yearlyBs" => {
-            return (1..=bs.day)
-                .rev()
-                .find_map(|day| {
-                    let next = sajilo_core::NepaliDate::new(bs.year + 1, bs.month, day);
-                    gregorian_date_from(next).ok().map(|ad| (ad, next))
-                })
-                .ok_or_else(|| "The next Bikram Sambat year is out of range.".to_owned());
-        }
+        "yearlyAd" | "yearlyBs" => 12,
         _ => return Err("This document doesn't repeat.".to_owned()),
     };
-    let next = ad
-        .checked_add_months(Months::new(months))
+    let day = anchor_day(ad, bs, recurrence, repeat_day);
+    if repeats_in_bs(recurrence) {
+        let next = day_months_later(months, bs, day)
+            .map_err(|_| "The next Bikram Sambat date is out of range.".to_owned())?;
+        let next_ad = gregorian_date_from(next).map_err(|error| error.to_string())?;
+        return Ok((next_ad, next));
+    }
+    let first = ad
+        .with_day(1)
+        .and_then(|first| first.checked_add_months(Months::new(months as u32)))
         .ok_or_else(|| "That date is out of range.".to_owned())?;
+    let next = month_date(first.year(), first.month(), day);
     let next_bs = nepali_date_from(next).map_err(|error| error.to_string())?;
     Ok((next, next_bs))
 }
@@ -389,6 +426,7 @@ fn item_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<KeeperItem> {
         updated_at: row.get(19)?,
         completed_at: row.get(20)?,
         template: row.get(21)?,
+        repeat_day: row.get(22)?,
     })
 }
 
@@ -431,6 +469,7 @@ fn record_from_row(row: &rusqlite::Row<'_>) -> rusqlite::Result<(KeeperRecord, R
         remind_days: parse_json(row.get(20)?)?,
         links: parse_json(row.get(21)?)?,
         custom_fields: parse_json(row.get(22)?)?,
+        repeat_day: row.get(23)?,
         id,
     };
     Ok((record, issued_err.and(expiry_err)))
@@ -444,7 +483,7 @@ fn records(app: &AppHandle<Wry>) -> Result<Vec<KeeperRecord>> {
                 issued_bs_year, issued_bs_month, issued_bs_day,
                 expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
                 office, note, created_at, updated_at, details,
-                person_id, recurrence, remind_days, links, custom_fields
+                person_id, recurrence, remind_days, links, custom_fields, repeat_day
          FROM keeper_records ORDER BY created_at",
         )
         .map_err(|error| error.to_string())?;
@@ -467,7 +506,8 @@ fn items(app: &AppHandle<Wry>) -> Result<Vec<KeeperItem>> {
             "SELECT id, person_id, title, category, due_calendar, due_ad,
                 due_bs_year, due_bs_month, due_bs_day, status, recurrence,
                 remind_days, note, official_url, office_location, fee,
-                application_status, checklist, created_at, updated_at, completed_at, template
+                application_status, checklist, created_at, updated_at, completed_at, template,
+                repeat_day
          FROM keeper_items ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, due_ad, title",
         )
         .map_err(|error| error.to_string())?;
@@ -530,81 +570,9 @@ pub fn delete_keeper_person(app: AppHandle<Wry>, id: String) -> Result<KeeperSna
     keeper_snapshot(app)
 }
 
-#[tauri::command]
-pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperSnapshot> {
-    if item.title.trim().is_empty() {
-        return Err("Give this reminder a name first.".to_owned());
-    }
-    let due_input = item.due_date.as_ref().map(|date| KeeperDateInput {
-        calendar: date.calendar.clone(),
-        year: date.year,
-        month: date.month,
-        day: date.day,
-    });
-    let due = resolve_opt_date(due_input.as_ref())?;
-    let created = if item.created_at.is_empty() {
-        now()
-    } else {
-        item.created_at.clone()
-    };
-    let updated = now();
-    let checklist = serde_json::to_string(&item.checklist).map_err(|error| error.to_string())?;
-    let remind_days =
-        serde_json::to_string(&item.remind_days).map_err(|error| error.to_string())?;
-    let completed_at = if item.status == "completed" {
-        Some(item.completed_at.unwrap_or_else(now))
-    } else {
-        None
-    };
-    let connection = db::open(&app)?;
-    connection.execute(
-        "INSERT INTO keeper_items
-          (id, person_id, title, category, status, due_calendar, due_ad,
-           due_bs_year, due_bs_month, due_bs_day, recurrence, remind_days, note,
-           official_url, office_location, fee, application_status, checklist,
-           created_at, updated_at, completed_at, template)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)
-         ON CONFLICT(id) DO UPDATE SET person_id=excluded.person_id, title=excluded.title,
-           category=excluded.category, status=excluded.status, due_calendar=excluded.due_calendar,
-           due_ad=excluded.due_ad, due_bs_year=excluded.due_bs_year, due_bs_month=excluded.due_bs_month,
-           due_bs_day=excluded.due_bs_day, recurrence=excluded.recurrence, remind_days=excluded.remind_days,
-           note=excluded.note, official_url=excluded.official_url, office_location=excluded.office_location,
-           fee=excluded.fee, application_status=excluded.application_status, checklist=excluded.checklist,
-           updated_at=excluded.updated_at, completed_at=excluded.completed_at,
-           template=excluded.template",
-        params![item.id, item.person_id, item.title.trim(), item.category, item.status,
-            due_input.as_ref().map(|date| date.calendar.clone()), due.map(|(ad, _)| ad.to_string()),
-            due.map(|(_, bs)| bs.year), due.map(|(_, bs)| bs.month), due.map(|(_, bs)| bs.day), item.recurrence, remind_days, item.note,
-            item.official_url, item.office_location, item.fee, item.application_status, checklist,
-            created, updated, completed_at, item.template],
-    ).map_err(|error| error.to_string())?;
-    keeper_snapshot(app)
-}
-
-#[tauri::command]
-pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
-    crate::commands::attachments::delete_for_owner(&app, "item", &id)?;
-    let connection = db::open(&app)?;
-    connection
-        .execute("DELETE FROM keeper_items WHERE id = ?1", [id])
-        .map_err(|error| error.to_string())?;
-    keeper_snapshot(app)
-}
-
-#[tauri::command]
-pub fn save_keeper_record(
-    app: AppHandle<Wry>,
-    record: KeeperRecordInput,
-) -> Result<KeeperSnapshot> {
-    if let Some(message) = missing_identity(&record) {
-        return Err(message.to_owned());
-    }
-    if !RECORD_RECURRENCES.contains(&record.recurrence.as_str()) {
-        return Err("That repeat interval isn't supported.".to_owned());
-    }
-    if record.recurrence != "none" && record.expiry_date.is_none() {
-        return Err("Add the next due date first.".to_owned());
-    }
+/// A record's free-form fields, tidied and encoded as their columns store
+/// them: blank details and self-links dropped, remind days deduplicated.
+fn stored_record_fields(record: &KeeperRecordInput) -> Result<(String, String, String, String)> {
     let details = record
         .details
         .iter()
@@ -636,6 +604,125 @@ pub fn save_keeper_record(
         .filter(|field| !field.label.is_empty() || !field.value.is_empty())
         .collect::<Vec<_>>();
     let custom_fields = serde_json::to_string(&custom_fields).map_err(|error| error.to_string())?;
+    Ok((details, links, remind_days, custom_fields))
+}
+
+/// The repeat day to store with a date being saved. Saving a date whose day
+/// was clamped by a short month must not make the clamp permanent, so while
+/// the date and the repeat's calendar are unchanged the stored day is kept;
+/// a date the user picked anew, or a new calendar, starts from its own day.
+fn kept_repeat_day(
+    connection: &rusqlite::Connection,
+    table: &str,
+    date_column: &str,
+    id: &str,
+    date: Option<(NaiveDate, sajilo_core::NepaliDate)>,
+    recurrence: &str,
+) -> Result<Option<u32>> {
+    let Some((ad, bs)) = date.filter(|_| recurrence != "none") else {
+        return Ok(None);
+    };
+    let stored: Option<(Option<String>, String, Option<u32>)> = connection
+        .query_row(
+            &format!("SELECT {date_column}, recurrence, repeat_day FROM {table} WHERE id = ?1"),
+            [id],
+            |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
+        )
+        .optional()
+        .map_err(|error| error.to_string())?;
+    let kept = stored.and_then(|(stored_ad, stored_recurrence, day)| {
+        (stored_ad.as_deref() == Some(ad.to_string().as_str())
+            && repeats_in_bs(&stored_recurrence) == repeats_in_bs(recurrence))
+        .then_some(day)
+        .flatten()
+    });
+    Ok(Some(anchor_day(ad, bs, recurrence, kept)))
+}
+
+#[tauri::command]
+pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperSnapshot> {
+    if item.title.trim().is_empty() {
+        return Err("Give this reminder a name first.".to_owned());
+    }
+    let due_input = item.due_date.as_ref().map(|date| KeeperDateInput {
+        calendar: date.calendar.clone(),
+        year: date.year,
+        month: date.month,
+        day: date.day,
+    });
+    let due = resolve_opt_date(due_input.as_ref())?;
+    let created = if item.created_at.is_empty() {
+        now()
+    } else {
+        item.created_at.clone()
+    };
+    let updated = now();
+    let checklist = serde_json::to_string(&item.checklist).map_err(|error| error.to_string())?;
+    let remind_days =
+        serde_json::to_string(&item.remind_days).map_err(|error| error.to_string())?;
+    let completed_at = if item.status == "completed" {
+        Some(item.completed_at.unwrap_or_else(now))
+    } else {
+        None
+    };
+    let connection = db::open(&app)?;
+    let repeat_day = kept_repeat_day(
+        &connection,
+        "keeper_items",
+        "due_ad",
+        &item.id,
+        due,
+        &item.recurrence,
+    )?;
+    connection.execute(
+        "INSERT INTO keeper_items
+          (id, person_id, title, category, status, due_calendar, due_ad,
+           due_bs_year, due_bs_month, due_bs_day, recurrence, remind_days, note,
+           official_url, office_location, fee, application_status, checklist,
+           created_at, updated_at, completed_at, template, repeat_day)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)
+         ON CONFLICT(id) DO UPDATE SET person_id=excluded.person_id, title=excluded.title,
+           category=excluded.category, status=excluded.status, due_calendar=excluded.due_calendar,
+           due_ad=excluded.due_ad, due_bs_year=excluded.due_bs_year, due_bs_month=excluded.due_bs_month,
+           due_bs_day=excluded.due_bs_day, recurrence=excluded.recurrence, remind_days=excluded.remind_days,
+           note=excluded.note, official_url=excluded.official_url, office_location=excluded.office_location,
+           fee=excluded.fee, application_status=excluded.application_status, checklist=excluded.checklist,
+           updated_at=excluded.updated_at, completed_at=excluded.completed_at,
+           template=excluded.template, repeat_day=excluded.repeat_day",
+        params![item.id, item.person_id, item.title.trim(), item.category, item.status,
+            due_input.as_ref().map(|date| date.calendar.clone()), due.map(|(ad, _)| ad.to_string()),
+            due.map(|(_, bs)| bs.year), due.map(|(_, bs)| bs.month), due.map(|(_, bs)| bs.day), item.recurrence, remind_days, item.note,
+            item.official_url, item.office_location, item.fee, item.application_status, checklist,
+            created, updated, completed_at, item.template, repeat_day],
+    ).map_err(|error| error.to_string())?;
+    keeper_snapshot(app)
+}
+
+#[tauri::command]
+pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnapshot> {
+    crate::commands::attachments::delete_for_owner(&app, "item", &id)?;
+    let connection = db::open(&app)?;
+    connection
+        .execute("DELETE FROM keeper_items WHERE id = ?1", [id])
+        .map_err(|error| error.to_string())?;
+    keeper_snapshot(app)
+}
+
+#[tauri::command]
+pub fn save_keeper_record(
+    app: AppHandle<Wry>,
+    record: KeeperRecordInput,
+) -> Result<KeeperSnapshot> {
+    if let Some(message) = missing_identity(&record) {
+        return Err(message.to_owned());
+    }
+    if !RECORD_RECURRENCES.contains(&record.recurrence.as_str()) {
+        return Err("That repeat interval isn't supported.".to_owned());
+    }
+    if record.recurrence != "none" && record.expiry_date.is_none() {
+        return Err("Add the next due date first.".to_owned());
+    }
+    let (details, links, remind_days, custom_fields) = stored_record_fields(&record)?;
     let issued = resolve_opt_date(record.issued_date.as_ref())?;
     let expiry = resolve_opt_date(record.expiry_date.as_ref())?;
     let created = if record.created_at.is_empty() {
@@ -646,6 +733,14 @@ pub fn save_keeper_record(
     let updated = now();
 
     let connection = db::open(&app)?;
+    let repeat_day = kept_repeat_day(
+        &connection,
+        "keeper_records",
+        "expiry_ad",
+        &record.id,
+        expiry,
+        &record.recurrence,
+    )?;
     connection
         .execute(
             "INSERT INTO keeper_records
@@ -653,9 +748,9 @@ pub fn save_keeper_record(
            issued_bs_year, issued_bs_month, issued_bs_day,
            expiry_calendar, expiry_ad, expiry_bs_year, expiry_bs_month, expiry_bs_day,
            office, note, created_at, updated_at, details,
-           person_id, recurrence, remind_days, links, custom_fields)
+           person_id, recurrence, remind_days, links, custom_fields, repeat_day)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18,
-                 ?19, ?20, ?21, ?22, ?23)
+                 ?19, ?20, ?21, ?22, ?23, ?24)
          ON CONFLICT(id) DO UPDATE SET document_type=excluded.document_type, number=excluded.number,
            issued_calendar=excluded.issued_calendar, issued_ad=excluded.issued_ad,
            issued_bs_year=excluded.issued_bs_year, issued_bs_month=excluded.issued_bs_month,
@@ -665,7 +760,7 @@ pub fn save_keeper_record(
            office=excluded.office, note=excluded.note, updated_at=excluded.updated_at,
            details=excluded.details, person_id=excluded.person_id,
            recurrence=excluded.recurrence, remind_days=excluded.remind_days, links=excluded.links,
-           custom_fields=excluded.custom_fields",
+           custom_fields=excluded.custom_fields, repeat_day=excluded.repeat_day",
             params![
                 record.id,
                 record.document_type,
@@ -690,6 +785,7 @@ pub fn save_keeper_record(
                 remind_days,
                 links,
                 custom_fields,
+                repeat_day,
             ],
         )
         .map_err(|error| error.to_string())?;
@@ -708,7 +804,7 @@ pub fn complete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSna
     let connection = db::open(&app)?;
     if let Some(due) = item.due_date.as_ref().filter(|_| item.recurrence != "none") {
         let bs = sajilo_core::NepaliDate::new(due.bs.year, due.bs.month, due.bs.day);
-        let (ad, bs) = advance_date(parse_ad(&due.ad)?, bs, &item.recurrence)?;
+        let (ad, bs) = advance_date(parse_ad(&due.ad)?, bs, &item.recurrence, item.repeat_day)?;
         connection
             .execute(
                 "UPDATE keeper_items SET due_ad = ?1, due_bs_year = ?2, due_bs_month = ?3,
@@ -742,7 +838,12 @@ pub fn advance_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSn
         .as_ref()
         .ok_or_else(|| "This document has no due date.".to_owned())?;
     let bs = sajilo_core::NepaliDate::new(due.bs.year, due.bs.month, due.bs.day);
-    let (ad, bs) = advance_date(parse_ad(&due.ad)?, bs, &record.recurrence)?;
+    let (ad, bs) = advance_date(
+        parse_ad(&due.ad)?,
+        bs,
+        &record.recurrence,
+        record.repeat_day,
+    )?;
     let connection = db::open(&app)?;
     connection
         .execute(
@@ -790,46 +891,26 @@ fn month_date(year: i32, month: u32, day: u32) -> NaiveDate {
         .unwrap_or_else(|| NaiveDate::from_ymd_opt(year, month, 1).expect("valid month"))
 }
 
+/// The first due date on or after `today`: the item's own date, then one
+/// period after another. A bill left unpaid still reminds each cycle, and one
+/// marked paid early (its date already moved on) never reminds for the cycle
+/// it settled.
 fn next_due(item: &KeeperItem, today: NaiveDate) -> Option<NaiveDate> {
     let due_date = item.due_date.as_ref()?;
-    let original = parse_ad(&due_date.ad).ok()?;
-    match item.recurrence.as_str() {
-        "monthly" => {
-            let mut year = today.year();
-            let mut month = today.month();
-            for _ in 0..24 {
-                let candidate = month_date(year, month, original.day());
-                if candidate >= today {
-                    return Some(candidate);
-                }
-                if month == 12 {
-                    year += 1;
-                    month = 1;
-                } else {
-                    month += 1;
-                }
-            }
-            None
-        }
-        "yearlyBs" => {
-            let today_bs = nepali_date_from(today).ok()?;
-            for year in today_bs.year..=today_bs.year + 2 {
-                if let Ok(candidate) = gregorian_date_from(sajilo_core::NepaliDate::new(
-                    year,
-                    due_date.bs.month,
-                    due_date.bs.day,
-                )) && candidate >= today
-                {
-                    return Some(candidate);
-                }
-            }
-            None
-        }
-        "yearlyAd" => (today.year()..=today.year() + 2)
-            .map(|year| month_date(year, original.month(), original.day()))
-            .find(|date| *date >= today),
-        _ => (original >= today).then_some(original),
+    let mut ad = parse_ad(&due_date.ad).ok()?;
+    if item.recurrence == "none" {
+        return (ad >= today).then_some(ad);
     }
+    let mut bs = sajilo_core::NepaliDate::new(due_date.bs.year, due_date.bs.month, due_date.bs.day);
+    let repeat_day = Some(anchor_day(ad, bs, &item.recurrence, item.repeat_day));
+    // Bounded: a monthly bill forgotten for years is not worth walking to.
+    for _ in 0..240 {
+        if ad >= today {
+            return Some(ad);
+        }
+        (ad, bs) = advance_date(ad, bs, &item.recurrence, repeat_day).ok()?;
+    }
+    None
 }
 
 /// The day after the due date, one last nudge that it has passed.
@@ -985,6 +1066,7 @@ mod tests {
             custom_fields: Vec::new(),
             created_at: String::new(),
             updated_at: String::new(),
+            repeat_day: None,
         }
     }
 
@@ -1029,18 +1111,18 @@ mod tests {
         let ad = NaiveDate::from_ymd_opt(2026, 1, 31).unwrap();
         let bs = nepali_date_from(ad).unwrap();
         assert_eq!(
-            advance_date(ad, bs, "monthly").unwrap().0,
+            advance_date(ad, bs, "monthly", None).unwrap().0,
             NaiveDate::from_ymd_opt(2026, 2, 28).unwrap()
         );
         assert_eq!(
-            advance_date(ad, bs, "quarterly").unwrap().0,
+            advance_date(ad, bs, "quarterly", None).unwrap().0,
             NaiveDate::from_ymd_opt(2026, 4, 30).unwrap()
         );
         assert_eq!(
-            advance_date(ad, bs, "yearlyAd").unwrap().0,
+            advance_date(ad, bs, "yearlyAd", None).unwrap().0,
             NaiveDate::from_ymd_opt(2027, 1, 31).unwrap()
         );
-        assert!(advance_date(ad, bs, "none").is_err());
+        assert!(advance_date(ad, bs, "none", None).is_err());
     }
 
     #[test]
@@ -1049,13 +1131,13 @@ mod tests {
         // on a real date in Ashad of the next year.
         let bs = sajilo_core::NepaliDate::new(2082, 3, 32);
         if let Ok(ad) = gregorian_date_from(bs) {
-            let (_, next) = advance_date(ad, bs, "yearlyBs").unwrap();
+            let (_, next) = advance_date(ad, bs, "yearlyBs", None).unwrap();
             assert_eq!((next.year, next.month), (2083, 3));
             assert!(next.day >= 29);
         }
         let bs = sajilo_core::NepaliDate::new(2082, 3, 15);
         let ad = gregorian_date_from(bs).unwrap();
-        let (_, next) = advance_date(ad, bs, "yearlyBs").unwrap();
+        let (_, next) = advance_date(ad, bs, "yearlyBs", None).unwrap();
         assert_eq!((next.year, next.month, next.day), (2083, 3, 15));
     }
 
@@ -1080,9 +1162,92 @@ mod tests {
             updated_at: String::new(),
             completed_at: None,
             template: None,
+            repeat_day: None,
         };
         let today = NaiveDate::from_ymd_opt(2026, 9, 16).unwrap();
         assert_eq!(next_due(&item, today), None);
+    }
+
+    /// An AD monthly bill on the 31st lands on February's last day, then goes
+    /// back to the 31st rather than staying on the 28th for good.
+    #[test]
+    fn ad_monthly_returns_to_its_day_after_a_short_month() {
+        let ad = NaiveDate::from_ymd_opt(2026, 1, 31).unwrap();
+        let bs = nepali_date_from(ad).unwrap();
+        let (feb, feb_bs) = advance_date(ad, bs, "monthly", Some(31)).unwrap();
+        assert_eq!(feb, NaiveDate::from_ymd_opt(2026, 2, 28).unwrap());
+        let (march, _) = advance_date(feb, feb_bs, "monthly", Some(31)).unwrap();
+        assert_eq!(march, NaiveDate::from_ymd_opt(2026, 3, 31).unwrap());
+    }
+
+    /// A BS monthly bill counts Nepali months: the 30th stays the 30th, not
+    /// whatever AD day the 30th first fell on.
+    #[test]
+    fn bs_monthly_steps_bikram_sambat_months_and_keeps_its_day() {
+        use sajilo_core::calendar::bikram_sambat::days_in_month;
+
+        let mut bs = sajilo_core::NepaliDate::new(2083, 1, 30);
+        let mut ad = gregorian_date_from(bs).unwrap();
+        let mut clamped = false;
+        for _ in 0..24 {
+            (ad, bs) = advance_date(ad, bs, "monthlyBs", Some(30)).unwrap();
+            assert_eq!(nepali_date_from(ad).unwrap(), bs, "AD and BS agree");
+            let length = days_in_month(bs.year, bs.month).unwrap() as u32;
+            assert_eq!(bs.day, length.min(30), "the 30th, or the month's last day");
+            clamped |= length < 30;
+        }
+        assert!(clamped, "the walk passes a 29-day month and recovers");
+    }
+
+    fn dated_item(bs: sajilo_core::NepaliDate, recurrence: &str) -> KeeperItem {
+        let ad = gregorian_date_from(bs).unwrap();
+        KeeperItem {
+            id: "i".to_owned(),
+            person_id: None,
+            title: "Rent".to_owned(),
+            category: "home".to_owned(),
+            status: "active".to_owned(),
+            due_date: Some(output_date("bs", ad, bs)),
+            recurrence: recurrence.to_owned(),
+            remind_days: vec![0],
+            note: String::new(),
+            official_url: String::new(),
+            office_location: String::new(),
+            fee: String::new(),
+            application_status: String::new(),
+            checklist: Vec::new(),
+            created_at: String::new(),
+            updated_at: String::new(),
+            completed_at: None,
+            template: None,
+            repeat_day: None,
+        }
+    }
+
+    /// An unpaid BS monthly bill still comes due next Nepali month, on its
+    /// Nepali day.
+    #[test]
+    fn an_unpaid_bs_monthly_item_comes_due_next_bs_month() {
+        let item = dated_item(sajilo_core::NepaliDate::new(2083, 4, 1), "monthlyBs");
+        // BS 2083-05-16: Bhadra 1 has passed, Asoj 1 is next.
+        let today = NaiveDate::from_ymd_opt(2026, 9, 1).unwrap();
+        let due = next_due(&item, today).unwrap();
+        assert_eq!(
+            nepali_date_from(due).unwrap(),
+            sajilo_core::NepaliDate::new(2083, 6, 1)
+        );
+    }
+
+    /// A first due date still ahead is the next one; a repeat never reminds
+    /// for a cycle before it.
+    #[test]
+    fn a_repeat_starts_at_its_own_date() {
+        let item = dated_item(sajilo_core::NepaliDate::new(2083, 9, 10), "monthlyBs");
+        let today = NaiveDate::from_ymd_opt(2026, 9, 1).unwrap();
+        assert_eq!(
+            nepali_date_from(next_due(&item, today).unwrap()).unwrap(),
+            sajilo_core::NepaliDate::new(2083, 9, 10)
+        );
     }
 
     #[test]

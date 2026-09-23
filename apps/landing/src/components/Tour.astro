@@ -1,5 +1,5 @@
 ---
-import { nepse, bullion, fuel, vegetables, usd, forexCount, kathmandu, newsSources, stationCount, rashifalSigns, ropaniInSqFt, upcoming } from "../data/showcase";
+import { nepse, bullion, fuel, vegetables, usd, forexCount, kathmandu, newsSources, stationCount, rashifalSigns, ropaniInSqFt, upcoming, focus } from "../data/showcase";
 import { rs, signed, ne } from "../lib/format";
 
 interface Stop {
@@ -107,6 +107,14 @@ const stops: Stop[] = [
     copy: "Land units, tola to grams, VAT, simple interest, a second clock and the date converter.",
     fact: `${rs(ropaniInSqFt)} ft²`,
     factNote: "in one ropani",
+  },
+  {
+    route: "/focus",
+    ne: "फोकस",
+    en: "Focus",
+    copy: "Reminders to rest your eyes, stand up and drink water, counted only while you're at the keyboard. Quiet after work hours and on holidays, and it never looks at which apps you use.",
+    fact: `${ne(focus.eyesEvery)} मिनेट`,
+    factNote: "until your eyes get a break",
   },
   {
     route: "/keeper",

@@ -19,6 +19,7 @@ export const TABS: readonly {
     | "rashifalEnabled"
     | "radioEnabled"
     | "keeperEnabled"
+    | "focusEnabled"
     | null;
 }[] = [
   { to: "/", labelKey: "tab.today", icon: "today", module: null },
@@ -27,6 +28,7 @@ export const TABS: readonly {
   { to: "/rashifal", labelKey: "tab.rashifal", icon: "rashifal", module: "rashifalEnabled" },
   { to: "/radio", labelKey: "tab.radio", icon: "radio", module: "radioEnabled" },
   { to: "/tools", labelKey: "tab.tools", icon: "tools", module: null },
+  { to: "/focus", labelKey: "tab.focus", icon: "focus", module: "focusEnabled" },
   { to: "/keeper", labelKey: "tab.keeper", icon: "keeper", module: "keeperEnabled" },
 ];
 

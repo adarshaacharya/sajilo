@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, Wry};
 
 const DATABASE_FILE: &str = "sajilo.db";
-pub const SCHEMA_VERSION: i64 = 8;
+pub const SCHEMA_VERSION: i64 = 9;
 
 pub type Result<T> = std::result::Result<T, String>;
 
@@ -92,7 +92,8 @@ const KEEPER_TABLES: &str = "
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL,
                 completed_at TEXT,
-                template TEXT
+                template TEXT,
+                repeat_day INTEGER
             );
             CREATE INDEX IF NOT EXISTS keeper_items_due_idx
                 ON keeper_items (due_ad, status);
@@ -121,7 +122,8 @@ const KEEPER_TABLES: &str = "
                 recurrence TEXT NOT NULL DEFAULT 'none',
                 remind_days TEXT NOT NULL DEFAULT '[]',
                 links TEXT NOT NULL DEFAULT '[]',
-                custom_fields TEXT NOT NULL DEFAULT '[]'
+                custom_fields TEXT NOT NULL DEFAULT '[]',
+                repeat_day INTEGER
             );
             CREATE TABLE IF NOT EXISTS keeper_attachments (
                 id TEXT PRIMARY KEY NOT NULL,
@@ -214,7 +216,33 @@ fn upgrade(connection: &Connection, from: i64) -> Result<()> {
             .execute_batch(STOCK_PORTFOLIO_TABLES)
             .map_err(|error| error.to_string())?;
     }
+    // The day a repeating Keeper date was set for, so a bill on the 30th that
+    // lands on a 29-day month goes back to the 30th after it. Tables rebuilt
+    // above already have it, hence the check.
+    if from < 9 {
+        for table in ["keeper_items", "keeper_records"] {
+            if !has_column(connection, table, "repeat_day")? {
+                connection
+                    .execute_batch(&format!(
+                        "ALTER TABLE {table} ADD COLUMN repeat_day INTEGER;"
+                    ))
+                    .map_err(|error| error.to_string())?;
+            }
+        }
+    }
     bump_schema_version(connection, SCHEMA_VERSION)
+}
+
+fn has_column(connection: &Connection, table: &str, column: &str) -> Result<bool> {
+    let mut statement = connection
+        .prepare(&format!("PRAGMA table_info({table})"))
+        .map_err(|error| error.to_string())?;
+    let names = statement
+        .query_map([], |row| row.get::<_, String>(1))
+        .map_err(|error| error.to_string())?
+        .collect::<rusqlite::Result<Vec<_>>>()
+        .map_err(|error| error.to_string())?;
+    Ok(names.iter().any(|name| name == column))
 }
 
 fn schema_version(connection: &Connection) -> Result<i64> {
@@ -355,5 +383,38 @@ mod tests {
             .unwrap();
         assert_eq!(people, 1);
         assert!(columns(&connection, "stock_transactions").contains(&"symbol".to_owned()));
+    }
+
+    #[test]
+    fn version_eight_keeps_keeper_rows_and_gains_repeat_day() {
+        let connection = Connection::open_in_memory().unwrap();
+        // A version-8 Keeper: today's shape without `repeat_day`.
+        let old_shape = KEEPER_TABLES.replace(",\n                repeat_day INTEGER", "");
+        assert!(!old_shape.contains("repeat_day"));
+        connection
+            .execute_batch(&format!(
+                "CREATE TABLE schema_meta (key TEXT PRIMARY KEY NOT NULL, value INTEGER NOT NULL);
+                INSERT INTO schema_meta VALUES ('schema_version', 8);
+                {old_shape}
+                INSERT INTO keeper_items (id, title, category, status, recurrence, remind_days,
+                    note, official_url, office_location, fee, application_status, checklist,
+                    created_at, updated_at)
+                VALUES ('i', 'Rent', 'home', 'active', 'monthly', '[]', '', '', '', '', '', '[]',
+                    'c', 'u');"
+            ))
+            .unwrap();
+
+        migrate(&connection).unwrap();
+        migrate(&connection).unwrap();
+
+        assert!(columns(&connection, "keeper_items").contains(&"repeat_day".to_owned()));
+        assert!(columns(&connection, "keeper_records").contains(&"repeat_day".to_owned()));
+        let title: String = connection
+            .query_row("SELECT title FROM keeper_items WHERE id = 'i'", [], |row| {
+                row.get(0)
+            })
+            .unwrap();
+        assert_eq!(title, "Rent", "existing reminders survive");
+        assert_eq!(schema_version(&connection).unwrap(), SCHEMA_VERSION);
     }
 }

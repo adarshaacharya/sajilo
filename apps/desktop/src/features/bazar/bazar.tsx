@@ -275,6 +275,7 @@ export function Bazar() {
           state={funds}
           onRetry={retryFunds}
           linkedFund={linked.get("fund")}
+          linkedKind={linked.get("kind")}
           settingUpSip={linked.get("setup") === "sip"}
         />
       )}

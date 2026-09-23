@@ -13,6 +13,7 @@ import type {
 import {
   documentSpec,
   fieldValue,
+  isMonthly,
   isVehicleInsurance,
   NUMBER,
   RECURRENCE_LABELS,
@@ -184,7 +185,7 @@ export function RecordEditor({
           <RemindDays
             value={record.remindDays}
             onChange={(remindDays) => onChange({ ...record, remindDays })}
-            span={record.recurrence === "monthly" ? 14 : 365}
+            span={isMonthly(record.recurrence) ? 14 : 365}
             label={t("keeper.remind-before")}
             onDayLabel={t("keeper.on-the-day")}
           />

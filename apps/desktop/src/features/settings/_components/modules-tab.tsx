@@ -116,6 +116,14 @@ export function ModulesTab() {
         onChange={(value) => setModules((current) => ({ ...current, keeperEnabled: value }))}
       />
 
+      <ModuleRow
+        title={t("screen.focus")}
+        note={t("settings.module-focus-note")}
+        icon="focus"
+        checked={modules.focusEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, focusEnabled: value }))}
+      />
+
       {noneOn && (
         <p className="px-0.5 text-[10px] text-text-muted">{t("settings.nothing-enabled")}</p>
       )}

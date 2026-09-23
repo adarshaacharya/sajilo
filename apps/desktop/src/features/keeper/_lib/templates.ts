@@ -39,7 +39,7 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
       "Penalty from day 16: 5%, then 10% after day 30, 25% after day 40",
     ],
     url: "https://nea.org.np/",
-    recurrence: "monthly",
+    recurrence: "monthlyBs",
     remindDays: [3, 0],
   },
   {
@@ -53,7 +53,7 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
       "Old arrears must be cleared before online payment is accepted",
     ],
     url: "https://www.kukl.org.np/",
-    recurrence: "monthly",
+    recurrence: "monthlyBs",
     remindDays: [3, 0],
   },
   {
@@ -90,7 +90,7 @@ export const REMINDER_TEMPLATES: readonly ReminderTemplate[] = [
       "The landlord owes 10% house rent tax; the agreement should say who pays it",
     ],
     url: "",
-    recurrence: "monthly",
+    recurrence: "monthlyBs",
     remindDays: [3, 0],
   },
   {

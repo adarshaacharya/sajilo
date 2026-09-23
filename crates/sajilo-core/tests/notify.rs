@@ -232,6 +232,35 @@ fn a_yearly_plan_rolls_forward_to_its_next_occurrence() {
     assert!(planned[0].id.ends_with(".2084"), "got {}", planned[0].id);
 }
 
+/// A monthly plan whose day has passed this month schedules next month's, and
+/// each month's reminder has its own id so one never replaces another.
+#[test]
+fn a_monthly_plan_rolls_forward_to_next_month() {
+    let mut plan = timed_plan("report", 5, 10, 0);
+    plan.recurrence = Recurrence::MonthlyBikramSambat;
+    plan.date = NepaliDate::new(2083, 1, 5);
+
+    // 2026-09-01 is BS 2083-05-16: this month's 5th has passed.
+    let now = nepal(2026, 9, 1, 9);
+    let planned = plan_day_plans(&[plan], now);
+
+    assert_eq!(planned.len(), 1, "it must find a future occurrence");
+    assert!(planned[0].fire_at > now);
+    let fire_day = sajilo_core::calendar::bikram_sambat::nepali_date_from(
+        planned[0]
+            .fire_at
+            .with_timezone(&nepal_time::offset())
+            .date_naive(),
+    )
+    .unwrap();
+    assert_eq!(
+        fire_day,
+        NepaliDate::new(2083, 6, 5),
+        "next BS month, same BS day"
+    );
+    assert!(planned[0].id.ends_with(".2083.6"), "got {}", planned[0].id);
+}
+
 /// A plan with no note still needs a body — a blank notification says nothing.
 #[test]
 fn a_plan_without_a_note_gets_a_default_body() {

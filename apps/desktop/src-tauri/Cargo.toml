@@ -58,3 +58,8 @@ tauri-plugin-updater = "2"
 objc2-app-kit = { version = "0.3.2", features = ["NSColor", "NSWindow"] }
 # Native NSVisualEffectView — same class of material Swift uses for `.regularMaterial`.
 window-vibrancy = "0.6"
+
+# Focus asks the desktop session how long input has been idle. Already in the
+# Linux build through the notification plugin, so this adds no new crates.
+[target."cfg(target_os = \"linux\")".dependencies]
+zbus = "5"

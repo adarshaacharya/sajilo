@@ -5,6 +5,7 @@ pub mod bazar;
 pub mod calendar;
 pub mod dividends;
 pub mod external;
+pub mod focus;
 pub mod forex;
 pub mod ipos;
 pub mod keeper;

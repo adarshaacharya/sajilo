@@ -71,11 +71,14 @@ export function MutualFunds({
   state,
   onRetry,
   linkedFund,
+  linkedKind,
   settingUpSip = false,
 }: {
   state: LoadState<MutualFundSnapshot> | undefined;
   onRetry: () => void;
   linkedFund?: string | null;
+  /** `?kind=` opens the list on that tab, e.g. the closed-end one. */
+  linkedKind?: string | null;
   settingUpSip?: boolean;
 }) {
   const { t } = useSettings();
@@ -83,7 +86,9 @@ export function MutualFunds({
   const sips = useSips();
   const { holdings, toggle, setUnits } = useFundHoldings();
   const [query, setQuery] = useState("");
-  const [kind, setKind] = useState<FundKind>("openEnd");
+  const [kind, setKind] = useState<FundKind>(() =>
+    KINDS.some((item) => item.id === linkedKind) ? (linkedKind as FundKind) : "openEnd",
+  );
   const [open, setOpen] = useState<string | null>(linkedFund ?? null);
   const today = nepalToday();
 

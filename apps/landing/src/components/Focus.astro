@@ -1,0 +1,405 @@
+---
+// Focus measures one person's own screen time, so the embedded screen shows
+// what a fresh install shows (see apps/showcase-data). The joke is the
+// prescription: an OPD ticket from a clinic that does not exist, written out
+// with the engine's real defaults — every interval and the water goal below
+// come from the recording, not from this file.
+import { focus } from "../data/showcase";
+import { ne } from "../lib/format";
+
+interface Rx {
+  what: string;
+  when: string;
+  aside: string;
+}
+
+const rx: Rx[] = [
+  {
+    what: "Look 6 m away for 20 seconds",
+    when: `every ${focus.eyesEvery} min`,
+    aside: "Kathmandu's smog will stop you seeing any further anyway.",
+  },
+  {
+    what: "Stand up. Walk somewhere.",
+    when: `every ${focus.moveEvery} min`,
+    aside: "Your grandfather walked from Gorkha to Kathmandu. You can make it to the kitchen.",
+  },
+  {
+    what: `${focus.waterGoal} glasses of water`,
+    when: "a day",
+    aside: "Melamchi took twenty years to reach Kathmandu. The least you can do is drink it.",
+  },
+];
+---
+
+<section class="focus wrap" id="focus" aria-labelledby="focus-title">
+  <div class="focus-grid">
+    <div class="focus-main">
+      <div class="section-head reveal">
+        <p class="focus-mark">
+          <span lang="ne">फोकस</span>
+          <span class="focus-mark-en">Focus</span>
+        </p>
+        <h2 id="focus-title">
+          Nine hours at a laptop. <em>Your physio is already shopping for a second car.</em>
+        </h2>
+      </div>
+
+      <article class="parchi reveal" aria-label="A prescription from Sajilo">
+        <header class="parchi-head">
+          <p class="parchi-clinic" lang="ne">सजिलो डेस्क क्लिनिक</p>
+          <p class="parchi-sub">OPD ticket · not a real hospital, real advice</p>
+        </header>
+
+        <dl class="parchi-fields">
+          <div>
+            <dt>Patient</dt>
+            <dd>You</dd>
+          </div>
+          <div>
+            <dt>Age</dt>
+            <dd>Old enough to groan when you stand up</dd>
+          </div>
+          <div>
+            <dt>Complaint</dt>
+            <dd>Neck clicks like a Pulsar that won't start on a cold morning</dd>
+          </div>
+          <div>
+            <dt>Screen time</dt>
+            <dd>Yes</dd>
+          </div>
+          <div>
+            <dt>Diagnosis</dt>
+            <dd>Chronic laptop. Terminal, if you code.</dd>
+          </div>
+        </dl>
+
+        <p class="parchi-rx" aria-hidden="true">℞</p>
+        <ol class="parchi-list">
+          {rx.map((item, i) => (
+            <li>
+              <span class="rx-num num">{ne(i + 1)}.</span>
+              <span class="rx-body">
+                <span class="rx-what">
+                  {item.what} <span class="rx-when">{item.when}</span>
+                </span>
+                <span class="rx-aside">{item.aside}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+
+        <footer class="parchi-foot">
+          <p class="parchi-fine">
+            Side effects may include blinking, hydration, and coworkers asking if you're okay.
+          </p>
+          <div class="parchi-sign">
+            <span class="sign-scrawl" aria-hidden="true">Sajilo</span>
+            <span class="sign-name">Not a doctor. Has seen your screen time.</span>
+          </div>
+          <span class="parchi-stamp" lang="ne" aria-label="Closed on public holidays">
+            बिदामा<br />बन्द
+          </span>
+        </footer>
+      </article>
+
+      <p class="focus-foot reveal">
+        It counts only the time you're actually at the keyboard, and five minutes away counts as a break,
+        even if you spent them doomscrolling on your phone. We won't tell. Reminders keep to your work hours
+        ({String(focus.workStart.hour).padStart(2, "0")}:{String(focus.workStart.minute).padStart(2, "0")} to
+        {String(focus.workEnd.hour).padStart(2, "0")}:{String(focus.workEnd.minute).padStart(2, "0")} unless
+        you say otherwise) and go quiet on Saturdays and every public holiday in the calendar, because nobody
+        should be told to hydrate on Dashain. Sajilo never records which apps you use. Frankly, we don't want
+        to know what you search at 2 a.m.
+      </p>
+    </div>
+
+    <div class="focus-stage reveal">
+      <div class="focus-frame">
+        <div class="focus-screen">
+          <iframe
+            class="focus-app"
+            title="Sajilo Focus screen"
+            tabindex="-1"
+            scrolling="no"
+            loading="lazy"
+            src="/assets/app/index.html?route=%2Ffocus&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .focus {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .focus-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+  }
+  .focus-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .focus-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .focus-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  /* The parchi: the cheap, slightly crooked OPD ticket everyone in Nepal has
+     queued for. Cream paper on the ink, a sindoor rule under the letterhead,
+     and a rubber stamp that did not land straight. */
+  .parchi {
+    position: relative;
+    margin-top: clamp(28px, 4vw, 44px);
+    max-width: 560px;
+    padding: 22px 24px 20px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 3px;
+    transform: rotate(-0.6deg);
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.35) inset,
+      0 24px 48px -22px rgb(0 0 0 / 0.95);
+  }
+  .parchi-head {
+    text-align: center;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--sindoor);
+  }
+  .parchi-clinic {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(22px, 2.6vw, 28px);
+    line-height: 1.1;
+  }
+  .parchi-sub {
+    margin-top: 4px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--paper-4);
+  }
+
+  .parchi-fields {
+    display: grid;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 14px;
+  }
+  .parchi-fields div {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 10px;
+    align-items: baseline;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed rgb(20 17 14 / 0.22);
+  }
+  .parchi-fields dt {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--paper-4);
+  }
+  .parchi-fields dd {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .parchi-rx {
+    margin-top: 14px;
+    font-family: var(--display);
+    font-size: 34px;
+    line-height: 1;
+    color: var(--sindoor);
+  }
+  .parchi-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 6px;
+    list-style: none;
+    padding: 0;
+  }
+  .parchi-list li {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 6px;
+  }
+  .rx-num {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.3;
+  }
+  .rx-body {
+    display: grid;
+    gap: 2px;
+  }
+  .rx-what {
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .rx-when {
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgb(20 17 14 / 0.08);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .rx-aside {
+    font-size: 13.5px;
+    color: var(--paper-4);
+    text-wrap: pretty;
+  }
+
+  .parchi-foot {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 18px;
+    align-items: end;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px dashed rgb(20 17 14 / 0.3);
+  }
+  .parchi-fine {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: var(--paper-4);
+    font-style: italic;
+  }
+  .parchi-sign {
+    display: grid;
+    justify-items: start;
+  }
+  .sign-scrawl {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 1;
+    transform: rotate(-6deg) skewX(-12deg);
+    transform-origin: left bottom;
+    color: #1f3a78;
+  }
+  .sign-name {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--paper-4);
+  }
+  /* The stamp: sindoor ink, a double ring, and a bored clerk's wrist. */
+  .parchi-stamp {
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    border: 3px double var(--sindoor);
+    color: var(--sindoor);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.1;
+    text-align: center;
+    transform: rotate(-14deg);
+    opacity: 0.85;
+    mix-blend-mode: multiply;
+  }
+
+  .focus-foot {
+    margin-top: clamp(26px, 3.5vw, 36px);
+    max-width: 58ch;
+    font-size: 15.5px;
+    color: var(--paper-2);
+    text-wrap: pretty;
+  }
+
+  .focus-stage {
+    position: sticky;
+    top: 92px;
+  }
+  /* Same frame as Keeper and the tour: the app at its real popover size. */
+  .focus-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 40px 80px -24px rgb(0 0 0 / 0.7);
+  }
+  .focus-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .focus-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .parchi {
+      transform: none;
+    }
+  }
+  @media (max-width: 860px) {
+    .focus-grid {
+      grid-template-columns: 1fr;
+    }
+    .focus-stage {
+      position: static;
+      width: min(100%, 300px);
+    }
+    .parchi {
+      padding: 18px 16px 16px;
+    }
+    .parchi-fields div {
+      grid-template-columns: 78px minmax(0, 1fr);
+    }
+    .parchi-stamp {
+      width: 70px;
+      height: 70px;
+      font-size: 13px;
+    }
+  }
+</style>
+
+<script>
+  // Scale the 380px screen to whatever width the frame has.
+  const frame = document.querySelector<HTMLElement>(".focus-frame");
+  const screen = document.querySelector<HTMLElement>(".focus-screen");
+  if (frame && screen) {
+    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
+    fit();
+    new ResizeObserver(fit).observe(frame);
+  }
+</script>

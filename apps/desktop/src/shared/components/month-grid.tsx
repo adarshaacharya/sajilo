@@ -5,8 +5,8 @@ import type { CalendarDay, CalendarMonth } from "../lib/ipc";
 import { digits } from "../lib/numerals";
 
 /** Swift MonthCalendarView weekday symbols. */
-const WEEKDAYS_NE = ["आ", "सो", "मं", "बु", "बि", "शु", "श"];
-const WEEKDAYS_EN = ["S", "M", "T", "W", "T", "F", "S"];
+export const WEEKDAYS_NE = ["आ", "सो", "मं", "बु", "बि", "शु", "श"];
+export const WEEKDAYS_EN = ["S", "M", "T", "W", "T", "F", "S"];
 const WEEKDAY_IDS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
 export function MonthGrid({

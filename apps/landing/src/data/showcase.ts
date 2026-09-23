@@ -172,6 +172,7 @@ export const mutualFunds = {
   total: funds.length,
   openEnd: funds.filter((fund) => fund.kind === "openEnd").length,
   closedEnd: funds.filter((fund) => fund.kind === "closedEnd").length,
+  matured: funds.filter((fund) => fund.kind === "matured").length,
   largest: funds
     .filter((fund) => fund.kind === "openEnd" && fund.latest && fund.previous)
     .sort((a, b) => (b.fundSize ?? 0) - (a.fundSize ?? 0))
@@ -264,3 +265,16 @@ export const vatExample = c.compute_vat;
 export const interestExample = c.compute_interest;
 /** The date converter's answer for the recorded day. */
 export const convertedDate = c.bs_to_ad;
+
+// ---------- Focus ----------
+
+/** The engine's own defaults, as a fresh install ships them. */
+const focusSettings = c.focus_snapshot.settings;
+export const focus = {
+  eyesEvery: focusSettings.eyes.everyMinutes,
+  moveEvery: focusSettings.move.everyMinutes,
+  waterEvery: focusSettings.water.everyMinutes,
+  waterGoal: focusSettings.waterGoal,
+  workStart: focusSettings.workStart,
+  workEnd: focusSettings.workEnd,
+};

@@ -7,6 +7,7 @@
 pub mod backup;
 pub mod calendar;
 pub mod error;
+pub mod focus;
 pub mod nepal_time;
 pub mod notify;
 pub mod numerals;

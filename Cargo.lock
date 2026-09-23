@@ -4069,6 +4069,7 @@ dependencies = [
  "url",
  "uuid",
  "window-vibrancy",
+ "zbus",
 ]
 
 [[package]]

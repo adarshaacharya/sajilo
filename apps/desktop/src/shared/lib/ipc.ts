@@ -148,6 +148,8 @@ export interface PlanTime {
   minute: number;
 }
 
+export type PlanRecurrence = "none" | "monthlyBikramSambat" | "yearlyBikramSambat";
+
 export interface DayPlan {
   id: string;
   date: NepaliDate;
@@ -155,9 +157,74 @@ export interface DayPlan {
   time: PlanTime | null;
   reminder: number | null;
   note: string;
-  recurrence: "none" | "yearlyBikramSambat";
+  recurrence: PlanRecurrence;
   createdAt: string;
 }
+
+export type BreakKind = "eyes" | "move" | "water";
+
+export interface BreakRule {
+  enabled: boolean;
+  everyMinutes: number;
+}
+
+export interface FocusSettings {
+  eyes: BreakRule;
+  move: BreakRule;
+  water: BreakRule;
+  waterGoal: number;
+  workStart: PlanTime;
+  workEnd: PlanTime;
+  /** Sunday first. */
+  workDays: boolean[];
+  skipPublicHolidays: boolean;
+}
+
+export interface BreakCount {
+  reminded: number;
+  taken: number;
+}
+
+export interface FocusDay {
+  /** The computer's own calendar day, `YYYY-MM-DD`. */
+  date: string;
+  screenSeconds: number;
+  waterGlasses: number;
+  eyes: BreakCount;
+  move: BreakCount;
+}
+
+export type FocusStatus =
+  | "off"
+  | "paused"
+  | "dayOff"
+  | "holiday"
+  | "outsideHours"
+  | "away"
+  | "active";
+
+export interface NextBreak {
+  kind: BreakKind;
+  enabled: boolean;
+  everyMinutes: number;
+  /** The intervals the editor offers, in minutes. */
+  choices: number[];
+  /** Minutes of computer use until due; null while nothing counts down. */
+  minutesLeft: number | null;
+}
+
+export interface FocusSnapshot {
+  settings: FocusSettings;
+  status: FocusStatus;
+  today: FocusDay;
+  breaks: NextBreak[];
+  pausedUntil: string | null;
+  idleSupported: boolean;
+  /** The last seven days, oldest first, ending today; unrecorded days are empty. */
+  week: FocusDay[];
+}
+
+export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "resume";
 
 export interface KeeperPerson {
   id: string;
@@ -194,7 +261,7 @@ export interface KeeperItem {
   /** Null for things with no deadline of their own (a citizenship
    * application). Undated items never notify. */
   dueDate: KeeperDate | null;
-  recurrence: "none" | "monthly" | "yearlyAd" | "yearlyBs";
+  recurrence: "none" | "monthly" | "monthlyBs" | "yearlyAd" | "yearlyBs";
   remindDays: number[];
   note: string;
   officialUrl: string;
@@ -229,6 +296,7 @@ export interface KeeperField {
 export type KeeperRecurrence =
   | "none"
   | "monthly"
+  | "monthlyBs"
   | "quarterly"
   | "halfYearly"
   | "yearlyAd"
@@ -382,8 +450,17 @@ export const api = {
   listPlans: () => invoke<DayPlan[]>("list_plans"),
   plansForDay: (year: number, month: number, day: number) =>
     invoke<DayPlan[]>("plans_for_day", { year, month, day }),
+  /** Days of a BS month with a plan on them, repeating plans included. */
+  planDays: (year: number, month: number) => invoke<number[]>("plan_days", { year, month }),
   savePlan: (plan: DayPlan) => invoke<DayPlan[]>("save_plan", { plan }),
   deletePlan: (id: string) => invoke<DayPlan[]>("delete_plan", { id }),
+
+  focusSnapshot: () => invoke<FocusSnapshot>("focus_snapshot"),
+  setFocusSettings: (settings: FocusSettings) =>
+    invoke<FocusSnapshot>("set_focus_settings", { settings }),
+  enableRecommendedBreaks: () => invoke<FocusSnapshot>("enable_recommended_breaks"),
+  logFocusWater: (delta: 1 | -1) => invoke<FocusSnapshot>("log_focus_water", { delta }),
+  pauseFocus: (choice: PauseChoice) => invoke<FocusSnapshot>("pause_focus", { choice }),
 
   keeperSnapshot: () => invoke<KeeperSnapshot>("keeper_snapshot"),
   resolveKeeperDate: (input: KeeperDateInput) =>

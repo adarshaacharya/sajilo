@@ -3,12 +3,30 @@
 use chrono::{DateTime, Utc};
 use rusqlite::params;
 use sajilo_core::NepaliDate;
-use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder, plans_on};
+use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder, plan_days_in_month, plans_on};
 use tauri::{AppHandle, Wry};
 
 use crate::db;
 
 type Result<T> = std::result::Result<T, String>;
+
+/// The stored spelling, matching the serde name so backups and the table agree.
+fn recurrence_name(recurrence: Recurrence) -> &'static str {
+    match recurrence {
+        Recurrence::None => "none",
+        Recurrence::MonthlyBikramSambat => "monthlyBikramSambat",
+        Recurrence::YearlyBikramSambat => "yearlyBikramSambat",
+    }
+}
+
+/// Anything unrecognised reads as one-time rather than failing the whole load.
+fn recurrence_from(name: &str) -> Recurrence {
+    match name {
+        "monthlyBikramSambat" => Recurrence::MonthlyBikramSambat,
+        "yearlyBikramSambat" => Recurrence::YearlyBikramSambat,
+        _ => Recurrence::None,
+    }
+}
 
 fn load(app: &AppHandle<Wry>) -> Result<Vec<DayPlan>> {
     let connection = db::open(app)?;
@@ -31,10 +49,7 @@ fn load(app: &AppHandle<Wry>) -> Result<Vec<DayPlan>> {
                 },
                 reminder: row.get::<_, Option<u32>>(7)?.map(Reminder),
                 note: row.get(8)?,
-                recurrence: match row.get::<_, String>(9)?.as_str() {
-                    "yearlyBikramSambat" => Recurrence::YearlyBikramSambat,
-                    _ => Recurrence::None,
-                },
+                recurrence: recurrence_from(&row.get::<_, String>(9)?),
                 created_at: row
                     .get::<_, String>(10)?
                     .parse::<DateTime<Utc>>()
@@ -73,10 +88,7 @@ fn save(app: &AppHandle<Wry>, plan: &DayPlan) -> Result<()> {
                 plan.time.map(|time| time.minute),
                 plan.reminder.map(|reminder| reminder.0),
                 plan.note,
-                match plan.recurrence {
-                    Recurrence::YearlyBikramSambat => "yearlyBikramSambat",
-                    Recurrence::None => "none",
-                },
+                recurrence_name(plan.recurrence),
                 plan.created_at.to_rfc3339(),
             ],
         )
@@ -92,6 +104,12 @@ pub fn list_plans(app: AppHandle<Wry>) -> Result<Vec<DayPlan>> {
 #[tauri::command]
 pub fn plans_for_day(app: AppHandle<Wry>, year: i32, month: u32, day: u32) -> Result<Vec<DayPlan>> {
     Ok(plans_on(&load(&app)?, NepaliDate::new(year, month, day)))
+}
+
+/// The days of a BS month the calendar grid marks, repeating plans included.
+#[tauri::command]
+pub fn plan_days(app: AppHandle<Wry>, year: i32, month: u32) -> Result<Vec<u32>> {
+    Ok(plan_days_in_month(&load(&app)?, year, month))
 }
 
 #[tauri::command]
@@ -139,10 +157,7 @@ pub fn replace_all(app: &AppHandle<Wry>, plans: &[DayPlan]) -> Result<()> {
                     plan.time.map(|time| time.minute),
                     plan.reminder.map(|reminder| reminder.0),
                     plan.note,
-                    match plan.recurrence {
-                        Recurrence::YearlyBikramSambat => "yearlyBikramSambat",
-                        Recurrence::None => "none",
-                    },
+                    recurrence_name(plan.recurrence),
                     plan.created_at.to_rfc3339(),
                 ],
             )

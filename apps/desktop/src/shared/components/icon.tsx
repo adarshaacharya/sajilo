@@ -26,6 +26,8 @@ import { SFDrop } from "sf-symbols-lib/monochrome/SFDrop";
 import { SFEllipsis } from "sf-symbols-lib/monochrome/SFEllipsis";
 import { SFEnvelope } from "sf-symbols-lib/monochrome/SFEnvelope";
 import { SFExclamationmarkCircle } from "sf-symbols-lib/monochrome/SFExclamationmarkCircle";
+import { SFEye } from "sf-symbols-lib/monochrome/SFEye";
+import { SFFigureWalk } from "sf-symbols-lib/monochrome/SFFigureWalk";
 import { SFFuelpump } from "sf-symbols-lib/monochrome/SFFuelpump";
 import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
 import { SFGraduationcap } from "sf-symbols-lib/monochrome/SFGraduationcap";
@@ -64,6 +66,7 @@ import { SFStopFill } from "sf-symbols-lib/monochrome/SFStopFill";
 import { SFStorefront } from "sf-symbols-lib/monochrome/SFStorefront";
 import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
 import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
+import { SFTarget } from "sf-symbols-lib/monochrome/SFTarget";
 import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
 import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
 import { SFWifi } from "sf-symbols-lib/monochrome/SFWifi";
@@ -86,6 +89,9 @@ const GLYPHS: Record<IconName, SFComp> = {
   tools: SFWrenchAndScrewdriver,
   directory: SFBook,
   keeper: SFCalendarBadgeCheckmark,
+  focus: SFTarget,
+  eye: SFEye,
+  walk: SFFigureWalk,
   settings: SFGearshape,
   power: SFPower,
   search: SFMagnifyingglass,
@@ -164,6 +170,9 @@ export type IconName =
   | "tools"
   | "directory"
   | "keeper"
+  | "focus"
+  | "eye"
+  | "walk"
   | "settings"
   | "power"
   | "search"

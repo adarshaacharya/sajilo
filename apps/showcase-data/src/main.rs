@@ -300,10 +300,32 @@ fn calendar(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
     insert(commands, "bs_to_ad", &conversion);
     insert(commands, "ad_to_bs", &conversion);
 
+    personal(commands, now);
+}
+
+/// What the user's own screens show on a fresh install: nothing of anyone's,
+/// and nothing invented.
+fn personal(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
     // Nobody's private notes belong on a marketing page, and an invented plan
     // would be a claim about a real day. Both plan lists are simply empty.
     insert(commands, "list_plans", &Value::Array(vec![]));
     insert(commands, "plans_for_day", &Value::Array(vec![]));
+    insert(commands, "plan_days", &Value::Array(vec![]));
+
+    // Focus measures one person's own screen time, so a visitor sees what a
+    // fresh install shows: the engine's own snapshot of a day not yet begun.
+    let mut focus_state = sajilo_core::focus::FocusState::default();
+    insert(
+        commands,
+        "focus_snapshot",
+        &sajilo_core::focus::snapshot(
+            &mut focus_state,
+            &sajilo_core::focus::FocusSettings::default(),
+            now,
+            now.with_timezone(&sajilo_core::nepal_time::offset())
+                .naive_local(),
+        ),
+    );
 
     // Keeper holds documents — citizenship and passport numbers. There is no
     // version of that screen that is honest to populate on a public page, so it

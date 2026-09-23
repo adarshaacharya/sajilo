@@ -4,6 +4,7 @@ import { RemindDays } from "../../../shared/components/remind-days";
 import { Select } from "../../../shared/components/select";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperItem, KeeperPerson } from "../../../shared/lib/ipc";
+import { isMonthly } from "../_lib/documents";
 import { REMINDER_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
 import { DateField } from "./date-picker";
@@ -80,10 +81,12 @@ export function ItemEditor({
                   ariaLabel={t("keeper.repeat")}
                   value={item.recurrence}
                   onChange={(next) => onChange({ ...item, recurrence: next })}
-                  options={(["none", "monthly", "yearlyAd", "yearlyBs"] as const).map((id) => ({
-                    id,
-                    label: t(`keeper.recurrence.${id}`),
-                  }))}
+                  options={(["none", "monthlyBs", "monthly", "yearlyBs", "yearlyAd"] as const).map(
+                    (id) => ({
+                      id,
+                      label: t(`keeper.recurrence.${id}`),
+                    }),
+                  )}
                 />
               </div>
             </div>
@@ -96,7 +99,7 @@ export function ItemEditor({
           <RemindDays
             value={item.remindDays}
             onChange={(remindDays) => onChange({ ...item, remindDays })}
-            span={item.recurrence === "monthly" ? 14 : 90}
+            span={isMonthly(item.recurrence) ? 14 : 90}
             label={t("keeper.remind-before")}
             onDayLabel={t("keeper.on-the-day")}
           />

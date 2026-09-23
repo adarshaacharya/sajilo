@@ -2,7 +2,10 @@
 
 use chrono::{TimeZone, Utc};
 use sajilo_core::NepaliDate;
-use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder, ordered, plans_on};
+use sajilo_core::calendar::bikram_sambat::days_in_month;
+use sajilo_core::planner::{
+    DayPlan, PlanTime, Recurrence, Reminder, ordered, plan_days_in_month, plans_on,
+};
 
 fn plan(id: &str, date: NepaliDate, time: Option<(u32, u32)>, created: i64) -> DayPlan {
     DayPlan {
@@ -24,7 +27,7 @@ fn a_one_time_plan_occurs_only_on_its_own_date() {
 
     assert!(plan.occurs_on(date));
     assert!(!plan.occurs_on(NepaliDate::new(2084, 4, 15)));
-    assert_eq!(plan.occurrence(2084), None);
+    assert_eq!(plan.occurrence_in(2084, 4), None);
 }
 
 /// A yearly date keeps its BS month and day and is resolved per year, rather
@@ -38,15 +41,13 @@ fn a_yearly_plan_recurs_on_the_same_bikram_sambat_day() {
     assert!(plan.occurs_on(NepaliDate::new(2083, 4, 15)));
     assert!(!plan.occurs_on(NepaliDate::new(2083, 4, 16)));
     // Never before the year it was created in.
-    assert_eq!(plan.occurrence(2079), None);
+    assert_eq!(plan.occurrence_in(2079, 4), None);
 }
 
 /// BS months vary between 29 and 32 days. A plan on the 32nd must still fire in
 /// a year where that month is shorter, rather than silently vanishing.
 #[test]
 fn a_yearly_plan_is_clamped_to_a_shorter_month() {
-    use sajilo_core::calendar::bikram_sambat::days_in_month;
-
     // BS 2083-03 has 32 days; find a later year where month 3 is shorter.
     assert_eq!(days_in_month(2083, 3), Some(32));
     let mut plan = plan("long", NepaliDate::new(2083, 3, 32), None, 0);
@@ -57,9 +58,83 @@ fn a_yearly_plan_is_clamped_to_a_shorter_month() {
         .expect("some later year has a shorter month 3");
     let length = days_in_month(shorter, 3).unwrap() as u32;
 
-    let occurrence = plan.occurrence(shorter).expect("it still occurs");
+    let occurrence = plan.occurrence_in(shorter, 3).expect("it still occurs");
     assert_eq!(occurrence.day, length, "clamped to the last real day");
     assert!(plan.occurs_on(occurrence));
+}
+
+/// A monthly plan keeps its BS day in every BS month from its own onward, not
+/// the AD day it started on — BS and AD months do not line up.
+#[test]
+fn a_monthly_plan_recurs_on_the_same_bikram_sambat_day() {
+    let mut plan = plan("report", NepaliDate::new(2083, 4, 15), None, 0);
+    plan.recurrence = Recurrence::MonthlyBikramSambat;
+
+    assert!(plan.occurs_on(NepaliDate::new(2083, 4, 15)));
+    assert!(plan.occurs_on(NepaliDate::new(2083, 5, 15)));
+    assert!(
+        plan.occurs_on(NepaliDate::new(2084, 1, 15)),
+        "across the year"
+    );
+    assert!(!plan.occurs_on(NepaliDate::new(2083, 5, 16)));
+    // Never before the month it was created in.
+    assert_eq!(plan.occurrence_in(2083, 3), None);
+    assert_eq!(plan.occurrence_in(2082, 12), None);
+}
+
+/// "The 30th of every month" must still fire in a 29-day month, on its last
+/// day, and go back to the 30th once the months are long enough again.
+#[test]
+fn a_monthly_plan_is_clamped_to_each_shorter_month() {
+    let mut plan = plan("report", NepaliDate::new(2083, 1, 30), None, 0);
+    plan.recurrence = Recurrence::MonthlyBikramSambat;
+
+    let (short_year, short_month) = (2083..=2084)
+        .flat_map(|year| (1..=12).map(move |month| (year, month)))
+        .find(|(year, month)| days_in_month(*year, *month) == Some(29))
+        .expect("a 29-day month within two years");
+    let occurrence = plan.occurrence_in(short_year, short_month).unwrap();
+    assert_eq!(occurrence.day, 29, "clamped to the last real day");
+    assert!(plan.occurs_on(occurrence));
+
+    let after = if short_month == 12 {
+        (short_year + 1, 1)
+    } else {
+        (short_year, short_month + 1)
+    };
+    let (year, month) = (after.0..=after.0 + 1)
+        .flat_map(|year| (1..=12).map(move |month| (year, month)))
+        .filter(|ym| *ym >= after)
+        .find(|(year, month)| days_in_month(*year, *month).is_some_and(|days| days >= 30))
+        .unwrap();
+    assert_eq!(
+        plan.occurrence_in(year, month).unwrap().day,
+        30,
+        "the anchor day is kept"
+    );
+}
+
+/// The month grid marks repeats too, not only the day a plan was created on.
+#[test]
+fn month_days_include_repeating_plans() {
+    let mut monthly = plan("monthly", NepaliDate::new(2083, 1, 30), None, 0);
+    monthly.recurrence = Recurrence::MonthlyBikramSambat;
+    let mut yearly = plan("yearly", NepaliDate::new(2080, 6, 3), None, 0);
+    yearly.recurrence = Recurrence::YearlyBikramSambat;
+    let plans = vec![
+        monthly,
+        yearly,
+        plan("once", NepaliDate::new(2083, 6, 10), None, 0),
+        plan("same-day", NepaliDate::new(2083, 6, 10), None, 1),
+        plan("elsewhere", NepaliDate::new(2083, 7, 10), None, 0),
+    ];
+
+    assert_eq!(plan_days_in_month(&plans, 2083, 6), [3, 10, 30]);
+    assert_eq!(
+        plan_days_in_month(&plans, 2082, 6),
+        [3],
+        "monthly not yet started"
+    );
 }
 
 /// Timed plans lead in clock order; untimed ones follow, oldest first.

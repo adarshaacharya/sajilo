@@ -33,6 +33,27 @@ const { advanced, declined, unchanged } = nepse.breadth;
 const total = advanced + declined + unchanged;
 const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
 const times = ipo && ipo.units > 0 ? Math.round(ipo.applied / ipo.units) : 0;
+// Three live screens rather than pictures of them: the open-ended list, the
+// closed-ended one, and one fund (the largest open-ended one recorded).
+const FUNDS = "/bazar?tab=stocks&view=funds";
+const fundScreens = [
+  {
+    title: "Open-ended",
+    route: FUNDS,
+    caption: `All ${mutualFunds.openEnd}, the ones an SIP buys, ranked by the week's move. Star the ones you hold and they stay at the top.`,
+  },
+  {
+    title: "Closed-ended",
+    route: `${FUNDS}&kind=closedEnd`,
+    caption: `All ${mutualFunds.closedEnd}, ranked by how far below NAV NEPSE is selling them, plus the ${mutualFunds.matured} that have matured.`,
+  },
+  {
+    title: "One fund",
+    route: `${FUNDS}&fund=${encodeURIComponent(mutualFunds.largest[0]?.symbol ?? "")}`,
+    caption: "Daily, weekly and monthly NAV, fund size and what it holds. Type in your units to see what they are worth, and set the day your SIP leaves the bank.",
+  },
+];
+
 const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocaleDateString("en-GB", {
   day: "numeric",
   month: "short",
@@ -150,10 +171,10 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
         </div>
       </div>
       <div class="ipo-copy">
-        <h3>The IPO lottery. <em>Now with a reminder.</em></h3>
+        <h3>Applied from all five family demat accounts. <em>Still not allotted.</em></h3>
         <p>
-          Every open IPO shows up in Bazar. Get a reminder on the last day so you do not miss the
-          deadline.
+          Every open IPO shows up in Bazar, with a reminder on the last day. Now you'll only miss the
+          allotment, not the deadline.
         </p>
       </div>
     </div>
@@ -162,12 +183,12 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
   {mutualFunds.largest.length > 0 && (
     <div class="funds reveal">
       <div class="funds-copy">
-        <h3>Mutual funds. <em>For when picking stocks yourself went badly.</em></h3>
+        <h3>Mutual funds. <em>Let a fund manager lose your money professionally.</em></h3>
         <p>
-          The NAV of every fund, {mutualFunds.openEnd} open-ended and {mutualFunds.closedEnd} closed-ended.
-          Add your units to see what they are worth, which is either reassuring or character-building.
-          Set the day your SIP leaves your account and Sajilo tells you before the bank does: a few
-          days early, and again on the day.
+          The NAV of every fund: {mutualFunds.openEnd} open-ended, {mutualFunds.closedEnd} closed-ended
+          and {mutualFunds.matured} matured. Add your units to see what they are worth, which is either
+          reassuring or character-building. Set the day your SIP leaves your account and Sajilo tells
+          you before the bank does: a few days early, and again on the day.
         </p>
       </div>
       <div class="nav-board">
@@ -189,6 +210,31 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
         </ol>
       </div>
     </div>
+  )}
+
+  {mutualFunds.largest.length > 0 && (
+    <ul class="fund-screens reveal" aria-label="The mutual funds screens">
+      {fundScreens.map((screen) => (
+        <li class="fund-screen">
+          <div class="fund-frame">
+            <div class="fund-canvas">
+              <iframe
+                class="fund-app"
+                title={screen.title}
+                tabindex="-1"
+                scrolling="no"
+                loading="lazy"
+                src={`/assets/app/index.html?route=${encodeURIComponent(screen.route)}&inert=1&theme=dark`}
+              ></iframe>
+            </div>
+          </div>
+          <p class="fund-caption">
+            <span class="fund-caption-title">{screen.title}</span>
+            {screen.caption}
+          </p>
+        </li>
+      ))}
+    </ul>
   )}
 </section>
 
@@ -573,6 +619,56 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     font-size: 13.5px;
   }
 
+  /* The funds screens: the app at its real popover size, three abreast. */
+  .fund-screens {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2.4vw, 32px);
+    margin-top: clamp(32px, 5vw, 56px);
+    padding: 0;
+    list-style: none;
+  }
+  .fund-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.7);
+  }
+  .fund-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  .fund-app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #1c1c1e;
+    pointer-events: none;
+  }
+  .fund-caption {
+    margin-top: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--paper-3);
+    text-wrap: pretty;
+  }
+  .fund-caption-title {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
+    color: var(--paper);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .chart-line {
       stroke-dasharray: none;
@@ -581,6 +677,18 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     }
   }
   @media (max-width: 860px) {
+    /* One screen at a time, swiped sideways, rather than three unreadable ones. */
+    .fund-screens {
+      grid-auto-flow: column;
+      grid-template-columns: none;
+      grid-auto-columns: min(78%, 280px);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+    }
+    .fund-screen {
+      scroll-snap-align: start;
+    }
     .ipo,
     .funds {
       grid-template-columns: 1fr;
@@ -614,5 +722,14 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
     fit();
     new ResizeObserver(fit).observe(frame);
+  }
+
+  // Each funds screen scales its 380px app to whatever width its frame has.
+  for (const fundFrame of document.querySelectorAll<HTMLElement>(".fund-frame")) {
+    const canvas = fundFrame.querySelector<HTMLElement>(".fund-canvas");
+    if (!canvas) continue;
+    const fitFund = () => canvas.style.setProperty("--fit", String(fundFrame.clientWidth / 380));
+    fitFund();
+    new ResizeObserver(fitFund).observe(fundFrame);
   }
 </script>

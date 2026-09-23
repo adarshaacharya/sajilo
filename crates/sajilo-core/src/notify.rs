@@ -347,20 +347,33 @@ fn next_for_plan(plan: &DayPlan, now: DateTime<Utc>) -> Option<PlannedNotificati
     plan.time?;
     plan.reminder?;
 
-    match plan.recurrence {
-        Recurrence::None => notification_for(plan, plan.date, now),
-        Recurrence::YearlyBikramSambat => {
-            // Walk forward from this year: a yearly plan whose date has passed
-            // should schedule next year's occurrence, not nothing.
-            let today =
-                nepali_date_from(now.with_timezone(&nepal_time::offset()).date_naive()).ok()?;
-            let start = today.year.max(plan.date.year);
-            (start..=LAST_YEAR).find_map(|year| {
-                let occurrence = plan.occurrence(year)?;
-                notification_for(plan, occurrence, now)
-            })
-        }
+    if plan.recurrence == Recurrence::None {
+        return notification_for(plan, plan.date, now);
     }
+    // Walk forward month by month: a repeating plan whose date has passed
+    // should schedule its next occurrence, not nothing. The walk starts a month
+    // back so a reminder late on last month's final day can still go out late.
+    let today = nepali_date_from(now.with_timezone(&nepal_time::offset()).date_naive()).ok()?;
+    let previous = if today.month == 1 {
+        (today.year - 1, 12)
+    } else {
+        (today.year, today.month - 1)
+    };
+    let (mut year, mut month) = previous.max((plan.date.year, plan.date.month));
+    while year <= LAST_YEAR {
+        if let Some(notification) = plan
+            .occurrence_in(year, month)
+            .and_then(|occurrence| notification_for(plan, occurrence, now))
+        {
+            return Some(notification);
+        }
+        (year, month) = if month == 12 {
+            (year + 1, 1)
+        } else {
+            (year, month + 1)
+        };
+    }
+    None
 }
 
 fn notification_for(
@@ -377,12 +390,12 @@ fn notification_for(
         return None;
     }
 
-    // A yearly plan needs one id per occurrence, or next year's reminder would
-    // replace this year's.
-    let suffix = if plan.recurrence == Recurrence::YearlyBikramSambat {
-        format!(".{}", date.year)
-    } else {
-        String::new()
+    // A repeating plan needs one id per occurrence, or the next occurrence's
+    // reminder would replace this one's.
+    let suffix = match plan.recurrence {
+        Recurrence::None => String::new(),
+        Recurrence::MonthlyBikramSambat => format!(".{}.{}", date.year, date.month),
+        Recurrence::YearlyBikramSambat => format!(".{}", date.year),
     };
     Some(PlannedNotification {
         id: format!("sajilo.plan.{}{}", plan.id, suffix),

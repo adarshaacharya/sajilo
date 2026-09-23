@@ -128,6 +128,7 @@ pub fn run() {
             app.manage(commands::forex::ForexCache::default());
             app.manage(commands::news::NewsCache::default());
             app.manage(commands::announcement::AnnouncementCache::default());
+            app.manage(commands::focus::FocusRuntime::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Clear chrome + popover vibrancy so the web UI sits on frosted glass
@@ -146,6 +147,7 @@ pub fn run() {
             // until the next reminder rather than polling.
             commands::notify::spawn_scheduler(app.handle().clone());
             background_refresh::spawn(app.handle().clone());
+            commands::focus::spawn(app.handle().clone());
 
             // A brand-new install turns on launch-at-login and shows itself
             // once. Without the second half, opening Sajilo for the very first
@@ -225,8 +227,14 @@ pub fn run() {
             commands::calendar::panchanga_for,
             commands::plans::list_plans,
             commands::plans::plans_for_day,
+            commands::plans::plan_days,
             commands::plans::save_plan,
             commands::plans::delete_plan,
+            commands::focus::focus_snapshot,
+            commands::focus::set_focus_settings,
+            commands::focus::enable_recommended_breaks,
+            commands::focus::log_focus_water,
+            commands::focus::pause_focus,
             commands::keeper::keeper_snapshot,
             commands::keeper::resolve_keeper_date,
             commands::keeper::save_keeper_person,

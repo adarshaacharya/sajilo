@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { Card } from "../../shared/components/card";
 import { MonthGrid } from "../../shared/components/month-grid";
@@ -9,7 +9,6 @@ import { useSettings } from "../../shared/context/settings-context";
 import {
   api,
   type CalendarMonth,
-  type DayPlan,
   type NepaliDate,
   type Today,
   type UpcomingEvent,
@@ -17,6 +16,7 @@ import {
 import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
+import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
 import { HomeAnnouncement } from "./_components/home-announcement";
 import { UpNext } from "./_components/up-next";
@@ -79,10 +79,6 @@ function relativeText(
   return t("relative.in-days").replace("{n}", digits(daysAway, numerals));
 }
 
-function planKey(date: NepaliDate): string {
-  return `${date.year}-${date.month}-${date.day}`;
-}
-
 /**
  * The month the grid is showing, read from the dashboard's own history entry.
  *
@@ -120,14 +116,8 @@ export function Dashboard() {
   const [month, setMonth] = useState<CalendarMonth | null>(null);
   const [monthSpan, setMonthSpan] = useState("");
   const [upcoming, setUpcoming] = useState<UpcomingEvent[]>([]);
-  const [plans, setPlans] = useState<DayPlan[]>([]);
+  const [planDays, setPlanDays] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
-
-  const planDays = useMemo(() => {
-    const keys = new Set<string>();
-    for (const plan of plans) keys.add(planKey(plan.date));
-    return keys;
-  }, [plans]);
 
   const reload = useCallback(() => {
     setError(null);
@@ -141,10 +131,6 @@ export function Dashboard() {
       .upcomingEvents(40, 180)
       .then(setUpcoming)
       .catch(() => setUpcoming([]));
-    api
-      .listPlans()
-      .then(setPlans)
-      .catch(() => setPlans([]));
   }, []);
 
   useEffect(reload, [reload]);
@@ -152,6 +138,19 @@ export function Dashboard() {
   const viewed = viewedMonth(params);
   const cursorYear = viewed?.year ?? today?.nepali.year;
   const cursorMonth = viewed?.month ?? today?.nepali.month;
+
+  // Asked per month rather than derived from every plan here: a monthly or
+  // yearly plan lands on a different day each time, and that is the engine's
+  // call, not the grid's.
+  useEffect(() => {
+    if (!cursorYear || !cursorMonth) return;
+    api
+      .planDays(cursorYear, cursorMonth)
+      .then((days) =>
+        setPlanDays(new Set((days ?? []).map((day) => `${cursorYear}-${cursorMonth}-${day}`))),
+      )
+      .catch(() => setPlanDays(new Set()));
+  }, [cursorYear, cursorMonth]);
 
   useEffect(() => {
     if (!cursorYear || !cursorMonth) return;
@@ -254,6 +253,7 @@ export function Dashboard() {
       </Card>
 
       <UpNext events={eventSlides} />
+      <FocusGlance />
       <GlanceCards />
     </div>
   );

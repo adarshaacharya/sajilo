@@ -211,6 +211,19 @@ pub fn gregorian_date_from(date: NepaliDate) -> Result<NaiveDate> {
     Ok(epoch() + Duration::days(i64::from(day_offset)))
 }
 
+/// Day `day` of the month `amount` months after `from`, clamped to that
+/// month's real length. A repeat on the 30th keeps asking for the 30th, so a
+/// 29-day month in between does not pull every later one back to the 29th.
+pub fn day_months_later(amount: i32, from: NepaliDate, day: u32) -> Result<NepaliDate> {
+    let month = adding_months(amount, from)?;
+    let length = days_in_month(month.year, month.month)
+        .ok_or(ConversionError::UnsupportedNepaliDate)? as u32;
+    Ok(NepaliDate {
+        day: day.clamp(1, length),
+        ..month
+    })
+}
+
 /// The first day of the month `amount` months away, as the Swift version does:
 /// day-of-month is dropped, not clamped.
 pub fn adding_months(amount: i32, to: NepaliDate) -> Result<NepaliDate> {

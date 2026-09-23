@@ -16,6 +16,11 @@ use crate::calendar::nepali_date::NepaliDate;
 pub enum Recurrence {
     #[default]
     None,
+    /// A monthly commitment (a report due on the 30th, rent on the 1st) keeps
+    /// its Bikram Sambat day and is resolved again for each BS month. English
+    /// months do not line up with BS ones, so an AD monthly repeat would land
+    /// on a different BS day every time.
+    MonthlyBikramSambat,
     /// A yearly important date keeps its Bikram Sambat month and day, and is
     /// resolved again for each year rather than pre-creating duplicate plans.
     YearlyBikramSambat,
@@ -55,27 +60,29 @@ pub struct DayPlan {
 }
 
 impl DayPlan {
-    /// Which day this plan falls on in `year`, if it recurs at all.
+    /// Which day this plan falls on in the BS month `year`/`month`, if any.
     ///
-    /// The day is clamped to the month's real length: a plan on the 32nd of a
-    /// 32-day month must still fire in a year where that month has 30.
-    pub fn occurrence(&self, year: i32) -> Option<NepaliDate> {
-        if self.recurrence != Recurrence::YearlyBikramSambat || year < self.date.year {
+    /// A repeating plan never occurs before the month it was created in, and
+    /// its day is clamped to the month's real length: a plan on the 30th must
+    /// still fire in a 29-day month, and one on the 32nd of a 32-day month in
+    /// a year where that month has 30.
+    pub fn occurrence_in(&self, year: i32, month: u32) -> Option<NepaliDate> {
+        let repeats_in = match self.recurrence {
+            Recurrence::None => {
+                return (self.date.year == year && self.date.month == month).then_some(self.date);
+            }
+            Recurrence::MonthlyBikramSambat => true,
+            Recurrence::YearlyBikramSambat => month == self.date.month,
+        };
+        if !repeats_in || (year, month) < (self.date.year, self.date.month) {
             return None;
         }
-        let length = days_in_month(year, self.date.month)? as u32;
-        Some(NepaliDate::new(
-            year,
-            self.date.month,
-            self.date.day.min(length),
-        ))
+        let length = days_in_month(year, month)? as u32;
+        Some(NepaliDate::new(year, month, self.date.day.min(length)))
     }
 
     pub fn occurs_on(&self, candidate: NepaliDate) -> bool {
-        match self.recurrence {
-            Recurrence::None => self.date == candidate,
-            Recurrence::YearlyBikramSambat => self.occurrence(candidate.year) == Some(candidate),
-        }
+        self.occurrence_in(candidate.year, candidate.month) == Some(candidate)
     }
 
     /// A reminder without a time has nothing to count back from, so the two are
@@ -108,4 +115,17 @@ pub fn plans_on(plans: &[DayPlan], date: NepaliDate) -> Vec<DayPlan> {
         .collect();
     ordered(&mut matching);
     matching
+}
+
+/// The days of the BS month `year`/`month` that have at least one plan,
+/// ascending — what the month grid marks, repeats included.
+pub fn plan_days_in_month(plans: &[DayPlan], year: i32, month: u32) -> Vec<u32> {
+    let mut days: Vec<u32> = plans
+        .iter()
+        .filter_map(|plan| plan.occurrence_in(year, month))
+        .map(|date| date.day)
+        .collect();
+    days.sort_unstable();
+    days.dedup();
+    days
 }

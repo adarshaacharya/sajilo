@@ -276,7 +276,7 @@ function customSpec(kind: string): DocumentSpec {
       ...base,
       kind: "repeats",
       due: "keeper.custom.due",
-      cycles: ["monthly", "quarterly", "halfYearly", "yearlyAd", "yearlyBs"],
+      cycles: ["monthlyBs", "monthly", "quarterly", "halfYearly", "yearlyAd", "yearlyBs"],
       defaultRecurrence: "yearlyAd",
       defaultRemindDays: [7, 0],
       action: "keeper.action.done",
@@ -330,9 +330,15 @@ export function docTypeLabel(t: TFn, type: KeeperDocumentType) {
   }
 }
 
+/** Monthly in either calendar: a short remind-before range fits both. */
+export function isMonthly(recurrence: KeeperRecurrence): boolean {
+  return recurrence === "monthly" || recurrence === "monthlyBs";
+}
+
 export const RECURRENCE_LABELS: Record<KeeperRecurrence, I18nKey> = {
   none: "keeper.recurrence.none",
   monthly: "keeper.recurrence.monthly",
+  monthlyBs: "keeper.recurrence.monthlyBs",
   quarterly: "keeper.recurrence.quarterly",
   halfYearly: "keeper.recurrence.halfYearly",
   yearlyAd: "keeper.recurrence.yearlyAd",
