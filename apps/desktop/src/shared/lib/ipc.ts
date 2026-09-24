@@ -181,6 +181,9 @@ export interface FocusSettings {
   eyes: BreakRule;
   move: BreakRule;
   water: BreakRule;
+  /** How long the eye and stand-up countdowns run, in seconds. */
+  eyesSeconds: number;
+  moveSeconds: number;
   /** Millilitres a day. */
   waterGoalMl: number;
   workStart: PlanTime;
@@ -227,7 +230,7 @@ export interface ActiveBreak {
   startedAt: string;
   /** Countdown length; 0 for water, which waits for a button. */
   seconds: number;
-  /** An example opened from the Breaks tab; closing it counts for nothing. */
+  /** An example opened from the Routine tab; closing it counts for nothing. */
   preview: boolean;
 }
 
@@ -245,6 +248,27 @@ export interface FocusDay {
   waterMl: number;
   eyes: BreakCount;
   move: BreakCount;
+  /** Longest time at the computer without stepping away. */
+  longestStretchSeconds: number;
+}
+
+/** One day's bar on the week chart; `weekday` is 0 for Sunday. */
+export interface WeekBar {
+  date: string;
+  weekday: number;
+  screenSeconds: number;
+  today: boolean;
+}
+
+/** The week in a few numbers, added up by the engine. */
+export interface WeekSummary {
+  days: WeekBar[];
+  trackedDays: number;
+  averageScreenSeconds: number;
+  breaksReminded: number;
+  breaksTaken: number;
+  waterGoalDays: number;
+  longestStretch: { weekday: number; today: boolean; seconds: number } | null;
 }
 
 export type FocusStatus =
@@ -263,6 +287,11 @@ export interface NextBreak {
   /** The interval the editor accepts, in minutes. */
   minMinutes: number;
   maxMinutes: number;
+  /** How long its countdown runs and what the editor accepts, in seconds;
+   * all zero for a break with no countdown. */
+  breakSeconds: number;
+  minBreakSeconds: number;
+  maxBreakSeconds: number;
   /** Minutes of computer use until due; null while nothing counts down. */
   minutesLeft: number | null;
 }
@@ -283,6 +312,7 @@ export interface FocusSnapshot {
   activeBreak: ActiveBreak | null;
   /** The last seven days, oldest first, ending today; unrecorded days are empty. */
   week: FocusDay[];
+  summary: WeekSummary;
 }
 
 export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "resume";
@@ -478,7 +508,7 @@ export interface NotificationOptions {
   ipoClosingDay: boolean;
   /** Master switch for SIP payment reminders; each fund's is opt-in. */
   sipPayment: boolean;
-  /** How every reminder arrives, Breaks included. */
+  /** How every reminder arrives, Routine's included. */
   style: ReminderStyle;
 }
 

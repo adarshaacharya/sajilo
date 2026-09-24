@@ -107,6 +107,13 @@ fn show_waiting(app: &AppHandle<Wry>) {
     crate::commands::focus::sync_card(app);
 }
 
+/// Puts a card away for good. Destroyed rather than closed: the app turns a
+/// close into a hide so the popover keeps its state, and a hidden card would
+/// still count as showing — holding back every card after it.
+pub fn dismiss(window: &tauri::WebviewWindow<Wry>) {
+    let _ = window.destroy();
+}
+
 /// A remembered card position, in logical pixels.
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
 struct Place {

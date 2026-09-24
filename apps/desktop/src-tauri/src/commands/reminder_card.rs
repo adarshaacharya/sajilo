@@ -102,7 +102,7 @@ pub fn dismiss_reminder(app: AppHandle<Wry>, open: Option<String>) {
     if remaining > 0 {
         let _ = card.emit(CHANGED_EVENT, ());
     } else {
-        let _ = card.close();
+        card_window::dismiss(&card);
     }
 }
 

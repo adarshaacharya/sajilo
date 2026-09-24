@@ -147,7 +147,7 @@ pub fn pause_focus(app: AppHandle<Wry>, choice: PauseChoice) -> Result<FocusSnap
 #[tauri::command]
 pub fn preview_focus_break(app: AppHandle<Wry>, kind: focus::BreakKind) -> FocusSnapshot {
     let (snapshot, chime) = with_tracker(&app, |tracker| {
-        focus::preview_break(&mut tracker.state, kind, Utc::now());
+        focus::preview_break(&mut tracker.state, &tracker.settings, kind, Utc::now());
         (view(tracker), tracker.settings.chime)
     });
     if chime {
@@ -234,9 +234,7 @@ pub fn sync_card(app: &AppHandle<Wry>) {
         (true, None) if !card_window::any_open(app) => {
             card_window::open(app, card_window::BREAK, "break", "Sajilo break");
         }
-        (false, Some(window)) => {
-            let _ = window.close();
-        }
+        (false, Some(window)) => card_window::dismiss(&window),
         _ => {}
     }
 }

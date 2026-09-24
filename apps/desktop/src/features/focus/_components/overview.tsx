@@ -11,6 +11,7 @@ import {
   litres,
   useSentenceNumerals,
 } from "../_lib/format";
+import { WeekCard } from "./week-card";
 
 const NEXT_WHAT = {
   eyes: "focus.next.what.eyes",
@@ -54,7 +55,10 @@ function NextBreak({ snapshot }: { snapshot: FocusSnapshot }) {
     headline = t("focus.next.in").replace("{n}", digits(next.minutesLeft ?? 0, numerals));
     detail =
       next.kind in NEXT_WHAT
-        ? t(NEXT_WHAT[next.kind as keyof typeof NEXT_WHAT])
+        ? t(NEXT_WHAT[next.kind as keyof typeof NEXT_WHAT]).replace(
+            "{n}",
+            digits(next.breakSeconds, numerals),
+          )
         : kindLabel(next.kind, settings, t);
   } else if (settings.water.enabled && snapshot.today.waterMl >= settings.waterGoalMl) {
     headline = t("focus.quiet.done");
@@ -162,6 +166,18 @@ export function Overview({
           on={settings.water.enabled}
           onToggle={toggle("water")}
         >
+          {/* A stepper: − amount +. The minus undoes a mistaken tap; on an
+              empty day there is nothing to undo, so it is hidden but keeps
+              its place and the amount does not shift. */}
+          <button
+            type="button"
+            aria-label={t("focus.water-remove").replace("{n}", String(snapshot.waterStepMl))}
+            title={t("focus.water-remove").replace("{n}", String(snapshot.waterStepMl))}
+            onClick={() => onWater(-1)}
+            className={`icon-btn size-6 shrink-0 ${today.waterMl > 0 ? "" : "invisible"}`}
+          >
+            <Icon name="minus" className="size-3" />
+          </button>
           <span className="shrink-0 text-[11px] tabular-nums text-text-secondary">
             {litres(today.waterMl, numerals)} / {litres(settings.waterGoalMl, numerals)}{" "}
             {t("focus.litres-unit")}
@@ -177,6 +193,8 @@ export function Overview({
           </button>
         </Row>
       </section>
+
+      <WeekCard snapshot={snapshot} />
 
       <div className="flex gap-2">
         {snapshot.pausedUntil ? (

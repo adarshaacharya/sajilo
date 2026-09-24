@@ -26,6 +26,9 @@ pub const ACTIVE_WINDOW_SECONDS: u32 = 60;
 /// Away this long is a break in itself, so the eye and movement timers start
 /// over. Water is not reset: stepping away is not drinking.
 pub const AWAY_RESET_SECONDS: u32 = 5 * 60;
+/// Away this long ends a stretch at the computer, for the week's "longest
+/// stretch without a break": the length of a stand-up break.
+pub const STRETCH_BREAK_SECONDS: u32 = 2 * 60;
 /// Ticks further apart than this mean the computer slept or Sajilo was not
 /// running. That time is not screen time.
 pub const MAX_TICK_GAP_SECONDS: u32 = 3 * 60;
@@ -85,16 +88,6 @@ impl BreakKind {
         }
     }
 
-    /// Idle this long after a reminder means the break was taken. Water has no
-    /// such signal; it is logged by hand.
-    fn rest_seconds(self) -> Option<u32> {
-        match self {
-            Self::Eyes => Some(20),
-            Self::Move => Some(2 * 60),
-            _ => None,
-        }
-    }
-
     /// How long a reminder waits to see its break taken before counting it
     /// as skipped.
     fn answer_window(self) -> Duration {
@@ -104,12 +97,14 @@ impl BreakKind {
         }
     }
 
-    /// How long the break card counts down. The others wait for a button.
-    pub fn break_seconds(self) -> u32 {
+    /// How long a break may be set to last, in seconds: a look away of ten
+    /// seconds to two minutes, a walk of one to fifteen minutes. The others
+    /// have no countdown; they wait for a button.
+    pub fn length_range(self) -> (u32, u32) {
         match self {
-            Self::Eyes => 20,
-            Self::Move => 2 * 60,
-            _ => 0,
+            Self::Eyes => (10, 2 * 60),
+            Self::Move => (60, 15 * 60),
+            _ => (0, 0),
         }
     }
 
@@ -156,6 +151,11 @@ pub struct FocusSettings {
     #[serde(rename = "move")]
     pub move_break: BreakRule,
     pub water: BreakRule,
+    /// How long the eye break's countdown runs: 20 seconds is the 20-20-20
+    /// rule.
+    pub eyes_seconds: u32,
+    /// How long the stand-up break's countdown runs.
+    pub move_seconds: u32,
     /// Millilitres a day. Water reminders stop once it is reached.
     pub water_goal_ml: u32,
     pub work_start: PlanTime,
@@ -278,6 +278,8 @@ impl Default for FocusSettings {
             eyes: BreakRule::off(20),
             move_break: BreakRule::off(60),
             water: BreakRule::off(60),
+            eyes_seconds: 20,
+            move_seconds: 2 * 60,
             water_goal_ml: DEFAULT_WATER_GOAL_ML,
             work_start: PlanTime { hour: 9, minute: 0 },
             work_end: PlanTime {
@@ -310,6 +312,15 @@ impl FocusSettings {
                 every_minutes: self.custom.every_minutes,
             },
             _ => BreakRule::off(0),
+        }
+    }
+
+    /// How long the card for `kind` counts down; zero for none.
+    pub fn break_seconds(&self, kind: BreakKind) -> u32 {
+        match kind {
+            BreakKind::Eyes => self.eyes_seconds,
+            BreakKind::Move => self.move_seconds,
+            _ => 0,
         }
     }
 
@@ -356,6 +367,14 @@ impl FocusSettings {
             };
             let (min, max) = kind.interval_range();
             *every = (*every).clamp(min, max);
+        }
+        for kind in [BreakKind::Eyes, BreakKind::Move] {
+            let (min, max) = kind.length_range();
+            let seconds = match kind {
+                BreakKind::Eyes => &mut self.eyes_seconds,
+                _ => &mut self.move_seconds,
+            };
+            *seconds = (*seconds).clamp(min, max);
         }
         self.custom.label = self
             .custom
@@ -446,6 +465,10 @@ pub struct FocusDay {
     pub eyes: BreakCount,
     #[serde(rename = "move")]
     pub move_break: BreakCount,
+    /// The longest time at the computer without stepping away for
+    /// [`STRETCH_BREAK_SECONDS`].
+    #[serde(default)]
+    pub longest_stretch_seconds: u32,
 }
 
 impl FocusDay {
@@ -456,6 +479,7 @@ impl FocusDay {
             water_ml: 0,
             eyes: BreakCount::default(),
             move_break: BreakCount::default(),
+            longest_stretch_seconds: 0,
         }
     }
 
@@ -498,6 +522,8 @@ pub struct FocusState {
     pub last_idle: Option<u32>,
     /// The break card on screen, if any.
     pub active_break: Option<ActiveBreak>,
+    /// Seconds at the computer since the user last stepped away.
+    pub stretch_seconds: u32,
     /// The public-holiday answer for one day, so the bundled calendar is not
     /// consulted every few seconds.
     #[serde(skip)]
@@ -514,6 +540,7 @@ impl FocusState {
             // carry over into the morning.
             self.since_break = [0; TIMED];
             self.awaiting = [None; TIMED];
+            self.stretch_seconds = 0;
         }
         self.today.get_or_insert_with(|| FocusDay::new(date))
     }
@@ -689,10 +716,18 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         active_part(elapsed, idle)
     };
 
+    let stretch = state.stretch_seconds.saturating_add(active);
     let today = state.day_mut(date);
     today.screen_seconds = today.screen_seconds.saturating_add(active);
+    today.longest_stretch_seconds = today.longest_stretch_seconds.max(stretch);
+    // Counted up to the moment the user went quiet, then over.
+    state.stretch_seconds = if idle >= STRETCH_BREAK_SECONDS {
+        0
+    } else {
+        stretch
+    };
 
-    settle_reminders(state, date, idle, tick.now);
+    settle_reminders(state, settings, date, idle, tick.now);
     if idle >= AWAY_RESET_SECONDS {
         state.since_break[0] = 0;
         state.since_break[1] = 0;
@@ -763,7 +798,7 @@ fn open_card(
         state.active_break = Some(ActiveBreak {
             kind,
             started_at: now,
-            seconds: kind.break_seconds(),
+            seconds: settings.break_seconds(kind),
             preview: false,
         });
     }
@@ -829,11 +864,16 @@ fn end_of_day_due(state: &mut FocusState, settings: &FocusSettings, tick: Tick, 
 
 /// Opens an example card, so someone deciding whether to turn reminders on
 /// sees exactly what they would get. It changes no count and no timer.
-pub fn preview_break(state: &mut FocusState, kind: BreakKind, now: DateTime<Utc>) {
+pub fn preview_break(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    kind: BreakKind,
+    now: DateTime<Utc>,
+) {
     state.active_break = Some(ActiveBreak {
         kind,
         started_at: now,
-        seconds: kind.break_seconds(),
+        seconds: settings.break_seconds(kind),
         preview: true,
     });
 }
@@ -893,7 +933,16 @@ pub fn finish_break(
 
 /// Resolves reminders waiting for an answer: a quiet computer soon after means
 /// the break was taken; silence past the window means it was skipped.
-fn settle_reminders(state: &mut FocusState, date: NaiveDate, idle: u32, now: DateTime<Utc>) {
+///
+/// Idle as long as the break lasts is the signal it was taken. Water has no
+/// such signal; it is logged by hand.
+fn settle_reminders(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    date: NaiveDate,
+    idle: u32,
+    now: DateTime<Utc>,
+) {
     for kind in BreakKind::ALL {
         let Some(index) = kind.slot() else {
             continue;
@@ -901,7 +950,8 @@ fn settle_reminders(state: &mut FocusState, date: NaiveDate, idle: u32, now: Dat
         let Some(sent) = state.awaiting[index] else {
             continue;
         };
-        if kind.rest_seconds().is_some_and(|rest| idle >= rest) {
+        let rest = settings.break_seconds(kind);
+        if rest > 0 && idle >= rest {
             if let Some(count) = state.day_mut(date).count_mut(kind) {
                 count.taken += 1;
             }
@@ -967,6 +1017,11 @@ pub struct NextBreak {
     /// The interval the editor accepts, so the screen never keeps its own.
     pub min_minutes: u32,
     pub max_minutes: u32,
+    /// How long its countdown runs, and what the editor accepts, in seconds;
+    /// all zero for a break with no countdown.
+    pub break_seconds: u32,
+    pub min_break_seconds: u32,
+    pub max_break_seconds: u32,
     /// Minutes of computer use until it is due; `None` while nothing counts
     /// down, or once today's water goal is met.
     pub minutes_left: Option<u32>,
@@ -996,6 +1051,97 @@ pub struct FocusSnapshot {
     /// record (Sajilo not running, or before it was installed) are empty
     /// rather than missing, so a chart always has seven slots.
     pub week: Vec<FocusDay>,
+    /// Those seven days, added up for the "This week" card.
+    pub summary: WeekSummary,
+}
+
+/// One day's bar on the week chart.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WeekBar {
+    pub date: NaiveDate,
+    /// Sunday is 0, as the calendar's own weekday labels are ordered.
+    pub weekday: u32,
+    pub screen_seconds: u32,
+    pub today: bool,
+}
+
+/// The longest stretch at the computer without stepping away, and its day.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stretch {
+    pub weekday: u32,
+    pub today: bool,
+    pub seconds: u32,
+}
+
+/// The week in a few numbers. Averages count only days Sajilo saw the
+/// computer in use, so a weekend away does not flatter the figure.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WeekSummary {
+    pub days: Vec<WeekBar>,
+    /// Days with any screen time.
+    pub tracked_days: u32,
+    pub average_screen_seconds: u32,
+    /// Eye and stand-up breaks: reminders sent, and breaks taken.
+    pub breaks_reminded: u32,
+    pub breaks_taken: u32,
+    /// Tracked days the water goal was reached, by today's goal.
+    pub water_goal_days: u32,
+    /// `None` until a stretch of at least a minute has been measured.
+    pub longest_stretch: Option<Stretch>,
+}
+
+/// Adds up the week the Focus screen shows.
+pub fn summarise(week: &[FocusDay], goal_ml: u32, today: NaiveDate) -> WeekSummary {
+    let tracked: Vec<&FocusDay> = week.iter().filter(|day| day.screen_seconds > 0).collect();
+    let tracked_days = u32::try_from(tracked.len()).unwrap_or(u32::MAX);
+    let total: u64 = tracked
+        .iter()
+        .map(|day| u64::from(day.screen_seconds))
+        .sum();
+    let average_screen_seconds = if tracked_days == 0 {
+        0
+    } else {
+        u32::try_from(total / u64::from(tracked_days)).unwrap_or(u32::MAX)
+    };
+    let longest_stretch = week
+        .iter()
+        .filter(|day| day.longest_stretch_seconds >= 60)
+        // The latest day wins a tie: it is the one the user remembers.
+        .max_by_key(|day| (day.longest_stretch_seconds, day.date))
+        .map(|day| Stretch {
+            weekday: day.date.weekday().num_days_from_sunday(),
+            today: day.date == today,
+            seconds: day.longest_stretch_seconds,
+        });
+    WeekSummary {
+        days: week
+            .iter()
+            .map(|day| WeekBar {
+                date: day.date,
+                weekday: day.date.weekday().num_days_from_sunday(),
+                screen_seconds: day.screen_seconds,
+                today: day.date == today,
+            })
+            .collect(),
+        tracked_days,
+        average_screen_seconds,
+        breaks_reminded: week
+            .iter()
+            .map(|day| day.eyes.reminded + day.move_break.reminded)
+            .sum(),
+        breaks_taken: week
+            .iter()
+            .map(|day| day.eyes.taken + day.move_break.taken)
+            .sum(),
+        water_goal_days: u32::try_from(
+            tracked.iter().filter(|day| day.water_ml >= goal_ml).count(),
+        )
+        .unwrap_or(u32::MAX),
+        longest_stretch,
+    }
 }
 
 pub fn snapshot(
@@ -1030,15 +1176,20 @@ pub fn snapshot(
                 every_minutes: rule.every_minutes,
                 min_minutes: kind.interval_range().0,
                 max_minutes: kind.interval_range().1,
+                break_seconds: settings.break_seconds(kind),
+                min_break_seconds: kind.length_range().0,
+                max_break_seconds: kind.length_range().1,
                 minutes_left: (rule.enabled && counting && !goal_met)
                     .then(|| rule.every_seconds().saturating_sub(used).div_ceil(60)),
             }
         })
         .collect();
+    let days = week(&state.history, &today);
     FocusSnapshot {
         settings: settings.clone(),
         status,
-        week: week(&state.history, &today),
+        summary: summarise(&days, settings.water_goal_ml, today.date),
+        week: days,
         today,
         breaks,
         paused_until: state.paused_until.filter(|until| now < *until),
@@ -1115,7 +1266,7 @@ pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (
         BreakKind::Water => (
             "Drink some water".to_owned(),
             format!(
-                "{} of {} L today. Log it in Sajilo's Breaks tab.",
+                "{} of {} litres today. Log it in Sajilo's Routine tab.",
                 litres(today.water_ml),
                 litres(settings.water_goal_ml)
             ),

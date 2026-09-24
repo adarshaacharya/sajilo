@@ -68,9 +68,9 @@ function NumberField({
         onKeyDown={(event) => {
           if (event.key === "Enter") event.currentTarget.blur();
         }}
-        className={`${CONTROL} w-[64px] text-right tabular-nums`}
+        className={`${CONTROL} w-[52px] text-right tabular-nums`}
       />
-      <span className="w-6 text-[11px] text-text-secondary">{unit}</span>
+      <span className="min-w-6 text-[11px] text-text-secondary">{unit}</span>
     </span>
   );
 }
@@ -99,6 +99,33 @@ function Every({
         onCommit={(minutes) => onCommit(Math.round(minutes))}
       />
     </span>
+  );
+}
+
+/** "[20] sec" or "[2] min": how long a break's countdown runs. A look away
+ * is set in seconds, a walk in minutes. */
+function Lasts({
+  item,
+  label,
+  onCommit,
+}: {
+  item: NextBreak;
+  label: string;
+  onCommit: (seconds: number) => void;
+}) {
+  const { t } = useSettings();
+  const inMinutes = item.minBreakSeconds >= 60;
+  const scale = inMinutes ? 60 : 1;
+  return (
+    <NumberField
+      value={String(item.breakSeconds / scale)}
+      min={item.minBreakSeconds / scale}
+      max={item.maxBreakSeconds / scale}
+      step={1}
+      unit={t(inMinutes ? "focus.minutes-unit" : "focus.seconds-unit")}
+      label={label}
+      onCommit={(value) => onCommit(Math.round(value) * scale)}
+    />
   );
 }
 
@@ -181,7 +208,7 @@ export function SettingsPanel({
   const { settings } = snapshot;
 
   // One choice for every Sajilo reminder, kept with the others in Settings;
-  // Breaks shows it here too, since this is where people look for it.
+  // Routine shows it here too, since this is where people look for it.
   const setStyle = async (style: ReminderStyle) => {
     const options = await api.getNotificationOptions().catch(() => null);
     if (!options) return;
@@ -200,22 +227,53 @@ export function SettingsPanel({
         <h3 className="text-[11px] font-semibold text-text-secondary">
           {t("focus.settings.often")}
         </h3>
-        {snapshot.breaks.flatMap((item) => {
-          if (item.kind !== "eyes" && item.kind !== "move" && item.kind !== "water") return [];
-          const kind = item.kind;
-          return [
-            <div key={kind} className="flex items-center justify-between gap-2">
-              <span className="text-[12px]">{t(OFTEN_LABELS[kind])}</span>
-              <Every
-                item={item}
-                label={t(OFTEN_LABELS[kind])}
-                onCommit={(everyMinutes) =>
-                  onSettings({ ...settings, [kind]: { ...settings[kind], everyMinutes } })
+        {/* A small table: one row per break, "every" and "lasts" in columns,
+            so each field sits under the same heading as its neighbours. */}
+        <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-2">
+          <span />
+          <span className="text-[10px] text-text-muted">{t("focus.every")}</span>
+          <span className="text-[10px] text-text-muted">{t("focus.lasts")}</span>
+          {snapshot.breaks.flatMap((item) => {
+            if (item.kind !== "eyes" && item.kind !== "move" && item.kind !== "water") return [];
+            const kind = item.kind;
+            const label = t(OFTEN_LABELS[kind]);
+            return [
+              <span key={`${kind}.label`} className="truncate text-[12px]">
+                {label}
+              </span>,
+              <NumberField
+                key={`${kind}.every`}
+                value={String(item.everyMinutes)}
+                min={item.minMinutes}
+                max={item.maxMinutes}
+                step={1}
+                unit={t("focus.minutes-unit")}
+                label={label}
+                onCommit={(minutes) =>
+                  onSettings({
+                    ...settings,
+                    [kind]: { ...settings[kind], everyMinutes: Math.round(minutes) },
+                  })
                 }
-              />
-            </div>,
-          ];
-        })}
+              />,
+              item.breakSeconds > 0 ? (
+                <Lasts
+                  key={`${kind}.lasts`}
+                  item={item}
+                  label={`${label} · ${t("focus.lasts")}`}
+                  onCommit={(seconds) =>
+                    onSettings({
+                      ...settings,
+                      [kind === "eyes" ? "eyesSeconds" : "moveSeconds"]: seconds,
+                    })
+                  }
+                />
+              ) : (
+                <span key={`${kind}.lasts`} />
+              ),
+            ];
+          })}
+        </div>
         <div className="flex items-center justify-between gap-2 border-t border-divider pt-2.5">
           <span className="text-[12px]">{t("focus.daily-goal")}</span>
           <NumberField

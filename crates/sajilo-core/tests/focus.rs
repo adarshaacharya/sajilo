@@ -522,7 +522,7 @@ fn an_example_card_changes_no_count_or_timer() {
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(10), 10, busy);
     let before = state.clone();
-    preview_break(&mut state, BreakKind::Eyes, monday_at(11));
+    preview_break(&mut state, &settings, BreakKind::Eyes, monday_at(11));
     assert!(state.active_break.is_some_and(|card| card.preview));
     finish_break(
         &mut state,
@@ -810,4 +810,110 @@ fn turning_everything_off_includes_meals() {
     let settings = with_lunch();
     assert!(settings.any_enabled(), "meals alone count as on");
     assert!(!settings.with_breaks_off().any_enabled());
+}
+
+// ------------------------------------------------------------ break length
+
+/// The card counts down however long the user set the break to last, and a
+/// break's length stays within what makes sense for it.
+#[test]
+fn a_break_lasts_as_long_as_the_user_set() {
+    let mut settings = eyes_only();
+    settings.eyes_seconds = 45;
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 20, busy);
+    assert_eq!(state.active_break.expect("a card").seconds, 45);
+
+    settings.eyes_seconds = 1;
+    settings.move_seconds = 60 * 60;
+    let kept = settings.normalised();
+    assert_eq!(kept.eyes_seconds, BreakKind::Eyes.length_range().0);
+    assert_eq!(kept.move_seconds, BreakKind::Move.length_range().1);
+}
+
+/// Settings saved before lengths existed keep the old ones: 20 seconds for
+/// the eyes, two minutes to stand up.
+#[test]
+fn settings_saved_before_break_length_keep_the_defaults() {
+    let saved: FocusSettings =
+        serde_json::from_str(r#"{"eyes":{"enabled":true,"everyMinutes":20}}"#).unwrap();
+    assert_eq!((saved.eyes_seconds, saved.move_seconds), (20, 120));
+}
+
+/// A longer walk needs a longer quiet computer before it counts as taken.
+#[test]
+fn a_break_counts_as_taken_after_its_own_length() {
+    let mut settings = FocusSettings::default();
+    settings.move_break.enabled = true;
+    settings.move_seconds = 5 * 60;
+    settings.style = ReminderStyle::Notification;
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 60, busy);
+    let away_since = monday_at(11);
+    // Two minutes away was enough before; now it is not.
+    run(&mut state, &settings, away_since, 2, |now| {
+        u32::try_from((now - away_since).num_seconds()).unwrap()
+    });
+    assert_eq!(state.today.as_ref().unwrap().move_break.taken, 0);
+}
+
+// ------------------------------------------------------------ the week
+
+/// A stretch is time at the computer without stepping away for two minutes;
+/// the day keeps its longest, and a short pause does not end one.
+#[test]
+fn the_longest_stretch_without_a_break_is_kept() {
+    let settings = FocusSettings::default();
+    let mut state = FocusState::default();
+    // 90 minutes busy, a one-minute pause (not a break), 30 more, then away.
+    run(&mut state, &settings, monday_at(9), 90, busy);
+    run(
+        &mut state,
+        &settings,
+        monday_at(9) + Duration::minutes(91),
+        1,
+        |_| 70,
+    );
+    run(
+        &mut state,
+        &settings,
+        monday_at(9) + Duration::minutes(92),
+        30,
+        busy,
+    );
+    let away = monday_at(11) + Duration::minutes(3);
+    run(&mut state, &settings, away, 5, |now| {
+        u32::try_from((now - away).num_seconds()).unwrap()
+    });
+    // Back for 40 minutes: shorter, so the record stands.
+    run(&mut state, &settings, monday_at(12), 40, busy);
+
+    let longest = state.today.as_ref().unwrap().longest_stretch_seconds;
+    assert!((120 * 60..=125 * 60).contains(&longest), "{longest}");
+}
+
+/// The card's numbers: averages over days actually used, breaks across both
+/// kinds, and the goal counted per day.
+#[test]
+fn the_week_adds_up() {
+    let mut settings = FocusSettings::default();
+    settings.eyes.enabled = true;
+    let mut state = FocusState::default();
+    let monday = monday_at(10);
+    run(&mut state, &settings, monday, 60, busy);
+    log_water(&mut state, monday.naive_utc(), 10);
+    let tuesday = monday + Duration::days(1);
+    run(&mut state, &settings, tuesday, 120, busy);
+
+    let view = snapshot(&mut state, &settings, tuesday, tuesday.naive_utc());
+    let week = &view.summary;
+    assert_eq!(week.days.len(), 7);
+    assert!(week.days[6].today);
+    assert_eq!(week.days[6].weekday, 2, "Tuesday");
+    assert_eq!(week.tracked_days, 2);
+    assert!((85 * 60..=95 * 60).contains(&week.average_screen_seconds));
+    assert!(week.breaks_reminded >= 8);
+    assert_eq!(week.water_goal_days, 1);
+    let stretch = week.longest_stretch.clone().expect("a stretch");
+    assert!(stretch.today);
 }

@@ -684,34 +684,46 @@
       "activeBreak": null,
       "breaks": [
         {
+          "breakSeconds": 20,
           "enabled": false,
           "everyMinutes": 20,
           "kind": "eyes",
+          "maxBreakSeconds": 120,
           "maxMinutes": 480,
+          "minBreakSeconds": 10,
           "minMinutes": 5,
           "minutesLeft": null
         },
         {
+          "breakSeconds": 120,
           "enabled": false,
           "everyMinutes": 60,
           "kind": "move",
+          "maxBreakSeconds": 900,
           "maxMinutes": 480,
+          "minBreakSeconds": 60,
           "minMinutes": 5,
           "minutesLeft": null
         },
         {
+          "breakSeconds": 0,
           "enabled": false,
           "everyMinutes": 60,
           "kind": "water",
+          "maxBreakSeconds": 0,
           "maxMinutes": 480,
+          "minBreakSeconds": 0,
           "minMinutes": 5,
           "minutesLeft": null
         },
         {
+          "breakSeconds": 0,
           "enabled": false,
           "everyMinutes": 120,
           "kind": "custom",
+          "maxBreakSeconds": 0,
           "maxMinutes": 480,
+          "minBreakSeconds": 0,
           "minMinutes": 5,
           "minutesLeft": null
         }
@@ -730,11 +742,13 @@
           "enabled": false,
           "everyMinutes": 20
         },
+        "eyesSeconds": 20,
         "jokes": true,
         "move": {
           "enabled": false,
           "everyMinutes": 60
         },
+        "moveSeconds": 120,
         "routine": {
           "bedtime": {
             "at": {
@@ -793,12 +807,65 @@
       },
       "snoozeMinutes": 5,
       "status": "off",
+      "summary": {
+        "averageScreenSeconds": 0,
+        "breaksReminded": 0,
+        "breaksTaken": 0,
+        "days": [
+          {
+            "date": "2026-08-20",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 4
+          },
+          {
+            "date": "2026-08-21",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 5
+          },
+          {
+            "date": "2026-08-22",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 6
+          },
+          {
+            "date": "2026-08-23",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 0
+          },
+          {
+            "date": "2026-08-24",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 1
+          },
+          {
+            "date": "2026-08-25",
+            "screenSeconds": 0,
+            "today": false,
+            "weekday": 2
+          },
+          {
+            "date": "2026-08-26",
+            "screenSeconds": 0,
+            "today": true,
+            "weekday": 3
+          }
+        ],
+        "longestStretch": null,
+        "trackedDays": 0,
+        "waterGoalDays": 0
+      },
       "today": {
         "date": "2026-08-26",
         "eyes": {
           "reminded": 0,
           "taken": 0
         },
+        "longestStretchSeconds": 0,
         "move": {
           "reminded": 0,
           "taken": 0
@@ -816,6 +883,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -829,6 +897,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -842,6 +911,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -855,6 +925,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -868,6 +939,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -881,6 +953,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -894,6 +967,7 @@
             "reminded": 0,
             "taken": 0
           },
+          "longestStretchSeconds": 0,
           "move": {
             "reminded": 0,
             "taken": 0
@@ -6629,8 +6703,10 @@
     "get_notification_options": {
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
-      "hour": 18,
-      "ipoClosingDay": true
+      "hour": 19,
+      "ipoClosingDay": true,
+      "sipPayment": true,
+      "style": "card"
     },
     "get_rashifal": {
       "status": "fresh",

@@ -19,7 +19,7 @@ function FocusSkeleton() {
 }
 
 /**
- * The Breaks tab. Before any reminder is on it explains itself and offers an
+ * The Routine tab. Before any reminder is on it explains itself and offers an
  * example; after, it answers one question — when is the next break — with
  * everything else behind Settings.
  */

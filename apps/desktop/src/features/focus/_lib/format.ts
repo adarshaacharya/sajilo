@@ -6,7 +6,7 @@ export type TFn = ReturnType<typeof useSettings>["t"];
 export type I18nKey = Parameters<TFn>[0];
 
 /**
- * The Breaks feature's numbers follow the language, not the numeral setting.
+ * The Routine tab's numbers follow the language, not the numeral setting.
  * That setting is for the calendar, where २६ गते belongs in Devanagari even
  * in English; here the numbers sit inside sentences, and "In ५ min" reads as
  * a mistake.
@@ -20,6 +20,16 @@ export function useSentenceNumerals(): NumeralStyle {
 export function litres(ml: number, numerals: NumeralStyle): string {
   const text = (ml / 1000).toFixed(2).replace(/\.?0+$/, "");
   return text.replace(/\d/g, (digit) => digits(Number(digit), numerals));
+}
+
+/** A length of time as hours and minutes: "6h 40m", or "25 min" under an
+ * hour. */
+export function duration(seconds: number, numerals: NumeralStyle, t: TFn): string {
+  const minutes = Math.round(seconds / 60);
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return t("focus.week.m").replace("{m}", digits(m, numerals));
+  return t("focus.week.hm").replace("{h}", digits(h, numerals)).replace("{m}", digits(m, numerals));
 }
 
 export const STATUS_LABELS: Record<FocusStatus, I18nKey> = {

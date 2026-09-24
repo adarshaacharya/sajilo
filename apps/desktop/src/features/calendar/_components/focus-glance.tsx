@@ -9,7 +9,7 @@ import { kindLabel, litres, STATUS_LABELS, useSentenceNumerals } from "../../foc
 
 const REFRESH_MS = 60_000;
 
-/** One line of Breaks on the home screen: when the next break is. */
+/** One line of Routine on the home screen: when the next break is. */
 export function FocusGlance() {
   const { modules, t } = useSettings();
   const numerals = useSentenceNumerals();
@@ -57,7 +57,7 @@ export function FocusGlance() {
         {snapshot.settings.water.enabled && (
           <span className="flex shrink-0 items-center gap-1 text-[11px] tabular-nums text-text-secondary">
             <Icon name="drop" className="size-3 text-[color:var(--color-weather-tint)]" />
-            {litres(snapshot.today.waterMl, numerals)}/
+            {litres(snapshot.today.waterMl, numerals)} /{" "}
             {litres(snapshot.settings.waterGoalMl, numerals)} {t("focus.litres-unit")}
           </span>
         )}
