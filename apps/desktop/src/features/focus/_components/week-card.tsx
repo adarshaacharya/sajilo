@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { WEEKDAYS_EN, WEEKDAYS_NE } from "../../../shared/components/month-grid";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { FocusSnapshot } from "../../../shared/lib/ipc";
@@ -43,6 +43,7 @@ function Row({ label, value, note }: { label: string; value: ReactNode; note?: s
 export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
   const { t, language } = useSettings();
   const numerals = useSentenceNumerals();
+  const [hovered, setHovered] = useState<number | null>(null);
   const week = snapshot.summary;
   if (week.trackedDays === 0) return null;
 
@@ -51,6 +52,7 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
   const letters = language === "en" ? WEEKDAYS_EN : WEEKDAYS_NE;
   const tallest = Math.max(...week.days.map((day) => day.screenSeconds), 1);
   const stretch = week.longestStretch;
+  const hoveredDay = hovered === null ? undefined : week.days[hovered];
 
   return (
     <section className="surface-card px-3 pt-3 pb-1.5">
@@ -62,28 +64,54 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
           row below does not, so it waits for a second day. */}
       {several && (
         <figure className="mt-2.5">
-          <div className="flex items-end gap-1.5" aria-hidden="true">
-            {week.days.map((day) => {
+          {/* A desktop webview shows no `title` tooltips, so the hovered day
+              carries its own value above the bar and names itself below. */}
+          <div
+            className="flex items-end gap-1.5 pt-4"
+            aria-hidden="true"
+            onPointerLeave={() => setHovered(null)}
+          >
+            {week.days.map((day, index) => {
               const height =
                 day.screenSeconds > 0
                   ? Math.max(EMPTY_BAR * 2, Math.round((day.screenSeconds / tallest) * BAR_HEIGHT))
                   : EMPTY_BAR;
+              const active = hovered === index;
+              const idle = day.today
+                ? "var(--color-accent-fill)"
+                : day.screenSeconds > 0
+                  ? "color-mix(in srgb, var(--color-text) 22%, transparent)"
+                  : "var(--color-divider)";
+              const lit = day.today
+                ? "var(--color-accent-fill)"
+                : "color-mix(in srgb, var(--color-text) 45%, transparent)";
               return (
-                <div key={day.date} className="flex flex-1 flex-col items-center gap-1">
-                  <div
-                    className="w-full max-w-[18px] rounded-[3px]"
-                    style={{
-                      height,
-                      background: day.today
-                        ? "var(--color-accent-fill)"
-                        : day.screenSeconds > 0
-                          ? "color-mix(in srgb, var(--color-text) 22%, transparent)"
-                          : "var(--color-divider)",
-                    }}
-                    title={duration(day.screenSeconds, numerals, t)}
-                  />
+                <div
+                  key={day.date}
+                  className="flex flex-1 flex-col items-center gap-1"
+                  onPointerEnter={() => setHovered(index)}
+                >
+                  <div className="relative flex w-full justify-center">
+                    <span
+                      className={`week-bar-value ${active ? "week-bar-value--shown" : ""}`}
+                      style={{ bottom: height + 3 }}
+                    >
+                      {duration(day.screenSeconds, numerals, t)}
+                    </span>
+                    <div
+                      className="week-bar w-full max-w-[18px] rounded-[3px]"
+                      style={{
+                        height,
+                        animationDelay: `${index * 35}ms`,
+                        backgroundColor: active ? lit : idle,
+                        opacity: hovered === null || active ? 1 : 0.45,
+                      }}
+                    />
+                  </div>
                   <span
-                    className={`text-[10px] ${day.today ? "font-semibold text-accent-mark" : "text-text-muted"}`}
+                    className={`text-[10px] transition-colors ${
+                      day.today || active ? "font-semibold" : ""
+                    } ${day.today ? "text-accent-mark" : active ? "text-text" : "text-text-muted"}`}
                   >
                     {letters[day.weekday]}
                   </span>
@@ -92,7 +120,7 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
             })}
           </div>
           <figcaption className="mt-1 text-center text-[10px] text-text-muted">
-            {t("focus.week.chart")}
+            {t((hoveredDay && DAY_NAMES[hoveredDay.weekday]) || "focus.week.chart")}
           </figcaption>
         </figure>
       )}
