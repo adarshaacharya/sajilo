@@ -17,42 +17,43 @@
  * state. Nowhere else.
  */
 @theme {
-  /* Window chrome and canvas. */
-  --color-canvas: #1c1c1e;
-  --color-chrome: #1c1c1e;
+  /* Window chrome and canvas. Near-black rather than the system's #1c1c1e:
+     cards lift off it by lightness alone, and the gilt reads richer. */
+  --color-canvas: #0e0e10;
+  --color-chrome: #0e0e10;
 
   /* Surfaces. Opaque: a card is a card, not a pane of glass. */
-  --color-surface: #2c2c2e;
-  --color-surface-raised: #2c2c2e;
-  --color-break-card: #151517;
-  --color-surface-hover: #3a3a3c;
+  --color-surface: #18181b;
+  --color-surface-raised: #18181b;
+  --color-break-card: #111113;
+  --color-surface-hover: #242428;
   /* An off switch's track. Its own step: the hover grey sits one shade off the
      card, which left an off switch nearly invisible. */
   --color-switch-off: #5b5b60;
 
   /* Hairlines — label-derived, never a bright white stroke. */
-  --color-border: #38383a;
-  --color-divider: #2f2f31;
+  --color-border: #28282c;
+  --color-divider: #222226;
   --logo-brightness: 0.9;
 
-  /* Ink. Ratios are against --color-surface (#2c2c2e), the worst case.
-     text 12.80:1 · secondary 6.30:1 · muted 4.85:1 */
+  /* Ink. Ratios are against --color-surface-hover (#242428), the lightest
+     fill text sits on. text 14.2:1 · secondary 7.0:1 · muted 5.4:1 */
   --color-text: #f5f5f7;
   --color-text-secondary: #aeaeb2;
   --color-text-muted: #98989d;
 
-  /* Gilt. `accent-mark` is the text/stroke tone (6.30:1 on surface);
+  /* Gilt. `accent-mark` is the text/stroke tone (8.0:1 on surface);
      `accent-fill` is the solid-fill tone, and `accent-ink` is what sits on
-     top of it (7.70:1). White on gilt was 2.21:1 — that is why it is gone. */
+     top of it (8.7:1). White on gilt was 2.21:1 — that is why it is gone. */
   --color-accent: #d4a84a;
   --color-accent-mark: #d4a84a;
   --color-accent-fill: #d4a84a;
-  --color-accent-ink: #1c1c1e;
+  --color-accent-ink: #0e0e10;
 
   /* Semantics. Never the only channel — pair with a glyph or +/- prefix.
      The red is sindoor, the same one the landing site uses for holidays, so
      the product and its page share a palette: gilt for the accent, sindoor
-     for what a patro prints in red. 5.2:1 on surface. */
+     for what a patro prints in red. 6.3:1 on surface. */
   --color-holiday: #ff6a52;
   --color-positive: #4ecf8a;
   --color-negative: #ff6a52;
@@ -62,13 +63,13 @@
   --color-weather-tint: #6aa9dd;
   --color-forex-tint: #5cc79b;
 
-  --color-control-bg: #1c1c1e;
-  --color-control-border: #48484a;
+  --color-control-bg: #0e0e10;
+  --color-control-border: #36363b;
   --color-control-inset: inset 0 1px 0 rgb(255 255 255 / 3%);
 
   /* One shadow. Cards do not lift on hover in macOS. */
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 24%);
-  --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 24%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 40%);
 
   --radius-xs: 4px;
   --radius-sm: 6px;
@@ -80,34 +81,37 @@
   --radius-card: 10px;
 }
 
-/* Light palette. Ratios against --color-surface (#ffffff) / canvas (#f2f2f7):
-   text 16.83 · secondary 7.54 · muted 5.07/4.54 · accent-mark 5.37/4.81 */
+/* Light palette. Ratios against --color-surface (#ffffff) / canvas (#f3f3f1):
+   text 16.83 · secondary 7.54 · muted 5.07/4.54 · accent-mark 5.37/4.81.
+   Filled gilt is the same #d4a84a as dark mode, with near-black ink on it
+   (7.6:1): white on a gold light enough to read as gold fails AA, and the
+   bronze that passed read as mud. Text-tone gilt stays bronze. */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --color-canvas: #f2f2f7;
-    --color-chrome: #f2f2f7;
+    --color-canvas: #f3f3f1;
+    --color-chrome: #f3f3f1;
     --color-surface: #ffffff;
     --color-surface-raised: #ffffff;
     --color-break-card: #ffffff;
-    --color-surface-hover: #e8e8ed;
-    --color-switch-off: #d6d6db;
-    --color-border: #d8d8dd;
-    --color-divider: #e3e3e8;
+    --color-surface-hover: #e9e9e6;
+    --color-switch-off: #d6d6d2;
+    --color-border: #dadad6;
+    --color-divider: #e5e5e1;
     --logo-brightness: 1;
     --color-text: #1d1d1f;
     --color-text-secondary: #545458;
     --color-text-muted: #6e6e73;
     --color-accent: #8a6414;
     --color-accent-mark: #8a6414;
-    --color-accent-fill: #8a6414;
-    --color-accent-ink: #ffffff;
+    --color-accent-fill: #d4a84a;
+    --color-accent-ink: #1d1d1f;
     --color-holiday: #c93a22;
     --color-positive: #0f7a3d;
     --color-negative: #c93a22;
     --color-weather-tint: #2f6fa8;
     --color-forex-tint: #1a7f52;
     --color-control-bg: #ffffff;
-    --color-control-border: #c6c6cb;
+    --color-control-border: #c8c8c3;
     --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
     --shadow-card: 0 1px 2px rgb(0 0 0 / 6%);
     --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 6%);
@@ -116,30 +120,30 @@
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-canvas: #f2f2f7;
-  --color-chrome: #f2f2f7;
+  --color-canvas: #f3f3f1;
+  --color-chrome: #f3f3f1;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
   --color-break-card: #ffffff;
-  --color-surface-hover: #e8e8ed;
-  --color-switch-off: #d6d6db;
-  --color-border: #d8d8dd;
-  --color-divider: #e3e3e8;
+  --color-surface-hover: #e9e9e6;
+  --color-switch-off: #d6d6d2;
+  --color-border: #dadad6;
+  --color-divider: #e5e5e1;
   --logo-brightness: 1;
   --color-text: #1d1d1f;
   --color-text-secondary: #545458;
   --color-text-muted: #6e6e73;
   --color-accent: #8a6414;
   --color-accent-mark: #8a6414;
-  --color-accent-fill: #8a6414;
-  --color-accent-ink: #ffffff;
+  --color-accent-fill: #d4a84a;
+  --color-accent-ink: #1d1d1f;
   --color-holiday: #c93a22;
   --color-positive: #0f7a3d;
   --color-negative: #c93a22;
   --color-weather-tint: #2f6fa8;
   --color-forex-tint: #1a7f52;
   --color-control-bg: #ffffff;
-  --color-control-border: #c6c6cb;
+  --color-control-border: #c8c8c3;
   --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 6%);
   --shadow-card-hover: 0 1px 2px rgb(0 0 0 / 6%);
@@ -343,8 +347,8 @@ html {
    `--color-surface-hover` used everywhere else. No shadow: cards still do
    not lift on hover in macOS. */
 .headline-card:hover {
-  background: color-mix(in srgb, var(--color-text) 6%, var(--color-surface-raised));
-  border-color: color-mix(in srgb, var(--color-text) 22%, var(--color-border));
+  background: color-mix(in srgb, var(--color-text) 4%, var(--color-surface-raised));
+  border-color: color-mix(in srgb, var(--color-text) 12%, var(--color-border));
 }
 
 /* A quiet broadcast indicator for time-sensitive links. The ring breathes
@@ -678,19 +682,27 @@ button.row-line + button.row-line::before {
 }
 
 /* Rashifal — reading card + sign strip. */
+/* Tiles are the card's own colour with a hairline, so twelve of them read as
+   choices on a card rather than a wall of grey; hover is the one fill step. */
 .rashifal-pick-tile {
   border-radius: var(--radius-md);
   padding: 8px;
-  background: var(--color-surface-hover);
-  transition: background-color 0.12s ease;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .rashifal-pick-tile:hover {
-  background: var(--color-surface-hover);
+  background: color-mix(in srgb, var(--color-text) 4%, var(--color-surface-raised));
+  border-color: color-mix(in srgb, var(--color-text) 12%, var(--color-border));
 }
 
-.rashifal-pick-tile-active {
-  box-shadow: inset 0 0 0 1px var(--color-accent-mark);
+.rashifal-pick-tile-active,
+.rashifal-pick-tile-active:hover {
+  border-color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-fill) 12%, var(--color-surface-raised));
 }
 
 .rashifal-sign-cell {
