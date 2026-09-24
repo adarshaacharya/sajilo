@@ -89,6 +89,16 @@ const rx: Rx[] = [
           ))}
         </ol>
 
+        <section class="parchi-followup" aria-labelledby="followup-title">
+          <p class="followup-title" id="followup-title">Follow-up after 7 days. Bring your report.</p>
+          <p class="followup-body">
+            Sajilo keeps the week as a row of bars: screen time each day, breaks taken against breaks
+            dodged, whether the water goal was hit, and the day you went longest without getting up. Hover a
+            bar and it reads out the exact number, the way your mother reads out your SEE marks to every
+            relative at a wedding.
+          </p>
+        </section>
+
         <footer class="parchi-foot">
           <p class="parchi-fine">
             Side effects may include blinking, hydration, and coworkers asking if you're okay.
@@ -266,6 +276,29 @@ const rx: Rx[] = [
     white-space: nowrap;
   }
   .rx-aside {
+    font-size: 13.5px;
+    color: var(--paper-4);
+    text-wrap: pretty;
+  }
+
+  /* The follow-up line a doctor scribbles under the prescription: the week
+     report, told on the slip rather than numbered, since a fresh install has
+     no week to show. */
+  .parchi-followup {
+    margin-top: 16px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--sindoor);
+    background: rgb(20 17 14 / 0.05);
+  }
+  .followup-title {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+  .followup-body {
+    margin-top: 4px;
     font-size: 13.5px;
     color: var(--paper-4);
     text-wrap: pretty;
