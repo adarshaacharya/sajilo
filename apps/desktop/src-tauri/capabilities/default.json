@@ -6,7 +6,8 @@
     "main",
     "update",
     "viewer",
-    "break"
+    "break",
+    "reminder"
   ],
   "permissions": [
     "core:default",

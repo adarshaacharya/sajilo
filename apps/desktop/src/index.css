@@ -858,6 +858,17 @@ button.row-line + button.row-line::before {
 .break-card--bedtime {
   --break-tint: var(--color-weather-tint);
 }
+/* Reminder cards share the break card; the tint says what kind. */
+.reminder-card--holiday {
+  --break-tint: var(--color-holiday);
+}
+.reminder-card--ipo,
+.reminder-card--sip {
+  --break-tint: var(--color-forex-tint);
+}
+.reminder-card--keeper {
+  --break-tint: var(--color-weather-tint);
+}
 .break-card__icon {
   display: flex;
   width: 44px;
@@ -868,6 +879,12 @@ button.row-line + button.row-line::before {
   border-radius: 999px;
   color: var(--break-tint);
   background: color-mix(in srgb, var(--break-tint) 15%, transparent);
+}
+.break-card__eyebrow {
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--break-tint);
 }
 .break-card__title {
   font-size: 16px;

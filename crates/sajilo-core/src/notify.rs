@@ -15,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use crate::calendar::bikram_sambat::{LAST_YEAR, gregorian_date_from, nepali_date_from};
 use crate::calendar::nepali_date::NepaliDate;
 use crate::calendar::upcoming::UpcomingEvent;
+use crate::focus::ReminderStyle;
 use crate::nepal_time;
 use crate::planner::{DayPlan, Recurrence};
 
@@ -41,6 +42,10 @@ pub struct NotificationOptions {
     /// only the switch that silences them all at once.
     #[serde(default = "enabled_by_default")]
     pub sip_payment: bool,
+    /// How every reminder arrives — these and Breaks alike. A card is the
+    /// default: a corner notification is gone before it is read.
+    #[serde(default)]
+    pub style: ReminderStyle,
 }
 
 fn default_hour() -> u32 {
@@ -61,6 +66,7 @@ impl Default for NotificationOptions {
             hour: default_hour(),
             ipo_closing_day: enabled_by_default(),
             sip_payment: enabled_by_default(),
+            style: ReminderStyle::default(),
         }
     }
 }
@@ -79,9 +85,24 @@ impl NotificationOptions {
 #[serde(rename_all = "camelCase")]
 pub struct PlannedNotification {
     pub id: String,
+    pub kind: ReminderKind,
     pub title: String,
     pub body: String,
     pub fire_at: DateTime<Utc>,
+}
+
+/// What a reminder is about, so a card can show the right icon and open the
+/// right screen.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ReminderKind {
+    #[default]
+    Plan,
+    Festival,
+    Holiday,
+    Ipo,
+    Sip,
+    Keeper,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.
@@ -135,6 +156,11 @@ pub fn plan_festivals(
             let is_holiday = same_day.iter().any(|event| event.is_public_holiday);
             Some(PlannedNotification {
                 id: festival_id(date),
+                kind: if is_holiday {
+                    ReminderKind::Holiday
+                } else {
+                    ReminderKind::Festival
+                },
                 title: if is_holiday {
                     "Public holiday tomorrow".to_owned()
                 } else {
@@ -219,6 +245,7 @@ pub fn plan_ipo_closing(
             };
             Some(PlannedNotification {
                 id: ipo_closing_id(date),
+                kind: ReminderKind::Ipo,
                 title,
                 body,
                 fire_at,
@@ -265,6 +292,7 @@ pub fn plan_sip_payments(
             {
                 all.push(PlannedNotification {
                     id: format!("{key}.{suffix}"),
+                    kind: ReminderKind::Sip,
                     title,
                     body: format!("{}{amount} on {on}", plan.name),
                     fire_at,
@@ -399,6 +427,7 @@ fn notification_for(
     };
     Some(PlannedNotification {
         id: format!("sajilo.plan.{}{}", plan.id, suffix),
+        kind: ReminderKind::Plan,
         title: plan.title.clone(),
         body: if plan.note.is_empty() {
             "Sajilo day plan".to_owned()

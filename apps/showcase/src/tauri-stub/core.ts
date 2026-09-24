@@ -85,6 +85,8 @@ const WRITES = new Set([
   "open_keeper_viewer",
   "delete_keeper_record",
   "set_notification_options",
+  "preview_reminder_card",
+  "dismiss_reminder",
   "set_autostart",
   "set_dock_icon_visible",
   "refresh_tray",

@@ -560,12 +560,7 @@ fn system(commands: &mut BTreeMap<String, Value>) {
     insert(
         commands,
         "get_notification_options",
-        &json!({
-            "eveOfPublicHoliday": true,
-            "eveOfFestival": true,
-            "hour": 18,
-            "ipoClosingDay": true,
-        }),
+        &sajilo_core::notify::NotificationOptions::default(),
     );
     insert(commands, "get_setting", &Value::Null);
 }

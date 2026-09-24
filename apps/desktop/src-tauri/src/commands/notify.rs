@@ -9,6 +9,7 @@ use crate::{db, prefs, prefs::NOTIFICATION_OPTIONS as OPTIONS_KEY};
 use chrono::{NaiveDate, Utc};
 use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::calendar::upcoming;
+use sajilo_core::focus::ReminderStyle;
 use sajilo_core::nepal_time;
 use sajilo_core::notify::{
     IpoDeadline, LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans,
@@ -152,7 +153,7 @@ async fn warm_ipos(app: &AppHandle<Wry>) {
 
 /// What is still to come, for the UI: `pending` without anything already
 /// delivered.
-fn upcoming(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
+pub fn upcoming(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let fired: LastFired = read(app, LAST_FIRED_KEY);
     pending(app)
         .into_iter()
@@ -163,6 +164,11 @@ fn upcoming(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
 #[tauri::command]
 pub fn pending_notifications(app: AppHandle<Wry>) -> Vec<PlannedNotification> {
     upcoming(&app)
+}
+
+/// How reminders arrive, for everything that shows one — Breaks included.
+pub fn style(app: &AppHandle<Wry>) -> ReminderStyle {
+    read::<NotificationOptions>(app, OPTIONS_KEY).style
 }
 
 #[tauri::command]
@@ -191,9 +197,19 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
     let now = Utc::now();
     let mut fired: LastFired = read(app, LAST_FIRED_KEY);
     let mut delivered = 0;
+    let as_cards = style(app) == ReminderStyle::Card;
+    let mut cards = Vec::new();
 
     for notification in pending(app) {
         if !should_fire_late(&notification, now, &fired) {
+            continue;
+        }
+        if as_cards {
+            // Queued is delivered: the card waits on screen until it is
+            // dealt with, however long that takes.
+            fired.record(&notification.id, now);
+            delivered += 1;
+            cards.push(notification);
             continue;
         }
         let result = app
@@ -214,6 +230,7 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
         }
     }
 
+    crate::commands::reminder_card::enqueue(app, cards);
     if delivered > 0 {
         fired.prune(now);
         if let Ok(value) = serde_json::to_value(&fired) {

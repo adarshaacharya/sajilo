@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type BreakOutcome, type FocusSnapshot } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
+import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
 import { JOKES, pick } from "./_lib/jokes";
 
@@ -30,33 +31,10 @@ const BODIES = {
 } as const;
 
 const RING = 2 * Math.PI * 17;
-/** Matches `CARD_WIDTH` in `commands::focus`; only the height follows content. */
-const CARD_WIDTH = 380;
 /** How long the "done" line stays before the card closes. */
 const CHEER_MS = 1600;
 /** A card still waiting after this long shakes once more. */
 const NUDGE_MS = 30_000;
-
-/** The card's own window, fitted to what it holds: the same card can be one
- * line of text in English and two in Nepali, and a fixed height leaves either
- * a gap or a clipped button. */
-function useFitWindow(element: HTMLElement | null) {
-  useLayoutEffect(() => {
-    if (!element) return;
-    const fit = () => {
-      const height = Math.ceil(element.getBoundingClientRect().height);
-      void import("@tauri-apps/api/window")
-        .then(({ getCurrentWindow, LogicalSize }) =>
-          getCurrentWindow().setSize(new LogicalSize(CARD_WIDTH, height)),
-        )
-        .catch(() => {});
-    };
-    fit();
-    const observer = new ResizeObserver(fit);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [element]);
-}
 
 /** Seconds left on the card's countdown, redrawn a few times a second. */
 function useRemaining(startedAt: string | undefined, seconds: number) {

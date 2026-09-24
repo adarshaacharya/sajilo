@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
+import { Segmented } from "../../../shared/components/segmented";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
-import { api, type NotificationOptions, type PermissionState } from "../../../shared/lib/ipc";
+import {
+  api,
+  type NotificationOptions,
+  type PermissionState,
+  type ReminderStyle,
+} from "../../../shared/lib/ipc";
 import { SettingsSection } from "./settings-section";
 
 function anyReminder(options: NotificationOptions): boolean {
@@ -32,6 +38,7 @@ export function SystemTab() {
     hour: 19,
     ipoClosingDay: true,
     sipPayment: true,
+    style: "card",
   });
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
@@ -53,7 +60,8 @@ export function SystemTab() {
   }, []);
 
   const updateOptions = async (next: NotificationOptions) => {
-    if (anyReminder(next) && permission !== "granted") {
+    // A card needs no permission; only the system notification does.
+    if (anyReminder(next) && next.style === "notification" && permission !== "granted") {
       setPermission(await api.requestNotificationPermission().catch(() => "denied" as const));
     }
     setOptions(next);
@@ -61,7 +69,7 @@ export function SystemTab() {
   };
 
   const reminderNote =
-    permission === "denied"
+    permission === "denied" && options.style === "notification"
       ? t("settings.reminder-denied-note")
       : anyReminder(options)
         ? t("settings.reminder-enabled-note")
@@ -162,6 +170,34 @@ export function SystemTab() {
       )}
 
       <SettingsSection title={t("settings.reminders")} footnote={reminderNote}>
+        <div className="space-y-2 pb-1">
+          <p className="text-[12px]">{t("reminders.style")}</p>
+          <Segmented<ReminderStyle>
+            label={t("reminders.style")}
+            value={options.style}
+            onChange={(style) => updateOptions({ ...options, style })}
+            options={[
+              { id: "card", label: t("reminders.style.card") },
+              { id: "notification", label: t("reminders.style.notification") },
+            ]}
+          />
+          <p className="text-[10px] leading-snug text-text-muted">
+            {t(
+              options.style === "card"
+                ? "reminders.style-note.card"
+                : "reminders.style-note.notification",
+            )}
+          </p>
+          {options.style === "card" && (
+            <button
+              type="button"
+              onClick={() => api.previewReminderCard().catch(() => {})}
+              className="settings-btn"
+            >
+              {t("reminders.preview")}
+            </button>
+          )}
+        </div>
         <Toggle
           label={t("reminder.holiday-tomorrow")}
           checked={options.eveOfPublicHoliday}

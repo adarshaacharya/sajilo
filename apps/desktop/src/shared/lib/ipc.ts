@@ -478,10 +478,22 @@ export interface NotificationOptions {
   ipoClosingDay: boolean;
   /** Master switch for SIP payment reminders; each fund's is opt-in. */
   sipPayment: boolean;
+  /** How every reminder arrives, Breaks included. */
+  style: ReminderStyle;
+}
+
+export type ReminderKind = "plan" | "festival" | "holiday" | "ipo" | "sip" | "keeper";
+
+/** The reminder card's contents: the reminder in front, and how many wait. */
+export interface ReminderCardView {
+  reminder: PlannedNotification;
+  waiting: number;
+  preview: boolean;
 }
 
 export interface PlannedNotification {
   id: string;
+  kind: ReminderKind;
   title: string;
   body: string;
   fireAt: string;
@@ -596,6 +608,10 @@ export const api = {
   setNotificationOptions: (options: NotificationOptions) =>
     invoke<PlannedNotification[]>("set_notification_options", { options }),
   pendingNotifications: () => invoke<PlannedNotification[]>("pending_notifications"),
+  currentReminder: () => invoke<ReminderCardView | null>("current_reminder"),
+  /** `open` is the screen to show in the popover; null just dismisses. */
+  dismissReminder: (open: string | null) => invoke<void>("dismiss_reminder", { open }),
+  previewReminderCard: () => invoke<void>("preview_reminder_card"),
 
   isAutostartEnabled: () => invoke<boolean>("is_autostart_enabled"),
   setAutostart: (enabled: boolean) => invoke<boolean>("set_autostart", { enabled }),

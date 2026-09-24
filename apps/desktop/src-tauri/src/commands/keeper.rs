@@ -940,6 +940,7 @@ fn plan_due(
                 .with_timezone(&Utc);
             sajilo_core::notify::still_deliverable(fire_at, now).then(|| PlannedNotification {
                 id: format!("sajilo.keeper.{key}.{due}.{days}"),
+                kind: sajilo_core::notify::ReminderKind::Keeper,
                 title: title.to_owned(),
                 body: due_body(person, days),
                 fire_at,

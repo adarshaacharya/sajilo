@@ -15,6 +15,7 @@ import { News } from "./features/news/news";
 import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
 import { Rashifal } from "./features/rashifal/rashifal";
+import { ReminderCard } from "./features/reminders/reminder-card";
 import { Settings } from "./features/settings/settings";
 import { Tools } from "./features/tools/tools";
 import { Weather } from "./features/weather/weather";
@@ -142,6 +143,18 @@ export function App({ initialEntries }: { initialEntries?: string[] } = {}) {
       <ErrorBoundary>
         <SettingsProvider>
           <BreakCard />
+        </SettingsProvider>
+      </ErrorBoundary>
+    );
+  }
+
+  // Festival, day plan, Keeper, IPO and SIP reminders shown as a card; see
+  // `commands::reminder_card`.
+  if (surface === "reminder") {
+    return (
+      <ErrorBoundary>
+        <SettingsProvider>
+          <ReminderCard />
         </SettingsProvider>
       </ErrorBoundary>
     );

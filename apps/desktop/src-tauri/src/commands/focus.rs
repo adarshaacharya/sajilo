@@ -13,29 +13,20 @@ use chrono::{Local, NaiveDateTime, Utc};
 use sajilo_core::focus::{
     self, BreakOutcome, FocusSettings, FocusSnapshot, FocusState, PauseChoice, ReminderStyle, Tick,
 };
-use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent, Wry};
+use tauri::{AppHandle, Manager, Wry};
 use tauri_plugin_notification::NotificationExt;
 
+use crate::system::card_window;
 use crate::{background_refresh, db, prefs};
 
 const SETTINGS_KEY: &str = "focus.settings.v1";
 const STATE_KEY: &str = "focus.state.v1";
-/// Where the user last dragged the break card, in logical pixels.
-const CARD_PLACE_KEY: &str = "focus.cardPosition.v1";
 /// Short enough to notice a 20-second look away; the work per tick is a clock
 /// read and a little arithmetic.
 const TICK: Duration = Duration::from_secs(15);
 /// The tracker is written every minute rather than every tick. A crash loses
 /// at most that much screen time.
 const SAVE_EVERY_TICKS: u32 = 4;
-/// The break card's window, created when a break comes due and closed when it
-/// is dealt with.
-const CARD: &str = "break";
-const CARD_WIDTH: f64 = 380.0;
-const CARD_HEIGHT: f64 = 114.0;
-/// Space between the card and the screen edge it sits against.
-const CARD_MARGIN: f64 = 14.0;
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -75,6 +66,8 @@ fn with_tracker<R>(app: &AppHandle<Wry>, change: impl FnOnce(&mut Tracker) -> R)
         settings: read::<FocusSettings>(app, SETTINGS_KEY).normalised(),
         unsaved_ticks: 0,
     });
+    // One choice for every reminder, made in Settings: breaks follow it.
+    tracker.settings.style = crate::commands::notify::style(app);
     change(tracker)
 }
 
@@ -232,125 +225,20 @@ fn measure(app: &AppHandle<Wry>) {
 }
 
 /// Shows the break card while the tracker has one, and closes it otherwise —
-/// after a tick opens or expires it, a button closes it, or a pause.
-fn sync_card(app: &AppHandle<Wry>) {
+/// after a tick opens or expires it, a button closes it, or a pause. A
+/// reminder card already on screen goes first; the break shows when it closes.
+pub fn sync_card(app: &AppHandle<Wry>) {
     let showing = with_tracker(app, |tracker| tracker.state.active_break.is_some());
-    let window = app.get_webview_window(CARD);
+    let window = app.get_webview_window(card_window::BREAK);
     match (showing, window) {
-        (true, None) => open_card(app),
+        (true, None) if !card_window::any_open(app) => {
+            card_window::open(app, card_window::BREAK, "break", "Sajilo break");
+        }
         (false, Some(window)) => {
             let _ = window.close();
         }
         _ => {}
     }
-}
-
-/// Opens the card at the top of the screen, without taking focus: a
-/// reminder that grabbed the keyboard would swallow whatever was being typed.
-fn open_card(app: &AppHandle<Wry>) {
-    let mut builder = WebviewWindowBuilder::new(
-        app,
-        CARD,
-        WebviewUrl::App("index.html?surface=break".into()),
-    )
-    .title("Sajilo break")
-    .inner_size(CARD_WIDTH, CARD_HEIGHT)
-    .resizable(false)
-    .maximizable(false)
-    .minimizable(false)
-    .decorations(false)
-    .transparent(true)
-    .always_on_top(true)
-    .visible_on_all_workspaces(true)
-    .skip_taskbar(true)
-    .shadow(true)
-    .focused(false);
-    if let Some(place) = remembered_place(app).or_else(|| card_position(app)) {
-        builder = builder.position(place.x, place.y);
-    }
-    match builder.build() {
-        Ok(window) => {
-            let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
-            #[cfg(target_os = "macos")]
-            crate::window::polish_macos_chrome(&window);
-            // Dragged somewhere else, it opens there next time. A drag
-            // reports every step, so the latest spot is kept in memory and
-            // written once, when the card closes.
-            let handle = app.clone();
-            let scale = window.scale_factor().unwrap_or(1.0);
-            let dragged_to = Mutex::new(None::<CardPlace>);
-            window.on_window_event(move |event| match event {
-                WindowEvent::Moved(position) => {
-                    let place = CardPlace {
-                        x: f64::from(position.x) / scale,
-                        y: f64::from(position.y) / scale,
-                    };
-                    if let Ok(mut latest) = dragged_to.lock() {
-                        *latest = Some(place);
-                    }
-                }
-                WindowEvent::Destroyed => {
-                    if let Some(place) = dragged_to.lock().ok().and_then(|latest| *latest) {
-                        let _ = write(&handle, CARD_PLACE_KEY, &place);
-                    }
-                }
-                _ => {}
-            });
-        }
-        Err(error) => eprintln!("sajilo: could not open the break card: {error}"),
-    }
-}
-
-/// A remembered card position, in logical pixels.
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
-struct CardPlace {
-    x: f64,
-    y: f64,
-}
-
-/// The last place the card was dragged to, if a connected screen still shows
-/// it: a spot on a monitor since unplugged falls back to the default.
-fn remembered_place(app: &AppHandle<Wry>) -> Option<CardPlace> {
-    let place: CardPlace = db::get_json(app, CARD_PLACE_KEY)
-        .ok()
-        .flatten()
-        .and_then(|value| serde_json::from_value(value).ok())?;
-    let monitors = app.available_monitors().ok()?;
-    let visible = monitors.iter().any(|monitor| {
-        let scale = monitor.scale_factor();
-        let area = monitor.work_area();
-        let left = f64::from(area.position.x) / scale;
-        let top = f64::from(area.position.y) / scale;
-        let right = left + f64::from(area.size.width) / scale;
-        let bottom = top + f64::from(area.size.height) / scale;
-        // Enough of the card to grab it again, not just a sliver.
-        place.x >= left - CARD_WIDTH / 2.0
-            && place.x + CARD_WIDTH / 2.0 <= right
-            && place.y >= top
-            && place.y + 40.0 <= bottom
-    });
-    visible.then_some(place)
-}
-
-/// Top centre, just under the menu bar or panel; bottom centre on Windows,
-/// just above the taskbar. The right-hand corner is where the system stacks
-/// its own notifications, which would cover the card. Logical pixels, from the
-/// primary monitor's work area so the card never sits under a bar.
-fn card_position(app: &AppHandle<Wry>) -> Option<CardPlace> {
-    let monitor = app.primary_monitor().ok().flatten()?;
-    let scale = monitor.scale_factor();
-    let area = monitor.work_area();
-    let left = f64::from(area.position.x) / scale;
-    let top = f64::from(area.position.y) / scale;
-    let width = f64::from(area.size.width) / scale;
-    let height = f64::from(area.size.height) / scale;
-    let x = left + (width - CARD_WIDTH) / 2.0;
-    let y = if cfg!(target_os = "windows") {
-        top + height - CARD_HEIGHT - CARD_MARGIN
-    } else {
-        top + CARD_MARGIN
-    };
-    Some(CardPlace { x, y })
 }
 
 /// Ticks for as long as the app runs. With Focus switched off in Settings it

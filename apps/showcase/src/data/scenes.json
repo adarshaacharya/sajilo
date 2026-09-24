@@ -6629,8 +6629,10 @@
     "get_notification_options": {
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
-      "hour": 18,
-      "ipoClosingDay": true
+      "hour": 19,
+      "ipoClosingDay": true,
+      "sipPayment": true,
+      "style": "card"
     },
     "get_rashifal": {
       "status": "fresh",

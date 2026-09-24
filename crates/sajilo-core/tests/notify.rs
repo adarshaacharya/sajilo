@@ -3,9 +3,10 @@
 
 use chrono::{Duration, NaiveDate, TimeZone, Utc};
 use sajilo_core::calendar::upcoming::UpcomingEvent;
+use sajilo_core::focus::ReminderStyle;
 use sajilo_core::notify::{
-    LATE_FIRE_WINDOW_HOURS, LIMIT, LastFired, NotificationOptions, next_wake, plan_day_plans,
-    plan_festivals, should_fire_late, still_deliverable,
+    LATE_FIRE_WINDOW_HOURS, LIMIT, LastFired, NotificationOptions, ReminderKind, next_wake,
+    plan_day_plans, plan_festivals, should_fire_late, still_deliverable,
 };
 use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder};
 use sajilo_core::{NepaliDate, nepal_time};
@@ -37,6 +38,7 @@ fn enabled() -> NotificationOptions {
         hour: 19,
         ipo_closing_day: false,
         sip_payment: false,
+        ..NotificationOptions::default()
     }
 }
 
@@ -81,6 +83,7 @@ fn the_two_toggles_are_independent() {
         hour: 19,
         ipo_closing_day: false,
         sip_payment: false,
+        ..NotificationOptions::default()
     };
     let planned = plan_festivals(&events, holidays_only, now);
     assert_eq!(planned.len(), 1);
@@ -92,6 +95,7 @@ fn the_two_toggles_are_independent() {
         hour: 19,
         ipo_closing_day: false,
         sip_payment: false,
+        ..NotificationOptions::default()
     };
     let planned = plan_festivals(&events, festivals_only, now);
     assert_eq!(planned.len(), 1);
@@ -436,4 +440,37 @@ fn the_next_wake_ignores_reminders_already_due() {
     let woke = fire_at + Duration::seconds(2);
     let replanned = plan_festivals(&events, enabled(), woke);
     assert_eq!(next_wake(&replanned, woke), None);
+}
+
+/// A card is the default for every reminder, including for options saved
+/// before the choice existed; a user who picked notifications keeps them.
+#[test]
+fn reminders_arrive_as_a_card_unless_the_user_chose_otherwise() {
+    assert_eq!(NotificationOptions::default().style, ReminderStyle::Card);
+
+    let saved_before: NotificationOptions =
+        serde_json::from_str(r#"{"eveOfFestival":true,"hour":19}"#).unwrap();
+    assert_eq!(saved_before.style, ReminderStyle::Card);
+
+    let chosen: NotificationOptions = serde_json::from_str(r#"{"style":"notification"}"#).unwrap();
+    assert_eq!(chosen.style, ReminderStyle::Notification);
+}
+
+/// Each reminder says what it is about, so the card can show the right icon
+/// and open the right screen; a date with a holiday on it is a holiday.
+#[test]
+fn every_reminder_carries_its_kind() {
+    let now = nepal(2026, 8, 1, 9);
+    let festival = plan_festivals(&[event(20, "Festival", false)], enabled(), now);
+    assert_eq!(festival[0].kind, ReminderKind::Festival);
+
+    let holiday = plan_festivals(
+        &[event(21, "Festival", false), event(21, "Holiday", true)],
+        enabled(),
+        now,
+    );
+    assert_eq!(holiday[0].kind, ReminderKind::Holiday);
+
+    let plan = plan_day_plans(&[timed_plan("a", 20, 9, 15)], now);
+    assert_eq!(plan[0].kind, ReminderKind::Plan);
 }

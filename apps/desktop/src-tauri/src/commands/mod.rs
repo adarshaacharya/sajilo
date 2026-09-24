@@ -17,6 +17,7 @@ pub mod plans;
 pub mod portfolio;
 pub mod radio;
 pub mod rashifal;
+pub mod reminder_card;
 pub mod sips;
 pub mod stocks;
 pub mod storage;

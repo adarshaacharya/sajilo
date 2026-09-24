@@ -4,11 +4,12 @@ import { CONTROL } from "../../../shared/components/control";
 import { Segmented } from "../../../shared/components/segmented";
 import { Switch } from "../../../shared/components/switch";
 import { useSettings } from "../../../shared/context/settings-context";
-import type {
-  FocusSettings,
-  FocusSnapshot,
-  NextBreak,
-  ReminderStyle,
+import {
+  api,
+  type FocusSettings,
+  type FocusSnapshot,
+  type NextBreak,
+  type ReminderStyle,
 } from "../../../shared/lib/ipc";
 import { litres } from "../_lib/format";
 import { RoutineRows } from "./routine";
@@ -179,6 +180,15 @@ export function SettingsPanel({
   const { t } = useSettings();
   const { settings } = snapshot;
 
+  // One choice for every Sajilo reminder, kept with the others in Settings;
+  // Breaks shows it here too, since this is where people look for it.
+  const setStyle = async (style: ReminderStyle) => {
+    const options = await api.getNotificationOptions().catch(() => null);
+    if (!options) return;
+    await api.setNotificationOptions({ ...options, style }).catch(() => {});
+    onSettings({ ...settings, style });
+  };
+
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2 px-0.5">
@@ -240,9 +250,9 @@ export function SettingsPanel({
         <Segmented<ReminderStyle>
           label={t("focus.style")}
           value={settings.style}
-          onChange={(style) => onSettings({ ...settings, style })}
+          onChange={(style) => setStyle(style)}
           options={[
-            { id: "card", label: t("focus.style.card") },
+            { id: "card", label: t("reminders.style.card") },
             { id: "notification", label: t("focus.style.notification") },
           ]}
         />

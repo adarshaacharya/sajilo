@@ -129,6 +129,7 @@ pub fn run() {
             app.manage(commands::news::NewsCache::default());
             app.manage(commands::announcement::AnnouncementCache::default());
             app.manage(commands::focus::FocusRuntime::default());
+            app.manage(commands::reminder_card::ReminderQueue::default());
             system::dock::set_hidden(app.handle(), true);
             tray::build(app.handle())?;
             // Clear chrome + popover vibrancy so the web UI sits on frosted glass
@@ -275,6 +276,9 @@ pub fn run() {
             commands::notify::notification_permission,
             commands::notify::request_notification_permission,
             commands::notify::pending_notifications,
+            commands::reminder_card::current_reminder,
+            commands::reminder_card::dismiss_reminder,
+            commands::reminder_card::preview_reminder_card,
             commands::notify::get_notification_options,
             commands::notify::set_notification_options,
             system::autostart::is_autostart_enabled,
