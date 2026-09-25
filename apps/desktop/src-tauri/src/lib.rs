@@ -175,6 +175,12 @@ pub fn run() {
             }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.
+            // Before the scheduler starts, so its first delivery already
+            // knows: a new install gets a few quiet minutes for setup.
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            if system::autostart::is_first_run(app.handle()) {
+                commands::notify::hold_for_first_run();
+            }
             commands::notify::spawn_scheduler(app.handle().clone());
             background_refresh::spawn(app.handle().clone());
             commands::focus::spawn(app.handle().clone());

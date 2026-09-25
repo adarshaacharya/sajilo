@@ -188,12 +188,39 @@ pub fn set_notification_options(
     Ok(upcoming(&app))
 }
 
+/// How long a brand-new install keeps reminders to itself: long enough to
+/// finish the setup card without a card or notification landing on top of it.
+const FIRST_RUN_HOLD: std::time::Duration = std::time::Duration::from_secs(5 * 60);
+
+/// Set on a brand-new install's first launch; nothing is delivered before it.
+static HOLD_UNTIL: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+
+/// Holds reminders for the first few minutes of a new install. Nothing is
+/// lost: a reminder that came due meanwhile is well inside the late window
+/// when the hold ends, and the scheduler wakes for exactly that moment.
+pub fn hold_for_first_run() {
+    if let Ok(mut until) = HOLD_UNTIL.lock() {
+        *until = Some(std::time::Instant::now() + FIRST_RUN_HOLD);
+    }
+}
+
+/// What is left of the first-run hold, if it is still on.
+fn hold_remaining() -> Option<std::time::Duration> {
+    let until = (*HOLD_UNTIL.lock().ok()?)?;
+    until
+        .checked_duration_since(std::time::Instant::now())
+        .filter(|left| !left.is_zero())
+}
+
 /// Delivers anything whose time has come, and returns how many went out.
 ///
 /// Called at startup and whenever the scheduler wakes. The `LastFired` record is
 /// what makes it idempotent: restarting five times on a reminder day produces
 /// exactly one notification.
 pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
+    if hold_remaining().is_some() {
+        return 0;
+    }
     let now = Utc::now();
     let mut fired: LastFired = read(app, LAST_FIRED_KEY);
     let mut delivered = 0;
@@ -263,7 +290,10 @@ pub fn spawn_scheduler(app: AppHandle<Wry>) {
                 .map_or(3_600, |at| (at - Utc::now()).num_seconds().max(1) as u64)
                 // And never sleep past an hour, so a preference change is
                 // reflected within one cycle.
-                .min(3_600);
+                .min(3_600)
+                // A new install's hold ending is a wake of its own, so what
+                // it held back arrives then rather than at the next one.
+                .min(hold_remaining().map_or(u64::MAX, |left| left.as_secs() + 1));
 
             let handle = tauri::async_runtime::spawn_blocking(move || {
                 std::thread::sleep(std::time::Duration::from_secs(wait));

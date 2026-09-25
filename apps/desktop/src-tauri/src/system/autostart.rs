@@ -51,6 +51,15 @@ pub fn refresh_login_item(app: &AppHandle<Wry>) {
 /// reading the live state would re-enable it every launch for anyone who had
 /// deliberately turned it off, which is precisely the behaviour that earns an
 /// uninstall.
+/// Whether this launch is a brand-new install's first, before
+/// [`apply_first_run_default`] records it. Reads only.
+pub fn is_first_run(app: &AppHandle<Wry>) -> bool {
+    db::get_json(app, AUTOSTART_DEFAULTED)
+        .ok()
+        .flatten()
+        .is_none()
+}
+
 pub fn apply_first_run_default(app: &AppHandle<Wry>) -> bool {
     let already_done = db::get_json(app, AUTOSTART_DEFAULTED)
         .ok()
