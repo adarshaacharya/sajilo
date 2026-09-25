@@ -26,6 +26,7 @@ const ASSETS = {
   windows: "Sajilo-windows-x64.exe",
   "linux-deb": "Sajilo-linux-amd64.deb",
   "linux-appimage": "Sajilo-linux-x86_64.AppImage",
+  "linux-rpm": "Sajilo-linux-x86_64.rpm",
 };
 
 function assetUrl(name) {

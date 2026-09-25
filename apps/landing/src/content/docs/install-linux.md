@@ -1,17 +1,19 @@
 ---
 title: Install on Linux
 nav: Linux
-description: Install Sajilo on Ubuntu, Debian, Linux Mint, Pop!_OS and other 64-bit Linux, and make its date show in your top bar.
+description: Install Sajilo on Ubuntu, Debian, Mint, Fedora, openSUSE, Arch and other 64-bit Linux, make its date show in your top bar, and use it on a tiling window manager.
 section: start
 order: 3
 ---
 
-Sajilo runs on **64-bit (x86_64) Linux**. There are two downloads:
+Sajilo runs on **64-bit (x86_64) Linux**, on **Ubuntu 22.04 or newer** and distributions of the same age or later. Pick the package for your system:
 
-| Download | Use it on |
+| Package | Use it on |
 |---|---|
 | **.deb** | Ubuntu, Debian, Linux Mint, Pop!_OS, Zorin, elementary |
-| **AppImage** | Anything else: Fedora, Arch, openSUSE, … |
+| **.rpm** | Fedora, openSUSE |
+| **AUR** (`sajilo-bin`) | Arch, Manjaro, EndeavourOS |
+| **AppImage** | Anything else |
 
 ## With the .deb
 
@@ -22,6 +24,34 @@ sudo apt install ./Sajilo-linux-amd64.deb
 ```
 
 `apt` installs what Sajilo needs along with it. Open **Sajilo** from your applications menu.
+
+## With the .rpm
+
+Download **Sajilo-linux-x86_64.rpm** from the [download section](/#download), then install it from the folder you saved it in.
+
+On Fedora:
+
+```bash
+sudo dnf install ./Sajilo-linux-x86_64.rpm
+```
+
+On openSUSE:
+
+```bash
+sudo zypper install ./Sajilo-linux-x86_64.rpm
+```
+
+Either one installs what Sajilo needs along with it.
+
+## On Arch, from the AUR
+
+Sajilo is in the AUR as **sajilo-bin**. With an AUR helper:
+
+```bash
+yay -S sajilo-bin
+```
+
+(or `paru -S sajilo-bin`). It updates along with the rest of your system.
 
 ## With the AppImage
 
@@ -45,6 +75,22 @@ Sajilo shows the Nepali date in your top bar, in the area where other apps put t
 Linux doesn't pass a click on a top-bar icon through to the app, so **click the date and choose Open Sajilo** from its menu.
 
 > **No top bar icon at all?** Sajilo still works: opening it from your applications menu always brings up its window.
+
+## On a tiling window manager
+
+Sajilo works on i3, sway, Hyprland and other tiling window managers: its window floats by itself instead of being tiled.
+
+With no top bar to click, open it from a **keyboard shortcut** instead. `sajilo-desktop --toggle` opens Sajilo, and running it again closes it. For example:
+
+```bash
+# i3 or sway: ~/.config/i3/config or ~/.config/sway/config
+bindsym $mod+n exec sajilo-desktop --toggle
+
+# Hyprland: ~/.config/hypr/hyprland.conf
+bind = $mainMod, N, exec, sajilo-desktop --toggle
+```
+
+Waybar and swaybar show Sajilo's date in their tray, if your bar has a tray enabled. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
 
 ## When it's installed
 

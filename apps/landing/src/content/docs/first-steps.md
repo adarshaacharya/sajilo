@@ -23,6 +23,8 @@ On Windows and macOS, **right-click** the tray icon for a short menu with the da
 
 > **Opening it from the Start menu, Launchpad or your applications menu** also works, any time. If Sajilo is already running, its window just comes to the front.
 
+On Linux you can also bind a key to `sajilo-desktop --toggle`, which opens and closes Sajilo; see [tiling window managers](/docs/install-linux.html#on-a-tiling-window-manager).
+
 ## The tabs
 
 Along the bottom of the window:
