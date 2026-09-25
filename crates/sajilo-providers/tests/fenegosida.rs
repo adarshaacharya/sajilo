@@ -108,3 +108,8 @@ fn rejects_a_payload_it_cannot_read() {
         "todayBaseRatePerGram":1.0,"yestardayBaseRatePerGram":1.0}]"#;
     assert!(fenegosida::parse(unknown, now).is_err());
 }
+
+#[test]
+fn credits_its_own_source() {
+    assert_eq!(parsed().source, sajilo_api::bazar::MetalSource::Fenegosida);
+}

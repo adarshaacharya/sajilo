@@ -55,6 +55,10 @@ dto! {
     }
 
     pub struct MetalRateSnapshot {
+        /// Who published these prices. The Federation, unless it was down
+        /// and a fallback answered; the screen credits whichever did.
+        #[serde(default)]
+        pub source: MetalSource,
         pub rates: Vec<MetalRate>,
         /// Gold price per tola over the last week, oldest first.
         #[serde(default)]
@@ -120,6 +124,23 @@ impl MetalRate {
     /// per-gram is what people divide down to at the counter.
     pub fn price_per_gram(&self) -> f64 {
         self.price / self.unit.grams()
+    }
+}
+
+dto_enum! {
+    /// Where gold and silver prices came from, for the credit under them.
+    pub enum MetalSource {
+        Fenegosida,
+        NepaliPatro,
+        HamroPatro,
+    }
+}
+
+/// Snapshots cached before the source was recorded all came from the
+/// Federation, the only source then.
+impl Default for MetalSource {
+    fn default() -> Self {
+        Self::Fenegosida
     }
 }
 

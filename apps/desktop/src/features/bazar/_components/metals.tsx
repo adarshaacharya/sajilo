@@ -1,6 +1,7 @@
 import { Sparkline } from "../../../shared/components/sparkline";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { MetalRateSnapshot } from "../../../types/api/MetalRateSnapshot";
+import type { MetalSource } from "../../../types/api/MetalSource";
 import {
   changePercent,
   headlineMetal,
@@ -16,8 +17,20 @@ import { MetalCalculator } from "./metal-calculator";
 import { MetalRow } from "./metal-row";
 import { SourceLink, SourceNote } from "./source-note";
 
+/** Who published the prices on screen: the Federation, or the fallback that
+ * answered when it was down. Proper names, so not translated. */
+const CREDITS: Record<MetalSource, { href: string; name: string }> = {
+  fenegosida: {
+    href: "https://www.fenegosida.org/",
+    name: "Federation of Nepal Gold and Silver Dealers' Association",
+  },
+  nepaliPatro: { href: "https://nepalipatro.com.np/", name: "Nepali Patro" },
+  hamroPatro: { href: "https://www.hamropatro.com/gold", name: "Hamro Patro" },
+};
+
 export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
   const { t } = useSettings();
+  const credit = CREDITS[snapshot.source];
   const headline = headlineMetal(snapshot);
   const published = sourceStamp(snapshot.freshness);
 
@@ -75,9 +88,7 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
       <MetalCalculator snapshot={snapshot} />
 
       <SourceNote label={t("bazar.published")} stamp={published}>
-        <SourceLink href="https://www.fenegosida.org/">
-          Federation of Nepal Gold and Silver Dealers&apos; Association
-        </SourceLink>
+        <SourceLink href={credit.href}>{credit.name}</SourceLink>
       </SourceNote>
     </div>
   );

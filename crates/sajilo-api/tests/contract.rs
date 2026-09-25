@@ -4,7 +4,8 @@
 use chrono::{TimeZone, Utc};
 
 use sajilo_api::bazar::{
-    Fuel, FuelPrice, FuelPriceSnapshot, MarketUnit, Metal, MetalRate, MetalRateSnapshot, MetalUnit,
+    Fuel, FuelPrice, FuelPriceSnapshot, MarketUnit, Metal, MetalRate, MetalRateSnapshot,
+    MetalSource, MetalUnit,
 };
 use sajilo_api::bundle::{BundleRequest, ModuleKey};
 use sajilo_api::forex::{ForexRate, ForexSnapshot};
@@ -185,6 +186,7 @@ fn derives_per_gram_from_the_quoted_unit() {
 #[test]
 fn picks_fine_gold_per_tola_as_the_headline() {
     let snapshot = MetalRateSnapshot {
+        source: MetalSource::Fenegosida,
         rates: vec![
             MetalRate {
                 metal: Metal::Silver,
@@ -320,4 +322,12 @@ fn the_module_key_matches_its_serialised_form() {
         let json = serde_json::to_string(&module).unwrap();
         assert_eq!(json, format!("\"{}\"", module.key()));
     }
+}
+
+/// Cached before the source was recorded, a snapshot came from the Federation.
+#[test]
+fn a_metal_snapshot_without_a_source_is_the_federations() {
+    let raw = r#"{"rates": [], "freshness": {"fetchedAt": "2026-09-25T00:00:00Z", "sourceTimestamp": null}}"#;
+    let snapshot: MetalRateSnapshot = serde_json::from_str(raw).unwrap();
+    assert_eq!(snapshot.source, MetalSource::Fenegosida);
 }

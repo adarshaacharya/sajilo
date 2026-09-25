@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { SearchField } from "../../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
@@ -135,15 +135,26 @@ export function Stocks({
     [ipoSnapshot, today],
   );
 
+  // Following one more than the limit says so, rather than a star that
+  // silently does nothing; the note clears itself after a few seconds.
+  const [watchlistFull, setWatchlistFull] = useState(false);
+  useEffect(() => {
+    if (!watchlistFull) return;
+    const timer = window.setTimeout(() => setWatchlistFull(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [watchlistFull]);
+
   const toggleFollow = (symbol: string) => {
     const upper = symbol.toUpperCase();
-    setWatchlist((current) => {
-      if (current.some((item) => item.toUpperCase() === upper)) {
-        return current.filter((item) => item.toUpperCase() !== upper);
-      }
-      if (current.length >= WATCHLIST_LIMIT) return current;
-      return [...current, upper];
-    });
+    const following = watchlist.some((item) => item.toUpperCase() === upper);
+    if (!following && watchlist.length >= WATCHLIST_LIMIT) {
+      setWatchlistFull(true);
+      return;
+    }
+    setWatchlistFull(false);
+    setWatchlist((current) =>
+      following ? current.filter((item) => item.toUpperCase() !== upper) : [...current, upper],
+    );
   };
 
   const followed = (symbol: string) =>
@@ -245,6 +256,11 @@ export function Stocks({
           }}
           placeholder={t("stocks.search")}
         />
+        {watchlistFull && (
+          <p role="status" className="px-1 text-[11px] text-text-secondary">
+            {t("stocks.watchlist-full")}
+          </p>
+        )}
 
         {openQuote ? (
           <CompanyDetail

@@ -2,7 +2,7 @@
 //! Association. Ported from `FenegosidaMetalProvider.swift`.
 
 use chrono::{DateTime, Utc};
-use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalUnit};
+use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalSource, MetalUnit};
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
 
@@ -76,6 +76,7 @@ pub fn parse(body: &str, now: DateTime<Utc>) -> Result<MetalRateSnapshot> {
     }
 
     Ok(MetalRateSnapshot {
+        source: MetalSource::Fenegosida,
         rates,
         gold_history: Vec::new(),
         freshness,

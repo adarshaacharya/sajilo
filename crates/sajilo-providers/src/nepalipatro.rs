@@ -14,7 +14,7 @@
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, Duration, Utc};
-use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalUnit};
+use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalSource, MetalUnit};
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
 
@@ -127,6 +127,7 @@ pub fn parse(body: &str, now: DateTime<Utc>) -> Result<MetalRateSnapshot> {
     gold_history.reverse();
 
     Ok(MetalRateSnapshot {
+        source: MetalSource::NepaliPatro,
         rates,
         gold_history,
         freshness: Freshness::new(now),

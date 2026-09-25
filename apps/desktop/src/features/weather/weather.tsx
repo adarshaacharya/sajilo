@@ -230,8 +230,13 @@ export function Weather() {
             ) : (
               <>
                 <p className="text-[34px] font-semibold leading-none">{t("state.unavailable")}</p>
-                <p className="mt-1 text-[11px] opacity-85">
-                  {banner.status === "failed" ? banner.message : t("state.not-yet")}
+                {/* Plain words on screen, like every other feed; the raw
+                    error stays in the tooltip for bug reports. */}
+                <p
+                  className="mt-1 text-[11px] opacity-85"
+                  title={banner.status === "failed" ? banner.message : undefined}
+                >
+                  {banner.status === "failed" ? t("state.failed-hint") : t("state.not-yet")}
                 </p>
                 <div className="mt-2 flex items-center justify-between gap-2">
                   <button

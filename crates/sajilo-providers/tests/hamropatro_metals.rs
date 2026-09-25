@@ -52,3 +52,8 @@ fn rejects_a_page_without_prices() {
     let now = Utc.timestamp_opt(1_800_000_000, 0).unwrap();
     assert!(metals::parse("<html><body><p>Down for maintenance</p></body></html>", now).is_err());
 }
+
+#[test]
+fn credits_its_own_source() {
+    assert_eq!(parsed().source, sajilo_api::bazar::MetalSource::HamroPatro);
+}

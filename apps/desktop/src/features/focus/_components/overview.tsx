@@ -1,10 +1,11 @@
 import { Icon } from "../../../shared/components/icon";
 import { Switch } from "../../../shared/components/switch";
 import { useSettings } from "../../../shared/context/settings-context";
-import type { BreakKind, FocusSettings, FocusSnapshot } from "../../../shared/lib/ipc";
+import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import {
   clock,
+  type I18nKey,
   KIND_ICONS,
   KIND_TINTS,
   kindLabel,
@@ -111,6 +112,12 @@ function Row({
 }
 
 /** The tab once reminders are on: what's next, three switches, pause. */
+const PAUSES = [
+  { choice: "halfHour", label: "focus.pause-half-hour" },
+  { choice: "hour", label: "focus.pause-hour" },
+  { choice: "restOfDay", label: "focus.pause-rest-of-day" },
+] as const satisfies readonly { choice: PauseChoice; label: I18nKey }[];
+
 export function Overview({
   snapshot,
   onSettings,
@@ -121,7 +128,7 @@ export function Overview({
   snapshot: FocusSnapshot;
   onSettings: (settings: FocusSettings) => void;
   onWater: (steps: 1 | -1) => void;
-  onPause: (pause: boolean) => void;
+  onPause: (choice: PauseChoice) => void;
   onOpenSettings: () => void;
 }) {
   const { t } = useSettings();
@@ -200,19 +207,24 @@ export function Overview({
         {snapshot.pausedUntil ? (
           <button
             type="button"
-            onClick={() => onPause(false)}
+            onClick={() => onPause("resume")}
             className="settings-btn flex-1 justify-center text-center text-[12px]"
           >
             {t("focus.resume")}
           </button>
         ) : (
-          <button
-            type="button"
-            onClick={() => onPause(true)}
-            className="settings-btn flex-1 justify-center text-center text-[12px]"
-          >
-            {t("focus.pause-hour")}
-          </button>
+          // Three lengths, because a meeting, an afternoon of deep work and
+          // "I'm done for today" are different pauses.
+          PAUSES.map((pause) => (
+            <button
+              key={pause.choice}
+              type="button"
+              onClick={() => onPause(pause.choice)}
+              className="settings-btn flex-1 justify-center whitespace-nowrap px-2 text-center text-[12px]"
+            >
+              {t(pause.label)}
+            </button>
+          ))
         )}
         <button
           type="button"

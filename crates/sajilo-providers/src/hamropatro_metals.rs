@@ -15,7 +15,7 @@
 //! can actually read.
 
 use chrono::{DateTime, Utc};
-use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalUnit};
+use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalSource, MetalUnit};
 use sajilo_api::load_state::Freshness;
 use scraper::{Html, Selector};
 
@@ -56,6 +56,7 @@ pub fn parse(page: &str, now: DateTime<Utc>) -> Result<MetalRateSnapshot> {
     }
 
     Ok(MetalRateSnapshot {
+        source: MetalSource::HamroPatro,
         rates,
         // Only the headline cards are server-rendered; the 30-day series behind
         // them is not, so this source contributes no sparkline.

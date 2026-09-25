@@ -78,7 +78,7 @@ export function Focus() {
       snapshot={snapshot}
       onSettings={save}
       onWater={(steps) => act(() => api.logFocusWater(steps))}
-      onPause={(pause) => act(() => api.pauseFocus(pause ? "hour" : "resume"))}
+      onPause={(choice) => act(() => api.pauseFocus(choice))}
       onOpenSettings={() => setSettingsOpen(true)}
     />
   );

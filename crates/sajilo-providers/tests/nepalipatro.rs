@@ -72,3 +72,8 @@ fn always_requests_a_bounded_window() {
     let url = nepalipatro::url(Utc.timestamp_opt(1_800_000_000, 0).unwrap());
     assert!(url.contains("from-date="), "{url}");
 }
+
+#[test]
+fn credits_its_own_source() {
+    assert_eq!(parsed().source, sajilo_api::bazar::MetalSource::NepaliPatro);
+}
