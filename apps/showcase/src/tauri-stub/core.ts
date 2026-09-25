@@ -60,6 +60,7 @@ function key(command: string, args: Args): string {
 const WRITES = new Set([
   "set_setting",
   "delete_setting",
+  "record_usage",
   "save_plan",
   "delete_plan",
   "set_focus_settings",

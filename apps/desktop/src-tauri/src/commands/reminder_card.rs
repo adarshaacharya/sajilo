@@ -86,10 +86,21 @@ pub fn current_reminder(app: AppHandle<Wry>) -> Option<ReminderCardView> {
 /// takes its place in the same card.
 #[tauri::command]
 pub fn dismiss_reminder(app: AppHandle<Wry>, open: Option<String>) {
-    let remaining = with_queue(&app, |queue| {
-        queue.pop_front();
-        queue.len()
+    let (remaining, preview) = with_queue(&app, |queue| {
+        let preview = queue.pop_front().is_some_and(|front| front.preview);
+        (queue.len(), preview)
     });
+    // An example card is not a reminder anyone acted on.
+    if !preview {
+        crate::commands::telemetry::record(
+            &app,
+            if open.is_some() {
+                "action.reminder-open"
+            } else {
+                "action.reminder-dismiss"
+            },
+        );
+    }
     if let Some(route) = open
         && let Some(window) = crate::window::main_window(&app)
     {

@@ -15,6 +15,7 @@ import {
   type KeeperSnapshot,
 } from "../../shared/lib/ipc";
 import { withPopoverPinned } from "../../shared/lib/popover-dialog";
+import { track } from "../../shared/lib/usage";
 import type { SipStatus } from "../../types/api/SipStatus";
 import { AddPicker } from "./_components/add-picker";
 import { GroupPage } from "./_components/group-page";
@@ -146,6 +147,7 @@ export function Keeper() {
       remindDays: spec.kind === "record" ? [] : draft.remindDays,
     };
     if (!(await run(api.saveKeeperRecord(clean), "keeper.error-save-record"))) return;
+    track("action.keeper-save");
     // Land on the document's own page: back from an edit to the page it came
     // from, and a new one replaces the picker it was chosen in.
     setStack((current) => {
@@ -170,7 +172,10 @@ export function Keeper() {
   const saveItem = async (draft: KeeperItem, newPerson: NewPerson | null) => {
     const personId = await ownerOf(draft.personId, newPerson);
     if (personId === undefined) return;
-    if (await run(api.saveKeeperItem({ ...draft, personId }), "keeper.error-save")) setStack([]);
+    if (await run(api.saveKeeperItem({ ...draft, personId }), "keeper.error-save")) {
+      track("action.keeper-save");
+      setStack([]);
+    }
   };
 
   const deleteItem = async (item: KeeperItem) => {

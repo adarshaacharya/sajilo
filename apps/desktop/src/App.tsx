@@ -30,6 +30,7 @@ import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
 import { api } from "./shared/lib/ipc";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
+import { track } from "./shared/lib/usage";
 
 type TranslationKey = Parameters<typeof translate>[0];
 
@@ -72,6 +73,16 @@ function TrayNavigation() {
   return null;
 }
 
+/** Counts each screen as it opens, for the daily usage report. */
+function TrackScreens() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const name = pathname === "/" ? "today" : pathname.slice(1).replaceAll("/", "-");
+    track(`screen.${name}`);
+  }, [pathname]);
+  return null;
+}
+
 /** Escape dismisses the popover, the way a menu-bar panel is expected to close.
  *
  * On macOS and Windows clicking away is enough. Linux has no such luxury: the
@@ -100,6 +111,7 @@ function Shell() {
     <div className="app-window flex flex-col">
       <TrayNavigation />
       <DismissOnEscape />
+      <TrackScreens />
       <Routes location={location}>
         {ROUTES.map((route) => (
           <Route

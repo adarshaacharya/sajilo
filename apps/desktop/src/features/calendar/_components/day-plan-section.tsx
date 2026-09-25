@@ -5,6 +5,7 @@ import { Select } from "../../../shared/components/select";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api, type DayPlan, type NepaliDate, type PlanRecurrence } from "../../../shared/lib/ipc";
+import { track } from "../../../shared/lib/usage";
 
 const REMINDERS = [
   { id: "", labelKey: "planner.no-reminder" as const },
@@ -236,6 +237,7 @@ export function DayPlanSection({
   const saveDraft = async () => {
     if (!draft?.title.trim()) return;
     const [hour, minute] = draft.time.split(":").map(Number);
+    track("action.plan-save");
     await api.savePlan({
       id: draft.id,
       date: draft.date,

@@ -1,16 +1,24 @@
-//! Anonymous daily count.
+//! Anonymous daily count, and which features were used.
 //!
-//! On by default; switching it off in Settings stops it entirely. The desktop
-//! app owns that switch and daily de-duplication. The endpoint receives a small
-//! bucket — version, platform, architecture, day — plus a random id this
-//! install generates for itself, so returning installs can be told apart from
-//! new ones. It never sees an account, a name, anything about the machine, any
-//! local data, or any record of what was used inside the app.
+//! On by default; switching it off in Settings stops it entirely, and nothing
+//! is even counted locally while it is off. The desktop app owns that switch
+//! and daily de-duplication. The endpoint receives a small bucket — version,
+//! platform, architecture, day — plus a random id this install generates for
+//! itself, so returning installs can be told apart from new ones.
+//!
+//! From 0.1.29 it also receives how many times each feature was used since the
+//! last report — screens opened, tabs picked, a handful of actions, all names
+//! from [`EVENTS`] and nothing else — and a few display choices (language,
+//! digits, theme, text size, reminder style, which modules are on). It never
+//! sees an account, a name, anything about the machine, anything typed,
+//! searched or saved, which story was read or which station played.
 //!
 //! The id is a v4 uuid: random, not derived from hardware, and never sent once
 //! the count is switched off. Builds before 0.1.28 send no id at all and are
 //! still counted, so the endpoint must keep treating it as optional.
 
+use std::collections::BTreeMap;
+use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use chrono::{NaiveDate, Utc};
@@ -25,6 +33,64 @@ const ENDPOINT: &str = "https://sajilo-telemetry.adarshx.workers.dev/v1/ping";
 const SOURCE_NAME: &str = "Sajilo usage insights";
 const MAX_GAP_DAYS: i64 = 45;
 static USAGE_PING_IN_FLIGHT: AtomicBool = AtomicBool::new(false);
+
+/// Every event the app may count. A name not listed is dropped before it is
+/// stored, so this list is the whole of what can leave the machine: names of
+/// screens, tabs and actions, never anything a person typed or chose.
+pub const EVENTS: &[&str] = &[
+    // Screens, as each is opened.
+    "screen.today",
+    "screen.news",
+    "screen.news-government",
+    "screen.bazar",
+    "screen.rashifal",
+    "screen.radio",
+    "screen.tools",
+    "screen.focus",
+    "screen.keeper",
+    "screen.settings",
+    "screen.weather",
+    "screen.events",
+    "screen.converter",
+    "screen.day",
+    // Tabs inside a screen.
+    "tab.bazar.stocks",
+    "tab.bazar.forex",
+    "tab.bazar.metals",
+    "tab.bazar.fuel",
+    "tab.bazar.vegetables",
+    "tab.tools.emergency",
+    "tab.tools.clock",
+    "tab.tools.date",
+    "tab.tools.land",
+    "tab.tools.weight",
+    "tab.tools.vat",
+    "tab.tools.interest",
+    // Things done.
+    "action.popover-open",
+    "action.date-convert",
+    "action.radio-play",
+    "action.rashi-pick",
+    "action.news-open",
+    "action.keeper-save",
+    "action.plan-save",
+    "action.setup-done",
+    "action.focus-on",
+    "action.focus-off",
+    "action.break-done",
+    "action.break-snooze",
+    "action.break-skip",
+    "action.reminder-open",
+    "action.reminder-dismiss",
+];
+
+/// Counts since the last report that got through, by event name.
+const EVENTS_KEY: &str = "usageInsights.events";
+/// A day of heavy use is still a count, not an overflow.
+const MAX_EVENT_COUNT: u32 = 100_000;
+/// Read-modify-write on the stored counts from a command and from the send
+/// path must not interleave, or a count is lost.
+static EVENTS_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -41,6 +107,11 @@ struct UsagePing {
     gap_days: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     upgraded_from_version: Option<String>,
+    /// Uses of each feature since the last report. See [`EVENTS`].
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    events: BTreeMap<String, u32>,
+    /// A few display choices, each a short word. See [`settings_snapshot`].
+    settings: BTreeMap<&'static str, String>,
 }
 
 /// "other" is still a count: a build for an unplanned target is in use too.
@@ -143,6 +214,120 @@ fn install_id(app: &AppHandle<Wry>) -> String {
     minted
 }
 
+fn read_events(app: &AppHandle<Wry>) -> BTreeMap<String, u32> {
+    read(app, EVENTS_KEY)
+        .and_then(|value| serde_json::from_value(value).ok())
+        .unwrap_or_default()
+}
+
+/// Counts one use of a feature, if the count is on and the name is one of
+/// [`EVENTS`]. Stored locally until the next daily report takes it.
+pub fn record(app: &AppHandle<Wry>, event: &str) {
+    if !EVENTS.contains(&event) || !enabled(app) {
+        return;
+    }
+    let _guard = EVENTS_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let mut events = read_events(app);
+    let count = events.entry(event.to_owned()).or_insert(0);
+    *count = count.saturating_add(1).min(MAX_EVENT_COUNT);
+    if let Ok(value) = serde_json::to_value(&events) {
+        let _ = db::set_json(app, EVENTS_KEY, &value);
+    }
+}
+
+/// Takes what a report that got through carried off the stored counts, and
+/// keeps anything counted while it was on its way.
+fn subtract_sent(app: &AppHandle<Wry>, sent: &BTreeMap<String, u32>) {
+    let _guard = EVENTS_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let mut events = read_events(app);
+    remove_sent(&mut events, sent);
+    if let Ok(value) = serde_json::to_value(&events) {
+        let _ = db::set_json(app, EVENTS_KEY, &value);
+    }
+}
+
+fn remove_sent(events: &mut BTreeMap<String, u32>, sent: &BTreeMap<String, u32>) {
+    for (name, count) in sent {
+        if let Some(left) = events.get_mut(name) {
+            *left = left.saturating_sub(*count);
+        }
+    }
+    events.retain(|_, count| *count > 0);
+}
+
+/// Only the counts this build may send: a stored name that is no longer in
+/// [`EVENTS`] stays home.
+fn sendable(events: BTreeMap<String, u32>) -> BTreeMap<String, u32> {
+    events
+        .into_iter()
+        .filter(|(name, count)| EVENTS.contains(&name.as_str()) && *count > 0)
+        .collect()
+}
+
+#[tauri::command]
+pub fn record_usage(app: AppHandle<Wry>, event: String) {
+    record(&app, &event);
+}
+
+/// A stored preference as one of the words it may be, or its default.
+fn choice(app: &AppHandle<Wry>, key: &str, allowed: &[&str], default: &str) -> String {
+    read_string(app, key)
+        .filter(|value| allowed.contains(&value.as_str()))
+        .unwrap_or_else(|| default.to_owned())
+}
+
+/// The display choices sent with the count: which language and digits people
+/// read in, and what they switch off. Every value is one of a few fixed words.
+fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
+    let on_off = |key: &str, default: bool| {
+        let on = read(app, key)
+            .and_then(|value| value.as_bool())
+            .unwrap_or(default);
+        (if on { "on" } else { "off" }).to_owned()
+    };
+    let reminder_style = match crate::commands::notify::style(app) {
+        sajilo_core::focus::ReminderStyle::Card => "card",
+        sajilo_core::focus::ReminderStyle::Notification => "notification",
+    };
+    BTreeMap::from([
+        (
+            "language",
+            choice(app, prefs::LANGUAGE, &["en", "ne"], "en"),
+        ),
+        (
+            "numerals",
+            choice(
+                app,
+                prefs::NUMERAL_STYLE,
+                &["latin", "devanagari"],
+                "devanagari",
+            ),
+        ),
+        (
+            "theme",
+            choice(app, "theme", &["system", "light", "dark"], "system"),
+        ),
+        (
+            "textSize",
+            choice(app, "textSize", &["small", "default", "large"], "default"),
+        ),
+        ("reminderStyle", reminder_style.to_owned()),
+        ("weather", on_off(prefs::WEATHER_ENABLED, true)),
+        ("forex", on_off(prefs::FOREX_ENABLED, true)),
+        ("news", on_off(prefs::NEWS_ENABLED, true)),
+        ("bazar", on_off(prefs::BAZAR_ENABLED, true)),
+        ("rashifal", on_off(prefs::RASHIFAL_ENABLED, true)),
+        ("radio", on_off(prefs::RADIO_ENABLED, true)),
+        ("keeper", on_off(prefs::KEEPER_ENABLED, true)),
+        ("focus", on_off(prefs::FOCUS_ENABLED, true)),
+        ("clocks", on_off("clocksEnabled", false)),
+    ])
+}
+
 /// Sends at most one event per UTC day, unless switched off. Failed
 /// requests leave the local marker untouched so the next hourly background
 /// refresh can try again.
@@ -179,6 +364,12 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
     // does not follow releases.
     let version = app.package_info().version.to_string();
     let previous_version = read_string(&app, prefs::USAGE_INSIGHTS_LAST_PING_VERSION);
+    let events = {
+        let _guard = EVENTS_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        sendable(read_events(&app))
+    };
     let payload = UsagePing {
         install_id: install_id(&app),
         version: version.clone(),
@@ -187,6 +378,8 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
         day_utc: today_text.clone(),
         gap_days: gap_days(previous_day.as_deref(), today),
         upgraded_from_version: upgraded_from(previous_version, &version),
+        events,
+        settings: settings_snapshot(&app),
     };
 
     if sajilo_providers::HttpClient::new()
@@ -197,6 +390,7 @@ async fn send_usage_ping_inner(app: AppHandle<Wry>) -> bool {
         return false;
     }
 
+    subtract_sent(&app, &payload.events);
     let _ = db::set_json(
         &app,
         prefs::USAGE_INSIGHTS_LAST_PING_DAY,
@@ -218,6 +412,13 @@ pub fn usage_insights_enabled(app: AppHandle<Wry>) -> bool {
 #[tauri::command]
 pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> db::Result<bool> {
     db::set_json(&app, prefs::USAGE_INSIGHTS_ENABLED, &json!(enabled))?;
+    if !enabled {
+        // Switching off means nothing waits to be sent later either.
+        let _guard = EVENTS_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _ = db::delete_json(&app, EVENTS_KEY);
+    }
     // The id is left alone. Switching off already stops everything being sent;
     // deleting it as well would only mean that switching back on reports a new
     // install, counting one undecided person several times. `install_id` has
@@ -229,8 +430,11 @@ pub async fn set_usage_insights_enabled(app: AppHandle<Wry>, enabled: bool) -> d
 mod tests {
     use chrono::NaiveDate;
 
+    use std::collections::BTreeMap;
+
     use super::{
-        UsagePing, already_counted, gap_days, is_enabled, upgraded_from, valid_install_id,
+        EVENTS, UsagePing, already_counted, gap_days, is_enabled, remove_sent, sendable,
+        upgraded_from, valid_install_id,
     };
 
     #[test]
@@ -301,9 +505,59 @@ mod tests {
             day_utc: "2026-09-14".to_owned(),
             gap_days: 0,
             upgraded_from_version: None,
+            events: BTreeMap::new(),
+            settings: BTreeMap::new(),
         };
         let json = serde_json::to_value(payload).unwrap();
         assert!(json.get("upgradedFromVersion").is_none());
+        assert!(json.get("events").is_none(), "no events, no field");
         assert_eq!(json["dayUtc"], "2026-09-14");
+    }
+
+    #[test]
+    fn event_names_are_short_fixed_words() {
+        let pattern = |name: &str| {
+            let mut parts = name.split('.');
+            let kind = parts.next().unwrap_or_default();
+            ["screen", "tab", "action"].contains(&kind)
+                && name.len() <= 48
+                && name
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '.' || c == '-')
+        };
+        for name in EVENTS {
+            assert!(pattern(name), "{name} must match what the endpoint accepts");
+        }
+        let mut unique = EVENTS.to_vec();
+        unique.sort_unstable();
+        unique.dedup();
+        assert_eq!(unique.len(), EVENTS.len(), "no duplicates");
+    }
+
+    #[test]
+    fn only_listed_events_are_sent() {
+        let stored = BTreeMap::from([
+            ("screen.news".to_owned(), 3),
+            ("something-typed".to_owned(), 1),
+            ("action.radio-play".to_owned(), 0),
+        ]);
+        assert_eq!(
+            sendable(stored),
+            BTreeMap::from([("screen.news".to_owned(), 3)])
+        );
+    }
+
+    #[test]
+    fn keeps_what_was_counted_while_a_report_was_sending() {
+        let mut stored = BTreeMap::from([
+            ("screen.news".to_owned(), 5),
+            ("screen.bazar".to_owned(), 2),
+        ]);
+        let sent = BTreeMap::from([
+            ("screen.news".to_owned(), 3),
+            ("screen.bazar".to_owned(), 2),
+        ]);
+        remove_sent(&mut stored, &sent);
+        assert_eq!(stored, BTreeMap::from([("screen.news".to_owned(), 2)]));
     }
 }

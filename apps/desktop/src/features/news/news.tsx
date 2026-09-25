@@ -16,6 +16,7 @@ import {
   loadedValue,
 } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
+import { track } from "../../shared/lib/usage";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import { HeadlineRow } from "./_components/headline-row";
@@ -186,11 +187,12 @@ export function News() {
               <HeadlineRow
                 item={item}
                 showSource={showSource}
-                onOpen={() =>
-                  item.source === "nepalGovernment" && item.id
+                onOpen={() => {
+                  track("action.news-open");
+                  return item.source === "nepalGovernment" && item.id
                     ? navigate(`/news/government?id=${encodeURIComponent(item.id)}`)
-                    : openExternalLink(item.link)
-                }
+                    : openExternalLink(item.link);
+                }}
               />
             </FadeUp>
           ))}

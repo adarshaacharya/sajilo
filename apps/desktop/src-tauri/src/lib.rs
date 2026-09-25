@@ -329,6 +329,7 @@ pub fn run() {
             commands::backup::export_backup,
             commands::backup::import_backup,
             commands::backup::is_first_run,
+            commands::telemetry::record_usage,
             commands::backup::mark_launched,
             commands::notify::notification_permission,
             commands::notify::request_notification_permission,

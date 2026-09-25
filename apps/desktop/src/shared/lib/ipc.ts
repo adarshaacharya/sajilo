@@ -617,6 +617,7 @@ export const api = {
   openKeeperViewer: (ownerKind: KeeperOwnerKind, ownerId: string, index: number) =>
     invoke<void>("open_keeper_viewer", { ownerKind, ownerId, index }),
 
+  recordUsage: (event: string) => invoke<void>("record_usage", { event }),
   getSetting: <T>(key: string) => invoke<T | null>("get_setting", { key }),
   setSetting: (key: string, value: unknown) => invoke<void>("set_setting", { key, value }),
   deleteSetting: (key: string) => invoke<void>("delete_setting", { key }),

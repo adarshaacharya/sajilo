@@ -12,6 +12,7 @@ import {
   loadedValue,
 } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
+import { track } from "../../shared/lib/usage";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
 import { SourceLink, SourceNote } from "../bazar/_components/source-note";
@@ -66,6 +67,7 @@ export function Rashifal() {
   useHeaderSlot(refreshButton);
 
   const choose = (id: RashiSign) => {
+    track("action.rashi-pick");
     setStoredSign(id);
     setViewing(null);
     setPicking(false);

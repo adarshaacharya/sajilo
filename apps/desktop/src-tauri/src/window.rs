@@ -48,6 +48,7 @@ pub fn hide(window: &WebviewWindow) {
 }
 
 pub fn show(window: &WebviewWindow) {
+    crate::commands::telemetry::record(window.app_handle(), "action.popover-open");
     position_at_tray(window);
     // Re-assert clear + vibrancy each open — some macOS builds repaint opaque after hide.
     let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));

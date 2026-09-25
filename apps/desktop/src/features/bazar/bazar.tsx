@@ -10,6 +10,7 @@ import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
+import { track } from "../../shared/lib/usage";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
@@ -84,6 +85,7 @@ export function Bazar() {
     const requested = new URLSearchParams(search).get("tab");
     return TABS.includes(requested as Tab) ? (requested as Tab) : "stocks";
   });
+  useEffect(() => track(`tab.bazar.${tab}`), [tab]);
   // A link to the Forex tab while Forex is switched off lands on Stocks.
   useEffect(() => {
     if (tab === "forex" && !modules.forexEnabled) setTab("stocks");

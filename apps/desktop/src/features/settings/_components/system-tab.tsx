@@ -220,7 +220,7 @@ export function SystemTab() {
         />
       </SettingsSection>
 
-      <SettingsSection title={t("settings.privacy")}>
+      <SettingsSection title={t("settings.privacy")} footnote={t("settings.usage-insights-note")}>
         <Toggle
           label={t("settings.usage-insights")}
           checked={usageInsightsEnabled}

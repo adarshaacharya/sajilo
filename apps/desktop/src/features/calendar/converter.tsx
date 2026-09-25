@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type Conversion, type SupportedRange } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
+import { track } from "../../shared/lib/usage";
 import { ToolSection } from "../tools/_components/quantity-row";
 import { ToolTextField } from "../tools/_components/tool-field";
 
@@ -83,6 +84,8 @@ export function Converter() {
       .catch(() => {});
   }, []);
 
+  const mounted = useRef(false);
+  const counted = useRef(false);
   useEffect(() => {
     const year = Number(fields.year);
     const month = Number(fields.month);
@@ -91,11 +94,19 @@ export function Converter() {
 
     const convert = direction === "bsToAd" ? api.bsToAd : api.adToBs;
     let cancelled = false;
+    // The first conversion is today's date, shown on arrival; what counts is
+    // someone converting a date of their own, once per visit.
+    const byHand = mounted.current;
+    mounted.current = true;
     convert(year, month, day)
       .then((value) => {
         if (cancelled) return;
         setResult(value);
         setError(null);
+        if (byHand && !counted.current) {
+          counted.current = true;
+          track("action.date-convert");
+        }
       })
       .catch((cause) => {
         if (cancelled) return;

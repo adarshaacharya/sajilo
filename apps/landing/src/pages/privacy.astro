@@ -4,7 +4,7 @@ import Base from "../layouts/Base.astro";
 
 <Base
   title="Privacy policy: Sajilo"
-  description="Sajilo stores your data on your device. There is no account. An optional anonymous daily count can be switched off."
+  description="Sajilo stores your data on your device. There is no account. An anonymous daily count of which features are used can be switched off."
   path="/privacy.html"
 >
   <main class="wrap policy" id="main">
@@ -13,7 +13,7 @@ import Base from "../layouts/Base.astro";
       Sajilo is a menu-bar app with no account. What you write stays on your computer. This page is
       the whole policy.
     </p>
-    <p class="policy-updated">Last updated 16 September 2026.</p>
+    <p class="policy-updated">Last updated 26 September 2026: the daily count now includes which features were used (see below).</p>
 
     <section class="policy-block">
       <h2>On your device</h2>
@@ -27,8 +27,8 @@ import Base from "../layouts/Base.astro";
     <section class="policy-block">
       <h2>Anonymous daily count</h2>
       <p>
-        To know how many people use the app, Sajilo can send at most one count per UTC day. It is
-        on by default. Switching it off in Settings › System › Privacy stops it; nothing is sent
+        To know how many people use the app, and which parts of it are worth improving, Sajilo can
+        send at most one count per UTC day. It is on by default. Switching it off in Settings › System › Privacy stops it; nothing is sent
         after that.
       </p>
       <p>Each count includes:</p>
@@ -40,7 +40,24 @@ import Base from "../layouts/Base.astro";
           a random id the app generates for itself, so that one person opening Sajilo for a month
           is not counted as thirty new people
         </li>
+        <li>
+          from version 0.1.29, how many times each feature was used since the last count: which
+          screens and tabs were opened (for example News, or Bazar › Gold &amp; Silver), and a few
+          actions such as converting a date, playing a radio station, picking a rashi, opening a
+          headline, saving a plan or a Keeper item, and taking or skipping a break
+        </li>
+        <li>
+          from version 0.1.29, a few display choices: language, digits, theme, text size, reminder
+          style, and which modules are switched on
+        </li>
       </ul>
+      <p>
+        Features are counted by name only, from a fixed list in the app’s source code. The count
+        never includes what you type or search for, which story you read, which station you play,
+        which rashi you picked, what you save, dates, places, amounts, or anything else you enter.
+        While the count is switched off, nothing is counted even on your computer, and switching it
+        off deletes any counts not yet sent.
+      </p>
       <p>
         That id is a random number. It is not derived from your device, your name, your network or
         anything else about you, and it is not shared with anyone. Switching the count off in
@@ -53,13 +70,13 @@ import Base from "../layouts/Base.astro";
         Alongside the id, the service records the day each count was for and the time it arrived, so
         it can tell an install still in use from one that stopped. The count is sent by Sajilo’s
         hourly background refresh, not by anything you do, so that time says the app was running —
-        not when you opened a screen or what you opened. There is at most one record per day.
+        not when you opened a screen. Feature counts are totals since the last count, with no times
+        attached. There is at most one record per day.
       </p>
       <p>
         Cloudflare derives an approximate country from the connection. The service does not store an
-        account, your name, an email address, an IP address, anything identifying your device, or
-        anything you do inside the app — which screens you open, what you search for, and what you
-        save are never sent anywhere.
+        account, your name, an email address, an IP address, or anything identifying your device.
+        What you search for, read, play and save is never sent anywhere.
       </p>
     </section>
 

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useHeaderInner } from "../../shared/components/header-slot";
 import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
+import { track } from "../../shared/lib/usage";
 import { Converter } from "../calendar/converter";
 import { ClockTab } from "./_components/clock-tab";
 import { EmergencyTab } from "./_components/emergency-tab";
@@ -17,6 +18,9 @@ type Tool = { id: Tab; label: string; hint: string; icon: IconName };
 export function Tools() {
   const { t } = useSettings();
   const [tab, setTab] = useState<Tab | null>(null);
+  useEffect(() => {
+    if (tab) track(`tab.tools.${tab}`);
+  }, [tab]);
 
   const tools: readonly Tool[] = [
     {

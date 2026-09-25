@@ -57,3 +57,23 @@ CREATE TABLE IF NOT EXISTS app_usage (
 );
 
 CREATE INDEX IF NOT EXISTS app_usage_day ON app_usage (day);
+
+CREATE TABLE IF NOT EXISTS usage_events (
+  install_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  event TEXT NOT NULL,
+  count INTEGER NOT NULL,
+  PRIMARY KEY (install_id, day, event)
+);
+
+CREATE INDEX IF NOT EXISTS usage_events_day ON usage_events (day, event);
+
+CREATE TABLE IF NOT EXISTS usage_settings (
+  install_id TEXT NOT NULL,
+  day TEXT NOT NULL,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  PRIMARY KEY (install_id, day, key)
+);
+
+CREATE INDEX IF NOT EXISTS usage_settings_day ON usage_settings (day, key);

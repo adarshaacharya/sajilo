@@ -10,6 +10,7 @@ import * as player from "../../shared/lib/audio";
 import { api } from "../../shared/lib/ipc";
 import { catchAsFailed } from "../../shared/lib/load-state";
 import { usePersistedList } from "../../shared/lib/persisted";
+import { track } from "../../shared/lib/usage";
 import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RadioStation } from "../../types/api/RadioStation";
@@ -216,6 +217,7 @@ export function Radio() {
       player.togglePlayback();
       return;
     }
+    track("action.radio-play");
 
     if (station.streamUrl) {
       player.play(

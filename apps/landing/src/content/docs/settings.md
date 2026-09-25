@@ -52,7 +52,7 @@ How reminders appear (**Card** or **Notification**), and switches for **Public h
 
 ### Privacy
 
-**Help improve Sajilo** sends one anonymous count a day: the app version (and the one before it), your operating system and processor type, and a random number that isn't tied to you. It never includes your dates, notes or what you look at. Turn it off here.
+**Help improve Sajilo** sends one anonymous count a day: the app version (and the one before it), your operating system and processor type, a random number that isn't tied to you, how many times each screen and a few features were used, and your language, digits and which modules are on. It never includes anything you type, search, read, play or save. Turn it off here, and nothing is counted at all. The [privacy policy](/privacy.html) lists exactly what's sent.
 
 ### Backup
 

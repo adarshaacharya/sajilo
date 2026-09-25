@@ -1,3 +1,5 @@
+import { usageEvents, usageSettings } from "./usage";
+
 type Environment = {
   DB: D1Database;
 };
@@ -22,10 +24,20 @@ type Ping = {
   dayNpt?: string;
   gapDays: number;
   upgradedFromVersion?: string;
+  /**
+   * Uses of each feature since the install's last report, sent from 0.1.29:
+   * screen, tab and action names from the app's fixed list, never content.
+   */
+  events?: unknown;
+  /** A few display choices, each a short word, sent from 0.1.29. */
+  settings?: unknown;
 };
 
 const DAY_MILLISECONDS = 24 * 60 * 60 * 1_000;
-const MAX_BODY_BYTES = 1_024;
+// Room for a day's feature counts and settings; still far too small to carry
+// anything like a document.
+const MAX_BODY_BYTES = 4_096;
+
 const MAX_GAP_DAYS = 45;
 const VERSION_PATTERN = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -161,7 +173,33 @@ export default {
             upgradedFromVersion,
           );
 
-    await write.run();
+    // Feature counts and choices, only from builds that send an id (every
+    // build that sends them does). Same rule as `app_usage`: a day already
+    // recorded for an install is kept, so a retry cannot count it twice.
+    const extra: D1PreparedStatement[] = [];
+    if (payload.installId !== undefined) {
+      const day = dayStartedAtUtc(payload);
+      for (const [event, count] of usageEvents(payload.events)) {
+        extra.push(
+          env.DB.prepare(
+            `INSERT INTO usage_events (install_id, day, event, count)
+             VALUES (?, ?, ?, ?)
+             ON CONFLICT(install_id, day, event) DO NOTHING`,
+          ).bind(payload.installId, day, event, count),
+        );
+      }
+      for (const [key, value] of usageSettings(payload.settings)) {
+        extra.push(
+          env.DB.prepare(
+            `INSERT INTO usage_settings (install_id, day, key, value)
+             VALUES (?, ?, ?, ?)
+             ON CONFLICT(install_id, day, key) DO NOTHING`,
+          ).bind(payload.installId, day, key, value),
+        );
+      }
+    }
+
+    await env.DB.batch([write, ...extra]);
 
     return empty(204, { "cache-control": "no-store" });
   },

@@ -4,6 +4,7 @@ import { Select } from "../../../shared/components/select";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { placeName, usePlaces } from "../../../shared/lib/places";
+import { track } from "../../../shared/lib/usage";
 
 /** Set by the shell on a brand-new install only, so people who already use
  * Sajilo never see this; cleared by Done. */
@@ -27,6 +28,7 @@ export function useSetupCard() {
   }, []);
 
   const dismiss = () => {
+    track("action.setup-done");
     setVisible(false);
     void api.deleteSetting(PENDING_KEY).catch(() => {});
   };

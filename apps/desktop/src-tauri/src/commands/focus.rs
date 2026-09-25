@@ -104,6 +104,7 @@ pub fn set_focus_settings(app: AppHandle<Wry>, settings: FocusSettings) -> Resul
 /// card. Which ones those are is the core's call, not the screen's.
 #[tauri::command]
 pub fn enable_recommended_breaks(app: AppHandle<Wry>) -> Result<FocusSnapshot> {
+    crate::commands::telemetry::record(&app, "action.focus-on");
     let settings = with_tracker(&app, |tracker| {
         tracker.settings.clone().with_recommended_breaks()
     });
@@ -114,6 +115,7 @@ pub fn enable_recommended_breaks(app: AppHandle<Wry>) -> Result<FocusSnapshot> {
 /// to the first screen.
 #[tauri::command]
 pub fn disable_breaks(app: AppHandle<Wry>) -> Result<FocusSnapshot> {
+    crate::commands::telemetry::record(&app, "action.focus-off");
     let settings = with_tracker(&app, |tracker| {
         tracker.state.active_break = None;
         tracker.settings.clone().with_breaks_off()
@@ -161,6 +163,22 @@ pub fn preview_focus_break(app: AppHandle<Wry>, kind: focus::BreakKind) -> Focus
 #[tauri::command]
 pub fn finish_focus_break(app: AppHandle<Wry>, outcome: BreakOutcome) -> Result<FocusSnapshot> {
     with_tracker(&app, |tracker| {
+        // "Show me an example" is not a break anyone took.
+        let preview = tracker
+            .state
+            .active_break
+            .as_ref()
+            .is_some_and(|card| card.preview);
+        if !preview {
+            crate::commands::telemetry::record(
+                &app,
+                match outcome {
+                    BreakOutcome::Done | BreakOutcome::Drank => "action.break-done",
+                    BreakOutcome::Skip => "action.break-skip",
+                    BreakOutcome::Snooze => "action.break-snooze",
+                },
+            );
+        }
         focus::finish_break(&mut tracker.state, &tracker.settings, outcome, now().1);
         save_state(&app, tracker)?;
         Ok(view(tracker))
