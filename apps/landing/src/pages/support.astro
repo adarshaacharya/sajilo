@@ -1,0 +1,156 @@
+---
+import Base from "../layouts/Base.astro";
+
+const MOMO_URL = "https://buymemomo.com/adarsha";
+---
+
+<Base
+  title="Support Sajilo"
+  description="Sajilo is free, with no ads and no accounts, and made by one person. Here is how to support it, with money or without."
+  path="/support.html"
+>
+  <main class="wrap support" id="main">
+    <p class="support-kicker" lang="ne">धन्यवाद</p>
+    <h1 class="support-title">Support Sajilo</h1>
+    <p class="support-lede">
+      Sajilo is free. It has no ads, no account to sign up for, and it never sells what you do. It's
+      built by one person in Nepal, in the evenings and on weekends.
+    </p>
+
+    <section class="support-momo" aria-labelledby="momo-title">
+      <span class="support-momo-icon" aria-hidden="true">🥟</span>
+      <div>
+        <h2 id="momo-title">Buy me a momo</h2>
+        <p>
+          If Sajilo is part of your day, a plate of momo is the nicest way to say so. It goes towards
+          what keeps Sajilo free and gets it past the install warnings.
+        </p>
+        <a class="btn btn--accent" href={MOMO_URL} target="_blank" rel="noopener">
+          Buy me a momo
+        </a>
+      </div>
+    </section>
+
+    <section class="support-block" aria-labelledby="pays-title">
+      <h2 id="pays-title">What it pays for</h2>
+      <ul>
+        <li>
+          <strong>Code signing</strong>, so Windows and macOS stop warning people when they install Sajilo.
+          Those warnings are the biggest reason people give up on it, and signing certificates cost money
+          every year.
+        </li>
+        <li><strong>The website and domain</strong>, and the small servers behind notices and downloads.</li>
+        <li><strong>Time</strong> for new features, and for fixing a source the day it changes.</li>
+      </ul>
+    </section>
+
+    <section class="support-block" aria-labelledby="free-title">
+      <h2 id="free-title">Ways to help that cost nothing</h2>
+      <ul>
+        <li><strong>Tell someone.</strong> Most people find Sajilo because a friend showed them.</li>
+        <li>
+          <strong>Report what's wrong.</strong> A clear <a href="/report.html">bug report</a> is worth more
+          than you'd think.
+        </li>
+        <li>
+          <strong>Star it on <a href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener">GitHub</a></strong>,
+          which helps others find it.
+        </li>
+        <li>
+          <strong>Suggest a number or website</strong> for the Directory, or a correction, by writing to
+          <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a>.
+        </li>
+      </ul>
+    </section>
+  </main>
+</Base>
+
+<style>
+  .support {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 64px;
+  }
+  .support-kicker {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--gilt-2);
+  }
+  .support-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(44px, 7vw, 76px);
+    line-height: 1.02;
+  }
+  .support-lede {
+    margin-top: 18px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--paper-2);
+  }
+
+  .support-momo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+    margin-top: 36px;
+    padding: 24px;
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--gilt) 8%, var(--ink-2));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gilt) 35%, transparent);
+  }
+  .support-momo-icon {
+    font-size: 44px;
+    line-height: 1;
+  }
+  .support-momo h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+  }
+  .support-momo p {
+    margin-top: 8px;
+    color: var(--paper-2);
+    line-height: 1.6;
+  }
+  .support-momo .btn {
+    margin-top: 16px;
+  }
+
+  .support-block {
+    margin-top: 44px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .support-block h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 24px;
+  }
+  .support-block ul {
+    margin: 14px 0 0;
+    padding-left: 20px;
+    display: grid;
+    gap: 10px;
+    color: var(--paper-2);
+    line-height: 1.6;
+  }
+  .support-block strong {
+    color: var(--paper);
+    font-weight: 600;
+  }
+  .support-block a {
+    color: var(--gilt);
+  }
+
+  @media (max-width: 520px) {
+    .support-momo {
+      grid-template-columns: 1fr;
+      padding: 20px;
+    }
+  }
+</style>

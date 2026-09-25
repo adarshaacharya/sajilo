@@ -46,7 +46,7 @@ Drag the card anywhere; it opens there next time. If eyes and standing are both 
 - **Next break:** what's coming and when, or why nothing is (paused, outside work hours, a holiday…).
 - **Switches** for each reminder. The **Water** row has **+** and **−** to log glasses, and shows today's total against your goal.
 - **Last 7 days:** your screen time each day (hover over a bar for the exact time), your daily average, **breaks taken**, days you reached your **water goal**, and your **longest time without a break**.
-- **Pause for 1 hour** when you need to concentrate; **Resume** brings reminders back early.
+- **Pause** for **30 min**, **1 hour** or the **rest of the day** when you need to concentrate; **Resume** brings reminders back early.
 
 ## Settings
 

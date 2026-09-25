@@ -63,4 +63,4 @@ How reminders appear (**Card** or **Notification**), and switches for **Public h
 
 ## About
 
-Your **version** of Sajilo, links to report a problem or get in touch, and the privacy policy. On Windows, **Can't find the tray icon?** shows the tip for pinning the flag to the taskbar again.
+Your **version** of Sajilo, links to report a problem or get in touch, **Buy me a momo** if you'd like to [support Sajilo](/support.html), and the privacy policy. On Windows, **Can't find the tray icon?** shows the tip for pinning the flag to the taskbar again.

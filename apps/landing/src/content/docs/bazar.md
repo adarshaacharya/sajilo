@@ -15,7 +15,7 @@ The **Bazar** tab has several sections along the top: **Stocks**, **Forex**, **G
 - **Fine gold**, **Tejabi gold** and **Silver**, per tola and per 10 g.
 - A **calculator** at the bottom: enter a quantity in tola, 10 g, grams or ounces, choose the metal, and see what it's worth.
 
-Prices come from the **Federation of Nepal Gold and Silver Dealers' Association**.
+Prices come from the **Federation of Nepal Gold and Silver Dealers' Association**. If its site is down, Sajilo uses Nepali Patro or Hamro Patro instead, and the credit at the bottom says which.
 
 ## Fuel
 

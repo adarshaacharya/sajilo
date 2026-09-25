@@ -12,6 +12,7 @@ const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
 const WEBSITE_URL = "https://sajilo.fyi";
 const PRIVACY_URL = `${WEBSITE_URL}/privacy.html`;
 const CONTACT_EMAIL = "contact@sajilo.fyi";
+const SUPPORT_URL = "https://buymemomo.com/adarsha";
 
 function QuietLink({ label, href }: { label: string; href: string }) {
   return (
@@ -127,6 +128,19 @@ export function AboutTab() {
         <span className="text-[10px] text-text-muted">·</span>
         <QuietLink label={CONTACT_EMAIL} href={`mailto:${CONTACT_EMAIL}`} />
       </div>
+
+      {/* Said once, here, where people look for it: never a prompt or a badge. */}
+      <p className="mt-5 max-w-[240px] text-[10px] leading-relaxed text-text-muted">
+        {t("about.support-note")}
+      </p>
+      <button
+        type="button"
+        onClick={() => openExternalLink(SUPPORT_URL)}
+        className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[11px] font-medium text-[color:var(--color-accent-mark)] transition-colors hover:bg-accent/20"
+      >
+        <span aria-hidden="true">🥟</span>
+        {t("about.support-button")}
+      </button>
 
       {/* The first-launch card, on demand — for anyone who pressed "Got it"
           before actually moving the icon. */}
