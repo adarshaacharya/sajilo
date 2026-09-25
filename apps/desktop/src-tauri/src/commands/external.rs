@@ -19,14 +19,15 @@ pub async fn open_external_url(url: String) -> Result<(), String> {
     }
 
     #[cfg(target_os = "linux")]
-    {
-        return tokio::task::spawn_blocking(move || open_on_linux(&url))
-            .await
-            .map_err(|error| format!("browser launcher task failed: {error}"))?;
-    }
+    let opened = tokio::task::spawn_blocking(move || open_on_linux(&url))
+        .await
+        .map_err(|error| format!("browser launcher task failed: {error}"))?;
 
     #[cfg(not(target_os = "linux"))]
-    tauri_plugin_opener::open_url(url, None::<&str>).map_err(|error| error.to_string())
+    let opened =
+        tauri_plugin_opener::open_url(url, None::<&str>).map_err(|error| error.to_string());
+
+    opened
 }
 
 #[cfg(target_os = "linux")]

@@ -142,3 +142,7 @@ jobs:
         run: bun run build
       - name: Build the shell
         run: cargo build -p sajilo-desktop
+      # Run on every OS: most of the shell is `#[cfg(target_os)]` code that
+      # only its own platform ever compiles, so one runner can't lint it all.
+      - name: Clippy the shell
+        run: cargo clippy -p sajilo-desktop --all-targets -- -D warnings

@@ -53,7 +53,7 @@ fn parse_source(value: Option<String>) -> Result<Option<StockAcquisitionSource>>
 }
 
 fn paisa(value: f64) -> Result<i64> {
-    if !value.is_finite() || value < 0.0 || value > 90_000_000_000_000.0 {
+    if !value.is_finite() || !(0.0..=90_000_000_000_000.0).contains(&value) {
         return Err("That amount is outside the supported range.".to_owned());
     }
     Ok((value * 100.0).round() as i64)

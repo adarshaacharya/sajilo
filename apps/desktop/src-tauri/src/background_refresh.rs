@@ -87,7 +87,9 @@ pub fn spawn(app: AppHandle<Wry>) {
     tauri::async_runtime::spawn(async move {
         tokio::time::sleep(INITIAL_DELAY).await;
         loop {
-            refresh(&app).await;
+            // Boxed: the refresh future holds every source's state at once
+            // (about 17 KB), too large to keep inline in the spawned task.
+            Box::pin(refresh(&app)).await;
             let _ = app.emit(REFRESHED_EVENT, ());
             tokio::time::sleep(REFRESH_INTERVAL).await;
         }

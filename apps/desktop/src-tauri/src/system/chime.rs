@@ -28,13 +28,24 @@ fn chime_file(app: &AppHandle<Wry>) -> Option<PathBuf> {
         .filter(|path| path.exists())
 }
 
+/// Waits for a finished player off the calling thread. A child that is never
+/// waited on stays behind as a zombie process until Sajilo quits — one per
+/// chime, all day.
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+fn reap(mut child: std::process::Child) {
+    std::thread::spawn(move || {
+        let _ = child.wait();
+    });
+}
+
 #[cfg(target_os = "macos")]
 mod platform {
     use std::path::Path;
 
     pub fn play(file: &Path) {
-        // Spawned, not waited on: `afplay` blocks for the length of the sound.
-        let _ = std::process::Command::new("afplay").arg(file).spawn();
+        if let Ok(child) = std::process::Command::new("afplay").arg(file).spawn() {
+            super::reap(child);
+        }
     }
 }
 
@@ -79,7 +90,8 @@ mod platform {
             if player == "aplay" {
                 command.arg("-q");
             }
-            if command.arg(file).spawn().is_ok() {
+            if let Ok(child) = command.arg(file).spawn() {
+                super::reap(child);
                 return;
             }
         }

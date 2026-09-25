@@ -102,6 +102,6 @@ pub fn mark_sip_paid(app: AppHandle<Wry>, symbol: String) -> Result<Vec<SipStatu
 pub fn remind_sip_tomorrow(app: AppHandle<Wry>, symbol: String) -> Result<Vec<SipStatus>> {
     let tomorrow = nepal_time::today() + chrono::Duration::days(1);
     edit(&app, &symbol, |plan| {
-        plan.remind_on = Some(tomorrow.to_string())
+        plan.remind_on = Some(tomorrow.to_string());
     })
 }

@@ -214,11 +214,9 @@ pub fn run() {
                     let _ = window.hide();
                 }
             }
-            WindowEvent::Focused(focused) => {
-                if window.label() == window::MAIN {
-                    if let Some(main) = window.get_webview_window(window::MAIN) {
-                        window::hide_on_blur(&main, *focused);
-                    }
+            WindowEvent::Focused(focused) if window.label() == window::MAIN => {
+                if let Some(main) = window.get_webview_window(window::MAIN) {
+                    window::hide_on_blur(&main, *focused);
                 }
             }
             _ => {}

@@ -237,6 +237,7 @@ fn today(app: &AppHandle) -> Option<(NepaliDate, NumeralStyle, String)> {
 }
 
 /// The tray menu's date row, for the one call that needs the text alone.
+#[cfg(not(target_os = "linux"))]
 fn label(app: &AppHandle) -> Option<String> {
     today(app).map(|(.., label)| label)
 }
