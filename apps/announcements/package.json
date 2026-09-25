@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
+    "test": "bun test",
     "dev": "wrangler dev --local",
     "deploy": "wrangler deploy",
-    "types": "wrangler types"
+    "types": "wrangler types",
+    "notices": "bun scripts/notices.ts"
   },
   "devDependencies": {
     "typescript": "^5.9.0",

@@ -87,6 +87,7 @@ const WRITES = new Set([
   "set_notification_options",
   "preview_reminder_card",
   "dismiss_reminder",
+  "dismiss_announcement",
   "set_autostart",
   "set_dock_icon_visible",
   "refresh_tray",

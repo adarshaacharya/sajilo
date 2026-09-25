@@ -1,0 +1,36 @@
+[
+  {
+    "id": "ipo-window-2026-10",
+    "level": "important",
+    "title": {
+      "en": "IPO application window",
+      "ne": "आईपीओ आवेदन समय"
+    },
+    "body": {
+      "en": "Review the issue details and apply before the closing date.",
+      "ne": "विवरण हेर्नुहोस् र अन्तिम मितिअघि आवेदन दिनुहोस्।"
+    },
+    "startsAt": "2026-10-01T00:00:00Z",
+    "expiresAt": "2026-10-08T18:00:00Z",
+    "action": {
+      "url": "https://cdsc.com.np/index.php/ipolist",
+      "label": {
+        "en": "View current issues",
+        "ne": "हालका निष्कासन हेर्नुहोस्"
+      }
+    }
+  },
+  {
+    "id": "windows-tray-fix",
+    "level": "info",
+    "platforms": ["windows"],
+    "title": {
+      "en": "Tray icon hidden?",
+      "ne": "ट्रे आइकन लुकेको छ?"
+    },
+    "body": {
+      "en": "Drag Sajilo out from under the ^ arrow in the taskbar to keep the date in view.",
+      "ne": "मिति सधैं देखिने बनाउन टास्कबारको ^ तीरभित्रबाट सजिलोलाई बाहिर तान्नुहोस्।"
+    }
+  }
+]

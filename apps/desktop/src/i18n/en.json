@@ -232,6 +232,7 @@
   "reminder.kind.sip": "SIP",
   "reminder.kind.keeper": "Keeper",
   "reminder.open": "Open",
+  "announcement.dismiss": "Close this notice",
   "reminder.dismiss": "Got it",
   "reminder.more": "{n} more",
   "keeper.action.done": "Mark done",

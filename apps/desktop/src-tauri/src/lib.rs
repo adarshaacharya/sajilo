@@ -244,6 +244,7 @@ pub fn run() {
             commands::news::get_news,
             commands::news::news_sources,
             commands::announcement::get_announcement,
+            commands::announcement::dismiss_announcement,
             commands::telemetry::usage_insights_enabled,
             commands::telemetry::set_usage_insights_enabled,
             commands::calendar::today,

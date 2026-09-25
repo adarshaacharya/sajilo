@@ -2,8 +2,12 @@
 import type { Announcement } from "./Announcement";
 
 /**
- * A wrapper instead of HTTP 204 lets Sajilo cache the deliberate absence
- * of a notice. Otherwise an expired banner would remain visible until the
- * app restarted or its previous cache entry aged out.
+ * The notices live now, most pressing first. A wrapper, not HTTP 204, so
+ * Sajilo caches the deliberate absence of notices too; otherwise an
+ * expired one would linger until its cache entry aged out.
+ *
+ * The Worker also sends a single `announcement` field, which this type
+ * ignores: it is what versions before the list read, and it carries a
+ * standing "update Sajilo" notice for them.
  */
-export type AnnouncementResponse = { announcement: Announcement | null, };
+export type AnnouncementResponse = { announcements: Array<Announcement>, };

@@ -73,6 +73,7 @@ import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
 import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
 import { SFWifi } from "sf-symbols-lib/monochrome/SFWifi";
 import { SFWrenchAndScrewdriver } from "sf-symbols-lib/monochrome/SFWrenchAndScrewdriver";
+import { SFXmark } from "sf-symbols-lib/monochrome/SFXmark";
 
 type SFComp = ComponentType<{ size?: number; className?: string }>;
 
@@ -144,6 +145,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   link: SFLink,
   pencil: SFPencil,
   minus: SFMinus,
+  close: SFXmark,
   rotate: SFRotateRight,
   idCitizenship: SFPersonTextRectangle,
   idCard: SFPersonCropRectangle,
@@ -227,6 +229,7 @@ export type IconName =
   | "link"
   | "pencil"
   | "minus"
+  | "close"
   | "rotate"
   | "idCitizenship"
   | "idCard"

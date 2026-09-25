@@ -44,7 +44,13 @@ pub const FOREX_KEY: &str = "forex.v1";
 /// joined the publisher catalog. Otherwise their picker options can filter an
 /// older cached digest to zero headlines until its normal refresh window.
 pub const NEWS_KEY: &str = "news.v3";
-pub const ANNOUNCEMENT_KEY: &str = "announcement.v1";
+pub const ANNOUNCEMENT_KEY: &str = "announcement.v2";
+/// Notices the user closed, by id. Kept short: ids of long-gone notices are
+/// trimmed away as new ones are closed.
+pub const DISMISSED_ANNOUNCEMENTS_KEY: &str = "dismissedAnnouncements";
+/// Urgent notices already sent as a system notification, by id, so each one
+/// is announced once however often the feed refreshes.
+pub const NOTIFIED_ANNOUNCEMENTS_KEY: &str = "notifiedAnnouncements";
 /// Same key the Swift app used, so a story resolved once there is not
 /// re-fetched here after a migration.
 pub const ARTICLE_DATES_KEY: &str = "articleDates.v1";
@@ -139,4 +145,14 @@ pub fn weather_location(app: &AppHandle<Wry>) -> &'static Place {
         .and_then(|value| value.as_str().map(str::to_owned))
         .unwrap_or_default();
     places::find_or_default(&id)
+}
+
+/// The app's language, which the frontend stores; system notifications
+/// follow it. English until one is chosen.
+pub fn language(app: &AppHandle<Wry>) -> sajilo_core::focus::Language {
+    db::get_json(app, LANGUAGE)
+        .ok()
+        .flatten()
+        .and_then(|value| serde_json::from_value(value).ok())
+        .unwrap_or_default()
 }

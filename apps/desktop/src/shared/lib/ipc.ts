@@ -741,6 +741,7 @@ export const api = {
   getNews: (refresh = false) => invoke<LoadState<NewsDigest>>("get_news", { refresh }),
   getAnnouncement: (refresh = false) =>
     invoke<LoadState<AnnouncementResponse>>("get_announcement", { refresh }),
+  dismissAnnouncement: (id: string) => invoke<void>("dismiss_announcement", { id }),
   /** The source picker's options — static, named in Rust. */
   newsSources: () => invoke<NewsSourceInfo[]>("news_sources"),
 

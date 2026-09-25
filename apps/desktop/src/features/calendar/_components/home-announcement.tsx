@@ -67,35 +67,76 @@ function AnnouncementContent({ announcement }: { announcement: Announcement }) {
   );
 }
 
-/** A server-scheduled notice; no empty, loading, or failure chrome on Home. */
-export function HomeAnnouncement() {
-  const { data: state } = useSWR("announcement", () => catchAsFailed(api.getAnnouncement(false)), {
-    revalidateOnFocus: false,
-  });
-  const announcement = loadedValue(state)?.announcement;
-
-  if (!announcement) return null;
-
-  const className =
-    "surface-card flex w-full items-start gap-2.5 px-2.5 py-2.5 text-left transition-colors active:scale-[0.99]";
-
+/** One notice: the whole card opens its link when it has one, and anything
+ * short of urgent can be closed for good. */
+function AnnouncementCard({
+  announcement,
+  onDismiss,
+}: {
+  announcement: Announcement;
+  onDismiss: (id: string) => void;
+}) {
+  const { t } = useSettings();
   const action = announcement.action;
-  if (!action) {
-    return (
-      <article className={className} aria-label={announcement.title.en}>
-        <AnnouncementContent announcement={announcement} />
-      </article>
-    );
-  }
+  const body =
+    "flex min-w-0 flex-1 items-start gap-2.5 px-2.5 py-2.5 text-left transition-colors active:scale-[0.99]";
 
   return (
-    <button
-      type="button"
-      className={className}
-      aria-label={`${action.label.en}: ${announcement.title.en}`}
-      onClick={() => openExternalLink(action.url)}
-    >
-      <AnnouncementContent announcement={announcement} />
-    </button>
+    <div className="surface-card flex w-full items-start">
+      {action ? (
+        <button
+          type="button"
+          className={body}
+          aria-label={`${action.label.en}: ${announcement.title.en}`}
+          onClick={() => openExternalLink(action.url)}
+        >
+          <AnnouncementContent announcement={announcement} />
+        </button>
+      ) : (
+        <article className={body} aria-label={announcement.title.en}>
+          <AnnouncementContent announcement={announcement} />
+        </article>
+      )}
+      {/* Urgent notices stay until they expire; the engine ignores closing
+          them too, so no button pretends otherwise. */}
+      {announcement.level !== "urgent" && (
+        <button
+          type="button"
+          className="icon-btn m-1.5 size-6 shrink-0 text-text-muted"
+          aria-label={t("announcement.dismiss")}
+          title={t("announcement.dismiss")}
+          onClick={() => onDismiss(announcement.id)}
+        >
+          <Icon name="close" className="size-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Server-scheduled notices, already filtered for this device by the engine;
+ * no empty, loading, or failure chrome on Home. */
+export function HomeAnnouncement() {
+  const { data: state, mutate } = useSWR(
+    "announcement",
+    () => catchAsFailed(api.getAnnouncement(false)),
+    { revalidateOnFocus: false },
+  );
+  const announcements = loadedValue(state)?.announcements ?? [];
+  if (announcements.length === 0) return null;
+
+  const dismiss = (id: string) => {
+    void api
+      .dismissAnnouncement(id)
+      .then(() => mutate())
+      .catch(() => {});
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      {announcements.map((announcement) => (
+        <AnnouncementCard key={announcement.id} announcement={announcement} onDismiss={dismiss} />
+      ))}
+    </div>
   );
 }
