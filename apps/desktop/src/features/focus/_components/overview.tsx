@@ -203,38 +203,51 @@ export function Overview({
 
       <WeekCard snapshot={snapshot} />
 
-      <div className="flex gap-2">
+      {/* Pausing and settings were one row of four look-alike buttons, where
+          "1 hour" meant nothing on its own and Settings read as a fourth
+          pause. Now the pause lengths sit under their own title, and
+          settings is a row of its own. */}
+      <section className="surface-card p-3">
+        <p className="text-[11px] font-semibold text-text-secondary">
+          {t(snapshot.pausedUntil ? "focus.status.paused" : "focus.pause-title")}
+        </p>
         {snapshot.pausedUntil ? (
           <button
             type="button"
             onClick={() => onPause("resume")}
-            className="settings-btn flex-1 justify-center text-center text-[12px]"
+            className="settings-btn settings-btn--accent mt-2 w-full justify-center text-center text-[12px]"
           >
             {t("focus.resume")}
           </button>
         ) : (
           // Three lengths, because a meeting, an afternoon of deep work and
           // "I'm done for today" are different pauses.
-          PAUSES.map((pause) => (
-            <button
-              key={pause.choice}
-              type="button"
-              onClick={() => onPause(pause.choice)}
-              className="settings-btn flex-1 justify-center whitespace-nowrap px-2 text-center text-[12px]"
-            >
-              {t(pause.label)}
-            </button>
-          ))
+          <div className="mt-2 grid grid-cols-3 gap-1.5">
+            {PAUSES.map((pause) => (
+              <button
+                key={pause.choice}
+                type="button"
+                onClick={() => onPause(pause.choice)}
+                className="settings-btn w-full justify-center whitespace-nowrap px-1 text-center text-[12px]"
+              >
+                {t(pause.label)}
+              </button>
+            ))}
+          </div>
         )}
-        <button
-          type="button"
-          onClick={onOpenSettings}
-          className="settings-btn flex items-center gap-1.5 text-[12px]"
-        >
-          <Icon name="settings" className="size-3" />
-          {t("focus.settings")}
-        </button>
-      </div>
+      </section>
+
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        className="surface-card flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+      >
+        <Icon name="settings" className="size-3.5 text-text-muted" />
+        <span className="flex-1 text-[12px] font-medium">{t("focus.settings-link")}</span>
+        <span className="text-[12px] text-text-muted" aria-hidden="true">
+          ›
+        </span>
+      </button>
     </div>
   );
 }

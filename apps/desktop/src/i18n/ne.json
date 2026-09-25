@@ -828,7 +828,7 @@
   "focus.row.eyes": "आँखा आराम",
   "focus.row.move": "उठ्ने",
   "focus.row.water": "पानी",
-  "focus.pause-half-hour": "३० मिनेट रोक्नुहोस्",
+  "focus.pause-half-hour": "३० मिनेट",
   "focus.pause-hour": "१ घण्टा",
   "focus.pause-rest-of-day": "आजभरि",
   "focus.settings": "सेटिङ",
@@ -905,5 +905,7 @@
   "setup.language-note": "धेरैले English चलाउँछन्। सेटिङबाट जुनसुकै बेला बदल्न सकिन्छ।",
   "setup.digits": "अङ्क",
   "setup.done": "भयो",
-  "settings.usage-insights-note": "कुन स्क्रिन र फिचर कति चलाउनुभयो भन्ने बेनामी दैनिक गन्ती पठाउँछ। तपाईंले लेखेको, पढेको वा सेभ गरेको कुरा कहिल्यै पठाउँदैन। बन्द गरे केही गनिँदैन।"
+  "settings.usage-insights-note": "कुन स्क्रिन र फिचर कति चलाउनुभयो भन्ने बेनामी दैनिक गन्ती पठाउँछ। तपाईंले लेखेको, पढेको वा सेभ गरेको कुरा कहिल्यै पठाउँदैन। बन्द गरे केही गनिँदैन।",
+  "focus.pause-title": "रिमाइन्डर केही बेर रोक्नुहोस्",
+  "focus.settings-link": "दिनचर्या सेटिङ"
 }
