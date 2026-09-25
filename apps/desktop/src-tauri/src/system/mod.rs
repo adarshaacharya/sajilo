@@ -1,6 +1,9 @@
 pub mod autostart;
 pub mod card_window;
 pub mod chime;
+#[cfg(target_os = "linux")]
+pub mod dbus;
+pub mod display;
 pub mod dock;
 pub mod idle;
 pub mod tray_pin;

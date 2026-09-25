@@ -70,14 +70,7 @@ mod platform {
 
 #[cfg(target_os = "linux")]
 mod platform {
-    use std::sync::OnceLock;
-
-    use zbus::blocking::Connection;
-
-    fn session() -> Option<&'static Connection> {
-        static SESSION: OnceLock<Option<Connection>> = OnceLock::new();
-        SESSION.get_or_init(|| Connection::session().ok()).as_ref()
-    }
+    use super::super::dbus::session;
 
     /// GNOME's idle monitor answers in milliseconds; KDE and others implement
     /// the freedesktop screensaver interface, in seconds. Anything else (a

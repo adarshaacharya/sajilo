@@ -163,6 +163,13 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
           />
         )}
       </div>
+      {/* Without an idle signal every minute counts, lunch included; the
+          numbers above say so rather than quietly overstating. */}
+      {!snapshot.idleSupported && (
+        <p className="pt-1 pb-1.5 text-[11px] leading-snug text-text-muted">
+          {t("focus.week.idle-unsupported")}
+        </p>
+      )}
     </section>
   );
 }

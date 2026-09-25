@@ -853,6 +853,7 @@
   "focus.week.water": "Water goal reached",
   "focus.week.water-count": "{met} of {days} days",
   "focus.week.stretch-row": "Longest without a break",
+  "focus.week.idle-unsupported": "This desktop can't tell when you step away, so every minute Sajilo runs counts as screen time.",
   "focus.week.chart": "Screen time by day",
   "focus.week.hm": "{h}h {m}m",
   "focus.week.m": "{m} min",

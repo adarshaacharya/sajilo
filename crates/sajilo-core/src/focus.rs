@@ -698,6 +698,9 @@ pub struct Tick {
     /// Seconds since the last keyboard or mouse input; `None` where the
     /// platform cannot tell, in which case all time counts as active.
     pub idle_seconds: Option<u32>,
+    /// Some app is keeping the display awake on an unlocked screen: a video,
+    /// a call, a slideshow. Hands off the keyboard, eyes on the screen.
+    pub display_held: bool,
 }
 
 /// Why reminders are or are not counting down right now.
@@ -758,7 +761,15 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         u32::try_from((tick.now - last).num_seconds().max(0)).unwrap_or(u32::MAX)
     });
     state.last_tick = Some(tick.now);
-    state.last_idle = tick.idle_seconds;
+    // Watching is being at the computer: a held display reads as fresh
+    // input, so the time counts and the eye timer keeps running through a
+    // film. Where idle cannot be measured at all, it stays unmeasured.
+    let input_idle = if tick.display_held {
+        tick.idle_seconds.map(|_| 0)
+    } else {
+        tick.idle_seconds
+    };
+    state.last_idle = input_idle;
     if state.paused_until.is_some_and(|until| tick.now >= until) {
         state.paused_until = None;
     }
@@ -773,7 +784,7 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     let idle = if elapsed > MAX_TICK_GAP_SECONDS {
         elapsed
     } else {
-        tick.idle_seconds.unwrap_or(0)
+        input_idle.unwrap_or(0)
     };
     let active = if elapsed > MAX_TICK_GAP_SECONDS {
         0

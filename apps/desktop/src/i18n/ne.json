@@ -853,6 +853,7 @@
   "focus.week.water": "पानीको लक्ष्य पुगेको",
   "focus.week.water-count": "{days} मध्ये {met} दिन",
   "focus.week.stretch-row": "विश्रामबिना सबैभन्दा लामो",
+  "focus.week.idle-unsupported": "यो डेस्कटपले तपाईं कहिले टाढा जानुहुन्छ भन्न सक्दैन, त्यसैले सजिलो चलेको हरेक मिनेट स्क्रिन टाइममा गनिन्छ।",
   "focus.week.chart": "दिनअनुसार स्क्रिन समय",
   "focus.week.hm": "{h} घण्टा {m} मिनेट",
   "focus.week.m": "{m} मिनेट",

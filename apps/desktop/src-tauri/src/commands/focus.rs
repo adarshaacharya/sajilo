@@ -187,6 +187,10 @@ fn notification_language(app: &AppHandle<Wry>) -> focus::Language {
 /// One measurement: advance the tracker and announce whatever came due.
 fn measure(app: &AppHandle<Wry>) {
     let idle = crate::system::idle::seconds();
+    // Only worth asking once input has gone quiet; while someone is typing,
+    // the answer changes nothing.
+    let display_held = idle.is_some_and(|idle| idle > focus::ACTIVE_WINDOW_SECONDS)
+        && crate::system::display::held_awake();
     let language = notification_language(app);
     let announce = with_tracker(app, |tracker| {
         let (now, local) = now();
@@ -197,6 +201,7 @@ fn measure(app: &AppHandle<Wry>) {
                 now,
                 local,
                 idle_seconds: idle,
+                display_held,
             },
         );
         tracker.unsaved_ticks += 1;

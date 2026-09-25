@@ -20,6 +20,15 @@ fn at(now: DateTime<Utc>, idle: u32) -> Tick {
         now,
         local: now.naive_utc(),
         idle_seconds: Some(idle),
+        display_held: false,
+    }
+}
+
+/// A tick while some app holds the display awake: a video, a call.
+fn watching(now: DateTime<Utc>, idle: u32) -> Tick {
+    Tick {
+        display_held: true,
+        ..at(now, idle)
     }
 }
 
@@ -1128,4 +1137,75 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
         (title.as_str(), plain.as_str()),
         ("टाढा हेर्नुहोस्", "२० सेकेन्ड ६ मिटर जति टाढाको कुनै चीज हेर्नुहोस्।")
     );
+}
+
+// ------------------------------------------------------------ watching
+
+/// Forty minutes of a video with hands off the keyboard: input idle climbs
+/// the whole time, but the held display says someone is watching.
+fn watch_film(state: &mut FocusState, settings: &FocusSettings, held: bool) -> Vec<BreakKind> {
+    let start = monday_at(10);
+    let mut due = Vec::new();
+    let mut now = start;
+    while now <= start + Duration::minutes(40) {
+        let idle = u32::try_from((now - start).num_seconds()).unwrap();
+        let tick_at = if held {
+            watching(now, idle)
+        } else {
+            at(now, idle)
+        };
+        due.extend(tick(state, settings, tick_at));
+        now += Duration::seconds(STEP);
+    }
+    due
+}
+
+#[test]
+fn watching_a_video_counts_as_screen_time_and_still_rests_the_eyes() {
+    let mut state = FocusState::default();
+    let due = watch_film(&mut state, &eyes_only(), true);
+    let today = state.today.as_ref().unwrap();
+    assert!(today.screen_seconds >= 39 * 60, "{}", today.screen_seconds);
+    assert!(
+        due.contains(&BreakKind::Eyes),
+        "the 20-20-20 reminder comes mid-film"
+    );
+
+    let view = snapshot(
+        &mut state,
+        &eyes_only(),
+        monday_at(10) + Duration::minutes(40),
+        (monday_at(10) + Duration::minutes(40)).naive_utc(),
+    );
+    assert_eq!(view.status, FocusStatus::Active, "watching is not away");
+}
+
+#[test]
+fn without_a_held_display_the_same_film_reads_as_away() {
+    let mut state = FocusState::default();
+    let due = watch_film(&mut state, &eyes_only(), false);
+    let today = state.today.as_ref().unwrap();
+    assert!(today.screen_seconds <= 2 * 60, "{}", today.screen_seconds);
+    assert!(due.is_empty());
+}
+
+/// A held display cannot turn a sleeping laptop into screen time.
+#[test]
+fn a_held_display_does_not_count_the_time_the_computer_slept() {
+    let mut state = FocusState::default();
+    let settings = eyes_only();
+    tick(&mut state, &settings, watching(monday_at(10), 0));
+    tick(&mut state, &settings, watching(monday_at(11), 0));
+    assert_eq!(state.today.as_ref().unwrap().screen_seconds, 0);
+}
+
+#[test]
+fn a_held_display_keeps_an_unmeasurable_idle_unmeasured() {
+    let mut state = FocusState::default();
+    let tick_at = Tick {
+        idle_seconds: None,
+        ..watching(monday_at(10), 0)
+    };
+    tick(&mut state, &eyes_only(), tick_at);
+    assert_eq!(state.last_idle, None);
 }
