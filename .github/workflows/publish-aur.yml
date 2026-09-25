@@ -1,0 +1,131 @@
+name: Publish to the AUR
+
+# Runs when a release is published — not when it is tagged. release-desktop.yml
+# leaves each release as a draft until someone publishes it on GitHub, and
+# `sajilo-bin` repackages that release's .deb, which is only downloadable once
+# the release is public. Publishing the release is the one step; Arch users get
+# the update with their next `yay -Syu`.
+#
+# One-time setup (see packaging/aur/README.md): an AUR account with an SSH key,
+# and that key's private half in this repository's secrets as
+# AUR_SSH_PRIVATE_KEY. The first run creates the package; later runs update it.
+# Without the secret it still builds and checks the package, then says so.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, without the v (e.g. 0.1.29)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  aur:
+    name: sajilo-bin
+    runs-on: ubuntu-latest
+    # makepkg lives here, and .SRCINFO must come from makepkg itself.
+    container: archlinux:base-devel
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Work out the version
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+          HAS_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY != '' }}
+        run: |
+          set -euo pipefail
+          # A beta is not what Arch users should update to.
+          if [ "$PRERELEASE" = "true" ]; then
+            echo "::notice::$TAG is a pre-release; the AUR package stays on the last stable version."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          VERSION="${INPUT_VERSION:-${TAG#v}}"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Not a release version: '$VERSION'"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          # The package is built and checked either way; only the push needs
+          # the key, so a missing key still proves the release packages.
+          echo "push=$HAS_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Build the package files
+        if: steps.version.outputs.skip == 'false'
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          pacman -Sy --noconfirm --needed git openssh
+
+          WORK="$RUNNER_TEMP/sajilo-bin"
+          mkdir -p "$WORK"
+          cp packaging/aur/PKGBUILD "$WORK/PKGBUILD"
+          cd "$WORK"
+
+          # The checksum of the exact file Arch users will download.
+          URL="https://github.com/adarshaacharya/sajilo/releases/download/v${VERSION}/Sajilo_${VERSION}_amd64.deb"
+          curl -fsSL --retry 5 --retry-delay 10 -o sajilo.deb "$URL"
+          SUM=$(sha256sum sajilo.deb | cut -d' ' -f1)
+          rm sajilo.deb
+
+          sed -i \
+            -e "s/^pkgver=.*/pkgver=${VERSION}/" \
+            -e "s/^pkgrel=.*/pkgrel=1/" \
+            -e "s/^sha256sums=.*/sha256sums=('${SUM}')/" \
+            PKGBUILD
+          grep -E '^(pkgver|pkgrel|sha256sums)=' PKGBUILD
+
+          # makepkg refuses to run as root, and must: it both checks the
+          # download against the checksum and writes .SRCINFO.
+          useradd -m builder
+          chown -R builder "$WORK"
+          su builder -c "cd '$WORK' && makepkg --verifysource --noconfirm && makepkg --printsrcinfo > .SRCINFO"
+          rm -f "$WORK"/*.deb
+          cat .SRCINFO
+
+      - name: Say why nothing was pushed
+        if: steps.version.outputs.skip == 'false' && steps.version.outputs.push != 'true'
+        run: echo "::notice::Built and checked sajilo-bin, but AUR_SSH_PRIVATE_KEY is not set, so nothing was pushed. See packaging/aur/README.md."
+
+      - name: Push to the AUR
+        if: steps.version.outputs.skip == 'false' && steps.version.outputs.push == 'true'
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          AUR_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$AUR_KEY" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          ssh-keyscan -t ed25519,rsa aur.archlinux.org >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/aur -o IdentitiesOnly=yes"
+
+          # Cloning a package that does not exist yet gives an empty repository;
+          # the first push creates it on the AUR.
+          REPO="$RUNNER_TEMP/aur-repo"
+          git clone ssh://aur@aur.archlinux.org/sajilo-bin.git "$REPO"
+          cp "$RUNNER_TEMP/sajilo-bin/PKGBUILD" "$RUNNER_TEMP/sajilo-bin/.SRCINFO" "$REPO/"
+          cd "$REPO"
+          git config user.name "Adarsha Acharya"
+          git config user.email "connectwithadarsha@gmail.com"
+          git add PKGBUILD .SRCINFO
+          if git diff --cached --quiet; then
+            echo "sajilo-bin is already at ${VERSION}."
+            exit 0
+          fi
+          git commit -m "Update to ${VERSION}"
+          git push origin HEAD:master
+          echo "::notice::sajilo-bin ${VERSION} is on the AUR: https://aur.archlinux.org/packages/sajilo-bin"

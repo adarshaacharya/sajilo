@@ -22,6 +22,7 @@ const platforms = [
     step: "The .deb for Ubuntu and Mint, the .rpm for Fedora and openSUSE, sajilo-bin from the AUR on Arch, or the AppImage anywhere.",
     find: "In your top bar. No top bar, or nothing there? Open Sajilo from your apps menu.",
     link: { href: "/docs/install-linux.html", label: "Commands and tray setup" },
+    cmd: { label: "Arch", code: "yay -S sajilo-bin" },
     dl: [
       { id: "linux-deb", label: ".deb" },
       { id: "linux-rpm", label: ".rpm" },
@@ -55,6 +56,12 @@ const platforms = [
             </a>
           ))}
         </div>
+        {p.cmd && (
+          <p class="platform-cmd">
+            <span>{p.cmd.label}</span>
+            <code>{p.cmd.code}</code>
+          </p>
+        )}
         {p.link && <a class="platform-link" href={p.link.href}>{p.link.label} →</a>}
       </li>
     ))}
@@ -118,6 +125,24 @@ const platforms = [
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+  }
+  .platform-cmd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .platform-cmd code {
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    user-select: all;
   }
   .platform-link {
     font-size: 14px;
