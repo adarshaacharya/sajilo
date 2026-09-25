@@ -154,10 +154,13 @@ export const UPDATE_NOTICE: Announcement = {
     en: "Update Sajilo",
     ne: "सजिलो अपडेट गर्नुहोस्",
   },
+  // The labels are the old versions' own, word for word, so the path can be
+  // followed on screen: every version since 0.1.25 has this Settings section.
   body: {
-    en: "A newer version is out. Click Update or Restart to update at the top of Sajilo. Don't see either? Quit Sajilo and open it again.",
-    ne: "नयाँ संस्करण आएको छ। सजिलोको माथि रहेको Update वा Restart to update थिच्नुहोस्। देखिएन भने सजिलो बन्द गरेर फेरि खोल्नुहोस्।",
+    en: "A newer version is out. Open Settings (the gear) › System › Updates, click Check for updates, then Install update or Restart now. Or quit Sajilo and open it again.",
+    ne: "नयाँ संस्करण आएको छ। सेटिङ (गियर) › प्रणाली › अपडेटहरूमा गएर अद्यावधिक जाँच गर्नुहोस्, अनि अद्यावधिक स्थापना गर्नुहोस् वा अहिले पुनः सुरु गर्नुहोस् थिच्नुहोस्। वा सजिलो बन्द गरेर फेरि खोल्नुहोस्।",
   },
+
   action: {
     url: "https://sajilo.fyi/docs/updating.html",
     label: { en: "How updating works", ne: "अपडेट कसरी हुन्छ" },
