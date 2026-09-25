@@ -1,405 +1,62 @@
 ---
 import Base from "../layouts/Base.astro";
-// The same file the Windows tray draws, so the picture matches the taskbar.
-import nepalFlag from "../../../desktop/src-tauri/assets/nepal-flag.svg?url";
 
-interface Shot { src: string; alt: string; wide?: boolean }
-interface Step {
-  text: string;
-  images?: Shot[];
-  /** A command to paste into a terminal. */
-  code?: string;
-  /** The ^-overflow-to-taskbar drag, drawn rather than photographed. */
-  trayDiagram?: boolean;
-}
-interface Platform { id: string; name: string; intro: string; steps: Step[] }
-
-const platforms: Platform[] = [
-  {
-    id: "macos",
-    name: "macOS",
-    intro:
-      "Beta builds are not signed with an Apple certificate yet, so macOS blocks the first launch. These steps are needed once per update.",
-    steps: [
-      {
-        text: "Open the downloaded .dmg and drag Sajilo onto the Applications shortcut.",
-        images: [{ src: "/assets/install/0-drag-to-applications.png", alt: "Dragging Sajilo.app onto the Applications shortcut", wide: true }],
-      },
-      {
-        text: "Open Sajilo from Applications, Launchpad or Spotlight. macOS says “Sajilo” Not Opened. Click Done, not Move to Trash.",
-        images: [{ src: "/assets/install/1-not-opened.png", alt: "“Sajilo” Not Opened dialog" }],
-      },
-      {
-        text: "Open System Settings, then Privacy & Security, and scroll to Security. Next to “Sajilo” was blocked to protect your Mac, click Open Anyway.",
-        images: [{ src: "/assets/install/2-open-anyway.png", alt: "Security section showing the Open Anyway button", wide: true }],
-      },
-      {
-        text: "Confirm Open Anyway once more, then authenticate with Touch ID or your password.",
-        images: [
-          { src: "/assets/install/3-confirm-open.png", alt: "Open Sajilo confirmation dialog" },
-          { src: "/assets/install/4-authenticate.png", alt: "Touch ID or admin password prompt" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "windows",
-    name: "Windows",
-    intro:
-      "Windows 10 or 11, 64-bit. Beta builds are not code-signed yet, so SmartScreen warns you the first time.",
-    steps: [
-      { text: "Run the downloaded installer, Sajilo-windows-x64.exe." },
-      {
-        text: "SmartScreen shows “Windows protected your PC”. Click More info, then Run anyway. Only do this for a file downloaded from this site or Sajilo’s GitHub releases.",
-      },
-      {
-        text: "Follow the installer. It installs for your account only, so it normally doesn’t ask for an administrator password. On Windows 10 it may download Microsoft Edge WebView2 first, so stay online.",
-      },
-      {
-        text: "Windows hides every new tray icon behind the ^ arrow next to the clock. Click ^, then drag the Nepal flag out and drop it on the taskbar beside the clock. Click it to open Sajilo; hover over it to see today’s date.",
-        trayDiagram: true,
-      },
-    ],
-  },
-  {
-    id: "linux",
-    name: "Linux",
-    intro: "64-bit (x86_64) systems. Use the .deb on Ubuntu, Debian, Linux Mint or Pop!_OS, and the AppImage anywhere else.",
-    steps: [
-      {
-        text: "With the .deb, install it from the folder you downloaded it to. apt also installs what Sajilo needs.",
-        code: "sudo apt install ./Sajilo-linux-amd64.deb",
-      },
-      {
-        text: "With the AppImage, make it executable and run it. If it complains about FUSE, install libfuse2 (libfuse2t64 on Ubuntu 24.04).",
-        code: "chmod +x Sajilo-linux-x86_64.AppImage\n./Sajilo-linux-x86_64.AppImage",
-      },
-      {
-        text: "Sajilo shows the Nepali date in your top bar. KDE, Cinnamon, XFCE, MATE and Budgie show it out of the box. On GNOME, install the AppIndicator and KStatusNotifierItem Support extension; Ubuntu already has it on.",
-      },
-      {
-        text: "Linux trays don’t pass clicks through to apps, so click the date and choose Open Sajilo from its menu.",
-      },
-    ],
-  },
+// Installing now lives in the docs, one page per system. This address stays
+// because links to it are out on the web (install.html#windows and so on):
+// it forwards to the matching page, by the #system in the link or, without
+// one, by the visitor's own system.
+const pages = [
+  { id: "windows", name: "Windows", href: "/docs/install-windows.html" },
+  { id: "macos", name: "macOS", href: "/docs/install-macos.html" },
+  { id: "linux", name: "Linux", href: "/docs/install-linux.html" },
 ];
-
-const digits = "०१२३४५६७८९";
 ---
 
 <Base
   title="Installing Sajilo"
-  description="How to install Sajilo on macOS, Windows and Linux, and get past the warnings that unsigned beta builds show on first launch."
+  description="How to install Sajilo on Windows, macOS and Linux."
   path="/install.html"
+  noindex
 >
-  <main class="wrap guide" id="main">
-    <h1 class="display guide-h1">Installing Sajilo</h1>
-    <p class="lede">
-      Beta builds are not code-signed yet, so each system asks for confirmation the first time. After that
-      Sajilo updates itself and starts with your computer.
-    </p>
-
-    <nav class="os-nav" aria-label="Choose your system">
-      {platforms.map((p) => (
-        <a class="btn btn--ghost btn--sm" href={`#${p.id}`} data-os={p.id}>{p.name}</a>
-      ))}
-    </nav>
-
-    {platforms.map((p) => (
-      <section class="os" id={p.id} aria-labelledby={`${p.id}-title`}>
-        <h2 class="os-title display" id={`${p.id}-title`}>{p.name}</h2>
-        <p class="os-intro">{p.intro}</p>
-        <ol class="steps">
-          {p.steps.map((s, i) => (
-            <li class="step reveal">
-              <span class="step-num" lang="ne">{digits[i + 1]}</span>
-              <div class="step-body">
-                <p>{s.text}</p>
-                {s.code && <pre class="step-code"><code>{s.code}</code></pre>}
-                {s.trayDiagram && (
-                  <div class="tray" role="img" aria-label="Drag the Nepal flag from the hidden icons panel onto the taskbar next to the clock">
-                    <div class="tray-panel">
-                      <div class="tray-pop">
-                        <img src={nepalFlag} alt="" />
-                        <span class="tray-slot"></span>
-                        <span class="tray-slot"></span>
-                      </div>
-                      <span class="tray-caret">^</span>
-                    </div>
-                    <svg class="tray-arrow" viewBox="0 0 64 24" aria-hidden="true">
-                      <path d="M4 18 Q 32 0 56 12" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
-                      <path d="M51 6 L57 12 L50 16" fill="none" stroke="currentColor" stroke-width="2" />
-                    </svg>
-                    <div class="tray-bar">
-                      <span>^</span>
-                      <img src={nepalFlag} alt="" />
-                      <span>ENG</span>
-                      <span>4:34 PM</span>
-                    </div>
-                  </div>
-                )}
-                {s.images && (
-                  <div class="step-images">
-                    {s.images.map((img) => (
-                      <img src={img.src} alt={img.alt} loading="lazy" class:list={{ wide: img.wide }} />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-    ))}
-
-    <div class="done reveal">
-      <!-- The app itself, not a screenshot of it, so this never shows an old UI. -->
-      <div class="done-frame">
-        <div class="done-screen">
-          <iframe
-            class="done-app"
-            title="Sajilo open, showing the Bikram Sambat calendar, Kathmandu weather and the NEPSE index"
-            tabindex="-1"
-            scrolling="no"
-            loading="lazy"
-            src="/assets/app/index.html?route=%2F&inert=1&theme=dark"
-          ></iframe>
-        </div>
-      </div>
-      <div>
-        <p class="done-ne" lang="ne">भयो।</p>
-        <p>
-          Sajilo now starts with your computer. It lives in the menu bar on a Mac, in the system tray on
-          Windows, and in the top bar on Linux. Turn off launch at login in Settings if you’d rather not.
-        </p>
-        <p class="done-help">Problems: <a href="mailto:contact@sajilo.fyi">contact@sajilo.fyi</a></p>
-        <a class="btn btn--sm" href="/#download">Back to downloads</a>
-      </div>
-    </div>
+  <script is:inline slot="head">
+    (function () {
+      var pages = {
+        windows: "/docs/install-windows.html",
+        macos: "/docs/install-macos.html",
+        linux: "/docs/install-linux.html",
+      };
+      var os = location.hash.slice(1);
+      if (!pages[os]) {
+        var ua = navigator.userAgent;
+        os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "macos" : /Linux/.test(ua) ? "linux" : "";
+      }
+      location.replace(pages[os] || "/docs.html");
+    })();
+  </script>
+  <main class="wrap moved" id="main">
+    <h1>Installing Sajilo has moved to the docs</h1>
+    <ul>
+      {pages.map((page) => <li><a href={page.href}>Install on {page.name}</a></li>)}
+    </ul>
   </main>
 </Base>
 
 <style>
-  .guide {
+  .moved {
     position: relative;
     z-index: 1;
-    padding-top: clamp(40px, 7vw, 90px);
-    max-width: 760px;
+    padding-block: clamp(40px, 7vw, 90px);
   }
-  .guide-h1 {
-    font-size: clamp(48px, 8vw, 92px);
-    margin-bottom: 22px;
-  }
-  .steps {
-    display: grid;
-    margin-top: clamp(40px, 6vw, 72px);
-  }
-  .step {
-    display: grid;
-    grid-template-columns: 64px 1fr;
-    gap: 20px;
-    padding: 32px 0;
-    border-top: 1px solid var(--line);
-  }
-  .step-num {
+  .moved h1 {
     font-family: var(--display);
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 1;
-    color: var(--accent);
+    font-size: clamp(28px, 4vw, 40px);
   }
-  .step-body {
+  .moved ul {
+    margin-top: 18px;
     display: grid;
-    gap: 16px;
-  }
-  .step-body p {
-    font-size: 17px;
-    color: var(--paper);
-    max-width: 52ch;
-  }
-  .step-images {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .step-images img {
-    max-width: 260px;
-    border-radius: 10px;
-    border: 1px solid var(--line-2);
-    box-shadow: 0 20px 40px -20px rgb(0 0 0 / 0.6);
-  }
-  .step-images img.wide {
-    max-width: 100%;
-  }
-  .done {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 32px;
-    align-items: center;
-    margin-top: 40px;
-    padding: 32px;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--ink-2);
-  }
-  .done-frame {
-    position: relative;
-    aspect-ratio: 380 / 560;
-    overflow: hidden;
-    border-radius: 14px;
-    border: 1px solid var(--line-2);
-    background: #0e0e10;
-  }
-  .done-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 380px;
-    height: 560px;
-    transform: scale(var(--fit, 1));
-    transform-origin: 0 0;
-  }
-  .done-app {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    pointer-events: none;
-  }
-  .done div {
-    display: grid;
-    gap: 12px;
-    justify-items: start;
-  }
-  .done-ne {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 44px;
-    line-height: 1;
-    color: var(--gilt-2);
-  }
-  .done p {
-    color: var(--paper-2);
-  }
-  .done-help {
-    font-size: 14px;
-    color: var(--paper-3);
-  }
-  .done-help a {
-    color: var(--gilt);
-  }
-  @media (max-width: 640px) {
-    .step {
-      grid-template-columns: 40px 1fr;
-      gap: 14px;
-    }
-    .step-num {
-      font-size: 34px;
-    }
-    .done {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .os-nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 28px;
-  }
-  .os-nav a[aria-current="true"] {
-    border-color: var(--gilt);
-    color: var(--gilt-2);
-  }
-  .os {
-    margin-top: clamp(56px, 8vw, 96px);
-    scroll-margin-top: 96px;
-  }
-  .os-title {
-    font-size: clamp(34px, 5vw, 52px);
-  }
-  .os-intro {
-    margin-top: 10px;
-    color: var(--paper-2);
-    max-width: 60ch;
-  }
-  .os .steps {
-    margin-top: 24px;
-  }
-  .step-code {
-    margin: 0;
-    padding: 12px 14px;
-    border: 1px solid var(--line-2);
-    border-radius: 10px;
-    background: var(--ink-2);
-    font-family: var(--mono);
-    font-size: 14px;
-    color: var(--paper);
-    overflow-x: auto;
-    white-space: pre;
-  }
-  .tray {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    max-width: 460px;
-  }
-  .tray img {
-    height: 16px;
-    width: auto;
-  }
-  .tray-panel {
-    display: grid;
-    justify-items: center;
-    gap: 4px;
-  }
-  .tray-pop,
-  .tray-bar {
-    display: flex;
-    align-items: center;
     gap: 8px;
-    padding: 8px 10px;
-    border: 1px solid var(--line-2);
-    border-radius: 8px;
-    background: var(--ink-2);
   }
-  .tray-slot {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-    background: var(--line-2);
-  }
-  .tray-caret {
-    font-size: 13px;
-    color: var(--paper-3);
-  }
-  .tray-arrow {
-    width: 64px;
-    height: 24px;
-    margin-bottom: 10px;
-    flex-shrink: 0;
+  .moved a {
     color: var(--gilt);
-  }
-  .tray-bar {
-    flex: 1;
-    justify-content: flex-end;
-    font-size: 13px;
-    color: var(--paper-3);
-    font-variant-numeric: tabular-nums;
   }
 </style>
-
-<script>
-  const frame = document.querySelector<HTMLElement>(".done-frame");
-  const screen = document.querySelector<HTMLElement>(".done-screen");
-  if (frame && screen) {
-    const fit = () => screen.style.setProperty("--fit", String(frame.clientWidth / 380));
-    fit();
-    new ResizeObserver(fit).observe(frame);
-  }
-
-  // Marks the visitor's own system in the switcher. The page still lists all
-  // three, so a guess that is wrong costs nothing.
-  const ua = navigator.userAgent;
-  const os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "macos" : /Linux/.test(ua) ? "linux" : null;
-  if (os) document.querySelector(`.os-nav [data-os="${os}"]`)?.setAttribute("aria-current", "true");
-</script>

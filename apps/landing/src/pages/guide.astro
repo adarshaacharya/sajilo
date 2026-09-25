@@ -1,259 +1,40 @@
 ---
 import Base from "../layouts/Base.astro";
 
-// Every label below is the app's own wording (apps/desktop/src/i18n/en.json),
-// so what a reader finds here is what they will see on screen.
-const tabs = [
-  { id: "display", label: "Display" },
-  { id: "modules", label: "Modules" },
-  { id: "system", label: "System" },
-  { id: "about", label: "About" },
-];
+// The settings guide is now a page of the docs. This address stays for the
+// links already out there, forwarding with their #section: the docs page uses
+// the same section names (display, modules, system, about).
 ---
 
 <Base
   title="Settings guide: Sajilo"
-  description="Every Sajilo setting, explained: theme, language, the menu bar date, which modules show, reminders, backups and updates."
+  description="Every Sajilo setting, explained."
   path="/guide.html"
+  noindex
 >
-  <main class="wrap guide" id="main">
-    <h1 class="display guide-h1">Settings guide</h1>
-    <p class="lede">
-      Click Sajilo in the menu bar, then the gear at the top right. Settings has four tabs. This page
-      goes through each one.
-    </p>
-
-    <nav class="guide-toc" aria-label="On this page">
-      {tabs.map((tab) => <a href={`#${tab.id}`}>{tab.label}</a>)}
-    </nav>
-
-    <section class="guide-block" id="display">
-      <h2>Display</h2>
-
-      <h3>Appearance</h3>
-      <dl>
-        <dt>Theme</dt>
-        <dd>System follows your computer's light or dark mode. Light and Dark fix it either way.</dd>
-        <dt>Text size</dt>
-        <dd>Small, Default or Large. It changes the text, not the size of the window.</dd>
-        <dt>Language</dt>
-        <dd>नेपाली or English, for the whole app.</dd>
-        <dt>Numerals</dt>
-        <dd>Devanagari (२०८३) or Latin (2083) digits for dates and numbers.</dd>
-      </dl>
-
-      <h3>Menu bar</h3>
-      <dl>
-        <dt>Format</dt>
-        <dd>
-          What the menu bar shows: the short Nepali date, the full date with the year, the date with a
-          Nepal flag, the Gregorian date, or a numeric date. Pick <strong>Custom…</strong> to choose
-          the pieces yourself.
-        </dd>
-        <dt>Show time</dt>
-        <dd>Adds the current time next to the date.</dd>
-        <dt>Show Nepal flag, Show BS year</dt>
-        <dd>Appear only with the Custom format.</dd>
-      </dl>
-
-      <h3>Startup</h3>
-      <dl>
-        <dt>Launch at login</dt>
-        <dd>
-          Starts Sajilo when you sign in. On macOS, if it says it is waiting for approval, allow it in
-          System Settings › General › Login Items.
-        </dd>
-        <dt>Show Dock icon</dt>
-        <dd>On macOS, shows Sajilo in the Dock as well as the menu bar.</dd>
-      </dl>
-    </section>
-
-    <section class="guide-block" id="modules">
-      <h2>Modules</h2>
-      <p>
-        Everything beyond the calendar is a module you can switch off. Switch them all off and Sajilo
-        shows the calendar only, which always stays.
-      </p>
-      <dl>
-        <dt>Weather</dt>
-        <dd>
-          Weather and air quality on the dashboard. <strong>Home place</strong> sets which place it
-          shows. To follow more places, pin them from the Weather screen.
-        </dd>
-        <dt>Forex</dt>
-        <dd>
-          Nepal Rastra Bank exchange rates. <strong>Currencies on the card</strong> picks which ones
-          appear; the first one you pick is the one the dashboard shows.
-        </dd>
-        <dt>News</dt>
-        <dd>Headlines from Nepali and English newsrooms, and official government notices.</dd>
-        <dt>Bazar</dt>
-        <dd>Gold, silver, fuel and Kalimati produce prices, alongside NEPSE and mutual funds.</dd>
-        <dt>Rashifal</dt>
-        <dd>The daily rashifal for all twelve signs.</dd>
-        <dt>Radio</dt>
-        <dd>Nepali FM stations.</dd>
-        <dt>Second Clock</dt>
-        <dd>A second clock next to Nepal time. Add cities from Tools.</dd>
-        <dt>Keeper</dt>
-        <dd>Family documents, renewals, bills and reminders in their own tab.</dd>
-      </dl>
-    </section>
-
-    <section class="guide-block" id="system">
-      <h2>System</h2>
-
-      <h3>Updates</h3>
-      <p>
-        <strong>Check for updates</strong> looks for a new version. When one is ready, install it and
-        restart. The update window that appears on its own also has a switch to download and install
-        future updates automatically. What changed in each version is on the
-        <a href="/releases.html">release notes</a> page.
-      </p>
-
-      <h3>Reminders</h3>
-      <dl>
-        <dt>Public holiday tomorrow, Festival tomorrow</dt>
-        <dd>Arrive at 7pm Nepal time, the evening before.</dd>
-        <dt>IPO closing day</dt>
-        <dd>Arrives at 10am on the closing day, unless you have marked that issue as applied.</dd>
-        <dt>SIP payment due</dt>
-        <dd>For the mutual fund SIPs you have set up under Bazar.</dd>
-      </dl>
-      <p>
-        Reminders are scheduled on your computer. If they never arrive, check that notifications are
-        allowed for Sajilo in your system settings (on macOS, System Settings › Notifications).
-      </p>
-
-      <h3>Privacy</h3>
-      <p>
-        <strong>Help improve Sajilo</strong> sends one anonymous count a day, under a random id the
-        app made up for itself so that returning users are not counted as new ones.
-        Switch the count off and nothing is sent at all. The
-        <a href="/privacy.html">privacy policy</a> lists exactly what the count contains.
-      </p>
-
-      <h3>Backup</h3>
-      <p>
-        <strong>Export Sajilo data…</strong> saves everything Sajilo keeps on your computer to one
-        file: day plans, Keeper documents and their photos, watchlists and settings. <strong>Import Sajilo data…</strong> restores it, on this computer or a new one. Prices
-        and news are not in the backup; they are fetched again.
-      </p>
-    </section>
-
-    <section class="guide-block" id="about">
-      <h2>About</h2>
-      <p>
-        The version you are running, a link to <a href="/report.html">report an issue</a>, the
-        <a href="/license.html">licence</a> and the <a href="/privacy.html">privacy policy</a>.
-      </p>
-    </section>
-
-    <section class="guide-block">
-      <h2>Something not covered here?</h2>
-      <p>
-        <a href="/report.html">Tell us</a>. If a setting confused you, that is worth fixing too.
-      </p>
-    </section>
+  <script is:inline slot="head">
+    location.replace("/docs/settings.html" + location.hash);
+  </script>
+  <main class="wrap moved" id="main">
+    <h1>The settings guide has moved to the docs</h1>
+    <p><a href="/docs/settings.html">Go to Settings in the docs</a></p>
   </main>
 </Base>
 
 <style>
-  .guide {
+  .moved {
     position: relative;
     z-index: 1;
-    padding-top: clamp(40px, 7vw, 90px);
-    padding-bottom: 40px;
-    max-width: 680px;
+    padding-block: clamp(40px, 7vw, 90px);
   }
-  .guide-h1 {
-    font-size: clamp(48px, 8vw, 84px);
-    margin-bottom: 22px;
-  }
-  .guide .lede {
-    max-width: none;
-  }
-
-  .guide-toc {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 28px;
-  }
-  .guide-toc a {
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--paper-2);
-    box-shadow: inset 0 0 0 1px var(--line-2);
-    transition: color 0.2s, background 0.2s;
-  }
-  .guide-toc a:hover {
-    color: var(--paper);
-    background: var(--ink-3);
-  }
-
-  .guide-block {
-    margin-top: 40px;
-    padding-top: 28px;
-    border-top: 1px solid var(--line);
-    scroll-margin-top: 84px;
-  }
-  .guide-block h2 {
+  .moved h1 {
     font-family: var(--display);
-    font-weight: 700;
-    font-size: 28px;
-    line-height: 1.2;
-    margin-bottom: 14px;
+    font-size: clamp(28px, 4vw, 40px);
   }
-  .guide-block h3 {
-    margin-top: 26px;
-    margin-bottom: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--paper-3);
-  }
-  .guide-block h2 + h3 {
-    margin-top: 0;
-  }
-  .guide-block p {
-    color: var(--paper-2);
-    font-size: 17px;
-    max-width: 58ch;
-  }
-  .guide-block p + p,
-  .guide-block dl + p,
-  .guide-block p + dl {
-    margin-top: 14px;
-  }
-  .guide-block dl {
-    margin: 0;
-  }
-  .guide-block dt {
-    font-weight: 600;
-    font-size: 16px;
-    color: var(--paper);
-  }
-  .guide-block dt:not(:first-child) {
+  .moved p {
     margin-top: 18px;
   }
-  .guide-block dd {
-    margin: 3px 0 0;
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--paper-2);
-  }
-  .guide-block strong {
-    font-weight: 600;
-    color: var(--paper);
-  }
-  .guide-block a {
+  .moved a {
     color: var(--gilt);
-  }
-  .guide-block a:hover {
-    color: var(--gilt-2);
   }
 </style>

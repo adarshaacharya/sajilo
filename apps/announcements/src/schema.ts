@@ -159,7 +159,7 @@ export const UPDATE_NOTICE: Announcement = {
     ne: "नयाँ संस्करण आएको छ। सुधार र यस्ता सूचना पाइरहन अपडेट गर्नुहोस्।",
   },
   action: {
-    url: "https://sajilo.fyi/install.html",
+    url: "https://sajilo.fyi/#download",
     label: { en: "Get the latest", ne: "नयाँ संस्करण लिनुहोस्" },
   },
 };

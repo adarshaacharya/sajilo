@@ -1,0 +1,142 @@
+---
+import AppFrame from "../components/AppFrame.astro";
+import Base from "../layouts/Base.astro";
+import { docHref, orderedDocs, SECTIONS } from "../lib/docs";
+
+const all = await orderedDocs();
+const groups = SECTIONS.map((section) => ({
+  ...section,
+  pages: all.filter((page) => page.data.section === section.id),
+}));
+---
+
+<Base
+  title="Sajilo docs"
+  description="How to install Sajilo on Windows, macOS and Linux, and how to use every part of it: the calendar, reminders, news, Bazar, radio, Routine and more."
+  path="/docs.html"
+>
+  <main class="wrap docs-index" id="main">
+    <div class="docs-index-head">
+      <div>
+        <p class="docs-index-kicker" lang="ne">सहायता</p>
+        <h1 class="docs-index-title">Sajilo docs</h1>
+        <p class="docs-index-lede">
+          Installing on Windows, macOS and Linux, keeping it up to date, and a page for every part of the
+          app, each with the real app open beside it.
+        </p>
+        <div class="docs-index-cta">
+          <a class="btn btn--accent btn--sm" href="/docs/install-windows.html">Install on Windows</a>
+          <a class="btn btn--ghost btn--sm" href="/docs/install-macos.html">macOS</a>
+          <a class="btn btn--ghost btn--sm" href="/docs/install-linux.html">Linux</a>
+        </div>
+      </div>
+      <div class="docs-index-frame">
+        <AppFrame route="/" title="Sajilo open on the Today screen" />
+      </div>
+    </div>
+
+    {groups.map((group) => (
+      <section class="docs-index-group" aria-labelledby={`group-${group.id}`}>
+        <h2 id={`group-${group.id}`}>{group.label}</h2>
+        <ul>
+          {group.pages.map((page) => (
+            <li>
+              <a href={docHref(page)}>
+                <strong>{page.data.nav ?? page.data.title}</strong>
+                <span>{page.data.description}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </main>
+</Base>
+
+<style>
+  .docs-index {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(40px, 7vw, 90px);
+    padding-bottom: 64px;
+  }
+  .docs-index-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: clamp(28px, 6vw, 80px);
+    align-items: center;
+  }
+  .docs-index-kicker {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--gilt-2);
+  }
+  .docs-index-title {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(48px, 8vw, 84px);
+    line-height: 1;
+  }
+  .docs-index-lede {
+    margin-top: 18px;
+    max-width: 52ch;
+    font-size: 18px;
+    color: var(--paper-2);
+  }
+  .docs-index-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+  }
+  .docs-index-group {
+    margin-top: clamp(44px, 6vw, 72px);
+  }
+  .docs-index-group h2 {
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 26px;
+  }
+  .docs-index-group ul {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .docs-index-group a {
+    display: grid;
+    gap: 4px;
+    height: 100%;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: var(--ink-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .docs-index-group a:hover {
+    background: var(--ink-3);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+  }
+  .docs-index-group strong {
+    font-weight: 600;
+    color: var(--paper);
+  }
+  .docs-index-group span {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--paper-3);
+  }
+  @media (max-width: 760px) {
+    .docs-index-head {
+      grid-template-columns: 1fr;
+    }
+    .docs-index-frame {
+      width: min(100%, 280px);
+    }
+  }
+</style>

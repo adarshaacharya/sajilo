@@ -19,7 +19,15 @@ const DIST = new URL("../dist/", import.meta.url);
 // own, copied under assets/), and paginated release-list pages past the
 // first — those already carry their own <meta name="robots" content="noindex">,
 // listing them here too would just contradict that tag.
-const EXCLUDE = [/^404\.html$/, /^og\.html$/, /^assets\//, /^releases\/page\//];
+// `install.html` and `guide.html` only redirect into the docs now.
+const EXCLUDE = [
+  /^404\.html$/,
+  /^og\.html$/,
+  /^assets\//,
+  /^releases\/page\//,
+  /^install\.html$/,
+  /^guide\.html$/,
+];
 
 /** Weekly for pages whose content keeps changing; a release's own page is
  * effectively frozen the moment it's published. */
@@ -27,7 +35,8 @@ function priorityAndFreq(pathname) {
   if (pathname === "/") return { priority: "1.0", changefreq: "weekly" };
   if (pathname === "/releases.html") return { priority: "0.8", changefreq: "weekly" };
   if (pathname.startsWith("/releases/")) return { priority: "0.3", changefreq: "never" };
-  if (pathname === "/install.html") return { priority: "0.6", changefreq: "monthly" };
+  if (pathname === "/docs.html") return { priority: "0.7", changefreq: "monthly" };
+  if (pathname.startsWith("/docs/")) return { priority: "0.6", changefreq: "monthly" };
   if (pathname === "/report.html") return { priority: "0.5", changefreq: "monthly" };
   return { priority: "0.4", changefreq: "yearly" };
 }

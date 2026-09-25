@@ -1,0 +1,63 @@
+---
+/**
+ * The real app, open on one screen, rendered from the showcase recording, not
+ * a screenshot of it, so it never shows an old UI. Drawn at the popover's own
+ * size (380 × 560) and scaled to whatever width the frame is given.
+ */
+interface Props {
+  /** The app's route, like "/weather". */
+  route: string;
+  /** What the frame shows, for screen readers. */
+  title: string;
+}
+
+const { route, title } = Astro.props;
+const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=dark`;
+---
+
+<div class="app-frame" data-app-frame>
+  <div class="app-frame-screen">
+    <iframe {title} {src} tabindex="-1" scrolling="no" loading="lazy"></iframe>
+  </div>
+</div>
+
+<style>
+  .app-frame {
+    position: relative;
+    aspect-ratio: 380 / 560;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #0e0e10;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.7);
+  }
+  .app-frame-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 380px;
+    height: 560px;
+    transform: scale(var(--fit, 1));
+    transform-origin: 0 0;
+  }
+  iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #0e0e10;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // Scale each 380px screen to its frame; one observer for every frame.
+  const fit = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const screen = entry.target.querySelector<HTMLElement>(".app-frame-screen");
+      screen?.style.setProperty("--fit", String(entry.contentRect.width / 380));
+    }
+  });
+  document.querySelectorAll("[data-app-frame]").forEach((frame) => fit.observe(frame));
+</script>
