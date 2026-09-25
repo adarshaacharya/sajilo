@@ -31,6 +31,3 @@ export async function openExternalLink(url: string) {
     }).catch(() => {});
   }
 }
-
-/** Buy me a momo: the one place people can say thanks for Sajilo. */
-export const SUPPORT_URL = "https://buymemomo.com/adarsha";

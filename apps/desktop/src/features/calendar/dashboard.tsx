@@ -6,7 +6,6 @@ import { SkeletonBlock } from "../../shared/components/skeleton";
 import { StateBanner } from "../../shared/components/state-banner";
 import { TrayPinTip, useTrayPinTip } from "../../shared/components/tray-pin-tip";
 import { useSettings } from "../../shared/context/settings-context";
-import { openExternalLink, SUPPORT_URL } from "../../shared/lib/external-link";
 import {
   api,
   type CalendarMonth,
@@ -260,19 +259,6 @@ export function Dashboard() {
       <UpNext events={eventSlides} />
       <FocusGlance />
       <GlanceCards />
-
-      {/* One quiet line, not a card: always there for someone who wants to
-          say thanks, easy to scroll past for everyone else. */}
-      <p className="pb-1 pt-2 text-center text-[10px] text-text-muted">
-        {t("dashboard.support-note")}{" "}
-        <button
-          type="button"
-          onClick={() => openExternalLink(SUPPORT_URL)}
-          className="cursor-pointer font-medium text-[color:var(--color-accent-mark)] hover:underline"
-        >
-          {t("about.support-button")} ›
-        </button>
-      </p>
     </div>
   );
 }

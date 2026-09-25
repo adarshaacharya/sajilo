@@ -904,6 +904,5 @@
   "setup.language": "Language",
   "setup.language-note": "Most people use English. You can switch any time in Settings.",
   "setup.digits": "Digits",
-  "setup.done": "Done",
-  "dashboard.support-note": "Free, no ads, made by one person."
+  "setup.done": "Done"
 }
