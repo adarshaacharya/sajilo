@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router";
 import { Segmented } from "../../shared/components/segmented";
 import { useSettings } from "../../shared/context/settings-context";
 import { AboutTab } from "./_components/about-tab";
@@ -7,10 +8,18 @@ import { ModulesTab } from "./_components/modules-tab";
 import { SystemTab } from "./_components/system-tab";
 
 type Tab = "display" | "modules" | "system" | "about";
+const TABS: readonly Tab[] = ["display", "modules", "system", "about"];
+
+/** `?tab=system` opens straight onto a tab, like Bazar's `?tab=`. */
+function isTab(value: string | null): value is Tab {
+  return TABS.includes(value as Tab);
+}
 
 export function Settings() {
   const { t, language, setLanguage, numerals, setNumerals } = useSettings();
-  const [tab, setTab] = useState<Tab>("display");
+  const [params] = useSearchParams();
+  const asked = params.get("tab");
+  const [tab, setTab] = useState<Tab>(isTab(asked) ? asked : "display");
 
   return (
     <div className="space-y-2.5">
