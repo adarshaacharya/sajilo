@@ -905,9 +905,6 @@
   "setup.language-note": "धेरैले English चलाउँछन्। सेटिङबाट जुनसुकै बेला बदल्न सकिन्छ।",
   "setup.digits": "अङ्क",
   "setup.done": "भयो",
-  "settings.quit-section": "सजिलो",
-  "settings.quit": "सजिलो बन्द गर्नुहोस्",
-  "settings.quit-note": "फेरि नखोलेसम्म रिमाइन्डर र मिति देखिँदैन।",
   "dashboard.rashifal": "तपाईंको राशिफल",
   "dashboard.rashifal-pick": "एकपटक आफ्नो राशि छान्नुहोस्, अनि आजको राशिफल हरेक दिन यहीँ देखिन्छ।"
 }

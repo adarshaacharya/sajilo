@@ -5,9 +5,7 @@ pub mod title;
 
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
-#[cfg(not(target_os = "linux"))]
-use tauri::menu::PredefinedMenuItem;
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Wry};
 
@@ -122,17 +120,20 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     // and opens this menu on *every* click — left included, which is why the
     // `TrayIconEvent::Click` branch below never fires on Linux. The menu is
     // therefore the only route to the popover, and the shortest such route is a
-    // single item that opens it: Settings and Quit are already in the popover's
-    // own header, so repeating them here only puts more between the tray icon
-    // and the app. Escape dismisses the popover (Linux skips blur-to-dismiss).
+    // single item that opens it, then Quit below a separator. Settings stays in
+    // the popover's header. Escape dismisses the popover (Linux skips blur-to-dismiss).
     //
     // macOS and Windows keep the full menu: there, left click toggles the
     // popover and this menu is the right-click affordance.
     #[cfg(target_os = "linux")]
     let open = MenuItem::with_id(app, "open", OPEN_LABEL, true, None::<&str>)?;
 
+    // Quit too: on Linux the tray menu is what every click opens, so it is
+    // the one place a user looks to close a tray app.
     #[cfg(target_os = "linux")]
-    let menu = Menu::with_items(app, &[&open])?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, None::<&str>)?;
+    #[cfg(target_os = "linux")]
+    let menu = Menu::with_items(app, &[&open, &PredefinedMenuItem::separator(app)?, &quit])?;
 
     // Kept so the label can follow the popover; see `set_popover_shown`.
     #[cfg(target_os = "linux")]

@@ -905,9 +905,6 @@
   "setup.language-note": "Most people use English. You can switch any time in Settings.",
   "setup.digits": "Digits",
   "setup.done": "Done",
-  "settings.quit-section": "Sajilo",
-  "settings.quit": "Quit Sajilo",
-  "settings.quit-note": "Reminders and the menu bar date stop until you open it again.",
   "dashboard.rashifal": "Your rashifal",
   "dashboard.rashifal-pick": "Choose your rashi once, and today's reading shows here every day."
 }

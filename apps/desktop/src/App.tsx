@@ -81,8 +81,18 @@ function TrayNavigation() {
 function DismissOnEscape() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented) return;
-      api.hidePopover().catch(() => {});
+      if (event.defaultPrevented) return;
+      if (event.key === "Escape") {
+        api.hidePopover().catch(() => {});
+        return;
+      }
+      // ⌘Q on a Mac, Ctrl+Q elsewhere: a tray app has no app menu to carry
+      // the usual Quit, so the popover answers the shortcut itself.
+      const modifier = navigator.userAgent.includes("Macintosh") ? event.metaKey : event.ctrlKey;
+      if (modifier && event.key.toLowerCase() === "q") {
+        event.preventDefault();
+        api.quitApp().catch(() => {});
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);

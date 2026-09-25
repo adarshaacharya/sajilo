@@ -20,6 +20,15 @@ function formatGregorian(iso: string): string {
   });
 }
 
+async function quitApp() {
+  try {
+    const { invoke } = await import("@tauri-apps/api/core");
+    await invoke("quit_app");
+  } catch {
+    window.close();
+  }
+}
+
 export function DateHeader({ today }: { today: Today }) {
   const { numerals, language, t } = useSettings();
   const navigate = useNavigate();
@@ -63,6 +72,14 @@ export function DateHeader({ today }: { today: Today }) {
           className="icon-btn"
         >
           <Icon name="settings" />
+        </button>
+        <button
+          type="button"
+          onClick={() => quitApp()}
+          aria-label={t("action.quit")}
+          className="icon-btn"
+        >
+          <Icon name="power" />
         </button>
       </div>
     </div>
