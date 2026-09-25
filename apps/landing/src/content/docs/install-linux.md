@@ -78,7 +78,7 @@ Linux doesn't pass a click on a top-bar icon through to the app, so **click the 
 
 ## On a tiling window manager
 
-Sajilo works on i3, sway, Hyprland and other tiling window managers: its window floats by itself instead of being tiled.
+Sajilo works on i3, sway, Hyprland and other tiling window managers. Its windows have a fixed size, which most of them float by themselves instead of tiling.
 
 With no top bar to click, open it from a **keyboard shortcut** instead. `sajilo-desktop --toggle` opens Sajilo, and running it again closes it. For example:
 
@@ -91,6 +91,16 @@ bind = $mainMod, N, exec, sajilo-desktop --toggle
 ```
 
 Waybar and swaybar show Sajilo's date in their tray, if your bar has a tray enabled. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
+
+If a Sajilo window does get tiled on your setup, add a floating rule for it. Find the window's class with `swaymsg -t get_tree`, `hyprctl clients` or `xprop`.
+
+### Reminders on a tiling setup
+
+Full desktops like GNOME and KDE have all of this built in. A bare window manager may be missing a piece:
+
+- **Use card reminders** (the default). They're Sajilo's own small window and need nothing else. The **Notification** style needs a notification daemon such as `dunst` or `mako` running.
+- **Rounded corners look square or black?** The card is see-through at its corners, which needs a compositor (`picom` on i3; sway and Hyprland have one built in). Without one it still works, it just looks boxier.
+- **No chime?** Sajilo plays it with `paplay`, `pw-play` or `aplay`, whichever is installed. Almost every distro ships one; if yours doesn't, install `pipewire` or `pulseaudio-utils`.
 
 ## When it's installed
 
