@@ -22,7 +22,13 @@ jobs:
           - os: macos-15
             target: macos-x64
             args: --target x86_64-apple-darwin
-          - os: ubuntu-latest
+          # The oldest Ubuntu still widely installed, on purpose: a Linux
+          # binary needs the glibc of the machine it was built on or newer.
+          # Built on 24.04, 0.1.28 required glibc 2.39 and silently failed to
+          # start on Ubuntu 22.04, Pop!_OS 22.04 and Mint 21. Bump only when
+          # 22.04 is no longer worth supporting, together with
+          # `bundle.linux.deb.depends` and the check below.
+          - os: ubuntu-22.04
             target: linux-x64
             args: ""
           - os: windows-latest
@@ -32,12 +38,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Linux webkit dependencies
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           # libayatana-appindicator, not the deprecated libappindicator:
           # `libappindicator-sys` dlopens `libayatana-appindicator3.so.1`
-          # first and only falls back to the old name, and on Ubuntu 24.04
+          # first and only falls back to the old name, and on newer Ubuntu
           # `libappindicator3-dev` is a transitional package for it anyway.
           # Without one of the two present at *runtime*, that dlopen panics and
           # the tray never appears — hence `bundle.linux.deb.depends`.
@@ -99,6 +105,11 @@ jobs:
           # tag/version already says what it is; the release itself stays a
           # normal (non-pre-release) GitHub release so updates keep working.
           args: ${{ matrix.args }}
+      # Refuse to publish a Linux build that older distros cannot start; see
+      # the runner note above and the script for why.
+      - name: Check the Linux binary runs on Ubuntu 22.04
+        if: matrix.target == 'linux-x64'
+        run: .github/scripts/check-linux-glibc.sh 2.35 target/release/sajilo-desktop
       # Tauri 2.11's AppImage bundler includes libwayland from the Ubuntu build
       # host. On rolling-release Wayland systems (including current Arch), that
       # library can conflict with the host Mesa EGL driver and prevent WebKitGTK

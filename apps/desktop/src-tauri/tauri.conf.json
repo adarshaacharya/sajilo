@@ -83,6 +83,7 @@
       },
       "deb": {
         "depends": [
+          "libc6 (>= 2.35)",
           "libwebkit2gtk-4.1-0",
           "libayatana-appindicator3-1 | libappindicator3-1"
         ]
