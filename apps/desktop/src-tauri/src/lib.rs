@@ -91,7 +91,25 @@ pub fn run() {
         enable_hls_playback();
     }
 
-    let mut builder = tauri::Builder::default()
+    let mut builder = tauri::Builder::default();
+
+    // One Sajilo at a time, registered first so a second launch exits before
+    // it builds anything. Opening Sajilo again from the app menu used to start
+    // a second, hidden copy, which looked like nothing happening; now it
+    // brings up the window of the one already running.
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            if args.iter().any(|arg| arg == system::autostart::LOGIN_FLAG) {
+                return;
+            }
+            if let Some(main) = window::main_window(app) {
+                window::show(&main);
+            }
+        }));
+    }
+
+    builder = builder
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -105,7 +123,7 @@ pub fn run() {
     {
         builder = builder.plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
+            Some(vec![system::autostart::LOGIN_FLAG]),
         ));
         builder = register_updater(builder);
     }
@@ -150,13 +168,17 @@ pub fn run() {
             background_refresh::spawn(app.handle().clone());
             commands::focus::spawn(app.handle().clone());
 
-            // A brand-new install turns on launch-at-login and shows itself
-            // once. Without the second half, opening Sajilo for the very first
-            // time appears to do nothing: the window starts hidden and a new
-            // tray icon is easy to miss among a dozen others.
+            // Opened on purpose, Sajilo shows itself; started at login, it
+            // waits in the tray. Before this, only the very first launch
+            // showed the window, so on a desktop whose tray icon was missing
+            // or unnoticed, every later launch appeared to do nothing.
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
-            if system::autostart::apply_first_run_default(app.handle()) {
-                if let Some(main) = window::main_window(app.handle()) {
+            {
+                let first_run = system::autostart::apply_first_run_default(app.handle());
+                system::autostart::refresh_login_item(app.handle());
+                if (first_run || !system::autostart::launched_at_login())
+                    && let Some(main) = window::main_window(app.handle())
+                {
                     window::show(&main);
                 }
             }
@@ -292,6 +314,20 @@ pub fn run() {
             commands::tray::pin_popover,
             updater_enabled,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Sajilo");
+        .build(tauri::generate_context!())
+        .expect("error while building Sajilo")
+        .run(|app, event| {
+            // macOS never starts a second copy: opening Sajilo again from
+            // Finder, Spotlight or Launchpad sends the running one a reopen
+            // instead, which it answers the way the other platforms answer a
+            // second launch (see the single-instance plugin above).
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { .. } = event
+                && let Some(main) = window::main_window(app)
+            {
+                window::show(&main);
+            }
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app, event);
+        });
 }

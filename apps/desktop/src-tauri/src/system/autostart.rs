@@ -16,6 +16,26 @@ use tauri_plugin_autostart::ManagerExt;
 
 type Result<T> = std::result::Result<T, String>;
 
+/// Passed by the login item, and only by it. A launch without it is someone
+/// opening Sajilo on purpose, and they get the window; a launch at login stays
+/// in the tray.
+pub const LOGIN_FLAG: &str = "--autostart";
+
+/// Whether this process was started by the login item.
+pub fn launched_at_login() -> bool {
+    std::env::args().any(|arg| arg == LOGIN_FLAG)
+}
+
+/// Rewrites an existing login item so it carries [`LOGIN_FLAG`]. Items made
+/// before the flag existed lack it, and would open the window at every login.
+/// Left alone when launch at login is off: that was the user's choice.
+pub fn refresh_login_item(app: &AppHandle<Wry>) {
+    let manager = app.autolaunch();
+    if manager.is_enabled().unwrap_or(false) {
+        let _ = manager.enable();
+    }
+}
+
 /// Turns launch-at-login on, once, for an install that has never run before.
 ///
 /// Returns whether this was that first run, so the caller can also show the
