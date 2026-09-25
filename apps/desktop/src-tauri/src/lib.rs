@@ -55,10 +55,14 @@ fn updater_enabled() -> bool {
 ///
 /// Respects an explicit `GDK_BACKEND` so anyone wanting the native Wayland
 /// surface (and the centred, docked window that comes with it) can still ask.
+/// And only asks for X11 where there is one: a Wayland session with XWayland
+/// turned off (common on sway and Hyprland) has no `DISPLAY`, and forcing X11
+/// there made GTK fail to start at all. Native Wayland places the popover
+/// less well, but it opens.
 /// Must run before GTK initialises, hence the top of [`run`].
 #[cfg(target_os = "linux")]
 fn prefer_x11_backend() {
-    if std::env::var_os("GDK_BACKEND").is_some() {
+    if std::env::var_os("GDK_BACKEND").is_some() || std::env::var_os("DISPLAY").is_none() {
         return;
     }
     // SAFETY: single-threaded — this is the first statement of `run`, which is
@@ -100,10 +104,13 @@ pub fn run() {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     {
         builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
-            if args.iter().any(|arg| arg == system::autostart::LOGIN_FLAG) {
+            let has = |flag: &str| args.iter().any(|arg| arg == flag);
+            if has(system::autostart::LOGIN_FLAG) {
                 return;
             }
-            if let Some(main) = window::main_window(app) {
+            if has(system::autostart::TOGGLE_FLAG) {
+                window::toggle(app);
+            } else if let Some(main) = window::main_window(app) {
                 window::show(&main);
             }
         }));

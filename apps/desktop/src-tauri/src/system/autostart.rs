@@ -21,6 +21,11 @@ type Result<T> = std::result::Result<T, String>;
 /// in the tray.
 pub const LOGIN_FLAG: &str = "--autostart";
 
+/// Passed by a keyboard shortcut, mostly on tiling window managers where there
+/// is no tray to click: `sajilo-desktop --toggle` opens the window, and the same
+/// key closes it again.
+pub const TOGGLE_FLAG: &str = "--toggle";
+
 /// Whether this process was started by the login item.
 pub fn launched_at_login() -> bool {
     std::env::args().any(|arg| arg == LOGIN_FLAG)
