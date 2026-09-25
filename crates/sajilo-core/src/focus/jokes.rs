@@ -370,7 +370,7 @@ pub const WATER: &[Line] = &[
     ),
     (
         "Official notice from the Department of Body Water Supply: drink up.",
-        "शरीर जलापूर्ति विभागको आधिकारिक सूचना: पानी पिउनुहोस्।",
+        "तपाईंको शरीरबाट सूचना: पानी पठाइदिनुहोस्।",
     ),
     (
         "Refill the bottle. It's been empty since Monday; we noticed.",
@@ -437,7 +437,7 @@ pub const DONE: &[Line] = &[
     ),
     (
         "Look at you, following instructions. Rare.",
-        "वाह, निर्देशन मान्नुभयो। दुर्लभ कुरा।",
+        "वाह, भनेको मान्नुभयो। यस्तो कहिलेकाहीँ मात्र हुन्छ।",
     ),
     (
         "Your spine sends its regards.",
@@ -512,7 +512,7 @@ pub const END_OF_DAY: &[Line] = &[
     ),
     (
         "Stop working. You're not paid for overtime, emotionally or financially.",
-        "काम रोक्नुहोस्। ओभरटाइमको पैसा पाउनुहुन्न, न भावनात्मक न आर्थिक।",
+        "काम रोक्नुहोस्। ओभरटाइमको पैसा पाउनुहुन्न, न खल्तीमा न मनमा।",
     ),
     (
         "If it's urgent, they'll call. They always call.",
@@ -582,7 +582,7 @@ pub const LUNCH: &[Line] = &[
     ),
     (
         "Lunch break. Legally, emotionally and spiritually required.",
-        "दिउँसोको खानाको ब्रेक। कानुनी, भावनात्मक र आध्यात्मिक रूपमा अनिवार्य।",
+        "दिउँसोको खानाको ब्रेक। यो चाहिँ छुटाउनै मिल्दैन।",
     ),
     (
         "Eat something that isn't Wai Wai. Or do; we're not the food police.",

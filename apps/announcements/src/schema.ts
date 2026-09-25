@@ -154,11 +154,14 @@ export const UPDATE_NOTICE: Announcement = {
     en: "Update Sajilo",
     ne: "सजिलो अपडेट गर्नुहोस्",
   },
-  // The labels are the old versions' own, word for word, so the path can be
-  // followed on screen: every version since 0.1.25 has this Settings section.
+  // Every version that reads this (0.1.21-0.1.28) shows an update button at
+  // the top right of the Today screen, beside the gear and right above this
+  // notice. Its wording differs between versions, so this points at the button
+  // rather than quoting it. Reopening makes a version that has not found the
+  // update yet check again, and runs one that has already installed it.
   body: {
-    en: "A newer version is out. Open Settings (the gear) › System › Updates, click Check for updates, then Install update or Restart now. Or quit Sajilo and open it again.",
-    ne: "नयाँ संस्करण आएको छ। सेटिङ (गियर) › प्रणाली › अपडेटहरूमा गएर अद्यावधिक जाँच गर्नुहोस्, अनि अद्यावधिक स्थापना गर्नुहोस् वा अहिले पुनः सुरु गर्नुहोस् थिच्नुहोस्। वा सजिलो बन्द गरेर फेरि खोल्नुहोस्।",
+    en: "A newer version is out. Click the update button at the top right, next to the gear. No button there? Quit Sajilo and open it again.",
+    ne: "सजिलोको नयाँ भर्सन आएको छ। माथि दायाँ, गियरको छेउमा रहेको अपडेट बटन थिच्नुहोस्। बटन छैन भने सजिलो बन्द गरेर फेरि खोल्नुहोस्।",
   },
 
   action: {
