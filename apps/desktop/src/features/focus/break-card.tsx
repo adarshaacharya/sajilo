@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
-import { api, type BreakOutcome, type FocusSnapshot } from "../../shared/lib/ipc";
+import { api, type BreakOutcome, type FocusSnapshot, type Joke } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
@@ -79,7 +79,7 @@ function Countdown({ remaining, seconds }: { remaining: number; seconds: number 
  * opens it unfocused — so it can interrupt a thought but not a sentence.
  */
 export function BreakCard() {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const numerals = useSentenceNumerals();
   const [snapshot, setSnapshot] = useState<FocusSnapshot | null>(null);
   const finishing = useRef(false);
@@ -111,7 +111,7 @@ export function BreakCard() {
   // card.
   // Both lines were dealt by the engine when the card opened, so they stay
   // put for as long as it is up.
-  const [cheer, setCheer] = useState<string | null>(null);
+  const [cheer, setCheer] = useState<Joke | null>(null);
   const cardCheer = card?.cheer ?? null;
   const finish = useCallback(
     (outcome: BreakOutcome) => {
@@ -140,7 +140,8 @@ export function BreakCard() {
   const waterLeft = Math.max(0, snapshot.settings.waterGoalMl - snapshot.today.waterMl);
   const waterLine = t("break.water.body").replace("{left}", litres(waterLeft, numerals));
   const plain = card.kind === "water" ? waterLine : t(BODIES[card.kind]);
-  const body = cheer ?? card.joke ?? plain;
+  const said = cheer ?? card.joke;
+  const body = said ? said[language] : plain;
   const title =
     card.kind === "custom" ? kindLabel(card.kind, snapshot.settings, t) : t(TITLES[card.kind]);
   const later = t("break.snooze").replace("{n}", digits(snapshot.snoozeMinutes, numerals));

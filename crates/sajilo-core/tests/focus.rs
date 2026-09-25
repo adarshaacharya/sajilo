@@ -2,9 +2,9 @@
 
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
-    BreakKind, BreakOutcome, FocusSettings, FocusState, FocusStatus, PauseChoice, ReminderStyle,
-    SNOOZE_MINUTES, Tick, announcement, finish_break, jokes, litres, log_water, pause,
-    preview_break, snapshot, tick,
+    BreakKind, BreakOutcome, FocusSettings, FocusState, FocusStatus, Language, PauseChoice,
+    ReminderStyle, SNOOZE_MINUTES, Tick, announcement, finish_break, jokes, litres, log_water,
+    pause, preview_break, snapshot, tick,
 };
 use std::collections::HashSet;
 
@@ -936,24 +936,40 @@ const DECKS: [BreakKind; 8] = [
     BreakKind::Bedtime,
 ];
 
-#[test]
-fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
-    let decks = DECKS
+fn every_deck() -> impl Iterator<Item = (&'static str, &'static [jokes::Line])> {
+    DECKS
         .iter()
         .map(|kind| (jokes::deck_name(*kind), jokes::lines(*kind)))
-        .chain([(jokes::DONE_DECK, jokes::DONE)]);
-    for (name, lines) in decks {
+        .chain([(jokes::DONE_DECK, jokes::DONE)])
+}
+
+fn in_deck(deck: &[jokes::Line], joke: &jokes::Joke) -> bool {
+    deck.iter().any(|(en, ne)| *en == joke.en && *ne == joke.ne)
+}
+
+#[test]
+fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
+    for (name, lines) in every_deck() {
         assert!(
             lines.len() >= jokes::MIN_DECK,
             "{name} is too small to rotate"
         );
-        let unique: HashSet<_> = lines.iter().collect();
-        assert_eq!(unique.len(), lines.len(), "{name} repeats a line");
-        for line in lines {
-            assert!(!line.trim().is_empty(), "{name} has an empty line");
+        let english: HashSet<_> = lines.iter().map(|(en, _)| en).collect();
+        let nepali: HashSet<_> = lines.iter().map(|(_, ne)| ne).collect();
+        assert_eq!(english.len(), lines.len(), "{name} repeats an English line");
+        assert_eq!(nepali.len(), lines.len(), "{name} repeats a Nepali line");
+        for (en, ne) in lines {
             assert!(
-                line.chars().count() <= jokes::MAX_LINE,
-                "{name} line is too long for the card: {line}"
+                !en.trim().is_empty() && !ne.trim().is_empty(),
+                "{name}: {en}"
+            );
+            assert!(
+                en.chars().count() <= jokes::MAX_LINE,
+                "{name} line is too long for the card: {en}"
+            );
+            assert!(
+                ne.chars().any(|c| ('\u{0900}'..='\u{097F}').contains(&c)),
+                "{name} has no Nepali for: {en}"
             );
         }
     }
@@ -963,13 +979,52 @@ fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
     );
 }
 
+/// The jokes are about the day at the desk, never about anyone's family.
+#[test]
+fn no_joke_mentions_family() {
+    const ENGLISH: [&str; 16] = [
+        "aama", "ama ", "baa", "buwa", "mother", "father", "mom", "dad", "family", "dai", "didi",
+        "aunty", "uncle", "cousin", "relative", "hajur",
+    ];
+    // Matched at the start of a word, so a suffix like -ले still counts but
+    // a word that merely contains the letters (निदाइसके) does not.
+    const NEPALI: [&str; 9] = [
+        "आमा",
+        "बुबा",
+        "बाबा",
+        "दाइ",
+        "दिदी",
+        "हजुर",
+        "परिवार",
+        "काका",
+        "माइजु",
+    ];
+    for (name, lines) in every_deck() {
+        for (en, ne) in lines {
+            let lower = en.to_lowercase();
+            for word in ENGLISH {
+                let hit = lower
+                    .split(|c: char| !c.is_alphabetic())
+                    .any(|token| token == word.trim());
+                assert!(!hit, "{name} mentions \"{}\": {en}", word.trim());
+            }
+            let words: Vec<&str> = ne
+                .split(|c: char| c.is_whitespace() || "।,?!.'\"".contains(c))
+                .collect();
+            for word in NEPALI {
+                let hit = words.iter().any(|token| token.starts_with(word));
+                assert!(!hit, "{name} mentions \"{word}\": {ne}");
+            }
+        }
+    }
+}
+
 /// Every line comes up once per round, and no line ever follows itself,
 /// not even where one round ends and the next begins.
 #[test]
 fn a_deck_deals_every_line_before_repeating_and_never_twice_in_a_row() {
-    for kind in DECKS {
-        let name = jokes::deck_name(kind);
-        let len = jokes::lines(kind).len();
+    for (name, lines) in every_deck() {
+        let len = lines.len();
         let dealt: Vec<usize> = (0..(len * 6) as u32)
             .map(|turn| jokes::position(name, turn, len))
             .collect();
@@ -1002,12 +1057,9 @@ fn each_card_brings_a_new_joke_and_a_cheer_when_jokes_are_on() {
             .clone()
             .expect("a card when it comes due");
         let joke = card.joke.expect("jokes are on by default");
-        assert!(jokes::EYES.contains(&joke.as_str()));
-        assert!(
-            card.cheer
-                .is_some_and(|line| jokes::DONE.contains(&line.as_str()))
-        );
-        seen.push(joke);
+        assert!(in_deck(jokes::EYES, &joke));
+        assert!(card.cheer.is_some_and(|line| in_deck(jokes::DONE, &line)));
+        seen.push(joke.en);
         finish_break(
             &mut state,
             &settings,
@@ -1041,25 +1093,39 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(10), 1, busy);
     let today = state.today.clone().unwrap();
+    let say = |state: &mut FocusState, settings: &FocusSettings, kind, language| {
+        announcement(state, settings, kind, &today, language)
+    };
 
-    let (title, body) = announcement(&mut state, &settings, BreakKind::Move, &today);
+    let (title, body) = say(&mut state, &settings, BreakKind::Move, Language::En);
     assert_eq!(title, "Time to move");
-    assert!(jokes::MOVE.contains(&body.as_str()), "{body}");
-    let (_, again) = announcement(&mut state, &settings, BreakKind::Move, &today);
+    assert!(jokes::MOVE.iter().any(|(en, _)| *en == body), "{body}");
+    let (_, again) = say(&mut state, &settings, BreakKind::Move, Language::En);
     assert_ne!(body, again, "two notifications in a row say the same thing");
 
-    let (_, water) = announcement(&mut state, &settings, BreakKind::Water, &today);
+    let (_, water) = say(&mut state, &settings, BreakKind::Water, Language::En);
     let (joke, total) = water.split_once('\n').expect("the joke, then the total");
-    assert!(jokes::WATER.contains(&joke));
+    assert!(jokes::WATER.iter().any(|(en, _)| *en == joke));
     assert_eq!(total, "0 of 2.5 litres today.");
 
-    let (_, custom) = announcement(&mut state, &settings, BreakKind::Custom, &today);
+    let (title, water) = say(&mut state, &settings, BreakKind::Water, Language::Ne);
+    assert_eq!(title, "पानी पिउनुहोस्");
+    let (joke, total) = water.split_once('\n').expect("the joke, then the total");
+    assert!(jokes::WATER.iter().any(|(_, ne)| *ne == joke), "{joke}");
+    assert_eq!(total, "आज २.५ मध्ये ० लिटर।");
+
+    let (_, custom) = say(&mut state, &settings, BreakKind::Custom, Language::En);
     assert_eq!(custom, "Your own reminder, from Sajilo.");
 
     settings.jokes = false;
-    let (_, plain) = announcement(&mut state, &settings, BreakKind::Eyes, &today);
+    let (_, plain) = say(&mut state, &settings, BreakKind::Eyes, Language::En);
     assert_eq!(
         plain,
         "Look at something about 6 metres away for 20 seconds."
+    );
+    let (title, plain) = say(&mut state, &settings, BreakKind::Eyes, Language::Ne);
+    assert_eq!(
+        (title.as_str(), plain.as_str()),
+        ("टाढा हेर्नुहोस्", "२० सेकेन्ड ६ मिटर जति टाढाको कुनै चीज हेर्नुहोस्।")
     );
 }

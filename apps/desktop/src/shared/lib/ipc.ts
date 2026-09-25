@@ -234,9 +234,15 @@ export interface ActiveBreak {
   preview: boolean;
   /** The engine's joke for this card, said in place of the instruction;
    * null with jokes off, or for the user's own reminder. */
-  joke: string | null;
+  joke: Joke | null;
   /** The engine's line for once the break is taken; null with jokes off. */
-  cheer: string | null;
+  cheer: Joke | null;
+}
+
+/** One joke in both of the app's languages; the card shows the one set. */
+export interface Joke {
+  en: string;
+  ne: string;
 }
 
 export type BreakOutcome = "done" | "skip" | "snooze" | "drank";

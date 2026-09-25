@@ -175,9 +175,19 @@ struct Announce {
     notifications: Vec<(String, String)>,
 }
 
+/// The app's language, which the frontend stores; notifications follow it.
+fn notification_language(app: &AppHandle<Wry>) -> focus::Language {
+    db::get_json(app, prefs::LANGUAGE)
+        .ok()
+        .flatten()
+        .and_then(|value| serde_json::from_value(value).ok())
+        .unwrap_or_default()
+}
+
 /// One measurement: advance the tracker and announce whatever came due.
 fn measure(app: &AppHandle<Wry>) {
     let idle = crate::system::idle::seconds();
+    let language = notification_language(app);
     let announce = with_tracker(app, |tracker| {
         let (now, local) = now();
         let due = focus::tick(
@@ -197,7 +207,9 @@ fn measure(app: &AppHandle<Wry>) {
         let notifications = match (settings.style, tracker.state.today.clone()) {
             (ReminderStyle::Notification, Some(today)) => due
                 .iter()
-                .map(|kind| focus::announcement(&mut tracker.state, settings, *kind, &today))
+                .map(|kind| {
+                    focus::announcement(&mut tracker.state, settings, *kind, &today, language)
+                })
                 .collect(),
             _ => Vec::new(),
         };

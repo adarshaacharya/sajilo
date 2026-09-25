@@ -604,6 +604,16 @@ fn public_holiday(date: NaiveDate) -> bool {
     })
 }
 
+/// The language a notification is written in; the card window picks its own
+/// from the app's setting.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Language {
+    #[default]
+    En,
+    Ne,
+}
+
 /// A break card showing now.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -617,10 +627,10 @@ pub struct ActiveBreak {
     pub preview: bool,
     /// Said in place of the plain instruction, when jokes are on.
     #[serde(default)]
-    pub joke: Option<String>,
+    pub joke: Option<jokes::Joke>,
     /// Said once the break is taken, when jokes are on.
     #[serde(default)]
-    pub cheer: Option<String>,
+    pub cheer: Option<jokes::Joke>,
 }
 
 impl ActiveBreak {
@@ -661,7 +671,7 @@ impl ActiveBreak {
     }
 }
 
-fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<String> {
+fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<jokes::Joke> {
     jokes::deal(told, jokes::deck_name(kind), jokes::lines(kind))
 }
 
@@ -1279,70 +1289,132 @@ pub fn announcement(
     settings: &FocusSettings,
     kind: BreakKind,
     today: &FocusDay,
+    language: Language,
 ) -> (String, String) {
-    let (title, plain) = message(kind, today, settings);
+    let (title, plain) = message(kind, today, settings, language);
     let joke = if settings.jokes {
         deal_joke(&mut state.jokes_told, kind)
     } else {
         None
     };
     let body = match (joke, kind) {
-        (Some(joke), BreakKind::Water) => format!(
-            "{joke}\n{} of {} litres today.",
-            litres(today.water_ml),
-            litres(settings.water_goal_ml)
-        ),
-        (Some(joke), _) => joke,
+        (Some(joke), BreakKind::Water) => {
+            format!(
+                "{}\n{}",
+                joke.text(language),
+                water_total(today, settings, language)
+            )
+        }
+        (Some(joke), _) => joke.text(language).to_owned(),
         (None, _) => plain,
     };
     (title, body)
 }
 
-/// The plain title and body of a reminder, without a joke.
-pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (String, String) {
-    match kind {
-        BreakKind::Eyes => (
-            "Rest your eyes".to_owned(),
-            "Look at something about 6 metres away for 20 seconds.".to_owned(),
+/// Today's water against the goal, as a notification says it.
+fn water_total(today: &FocusDay, settings: &FocusSettings, language: Language) -> String {
+    let (drunk, goal) = (litres(today.water_ml), litres(settings.water_goal_ml));
+    match language {
+        Language::En => format!("{drunk} of {goal} litres today."),
+        Language::Ne => format!(
+            "आज {} मध्ये {} लिटर।",
+            devanagari_digits(&goal),
+            devanagari_digits(&drunk)
         ),
-        BreakKind::Move => (
-            "Time to move".to_owned(),
+    }
+}
+
+fn devanagari_digits(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            c.to_digit(10)
+                .and_then(|d| char::from_u32('०' as u32 + d))
+                .unwrap_or(c)
+        })
+        .collect()
+}
+
+/// The plain title and body of a reminder, without a joke.
+pub fn message(
+    kind: BreakKind,
+    today: &FocusDay,
+    settings: &FocusSettings,
+    language: Language,
+) -> (String, String) {
+    let (title, body): (&str, String) = match (kind, language) {
+        (BreakKind::Custom, Language::En) => (
+            &settings.custom.label,
+            "Your own reminder, from Sajilo.".to_owned(),
+        ),
+        (BreakKind::Custom, Language::Ne) => (
+            &settings.custom.label,
+            "सजिलोबाट तपाईंको आफ्नै रिमाइन्डर।".to_owned(),
+        ),
+        (BreakKind::Water, _) => (
+            match language {
+                Language::En => "Drink some water",
+                Language::Ne => "पानी पिउनुहोस्",
+            },
+            match language {
+                Language::En => format!(
+                    "{} Log it in Sajilo's Routine tab.",
+                    water_total(today, settings, language)
+                ),
+                Language::Ne => format!(
+                    "{} सजिलोको दिनचर्या ट्याबमा लेख्नुहोस्।",
+                    water_total(today, settings, language)
+                ),
+            },
+        ),
+        (BreakKind::Move, Language::En) => (
+            "Time to move",
             format!(
                 "{} minutes at the screen. Stand up and walk for a couple of minutes.",
                 settings.move_break.every_minutes
             ),
         ),
-        BreakKind::Custom => (
-            settings.custom.label.clone(),
-            "Your own reminder, from Sajilo.".to_owned(),
-        ),
-        BreakKind::Breakfast => (
-            "Breakfast time".to_owned(),
-            "Food first, laptop later.".to_owned(),
-        ),
-        BreakKind::Lunch => (
-            "Lunch time".to_owned(),
-            "Go and eat. Not later, now.".to_owned(),
-        ),
-        BreakKind::Dinner => (
-            "Dinner time".to_owned(),
-            "Step away from the screen and eat.".to_owned(),
-        ),
-        BreakKind::Bedtime => (
-            "Bedtime".to_owned(),
-            "Laptop off. The internet will still be there tomorrow.".to_owned(),
-        ),
-        BreakKind::EndOfDay => (
-            "Work hours are over".to_owned(),
-            "Time to wrap up. Tomorrow's problems can wait until tomorrow.".to_owned(),
-        ),
-        BreakKind::Water => (
-            "Drink some water".to_owned(),
+        (BreakKind::Move, Language::Ne) => (
+            "उठ्ने बेला भयो",
             format!(
-                "{} of {} litres today. Log it in Sajilo's Routine tab.",
-                litres(today.water_ml),
-                litres(settings.water_goal_ml)
+                "{} मिनेट स्क्रिनमा। उठेर दुई-चार मिनेट हिँड्नुहोस्।",
+                devanagari_digits(&settings.move_break.every_minutes.to_string())
             ),
         ),
+        (kind, language) => {
+            let (title, body) = fixed_message(kind, language);
+            (title, body.to_owned())
+        }
+    };
+    (title.to_owned(), body)
+}
+
+/// The reminders whose words never change.
+fn fixed_message(kind: BreakKind, language: Language) -> (&'static str, &'static str) {
+    match (kind, language) {
+        (BreakKind::Eyes, Language::En) => (
+            "Rest your eyes",
+            "Look at something about 6 metres away for 20 seconds.",
+        ),
+        (BreakKind::Eyes, Language::Ne) => {
+            ("टाढा हेर्नुहोस्", "२० सेकेन्ड ६ मिटर जति टाढाको कुनै चीज हेर्नुहोस्।")
+        }
+        (BreakKind::Breakfast, Language::En) => ("Breakfast time", "Food first, laptop later."),
+        (BreakKind::Breakfast, Language::Ne) => ("बिहानको खाना खाने बेला", "पहिले खाना, अनि ल्यापटप।"),
+        (BreakKind::Lunch, Language::En) => ("Lunch time", "Go and eat. Not later, now."),
+        (BreakKind::Lunch, Language::Ne) => ("खाना खाने बेला", "गएर खाना खानुहोस्। पछि होइन, अहिले।"),
+        (BreakKind::Dinner, Language::En) => ("Dinner time", "Step away from the screen and eat."),
+        (BreakKind::Dinner, Language::Ne) => ("बेलुकाको खाना खाने बेला", "स्क्रिनबाट उठेर खाना खानुहोस्।"),
+        (BreakKind::Bedtime, Language::En) => (
+            "Bedtime",
+            "Laptop off. The internet will still be there tomorrow.",
+        ),
+        (BreakKind::Bedtime, Language::Ne) => ("सुत्ने बेला भयो", "ल्यापटप बन्द। इन्टरनेट भोलि पनि हुन्छ।"),
+        (BreakKind::EndOfDay, Language::En) => (
+            "Work hours are over",
+            "Time to wrap up. Tomorrow's problems can wait until tomorrow.",
+        ),
+        (BreakKind::EndOfDay, Language::Ne) => ("कामको समय सकियो", "आजलाई काम समेट्ने बेला।"),
+        // Handled with their numbers or the user's own words above.
+        (BreakKind::Move | BreakKind::Water | BreakKind::Custom, _) => ("", ""),
     }
 }
