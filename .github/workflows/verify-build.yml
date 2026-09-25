@@ -58,3 +58,17 @@ jobs:
       - name: Check the Linux binary runs on Ubuntu 22.04
         if: matrix.target == 'linux-x64'
         run: .github/scripts/check-linux-glibc.sh 2.35 target/release/sajilo-desktop
+      # Kept as a download on the run's page, for handing a test build to
+      # someone before a release. Unsigned, and it won't self-update.
+      - name: Upload the installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: sajilo-${{ matrix.target }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            target/**/release/bundle/appimage/*.AppImage
+            target/**/release/bundle/deb/*.deb
+            target/**/release/bundle/rpm/*.rpm
+            target/**/release/bundle/dmg/*.dmg
+            target/**/release/bundle/nsis/*.exe
