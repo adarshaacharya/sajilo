@@ -17,9 +17,13 @@ const platforms = [
   {
     id: "linux",
     name: "Linux",
-    step: "Install the .deb, or make the AppImage executable and run it.",
+    step: "The .deb for Ubuntu and Mint, the .rpm for Fedora and openSUSE, sajilo-bin from the AUR on Arch, or the AppImage anywhere.",
     link: { href: "/docs/install-linux.html", label: "Commands and tray setup" },
-    dl: [{ id: "linux-deb", label: ".deb" }, { id: "linux-appimage", label: "AppImage" }],
+    dl: [
+      { id: "linux-deb", label: ".deb" },
+      { id: "linux-rpm", label: ".rpm" },
+      { id: "linux-appimage", label: "AppImage" },
+    ],
   },
 ];
 ---

@@ -34,6 +34,8 @@ In the update window, untick **Automatically download and install future updates
 | **macOS** | Sajilo replaces itself. Because beta builds aren't signed by Apple yet, macOS may ask you to confirm it again, as the first time; see [Install on macOS](/docs/install-macos.html#allow-it-the-first-time). |
 | **Linux, AppImage** | The AppImage file replaces itself. |
 | **Linux, .deb** | Sajilo installs the new package, which asks for your **password**, like any system update. |
+| **Linux, .rpm** | The same as the .deb: Sajilo installs the new package and asks for your **password**. |
+| **Arch (AUR)** | Update with your system, for example `yay -Syu`. |
 
 ## Update by hand
 
