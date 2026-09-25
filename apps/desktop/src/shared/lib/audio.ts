@@ -1,3 +1,5 @@
+import { api } from "./ipc";
+
 /**
  * One `<audio>` element for the whole app.
  *
@@ -136,8 +138,13 @@ const bag: AudioBag = (() => {
 })();
 
 function publish(next: Partial<PlayerState>) {
+  const wasPlaying = bag.state.isPlaying;
   bag.state = { ...bag.state, ...next };
   for (const listener of bag.listeners) listener(bag.state);
+  // The shell restarts into an installed update only while nothing plays.
+  if (bag.state.isPlaying !== wasPlaying) {
+    void api.setAudioPlaying(bag.state.isPlaying).catch(() => {});
+  }
 }
 
 function syncFromElement() {

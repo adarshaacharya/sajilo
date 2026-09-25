@@ -742,6 +742,10 @@ export const api = {
   getAnnouncement: (refresh = false) =>
     invoke<LoadState<AnnouncementResponse>>("get_announcement", { refresh }),
   dismissAnnouncement: (id: string) => invoke<void>("dismiss_announcement", { id }),
+  /** An update is installed; the shell restarts into it at a quiet moment. */
+  updateInstalled: () => invoke<void>("update_installed"),
+  /** So an automatic restart never cuts off the radio. */
+  setAudioPlaying: (playing: boolean) => invoke<void>("set_audio_playing", { playing }),
   /** The source picker's options — static, named in Rust. */
   newsSources: () => invoke<NewsSourceInfo[]>("news_sources"),
 

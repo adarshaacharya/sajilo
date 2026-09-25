@@ -155,11 +155,11 @@ export const UPDATE_NOTICE: Announcement = {
     ne: "सजिलो अपडेट गर्नुहोस्",
   },
   body: {
-    en: "A newer version is out. Update to keep getting fixes and notices like this one.",
-    ne: "नयाँ संस्करण आएको छ। सुधार र यस्ता सूचना पाइरहन अपडेट गर्नुहोस्।",
+    en: "A newer version is out. Click Update or Restart to update at the top of Sajilo. Don't see either? Quit Sajilo and open it again.",
+    ne: "नयाँ संस्करण आएको छ। सजिलोको माथि रहेको Update वा Restart to update थिच्नुहोस्। देखिएन भने सजिलो बन्द गरेर फेरि खोल्नुहोस्।",
   },
   action: {
-    url: "https://sajilo.fyi/#download",
-    label: { en: "Get the latest", ne: "नयाँ संस्करण लिनुहोस्" },
+    url: "https://sajilo.fyi/docs/updating.html",
+    label: { en: "How updating works", ne: "अपडेट कसरी हुन्छ" },
   },
 };

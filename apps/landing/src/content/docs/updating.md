@@ -14,7 +14,7 @@ Sajilo **updates itself**. It checks when it starts and every half hour, and by 
 2. When it's installed, you'll see **Restart to update**: at the top of Sajilo, and in the tray icon's menu as **Restart to update to v…**.
 3. Click it. Sajilo closes and opens again on the new version.
 
-Until you restart, you keep using the version you had. Nothing is lost when it restarts.
+If you don't, Sajilo finishes the update by itself: it restarts when you've been away from the computer for a while, with its window closed and the radio off, so it never interrupts you. Nothing is lost when it restarts.
 
 **See what's new** in the update window shows what changed; so does the [releases page](/releases.html).
 

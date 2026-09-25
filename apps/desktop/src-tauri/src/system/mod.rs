@@ -7,5 +7,6 @@ pub mod display;
 pub mod dock;
 pub mod idle;
 pub mod tray_pin;
+pub mod update_restart;
 #[cfg(target_os = "windows")]
 pub mod windows_version;

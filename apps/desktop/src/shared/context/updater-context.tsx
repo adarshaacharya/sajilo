@@ -136,6 +136,7 @@ export function UpdaterProvider({
         setState("downloading");
         await next.downloadAndInstall();
         setState("installed");
+        void api.updateInstalled().catch(() => {});
       } else {
         setState("available");
       }
@@ -153,6 +154,7 @@ export function UpdaterProvider({
     try {
       await pending.downloadAndInstall();
       setState("installed");
+      void api.updateInstalled().catch(() => {});
       return true;
     } catch (installError) {
       setError(String(installError));

@@ -325,6 +325,8 @@ pub fn run() {
             commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,
+            system::update_restart::update_installed,
+            system::update_restart::set_audio_playing,
         ])
         .build(tauri::generate_context!())
         .expect("error while building Sajilo")

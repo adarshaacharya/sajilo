@@ -88,6 +88,8 @@ const WRITES = new Set([
   "preview_reminder_card",
   "dismiss_reminder",
   "dismiss_announcement",
+  "update_installed",
+  "set_audio_playing",
   "set_autostart",
   "set_dock_icon_visible",
   "refresh_tray",
