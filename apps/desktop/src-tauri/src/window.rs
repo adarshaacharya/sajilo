@@ -80,7 +80,10 @@ fn position_at_tray(window: &WebviewWindow) {
     #[cfg(target_os = "windows")]
     let placed = above_taskbar(window);
     #[cfg(target_os = "macos")]
-    let placed = false;
+    let placed = {
+        tell_positioner_where_the_tray_is(window);
+        false
+    };
 
     if !placed {
         let placement = if cfg!(target_os = "macos") {
@@ -93,6 +96,31 @@ fn position_at_tray(window: &WebviewWindow) {
             let _ = window.move_window(Position::Center);
         }
     }
+}
+
+/// Hands the positioner the tray icon's current frame, read from macOS.
+///
+/// The positioner only learns where the icon is from tray events, and Sajilo
+/// opens itself at launch before any has happened, so that first popover
+/// landed in the wrong place and only the second click put it under the icon.
+/// Asking for the frame on every open fixes the first one, and keeps later
+/// ones right as the date beside the icon changes width. The event is built,
+/// not received: it carries the same frame a hover over the icon would.
+#[cfg(target_os = "macos")]
+fn tell_positioner_where_the_tray_is(window: &WebviewWindow) {
+    let app = window.app_handle();
+    let Some(tray) = app.tray_by_id("main") else {
+        return;
+    };
+    let Ok(Some(rect)) = tray.rect() else {
+        return;
+    };
+    let event = tauri::tray::TrayIconEvent::Move {
+        id: tray.id().clone(),
+        position: rect.position.to_physical(1.0),
+        rect,
+    };
+    tauri_plugin_positioner::on_tray_event(app, &event);
 }
 
 /// Opens the popover under the pointer, which on Linux means under the tray
