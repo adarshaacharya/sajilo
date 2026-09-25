@@ -1,0 +1,25 @@
+# Maintainer: Adarsha Acharya <connectwithadarsha@gmail.com>
+#
+# Repackages the official .deb from the GitHub release: the same binary every
+# Linux user gets, with Arch's own libraries underneath it.
+pkgname=sajilo-bin
+pkgver=0.1.28
+pkgrel=1
+pkgdesc="Nepali calendar and daily essentials in your tray: Bikram Sambat, festivals, forex, weather, news"
+arch=('x86_64')
+url="https://sajilo.app"
+license=('custom')
+depends=('gtk3' 'webkit2gtk-4.1' 'libayatana-appindicator')
+optdepends=(
+  'gst-plugins-good: FM radio (MP3 and HLS streams)'
+  'gst-plugins-bad: FM radio (HLS streams)'
+  'gst-libav: FM radio (AAC streams)'
+)
+provides=('sajilo')
+conflicts=('sajilo')
+source=("Sajilo_${pkgver}_amd64.deb::https://github.com/adarshaacharya/sajilo/releases/download/v${pkgver}/Sajilo_${pkgver}_amd64.deb")
+sha256sums=('c207764da9ed1e071a678e24129c54b84ade706b9449c1f342cc5de17ec22e70')
+
+package() {
+  bsdtar -xf data.tar.gz -C "$pkgdir"
+}

@@ -59,6 +59,7 @@
       "dmg",
       "nsis",
       "deb",
+      "rpm",
       "appimage"
     ],
     "resources": {
@@ -87,6 +88,9 @@
           "libwebkit2gtk-4.1-0",
           "libayatana-appindicator3-1 | libappindicator3-1"
         ]
+      },
+      "rpm": {
+        "depends": ["libc.so.6(GLIBC_2.35)(64bit)"]
       }
     }
   },

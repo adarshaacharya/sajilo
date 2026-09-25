@@ -199,6 +199,7 @@ jobs:
             windows-x64)  upload Sajilo-windows-x64.exe      '*setup.exe' ;;
             linux-x64)
               upload Sajilo-linux-amd64.deb        '*amd64.deb'
+              upload Sajilo-linux-x86_64.rpm       '*.x86_64.rpm'
               upload Sajilo-linux-x86_64.AppImage  '*amd64.AppImage'
               ;;
           esac
