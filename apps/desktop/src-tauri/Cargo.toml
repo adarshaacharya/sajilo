@@ -34,11 +34,9 @@ tauri-plugin-fs = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
 tauri-plugin-process = "2"
-# Windows and Linux cannot show text beside a tray icon, so the day number is
-# drawn into the icon itself.
 tokio = { version = "1", features = ["macros", "rt"] }
+# Rasterises the Windows tray flag (see resvg below).
 tiny-skia = "0.11"
-cosmic-text = "0.14"
 # Renders the bundled Nepal flag SVG for Windows' tray icon. Pinned to 0.44 —
 # the last resvg release on tiny-skia 0.11, matching the pin above rather than
 # the 0.12 that newer resvg wants. `default-features = false` drops text/font

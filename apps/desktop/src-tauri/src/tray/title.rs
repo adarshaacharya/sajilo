@@ -1,8 +1,8 @@
 //! What the tray actually shows.
 //!
-//! On macOS the tray can carry text beside the icon, which is how the Swift app
-//! puts the Nepali date in the menu bar. Windows and Linux have no such thing —
-//! there the day number is drawn into the icon itself (`tray/icon.rs`).
+//! macOS carries this text beside the tray icon, and so does Linux where the
+//! desktop shows AppIndicator labels. Windows has no tray text: it shows a
+//! Nepal flag (`tray/icon.rs`) with this date in the tooltip.
 
 use sajilo_core::calendar::bikram_sambat as bs;
 use sajilo_core::numerals::NumeralStyle;
