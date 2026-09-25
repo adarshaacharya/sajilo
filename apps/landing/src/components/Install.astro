@@ -4,6 +4,7 @@ const platforms = [
     id: "macos",
     name: "macOS",
     step: "Drag to Applications, open it, then click Open Anyway under Privacy & Security.",
+    find: "At the top of your screen, in the menu bar. There's no Dock icon.",
     link: { href: "/docs/install-macos.html", label: "Step-by-step with screenshots" },
     dl: [{ id: "macos-arm64", label: "Apple Silicon" }, { id: "macos-x64", label: "Intel" }],
   },
@@ -11,6 +12,7 @@ const platforms = [
     id: "windows",
     name: "Windows",
     step: "SmartScreen shows a warning. Click More info, then Run anyway.",
+    find: "Bottom right, next to the clock. Not there? Click the ^ arrow and drag the Nepal flag out beside the clock.",
     link: { href: "/docs/install-windows.html", label: "Install and find the tray icon" },
     dl: [{ id: "windows", label: "Installer (.exe)" }],
   },
@@ -18,6 +20,7 @@ const platforms = [
     id: "linux",
     name: "Linux",
     step: "The .deb for Ubuntu and Mint, the .rpm for Fedora and openSUSE, sajilo-bin from the AUR on Arch, or the AppImage anywhere.",
+    find: "In your top bar. No top bar, or nothing there? Open Sajilo from your apps menu.",
     link: { href: "/docs/install-linux.html", label: "Commands and tray setup" },
     dl: [
       { id: "linux-deb", label: ".deb" },
@@ -32,8 +35,9 @@ const platforms = [
   <div class="section-head reveal">
     <h2>Install</h2>
     <p class="lede">
-      Beta builds are not code-signed yet, so each system shows a warning on the first launch. After that,
-      Sajilo starts with your computer and sits in the menu bar.
+      Sajilo isn't a normal window. It lives next to your clock: click it to open, click away and it
+      tucks back. It starts with your computer, so it's there whenever you look. Beta builds aren't
+      code-signed yet, so each system shows a warning the first time you open it.
     </p>
   </div>
 
@@ -42,6 +46,7 @@ const platforms = [
       <li class="platform reveal" style={`--d:${i * 90}ms`}>
         <h3>{p.name}</h3>
         <p class="platform-step">{p.step}</p>
+        <p class="platform-find"><span>Where it lives</span>{p.find}</p>
         <div class="platform-dl">
           {p.dl.map((d) => (
             <a class="btn btn--ghost btn--sm" href={`/dl/${d.id}`}>
@@ -91,6 +96,23 @@ const platforms = [
     color: var(--paper-2);
     font-size: 15px;
     min-height: 3lh;
+  }
+  .platform-find {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--ink);
+    border: 1px solid var(--line);
+    color: var(--paper);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .platform-find span {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gilt);
   }
   .platform-dl {
     display: flex;
