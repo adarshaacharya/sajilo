@@ -194,6 +194,16 @@ pub fn run() {
                         prefs::SETUP_CARD_PENDING,
                         &serde_json::Value::Bool(true),
                     );
+                    // New installs start on 1 2 3, which most people read
+                    // fastest. Stored rather than made the default, so anyone
+                    // already on the old default (१ २ ३) keeps what they see.
+                    let _ = db::set_json(
+                        app.handle(),
+                        prefs::NUMERAL_STYLE,
+                        &serde_json::Value::String("latin".to_owned()),
+                    );
+                    // The tray was drawn before this was stored.
+                    tray::refresh_title(app.handle());
                 }
                 system::autostart::refresh_login_item(app.handle());
                 if (first_run || !system::autostart::launched_at_login())
