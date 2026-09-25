@@ -897,5 +897,12 @@
   "break.dinner.title": "Dinner time",
   "break.dinner.body": "Step away from the screen and eat.",
   "break.bedtime.title": "Bedtime",
-  "break.bedtime.body": "Laptop off. The internet will still be there tomorrow."
+  "break.bedtime.body": "Laptop off. The internet will still be there tomorrow.",
+  "setup.title": "Make Sajilo yours",
+  "setup.body": "Three quick choices. All of them are in Settings too.",
+  "setup.place": "Your place, for weather",
+  "setup.language": "Language",
+  "setup.language-note": "Most people use English. You can switch any time in Settings.",
+  "setup.digits": "Digits",
+  "setup.done": "Done"
 }

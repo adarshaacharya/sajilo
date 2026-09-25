@@ -186,6 +186,15 @@ pub fn run() {
             #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
                 let first_run = system::autostart::apply_first_run_default(app.handle());
+                if first_run {
+                    // Existing installs recorded their first run long ago, so
+                    // only a new one is offered the setup card.
+                    let _ = db::set_json(
+                        app.handle(),
+                        prefs::SETUP_CARD_PENDING,
+                        &serde_json::Value::Bool(true),
+                    );
+                }
                 system::autostart::refresh_login_item(app.handle());
                 if (first_run || !system::autostart::launched_at_login())
                     && let Some(main) = window::main_window(app.handle())

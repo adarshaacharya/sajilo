@@ -897,5 +897,12 @@
   "break.dinner.title": "बेलुकाको खाना खाने बेला",
   "break.dinner.body": "स्क्रिनबाट उठेर खाना खानुहोस्।",
   "break.bedtime.title": "सुत्ने बेला भयो",
-  "break.bedtime.body": "ल्यापटप बन्द। इन्टरनेट भोलि पनि हुन्छ।"
+  "break.bedtime.body": "ल्यापटप बन्द। इन्टरनेट भोलि पनि हुन्छ।",
+  "setup.title": "सजिलोलाई आफ्नो बनाउनुहोस्",
+  "setup.body": "तीनवटा छोटो छनोट। सबै सेटिङमा पनि छन्।",
+  "setup.place": "मौसमका लागि तपाईंको ठाउँ",
+  "setup.language": "भाषा",
+  "setup.language-note": "धेरैले English चलाउँछन्। सेटिङबाट जुनसुकै बेला बदल्न सकिन्छ।",
+  "setup.digits": "अङ्क",
+  "setup.done": "भयो"
 }

@@ -11,6 +11,8 @@ use tauri::{AppHandle, Wry};
 
 pub const MENU_BAR_FORMAT: &str = "menuBarFormat";
 pub const NUMERAL_STYLE: &str = "numeralStyle";
+/// Set on a brand-new install only; the Today screen's setup card clears it.
+pub const SETUP_CARD_PENDING: &str = "setupCardPending";
 pub const CUSTOM_MENU_BAR_SHOWS_FLAG: &str = "customMenuBarShowsFlag";
 pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
 /// Appends `HH:MM` to whatever date format is already showing — composes with

@@ -19,6 +19,7 @@ import { DateHeader } from "./_components/date-header";
 import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
 import { HomeAnnouncement } from "./_components/home-announcement";
+import { SetupCard, useSetupCard } from "./_components/setup-card";
 import { UpNext } from "./_components/up-next";
 
 /**
@@ -111,6 +112,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const trayPin = useTrayPinTip();
+  const setup = useSetupCard();
 
   const [today, setToday] = useState<Today | null>(null);
   const [month, setMonth] = useState<CalendarMonth | null>(null);
@@ -209,8 +211,10 @@ export function Dashboard() {
     <div className="space-y-2.5">
       {/* Above the date, once: a Windows user who cannot find the tray icon
           will not come back to read it anywhere lower. */}
-      {trayPin.visible && <TrayPinTip onDismiss={trayPin.dismiss} />}
+      {/* One first-run card at a time: setup first, then where the tray icon is. */}
+      {trayPin.visible && !setup.visible && <TrayPinTip onDismiss={trayPin.dismiss} />}
       <DateHeader today={today} />
+      {setup.visible && <SetupCard onDone={setup.dismiss} />}
 
       <HomeAnnouncement />
 
