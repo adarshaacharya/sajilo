@@ -12,8 +12,7 @@ Sajilo runs on **64-bit (x86_64) Linux**, on **Ubuntu 22.04 or newer** and distr
 |---|---|
 | **.deb** | Ubuntu, Debian, Linux Mint, Pop!_OS, Zorin, elementary |
 | **.rpm** | Fedora, openSUSE |
-| **AUR** (`sajilo-bin`) | Arch, Manjaro, EndeavourOS |
-| **AppImage** | Anything else |
+| **AppImage** | Arch, Manjaro, EndeavourOS, and anything else |
 
 ## With the .deb
 
@@ -43,16 +42,6 @@ sudo zypper install ./Sajilo-linux-x86_64.rpm
 
 Either one installs what Sajilo needs along with it.
 
-## On Arch, from the AUR
-
-Sajilo is in the AUR as **sajilo-bin**. With an AUR helper:
-
-```bash
-yay -S sajilo-bin
-```
-
-(or `paru -S sajilo-bin`). It updates along with the rest of your system.
-
 ## With the AppImage
 
 Download **Sajilo-linux-x86_64.AppImage**, make it executable, and run it:
@@ -62,7 +51,7 @@ chmod +x Sajilo-linux-x86_64.AppImage
 ./Sajilo-linux-x86_64.AppImage
 ```
 
-If it complains about **FUSE**, install `libfuse2` (on Ubuntu 24.04 the package is called `libfuse2t64`).
+If it complains about **FUSE**, install `libfuse2` (on Ubuntu 24.04 the package is called `libfuse2t64`; on Arch, `sudo pacman -S fuse2`).
 
 ## Seeing the date in your top bar
 
