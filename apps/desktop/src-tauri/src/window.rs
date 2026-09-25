@@ -77,7 +77,9 @@ fn position_at_tray(window: &WebviewWindow) {
     // tray anchors. See [`center_under_cursor`] for why Linux is special.
     #[cfg(target_os = "linux")]
     let placed = center_under_cursor(window);
-    #[cfg(not(target_os = "linux"))]
+    #[cfg(target_os = "windows")]
+    let placed = above_taskbar(window);
+    #[cfg(target_os = "macos")]
     let placed = false;
 
     if !placed {
@@ -139,6 +141,76 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
         area.position.y,
     );
     window.set_position(position).is_ok()
+}
+
+/// Where the tray icon was last clicked, in physical pixels. Windows only.
+#[cfg(target_os = "windows")]
+static TRAY_CLICK: std::sync::Mutex<Option<tauri::PhysicalPosition<f64>>> =
+    std::sync::Mutex::new(None);
+
+/// Remembers where the tray icon was clicked, for [`above_taskbar`].
+#[cfg(target_os = "windows")]
+pub fn remember_tray_click(position: tauri::PhysicalPosition<f64>) {
+    if let Ok(mut click) = TRAY_CLICK.lock() {
+        *click = Some(position);
+    }
+}
+
+/// Opens the popover against the taskbar, lined up with the tray icon.
+///
+/// Anchoring to the icon itself, as the positioner's tray anchors do, breaks
+/// when the icon lives in the ^ overflow panel: the popover opens above that
+/// panel, and once Windows closes it the popover is left floating mid-screen.
+/// Hanging it from the taskbar's edge instead puts it where Windows' own
+/// flyouts open, whether the icon is pinned or tucked away.
+///
+/// The click (or, before any click, the pointer) picks the column and the
+/// monitor; the work area decides which edge the taskbar is on.
+#[cfg(target_os = "windows")]
+fn above_taskbar(window: &WebviewWindow) -> bool {
+    let anchor = TRAY_CLICK
+        .lock()
+        .ok()
+        .and_then(|click| *click)
+        .or_else(|| window.cursor_position().ok());
+    let Some(anchor) = anchor else {
+        return false;
+    };
+    let monitor = match window.monitor_from_point(anchor.x, anchor.y) {
+        Ok(Some(monitor)) => monitor,
+        _ => match window.primary_monitor() {
+            Ok(Some(monitor)) => monitor,
+            _ => return false,
+        },
+    };
+    let Ok(size) = window.outer_size() else {
+        return false;
+    };
+
+    #[allow(clippy::cast_possible_truncation)]
+    let gap = (12.0 * monitor.scale_factor()).round() as i32;
+    let width = i32::try_from(size.width).unwrap_or(i32::MAX);
+    let height = i32::try_from(size.height).unwrap_or(i32::MAX);
+    let area = monitor.work_area();
+    let left = area.position.x;
+    let top = area.position.y;
+    let right = left + i32::try_from(area.size.width).unwrap_or(i32::MAX);
+    let bottom = top + i32::try_from(area.size.height).unwrap_or(i32::MAX);
+
+    #[allow(clippy::cast_possible_truncation)]
+    let centered = anchor.x.round() as i32 - width / 2;
+    let x = centered.clamp(left + gap, (right - width - gap).max(left + gap));
+    // A taskbar docked at the top pushes the work area down from the
+    // monitor's edge; anywhere else, the popover sits above the bottom one.
+    let taskbar_on_top = top > monitor.position().y;
+    let y = if taskbar_on_top {
+        top + gap
+    } else {
+        (bottom - height - gap).max(top)
+    };
+    window
+        .set_position(tauri::PhysicalPosition::new(x, y))
+        .is_ok()
 }
 
 /// Dismiss on blur, the way a menu-bar popover is expected to behave.

@@ -202,6 +202,10 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             // The positioner needs every tray event to keep track of where the
             // icon actually is.
             tauri_plugin_positioner::on_tray_event(tray.app_handle(), &event);
+            #[cfg(target_os = "windows")]
+            if let TrayIconEvent::Click { position, .. } = &event {
+                window::remember_tray_click(*position);
+            }
 
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
