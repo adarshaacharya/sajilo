@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CONTROL, CONTROL_LABEL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
 import { Select } from "../../../shared/components/select";
+import { TimeField } from "../../../shared/components/time-field";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api, type DayPlan, type NepaliDate, type PlanRecurrence } from "../../../shared/lib/ipc";
@@ -111,15 +112,14 @@ function PlanEditor({
 
       {draft.hasTime && (
         <div className="grid grid-cols-2 gap-2">
-          <label className="block min-w-0">
+          <div className="min-w-0">
             <span className={CONTROL_LABEL}>{t("planner.time")}</span>
-            <input
-              type="time"
+            <TimeField
               value={draft.time}
-              onChange={(e) => onChange({ ...draft, time: e.target.value })}
-              className={CONTROL}
+              ariaLabel={t("planner.time")}
+              onChange={(time) => onChange({ ...draft, time })}
             />
-          </label>
+          </div>
           <Select
             label={t("planner.reminder")}
             value={draft.reminder}

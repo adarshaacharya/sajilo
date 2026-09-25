@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { CONTROL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
 import { Switch } from "../../../shared/components/switch";
+import { TimeField } from "../../../shared/components/time-field";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { FocusSettings, Routine } from "../../../shared/lib/ipc";
 import { clock, KIND_ICONS, KIND_LABELS, KIND_TINTS, parseClock } from "../_lib/format";
@@ -38,17 +38,15 @@ export function RoutineRows({
               <Icon name={KIND_ICONS[meal]} className="size-3.5" />
             </span>
             <span className="min-w-0 flex-1 truncate text-[12px]">{t(KIND_LABELS[meal])}</span>
-            {/* `CONTROL` is full width; the box, not the input, sets the size. */}
+            {/* The field is full width; the box sets its size. */}
             <div className="w-[96px] shrink-0">
-              <input
-                type="time"
+              <TimeField
                 value={clock(rule.at)}
-                aria-label={t(KIND_LABELS[meal])}
-                onChange={(event) => {
-                  const at = parseClock(event.target.value);
+                ariaLabel={t(KIND_LABELS[meal])}
+                onChange={(value) => {
+                  const at = parseClock(value);
                   if (at) onChange({ ...routine, [meal]: { ...rule, at } });
                 }}
-                className={`${CONTROL} tabular-nums`}
               />
             </div>
             <Switch
@@ -92,20 +90,22 @@ export function RoutineAsk({
       <div className="mt-3">
         <RoutineRows routine={draft} onChange={setDraft} />
       </div>
-      <div className="mt-4 space-y-2">
-        <button
-          type="button"
-          onClick={() => onSave({ ...settings, routine: draft, routineAsked: true })}
-          className="settings-btn settings-btn--accent w-full justify-center text-center text-[12px]"
-        >
-          {t("focus.routine.save")}
-        </button>
+      {/* One row, the way a dialog reads: the way out on the left, the
+          main action on the right. */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => onSave({ ...settings, routineAsked: true })}
           className="settings-btn w-full justify-center text-center text-[12px]"
         >
           {t("focus.routine.skip")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onSave({ ...settings, routine: draft, routineAsked: true })}
+          className="settings-btn settings-btn--accent w-full justify-center text-center text-[12px]"
+        >
+          {t("focus.routine.save")}
         </button>
       </div>
     </section>

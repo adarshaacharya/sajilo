@@ -1,5 +1,6 @@
-import { CONTROL, CONTROL_LABEL } from "../../../shared/components/control";
+import { CONTROL_LABEL } from "../../../shared/components/control";
 import { WEEKDAYS_EN, WEEKDAYS_NE } from "../../../shared/components/month-grid";
+import { TimeField } from "../../../shared/components/time-field";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { FocusSettings } from "../../../shared/lib/ipc";
@@ -28,24 +29,22 @@ export function ScheduleCard({
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <label className="block min-w-0">
+        <div className="min-w-0">
           <span className={CONTROL_LABEL}>{t("focus.from")}</span>
-          <input
-            type="time"
+          <TimeField
             value={clock(settings.workStart)}
-            onChange={(event) => setTime("workStart", event.target.value)}
-            className={CONTROL}
+            ariaLabel={t("focus.from")}
+            onChange={(value) => setTime("workStart", value)}
           />
-        </label>
-        <label className="block min-w-0">
+        </div>
+        <div className="min-w-0">
           <span className={CONTROL_LABEL}>{t("focus.to")}</span>
-          <input
-            type="time"
+          <TimeField
             value={clock(settings.workEnd)}
-            onChange={(event) => setTime("workEnd", event.target.value)}
-            className={CONTROL}
+            ariaLabel={t("focus.to")}
+            onChange={(value) => setTime("workEnd", value)}
           />
-        </label>
+        </div>
       </div>
 
       <div>
