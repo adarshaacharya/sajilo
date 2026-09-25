@@ -31,7 +31,11 @@ pub struct CalendarDay {
 #[serde(rename_all = "camelCase")]
 pub struct CalendarMonth {
     pub first_date: NepaliDate,
+    /// The month and year in Devanagari digits, whatever the setting.
     pub title: String,
+    /// The month's name alone, for a heading that draws the year in the
+    /// digits the user picked.
+    pub month_name: String,
     pub days: Vec<CalendarDay>,
 }
 
@@ -83,6 +87,7 @@ pub fn month(date: NepaliDate, today: NepaliDate) -> Result<CalendarMonth> {
             first_date.nepali_month_name(),
             devanagari(date.year, None)
         ),
+        month_name: first_date.nepali_month_name().to_owned(),
         days,
     })
 }

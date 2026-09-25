@@ -58,6 +58,7 @@ export interface CalendarDay {
 export interface CalendarMonth {
   firstDate: NepaliDate;
   title: string;
+  monthName: string;
   days: CalendarDay[];
 }
 

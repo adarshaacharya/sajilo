@@ -232,7 +232,7 @@ export function Dashboard() {
             <span className="text-[15px] leading-none">‹</span>
           </button>
           <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
-            {month.title}
+            {month.monthName} {digits(month.firstDate.year, numerals)}
             {monthSpan ? ` · ${monthSpan}` : ""}
           </span>
           <button
