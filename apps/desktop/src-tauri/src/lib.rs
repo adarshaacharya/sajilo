@@ -163,11 +163,15 @@ pub fn run() {
                 let _ = main.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
                 #[cfg(target_os = "macos")]
                 window::polish_macos_chrome(&main);
+                #[cfg(target_os = "windows")]
+                window::fit_windows_shadow(&main);
             }
             if let Some(update) = app.get_webview_window(window::UPDATE) {
                 let _ = update.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
                 #[cfg(target_os = "macos")]
                 window::polish_macos_chrome(&update);
+                #[cfg(target_os = "windows")]
+                window::fit_windows_shadow(&update);
             }
             // Delivers anything missed while the app was closed, then sleeps
             // until the next reminder rather than polling.

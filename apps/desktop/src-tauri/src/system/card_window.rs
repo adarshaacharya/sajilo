@@ -67,6 +67,8 @@ pub fn open(app: &AppHandle<Wry>, label: &str, surface: &str, title: &str) {
             let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
             #[cfg(target_os = "macos")]
             crate::window::polish_macos_chrome(&window);
+            #[cfg(target_os = "windows")]
+            crate::window::fit_windows_shadow(&window);
             // Dragged somewhere else, it opens there next time. A drag
             // reports every step, so the latest spot is kept in memory and
             // written once, when the card closes.

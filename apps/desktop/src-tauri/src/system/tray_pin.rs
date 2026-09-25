@@ -30,12 +30,17 @@ pub fn notify_once(app: &AppHandle<Wry>) {
         return;
     }
 
-    let result = app
-        .notification()
-        .builder()
-        .title("Sajilo is running")
-        .body("Find it under the ^ arrow on your taskbar, then drag the flag next to the clock.")
-        .show();
+    let (title, body) = match crate::prefs::language(app) {
+        sajilo_core::focus::Language::Ne => (
+            "सजिलो चलिरहेको छ",
+            "टास्कबारको ^ तीरभित्र खोज्नुहोस्, अनि झण्डालाई घडीको छेउमा तान्नुहोस्।",
+        ),
+        sajilo_core::focus::Language::En => (
+            "Sajilo is running",
+            "Find it under the ^ arrow on your taskbar, then drag the flag next to the clock.",
+        ),
+    };
+    let result = app.notification().builder().title(title).body(body).show();
 
     // Recorded only on success, so a failed delivery is retried next launch
     // rather than silently marked done.

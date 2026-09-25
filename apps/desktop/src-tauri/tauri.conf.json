@@ -72,6 +72,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "publisher": "Adarsha Acharya",
+    "copyright": "© 2026 Adarsha Acharya",
+    "homepage": "https://sajilo.fyi",
     "category": "Utility",
     "shortDescription": "Nepali calendar and daily essentials",
     "longDescription": "Bikram Sambat calendar, festivals, forex, weather, news and Nepali unit tools in the menu bar.",

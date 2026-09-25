@@ -172,6 +172,19 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
     }
 }
 
+/// Keeps the shadow only where it draws what we want.
+///
+/// On Windows 11 a borderless window's shadow comes with rounded corners that
+/// match the card. On Windows 10 the same setting draws a 1px white border
+/// around the whole, square window, which frames the transparent corners of
+/// the rounded card in white. There, no shadow looks right.
+#[cfg(target_os = "windows")]
+pub fn fit_windows_shadow(window: &WebviewWindow) {
+    if !crate::system::windows_version::is_windows_11() {
+        let _ = window.set_shadow(false);
+    }
+}
+
 /// Clear NSWindow fill + apply popover vibrancy (Swift Patro / `.regularMaterial`).
 ///
 /// CSS alone cannot frost the desk behind a WKWebView; that needs an
