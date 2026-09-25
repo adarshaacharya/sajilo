@@ -232,6 +232,11 @@ export interface ActiveBreak {
   seconds: number;
   /** An example opened from the Routine tab; closing it counts for nothing. */
   preview: boolean;
+  /** The engine's joke for this card, said in place of the instruction;
+   * null with jokes off, or for the user's own reminder. */
+  joke: string | null;
+  /** The engine's line for once the break is taken; null with jokes off. */
+  cheer: string | null;
 }
 
 export type BreakOutcome = "done" | "skip" | "snooze" | "drank";

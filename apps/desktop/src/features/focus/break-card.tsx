@@ -5,7 +5,6 @@ import { api, type BreakOutcome, type FocusSnapshot } from "../../shared/lib/ipc
 import { digits } from "../../shared/lib/numerals";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
-import { JOKES, pick } from "./_lib/jokes";
 
 const TITLES = {
   eyes: "break.eyes.title",
@@ -110,9 +109,10 @@ export function BreakCard() {
   // A break taken earns a line before the card goes; skipping or putting it
   // off just closes it. The shell closes this window once the tracker has no
   // card.
-  const [cheer, setCheer] = useState<(typeof JOKES.done)[number] | null>(null);
-  const jokes = snapshot?.settings.jokes ?? false;
-  const startedAt = card?.startedAt ?? "";
+  // Both lines were dealt by the engine when the card opened, so they stay
+  // put for as long as it is up.
+  const [cheer, setCheer] = useState<string | null>(null);
+  const cardCheer = card?.cheer ?? null;
   const finish = useCallback(
     (outcome: BreakOutcome) => {
       if (finishing.current) return;
@@ -121,14 +121,14 @@ export function BreakCard() {
         api.finishFocusBreak(outcome).catch(() => {
           finishing.current = false;
         });
-      if (jokes && (outcome === "done" || outcome === "drank")) {
-        setCheer(pick(JOKES.done, startedAt + outcome));
+      if (cardCheer && (outcome === "done" || outcome === "drank")) {
+        setCheer(cardCheer);
         window.setTimeout(close, CHEER_MS);
       } else {
         void close();
       }
     },
-    [jokes, startedAt],
+    [cardCheer],
   );
 
   useEffect(() => {
@@ -140,9 +140,7 @@ export function BreakCard() {
   const waterLeft = Math.max(0, snapshot.settings.waterGoalMl - snapshot.today.waterMl);
   const waterLine = t("break.water.body").replace("{left}", litres(waterLeft, numerals));
   const plain = card.kind === "water" ? waterLine : t(BODIES[card.kind]);
-  // The user's own reminder is their words, not ours: no joke over it.
-  const joke = card.kind === "custom" ? null : JOKES[card.kind];
-  const body = cheer ? t(cheer) : jokes && joke ? t(pick(joke, card.startedAt)) : plain;
+  const body = cheer ?? card.joke ?? plain;
   const title =
     card.kind === "custom" ? kindLabel(card.kind, snapshot.settings, t) : t(TITLES[card.kind]);
   const later = t("break.snooze").replace("{n}", digits(snapshot.snoozeMinutes, numerals));
@@ -170,7 +168,7 @@ export function BreakCard() {
             {body}
           </p>
           {/* A joke replaces the instruction, but never the number that matters. */}
-          {jokes && !cheer && card.kind === "water" && (
+          {card.joke && !cheer && card.kind === "water" && (
             <p className="break-card__meta" data-tauri-drag-region>
               {waterLine}
             </p>

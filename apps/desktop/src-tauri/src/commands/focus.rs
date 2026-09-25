@@ -194,10 +194,10 @@ fn measure(app: &AppHandle<Wry>) {
             let _ = save_state(app, tracker);
         }
         let settings = &tracker.settings;
-        let notifications = match (settings.style, tracker.state.today.as_ref()) {
+        let notifications = match (settings.style, tracker.state.today.clone()) {
             (ReminderStyle::Notification, Some(today)) => due
                 .iter()
-                .map(|kind| focus::message(*kind, today, settings))
+                .map(|kind| focus::announcement(&mut tracker.state, settings, *kind, &today))
                 .collect(),
             _ => Vec::new(),
         };

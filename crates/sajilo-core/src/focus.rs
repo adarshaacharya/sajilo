@@ -13,12 +13,16 @@
 //! - **Never nag at the wrong moment.** Outside work hours, on days off, on
 //!   public holidays and while paused, nothing is due.
 
+use std::collections::BTreeMap;
+
 use chrono::{DateTime, Datelike, Duration, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::calendar::bikram_sambat::nepali_date_from;
 use crate::calendar::events;
 use crate::planner::PlanTime;
+
+pub mod jokes;
 
 /// Input within this long counts as being at the computer: reading a page
 /// without touching the mouse is still screen time.
@@ -524,6 +528,9 @@ pub struct FocusState {
     pub active_break: Option<ActiveBreak>,
     /// Seconds at the computer since the user last stepped away.
     pub stretch_seconds: u32,
+    /// How far each joke deck has been dealt, by [`jokes::deck_name`], so
+    /// a line does not come round again until the rest have.
+    pub jokes_told: BTreeMap<String, u32>,
     /// The public-holiday answer for one day, so the bundled calendar is not
     /// consulted every few seconds.
     #[serde(skip)]
@@ -598,7 +605,7 @@ fn public_holiday(date: NaiveDate) -> bool {
 }
 
 /// A break card showing now.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ActiveBreak {
     pub kind: BreakKind,
@@ -608,6 +615,54 @@ pub struct ActiveBreak {
     /// Opened from "Show me an example": closing it counts for nothing.
     #[serde(default)]
     pub preview: bool,
+    /// Said in place of the plain instruction, when jokes are on.
+    #[serde(default)]
+    pub joke: Option<String>,
+    /// Said once the break is taken, when jokes are on.
+    #[serde(default)]
+    pub cheer: Option<String>,
+}
+
+impl ActiveBreak {
+    /// A card for `kind`, its lines dealt now so they stay put while it is
+    /// on screen.
+    fn new(
+        state: &mut FocusState,
+        settings: &FocusSettings,
+        kind: BreakKind,
+        started_at: DateTime<Utc>,
+        preview: bool,
+    ) -> Self {
+        // An example shows the next lines without dealing them, so trying
+        // the card out moves nothing on.
+        let mut scratch;
+        let told = if preview {
+            scratch = state.jokes_told.clone();
+            &mut scratch
+        } else {
+            &mut state.jokes_told
+        };
+        let (joke, cheer) = if settings.jokes {
+            (
+                deal_joke(told, kind),
+                jokes::deal(told, jokes::DONE_DECK, jokes::DONE),
+            )
+        } else {
+            (None, None)
+        };
+        Self {
+            kind,
+            started_at,
+            seconds: settings.break_seconds(kind),
+            preview,
+            joke,
+            cheer,
+        }
+    }
+}
+
+fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<String> {
+    jokes::deal(told, jokes::deck_name(kind), jokes::lines(kind))
 }
 
 /// How a break card was closed.
@@ -697,7 +752,7 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     if state.paused_until.is_some_and(|until| tick.now >= until) {
         state.paused_until = None;
     }
-    if state.active_break.is_some_and(|card| {
+    if state.active_break.as_ref().is_some_and(|card| {
         tick.now - card.started_at
             > Duration::seconds(i64::from(card.seconds) + CARD_TIMEOUT_SECONDS)
     }) {
@@ -795,12 +850,7 @@ fn open_card(
     now: DateTime<Utc>,
 ) {
     if settings.style == ReminderStyle::Card && state.active_break.is_none() {
-        state.active_break = Some(ActiveBreak {
-            kind,
-            started_at: now,
-            seconds: settings.break_seconds(kind),
-            preview: false,
-        });
+        state.active_break = Some(ActiveBreak::new(state, settings, kind, now, false));
     }
 }
 
@@ -870,12 +920,7 @@ pub fn preview_break(
     kind: BreakKind,
     now: DateTime<Utc>,
 ) {
-    state.active_break = Some(ActiveBreak {
-        kind,
-        started_at: now,
-        seconds: settings.break_seconds(kind),
-        preview: true,
-    });
+    state.active_break = Some(ActiveBreak::new(state, settings, kind, now, true));
 }
 
 /// Closes the break card the way the user closed it.
@@ -1198,7 +1243,7 @@ pub fn snapshot(
         water_goal_min_ml: WATER_GOAL_MIN_ML,
         water_goal_max_ml: WATER_GOAL_MAX_ML,
         snooze_minutes: SNOOZE_MINUTES,
-        active_break: state.active_break,
+        active_break: state.active_break.clone(),
     }
 }
 
@@ -1226,6 +1271,34 @@ pub fn litres(ml: u32) -> String {
 }
 
 /// The notification for a break. English, like every other Sajilo reminder.
+/// The title and body of a reminder in the notification style. With jokes
+/// on, the body is the next line from the kind's deck; water keeps its
+/// running total under it, since that number is the point.
+pub fn announcement(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    kind: BreakKind,
+    today: &FocusDay,
+) -> (String, String) {
+    let (title, plain) = message(kind, today, settings);
+    let joke = if settings.jokes {
+        deal_joke(&mut state.jokes_told, kind)
+    } else {
+        None
+    };
+    let body = match (joke, kind) {
+        (Some(joke), BreakKind::Water) => format!(
+            "{joke}\n{} of {} litres today.",
+            litres(today.water_ml),
+            litres(settings.water_goal_ml)
+        ),
+        (Some(joke), _) => joke,
+        (None, _) => plain,
+    };
+    (title, body)
+}
+
+/// The plain title and body of a reminder, without a joke.
 pub fn message(kind: BreakKind, today: &FocusDay, settings: &FocusSettings) -> (String, String) {
     match kind {
         BreakKind::Eyes => (

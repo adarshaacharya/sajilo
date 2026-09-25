@@ -3,8 +3,10 @@
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
     BreakKind, BreakOutcome, FocusSettings, FocusState, FocusStatus, PauseChoice, ReminderStyle,
-    SNOOZE_MINUTES, Tick, finish_break, litres, log_water, pause, preview_break, snapshot, tick,
+    SNOOZE_MINUTES, Tick, announcement, finish_break, jokes, litres, log_water, pause,
+    preview_break, snapshot, tick,
 };
+use std::collections::HashSet;
 
 const STEP: i64 = 15;
 
@@ -383,7 +385,7 @@ fn water_is_counted_in_litres() {
 fn a_due_break_opens_a_card_with_its_countdown() {
     let mut state = FocusState::default();
     run(&mut state, &eyes_only(), monday_at(10), 20, busy);
-    let card = state.active_break.expect("a card is showing");
+    let card = state.active_break.clone().expect("a card is showing");
     assert_eq!(card.kind, BreakKind::Eyes);
     assert_eq!(card.seconds, 20);
 
@@ -457,7 +459,7 @@ fn drinking_from_the_card_logs_a_step_of_water() {
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(10), 60, busy);
     assert_eq!(
-        state.active_break.map(|card| card.kind),
+        state.active_break.as_ref().map(|card| card.kind),
         Some(BreakKind::Water)
     );
     finish_break(
@@ -523,7 +525,7 @@ fn an_example_card_changes_no_count_or_timer() {
     run(&mut state, &settings, monday_at(10), 10, busy);
     let before = state.clone();
     preview_break(&mut state, &settings, BreakKind::Eyes, monday_at(11));
-    assert!(state.active_break.is_some_and(|card| card.preview));
+    assert!(state.active_break.as_ref().is_some_and(|card| card.preview));
     finish_break(
         &mut state,
         &settings,
@@ -563,7 +565,10 @@ fn a_custom_break_comes_on_its_own_interval() {
 
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(10), 30, busy);
-    let card = state.active_break.expect("a card when it comes due");
+    let card = state
+        .active_break
+        .clone()
+        .expect("a card when it comes due");
     assert_eq!((card.kind, card.seconds), (BreakKind::Custom, 0));
 }
 
@@ -645,7 +650,7 @@ fn putting_off_the_end_of_work_nudge_brings_it_back() {
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(18), 1, busy);
     assert_eq!(
-        state.active_break.map(|card| card.kind),
+        state.active_break.as_ref().map(|card| card.kind),
         Some(BreakKind::EndOfDay)
     );
     finish_break(
@@ -762,7 +767,7 @@ fn a_put_off_meal_comes_back_in_five_minutes() {
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(13), 0, busy);
     assert_eq!(
-        state.active_break.map(|card| card.kind),
+        state.active_break.as_ref().map(|card| card.kind),
         Some(BreakKind::Lunch)
     );
     finish_break(
@@ -794,7 +799,7 @@ fn a_meal_waits_for_the_card_on_screen() {
     let start = monday_at(12) + Duration::minutes(39);
     run(&mut state, &settings, start, 20, busy);
     assert_eq!(
-        state.active_break.map(|card| card.kind),
+        state.active_break.as_ref().map(|card| card.kind),
         Some(BreakKind::Eyes)
     );
     let due = run(&mut state, &settings, monday_at(13), 5, busy);
@@ -916,4 +921,145 @@ fn the_week_adds_up() {
     assert_eq!(week.water_goal_days, 1);
     let stretch = week.longest_stretch.clone().expect("a stretch");
     assert!(stretch.today);
+}
+
+// ------------------------------------------------------------------ jokes
+
+const DECKS: [BreakKind; 8] = [
+    BreakKind::Eyes,
+    BreakKind::Move,
+    BreakKind::Water,
+    BreakKind::EndOfDay,
+    BreakKind::Breakfast,
+    BreakKind::Lunch,
+    BreakKind::Dinner,
+    BreakKind::Bedtime,
+];
+
+#[test]
+fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
+    let decks = DECKS
+        .iter()
+        .map(|kind| (jokes::deck_name(*kind), jokes::lines(*kind)))
+        .chain([(jokes::DONE_DECK, jokes::DONE)]);
+    for (name, lines) in decks {
+        assert!(
+            lines.len() >= jokes::MIN_DECK,
+            "{name} is too small to rotate"
+        );
+        let unique: HashSet<_> = lines.iter().collect();
+        assert_eq!(unique.len(), lines.len(), "{name} repeats a line");
+        for line in lines {
+            assert!(!line.trim().is_empty(), "{name} has an empty line");
+            assert!(
+                line.chars().count() <= jokes::MAX_LINE,
+                "{name} line is too long for the card: {line}"
+            );
+        }
+    }
+    assert!(
+        jokes::lines(BreakKind::Custom).is_empty(),
+        "the user's own words stay theirs"
+    );
+}
+
+/// Every line comes up once per round, and no line ever follows itself,
+/// not even where one round ends and the next begins.
+#[test]
+fn a_deck_deals_every_line_before_repeating_and_never_twice_in_a_row() {
+    for kind in DECKS {
+        let name = jokes::deck_name(kind);
+        let len = jokes::lines(kind).len();
+        let dealt: Vec<usize> = (0..(len * 6) as u32)
+            .map(|turn| jokes::position(name, turn, len))
+            .collect();
+        for round in dealt.chunks(len) {
+            let seen: HashSet<_> = round.iter().collect();
+            assert_eq!(seen.len(), len, "{name} skipped a line in a round");
+        }
+        assert!(
+            dealt.windows(2).all(|pair| pair[0] != pair[1]),
+            "{name} dealt the same line twice in a row"
+        );
+        assert_ne!(
+            dealt[..len],
+            dealt[len..len * 2],
+            "{name} rounds should reshuffle"
+        );
+    }
+}
+
+#[test]
+fn each_card_brings_a_new_joke_and_a_cheer_when_jokes_are_on() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    let mut seen = Vec::new();
+    let mut now = monday_at(10);
+    for _ in 0..5 {
+        run(&mut state, &settings, now, 20, busy);
+        let card = state
+            .active_break
+            .clone()
+            .expect("a card when it comes due");
+        let joke = card.joke.expect("jokes are on by default");
+        assert!(jokes::EYES.contains(&joke.as_str()));
+        assert!(
+            card.cheer
+                .is_some_and(|line| jokes::DONE.contains(&line.as_str()))
+        );
+        seen.push(joke);
+        finish_break(
+            &mut state,
+            &settings,
+            BreakOutcome::Done,
+            card.started_at.naive_utc(),
+        );
+        now = card.started_at + Duration::seconds(STEP);
+    }
+    let unique: HashSet<_> = seen.iter().collect();
+    assert_eq!(
+        unique.len(),
+        seen.len(),
+        "a joke came back too soon: {seen:?}"
+    );
+
+    let mut plain = eyes_only();
+    plain.jokes = false;
+    let mut state = FocusState::default();
+    run(&mut state, &plain, monday_at(10), 20, busy);
+    let card = state.active_break.expect("a card is showing");
+    assert_eq!((card.joke, card.cheer), (None, None));
+    assert!(state.jokes_told.is_empty());
+}
+
+#[test]
+fn a_notification_says_the_joke_and_keeps_the_water_total() {
+    let mut settings = FocusSettings {
+        style: ReminderStyle::Notification,
+        ..FocusSettings::default()
+    };
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(10), 1, busy);
+    let today = state.today.clone().unwrap();
+
+    let (title, body) = announcement(&mut state, &settings, BreakKind::Move, &today);
+    assert_eq!(title, "Time to move");
+    assert!(jokes::MOVE.contains(&body.as_str()), "{body}");
+    let (_, again) = announcement(&mut state, &settings, BreakKind::Move, &today);
+    assert_ne!(body, again, "two notifications in a row say the same thing");
+
+    let (_, water) = announcement(&mut state, &settings, BreakKind::Water, &today);
+    let (joke, total) = water.split_once('\n').expect("the joke, then the total");
+    assert!(jokes::WATER.contains(&joke));
+    assert_eq!(total, "0 of 2.5 litres today.");
+
+    let (_, custom) = announcement(&mut state, &settings, BreakKind::Custom, &today);
+    assert_eq!(custom, "Your own reminder, from Sajilo.");
+
+    settings.jokes = false;
+    let (_, plain) = announcement(&mut state, &settings, BreakKind::Eyes, &today);
+    assert_eq!(
+        plain,
+        "Look at something about 6 metres away for 20 seconds."
+    );
 }
