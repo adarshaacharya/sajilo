@@ -19,7 +19,6 @@ import { DateHeader } from "./_components/date-header";
 import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
 import { HomeAnnouncement } from "./_components/home-announcement";
-import { RashifalGlance } from "./_components/rashifal-glance";
 import { SetupCard, useSetupCard } from "./_components/setup-card";
 import { UpNext } from "./_components/up-next";
 
@@ -260,7 +259,6 @@ export function Dashboard() {
       <UpNext events={eventSlides} />
       <FocusGlance />
       <GlanceCards />
-      <RashifalGlance />
     </div>
   );
 }
