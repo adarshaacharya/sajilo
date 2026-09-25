@@ -235,6 +235,8 @@
   "reminder.kind.sip": "SIP",
   "reminder.kind.keeper": "Keeper",
   "reminder.open": "Open",
+  "announcement.label": "Notice from Sajilo",
+  "announcement.next": "Next notice",
   "announcement.dismiss": "Close this notice",
   "reminder.dismiss": "Got it",
   "reminder.more": "{n} more",

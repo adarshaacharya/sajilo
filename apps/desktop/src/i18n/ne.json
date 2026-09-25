@@ -235,6 +235,8 @@
   "reminder.kind.sip": "SIP",
   "reminder.kind.keeper": "रिमाइन्डर",
   "reminder.open": "खोल्नुहोस्",
+  "announcement.label": "सजिलोको सूचना",
+  "announcement.next": "अर्को सूचना",
   "announcement.dismiss": "यो सूचना बन्द गर्नुहोस्",
   "reminder.dismiss": "ठिक छ",
   "reminder.more": "अरू {n}",
