@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { spring } from "../lib/motion";
 import { Icon, type IconName } from "./icon";
 
@@ -28,11 +29,24 @@ export function Segmented<T extends string>({
 }) {
   const scroll = scrollable ?? options.length >= 4;
   const small = size === "sm";
+  const track = useRef<HTMLDivElement>(null);
+  const more = useHiddenSides(track, scroll);
+
+  // A tab picked while half off the edge, or arriving selected from a link,
+  // slides fully into view.
+  useEffect(() => {
+    if (!scroll) return;
+    track.current
+      ?.querySelector<HTMLElement>(`[data-segment="${CSS.escape(value)}"]`)
+      ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }, [scroll, value]);
 
   return (
     <div
+      ref={track}
       role="tablist"
       aria-label={label}
+      data-more={more}
       className={`seg-track flex shrink-0 ${small ? "h-[22px] rounded-[6px] p-[2px]" : "h-[30px] rounded-[8px] p-[3px]"} ${scroll ? "seg-track--scroll" : ""}`}
     >
       {options.map((option) => {
@@ -42,6 +56,7 @@ export function Segmented<T extends string>({
             key={option.id}
             type="button"
             role="tab"
+            data-segment={option.id}
             aria-selected={selected}
             onClick={() => onChange(option.id)}
             className={`seg-segment relative z-[1] flex h-full items-center justify-center gap-1 ${small ? "rounded-[4px] px-2 text-[10px]" : "rounded-[6px] text-[11px]"} ${scroll ? "min-w-0 px-2.5" : small ? "" : "px-1"} font-medium transition-colors duration-150 ${
@@ -70,4 +85,33 @@ export function Segmented<T extends string>({
       })}
     </div>
   );
+}
+
+type HiddenSides = "start" | "end" | "both" | undefined;
+
+/** Which ends of a scrolling track have tabs out of view, for its edge fade. */
+function useHiddenSides(track: RefObject<HTMLDivElement | null>, enabled: boolean): HiddenSides {
+  const [sides, setSides] = useState<HiddenSides>();
+
+  useEffect(() => {
+    const element = track.current;
+    if (!enabled || !element) return;
+    const measure = () => {
+      const start = element.scrollLeft > 1;
+      const end = element.scrollLeft + element.clientWidth < element.scrollWidth - 1;
+      setSides(start && end ? "both" : start ? "start" : end ? "end" : undefined);
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    // Resizes and late font loads change what fits, not just scrolling.
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    for (const child of element.children) observer.observe(child);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [track, enabled]);
+
+  return enabled ? sides : undefined;
 }

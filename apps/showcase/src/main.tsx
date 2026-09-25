@@ -25,6 +25,10 @@ if (theme === "light" || theme === "dark") document.documentElement.dataset.them
  * every visitor's machine, not like the opaque Linux/Windows fallback. */
 document.documentElement.dataset.windowMaterial = "vibrant";
 
+/* A Windows visitor's browser draws flag emoji as letters, the same as the app;
+ * the desktop stylesheet's flag face covers it once this is set. */
+if (navigator.userAgent.includes("Windows")) document.documentElement.dataset.platform = "windows";
+
 /* A panel embedded in the carousel is scenery: it must not take the pointer or
  * the tab key, or a visitor working down the page with a keyboard would fall
  * into five copies of an app they cannot see. `pointer-events` is set by the

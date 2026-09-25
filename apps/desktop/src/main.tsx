@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
+import { isWindows } from "./shared/lib/platform";
 import "./index.css";
 
 // macOS supplies the frosted material behind our transparent shell. Other
@@ -8,6 +9,11 @@ import "./index.css";
 // visual treatment or the rounded transparent corners of the popover.
 if (!navigator.userAgent.includes("Macintosh")) {
   document.documentElement.dataset.windowMaterial = "opaque";
+}
+
+// Windows draws flag emoji as letters; index.css gives it a flag face.
+if (isWindows) {
+  document.documentElement.dataset.platform = "windows";
 }
 
 const root = document.getElementById("root");

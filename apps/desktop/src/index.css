@@ -166,6 +166,35 @@ html {
   color-scheme: light dark;
 }
 
+/* The UI face, in one place so a platform can add to it. */
+:root {
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    "Noto Sans Devanagari", sans-serif;
+}
+
+/*
+ * Windows ships no country-flag emoji: Segoe UI Emoji draws 🇳🇵 as the letters
+ * "NP", which is how the world clocks came out as "QA Doha". This face holds
+ * only the flags (Twemoji's art, CC BY 4.0, via country-flag-emoji-polyfill,
+ * MIT; see /fonts/twemoji-country-flags.LICENSE.md), and its unicode-range
+ * keeps it off every other character. macOS and Linux keep their own flags.
+ */
+@font-face {
+  font-family: "Twemoji Country Flags";
+  unicode-range:
+    U+1F1E6-1F1FF, U+1F3F4, U+E0062-E0063, U+E0065, U+E0067, U+E006C, U+E006E,
+    U+E0073-E0074, U+E0077, U+E007F;
+  src: url("/fonts/twemoji-country-flags.woff2") format("woff2");
+  font-display: block;
+}
+
+:root[data-platform="windows"] {
+  --font-ui:
+    "Twemoji Country Flags", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    system-ui, "Noto Sans Devanagari", sans-serif;
+}
+
 /* Text size is an accessibility preference, not browser zoom: it changes type
    while leaving the tray window and its controls at a dependable size. Most
    compact copy uses Tailwind's explicit pixel utilities, so each shipped type
@@ -286,9 +315,7 @@ html {
   border: 1px solid var(--color-border);
   background: var(--color-canvas);
   color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-    "Noto Sans Devanagari", sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
@@ -802,9 +829,7 @@ button.row-line + button.row-line::before {
   background: var(--color-break-card);
   padding: 16px 18px 14px;
   color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-    "Noto Sans Devanagari", sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   user-select: none;
   cursor: grab;
@@ -991,9 +1016,7 @@ button.row-line + button.row-line::before {
   box-shadow: 0 4px 8px rgb(0 0 0 / 32%);
   padding: 20px;
   color: var(--color-text);
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
-    "Noto Sans Devanagari", sans-serif;
+  font-family: var(--font-ui);
   font-size: 12px;
   user-select: none;
   -webkit-font-smoothing: antialiased;
@@ -1338,6 +1361,24 @@ button.row-line + button.row-line::before {
 
 .seg-track--scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* A scrolling track fades out on whichever side has more tabs, so a label cut
+   at the edge reads as "there is more" rather than as a clipping bug. */
+.seg-track--scroll[data-more="end"] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+.seg-track--scroll[data-more="start"] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 28px), transparent);
+}
+.seg-track--scroll[data-more="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 28px,
+    #000 calc(100% - 28px),
+    transparent
+  );
 }
 
 .seg-thumb {
