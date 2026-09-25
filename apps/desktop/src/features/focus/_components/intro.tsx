@@ -57,20 +57,22 @@ export function Intro({
 
       <p className="mt-4 text-[11px] leading-relaxed text-text-muted">{t("focus.intro.fine")}</p>
 
-      <div className="mt-4 space-y-2">
-        <button
-          type="button"
-          onClick={onTurnOn}
-          className="settings-btn settings-btn--accent w-full justify-center text-center text-[12px]"
-        >
-          {t("focus.intro.turn-on")}
-        </button>
+      {/* One row, like the routine question: the lesser choice on the left,
+          the main action on the right. */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => onExample("eyes")}
           className="settings-btn w-full justify-center text-center text-[12px]"
         >
           {t("focus.intro.example")}
+        </button>
+        <button
+          type="button"
+          onClick={onTurnOn}
+          className="settings-btn settings-btn--accent w-full justify-center text-center text-[12px]"
+        >
+          {t("focus.intro.turn-on")}
         </button>
       </div>
     </section>
