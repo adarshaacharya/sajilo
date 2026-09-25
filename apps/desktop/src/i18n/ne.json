@@ -904,5 +904,6 @@
   "setup.language": "भाषा",
   "setup.language-note": "धेरैले English चलाउँछन्। सेटिङबाट जुनसुकै बेला बदल्न सकिन्छ।",
   "setup.digits": "अङ्क",
-  "setup.done": "भयो"
+  "setup.done": "भयो",
+  "dashboard.support-note": "फ्री, विज्ञापन छैन, एक जनाले बनाएको।"
 }

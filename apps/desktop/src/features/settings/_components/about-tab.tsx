@@ -3,7 +3,7 @@ import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
 import { TrayPinTip } from "../../../shared/components/tray-pin-tip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
-import { openExternalLink } from "../../../shared/lib/external-link";
+import { openExternalLink, SUPPORT_URL } from "../../../shared/lib/external-link";
 import { isWindows } from "../../../shared/lib/platform";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
@@ -13,7 +13,6 @@ const WEBSITE_URL = "https://sajilo.fyi";
 const PRIVACY_URL = `${WEBSITE_URL}/privacy.html`;
 const DOCS_URL = `${WEBSITE_URL}/docs.html`;
 const CONTACT_EMAIL = "contact@sajilo.fyi";
-const SUPPORT_URL = "https://buymemomo.com/adarsha";
 
 function QuietLink({ label, href }: { label: string; href: string }) {
   return (
