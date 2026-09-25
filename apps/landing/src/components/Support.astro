@@ -1,0 +1,91 @@
+---
+// The last stop on the home page: Sajilo is free, and this is where someone
+// glad of it can say so. One band, after Help, so it never gets between a
+// visitor and the download.
+const MOMO_URL = "https://buymemomo.com/adarsha";
+---
+
+<section class="support-band wrap" id="support" aria-labelledby="support-title">
+  <div class="support-card reveal">
+    <span class="support-icon" aria-hidden="true">🥟</span>
+    <div class="support-copy">
+      <p class="support-mark">
+        <span lang="ne">धन्यवाद</span>
+        <span class="support-mark-en">Support</span>
+      </p>
+      <h2 id="support-title">Free, no ads, made by one person.</h2>
+      <p>
+        If Sajilo is part of your day, a plate of momo is the nicest way to say so. It goes towards code
+        signing, so installs stop showing warnings, and time for what comes next.
+      </p>
+      <div class="support-cta">
+        <a class="btn btn--accent" href={MOMO_URL} target="_blank" rel="noopener">Buy me a momo</a>
+        <a class="btn btn--ghost" href="/support.html">Other ways to help</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .support-band {
+    position: relative;
+    z-index: 1;
+    padding-bottom: clamp(60px, 8vw, 110px);
+  }
+  .support-card {
+    display: flex;
+    gap: clamp(18px, 3vw, 32px);
+    align-items: flex-start;
+    padding: clamp(24px, 4vw, 40px);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--ink-2);
+  }
+  .support-icon {
+    font-size: clamp(40px, 5vw, 56px);
+    line-height: 1;
+  }
+  .support-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .support-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .support-mark-en {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+  .support-copy h2 {
+    margin-top: 10px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3.4vw, 38px);
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .support-copy > p:not(.support-mark) {
+    margin-top: 12px;
+    max-width: 60ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--paper-2);
+  }
+  .support-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+  }
+  @media (max-width: 560px) {
+    .support-card {
+      flex-direction: column;
+    }
+  }
+</style>
