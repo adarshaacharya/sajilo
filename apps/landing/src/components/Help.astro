@@ -1,0 +1,158 @@
+---
+// After Install, where people get stuck: the problems they actually hit,
+// each linking straight to its fix in the docs, then the docs themselves.
+const questions = [
+  {
+    q: "Opened it and nothing happened?",
+    a: "Sajilo lives in the menu bar or tray, not in a window. Here's where to look.",
+    href: "/docs/troubleshooting.html#i-opened-sajilo-and-nothing-happened",
+  },
+  {
+    q: "Can't find the flag on Windows?",
+    a: "Windows hides new tray icons behind the ^ arrow. Bring it out in one drag.",
+    href: "/docs/install-windows.html#put-sajilo-on-your-taskbar",
+  },
+  {
+    q: "Reminders not arriving?",
+    a: "Four things to check, from Do Not Disturb to whether Sajilo is running.",
+    href: "/docs/troubleshooting.html#reminders-dont-arrive",
+  },
+  {
+    q: "Linux: installs, but never opens?",
+    a: "Older builds can't start on Ubuntu 22.04 and Mint 21. The fix takes a minute.",
+    href: "/docs/troubleshooting.html#linux-it-installs-but-never-opens",
+  },
+];
+---
+
+<section class="help wrap" id="help" aria-labelledby="help-title">
+  <div class="help-head reveal">
+    <p class="help-mark">
+      <span lang="ne">सहायता</span>
+      <span class="help-mark-en">Help</span>
+    </p>
+    <h2 id="help-title">Stuck somewhere? <em>It's in the docs.</em></h2>
+    <p class="lede">
+      Installing on each system, every feature step by step with the real app beside it, and fixes for
+      the problems people run into.
+    </p>
+  </div>
+
+  <ul class="help-grid">
+    {questions.map((item, i) => (
+      <li class="reveal" style={`--d:${i * 70}ms`}>
+        <a class="help-card" href={item.href}>
+          <strong>{item.q}</strong>
+          <span>{item.a}</span>
+          <span class="help-go" aria-hidden="true">Read the fix →</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <div class="help-cta reveal">
+    <a class="btn btn--accent" href="/docs.html">Read the docs</a>
+    <a class="btn btn--ghost" href="/report.html">Report an issue</a>
+  </div>
+</section>
+
+<style>
+  .help {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+    padding-bottom: clamp(60px, 8vw, 110px);
+  }
+  .help-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .help-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .help-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+  .help-head h2 {
+    margin-top: 14px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  .help-head h2 em {
+    font-style: normal;
+    color: var(--gilt);
+  }
+  .help-head .lede {
+    margin-top: 16px;
+    max-width: 60ch;
+  }
+
+  .help-grid {
+    list-style: none;
+    margin: clamp(28px, 4vw, 44px) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .help-card {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    height: 100%;
+    padding: 22px 22px 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--ink-2);
+    transition: border-color 0.3s, transform 0.4s var(--ease);
+  }
+  .help-card:hover {
+    border-color: var(--line-2);
+    transform: translateY(-2px);
+  }
+  .help-card strong {
+    font-weight: 600;
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--paper);
+  }
+  .help-card span {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--paper-3);
+  }
+  .help-card .help-go {
+    margin-top: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gilt);
+  }
+
+  .help-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  @media (max-width: 1000px) {
+    .help-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .help-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
