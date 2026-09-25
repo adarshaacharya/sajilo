@@ -249,6 +249,18 @@ export function SystemTab() {
         </div>
         {message && <p className="text-[10px] text-positive">{message}</p>}
       </SettingsSection>
+
+      {/* Quitting a tray app is rare, so it lives here and in the tray's
+          right-click menu rather than on Today. Linux's tray menu has no
+          Quit, which makes this its one route. */}
+      <SettingsSection title={t("settings.quit-section")} footnote={t("settings.quit-note")}>
+        <div>
+          <button type="button" onClick={() => void api.quitApp()} className="settings-btn">
+            <Icon name="power" className="size-3 shrink-0" />
+            {t("settings.quit")}
+          </button>
+        </div>
+      </SettingsSection>
     </div>
   );
 }

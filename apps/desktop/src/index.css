@@ -251,6 +251,16 @@ html {
   font-size: var(--text-size-12);
 }
 
+/* The default size lifts the smallest steps by a pixel: 8–11px captions were
+   tiring on a Windows laptop at 100% scaling, where most people run Sajilo.
+   Nothing starts below 9px or reads below 11px. "Small" and "Large" keep
+   their own scales above; "Small" is the way back to the denser look. */
+:root:not([data-text-size]) .text-\[8px\] { font-size: 9px; }
+:root:not([data-text-size]) .text-\[9px\] { font-size: 10px; }
+:root:not([data-text-size]) .text-\[9\.5px\] { font-size: 10.5px; }
+:root:not([data-text-size]) .text-\[10px\] { font-size: 11px; }
+:root:not([data-text-size]) .text-\[11px\] { font-size: 12px; }
+
 :root[data-text-size] .text-\[8px\] { font-size: var(--text-size-8); }
 :root[data-text-size] .text-\[9px\] { font-size: var(--text-size-9); }
 :root[data-text-size] .text-\[9\.5px\] { font-size: var(--text-size-9-5); }
