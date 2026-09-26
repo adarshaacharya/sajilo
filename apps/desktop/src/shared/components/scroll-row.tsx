@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { scrollIntoBox } from "../lib/scroll";
 import { Icon } from "./icon";
 
 /** Pixels per wheel "line" when a mouse reports lines instead of pixels. */
@@ -73,17 +74,15 @@ export function ScrollRow({
 
   useWheelScroll(ref);
 
-  // Keep the chosen item on screen. Scrolls only the row, never the page.
+  // Keep the chosen item on screen. Scrolls only the row, never the page
+  // (or, on the landing site, the page around the frame).
   const chosen = useChosenKey(ref);
   useEffect(() => {
     const row = ref.current;
     if (!row || chosen === null) return;
     const item = row.querySelector<HTMLElement>(SELECTED);
-    if (!item) return;
-    const start = item.offsetLeft - row.offsetLeft;
-    const end = start + item.offsetWidth;
-    if (start < row.scrollLeft) row.scrollLeft = start - 24;
-    else if (end > row.scrollLeft + row.clientWidth) row.scrollLeft = end - row.clientWidth + 24;
+    // Centred rather than nearest: at the edge it would sit under the fade.
+    if (item) scrollIntoBox(item, "x", "center", "smooth");
   }, [chosen]);
 
   const page = (direction: 1 | -1) => {
