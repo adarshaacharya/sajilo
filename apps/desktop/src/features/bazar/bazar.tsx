@@ -309,7 +309,9 @@ export function Bazar() {
         />
       )}
 
-      {tab === "stocks" && view === "crypto" && <Crypto state={crypto} onRetry={retryCrypto} />}
+      {tab === "stocks" && view === "crypto" && (
+        <Crypto state={crypto} onRetry={retryCrypto} linkedCoin={linked.get("coin")} />
+      )}
 
       {tab === "stocks" && view === "nepse" && (
         <Stocks

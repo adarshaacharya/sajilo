@@ -1,7 +1,7 @@
 ---
 title: "Bazar: prices, NEPSE, IPOs and funds"
 nav: Bazar
-description: Gold and silver, fuel and Kalimati vegetable prices, the NEPSE market, IPOs, dividends, your shares and mutual funds, with SIP reminders.
+description: Gold and silver, fuel and Kalimati vegetable prices, the NEPSE market, IPOs, dividends, your shares and mutual funds, with SIP reminders, and crypto prices.
 section: features
 order: 10
 screen: /bazar
@@ -81,6 +81,16 @@ For an open-ended fund you pay into monthly:
 2. Choose the day it **Pays on**, an optional **Amount**, and when to **Remind me**: 7, 3 or 1 day before, and on the day.
 
 When a payment is due, **Your funds** shows it with **Paid** and **Remind tomorrow**. SIPs also appear in [Keeper](/docs/keeper.html).
+
+## Crypto
+
+Switch **Stocks** to **Crypto** at the top for the 50 largest coins by market value, priced in US dollars, with rupees beside them at NRB's rate. Sort them by **Top**, **Gainers** or **Losers**, or search by name or ticker.
+
+- **Star** a coin to keep it under **Your coins**.
+- Open a coin for its chart over **1D**, **7D**, **1M** or **1Y**, and its market value, 24-hour range, supply and all-time high.
+- Under **What you hold**, enter the amount and, if you like, your average buy price, to see what it's worth and your gain or loss. This stays on this computer.
+
+Trading crypto is illegal in Nepal. Sajilo only shows prices, from CoinGecko, or Kraken when CoinGecko can't be reached; it can't buy or sell anything.
 
 ## Freshness
 

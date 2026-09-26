@@ -2,7 +2,7 @@
 // The recorded session, drawn. Every number and every point on the line is
 // the recording's (src/data/showcase.ts); the chart is the same minute-by-
 // minute series the app plots, laid out here as one wide stroke.
-import { ipo, mutualFunds, nepse, nepseIntraday } from "../data/showcase";
+import { crypto, ipo, mutualFunds, nepse, nepseIntraday } from "../data/showcase";
 import { rs, signed, nepalClock, ne } from "../lib/format";
 
 const W = 800;
@@ -53,6 +53,42 @@ const fundScreens = [
     caption: "Daily, weekly and monthly NAV, fund size and what it holds. Type in your units to see what they are worth, and set the day your SIP leaves the bank.",
   },
 ];
+
+// Crypto: the recorded list and bitcoin's page, as the app draws them.
+const CRYPTO = "/bazar?tab=stocks&view=crypto";
+const cryptoScreens = [
+  {
+    title: "The list",
+    route: CRYPTO,
+    caption: `Top ${crypto.count} by market value, today's gainers and losers, and the coins you starred with what they add up to.`,
+  },
+  {
+    title: "One coin",
+    route: `${CRYPTO}&coin=bitcoin`,
+    caption: "A chart from one day to one year, market value, supply and the all-time high. Add what you hold and what you paid to see the gain, or the lesson.",
+  },
+];
+const dollars = (n: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: n >= 1000 ? 0 : n >= 1 ? 2 : 4,
+  }).format(n);
+// Each coin's week as a small line, the same hourly prices the app plots.
+const weekLine = (week: number[]) => {
+  const lo = Math.min(...week);
+  const span = Math.max(...week) - lo || 1;
+  return week
+    .map((v, i) => `${i === 0 ? "M" : "L"}${((i / (week.length - 1)) * 100).toFixed(1)} ${(22 - ((v - lo) / span) * 20).toFixed(1)}`)
+    .join(" ");
+};
+const cryptoAsOf = new Date(crypto.asOf).toLocaleDateString("en-GB", {
+  day: "numeric",
+  month: "short",
+  timeZone: "UTC",
+});
+const belowHigh = Math.round(Math.abs(crypto.bitcoin.fromAllTimeHigh));
+const highYear = crypto.bitcoin.allTimeHighDate.slice(0, 4);
 
 const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocaleDateString("en-GB", {
   day: "numeric",
@@ -215,6 +251,75 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
   {mutualFunds.largest.length > 0 && (
     <ul class="fund-screens reveal" aria-label="The mutual funds screens">
       {fundScreens.map((screen) => (
+        <li class="fund-screen">
+          <div class="fund-frame">
+            <div class="fund-canvas">
+              <iframe
+                class="fund-app"
+                title={screen.title}
+                tabindex="-1"
+                scrolling="no"
+                loading="lazy"
+                src={`/assets/app/index.html?route=${encodeURIComponent(screen.route)}&inert=1&theme=dark`}
+              ></iframe>
+            </div>
+          </div>
+          <p class="fund-caption">
+            <span class="fund-caption-title">{screen.title}</span>
+            {screen.caption}
+          </p>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  {crypto.count > 0 && (
+    <div class="crypto reveal">
+      <div class="nav-board coin-board">
+        <p class="nav-head">
+          <span>Top coins, in dollars</span>
+          <span class="num">24h, {cryptoAsOf}</span>
+        </p>
+        <ol>
+          {crypto.top.map((coin) => {
+            const rising = coin.week.length > 1 && coin.week[coin.week.length - 1] >= coin.week[0];
+            return (
+              <li>
+                <span class="sym">{coin.symbol}</span>
+                <span class="nav-name">{coin.name}</span>
+                {coin.week.length > 1 ? (
+                  <svg class:list={["coin-week", rising ? "t-up" : "t-down"]} viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+                    <path d={weekLine(coin.week)} />
+                  </svg>
+                ) : <span />}
+                <span class="num nav-value">{dollars(coin.price)}</span>
+                <span class:list={["num", "nav-change", (coin.change24h ?? 0) >= 0 ? "t-up" : "t-down"]}>
+                  {coin.change24h == null ? "" : `${signed(Number(coin.change24h.toFixed(2)), 2)}%`}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+      <div class="funds-copy">
+        <h3>Crypto. <em>Illegal to trade here, perfectly legal to stare at.</em></h3>
+        <p>
+          The top {crypto.count} coins in dollars, with rupees beside them at NRB's rate. Star the ones
+          your cousin in Qatar keeps forwarding, type in what you hold, and watch it do the thing.
+          Bitcoin is {belowHigh}% below the high it hit in {highYear}, which your mama calls a dip and
+          your mom calls "I told you so".
+        </p>
+        <p class="crypto-note">
+          Trading crypto is illegal in Nepal. Sajilo only shows prices. It can't buy, sell, or explain
+          your cousin.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {crypto.count > 0 && (
+    <ul class="fund-screens is-pair reveal" aria-label="The crypto screens">
+      {cryptoScreens.map((screen) => (
         <li class="fund-screen">
           <div class="fund-frame">
             <div class="fund-canvas">
@@ -619,6 +724,34 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     font-size: 13.5px;
   }
 
+  /* Crypto mirrors the funds row, board first, so the two don't read as one. */
+  .crypto {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+    margin-top: clamp(56px, 8vw, 96px);
+  }
+  .coin-board li {
+    grid-template-columns: 56px minmax(0, 1fr) 72px auto 64px;
+  }
+  .coin-week {
+    width: 72px;
+    height: 22px;
+    overflow: visible;
+  }
+  .coin-week path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+  .crypto-note {
+    font-size: 13.5px !important;
+    color: var(--paper-3) !important;
+  }
+
   /* The funds screens: the app at its real popover size, three abreast. */
   .fund-screens {
     display: grid;
@@ -655,6 +788,11 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     background: #0e0e10;
     pointer-events: none;
   }
+  /* Two screens sit at the width three would, so each stays popover-sized. */
+  .fund-screens.is-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: calc((100% - 2 * clamp(16px, 2.4vw, 32px)) * 2 / 3 + clamp(16px, 2.4vw, 32px));
+  }
   .fund-caption {
     margin-top: 14px;
     font-size: 14px;
@@ -690,7 +828,8 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
       scroll-snap-align: start;
     }
     .ipo,
-    .funds {
+    .funds,
+    .crypto {
       grid-template-columns: 1fr;
     }
     .nav-name {
@@ -698,6 +837,13 @@ const navAsOf = new Date(`${mutualFunds.largest[0]?.navDate}T00:00:00Z`).toLocal
     }
     .nav-board li {
       grid-template-columns: 76px 1fr 52px;
+    }
+    .coin-board li {
+      grid-template-columns: 56px 72px 1fr 64px;
+    }
+    .fund-screens.is-pair {
+      max-width: none;
+      grid-template-columns: none;
     }
     .board-head {
       grid-template-columns: 1fr;

@@ -185,6 +185,29 @@ export const mutualFunds = {
       change: fund.latest!.nav - fund.previous!.nav,
     })),
 };
+/** Crypto: how many coins the list carries, the top few with their week as a
+ * line, and how far bitcoin sits below its all-time high. */
+const coins = c.get_crypto.value.coins;
+const bitcoin = coins.find((coin) => coin.id === "bitcoin")!;
+export const crypto = {
+  count: coins.length,
+  source: c.get_crypto.value.source,
+  asOf: c.get_crypto.value.freshness.sourceTimestamp ?? c.get_crypto.value.freshness.fetchedAt,
+  top: coins.slice(0, 5).map((coin) => ({
+    id: coin.id,
+    symbol: coin.symbol,
+    name: coin.name,
+    price: coin.price,
+    change24h: coin.change24h,
+    week: coin.sparkline,
+  })),
+  bitcoin: {
+    price: bitcoin.price,
+    allTimeHigh: bitcoin.allTimeHigh!,
+    fromAllTimeHigh: bitcoin.fromAllTimeHigh!,
+    allTimeHighDate: bitcoin.allTimeHighDate!,
+  },
+};
 /** The index through the recorded session, a sample a minute. */
 export const nepseIntraday = c.get_nepse_intraday.value.points;
 

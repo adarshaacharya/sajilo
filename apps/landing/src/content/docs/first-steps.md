@@ -33,7 +33,7 @@ Along the bottom of the window:
 |---|---|
 | **Today** | The date, the Nepali calendar, what's coming up, weather and NEPSE at a glance |
 | **News** | Headlines from Nepali and English newsrooms, and government notices |
-| **Bazar** | Gold and silver, fuel, Kalimati vegetables, NEPSE, IPOs and mutual funds |
+| **Bazar** | Gold and silver, fuel, Kalimati vegetables, NEPSE, IPOs, mutual funds and crypto prices |
 | **Rashifal** | Today's horoscope for your sign |
 | **Radio** | Nepali FM stations |
 | **Tools** | The date converter, Nepali units, world clocks and more |

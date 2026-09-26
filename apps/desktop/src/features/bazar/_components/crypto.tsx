@@ -60,9 +60,12 @@ function banner(state: LoadState<CryptoSnapshot> | undefined): LoadStatus {
 export function Crypto({
   state,
   onRetry,
+  linkedCoin,
 }: {
   state: LoadState<CryptoSnapshot> | undefined;
   onRetry: () => void;
+  /** `?coin=` opens that coin's page, by its CoinGecko id. */
+  linkedCoin?: string | null;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
@@ -72,7 +75,7 @@ export function Crypto({
   const nprRate = nprPerUsd(loadedValue(forex));
   const [query, setQuery] = useState("");
   const [list, setList] = useState<CryptoList>("top");
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<string | null>(linkedCoin ?? null);
 
   const coins = snapshot?.coins ?? [];
   const byId = useMemo(() => new Map(coins.map((coin) => [coin.id, coin])), [coins]);
