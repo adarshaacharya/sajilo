@@ -563,4 +563,7 @@ fn system(commands: &mut BTreeMap<String, Value>) {
         &sajilo_core::notify::NotificationOptions::default(),
     );
     insert(commands, "get_setting", &Value::Null);
+    // A fresh install: the shell stores 1 2 3 on first run (see the desktop
+    // `lib.rs`), so the site shows the digits a new user starts on.
+    insert(commands, "get_setting:numeralStyle", &"latin");
 }
