@@ -1329,6 +1329,13 @@ button.rashi-pin:hover {
   border-radius: 8px;
 }
 
+/* Today on a holiday: gold would hide the red that marks it, so the fill
+   turns sindoor instead and still reads as today. */
+.cal-today--holiday {
+  background: var(--color-holiday);
+  color: #fff;
+}
+
 /* Dashboard — compact capsules and grouped calendar. */
 .clock-chip {
   border-radius: 999px;

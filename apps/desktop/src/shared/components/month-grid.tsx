@@ -84,7 +84,9 @@ export function MonthGrid({
                 disabled
                   ? "cursor-default opacity-30"
                   : day.isToday
-                    ? "cal-today"
+                    ? day.isHoliday
+                      ? "cal-today cal-today--holiday"
+                      : "cal-today"
                     : day.isHoliday
                       ? "font-medium text-holiday hover:bg-holiday/12"
                       : "hover:bg-surface-hover"
@@ -100,7 +102,9 @@ export function MonthGrid({
               <span
                 className={`text-[9px] leading-none ${
                   day.isToday
-                    ? "text-accent-ink/70"
+                    ? day.isHoliday
+                      ? "text-white/75"
+                      : "text-accent-ink/70"
                     : day.isHoliday
                       ? "text-holiday/70"
                       : "text-text-muted"
@@ -111,7 +115,11 @@ export function MonthGrid({
               {planDays?.has(`${day.date.year}-${day.date.month}-${day.date.day}`) && (
                 <span
                   className={`absolute bottom-0.5 size-1 rounded-full ${
-                    day.isToday ? "bg-accent-ink" : "bg-[color:var(--color-accent-mark)]"
+                    day.isToday
+                      ? day.isHoliday
+                        ? "bg-white"
+                        : "bg-accent-ink"
+                      : "bg-[color:var(--color-accent-mark)]"
                   }`}
                 />
               )}
