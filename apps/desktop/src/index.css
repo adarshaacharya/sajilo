@@ -1969,10 +1969,21 @@ button.row-line + button.row-line::before {
     inset 0 0 0 1px var(--color-border);
 }
 
+/* The thumb of a scrolling strip slides by transition; see `Segmented`.
+   Its position animates, not a transform: a transform lifts it onto a layer
+   of its own, and inside a scrolling strip WebKit draws that layer over the
+   labels whatever their stacking order, hiding the picked tab's name. */
+.seg-thumb--track[data-animate] {
+  transition:
+    left 0.28s cubic-bezier(0.25, 0.9, 0.3, 1),
+    width 0.28s cubic-bezier(0.25, 0.9, 0.3, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mac-switch,
   .mac-switch-knob,
-  .surface-card {
+  .surface-card,
+  .seg-thumb--track[data-animate] {
     transition: none;
   }
 

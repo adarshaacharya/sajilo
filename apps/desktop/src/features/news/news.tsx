@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
-import { ScrollRow } from "../../shared/components/scroll-row";
+import { Select } from "../../shared/components/select";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
@@ -19,7 +19,7 @@ import { usePersistedList, usePersistedString } from "../../shared/lib/persisted
 import { track } from "../../shared/lib/usage";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
-import { HeadlineRow, sourceColor } from "./_components/headline-row";
+import { HeadlineRow } from "./_components/headline-row";
 
 const PAGE = 20;
 
@@ -116,6 +116,25 @@ export function News() {
   // Filtered, the only failure worth reporting is the chosen source's own —
   // otherwise an empty list is explained by papers the reader is not reading.
   const selectedName = sources.find((source) => source.id === selected)?.name;
+  // Fourteen publishers do not fit one row of this window. One menu, split
+  // the way the catalogue already is: official, then Nepali, then English.
+  const sourceGroups = useMemo(() => {
+    const option = (source: NewsSourceInfo) => ({ id: source.id, label: source.name });
+    return [
+      {
+        label: t("news.group-official"),
+        options: sources.filter((source) => source.official).map(option),
+      },
+      {
+        label: t("news.group-nepali"),
+        options: sources.filter((source) => !source.official && !source.english).map(option),
+      },
+      {
+        label: t("news.group-english"),
+        options: sources.filter((source) => source.english).map(option),
+      },
+    ].filter((group) => group.options.length > 0);
+  }, [sources, t]);
   const failed = (digest?.failedSources ?? []).filter(
     (name) => selected === ALL || name === selectedName,
   );
@@ -157,33 +176,15 @@ export function News() {
 
   return (
     <StateBanner state={banner} onRetry={() => load(true)}>
-      {/* Every source at once, one tap each, instead of a dropdown. */}
-      <fieldset aria-label={t("news.source")} className="mb-2 min-w-0 border-0">
-        <ScrollRow className="-mx-0.5 flex gap-1.5 px-0.5 pb-0.5">
-          {[{ id: ALL, name: t("news.all-sources") }, ...sources].map((source) => (
-            <button
-              key={source.id}
-              type="button"
-              aria-pressed={selected === source.id}
-              onClick={() => pick(source.id)}
-              className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors ${
-                selected === source.id
-                  ? "border-[color:var(--color-accent-mark)] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] font-semibold text-accent-mark"
-                  : "border-[color:var(--color-border)] text-text-secondary hover:text-text"
-              }`}
-            >
-              {source.id !== ALL && (
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ background: sourceColor(source.id) }}
-                  aria-hidden="true"
-                />
-              )}
-              {source.name}
-            </button>
-          ))}
-        </ScrollRow>
-      </fieldset>
+      <div className="mb-2">
+        <Select
+          ariaLabel={t("news.source")}
+          value={selected}
+          onChange={pick}
+          options={[{ id: ALL, label: t("news.all-sources") }]}
+          groups={sourceGroups}
+        />
+      </div>
 
       {selected === ALL && notices.length > 0 && (
         <button
