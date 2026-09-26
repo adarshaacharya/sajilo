@@ -4,11 +4,9 @@ import {
   type KeeperAttachmentSummary,
   type KeeperDate,
   type KeeperItem,
-  type KeeperRecord,
 } from "../../../shared/lib/ipc";
 import { daysUntil, dueLabel, dueTone, type TFn } from "../_lib/shared";
 import { PhotoBadge } from "./photo-strip";
-import { RecordDue } from "./record-detail";
 
 export function ItemRow({
   item,
@@ -85,51 +83,6 @@ export function PaperStack({ count, label }: { count: number; label: string }) {
         {count}
       </span>
     </span>
-  );
-}
-
-/** One kind of paper in the list: how many, whose, and the soonest date any
- * of them needs. */
-export function GroupRow({
-  name,
-  records,
-  owners,
-  onOpen,
-  t,
-}: {
-  name: string;
-  records: readonly KeeperRecord[];
-  /** Whose these are, already resolved to names. */
-  owners: readonly string[];
-  onOpen: () => void;
-  t: TFn;
-}) {
-  const dated = records.find((record) => record.expiryDate);
-  const count = records.length;
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="flex w-full items-center gap-2.5 border-b border-divider py-2.5 text-left last:border-0"
-    >
-      <PaperStack
-        count={count}
-        label={t(count === 1 ? "keeper.count.one" : "keeper.count.many").replace(
-          "{n}",
-          String(count),
-        )}
-      />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12px] font-medium">{name}</span>
-        <span className="mt-0.5 block truncate text-[10px] text-text-muted">
-          {[...new Set(owners)].join(" · ")}
-        </span>
-      </span>
-      {count === 1 && records[0] && records[0].links.length > 0 && (
-        <Icon name="link" className="size-3 shrink-0 text-text-muted" />
-      )}
-      {dated && <RecordDue record={dated} t={t} />}
-    </button>
   );
 }
 
