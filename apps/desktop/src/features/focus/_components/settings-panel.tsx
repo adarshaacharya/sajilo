@@ -6,21 +6,50 @@ import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import {
   api,
+  type BreakKind,
   type DaysOff,
   type FocusSettings,
   type FocusSnapshot,
   type HoldRules,
   type ReminderStyle,
 } from "../../../shared/lib/ipc";
-import type { I18nKey } from "../_lib/format";
+import { type I18nKey, kindLabel, type TFn } from "../_lib/format";
 
 const DAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
-const DAYS_OFF: { id: DaysOff; label: I18nKey; note: I18nKey }[] = [
-  { id: "lighter", label: "focus.days.lighter", note: "focus.days.lighter-note" },
-  { id: "normal", label: "focus.days.normal", note: "focus.days.normal-note" },
-  { id: "off", label: "focus.days.off", note: "focus.days.off-note" },
+/** Most to least, so the list reads as a scale; the gentle one is marked. */
+const DAYS_OFF: { id: DaysOff; label: I18nKey }[] = [
+  { id: "normal", label: "focus.days.option.normal" },
+  { id: "lighter", label: "focus.days.option.lighter" },
+  { id: "off", label: "focus.days.option.off" },
 ];
+
+/** What each choice keeps on a day off, mirroring the engine's rule: a
+ * lighter day drops only standing up, and stop-work rests on every day off. */
+const ON_A_DAY_OFF: { kind: BreakKind; in: DaysOff[] }[] = [
+  { kind: "eyes", in: ["normal", "lighter"] },
+  { kind: "water", in: ["normal", "lighter"] },
+  { kind: "custom", in: ["normal", "lighter"] },
+  { kind: "move", in: ["normal"] },
+  { kind: "endOfDay", in: [] },
+];
+
+const PLURAL_DAYS = [
+  "focus.days.plural.0",
+  "focus.days.plural.1",
+  "focus.days.plural.2",
+  "focus.days.plural.3",
+  "focus.days.plural.4",
+  "focus.days.plural.5",
+  "focus.days.plural.6",
+] as const satisfies readonly I18nKey[];
+
+/** "Saturdays", "Fridays and Saturdays", "Fridays, Saturdays and Sundays". */
+function daysOffNames(workDays: readonly boolean[], t: TFn): string {
+  const names = PLURAL_DAYS.filter((_, day) => !workDays[day]).map((key) => t(key));
+  if (names.length <= 1) return names.join("");
+  return `${names.slice(0, -1).join(", ")}${t("focus.days.and")}${names.at(-1)}`;
+}
 
 const HOLDS: { id: keyof HoldRules; label: I18nKey; note: I18nKey }[] = [
   { id: "calls", label: "focus.hold.calls", note: "focus.hold.calls-note" },
@@ -59,8 +88,7 @@ export function SettingsPanel({
   const { t, language } = useSettings();
   const { settings, holdSupport } = snapshot;
   const weekdays = language === "ne" ? WEEKDAYS_NE : DAYS_EN;
-  const daysOffNote =
-    DAYS_OFF.find((option) => option.id === settings.daysOff)?.note ?? "focus.days.lighter-note";
+  const offNames = daysOffNames(settings.workDays, t);
 
   // One choice for every Sajilo reminder, kept with the others in Settings;
   // Routine shows it here too, since this is where people look for it.
@@ -126,27 +154,69 @@ export function SettingsPanel({
             })}
           </div>
         </div>
-        <div className="border-t border-divider pt-2.5">
-          <p className="mb-1.5 text-[10px] font-medium text-text-muted">{t("focus.days.mode")}</p>
-          {/* One choice of three, in the same chips as the currency picker. */}
-          <div className="flex flex-wrap gap-1.5">
+        <div className="space-y-2 border-t border-divider pt-2.5">
+          {/* Named days, not "days off": the user just picked them above. */}
+          <p className="text-[11px] font-medium text-text-secondary">
+            {offNames
+              ? t("focus.days.mode-named").replace("{days}", offNames)
+              : t("focus.days.mode-holidays")}
+          </p>
+          <fieldset className="space-y-1">
+            <legend className="sr-only">{t("focus.days.title")}</legend>
             {DAYS_OFF.map((option) => {
               const on = option.id === settings.daysOff;
               return (
-                <button
+                <label
                   key={option.id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => onSettings({ ...settings, daysOff: option.id })}
-                  className={`toggle-chip ${on ? "toggle-chip--on" : "toggle-chip--off"}`}
+                  className={`days-off-option ${on ? "days-off-option--on" : ""}`}
                 >
-                  {t(option.label)}
-                </button>
+                  <input
+                    type="radio"
+                    name="focus-days-off"
+                    className="sr-only"
+                    checked={on}
+                    onChange={() => onSettings({ ...settings, daysOff: option.id })}
+                  />
+                  <span className="days-off-option__dot" aria-hidden="true" />
+                  <span className="min-w-0 flex-1 text-left">{t(option.label)}</span>
+                  {option.id === "lighter" && (
+                    <span className="text-[10px] text-text-muted">
+                      {t("focus.days.recommended")}
+                    </span>
+                  )}
+                </label>
               );
             })}
+          </fieldset>
+          {/* What the chosen option means, as a list to scan rather than a
+              sentence to decode. */}
+          <div className="rounded-[8px] bg-[color:var(--color-surface-hover)] px-2.5 py-2">
+            <p className="text-[10px] font-medium text-text-muted">{t("focus.days.you-get")}</p>
+            <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
+              {ON_A_DAY_OFF.map((item) => {
+                const kept = item.in.includes(settings.daysOff);
+                return (
+                  <li
+                    key={item.kind}
+                    className={`flex items-center gap-1.5 text-[11px] ${kept ? "text-text" : "text-text-muted line-through"}`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={kept ? "text-[color:var(--color-positive)]" : "text-text-muted"}
+                    >
+                      {kept ? "✓" : "✕"}
+                    </span>
+                    <span className="truncate">{kindLabel(item.kind, settings, t)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <p className="mt-1.5 text-[10px] leading-snug text-text-muted">
+              {t("focus.days.meals")}
+            </p>
           </div>
-          <p className="mt-1.5 text-[10px] leading-snug text-text-muted">
-            {t(daysOffNote)} {t("focus.days.holidays-note")}
+          <p className="text-[10px] leading-snug text-text-muted">
+            {t("focus.days.holidays-note")}
           </p>
         </div>
       </Group>

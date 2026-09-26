@@ -18,6 +18,7 @@ Package.resolved
 
 # Local tooling and generated artifacts
 build/
+brag-output/
 documents/
 scripts/AppIcon.iconset/
 
@@ -71,3 +72,4 @@ apps/desktop/src-tauri/gen/
 .sajilo-dev-*
 # Astro generated types (apps/landing)
 .astro/
+

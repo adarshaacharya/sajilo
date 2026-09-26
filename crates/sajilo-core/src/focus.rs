@@ -303,22 +303,12 @@ pub enum DaysOff {
 /// Which moments hold a due break until they pass. All start off: each
 /// signal is a guess about the moment (an app can keep a microphone open for
 /// hours), so holding breaks is something the user chooses.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct HoldRules {
     pub calls: bool,
     pub fullscreen: bool,
     pub do_not_disturb: bool,
-}
-
-impl Default for HoldRules {
-    fn default() -> Self {
-        Self {
-            calls: false,
-            fullscreen: false,
-            do_not_disturb: false,
-        }
-    }
 }
 
 /// Why a due break is being held.

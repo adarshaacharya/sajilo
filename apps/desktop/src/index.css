@@ -1370,6 +1370,71 @@ button.row-line + button.row-line::before {
    `--tone` is set per element from the one urgency scale. */
 /* Routine's "Customise" in the top bar: quieter than Keeper's Add, since
    it changes settings rather than making something. */
+/* One of the three day-off choices: a radio row, the chosen one tinted. */
+.days-off-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  padding: 7px 10px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.days-off-option:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.days-off-option--on,
+.days-off-option--on:hover {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  background: color-mix(in srgb, var(--color-accent-mark) 10%, transparent);
+  color: var(--color-text);
+}
+.days-off-option {
+  cursor: pointer;
+}
+.days-off-option:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent-mark);
+  outline-offset: 2px;
+}
+.days-off-option__dot {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-text-muted);
+}
+.days-off-option--on .days-off-option__dot {
+  border: 4px solid var(--color-accent-mark);
+}
+
+/* Routine's one line on the home screen: a hairline row, not a card, so it
+   sits quieter than Weather and NEPSE below it. */
+.focus-glance {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--color-divider);
+  padding: 6px 10px;
+  text-align: left;
+  color: var(--color-text-secondary);
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease;
+}
+.focus-glance:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
 .focus-customise-btn {
   display: inline-flex;
   flex-shrink: 0;

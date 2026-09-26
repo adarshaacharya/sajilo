@@ -732,6 +732,7 @@
           "restsToday": false
         }
       ],
+      "callIgnored": false,
       "dayOff": null,
       "hold": null,
       "holdSupport": {
@@ -756,9 +757,9 @@
         },
         "eyesSeconds": 20,
         "hold": {
-          "calls": true,
-          "doNotDisturb": true,
-          "fullscreen": true
+          "calls": false,
+          "doNotDisturb": false,
+          "fullscreen": false
         },
         "jokes": true,
         "move": {
