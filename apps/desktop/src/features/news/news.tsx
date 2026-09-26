@@ -4,7 +4,6 @@ import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
-import { Select } from "../../shared/components/select";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
@@ -15,11 +14,11 @@ import {
   loadBanner,
   loadedValue,
 } from "../../shared/lib/load-state";
-import { usePersistedString } from "../../shared/lib/persisted";
+import { usePersistedList, usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
-import { HeadlineRow } from "./_components/headline-row";
+import { HeadlineRow, sourceColor } from "./_components/headline-row";
 
 const PAGE = 20;
 
@@ -27,6 +26,11 @@ const PAGE = 20;
 const ALL = "all";
 
 const SOURCE_KEY = "news.source";
+/** Links of headlines already opened, newest first. */
+const READ_KEY = "news.read";
+/** Enough to cover several days of every feed; older links fall off. */
+const READ_LIMIT = 600;
+const GOVERNMENT = "nepalGovernment";
 
 export function News() {
   const { t } = useSettings();
@@ -34,6 +38,8 @@ export function News() {
   const [visible, setVisible] = useState(PAGE);
   const [sources, setSources] = useState<NewsSourceInfo[]>([]);
   const [saved, setSaved] = usePersistedString(SOURCE_KEY);
+  const [readLinks, setReadLinks] = usePersistedList(READ_KEY);
+  const read = useMemo(() => new Set(readLinks), [readLinks]);
   const {
     data: state,
     isValidating,
@@ -91,9 +97,13 @@ export function News() {
   useHeaderSlot(refreshButton);
 
   const digest = loadedValue(state);
+  // Government notices have their own row at the top of "All", so the
+  // newsroom feed below is newsrooms only.
+  const notices = (digest?.items ?? []).filter((item) => item.source === GOVERNMENT);
+  const newNotices = notices.filter((item) => !read.has(item.link)).length;
   const filtered =
     selected === ALL
-      ? (digest?.items ?? [])
+      ? (digest?.items ?? []).filter((item) => item.source !== GOVERNMENT)
       : (digest?.items ?? []).filter((item) => item.source === selected);
   const items = filtered.slice(0, visible);
   const banner = loadBanner(state, fetchedAtLabel(digest?.freshness));
@@ -146,34 +156,60 @@ export function News() {
 
   return (
     <StateBanner state={banner} onRetry={() => load(true)}>
-      <div className="mb-2">
-        <Select
-          ariaLabel={t("news.source")}
-          value={selected}
-          onChange={pick}
-          options={[{ id: ALL, label: t("news.all-sources") }]}
-          groups={[
-            {
-              label: t("news.group-official"),
-              options: sources
-                .filter((source) => source.official)
-                .map((source) => ({ id: source.id as string, label: source.name })),
-            },
-            {
-              label: t("news.group-nepali"),
-              options: sources
-                .filter((source) => !source.english && !source.official)
-                .map((source) => ({ id: source.id as string, label: source.name })),
-            },
-            {
-              label: t("news.group-english"),
-              options: sources
-                .filter((source) => source.english)
-                .map((source) => ({ id: source.id as string, label: source.name })),
-            },
-          ]}
-        />
-      </div>
+      {/* Every source at once, one tap each, instead of a dropdown. */}
+      <fieldset
+        aria-label={t("news.source")}
+        className="-mx-0.5 mb-2 flex min-w-0 border-0 gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {[{ id: ALL, name: t("news.all-sources") }, ...sources].map((source) => (
+          <button
+            key={source.id}
+            type="button"
+            aria-pressed={selected === source.id}
+            onClick={() => pick(source.id)}
+            className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors ${
+              selected === source.id
+                ? "border-[color:var(--color-accent-mark)] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] font-semibold text-accent-mark"
+                : "border-[color:var(--color-border)] text-text-secondary hover:text-text"
+            }`}
+          >
+            {source.id !== ALL && (
+              <span
+                className="size-1.5 rounded-full"
+                style={{ background: sourceColor(source.id) }}
+                aria-hidden="true"
+              />
+            )}
+            {source.name}
+          </button>
+        ))}
+      </fieldset>
+
+      {selected === ALL && notices.length > 0 && (
+        <button
+          type="button"
+          onClick={() => pick(GOVERNMENT)}
+          className="surface-card mb-2 flex w-full cursor-pointer items-center gap-2.5 p-2.5 text-left transition-colors hover:bg-surface-hover"
+        >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-[color:color-mix(in_srgb,var(--color-holiday)_14%,transparent)] text-[color:var(--color-holiday)]">
+            <Icon name="news" className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[12px] font-semibold">
+              {t("news.notices-title")}
+              {newNotices > 0 && (
+                <span className="ml-1.5 rounded-full bg-[color:var(--color-holiday)] px-1.5 py-px text-[10px] text-white">
+                  {t("news.notices-new").replace("{n}", String(newNotices))}
+                </span>
+              )}
+            </span>
+            <span className="block truncate text-[11px] text-text-muted">{notices[0]?.title}</span>
+          </span>
+          <span className="text-[12px] text-text-muted" aria-hidden="true">
+            ›
+          </span>
+        </button>
+      )}
 
       {items.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
@@ -181,14 +217,22 @@ export function News() {
           <p className="text-text-secondary">{emptyMessage}</p>
         </div>
       ) : (
-        <Stagger className="space-y-1">
+        // One card, thin dividers: more headlines fit, and it reads as a list.
+        <Stagger className="surface-card overflow-hidden">
           {items.map((item) => (
-            <FadeUp key={`${item.source}-${item.link}`}>
+            <FadeUp
+              key={`${item.source}-${item.link}`}
+              className="border-b border-divider last:border-b-0"
+            >
               <HeadlineRow
                 item={item}
                 showSource={showSource}
+                read={read.has(item.link)}
                 onOpen={() => {
                   track("action.news-open");
+                  if (!read.has(item.link)) {
+                    setReadLinks((current) => [item.link, ...current].slice(0, READ_LIMIT));
+                  }
                   return item.source === "nepalGovernment" && item.id
                     ? navigate(`/news/government?id=${encodeURIComponent(item.id)}`)
                     : openExternalLink(item.link);

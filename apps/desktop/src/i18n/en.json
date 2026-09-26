@@ -926,5 +926,7 @@
   "focus.water.undo": "Undo",
   "radio.paused": "Paused",
   "radio.play": "Play",
-  "radio.pause": "Pause"
+  "radio.pause": "Pause",
+  "news.notices-title": "Government notices",
+  "news.notices-new": "{n} new"
 }

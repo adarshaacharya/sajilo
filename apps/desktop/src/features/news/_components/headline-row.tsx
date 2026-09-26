@@ -1,4 +1,3 @@
-import { Icon } from "../../../shared/components/icon";
 import type { NewsItem } from "../../../types/api/NewsItem";
 
 function age(item: NewsItem): string {
@@ -18,40 +17,67 @@ function age(item: NewsItem): string {
   );
 }
 
+/** A steady colour per publisher, so each is recognisable at a glance. */
+export function sourceColor(source: string): string {
+  let hash = 0;
+  for (const char of source) hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 360;
+  return `hsl(${hash} 60% 50%)`;
+}
+
+/**
+ * One headline in the list: its publisher's dot, name and age above, the
+ * title below. Read ones dim and lose their marker, so what is new since the
+ * last visit stands out.
+ */
 export function HeadlineRow({
   item,
   showSource = true,
+  read,
   onOpen,
 }: {
   item: NewsItem;
   /** False when the list is already filtered to one publisher. */
   showSource?: boolean;
+  read: boolean;
   onOpen: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="surface-card headline-card group w-full cursor-pointer p-2 text-left transition-[background-color,border-color,transform] active:scale-[0.99]"
+      className="relative block w-full cursor-pointer py-2.5 pr-7 pl-3 text-left transition-colors hover:bg-surface-hover"
     >
-      <p className="text-[13px] leading-snug">{item.title}</p>
-      <div className="mt-1 flex items-center gap-1 text-[10px]">
+      <span className="flex items-center gap-1.5 text-[10px] text-text-muted">
         {showSource && (
-          <span className="font-medium text-[color:var(--color-accent-mark)]">
-            {item.sourceName}
-          </span>
+          <>
+            <span
+              className="size-[7px] shrink-0 rounded-full"
+              style={{ background: sourceColor(item.source) }}
+              aria-hidden="true"
+            />
+            <span className="font-semibold text-text-secondary">{item.sourceName}</span>
+          </>
         )}
         {item.published && (
           <>
-            {showSource && <span className="text-text-muted">·</span>}
-            <span className="text-text-secondary">{age(item)}</span>
+            {showSource && <span aria-hidden="true">·</span>}
+            <span>{age(item)}</span>
           </>
         )}
-        <Icon
-          name="openExternal"
-          className="ml-auto size-2 shrink-0 -translate-x-0.5 text-text-muted opacity-0 transition-[opacity,transform,color] group-hover:translate-x-0 group-hover:text-[color:var(--color-accent-mark)] group-hover:opacity-100"
+      </span>
+      <span
+        className={`mt-0.5 block text-[13px] leading-snug ${
+          read ? "text-text-muted" : "font-medium text-text"
+        }`}
+      >
+        {item.title}
+      </span>
+      {!read && (
+        <span
+          className="absolute top-[15px] right-3 size-1.5 rounded-full bg-[color:var(--color-accent-fill)]"
+          aria-hidden="true"
         />
-      </div>
+      )}
     </button>
   );
 }

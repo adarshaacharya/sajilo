@@ -926,5 +926,7 @@
   "focus.water.undo": "फिर्ता",
   "radio.paused": "रोकिएको",
   "radio.play": "बजाउनुहोस्",
-  "radio.pause": "रोक्नुहोस्"
+  "radio.pause": "रोक्नुहोस्",
+  "news.notices-title": "सरकारी सूचना",
+  "news.notices-new": "{n} नयाँ"
 }
