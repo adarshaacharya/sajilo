@@ -690,7 +690,6 @@
   "tools.date-hint-short": "BS ⇄ AD",
   "tools.directory": "Directory",
   "tools.directory-hint-short": "Emergency numbers",
-  "tools.essential": "Everyday",
   "tools.hill-system": "Hill system",
   "tools.interest": "Interest",
   "tools.interest-amount": "Interest",
@@ -944,5 +943,7 @@
   "keeper.status.valid": "Valid",
   "keeper.welcome": "Never miss a renewal again",
   "keeper.start-with": "Start with one",
-  "keeper.see-all-types": "See all types"
+  "keeper.see-all-types": "See all types",
+  "tools.emergency-title": "Emergency numbers",
+  "tools.clock-add": "Pick a city"
 }

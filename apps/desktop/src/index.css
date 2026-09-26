@@ -67,6 +67,7 @@
   --sky-dusk: linear-gradient(170deg, #3c3460, #9c5752);
   --sky-ink: #fff;
   --color-forex-tint: #5cc79b;
+  --color-violet: #a98be8;
 
   --color-control-bg: #0e0e10;
   --color-control-border: #36363b;
@@ -120,6 +121,7 @@
     --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
     --sky-ink: #1c2b45;
     --color-forex-tint: #1a7f52;
+    --color-violet: #6a4fc0;
     --color-control-bg: #ffffff;
     --color-control-border: #c8c8c3;
     --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
@@ -157,6 +159,7 @@
   --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
   --sky-ink: #1c2b45;
   --color-forex-tint: #1a7f52;
+  --color-violet: #6a4fc0;
   --color-control-bg: #ffffff;
   --color-control-border: #c8c8c3;
   --color-control-inset: inset 0 1px 1px rgb(0 0 0 / 4%);
@@ -1628,6 +1631,83 @@ button.row-line + button.row-line::before {
 /* A tab strip's buttons centre on its labels, above the divider line. */
 .scroll-row:has(> .tab-strip) .scroll-row__edge {
   top: calc(50% - 3px);
+}
+
+/* Tools — every card carries its own --tint: the icon's colour and wash. */
+.tool-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  text-align: left;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  box-shadow: var(--shadow-card);
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    transform 0.1s ease;
+}
+
+.tool-card:hover {
+  border-color: color-mix(in srgb, var(--tint) 40%, var(--color-border));
+}
+
+.tool-card:active {
+  transform: scale(0.98);
+}
+
+.tool-card__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 15%, transparent);
+}
+
+/* The two live cards lean into their colour, top-down, so they read as the
+   page's headline rather than two more tiles. */
+.tool-feature {
+  justify-content: space-between;
+  min-height: 112px;
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--tint) 13%, var(--color-surface-raised)),
+    var(--color-surface-raised) 70%
+  );
+}
+
+.tool-emergency__number {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  background: color-mix(in srgb, var(--tint) 8%, transparent);
+}
+
+.tool-emergency__number b {
+  font-size: 16px;
+  line-height: 1.1;
+  color: var(--tint);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-card {
+    transition: none;
+  }
+
+  .tool-card:active {
+    transform: none;
+  }
 }
 
 /* Station logos — most sit on white, so a hairline and (on dark) a slight

@@ -690,7 +690,6 @@
   "tools.date-hint-short": "बि.सं. ⇄ ई.सं.",
   "tools.directory": "फोन नम्बर",
   "tools.directory-hint-short": "इमर्जेन्सी नम्बर",
-  "tools.essential": "दैनिक प्रयोग",
   "tools.hill-system": "पहाडी नाप",
   "tools.interest": "ब्याज",
   "tools.interest-amount": "ब्याज",
@@ -944,5 +943,7 @@
   "keeper.status.valid": "चालु छ",
   "keeper.welcome": "नवीकरण अब नछुटोस्",
   "keeper.start-with": "यहाँबाट सुरु गर्नुहोस्",
-  "keeper.see-all-types": "सबै प्रकार हेर्नुहोस्"
+  "keeper.see-all-types": "सबै प्रकार हेर्नुहोस्",
+  "tools.emergency-title": "इमर्जेन्सी नम्बर",
+  "tools.clock-add": "सहर छान्नुहोस्"
 }
