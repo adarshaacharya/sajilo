@@ -694,6 +694,55 @@ button.row-line + button.row-line::before {
 }
 
 /* Settings — selectable option chips (forex currencies, etc.). */
+/* A currency to show on the Forex card. Picked ones are tinted, not filled:
+   ten solid gold blocks shouted; the picked set should read at a glance
+   without taking over the card. */
+.currency-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.currency-chip:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.currency-chip--on,
+.currency-chip--on:hover {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  background: color-mix(in srgb, var(--color-accent-mark) 12%, transparent);
+  color: var(--color-accent-mark);
+}
+/* Where the converter starts. */
+.currency-chip__first {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 .toggle-chip {
   display: inline-flex;
   align-items: center;
