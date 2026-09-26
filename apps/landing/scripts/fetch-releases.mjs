@@ -31,6 +31,7 @@ const KNOWN_ASSETS = [
   { filename: "Sajilo-windows-x64.exe", platform: "windows", label: "Windows" },
   { filename: "Sajilo-linux-amd64.deb", platform: "linux-deb", label: "Linux (.deb)" },
   { filename: "Sajilo-linux-x86_64.AppImage", platform: "linux-appimage", label: "Linux (AppImage)" },
+  { filename: "Sajilo-linux-x86_64.rpm", platform: "linux-rpm", label: "Linux (.rpm)" },
 ];
 
 function knownAssetsOf(ghAssets) {

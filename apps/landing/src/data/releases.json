@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.29",
+    "name": "Sajilo v0.1.29",
+    "publishedAt": "2026-09-26T17:59:03Z",
+    "body": "## Routine: small breaks while you work\r\n\r\nSajilo can now remind you to rest your eyes, stand up, drink water and stop working at the end of the day. Turn it on from the new Routine tab.\r\n\r\n- Reminders count only the time you're actually at the computer, and five minutes away counts as a break.\r\n- They wait during calls, fullscreen video and Do Not Disturb, then come as soon as it ends.\r\n- Saturdays and public holidays are lighter: your eyes still get a rest, but no stand-up and no stop-work.\r\n- Tap the glass to log water, and see your week: screen time on work days and days off, breaks taken, and your longest stretch.\r\n- Meal and bedtime reminders are there if you want them.\r\n\r\n## Crypto in Bazar\r\n\r\nBazar now tracks crypto prices next to NEPSE, forex, gold and fuel, with a chart and details for each coin.\r\n\r\n## A fresh look across the app\r\n\r\n- **Keeper** shows what needs doing next, with family members' late items at a glance and your documents as cards.\r\n- **News** has one list for all sources, marks what you've read, and gives government notices their own card.\r\n- **Weather** has a cleaner card, a range bar for each day, and place search.\r\n- **Rashifal:** type the start of your name and it finds your sign.\r\n- **Radio:** a proper now-playing card, with pinned stations as tiles.\r\n- **Tools** shows today's date and your second clock right on the page, plus the emergency numbers and the full Directory of official sites and apps.\r\n- **Bazar:** one row per metal, a quieter fuel list, and loading placeholders instead of blank screens.\r\n\r\n## Easier to start\r\n\r\n- New installs get a short setup card: pick language, digits and your weather place, and see today's date change as you choose.\r\n- New installs start on 1 2 3 digits, and reminders hold off for the first few minutes.\r\n\r\n## Fixes\r\n\r\n- Rows that scroll sideways now work with an ordinary mouse wheel and show arrows when there's more.\r\n- Tabs no longer flash black when you switch them on macOS.\r\n- The first popover on macOS opens under the menu bar icon.\r\n- On Windows the popover opens against the taskbar, with real flags and no white frame on Windows 10.\r\n- Linux starts on Wayland without XWayland, gets an .rpm for Fedora and openSUSE, and adds `--toggle` for keyboard shortcuts.\r\n- Plainer, everyday Nepali throughout the app.\r\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.29",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-macos-arm64.dmg",
+        "size": 10193334
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-macos-x64.dmg",
+        "size": 10805100
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-windows-x64.exe",
+        "size": 7538354
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-linux-amd64.deb",
+        "size": 12635962
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-linux-x86_64.AppImage",
+        "size": 157825528
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.29/Sajilo-linux-x86_64.rpm",
+        "size": 12636359
+      }
+    ]
+  },
+  {
     "version": "v0.1.28",
     "name": "Sajilo v0.1.28",
     "publishedAt": "2026-09-20T17:26:29Z",
