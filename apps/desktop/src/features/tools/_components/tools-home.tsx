@@ -112,28 +112,25 @@ function DateCard({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="tool-card tool-feature"
+      className="tool-card tool-feature min-h-0 gap-1.5"
       style={tinted("var(--color-accent-mark)")}
     >
-      <span className="flex items-center justify-between">
+      <span className="flex min-w-0 items-center gap-2">
         <span className="tool-card__icon">
           <Icon name="upcoming" className="size-3.5" />
         </span>
-        <span className="text-[10px] text-text-muted">{t("tools.date-hint-short")}</span>
+        <span className="truncate text-[11px] font-semibold">{t("tools.date")}</span>
       </span>
       <span className="min-w-0">
-        <span className="block text-[10px] text-text-muted">{t("tools.date")}</span>
         {today ? (
           <>
-            <span className="block truncate text-[18px] font-bold leading-tight">
+            <span className="block truncate text-[15px] font-bold leading-tight">
               {today.nepaliMonthName} {digits(today.nepali.day, numerals)}
             </span>
-            <span className="block truncate text-[10px] text-text-secondary">
-              {digits(today.nepali.year, numerals)} · {ad}
-            </span>
+            <span className="mt-0.5 block truncate text-[10px] text-text-muted">{ad}</span>
           </>
         ) : (
-          <span className="block text-[18px] font-bold leading-tight">—</span>
+          <span className="block text-[15px] font-bold leading-tight">—</span>
         )}
       </span>
     </button>
@@ -151,33 +148,40 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="tool-card tool-feature"
+      className="tool-card tool-feature min-h-0 gap-1.5"
       style={tinted("var(--color-weather-tint)")}
     >
-      <span className="flex items-center justify-between">
-        <span className="tool-card__icon">
-          <Icon name="clock" className="size-3.5" />
+      <span className="flex items-center justify-between gap-1">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="tool-card__icon">
+            <Icon name="clock" className="size-3.5" />
+          </span>
+          <span className="truncate text-[11px] font-semibold">{t("tools.clock")}</span>
         </span>
         {zone && reading && reading.dayOffset !== 0 && (
-          <span className="text-[10px] text-text-muted">{formatDayOffset(reading.dayOffset)}</span>
+          <span className="shrink-0 text-[10px] text-text-muted">{formatDayOffset(reading.dayOffset)}</span>
         )}
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[10px] text-text-muted">
-          {zone ? `${flagFor(zone)} ${cityFor(zone).city}` : t("tools.clock")}
-        </span>
         {zone ? (
-          <span className="block text-[18px] font-bold leading-tight tabular-nums">
-            {reading?.time ?? "--:--"}
-          </span>
+          <>
+            <span className="block text-[18px] font-bold leading-none tabular-nums">
+              {reading?.time ?? "--:--"}
+            </span>
+            <span className="mt-1 block truncate text-[10px] text-text-muted">
+              {flagFor(zone)} {cityFor(zone).city}
+            </span>
+          </>
         ) : (
-          <span className="block text-[13px] font-semibold leading-tight">
-            {t("tools.clock-add")}
-          </span>
+          <>
+            <span className="block text-[18px] font-bold leading-none tabular-nums text-text-muted">
+              --:--
+            </span>
+            <span className="mt-1 block truncate text-[10px] text-text-muted">
+              {t("tools.clock-add")}
+            </span>
+          </>
         )}
-        <span className="block truncate text-[10px] text-text-secondary">
-          {zone ? t("tools.clock") : t("tools.clock-hint-short")}
-        </span>
       </span>
     </button>
   );
