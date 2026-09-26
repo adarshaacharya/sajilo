@@ -15,6 +15,7 @@ import { track } from "../../shared/lib/usage";
 import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RadioStation } from "../../types/api/RadioStation";
+import { RadioSkeleton } from "./_components/radio-skeleton";
 import { RadioVolumeControl } from "./_components/radio-volume-control";
 import { StationArt } from "./_components/station-art";
 
@@ -383,7 +384,11 @@ export function Radio() {
 
       {state.error && <p className="px-0.5 text-[11px] text-holiday">{state.error}</p>}
 
-      <StateBanner state={banner(directory)} onRetry={() => load(true)}>
+      <StateBanner
+        state={banner(directory)}
+        onRetry={() => load(true)}
+        skeleton={<RadioSkeleton pinned={pins.length} />}
+      >
         <SearchField value={query} onChange={setQuery} placeholder={t("radio.search")} />
 
         {matches.length === 0 ? (

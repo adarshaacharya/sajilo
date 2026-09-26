@@ -18,6 +18,7 @@ import { PinnedPlaces } from "./_components/pinned-places";
 import { PlacePicker } from "./_components/place-picker";
 import { WeatherAtmosphere } from "./_components/weather-atmosphere";
 import { WeatherIcon } from "./_components/weather-icon";
+import { SkyReadingSkeleton, WeatherDetailsSkeleton } from "./_components/weather-skeleton";
 import { aqiCategory, conditionTitle, formatCelsius, formatPercent } from "./_lib/format";
 import { currentSkyPhase } from "./_lib/sky-phase";
 
@@ -203,26 +204,24 @@ export function Weather() {
                 </div>
               </div>
             </>
+          ) : loading ? (
+            <SkyReadingSkeleton />
           ) : (
             <>
-              <p className="text-[28px] font-semibold leading-none">
-                {loading ? t("state.loading") : t("state.unavailable")}
-              </p>
+              <p className="text-[28px] font-semibold leading-none">{t("state.unavailable")}</p>
               {/* Plain words on screen, like every other feed; the raw
                   error stays in the tooltip for bug reports. */}
-              {!loading && (
-                <div className="mt-2 flex items-center gap-2">
-                  <p
-                    className="min-w-0 flex-1 text-[11px] opacity-75"
-                    title={banner.status === "failed" ? banner.message : undefined}
-                  >
-                    {banner.status === "failed" ? t("state.failed-hint") : t("state.not-yet")}
-                  </p>
-                  <button type="button" onClick={() => load(true)} className="sky-btn">
-                    {t("action.retry")}
-                  </button>
-                </div>
-              )}
+              <div className="mt-2 flex items-center gap-2">
+                <p
+                  className="min-w-0 flex-1 text-[11px] opacity-75"
+                  title={banner.status === "failed" ? banner.message : undefined}
+                >
+                  {banner.status === "failed" ? t("state.failed-hint") : t("state.not-yet")}
+                </p>
+                <button type="button" onClick={() => load(true)} className="sky-btn">
+                  {t("action.retry")}
+                </button>
+              </div>
             </>
           )}
           <div className="mt-3 flex items-center justify-between gap-2 border-t border-[color:color-mix(in_srgb,currentColor_14%,transparent)] pt-2.5">
@@ -234,6 +233,8 @@ export function Weather() {
           </div>
         </div>
       </section>
+
+      {!snapshot && loading && <WeatherDetailsSkeleton />}
 
       {snapshot?.airQuality && (
         <AirQualityPanel

@@ -1012,7 +1012,6 @@
   "crypto.today": "today",
   "crypto.overall": "overall",
   "crypto.updated": "Prices as of",
-  "crypto.source": "In US dollars, via {source}",
   "crypto.chart-range": "Chart range",
   "crypto.chart-label": "Price chart",
   "crypto.chart-unavailable": "Chart unavailable right now.",

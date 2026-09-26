@@ -20,6 +20,7 @@ import { track } from "../../shared/lib/usage";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import { HeadlineRow } from "./_components/headline-row";
+import { NewsSkeleton } from "./_components/news-skeleton";
 
 const PAGE = 20;
 
@@ -175,7 +176,11 @@ export function News() {
   }, [loadingMore]);
 
   return (
-    <StateBanner state={banner} onRetry={() => load(true)}>
+    <StateBanner
+      state={banner}
+      onRetry={() => load(true)}
+      skeleton={<NewsSkeleton showNotices={selected === ALL} />}
+    >
       <div className="mb-2">
         <Select
           ariaLabel={t("news.source")}

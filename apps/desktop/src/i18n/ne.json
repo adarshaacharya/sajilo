@@ -1012,7 +1012,6 @@
   "crypto.today": "आज",
   "crypto.overall": "जम्मा",
   "crypto.updated": "मूल्य",
-  "crypto.source": "अमेरिकी डलरमा, स्रोत {source}",
   "crypto.chart-range": "चार्ट अवधि",
   "crypto.chart-label": "मूल्य चार्ट",
   "crypto.chart-unavailable": "अहिले चार्ट उपलब्ध छैन।",

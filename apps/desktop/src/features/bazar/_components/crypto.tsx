@@ -5,6 +5,7 @@ import { SearchField } from "../../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
+import { openExternalLink } from "../../../shared/lib/external-link";
 import { api } from "../../../shared/lib/ipc";
 import { catchAsFailed, loadedValue } from "../../../shared/lib/load-state";
 import type { CryptoCoin } from "../../../types/api/CryptoCoin";
@@ -25,7 +26,6 @@ import {
 import { money0, sourceStamp } from "../_lib/format";
 import { CryptoDetail } from "./crypto-detail";
 import { CryptoRow } from "./crypto-row";
-import { SourceLink, SourceNote } from "./source-note";
 
 const COINGECKO_LINK = "https://www.coingecko.com/";
 const SOURCE_LINKS: Record<string, string> = {
@@ -156,18 +156,25 @@ export function Crypto({
               </>
             )}
 
-            <SourceNote label={t("crypto.updated")} stamp={sourceStamp(snapshot.freshness)}>
-              <SourceLink href={SOURCE_LINKS[snapshot.source] ?? COINGECKO_LINK}>
-                {t("crypto.source").replace("{source}", snapshot.source)}
-              </SourceLink>
-            </SourceNote>
+            <div className="space-y-0.5">
+              <p className="flex items-start gap-1.5 px-0.5 text-[10px] leading-snug text-text-muted">
+                <Icon name="info" className="mt-px size-3 shrink-0" />
+                <span>{t("crypto.note")}</span>
+              </p>
+              <p className="px-0.5 text-[10px] text-text-muted">
+                {t("crypto.updated")} {sourceStamp(snapshot.freshness)} ·{" "}
+                <button
+                  type="button"
+                  onClick={() => openExternalLink(SOURCE_LINKS[snapshot.source] ?? COINGECKO_LINK)}
+                  className="text-[color:var(--color-accent-mark)] hover:underline"
+                >
+                  {snapshot.source}
+                </button>
+              </p>
+            </div>
           </div>
         )}
       </StateBanner>
-      <p className="flex items-start gap-1.5 px-0.5 text-[10px] leading-snug text-text-muted">
-        <Icon name="info" className="mt-px size-3 shrink-0" />
-        <span>{t("crypto.note")}</span>
-      </p>
     </div>
   );
 }

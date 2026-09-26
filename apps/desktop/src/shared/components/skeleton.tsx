@@ -8,9 +8,22 @@
  * real rows mean the window is already the right size and the eye is already
  * in the right place.
  */
-export function SkeletonBlock({ className }: { className?: string }) {
+/** `current` tints from the text colour, for cards with their own background (the sky card). */
+const TONES = {
+  surface: "bg-surface-hover",
+  current: "bg-[color-mix(in_srgb,currentColor_16%,transparent)]",
+};
+type Tone = keyof typeof TONES;
+
+export function SkeletonBlock({
+  className,
+  tone = "surface",
+}: {
+  className?: string;
+  tone?: Tone;
+}) {
   return (
-    <div className={`animate-pulse rounded bg-surface-hover${className ? ` ${className}` : ""}`} />
+    <div className={`animate-pulse rounded ${TONES[tone]}${className ? ` ${className}` : ""}`} />
   );
 }
 
@@ -19,11 +32,19 @@ export function SkeletonBlock({ className }: { className?: string }) {
  * line's type classes, so the line is exactly as tall as the text it stands in
  * for, and a skeleton built from these lands at the loaded screen's height.
  */
-export function SkeletonLine({ className, bar = "w-3/5" }: { className?: string; bar?: string }) {
+export function SkeletonLine({
+  className,
+  bar = "w-3/5",
+  tone = "surface",
+}: {
+  className?: string;
+  bar?: string;
+  tone?: Tone;
+}) {
   return (
     <div className={className}>
       <span
-        className={`inline-block h-[0.75em] animate-pulse rounded bg-surface-hover align-middle ${bar}`}
+        className={`inline-block h-[0.75em] animate-pulse rounded align-middle ${TONES[tone]} ${bar}`}
       />
     </div>
   );

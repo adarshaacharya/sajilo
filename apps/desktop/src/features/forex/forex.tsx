@@ -9,6 +9,7 @@ import { fetchedAtLabel, loadBanner, loadedValue } from "../../shared/lib/load-s
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import { ForexRateRow } from "./_components/forex-rate-row";
+import { ConverterSkeleton, RateCardSkeleton } from "./_components/forex-skeleton";
 import { conversionText, rateFootnote, sourceTimestamp } from "./_lib/format";
 
 const NRB_URL = "https://www.nrb.org.np/";
@@ -47,7 +48,7 @@ export function ForexRates({
   return (
     <div className="space-y-2.5">
       <section className="surface-card p-2.5">
-        <StateBanner state={banner} onRetry={onRetry}>
+        <StateBanner state={banner} onRetry={onRetry} skeleton={<ConverterSkeleton />}>
           {snapshot && selected ? (
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
@@ -91,6 +92,15 @@ export function ForexRates({
           ) : null}
         </StateBanner>
       </section>
+
+      {banner.status === "loading" && (
+        <>
+          {modules.forexFavourites.length > 0 && (
+            <RateCardSkeleton rows={modules.forexFavourites.length} />
+          )}
+          <RateCardSkeleton rows={8} />
+        </>
+      )}
 
       {favourites.length > 0 && (
         <section className="surface-card p-2.5">

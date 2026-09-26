@@ -7,6 +7,7 @@ import { openExternalLink } from "../../shared/lib/external-link";
 import { api } from "../../shared/lib/ipc";
 import { catchAsFailed, loadBanner, loadedValue } from "../../shared/lib/load-state";
 import type { NewsAttachment } from "../../types/api/NewsAttachment";
+import { NoticeSkeleton } from "./_components/notice-skeleton";
 
 function formatTag(tag: string): string {
   return tag
@@ -73,7 +74,7 @@ export function GovernmentUpdateDetail() {
   const banner = loadBanner(state);
 
   return (
-    <StateBanner state={banner}>
+    <StateBanner state={banner} skeleton={<NoticeSkeleton />}>
       {!update?.content ? (
         <div className="surface-card p-2.5">
           <p className="text-[12px] font-medium">{t("news.official-unavailable")}</p>
