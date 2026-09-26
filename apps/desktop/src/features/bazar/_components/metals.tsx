@@ -1,7 +1,9 @@
 import { Sparkline } from "../../../shared/components/sparkline";
 import { useSettings } from "../../../shared/context/settings-context";
+import type { Metal } from "../../../types/api/Metal";
 import type { MetalRateSnapshot } from "../../../types/api/MetalRateSnapshot";
 import type { MetalSource } from "../../../types/api/MetalSource";
+import type { MetalUnit } from "../../../types/api/MetalUnit";
 import {
   changePercent,
   headlineMetal,
@@ -35,6 +37,16 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
   const credit = CREDITS[snapshot.source] as (typeof CREDITS)[MetalSource] | undefined;
   const headline = headlineMetal(snapshot);
   const published = sourceStamp(snapshot.freshness);
+  const rateOf = (metal: Metal, unit: MetalUnit) =>
+    snapshot.rates.find((rate) => rate.metal === metal && rate.unit === unit);
+  // The headline metal has its own card, both units in it; the list below is
+  // every other metal once, not each metal once per unit.
+  const others = [...new Set(snapshot.rates.map((rate) => rate.metal))].filter(
+    (metal) => metal !== headline?.metal,
+  );
+  const headlineOther = headline
+    ? rateOf(headline.metal, headline.unit === "tola" ? "tenGram" : "tola")
+    : undefined;
 
   return (
     <div className="space-y-2.5">
@@ -59,6 +71,12 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
             </p>
             <div className="mt-2 flex items-end justify-between gap-2">
               <p className="text-[11px] text-text-muted tabular-nums">
+                {headlineOther && (
+                  <>
+                    Rs {money.format(headlineOther.price)} {metalUnitLabel(headlineOther.unit)}
+                    {" · "}
+                  </>
+                )}
                 Rs {money.format(pricePerGram(headline))}/g
               </p>
               {snapshot.goldHistory.length >= 3 && (
@@ -81,11 +99,18 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
         </section>
       )}
 
-      <section className="surface-card p-2.5">
-        {snapshot.rates.map((rate) => (
-          <MetalRow key={`${rate.metal}-${rate.unit}`} rate={rate} />
-        ))}
-      </section>
+      {others.length > 0 && (
+        <section className="surface-card px-3 py-0.5">
+          {others.map((metal) => (
+            <MetalRow
+              key={metal}
+              metal={metal}
+              tola={rateOf(metal, "tola")}
+              tenGram={rateOf(metal, "tenGram")}
+            />
+          ))}
+        </section>
+      )}
 
       <MetalCalculator snapshot={snapshot} />
 

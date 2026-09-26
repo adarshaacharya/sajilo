@@ -305,9 +305,7 @@ function NextUp({
       className="surface-card relative space-y-2.5 overflow-hidden p-3"
       style={toned(tone)}
     >
-      <p className="text-[10px] font-semibold tracking-wide text-text-muted uppercase">
-        {t("keeper.next-up")}
-      </p>
+      <p className="text-[11px] font-semibold text-text-secondary">{t("keeper.next-up")}</p>
       <button type="button" onClick={onOpen} className="flex w-full items-center gap-3 text-left">
         <span className="keeper-due-big">
           <b>{days === 0 ? "!" : Math.abs(days)}</b>

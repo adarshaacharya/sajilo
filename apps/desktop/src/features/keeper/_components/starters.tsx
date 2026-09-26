@@ -69,9 +69,7 @@ export function Starters({
         </div>
 
         <div className="space-y-1.5">
-          <p className="text-[10px] font-semibold tracking-wide text-text-muted uppercase">
-            {t("keeper.start-with")}
-          </p>
+          <p className="text-[11px] font-semibold text-text-secondary">{t("keeper.start-with")}</p>
           {rows.map((row) => (
             <button key={row.key} type="button" onClick={row.onPick} className="keeper-starter">
               <span className="keeper-doc__icon">

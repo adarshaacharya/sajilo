@@ -63,10 +63,10 @@
   /* Feature identity comes from the icon and the data, not a background wash.
      These two survive only as icon tints. */
   --color-weather-tint: #6aa9dd;
-  --sky-day: linear-gradient(170deg, #1d3f6e, #3a6ea8);
-  --sky-night: linear-gradient(170deg, #121a30, #262c52);
-  --sky-dawn: linear-gradient(170deg, #4b3f66, #a8675a);
-  --sky-dusk: linear-gradient(170deg, #3c3460, #9c5752);
+  --sky-day: #244a78;
+  --sky-night: #1a2140;
+  --sky-dawn: #56405f;
+  --sky-dusk: #473857;
   --sky-ink: #fff;
   --color-forex-tint: #5cc79b;
   --color-violet: #a98be8;
@@ -118,10 +118,10 @@
     --color-positive: #0f7a3d;
     --color-negative: #c93a22;
     --color-weather-tint: #2f6fa8;
-    --sky-day: linear-gradient(170deg, #cfe3f5, #eef5fb);
-    --sky-night: linear-gradient(170deg, #d7dbee, #eef0f8);
-    --sky-dawn: linear-gradient(170deg, #ecdbe6, #faeee6);
-    --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
+    --sky-day: #dde9f5;
+    --sky-night: #e2e5f1;
+    --sky-dawn: #f2e6e9;
+    --sky-dusk: #ebe4ee;
     --sky-ink: #1c2b45;
     --color-forex-tint: #1a7f52;
     --color-violet: #6a4fc0;
@@ -157,10 +157,10 @@
   --color-positive: #0f7a3d;
   --color-negative: #c93a22;
   --color-weather-tint: #2f6fa8;
-  --sky-day: linear-gradient(170deg, #cfe3f5, #eef5fb);
-  --sky-night: linear-gradient(170deg, #d7dbee, #eef0f8);
-  --sky-dawn: linear-gradient(170deg, #ecdbe6, #faeee6);
-  --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
+  --sky-day: #dde9f5;
+  --sky-night: #e2e5f1;
+  --sky-dawn: #f2e6e9;
+  --sky-dusk: #ebe4ee;
   --sky-ink: #1c2b45;
   --color-forex-tint: #1a7f52;
   --color-violet: #6a4fc0;
@@ -1250,7 +1250,7 @@ button.row-line + button.row-line::before {
 
 /* Controls over the weather hero image — the one place a translucent white
    control is right, because it sits on artwork rather than on a surface. */
-/* Weather — the sky card follows the theme: deep gradients with white ink on
+/* Weather — the sky card follows the theme: deep flat colours with white ink on
    dark, pale washes with dark ink on light, each tinted by the time of day. */
 .sky-card {
   border-radius: var(--radius-card);
@@ -1479,19 +1479,11 @@ button.row-line + button.row-line::before {
   gap: 6px;
   min-width: 0;
   overflow: hidden;
-  padding: 10px 10px 10px 12px;
+  padding: 10px;
   text-align: left;
   transition:
     background-color 0.12s ease,
     transform 0.1s ease;
-}
-
-.keeper-doc::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--tone);
 }
 
 .keeper-doc:hover {
@@ -1531,10 +1523,6 @@ button.row-line + button.row-line::before {
   font-size: 11px;
   font-weight: 500;
   color: var(--color-accent-mark);
-}
-
-.keeper-doc--add::before {
-  display: none;
 }
 
 .keeper-starter {
@@ -1701,16 +1689,11 @@ button.row-line + button.row-line::before {
   background: color-mix(in srgb, var(--tint) 15%, transparent);
 }
 
-/* The two live cards lean into their colour, top-down, so they read as the
-   page's headline rather than two more tiles. */
+/* The two live cards are taller than the rest, with a large answer in them,
+   which is what makes them the page's headline. No wash of colour. */
 .tool-feature {
   justify-content: space-between;
   min-height: 112px;
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--tint) 13%, var(--color-surface-raised)),
-    var(--color-surface-raised) 70%
-  );
 }
 
 .tool-directory {
@@ -1772,6 +1755,33 @@ button.row-line + button.row-line::before {
   .tool-card:active {
     transform: none;
   }
+}
+
+/* A work-day toggle: quiet when off, tinted when on. Solid gold for six of
+   seven days made the least important setting the loudest thing on screen. */
+.day-chip {
+  height: 30px;
+  min-width: 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.day-chip:hover {
+  color: var(--color-text);
+}
+
+.day-chip--on {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 55%, var(--color-border));
+  background: color-mix(in srgb, var(--color-accent-fill) 14%, transparent);
+  color: var(--color-accent-mark);
+  font-weight: 600;
 }
 
 /* Station logos — most sit on white, so a hairline and (on dark) a slight

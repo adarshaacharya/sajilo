@@ -1,10 +1,12 @@
 import { CONTROL_LABEL } from "../../../shared/components/control";
-import { WEEKDAYS_EN, WEEKDAYS_NE } from "../../../shared/components/month-grid";
+import { WEEKDAYS_NE } from "../../../shared/components/month-grid";
 import { TimeField } from "../../../shared/components/time-field";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { FocusSettings } from "../../../shared/lib/ipc";
 import { clock, parseClock } from "../_lib/format";
+
+const DAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
 export function ScheduleCard({
   settings,
@@ -14,7 +16,8 @@ export function ScheduleCard({
   onSettings: (settings: FocusSettings) => void;
 }) {
   const { language, t } = useSettings();
-  const weekdays = language === "ne" ? WEEKDAYS_NE : WEEKDAYS_EN;
+  // Two letters in English: "S M T W T F S" has two S's and two T's.
+  const weekdays = language === "ne" ? WEEKDAYS_NE : DAYS_EN;
 
   const setTime = (field: "workStart" | "workEnd", value: string) => {
     const time = parseClock(value);
@@ -49,7 +52,7 @@ export function ScheduleCard({
 
       <div>
         <span className={CONTROL_LABEL}>{t("focus.days")}</span>
-        <div className="flex justify-between gap-1">
+        <div className="grid grid-cols-7 gap-1">
           {weekdays.map((label, index) => {
             const on = settings.workDays[index] ?? false;
             return (
@@ -64,9 +67,7 @@ export function ScheduleCard({
                     workDays: settings.workDays.map((day, i) => (i === index ? !day : day)),
                   })
                 }
-                className={`toggle-chip size-8 min-w-0 rounded-full p-0 ${
-                  on ? "toggle-chip--on" : "toggle-chip--off"
-                }`}
+                className={`day-chip ${on ? "day-chip--on" : ""}`}
               >
                 {label}
               </button>
