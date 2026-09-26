@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { triggerSetupPreview } from "../../calendar/_components/setup-card";
 import { Icon } from "../../../shared/components/icon";
 import { Segmented } from "../../../shared/components/segmented";
 import { Toggle } from "../../../shared/components/toggle";
@@ -23,6 +25,7 @@ function anyReminder(options: NotificationOptions): boolean {
 
 export function SystemTab() {
   const { t } = useSettings();
+  const navigate = useNavigate();
   const {
     enabled: updaterEnabled,
     state: updateState,
@@ -227,6 +230,21 @@ export function SystemTab() {
           onChange={setUsageInsights}
         />
       </SettingsSection>
+
+      {import.meta.env.DEV && (
+        <SettingsSection title={t("settings.developer")}>
+          <button
+            type="button"
+            className="settings-btn"
+            onClick={() => {
+              triggerSetupPreview();
+              navigate("/");
+            }}
+          >
+            {t("setup.preview-dev")}
+          </button>
+        </SettingsSection>
+      )}
 
       <SettingsSection title={t("settings.backup")} footnote={t("settings.backup-note")}>
         <div className="flex flex-wrap gap-1.5">

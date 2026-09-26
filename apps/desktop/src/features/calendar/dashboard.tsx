@@ -190,7 +190,7 @@ export function Dashboard() {
   if (error) {
     return <StateBanner state={{ status: "failed", message: error }} onRetry={reload} />;
   }
-  if (!today || !month) return <DashboardSkeleton />;
+  if (!today) return <DashboardSkeleton />;
 
   const provisional = cursorYear !== undefined && PROVISIONAL_YEARS.has(cursorYear);
   const upNext = upcoming[0];
@@ -221,40 +221,52 @@ export function Dashboard() {
       {modules.clocksEnabled && modules.clocks.length > 0 && (
         <ClockRow timeZones={modules.clocks} />
       )}
-      <Card className="calendar-panel">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <button
-            type="button"
-            aria-label={t("calendar.previous-month")}
-            onClick={() => step(-1)}
-            className="icon-btn size-7"
-          >
-            <span className="text-[15px] leading-none">‹</span>
-          </button>
-          <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
-            {month.monthName} {digits(month.firstDate.year, numerals)}
-            {monthSpan ? ` · ${monthSpan}` : ""}
-          </span>
-          <button
-            type="button"
-            aria-label={t("calendar.next-month")}
-            onClick={() => step(1)}
-            className="icon-btn size-7"
-          >
-            <span className="text-[15px] leading-none">›</span>
-          </button>
+      {month ? (
+        <Card className="calendar-panel">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              aria-label={t("calendar.previous-month")}
+              onClick={() => step(-1)}
+              className="icon-btn size-7"
+            >
+              <span className="text-[15px] leading-none">‹</span>
+            </button>
+            <span className="min-w-0 flex-1 truncate text-center text-[11px] font-semibold tracking-[0.01em] text-text-secondary">
+              {month.monthName} {digits(month.firstDate.year, numerals)}
+              {monthSpan ? ` · ${monthSpan}` : ""}
+            </span>
+            <button
+              type="button"
+              aria-label={t("calendar.next-month")}
+              onClick={() => step(1)}
+              className="icon-btn size-7"
+            >
+              <span className="text-[15px] leading-none">›</span>
+            </button>
+          </div>
+          <MonthGrid
+            month={month}
+            planDays={planDays}
+            onSelect={(day) =>
+              day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
+            }
+          />
+          {provisional && (
+            <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
+          )}
+        </Card>
+      ) : (
+        <div className="surface-card calendar-panel p-2.5" aria-hidden>
+          <SkeletonBlock className="mx-auto h-3 w-2/5" />
+          <div className="mt-2.5 grid grid-cols-7 gap-1">
+            {Array.from({ length: 42 }, (_, cell) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed grid
+              <SkeletonBlock key={cell} className="aspect-square w-full" />
+            ))}
+          </div>
         </div>
-        <MonthGrid
-          month={month}
-          planDays={planDays}
-          onSelect={(day) =>
-            day.date && navigate(`/day?y=${day.date.year}&m=${day.date.month}&d=${day.date.day}`)
-          }
-        />
-        {provisional && (
-          <p className="mt-2 text-[10px] text-text-muted">{t("calendar.provisional")}</p>
-        )}
-      </Card>
+      )}
 
       <UpNext events={eventSlides} />
       <FocusGlance />
