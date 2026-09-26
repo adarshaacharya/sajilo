@@ -1647,6 +1647,14 @@ button.row-line + button.row-line::before {
   right: 0;
 }
 
+/* Inside a segmented strip the ‹ › sit just within its rounded border. */
+.seg-edge.scroll-row__edge--left {
+  left: 4px;
+}
+.seg-edge.scroll-row__edge--right {
+  right: 4px;
+}
+
 /* A tab strip's buttons centre on its labels, above the divider line. */
 .scroll-row:has(> .tab-strip) .scroll-row__edge {
   top: calc(50% - 3px);

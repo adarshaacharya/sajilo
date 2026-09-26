@@ -82,7 +82,14 @@ fn save_state(app: &AppHandle<Wry>, tracker: &mut Tracker) -> Result<()> {
 
 fn view(tracker: &mut Tracker) -> FocusSnapshot {
     let (now, local) = now();
-    focus::snapshot(&mut tracker.state, &tracker.settings, now, local)
+    let mut snapshot = focus::snapshot(&mut tracker.state, &tracker.settings, now, local);
+    let supported = crate::system::activity::supported();
+    snapshot.hold_support = focus::HoldSupport {
+        calls: supported.call,
+        fullscreen: supported.fullscreen,
+        do_not_disturb: supported.do_not_disturb,
+    };
+    snapshot
 }
 
 #[tauri::command]
@@ -186,11 +193,41 @@ pub fn finish_focus_break(app: AppHandle<Wry>, outcome: BreakOutcome) -> Result<
     .inspect(|_| sync_card(&app))
 }
 
+/// Seconds since the last keyboard or mouse input, for the break card: its
+/// countdown runs while hands are off, so a look away finishes by itself.
+#[tauri::command]
+pub fn focus_idle_seconds() -> Option<u32> {
+    crate::system::idle::seconds()
+}
+
 /// What one measurement asks the platform to do.
 struct Announce {
     chime: bool,
     /// Title and body of each notification, in the notification style.
     notifications: Vec<(String, String)>,
+    /// A heads-up beside the tray date while a break is a minute away.
+    soon: Option<String>,
+}
+
+/// "👀 1m" while the next break is a minute of use away, so it never
+/// arrives from nowhere; nothing otherwise.
+fn heads_up(snapshot: &FocusSnapshot) -> Option<String> {
+    if snapshot.status != focus::FocusStatus::Active || snapshot.active_break.is_some() {
+        return None;
+    }
+    snapshot
+        .breaks
+        .iter()
+        .filter(|item| item.minutes_left.is_some_and(|left| left <= 1))
+        .min_by_key(|item| item.minutes_left)
+        .map(|item| {
+            let mark = match item.kind {
+                focus::BreakKind::Move => "🚶",
+                focus::BreakKind::Water => "💧",
+                _ => "👀",
+            };
+            format!("{mark} 1m")
+        })
 }
 
 /// One measurement: advance the tracker and announce whatever came due.
@@ -200,6 +237,12 @@ fn measure(app: &AppHandle<Wry>) {
     // the answer changes nothing.
     let display_held = idle.is_some_and(|idle| idle > focus::ACTIVE_WINDOW_SECONDS)
         && crate::system::display::held_awake();
+    let seen = crate::system::activity::moment();
+    let moment = focus::Moment {
+        call: seen.call,
+        fullscreen: seen.fullscreen,
+        do_not_disturb: seen.do_not_disturb,
+    };
     let language = prefs::language(app);
     let announce = with_tracker(app, |tracker| {
         let (now, local) = now();
@@ -211,6 +254,7 @@ fn measure(app: &AppHandle<Wry>) {
                 local,
                 idle_seconds: idle,
                 display_held,
+                moment,
             },
         );
         tracker.unsaved_ticks += 1;
@@ -230,8 +274,10 @@ fn measure(app: &AppHandle<Wry>) {
         Announce {
             chime: settings.chime && !due.is_empty(),
             notifications,
+            soon: heads_up(&view(tracker)),
         }
     });
+    crate::tray::set_note(app, announce.soon);
 
     if announce.chime {
         crate::system::chime::play(app);
@@ -275,7 +321,15 @@ pub fn spawn(app: AppHandle<Wry>) {
                 return;
             }
             if background_refresh::enabled(&app, prefs::FOCUS_ENABLED) {
-                measure(&app);
+                // Asking the OS about microphones and windows takes a few
+                // milliseconds; that belongs on a blocking thread.
+                let app = app.clone();
+                if tauri::async_runtime::spawn_blocking(move || measure(&app))
+                    .await
+                    .is_err()
+                {
+                    return;
+                }
             }
         }
     });

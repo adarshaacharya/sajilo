@@ -10,8 +10,11 @@
 //! - **Only time at the computer counts.** A reminder to look away after 20
 //!   minutes means 20 minutes of use, not 20 minutes since launch. Stepping
 //!   away for five minutes is itself a break, so the timers start over.
-//! - **Never nag at the wrong moment.** Outside work hours, on days off, on
-//!   public holidays and while paused, nothing is due.
+//! - **Never nag at the wrong moment.** The calendar is a poor guide to that;
+//!   what the computer is doing is a good one. A break that comes due during
+//!   a call, in a fullscreen app or with Do Not Disturb on is held until the
+//!   moment passes, and one due while the user is typing waits for a pause.
+//!   Days off are lighter rather than silent: eyes strain on a Saturday too.
 
 use std::collections::BTreeMap;
 
@@ -52,6 +55,16 @@ pub const SNOOZE_MINUTES: u32 = 5;
 /// A card left alone this long past its countdown was ignored; it goes away
 /// on its own rather than sitting on screen all afternoon.
 const CARD_TIMEOUT_SECONDS: i64 = 120;
+/// Input this recent means the user is mid-sentence: a break that has come
+/// due waits for the next pause rather than landing on a keystroke.
+pub const TYPING_PAUSE_SECONDS: u32 = 3;
+/// How long a due break waits for that pause before it shows anyway.
+const DUE_GRACE_SECONDS: i64 = 60;
+/// A break that comes due right after a held stretch this long says so: "that
+/// was a 45-minute call". Shorter holds are not worth a mention.
+pub const HOLD_NOTE_MINUTES: u32 = 10;
+/// How soon after a hold ends its note still applies to the next card.
+const HOLD_NOTE_WINDOW_MINUTES: i64 = 3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -113,9 +126,9 @@ impl BreakKind {
     }
 
     /// The interval, in minutes, the editor accepts: typed freely, from five
-    /// minutes to eight hours. Timers count only time at the computer in work
-    /// hours and restart each morning, so anything longer could never come
-    /// due. The end-of-work nudge has no interval.
+    /// minutes to eight hours. Timers count only time at the computer and
+    /// restart each morning, so anything longer could never come due. The
+    /// stop-work nudge has no interval.
     pub fn interval_range(self) -> (u32, u32) {
         if self.slot().is_some() {
             (5, 480)
@@ -162,12 +175,17 @@ pub struct FocusSettings {
     pub move_seconds: u32,
     /// Millilitres a day. Water reminders stop once it is reached.
     pub water_goal_ml: u32,
-    pub work_start: PlanTime,
-    pub work_end: PlanTime,
-    /// Sunday first. Saturday is the one day off everyone shares.
+    /// When the stop-work nudge comes. Read from the old "work hours end"
+    /// setting, which it replaces: work hours no longer gate breaks.
+    #[serde(alias = "workEnd")]
+    pub stop_work_at: PlanTime,
+    /// Sunday first. The days not ticked, and public holidays, are days off.
+    /// Saturday is the one day off everyone shares.
     pub work_days: [bool; 7],
-    /// Quiet on the public holidays in the bundled calendar.
-    pub skip_public_holidays: bool,
+    /// How breaks behave on a day off.
+    pub days_off: DaysOff,
+    /// The moments a due break waits out.
+    pub hold: HoldRules,
     pub style: ReminderStyle,
     /// A soft sound with each reminder, whichever style it takes.
     pub chime: bool,
@@ -176,7 +194,8 @@ pub struct FocusSettings {
     pub jokes: bool,
     /// The user's own reminder.
     pub custom: CustomBreak,
-    /// One card when work hours end, if still at the computer.
+    /// One card at [`Self::stop_work_at`] on a work day, if still at the
+    /// computer.
     pub end_of_day: bool,
     /// Meals and bedtime, each at the user's own time.
     pub routine: Routine,
@@ -266,6 +285,90 @@ impl Default for CustomBreak {
 /// Longest custom label kept; the card has one line for a title.
 const CUSTOM_LABEL_MAX: usize = 60;
 
+/// What a day off does to breaks. Screen time on a Saturday strains the eyes
+/// as much as on a Monday, so the default keeps the look-away and drops only
+/// what belongs to a working day.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum DaysOff {
+    /// Eyes, water and the user's own reminder; no stand-up, no stop-work.
+    #[default]
+    Lighter,
+    /// Every break, as on a work day. The stop-work nudge still rests.
+    Normal,
+    /// No interval breaks at all. Meals and bedtime keep their times.
+    Off,
+}
+
+/// Which moments hold a due break until they pass. Each can be switched off
+/// for someone whose microphone is always open, say.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct HoldRules {
+    pub calls: bool,
+    pub fullscreen: bool,
+    pub do_not_disturb: bool,
+}
+
+impl Default for HoldRules {
+    fn default() -> Self {
+        Self {
+            calls: true,
+            fullscreen: true,
+            do_not_disturb: true,
+        }
+    }
+}
+
+/// Why a due break is being held.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum HoldReason {
+    Call,
+    Fullscreen,
+    DoNotDisturb,
+}
+
+/// Why today is a day off.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum DayOffKind {
+    /// A weekday not ticked as a work day: Saturday, for most.
+    Weekly,
+    PublicHoliday,
+}
+
+/// What the platform can see right now. The shell measures it; which of it
+/// holds a break is the user's setting, decided here.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct Moment {
+    /// A microphone or camera is in use.
+    pub call: bool,
+    /// The frontmost app covers a whole display.
+    pub fullscreen: bool,
+    pub do_not_disturb: bool,
+}
+
+/// Which of those this platform can tell at all, so Settings does not offer
+/// a switch that could never do anything.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HoldSupport {
+    pub calls: bool,
+    pub fullscreen: bool,
+    pub do_not_disturb: bool,
+}
+
+impl Default for HoldSupport {
+    fn default() -> Self {
+        Self {
+            calls: true,
+            fullscreen: true,
+            do_not_disturb: true,
+        }
+    }
+}
+
 /// How a due break is announced. A corner notification is easy to miss, so
 /// the default is a small card that stays until it is dealt with.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -285,13 +388,13 @@ impl Default for FocusSettings {
             eyes_seconds: 20,
             move_seconds: 2 * 60,
             water_goal_ml: DEFAULT_WATER_GOAL_ML,
-            work_start: PlanTime { hour: 9, minute: 0 },
-            work_end: PlanTime {
+            stop_work_at: PlanTime {
                 hour: 18,
                 minute: 0,
             },
             work_days: [true, true, true, true, true, true, false],
-            skip_public_holidays: true,
+            days_off: DaysOff::default(),
+            hold: HoldRules::default(),
             style: ReminderStyle::Card,
             chime: true,
             jokes: true,
@@ -342,7 +445,7 @@ impl FocusSettings {
     }
 
     /// Every reminder off, the user's own included, for "Turn off break
-    /// reminders". Intervals, the water goal and work hours are kept, so
+    /// reminders". Intervals, the water goal and work days are kept, so
     /// turning them back on picks up where they were.
     #[must_use]
     pub fn with_breaks_off(mut self) -> Self {
@@ -397,8 +500,7 @@ impl FocusSettings {
         ] {
             rule.at = clamp_time(rule.at);
         }
-        self.work_start = clamp_time(self.work_start);
-        self.work_end = clamp_time(self.work_end);
+        self.stop_work_at = clamp_time(self.stop_work_at);
         self
     }
 
@@ -406,29 +508,35 @@ impl FocusSettings {
         self.work_days[date.weekday().num_days_from_sunday() as usize]
     }
 
-    /// Whether `time` falls inside work hours. An end before the start is an
-    /// overnight shift; equal times mean all day.
-    fn in_work_hours(&self, time: NaiveTime) -> bool {
-        let start = as_time(self.work_start);
-        let end = as_time(self.work_end);
-        match start.cmp(&end) {
-            std::cmp::Ordering::Less => start <= time && time < end,
-            std::cmp::Ordering::Greater => time >= start || time < end,
-            std::cmp::Ordering::Equal => true,
+    /// Whether `kind`'s interval runs today. Every kind runs on a work day;
+    /// a day off drops what [`DaysOff`] says it drops.
+    fn runs_today(&self, kind: BreakKind, day_off: bool) -> bool {
+        !day_off
+            || match self.days_off {
+                DaysOff::Normal => true,
+                DaysOff::Lighter => kind != BreakKind::Move,
+                DaysOff::Off => false,
+            }
+    }
+
+    /// Which of `moment`'s signals the user lets hold a break, the most
+    /// telling first: a call is the worst moment to be interrupted.
+    fn hold_reason(&self, moment: Moment) -> Option<HoldReason> {
+        if self.hold.calls && moment.call {
+            Some(HoldReason::Call)
+        } else if self.hold.fullscreen && moment.fullscreen {
+            Some(HoldReason::Fullscreen)
+        } else if self.hold.do_not_disturb && moment.do_not_disturb {
+            Some(HoldReason::DoNotDisturb)
+        } else {
+            None
         }
     }
-}
 
-impl FocusSettings {
-    /// Whether `time` is in the three hours after work ends, when a nudge to
-    /// stop still means something. Never when work hours are all day.
+    /// Whether `time` is in the three hours after the stop-work time, when a
+    /// nudge to stop still means something.
     fn just_after_work(&self, time: NaiveTime) -> bool {
-        let start = as_time(self.work_start);
-        let end = as_time(self.work_end);
-        if start == end {
-            return false;
-        }
-        let since_end = time.signed_duration_since(end);
+        let since_end = time.signed_duration_since(as_time(self.stop_work_at));
         let since_end = if since_end < Duration::zero() {
             since_end + Duration::days(1)
         } else {
@@ -531,6 +639,17 @@ pub struct FocusState {
     /// How far each joke deck has been dealt, by [`jokes::deck_name`], so
     /// a line does not come round again until the rest have.
     pub jokes_told: BTreeMap<String, u32>,
+    /// Each kind's current reminder has been put off once already; the next
+    /// card for it offers no "later".
+    #[serde(deserialize_with = "padded")]
+    pub snoozed: [bool; TIMED],
+    /// The moment holding breaks back now, and since when.
+    pub held: Option<Held>,
+    /// A hold that just ended, for the next card to mention.
+    pub after_hold: Option<AfterHold>,
+    /// When a break came due while the user was typing; it waits for a
+    /// pause, but not forever.
+    pub due_since: Option<DateTime<Utc>>,
     /// The public-holiday answer for one day, so the bundled calendar is not
     /// consulted every few seconds.
     #[serde(skip)]
@@ -547,7 +666,13 @@ impl FocusState {
             // carry over into the morning.
             self.since_break = [0; TIMED];
             self.awaiting = [None; TIMED];
+            self.snoozed = [false; TIMED];
             self.stretch_seconds = 0;
+            self.due_since = None;
+            self.end_of_day_after = None;
+            for sent in &mut self.routine {
+                sent.after = None;
+            }
         }
         self.today.get_or_insert_with(|| FocusDay::new(date))
     }
@@ -562,6 +687,24 @@ impl FocusState {
         self.holiday = Some((date, answer));
         answer
     }
+}
+
+/// A moment holding breaks back.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Held {
+    pub reason: HoldReason,
+    pub since: DateTime<Utc>,
+}
+
+/// A hold that has ended: what it was and how long it lasted.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AfterHold {
+    pub reason: HoldReason,
+    pub minutes: u32,
+    /// The note is for the break the hold kept back, not one an hour later.
+    pub until: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -631,6 +774,14 @@ pub struct ActiveBreak {
     /// Said once the break is taken, when jokes are on.
     #[serde(default)]
     pub cheer: Option<jokes::Joke>,
+    /// Whether "later" is on offer: once per reminder, and never for a look
+    /// away, which takes less time than deciding to put it off.
+    #[serde(default)]
+    pub can_snooze: bool,
+    /// The call (or film, or quiet hour) this break waited out, when it was
+    /// long enough to mention.
+    #[serde(default)]
+    pub after_hold: Option<AfterHold>,
 }
 
 impl ActiveBreak {
@@ -660,6 +811,13 @@ impl ActiveBreak {
         } else {
             (None, None)
         };
+        let can_snooze = match (kind, kind.slot(), routine_slot(kind)) {
+            (BreakKind::Eyes, ..) => false,
+            _ if preview => true,
+            (_, Some(slot), _) => !state.snoozed[slot],
+            (_, None, Some(slot)) => state.routine[slot].after.is_none(),
+            (_, None, None) => state.end_of_day_after.is_none(),
+        };
         Self {
             kind,
             started_at,
@@ -667,6 +825,8 @@ impl ActiveBreak {
             preview,
             joke,
             cheer,
+            can_snooze,
+            after_hold: None,
         }
     }
 }
@@ -698,6 +858,8 @@ pub struct Tick {
     /// Seconds since the last keyboard or mouse input; `None` where the
     /// platform cannot tell, in which case all time counts as active.
     pub idle_seconds: Option<u32>,
+    /// Calls, fullscreen apps and Do Not Disturb, as the platform sees them.
+    pub moment: Moment,
     /// Some app is keeping the display awake on an unlocked screen: a video,
     /// a call, a slideshow. Hands off the keyboard, eyes on the screen.
     pub display_held: bool,
@@ -710,11 +872,26 @@ pub enum FocusStatus {
     /// Every reminder is switched off.
     Off,
     Paused,
+    /// A call, a fullscreen app or Do Not Disturb: breaks still come due,
+    /// and wait.
+    Held,
+    /// A day off with interval breaks set to rest.
     DayOff,
-    Holiday,
-    OutsideHours,
     Away,
     Active,
+}
+
+impl FocusState {
+    /// Why today is a day off, if it is.
+    fn day_off(&mut self, settings: &FocusSettings, date: NaiveDate) -> Option<DayOffKind> {
+        if self.is_public_holiday(date) {
+            Some(DayOffKind::PublicHoliday)
+        } else if !settings.is_work_day(date) {
+            Some(DayOffKind::Weekly)
+        } else {
+            None
+        }
+    }
 }
 
 fn quiet_reason(
@@ -729,16 +906,47 @@ fn quiet_reason(
     if state.paused_until.is_some_and(|until| now < until) {
         return Some(FocusStatus::Paused);
     }
-    if !settings.is_work_day(local.date()) {
+    if state.held.is_some() {
+        return Some(FocusStatus::Held);
+    }
+    if settings.days_off == DaysOff::Off && state.day_off(settings, local.date()).is_some() {
         return Some(FocusStatus::DayOff);
     }
-    if settings.skip_public_holidays && state.is_public_holiday(local.date()) {
-        return Some(FocusStatus::Holiday);
-    }
-    if !settings.in_work_hours(local.time()) {
-        return Some(FocusStatus::OutsideHours);
-    }
     None
+}
+
+/// Starts, keeps or ends the hold `reason` asks for. A card already up when
+/// a call starts goes away: nobody wants it on a shared screen. Its reminder
+/// stays open, so stepping away still counts it taken.
+fn track_hold(state: &mut FocusState, reason: Option<HoldReason>, now: DateTime<Utc>) {
+    match (state.held, reason) {
+        (None, Some(reason)) => {
+            state.held = Some(Held { reason, since: now });
+            if state
+                .active_break
+                .as_ref()
+                .is_some_and(|card| !card.preview)
+            {
+                state.active_break = None;
+            }
+        }
+        (Some(held), Some(reason)) => {
+            state.held = Some(Held { reason, ..held });
+        }
+        (Some(held), None) => {
+            state.held = None;
+            let minutes = u32::try_from((now - held.since).num_minutes().max(0)).unwrap_or(0);
+            state.after_hold = (minutes >= HOLD_NOTE_MINUTES).then_some(AfterHold {
+                reason: held.reason,
+                minutes,
+                until: now + Duration::minutes(HOLD_NOTE_WINDOW_MINUTES),
+            });
+        }
+        (None, None) => {}
+    }
+    if state.after_hold.is_some_and(|after| now > after.until) {
+        state.after_hold = None;
+    }
 }
 
 /// The part of the last `elapsed` seconds spent at the computer. Input within
@@ -763,8 +971,9 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     state.last_tick = Some(tick.now);
     // Watching is being at the computer: a held display reads as fresh
     // input, so the time counts and the eye timer keeps running through a
-    // film. Where idle cannot be measured at all, it stays unmeasured.
-    let input_idle = if tick.display_held {
+    // film. So is a call, with nobody touching the keyboard. Where idle
+    // cannot be measured at all, it stays unmeasured.
+    let input_idle = if tick.display_held || tick.moment.call {
         tick.idle_seconds.map(|_| 0)
     } else {
         tick.idle_seconds
@@ -809,56 +1018,115 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         state.since_break[1] = 0;
     }
 
-    if let Some(kind) = routine_due(state, settings, tick, idle) {
-        return vec![kind];
+    track_hold(state, settings.hold_reason(tick.moment), tick.now);
+    let held = state.held.is_some();
+
+    if !held {
+        if let Some(kind) = routine_due(state, settings, tick, idle) {
+            return vec![kind];
+        }
+        if end_of_day_due(state, settings, tick, idle) {
+            state.end_of_day_sent = Some(date);
+            open_card(state, settings, BreakKind::EndOfDay, tick.now);
+            return vec![BreakKind::EndOfDay];
+        }
     }
 
-    if end_of_day_due(state, settings, tick, idle) {
-        state.end_of_day_sent = Some(date);
-        open_card(state, settings, BreakKind::EndOfDay, tick.now);
-        return vec![BreakKind::EndOfDay];
-    }
-
-    if quiet_reason(state, settings, tick.now, tick.local).is_some() {
+    // A hold is not quiet: the timers keep counting through a call, so the
+    // stand-up it held back comes the moment it ends.
+    if quiet_reason(state, settings, tick.now, tick.local)
+        .is_some_and(|status| status != FocusStatus::Held)
+    {
+        state.due_since = None;
         return Vec::new();
     }
 
-    let mut due = Vec::new();
-    for kind in BreakKind::ALL {
-        let rule = settings.rule(kind);
+    let mut due = count_towards_breaks(state, settings, date, active);
+    if held || due.is_empty() {
+        state.due_since = None;
+        return Vec::new();
+    }
+
+    // Mid-sentence, it waits for the next pause in typing, up to a minute.
+    let typing = tick
+        .idle_seconds
+        .is_some_and(|idle| idle < TYPING_PAUSE_SECONDS);
+    let waiting_since = *state.due_since.get_or_insert(tick.now);
+    if typing && tick.now - waiting_since < Duration::seconds(DUE_GRACE_SECONDS) {
+        return Vec::new();
+    }
+    state.due_since = None;
+
+    mark_reminded(state, date, tick.now, &mut due);
+
+    if let Some(kind) = due.first().copied() {
+        open_card(state, settings, kind, tick.now);
+        let after_hold = state.after_hold.take();
+        if let Some(card) = state.active_break.as_mut()
+            && card.started_at == tick.now
+        {
+            card.after_hold = after_hold;
+        }
+    }
+    due
+}
+
+/// Records `due` as reminded now and restarts their timers. Standing up rests
+/// the eyes too: when both come due together, the movement break is the one
+/// asked for.
+fn mark_reminded(
+    state: &mut FocusState,
+    date: NaiveDate,
+    now: DateTime<Utc>,
+    due: &mut Vec<BreakKind>,
+) {
+    for kind in due.iter() {
         let Some(index) = kind.slot() else {
             continue;
         };
-        if !rule.enabled {
-            continue;
-        }
-        state.since_break[index] = state.since_break[index].saturating_add(active);
-        if state.since_break[index] < rule.every_seconds() || state.awaiting[index].is_some() {
-            continue;
-        }
         state.since_break[index] = 0;
-        let today = state.day_mut(date);
-        if kind == BreakKind::Water && today.water_ml >= settings.water_goal_ml {
-            continue;
-        }
-        if let Some(count) = today.count_mut(kind) {
+        state.awaiting[index] = Some(now);
+        if let Some(count) = state.day_mut(date).count_mut(*kind) {
             count.reminded += 1;
         }
-        state.awaiting[index] = Some(tick.now);
-        due.push(kind);
     }
 
-    // Standing up rests the eyes too: when both come due together, the
-    // movement break is the one asked for.
     if due.contains(&BreakKind::Move) && due.contains(&BreakKind::Eyes) {
         due.retain(|kind| *kind != BreakKind::Eyes);
         state.awaiting[0] = None;
         let today = state.day_mut(date);
         today.eyes.reminded = today.eyes.reminded.saturating_sub(1);
     }
+}
 
-    if let Some(kind) = due.first().copied() {
-        open_card(state, settings, kind, tick.now);
+/// Adds `active` seconds to every interval that runs today and returns the
+/// kinds whose time has come, without announcing them yet. A met water goal
+/// restarts its timer instead of coming due.
+fn count_towards_breaks(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    date: NaiveDate,
+    active: u32,
+) -> Vec<BreakKind> {
+    let day_off = state.day_off(settings, date).is_some();
+    let mut due = Vec::new();
+    for kind in BreakKind::ALL {
+        let rule = settings.rule(kind);
+        let Some(index) = kind.slot() else {
+            continue;
+        };
+        if !rule.enabled || !settings.runs_today(kind, day_off) {
+            continue;
+        }
+        state.since_break[index] = state.since_break[index].saturating_add(active);
+        if state.since_break[index] < rule.every_seconds() || state.awaiting[index].is_some() {
+            continue;
+        }
+        if kind == BreakKind::Water && state.day_mut(date).water_ml >= settings.water_goal_ml {
+            state.since_break[index] = 0;
+            continue;
+        }
+        due.push(kind);
     }
     due
 }
@@ -917,8 +1185,8 @@ fn routine_due(
     Some(kind)
 }
 
-/// Once a work day, in the hours after work ends, and only to someone still
-/// at the computer: a nudge to someone who has already left is noise.
+/// Once a work day, in the hours after the stop-work time, and only to someone
+/// still at the computer: a nudge to someone who has already left is noise.
 fn end_of_day_due(state: &mut FocusState, settings: &FocusSettings, tick: Tick, idle: u32) -> bool {
     let date = tick.local.date();
     settings.end_of_day
@@ -928,8 +1196,7 @@ fn end_of_day_due(state: &mut FocusState, settings: &FocusSettings, tick: Tick, 
         && state.end_of_day_after.is_none_or(|after| tick.now >= after)
         && state.paused_until.is_none_or(|until| tick.now >= until)
         && idle <= ACTIVE_WINDOW_SECONDS
-        && settings.is_work_day(date)
-        && !(settings.skip_public_holidays && state.is_public_holiday(date))
+        && state.day_off(settings, date).is_none()
         && settings.just_after_work(tick.local.time())
 }
 
@@ -961,7 +1228,7 @@ pub fn finish_break(
     let Some(index) = card.kind.slot() else {
         // Timed cards keep no timer. Put off, they ask again in five
         // minutes; otherwise they are done for the day.
-        if outcome == BreakOutcome::Snooze {
+        if outcome == BreakOutcome::Snooze && card.can_snooze {
             let after = Some(card.started_at + Duration::minutes(i64::from(SNOOZE_MINUTES)));
             if let Some(slot) = routine_slot(card.kind) {
                 state.routine[slot] = RoutineSent { on: None, after };
@@ -972,7 +1239,9 @@ pub fn finish_break(
         }
         return;
     };
+    state.snoozed[index] = outcome == BreakOutcome::Snooze && card.can_snooze;
     match outcome {
+        BreakOutcome::Snooze if !card.can_snooze => state.awaiting[index] = None,
         BreakOutcome::Done => {
             // Already counted if the computer went quiet during the countdown.
             if state.awaiting[index].take().is_some()
@@ -1022,8 +1291,10 @@ fn settle_reminders(
                 count.taken += 1;
             }
             state.awaiting[index] = None;
+            state.snoozed[index] = false;
         } else if now - sent > kind.answer_window() {
             state.awaiting[index] = None;
+            state.snoozed[index] = false;
         }
     }
 }
@@ -1037,6 +1308,7 @@ pub fn log_water(state: &mut FocusState, local: NaiveDateTime, steps: i32) {
     // Drinking answers a pending water reminder, and restarts its timer.
     if steps > 0 {
         state.awaiting[2] = None;
+        state.snoozed[2] = false;
         state.since_break[2] = 0;
     }
 }
@@ -1091,6 +1363,8 @@ pub struct NextBreak {
     /// Minutes of computer use until it is due; `None` while nothing counts
     /// down, or once today's water goal is met.
     pub minutes_left: Option<u32>,
+    /// Switched on, but resting because today is a day off.
+    pub rests_today: bool,
 }
 
 /// Everything the Focus screen and the home card show.
@@ -1119,6 +1393,16 @@ pub struct FocusSnapshot {
     pub week: Vec<FocusDay>,
     /// Those seven days, added up for the "This week" card.
     pub summary: WeekSummary,
+    /// What is holding breaks back right now, while [`FocusStatus::Held`].
+    pub hold: Option<HoldReason>,
+    /// Why today is a day off, if it is; what that does is
+    /// [`FocusSettings::days_off`].
+    pub day_off: Option<DayOffKind>,
+    /// A usual day's screen time: the average of the recorded days before
+    /// today. `None` until there is one.
+    pub usual_screen_seconds: Option<u32>,
+    /// Which holds this platform can see. The shell fills it in.
+    pub hold_support: HoldSupport,
 }
 
 /// One day's bar on the week chart.
@@ -1230,10 +1514,12 @@ pub fn snapshot(
         FocusStatus::Active
     });
     let counting = quiet.is_none();
+    let day_off = state.day_off(settings, local.date());
     let breaks = BreakKind::ALL
         .into_iter()
         .map(|kind| {
             let rule = settings.rule(kind);
+            let runs = settings.runs_today(kind, day_off.is_some());
             let goal_met = kind == BreakKind::Water && today.water_ml >= settings.water_goal_ml;
             let used = kind.slot().map_or(0, |slot| state.since_break[slot]);
             NextBreak {
@@ -1245,13 +1531,31 @@ pub fn snapshot(
                 break_seconds: settings.break_seconds(kind),
                 min_break_seconds: kind.length_range().0,
                 max_break_seconds: kind.length_range().1,
-                minutes_left: (rule.enabled && counting && !goal_met)
+                minutes_left: (rule.enabled && counting && runs && !goal_met)
                     .then(|| rule.every_seconds().saturating_sub(used).div_ceil(60)),
+                rests_today: rule.enabled && !runs,
             }
         })
         .collect();
     let days = week(&state.history, &today);
+    let before: Vec<u32> = state
+        .history
+        .iter()
+        .map(|day| day.screen_seconds)
+        .filter(|seconds| *seconds > 0)
+        .collect();
+    let usual_screen_seconds = u32::try_from(before.len())
+        .ok()
+        .filter(|count| *count > 0)
+        .map(|count| {
+            let total: u64 = before.iter().copied().map(u64::from).sum();
+            u32::try_from(total / u64::from(count)).unwrap_or(u32::MAX)
+        });
     FocusSnapshot {
+        hold: state.held.map(|held| held.reason),
+        day_off,
+        usual_screen_seconds,
+        hold_support: HoldSupport::default(),
         settings: settings.clone(),
         status,
         summary: summarise(&days, settings.water_goal_ml, today.date),
@@ -1421,10 +1725,10 @@ fn fixed_message(kind: BreakKind, language: Language) -> (&'static str, &'static
         ),
         (BreakKind::Bedtime, Language::Ne) => ("सुत्ने बेला भयो", "ल्यापटप बन्द। इन्टरनेट भोलि पनि हुन्छ।"),
         (BreakKind::EndOfDay, Language::En) => (
-            "Work hours are over",
-            "Time to wrap up. Tomorrow's problems can wait until tomorrow.",
+            "Time to stop work",
+            "Wrap up for today. Tomorrow's problems can wait until tomorrow.",
         ),
-        (BreakKind::EndOfDay, Language::Ne) => ("कामको समय सकियो", "आजलाई काम समेट्ने बेला।"),
+        (BreakKind::EndOfDay, Language::Ne) => ("काम रोक्ने बेला", "आजलाई काम समेट्ने बेला।"),
         // Handled with their numbers or the user's own words above.
         (BreakKind::Move | BreakKind::Water | BreakKind::Custom, _) => ("", ""),
     }

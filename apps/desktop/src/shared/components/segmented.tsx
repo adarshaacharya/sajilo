@@ -45,6 +45,10 @@ export function Segmented<T extends string>({
     if (selected) scrollIntoBoxIfNeeded(selected, "x", "nearest");
   }, [scroll, value]);
   const thumb = useTrackThumb(track, scroll, value);
+  const page = (direction: 1 | -1) => {
+    const row = track.current;
+    if (row) row.scrollBy({ left: direction * row.clientWidth * 0.7, behavior: "smooth" });
+  };
 
   const radius = small ? "rounded-[6px]" : "rounded-[8px]";
   return (
@@ -118,6 +122,32 @@ export function Segmented<T extends string>({
         <>
           <span aria-hidden="true" className={`seg-fade seg-fade--start ${radius}`} />
           <span aria-hidden="true" className={`seg-fade seg-fade--end ${radius}`} />
+          {/* The same ‹ › as every other sideways row (`ScrollRow`): a strip
+              with its scrollbar hidden otherwise gives no sign of the tabs
+              past its edge. Mouse-only; the tabs themselves are reachable by
+              keyboard. */}
+          {(more === "start" || more === "both") && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-hidden="true"
+              onClick={() => page(-1)}
+              className="scroll-row__edge scroll-row__edge--left seg-edge"
+            >
+              <Icon name="chevronLeft" className="size-3" />
+            </button>
+          )}
+          {(more === "end" || more === "both") && (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-hidden="true"
+              onClick={() => page(1)}
+              className="scroll-row__edge scroll-row__edge--right seg-edge"
+            >
+              <Icon name="chevronLeft" className="size-3 rotate-180" />
+            </button>
+          )}
         </>
       )}
     </div>

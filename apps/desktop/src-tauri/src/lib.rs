@@ -302,6 +302,7 @@ pub fn run() {
             commands::focus::log_focus_water,
             commands::focus::pause_focus,
             commands::focus::finish_focus_break,
+            commands::focus::focus_idle_seconds,
             commands::focus::preview_focus_break,
             commands::keeper::keeper_snapshot,
             commands::keeper::resolve_keeper_date,

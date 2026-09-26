@@ -187,18 +187,21 @@ export interface FocusSettings {
   moveSeconds: number;
   /** Millilitres a day. */
   waterGoalMl: number;
-  workStart: PlanTime;
-  workEnd: PlanTime;
-  /** Sunday first. */
+  /** When the stop-work nudge comes, on a work day. */
+  stopWorkAt: PlanTime;
+  /** Sunday first. Days not ticked, and public holidays, are days off. */
   workDays: boolean[];
-  skipPublicHolidays: boolean;
+  /** What a day off does to breaks. */
+  daysOff: DaysOff;
+  /** The moments a due break waits out. */
+  hold: HoldRules;
   style: ReminderStyle;
   chime: boolean;
   /** A rotating joke on the break card instead of the plain instruction. */
   jokes: boolean;
   /** The user's own reminder; off while it has no words. */
   custom: CustomBreak;
-  /** One card when work hours end, if still at the computer. */
+  /** One card at the stop-work time on a work day, if still at the computer. */
   endOfDay: boolean;
   /** Meals and bedtime, each at the user's own time. */
   routine: Routine;
@@ -226,6 +229,27 @@ export interface CustomBreak {
 
 export type ReminderStyle = "card" | "notification";
 
+/** Lighter: eyes, water and the user's own reminder; normal: every break;
+ * off: no interval breaks. Meals and bedtime keep their times either way. */
+export type DaysOff = "lighter" | "normal" | "off";
+
+export interface HoldRules {
+  calls: boolean;
+  fullscreen: boolean;
+  doNotDisturb: boolean;
+}
+
+export type HoldReason = "call" | "fullscreen" | "doNotDisturb";
+
+export type DayOffKind = "weekly" | "publicHoliday";
+
+/** A hold that just ended, mentioned on the break it kept back. */
+export interface AfterHold {
+  reason: HoldReason;
+  minutes: number;
+  until: string;
+}
+
 export interface ActiveBreak {
   kind: BreakKind;
   startedAt: string;
@@ -238,6 +262,10 @@ export interface ActiveBreak {
   joke: Joke | null;
   /** The engine's line for once the break is taken; null with jokes off. */
   cheer: Joke | null;
+  /** Whether "later" is on offer: once per reminder, never for a look away. */
+  canSnooze: boolean;
+  /** The call or fullscreen stretch this break waited out, when long enough to say. */
+  afterHold: AfterHold | null;
 }
 
 /** One joke in both of the app's languages; the card shows the one set. */
@@ -283,14 +311,7 @@ export interface WeekSummary {
   longestStretch: { weekday: number; today: boolean; seconds: number } | null;
 }
 
-export type FocusStatus =
-  | "off"
-  | "paused"
-  | "dayOff"
-  | "holiday"
-  | "outsideHours"
-  | "away"
-  | "active";
+export type FocusStatus = "off" | "paused" | "held" | "dayOff" | "away" | "active";
 
 export interface NextBreak {
   kind: BreakKind;
@@ -306,6 +327,8 @@ export interface NextBreak {
   maxBreakSeconds: number;
   /** Minutes of computer use until due; null while nothing counts down. */
   minutesLeft: number | null;
+  /** Switched on, but resting because today is a day off. */
+  restsToday: boolean;
 }
 
 export interface FocusSnapshot {
@@ -325,6 +348,14 @@ export interface FocusSnapshot {
   /** The last seven days, oldest first, ending today; unrecorded days are empty. */
   week: FocusDay[];
   summary: WeekSummary;
+  /** What holds breaks back right now, while the status is "held". */
+  hold: HoldReason | null;
+  /** Why today is a day off, if it is. */
+  dayOff: DayOffKind | null;
+  /** The average screen time of the recorded days before today. */
+  usualScreenSeconds: number | null;
+  /** Which holds this computer can see at all. */
+  holdSupport: HoldRules;
 }
 
 export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "resume";
@@ -580,6 +611,7 @@ export const api = {
   previewFocusBreak: (kind: BreakKind) => invoke<FocusSnapshot>("preview_focus_break", { kind }),
   finishFocusBreak: (outcome: BreakOutcome) =>
     invoke<FocusSnapshot>("finish_focus_break", { outcome }),
+  focusIdleSeconds: () => invoke<number | null>("focus_idle_seconds"),
 
   keeperSnapshot: () => invoke<KeeperSnapshot>("keeper_snapshot"),
   resolveKeeperDate: (input: KeeperDateInput) =>

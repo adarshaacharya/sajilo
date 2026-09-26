@@ -1,3 +1,4 @@
+pub mod activity;
 pub mod autostart;
 pub mod card_window;
 pub mod chime;

@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
-import { api, type BreakOutcome, type FocusSnapshot, type Joke } from "../../shared/lib/ipc";
+import {
+  type ActiveBreak,
+  api,
+  type BreakOutcome,
+  type FocusSnapshot,
+  type Joke,
+} from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
@@ -35,17 +41,52 @@ const CHEER_MS = 1600;
 /** A card still waiting after this long shakes once more. */
 const NUDGE_MS = 30_000;
 
-/** Seconds left on the card's countdown, redrawn a few times a second. */
+const HOLD_NOTES = {
+  call: "break.after.call",
+  fullscreen: "break.after.fullscreen",
+  doNotDisturb: "break.after.dnd",
+} as const;
+
+/**
+ * Seconds left on the card's countdown, redrawn a few times a second. The
+ * countdown runs while hands are off the keyboard and mouse, so looking away
+ * finishes the break by itself and a keystroke starts it over. Where input
+ * idle can't be read, it runs on the clock instead.
+ */
 function useRemaining(startedAt: string | undefined, seconds: number) {
   const [now, setNow] = useState(() => Date.now());
+  const [idle, setIdle] = useState<number | null>(null);
   useEffect(() => {
     if (!startedAt || seconds === 0) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 250);
-    return () => window.clearInterval(timer);
+    let live = true;
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+      api
+        .focusIdleSeconds()
+        .then((value) => {
+          if (live) setIdle(typeof value === "number" ? value : null);
+        })
+        .catch(() => {
+          if (live) setIdle(null);
+        });
+    }, 250);
+    return () => {
+      live = false;
+      window.clearInterval(timer);
+    };
   }, [startedAt, seconds]);
   if (!startedAt) return seconds;
-  const elapsed = (now - Date.parse(startedAt)) / 1000;
-  return Math.max(0, seconds - elapsed);
+  const elapsed = Math.max(0, (now - Date.parse(startedAt)) / 1000);
+  // Idle from before the card opened is not part of this break.
+  const handsOff = idle === null ? elapsed : Math.min(idle, elapsed);
+  return Math.max(0, seconds - handsOff);
+}
+
+/** The main button: the one that counts the break. A look away has none:
+ * leaving the mouse alone is how it is taken. */
+function mainAction(card: ActiveBreak): "done" | "drank" | null {
+  if (card.kind === "eyes") return null;
+  return card.kind === "water" ? "drank" : "done";
 }
 
 function Countdown({ remaining, seconds }: { remaining: number; seconds: number }) {
@@ -145,6 +186,10 @@ export function BreakCard() {
   const title =
     card.kind === "custom" ? kindLabel(card.kind, snapshot.settings, t) : t(TITLES[card.kind]);
   const later = t("break.snooze").replace("{n}", digits(snapshot.snoozeMinutes, numerals));
+  const main = mainAction(card);
+  const heldNote = card.afterHold
+    ? t(HOLD_NOTES[card.afterHold.reason]).replace("{n}", digits(card.afterHold.minutes, numerals))
+    : null;
 
   return (
     <div
@@ -161,6 +206,11 @@ export function BreakCard() {
           <Icon name={KIND_ICONS[card.kind]} className="size-5" />
         </span>
         <div className="min-w-0 flex-1" data-tauri-drag-region>
+          {heldNote && (
+            <p className="break-card__eyebrow" data-tauri-drag-region>
+              {heldNote}
+            </p>
+          )}
           <p className="break-card__title" data-tauri-drag-region>
             {title}
             {card.preview && <span className="break-card__example">{t("break.example")}</span>}
@@ -174,6 +224,11 @@ export function BreakCard() {
               {waterLine}
             </p>
           )}
+          {card.seconds > 0 && !cheer && (
+            <p className="break-card__meta" data-tauri-drag-region>
+              {t("break.hands-off")}
+            </p>
+          )}
         </div>
         {card.seconds > 0 && <Countdown remaining={remaining} seconds={card.seconds} />}
       </div>
@@ -184,14 +239,16 @@ export function BreakCard() {
         <button type="button" onClick={() => finish("skip")} className="btn-ghost mr-auto">
           {t("break.skip")}
         </button>
-        <button
-          type="button"
-          onClick={() => finish("snooze")}
-          className="break-card__button break-card__button--quiet"
-        >
-          {later}
-        </button>
-        {card.kind === "water" ? (
+        {card.canSnooze && (
+          <button
+            type="button"
+            onClick={() => finish("snooze")}
+            className="break-card__button break-card__button--quiet"
+          >
+            {later}
+          </button>
+        )}
+        {main === "drank" && (
           <button
             type="button"
             onClick={() => finish("drank")}
@@ -199,7 +256,8 @@ export function BreakCard() {
           >
             {t("break.drank").replace("{n}", digits(snapshot.waterStepMl, numerals))}
           </button>
-        ) : (
+        )}
+        {main === "done" && (
           <button
             type="button"
             onClick={() => finish("done")}

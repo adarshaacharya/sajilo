@@ -2,9 +2,10 @@
 
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
-    BreakKind, BreakOutcome, FocusSettings, FocusState, FocusStatus, Language, PauseChoice,
-    ReminderStyle, SNOOZE_MINUTES, Tick, announcement, finish_break, jokes, litres, log_water,
-    pause, preview_break, snapshot, tick,
+    BreakKind, BreakOutcome, DayOffKind, DaysOff, FocusSettings, FocusState, FocusStatus,
+    HOLD_NOTE_MINUTES, HoldReason, Language, Moment, PauseChoice, ReminderStyle, SNOOZE_MINUTES,
+    Tick, announcement, finish_break, jokes, litres, log_water, pause, preview_break, snapshot,
+    tick,
 };
 use std::collections::HashSet;
 
@@ -21,6 +22,7 @@ fn at(now: DateTime<Utc>, idle: u32) -> Tick {
         local: now.naive_utc(),
         idle_seconds: Some(idle),
         display_held: false,
+        moment: Moment::default(),
     }
 }
 
@@ -137,52 +139,101 @@ fn a_reminder_ignored_past_its_window_is_not_taken() {
     assert_eq!((today.eyes.reminded, today.eyes.taken), (1, 0));
 }
 
+/// Eyes strain in the evening too: breaks follow the screen, not the clock.
 #[test]
-fn nothing_is_due_outside_work_hours_but_screen_time_counts() {
+fn breaks_come_whenever_the_computer_is_in_use() {
     let mut settings = eyes_only();
     settings.end_of_day = false;
     let mut state = FocusState::default();
-    let evening = monday_at(19);
-    assert!(run(&mut state, &settings, evening, 60, busy).is_empty());
-    assert!(state.today.as_ref().unwrap().screen_seconds >= 59 * 60);
-
-    let view = snapshot(&mut state, &settings, evening, evening.naive_utc());
-    assert_eq!(view.status, FocusStatus::OutsideHours);
-    assert_eq!(view.breaks[0].minutes_left, None);
+    let late = monday_at(22);
+    let due = run(&mut state, &settings, late, 25, busy);
+    assert_eq!(due, [(late + Duration::minutes(20), BreakKind::Eyes)]);
 }
 
+fn is_public_holiday(date: NaiveDate) -> bool {
+    let bs = sajilo_core::calendar::bikram_sambat::nepali_date_from(date).unwrap();
+    sajilo_core::calendar::events::events(bs.year, bs.month)
+        .get(&bs.day)
+        .is_some_and(|event| event.is_public_holiday)
+}
+
+/// A plain Saturday: a day off by the week, not by a holiday on it.
+fn saturday_at(hour: u32) -> DateTime<Utc> {
+    let date = (0..52)
+        .map(|week| NaiveDate::from_ymd_opt(2026, 9, 5).unwrap() + Duration::weeks(week))
+        .find(|date| !is_public_holiday(*date))
+        .expect("a Saturday with no holiday on it");
+    assert_eq!(date.weekday(), Weekday::Sat);
+    Utc.from_utc_datetime(&date.and_hms_opt(hour, 0, 0).unwrap())
+}
+
+fn eyes_and_move() -> FocusSettings {
+    let mut settings = eyes_only();
+    settings.move_break.enabled = true;
+    settings.move_break.every_minutes = 30;
+    settings
+}
+
+/// A day off is lighter by default: the look away still comes, the stand-up
+/// rests, and the screen says why.
 #[test]
-fn saturday_is_a_day_off_by_default() {
-    let saturday = Utc.with_ymd_and_hms(2026, 9, 26, 10, 0, 0).unwrap();
-    assert_eq!(saturday.weekday(), Weekday::Sat);
+fn saturday_is_lighter_by_default() {
+    let settings = eyes_and_move();
     let mut state = FocusState::default();
-    assert!(run(&mut state, &eyes_only(), saturday, 60, busy).is_empty());
+    let due = run(&mut state, &settings, saturday_at(10), 45, busy);
+    assert!(due.iter().any(|(_, kind)| *kind == BreakKind::Eyes));
+    assert!(due.iter().all(|(_, kind)| *kind != BreakKind::Move));
+
+    let now = saturday_at(10) + Duration::minutes(45);
+    let view = snapshot(&mut state, &settings, now, now.naive_utc());
+    assert_eq!(view.day_off, Some(DayOffKind::Weekly));
+    assert_eq!(view.status, FocusStatus::Active);
+    let stand = view
+        .breaks
+        .iter()
+        .find(|item| item.kind == BreakKind::Move)
+        .unwrap();
+    assert!(stand.rests_today);
+    assert_eq!(stand.minutes_left, None);
 }
 
 #[test]
-fn public_holidays_are_quiet_unless_asked_otherwise() {
+fn a_day_off_can_be_the_same_as_a_work_day_or_silent() {
+    let mut same = eyes_and_move();
+    same.days_off = DaysOff::Normal;
+    let mut state = FocusState::default();
+    let due = run(&mut state, &same, saturday_at(10), 35, busy);
+    assert!(due.iter().any(|(_, kind)| *kind == BreakKind::Move));
+
+    let mut silent = eyes_and_move();
+    silent.days_off = DaysOff::Off;
+    let mut state = FocusState::default();
+    assert!(run(&mut state, &silent, saturday_at(10), 60, busy).is_empty());
+    let now = saturday_at(11);
+    let view = snapshot(&mut state, &silent, now, now.naive_utc());
+    assert_eq!(view.status, FocusStatus::DayOff);
+}
+
+#[test]
+fn public_holidays_are_days_off() {
     // The first public holiday in the bundled calendar that falls on a
     // weekday someone would normally work.
     let holiday = (0..365)
         .map(|offset| NaiveDate::from_ymd_opt(2026, 1, 1).unwrap() + Duration::days(offset))
-        .find(|date| {
-            date.weekday() != Weekday::Sat && {
-                let bs = sajilo_core::calendar::bikram_sambat::nepali_date_from(*date).unwrap();
-                sajilo_core::calendar::events::events(bs.year, bs.month)
-                    .get(&bs.day)
-                    .is_some_and(|event| event.is_public_holiday)
-            }
-        })
+        .find(|date| date.weekday() != Weekday::Sat && is_public_holiday(*date))
         .expect("a weekday public holiday in 2026");
     let start = Utc.from_utc_datetime(&holiday.and_hms_opt(10, 0, 0).unwrap());
 
+    let mut silent = eyes_only();
+    silent.days_off = DaysOff::Off;
     let mut state = FocusState::default();
-    assert!(run(&mut state, &eyes_only(), start, 30, busy).is_empty());
+    assert!(run(&mut state, &silent, start, 30, busy).is_empty());
 
-    let mut working = eyes_only();
-    working.skip_public_holidays = false;
+    // Lighter, the default: the look away still comes.
     let mut state = FocusState::default();
-    assert_eq!(run(&mut state, &working, start, 30, busy).len(), 1);
+    assert_eq!(run(&mut state, &eyes_only(), start, 30, busy).len(), 1);
+    let view = snapshot(&mut state, &eyes_only(), start, start.naive_utc());
+    assert_eq!(view.day_off, Some(DayOffKind::PublicHoliday));
 }
 
 /// A closed lid is neither screen time nor a reason to nag the moment it
@@ -357,18 +408,43 @@ fn stored_settings_fill_in_and_stay_within_the_editor() {
     );
 }
 
+/// Settings saved when work hours still gated breaks keep their end time as
+/// the stop-work time; the rest of the old schedule is let go.
 #[test]
-fn an_overnight_shift_wraps_past_midnight() {
-    let mut settings = eyes_only();
-    settings.work_start = sajilo_core::planner::PlanTime {
-        hour: 22,
-        minute: 0,
+fn old_work_hours_become_the_stop_work_time() {
+    let old: FocusSettings = serde_json::from_str(
+        r#"{"workStart":{"hour":10,"minute":0},"workEnd":{"hour":17,"minute":30},"skipPublicHolidays":false}"#,
+    )
+    .unwrap();
+    assert_eq!(
+        old.stop_work_at,
+        sajilo_core::planner::PlanTime {
+            hour: 17,
+            minute: 30
+        }
+    );
+    assert_eq!(old.days_off, DaysOff::Lighter);
+}
+
+/// A stop-work time late in the evening still nudges just after midnight.
+#[test]
+fn the_stop_work_nudge_wraps_past_midnight() {
+    let mut settings = working();
+    settings.eyes.enabled = false;
+    settings.move_break.enabled = true;
+    settings.stop_work_at = sajilo_core::planner::PlanTime {
+        hour: 23,
+        minute: 30,
     };
-    settings.work_end = sajilo_core::planner::PlanTime { hour: 6, minute: 0 };
     let mut state = FocusState::default();
-    assert_eq!(run(&mut state, &settings, monday_at(23), 25, busy).len(), 1);
-    let mut state = FocusState::default();
-    assert!(run(&mut state, &settings, monday_at(12), 25, busy).is_empty());
+    let due = run(
+        &mut state,
+        &settings,
+        monday_at(23) + Duration::minutes(29),
+        3,
+        busy,
+    );
+    assert!(due.iter().any(|(_, kind)| *kind == BreakKind::EndOfDay));
 }
 
 /// Each tap is a quarter litre, it never goes below nothing, and the
@@ -436,15 +512,23 @@ fn skipping_leaves_the_break_untaken() {
     assert_eq!((today.eyes.reminded, today.eyes.taken), (1, 0));
 }
 
+fn move_only() -> FocusSettings {
+    let mut settings = FocusSettings::default();
+    settings.move_break.enabled = true;
+    settings.move_break.every_minutes = 30;
+    settings
+}
+
 /// "In 5 min" brings the same reminder back after five more minutes of use,
-/// and it is not counted as a second reminder.
+/// and it is not counted as a second reminder. It is on offer once.
 #[test]
-fn snoozing_asks_again_after_five_minutes_of_use() {
-    let settings = eyes_only();
+fn snoozing_asks_again_after_five_minutes_of_use_once() {
+    let settings = move_only();
     let mut state = FocusState::default();
     let start = monday_at(10);
-    run(&mut state, &settings, start, 20, busy);
-    let snoozed_at = start + Duration::seconds(20 * 60 + 15);
+    run(&mut state, &settings, start, 30, busy);
+    assert!(state.active_break.as_ref().unwrap().can_snooze);
+    let snoozed_at = start + Duration::seconds(30 * 60 + 15);
     finish_break(
         &mut state,
         &settings,
@@ -452,13 +536,25 @@ fn snoozing_asks_again_after_five_minutes_of_use() {
         snoozed_at.naive_utc(),
     );
 
-    let due = run(&mut state, &settings, snoozed_at, 10, busy);
+    let due = run(&mut state, &settings, snoozed_at, 6, busy);
     let back = due.first().expect("it comes back").0 - snoozed_at;
     assert!(
         back <= Duration::minutes(i64::from(SNOOZE_MINUTES)),
         "got {back}"
     );
-    assert_eq!(state.today.as_ref().unwrap().eyes.reminded, 1);
+    assert_eq!(state.today.as_ref().unwrap().move_break.reminded, 1);
+    assert!(
+        !state.active_break.as_ref().unwrap().can_snooze,
+        "the second card offers no later"
+    );
+}
+
+/// A look away takes less time than deciding to put it off.
+#[test]
+fn a_look_away_cannot_be_put_off() {
+    let mut state = FocusState::default();
+    run(&mut state, &eyes_only(), monday_at(10), 20, busy);
+    assert!(!state.active_break.as_ref().unwrap().can_snooze);
 }
 
 #[test]
@@ -640,9 +736,9 @@ fn nobody_at_the_computer_gets_no_end_of_work_nudge() {
 
 #[test]
 fn no_end_of_work_nudge_on_a_day_off_or_with_reminders_off() {
-    let saturday = Utc.with_ymd_and_hms(2026, 9, 26, 18, 0, 0).unwrap();
     let mut state = FocusState::default();
-    assert!(run(&mut state, &working(), saturday, 30, busy).is_empty());
+    let due = run(&mut state, &working(), saturday_at(18), 30, busy);
+    assert!(due.iter().all(|(_, kind)| *kind != BreakKind::EndOfDay));
 
     // Every reminder off, so there is no work day to end.
     let off = FocusSettings {
@@ -1208,4 +1304,124 @@ fn a_held_display_keeps_an_unmeasurable_idle_unmeasured() {
     };
     tick(&mut state, &eyes_only(), tick_at);
     assert_eq!(state.last_idle, None);
+}
+
+// ------------------------------------------------------------ holding
+
+fn in_call(now: DateTime<Utc>, idle: u32) -> Tick {
+    Tick {
+        moment: Moment {
+            call: true,
+            ..Moment::default()
+        },
+        ..at(now, idle)
+    }
+}
+
+/// A 45-minute call from 10:00: hands off the keyboard, microphone on.
+fn call(state: &mut FocusState, settings: &FocusSettings, minutes: i64) -> Vec<BreakKind> {
+    let start = monday_at(10);
+    let mut due = Vec::new();
+    let mut now = start;
+    while now <= start + Duration::minutes(minutes) {
+        let idle = u32::try_from((now - start).num_seconds()).unwrap();
+        due.extend(tick(state, settings, in_call(now, idle)));
+        now += Duration::seconds(STEP);
+    }
+    due
+}
+
+/// Nothing interrupts a call; the time still counts, so the stand-up it held
+/// back comes the moment it ends, and says why.
+#[test]
+fn a_call_holds_breaks_and_they_come_when_it_ends() {
+    let settings = move_only();
+    let mut state = FocusState::default();
+    assert!(call(&mut state, &settings, 45).is_empty());
+    assert!(state.active_break.is_none());
+    let today = state.today.as_ref().unwrap();
+    assert!(today.screen_seconds >= 44 * 60, "a call is screen time");
+
+    let now = monday_at(10) + Duration::minutes(45);
+    let view = snapshot(&mut state, &settings, now, now.naive_utc());
+    assert_eq!(view.status, FocusStatus::Held);
+    assert_eq!(view.hold, Some(HoldReason::Call));
+
+    let ended = now + Duration::seconds(STEP);
+    let due = tick(&mut state, &settings, at(ended, 5));
+    assert_eq!(due, [BreakKind::Move]);
+    let card = state.active_break.as_ref().unwrap();
+    let after = card.after_hold.expect("the card mentions the call");
+    assert_eq!(after.reason, HoldReason::Call);
+    assert!(after.minutes >= HOLD_NOTE_MINUTES);
+}
+
+#[test]
+fn a_card_on_screen_goes_away_when_a_call_starts() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(9), 20, busy);
+    assert!(state.active_break.is_some());
+    tick(
+        &mut state,
+        &settings,
+        in_call(monday_at(9) + Duration::minutes(21), 0),
+    );
+    assert!(state.active_break.is_none());
+}
+
+#[test]
+fn holding_for_calls_can_be_switched_off() {
+    let mut settings = move_only();
+    settings.hold.calls = false;
+    let mut state = FocusState::default();
+    assert_eq!(call(&mut state, &settings, 45), [BreakKind::Move]);
+}
+
+/// A break that comes due mid-sentence waits for a pause in typing, but
+/// only for a minute.
+#[test]
+fn a_due_break_waits_for_a_pause_in_typing() {
+    let settings = eyes_only();
+    let typing = |_: DateTime<Utc>| 0;
+    let mut state = FocusState::default();
+    let start = monday_at(10);
+    let due = run(&mut state, &settings, start, 25, typing);
+    let first = due.first().expect("it comes anyway").0 - start;
+    assert_eq!(first, Duration::minutes(21), "a minute of grace");
+
+    let mut state = FocusState::default();
+    run(&mut state, &settings, start, 20, typing);
+    assert!(state.active_break.is_none(), "not on a keystroke");
+    let due = tick(
+        &mut state,
+        &settings,
+        at(start + Duration::seconds(20 * 60 + 15), 4),
+    );
+    assert_eq!(due, [BreakKind::Eyes], "the first pause will do");
+}
+
+#[test]
+fn a_usual_day_is_the_average_before_today() {
+    let settings = eyes_only();
+    let mut state = FocusState::default();
+    run(
+        &mut state,
+        &settings,
+        monday_at(10) - Duration::days(2),
+        60,
+        busy,
+    );
+    run(
+        &mut state,
+        &settings,
+        monday_at(10) - Duration::days(1),
+        120,
+        busy,
+    );
+    run(&mut state, &settings, monday_at(10), 10, busy);
+    let now = monday_at(11);
+    let view = snapshot(&mut state, &settings, now, now.naive_utc());
+    let usual = view.usual_screen_seconds.expect("two days before today");
+    assert!((85 * 60..=95 * 60).contains(&usual), "{usual}");
 }

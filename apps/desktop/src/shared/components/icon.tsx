@@ -2,8 +2,10 @@ import type { ComponentType } from "react";
 import { SFArrowClockwise } from "sf-symbols-lib/monochrome/SFArrowClockwise";
 import { SFArrowLeftArrowRight } from "sf-symbols-lib/monochrome/SFArrowLeftArrowRight";
 import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
+import { SFArrowUpLeftAndArrowDownRight } from "sf-symbols-lib/monochrome/SFArrowUpLeftAndArrowDownRight";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
+import { SFBellSlash } from "sf-symbols-lib/monochrome/SFBellSlash";
 import { SFBolt } from "sf-symbols-lib/monochrome/SFBolt";
 import { SFBook } from "sf-symbols-lib/monochrome/SFBook";
 import { SFBookClosed } from "sf-symbols-lib/monochrome/SFBookClosed";
@@ -15,6 +17,7 @@ import { SFCheckmark } from "sf-symbols-lib/monochrome/SFCheckmark";
 import { SFCheckmarkShield } from "sf-symbols-lib/monochrome/SFCheckmarkShield";
 import { SFChevronDown } from "sf-symbols-lib/monochrome/SFChevronDown";
 import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
+import { SFChevronRight } from "sf-symbols-lib/monochrome/SFChevronRight";
 import { SFCircleHexagongridFill } from "sf-symbols-lib/monochrome/SFCircleHexagongridFill";
 import { SFClock } from "sf-symbols-lib/monochrome/SFClock";
 import { SFCloudSun } from "sf-symbols-lib/monochrome/SFCloudSun";
@@ -39,7 +42,9 @@ import { SFLeaf } from "sf-symbols-lib/monochrome/SFLeaf";
 import { SFLink } from "sf-symbols-lib/monochrome/SFLink";
 import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
 import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
+import { SFMicrophone } from "sf-symbols-lib/monochrome/SFMicrophone";
 import { SFMinus } from "sf-symbols-lib/monochrome/SFMinus";
+import { SFMoon } from "sf-symbols-lib/monochrome/SFMoon";
 import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
 import { SFMoonZzz } from "sf-symbols-lib/monochrome/SFMoonZzz";
 import { SFNewspaper } from "sf-symbols-lib/monochrome/SFNewspaper";
@@ -56,6 +61,7 @@ import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
 import { SFRotateRight } from "sf-symbols-lib/monochrome/SFRotateRight";
+import { SFSofa } from "sf-symbols-lib/monochrome/SFSofa";
 import { SFSpeakerSlash } from "sf-symbols-lib/monochrome/SFSpeakerSlash";
 import { SFSpeakerWave2 } from "sf-symbols-lib/monochrome/SFSpeakerWave2";
 import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
@@ -67,6 +73,7 @@ import { SFStarFill } from "sf-symbols-lib/monochrome/SFStarFill";
 import { SFSteeringwheel } from "sf-symbols-lib/monochrome/SFSteeringwheel";
 import { SFStopFill } from "sf-symbols-lib/monochrome/SFStopFill";
 import { SFStorefront } from "sf-symbols-lib/monochrome/SFStorefront";
+import { SFSunMax } from "sf-symbols-lib/monochrome/SFSunMax";
 import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
 import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
 import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
@@ -98,6 +105,12 @@ const GLYPHS: Record<IconName, SFComp> = {
   walk: SFFigureWalk,
   meal: SFForkKnife,
   sleep: SFMoonZzz,
+  mic: SFMicrophone,
+  fullscreen: SFArrowUpLeftAndArrowDownRight,
+  moon: SFMoon,
+  sun: SFSunMax,
+  bellOff: SFBellSlash,
+  sofa: SFSofa,
   settings: SFGearshape,
   power: SFPower,
   search: SFMagnifyingglass,
@@ -120,6 +133,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   refresh: SFArrowClockwise,
   swap: SFArrowLeftArrowRight,
   chevronDown: SFChevronDown,
+  chevronRight: SFChevronRight,
   chevronLeft: SFChevronLeft,
   copy: SFSquareOnSquare,
   checkmark: SFCheckmark,
@@ -182,6 +196,12 @@ export type IconName =
   | "walk"
   | "meal"
   | "sleep"
+  | "mic"
+  | "fullscreen"
+  | "moon"
+  | "sun"
+  | "bellOff"
+  | "sofa"
   | "settings"
   | "power"
   | "search"
@@ -204,6 +224,7 @@ export type IconName =
   | "refresh"
   | "swap"
   | "chevronDown"
+  | "chevronRight"
   | "chevronLeft"
   | "copy"
   | "checkmark"

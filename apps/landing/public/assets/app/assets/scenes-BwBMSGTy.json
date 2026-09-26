@@ -692,7 +692,8 @@
           "maxMinutes": 480,
           "minBreakSeconds": 10,
           "minMinutes": 5,
-          "minutesLeft": null
+          "minutesLeft": null,
+          "restsToday": false
         },
         {
           "breakSeconds": 120,
@@ -703,7 +704,8 @@
           "maxMinutes": 480,
           "minBreakSeconds": 60,
           "minMinutes": 5,
-          "minutesLeft": null
+          "minutesLeft": null,
+          "restsToday": false
         },
         {
           "breakSeconds": 0,
@@ -714,7 +716,8 @@
           "maxMinutes": 480,
           "minBreakSeconds": 0,
           "minMinutes": 5,
-          "minutesLeft": null
+          "minutesLeft": null,
+          "restsToday": false
         },
         {
           "breakSeconds": 0,
@@ -725,9 +728,17 @@
           "maxMinutes": 480,
           "minBreakSeconds": 0,
           "minMinutes": 5,
-          "minutesLeft": null
+          "minutesLeft": null,
+          "restsToday": false
         }
       ],
+      "dayOff": null,
+      "hold": null,
+      "holdSupport": {
+        "calls": true,
+        "doNotDisturb": true,
+        "fullscreen": true
+      },
       "idleSupported": true,
       "pausedUntil": null,
       "settings": {
@@ -737,12 +748,18 @@
           "everyMinutes": 120,
           "label": ""
         },
+        "daysOff": "lighter",
         "endOfDay": true,
         "eyes": {
           "enabled": false,
           "everyMinutes": 20
         },
         "eyesSeconds": 20,
+        "hold": {
+          "calls": true,
+          "doNotDisturb": true,
+          "fullscreen": true
+        },
         "jokes": true,
         "move": {
           "enabled": false,
@@ -780,7 +797,10 @@
           }
         },
         "routineAsked": false,
-        "skipPublicHolidays": true,
+        "stopWorkAt": {
+          "hour": 18,
+          "minute": 0
+        },
         "style": "card",
         "water": {
           "enabled": false,
@@ -795,15 +815,7 @@
           true,
           true,
           false
-        ],
-        "workEnd": {
-          "hour": 18,
-          "minute": 0
-        },
-        "workStart": {
-          "hour": 9,
-          "minute": 0
-        }
+        ]
       },
       "snoozeMinutes": 5,
       "status": "off",
@@ -873,6 +885,7 @@
         "screenSeconds": 0,
         "waterMl": 0
       },
+      "usualScreenSeconds": null,
       "waterGoalMaxMl": 8000,
       "waterGoalMinMl": 500,
       "waterStepMl": 250,

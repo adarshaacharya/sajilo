@@ -1,5 +1,12 @@
 import { useSettings } from "../../../shared/context/settings-context";
-import type { BreakKind, FocusSettings, FocusStatus } from "../../../shared/lib/ipc";
+import type {
+  BreakKind,
+  FocusSettings,
+  FocusSnapshot,
+  FocusStatus,
+  HoldReason,
+  NextBreak,
+} from "../../../shared/lib/ipc";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
 
 export type TFn = ReturnType<typeof useSettings>["t"];
@@ -35,12 +42,24 @@ export function duration(seconds: number, numerals: NumeralStyle, t: TFn): strin
 export const STATUS_LABELS: Record<FocusStatus, I18nKey> = {
   off: "focus.status.off",
   paused: "focus.status.paused",
+  held: "focus.status.held",
   dayOff: "focus.status.dayOff",
-  holiday: "focus.status.holiday",
-  outsideHours: "focus.status.outsideHours",
   away: "focus.status.away",
   active: "focus.status.active",
 };
+
+/** What is holding breaks back, as a heading. */
+export const HOLD_LABELS: Record<HoldReason, I18nKey> = {
+  call: "focus.held.call",
+  fullscreen: "focus.held.fullscreen",
+  doNotDisturb: "focus.held.dnd",
+};
+
+export const HOLD_ICONS = {
+  call: "mic",
+  fullscreen: "fullscreen",
+  doNotDisturb: "moon",
+} as const;
 
 export const KIND_LABELS: Record<BreakKind, I18nKey> = {
   eyes: "focus.kind.eyes",
@@ -58,6 +77,14 @@ export const KIND_LABELS: Record<BreakKind, I18nKey> = {
 export function kindLabel(kind: BreakKind, settings: FocusSettings, t: TFn): string {
   if (kind === "custom" && settings.custom.label.trim()) return settings.custom.label;
   return t(KIND_LABELS[kind]);
+}
+
+/** A break's name inside a sentence: "then stand up", not "then Stand up".
+ * The user's own words are left as they wrote them, and Nepali has no case. */
+export function kindInSentence(kind: BreakKind, settings: FocusSettings, t: TFn): string {
+  const label = kindLabel(kind, settings, t);
+  if (kind === "custom") return label;
+  return label.charAt(0).toLowerCase() + label.slice(1);
 }
 
 export const KIND_ICONS = {
@@ -95,4 +122,11 @@ export function parseClock(value: string): { hour: number; minute: number } | nu
     return null;
   }
   return { hour, minute };
+}
+
+/** The breaks still counting down, soonest first. */
+export function upcoming(snapshot: FocusSnapshot): NextBreak[] {
+  return snapshot.breaks
+    .filter((item) => item.enabled && item.minutesLeft !== null)
+    .sort((a, b) => (a.minutesLeft ?? 0) - (b.minutesLeft ?? 0));
 }

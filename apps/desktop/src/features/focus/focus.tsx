@@ -20,8 +20,8 @@ function FocusSkeleton() {
 
 /**
  * The Routine tab. Before any reminder is on it explains itself and offers an
- * example; after, it answers one question — when is the next break — with
- * everything else behind Settings.
+ * example; after, it leads with one question — when is the next break — and
+ * keeps each reminder's own numbers on its row.
  */
 export function Focus() {
   const { t } = useSettings();
@@ -79,6 +79,7 @@ export function Focus() {
       onSettings={save}
       onWater={(steps) => act(() => api.logFocusWater(steps))}
       onPause={(choice) => act(() => api.pauseFocus(choice))}
+      onExample={(kind) => act(() => api.previewFocusBreak(kind))}
       onOpenSettings={() => setSettingsOpen(true)}
     />
   );
