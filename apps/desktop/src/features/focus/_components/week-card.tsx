@@ -40,7 +40,15 @@ function Row({ label, value, note }: { label: string; value: ReactNode; note?: s
  * is more than one day to compare. Every number is the engine's; this only
  * draws them. Nothing here leaves the computer.
  */
-export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
+export function WeekCard({
+  snapshot,
+  bare = false,
+}: {
+  snapshot: FocusSnapshot;
+  /** Inside another card (the Routine screen's "Your day"): no card of its
+   * own and no title, which the switch above it already says. */
+  bare?: boolean;
+}) {
   const { t, language } = useSettings();
   const numerals = useSentenceNumerals();
   const [hovered, setHovered] = useState<number | null>(null);
@@ -54,10 +62,12 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
   const hoveredDay = hovered === null ? undefined : week.days[hovered];
 
   return (
-    <section className="surface-card px-3 pt-3 pb-1.5">
-      <h3 className="text-[11px] font-semibold text-text-secondary">
-        {t(several ? "focus.week.title" : "focus.week.title-today")}
-      </h3>
+    <section className={bare ? "" : "surface-card px-3 pt-3 pb-1.5"}>
+      {!bare && (
+        <h3 className="text-[11px] font-semibold text-text-secondary">
+          {t(several ? "focus.week.title" : "focus.week.title-today")}
+        </h3>
+      )}
 
       {/* A chart of one day is one bar and six blanks: it says nothing the
           row below does not, so it waits for a second day. */}

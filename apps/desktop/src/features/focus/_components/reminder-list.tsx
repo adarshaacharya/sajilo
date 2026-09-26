@@ -21,6 +21,7 @@ import {
   parseClock,
   type TFn,
   useSentenceNumerals,
+  workDaysText,
 } from "../_lib/format";
 import { NumberField } from "./number-field";
 
@@ -47,10 +48,13 @@ export function ReminderList({
   snapshot,
   onSettings,
   onExample,
+  onCustomise,
 }: {
   snapshot: FocusSnapshot;
   onSettings: (settings: FocusSettings) => void;
   onExample: (kind: BreakKind) => void;
+  /** Opens Routine's settings: when not to interrupt, days off, the card. */
+  onCustomise: () => void;
 }) {
   const { t } = useSettings();
   const numerals = useSentenceNumerals();
@@ -75,9 +79,17 @@ export function ReminderList({
 
   return (
     <section aria-labelledby="focus-list-title" className="space-y-1.5">
-      <h2 id="focus-list-title" className="px-0.5 text-[11px] font-semibold text-text-secondary">
-        {t("focus.list.title")}
-      </h2>
+      {/* Customise sits with the reminders it adjusts, not in the top bar
+          (too far from them) or at the foot of the screen (never found). */}
+      <div className="flex items-center justify-between gap-2 px-0.5">
+        <h2 id="focus-list-title" className="text-[11px] font-semibold text-text-secondary">
+          {t("focus.list.title")}
+        </h2>
+        <button type="button" onClick={onCustomise} className="focus-customise-btn">
+          <Icon name="sliders" className="size-3" />
+          {t("focus.header.customise")}
+        </button>
+      </div>
       <div className="surface-card overflow-hidden">
         {INTERVALS.map((kind) => {
           const rule = item(kind);
@@ -158,7 +170,9 @@ export function ReminderList({
           detail={
             snapshot.dayOff && settings.endOfDay
               ? t("focus.row.stop-rests")
-              : t("focus.row.stop").replace("{time}", clock(settings.stopWorkAt))
+              : t("focus.row.stop")
+                  .replace("{time}", clock(settings.stopWorkAt))
+                  .replace("{days}", workDaysText(settings.workDays, t))
           }
           on={settings.endOfDay}
           dim={settings.endOfDay && snapshot.dayOff !== null}

@@ -61,6 +61,7 @@ import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
 import { SFRotateRight } from "sf-symbols-lib/monochrome/SFRotateRight";
+import { SFSliderHorizontal3 } from "sf-symbols-lib/monochrome/SFSliderHorizontal3";
 import { SFSofa } from "sf-symbols-lib/monochrome/SFSofa";
 import { SFSpeakerSlash } from "sf-symbols-lib/monochrome/SFSpeakerSlash";
 import { SFSpeakerWave2 } from "sf-symbols-lib/monochrome/SFSpeakerWave2";
@@ -112,6 +113,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   bellOff: SFBellSlash,
   sofa: SFSofa,
   settings: SFGearshape,
+  sliders: SFSliderHorizontal3,
   power: SFPower,
   search: SFMagnifyingglass,
   display: SFDesktopcomputer,
@@ -203,6 +205,7 @@ export type IconName =
   | "bellOff"
   | "sofa"
   | "settings"
+  | "sliders"
   | "power"
   | "search"
   | "display"

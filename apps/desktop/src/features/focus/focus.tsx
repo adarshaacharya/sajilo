@@ -80,7 +80,7 @@ export function Focus() {
       onWater={(steps) => act(() => api.logFocusWater(steps))}
       onPause={(choice) => act(() => api.pauseFocus(choice))}
       onExample={(kind) => act(() => api.previewFocusBreak(kind))}
-      onOpenSettings={() => setSettingsOpen(true)}
+      onCustomise={() => setSettingsOpen(true)}
     />
   );
 }

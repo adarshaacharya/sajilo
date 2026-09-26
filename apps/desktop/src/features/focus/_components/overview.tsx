@@ -1,8 +1,10 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
+import { Segmented } from "../../../shared/components/segmented";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
+import { usePersistedList } from "../../../shared/lib/persisted";
 import {
   duration,
   HOLD_ICONS,
@@ -11,6 +13,7 @@ import {
   KIND_TINTS,
   kindInSentence,
   kindLabel,
+  litres,
   upcoming,
   useSentenceNumerals,
 } from "../_lib/format";
@@ -39,34 +42,27 @@ export function Overview({
   onWater,
   onPause,
   onExample,
-  onOpenSettings,
+  onCustomise,
 }: {
   snapshot: FocusSnapshot;
   onSettings: (settings: FocusSettings) => void;
   onWater: (steps: 1 | -1) => void;
   onPause: (choice: PauseChoice) => void;
   onExample: (kind: BreakKind) => void;
-  onOpenSettings: () => void;
+  onCustomise: () => void;
 }) {
-  const { t } = useSettings();
-
   return (
     <div className="space-y-2.5">
       <StatusCard snapshot={snapshot} onPause={onPause} />
-      <TodayCard snapshot={snapshot} />
+      <HowItWorks />
       {snapshot.settings.water.enabled && <WaterCard snapshot={snapshot} onWater={onWater} />}
-      <ReminderList snapshot={snapshot} onSettings={onSettings} onExample={onExample} />
-      <WeekCard snapshot={snapshot} />
-
-      <button
-        type="button"
-        onClick={onOpenSettings}
-        className="surface-card flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
-      >
-        <Icon name="settings" className="size-3.5 text-text-muted" />
-        <span className="flex-1 text-[12px] font-medium">{t("focus.settings-link")}</span>
-        <Icon name="chevronRight" className="size-3 text-text-muted" />
-      </button>
+      <ReminderList
+        snapshot={snapshot}
+        onSettings={onSettings}
+        onExample={onExample}
+        onCustomise={onCustomise}
+      />
+      <DayCard snapshot={snapshot} />
     </div>
   );
 }
@@ -254,8 +250,68 @@ function PauseMenu({
   );
 }
 
+/** The key to every number on this screen, said once and then put away:
+ * without it "9 of 12 breaks taken" reads as a guess. */
+const HOW_KEY = "focus.tips";
+
+function HowItWorks() {
+  const { t } = useSettings();
+  const [dismissed, setDismissed, loaded] = usePersistedList(HOW_KEY);
+  if (!loaded || dismissed.includes("how")) return null;
+  return (
+    <section className="surface-card flex gap-2.5 p-3">
+      <Icon name="info" className="mt-0.5 size-3.5 shrink-0 text-accent-mark" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[12px] font-semibold">{t("focus.how.title")}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-text-secondary">{t("focus.how.body")}</p>
+        <button
+          type="button"
+          onClick={() => setDismissed((current) => [...current, "how"])}
+          className="settings-btn mt-2 rounded-full px-3 text-[11px]"
+        >
+          {t("focus.how.dismiss")}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/** Today and the week in one card, one at a time: two cards of numbers
+ * stacked on the same screen read as a wall. The week waits for a second
+ * day; one day of "week" is the same as today. */
+function DayCard({ snapshot }: { snapshot: FocusSnapshot }) {
+  const { t } = useSettings();
+  const [view, setView] = useState<"today" | "week">("today");
+  const week = snapshot.summary.trackedDays > 1;
+  const showing = week ? view : "today";
+
+  return (
+    <section className="surface-card space-y-2.5 p-3">
+      {week ? (
+        <Segmented
+          label={t("focus.day.label")}
+          value={view}
+          onChange={setView}
+          size="sm"
+          options={[
+            { id: "today", label: t("focus.day.today") },
+            { id: "week", label: t("focus.day.week") },
+          ]}
+        />
+      ) : (
+        <h2 className="text-[11px] font-semibold text-text-secondary">{t("focus.today.title")}</h2>
+      )}
+      {showing === "today" ? (
+        <TodayStats snapshot={snapshot} />
+      ) : (
+        <WeekCard snapshot={snapshot} bare />
+      )}
+    </section>
+  );
+}
+
 /** Today in three numbers, with screen time measured against a usual day. */
-function TodayCard({ snapshot }: { snapshot: FocusSnapshot }) {
+function TodayStats({ snapshot }: { snapshot: FocusSnapshot }) {
   const { t } = useSettings();
   const numerals = useSentenceNumerals();
   const { today, usualScreenSeconds } = snapshot;
@@ -263,15 +319,12 @@ function TodayCard({ snapshot }: { snapshot: FocusSnapshot }) {
   const reminded = Math.max(taken, today.eyes.reminded + today.move.reminded);
 
   return (
-    <section className="surface-card space-y-2.5 p-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-[11px] font-semibold text-text-secondary">{t("focus.today.title")}</h2>
-        {usualScreenSeconds !== null && (
-          <span className="truncate text-[10px] text-text-muted">
-            {t("focus.today.usual").replace("{d}", duration(usualScreenSeconds, numerals, t))}
-          </span>
-        )}
-      </div>
+    <div className="space-y-2.5">
+      {usualScreenSeconds !== null && (
+        <p className="truncate text-[10px] text-text-muted">
+          {t("focus.today.usual").replace("{d}", duration(usualScreenSeconds, numerals, t))}
+        </p>
+      )}
       <div className="grid grid-cols-3 gap-2">
         <Stat value={duration(today.screenSeconds, numerals, t)} label={t("focus.today.screen")} />
         <Stat
@@ -304,7 +357,7 @@ function TodayCard({ snapshot }: { snapshot: FocusSnapshot }) {
           />
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -312,7 +365,9 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
   return (
     <div className="min-w-0">
       <p className="truncate text-[15px] font-bold tabular-nums">{value}</p>
-      <p className="truncate text-[10px] text-text-muted">{label}</p>
+      {/* Wraps: "longest without a break" is the label that explains the
+          number, so it is never cut. */}
+      <p className="text-[10px] leading-snug text-text-muted">{label}</p>
     </div>
   );
 }
@@ -332,13 +387,8 @@ function WaterCard({
   const numerals = useSentenceNumerals();
   const { today, settings, waterStepMl } = snapshot;
   const [splash, setSplash] = useState(0);
-  const step = Math.max(1, waterStepMl);
-  const glasses = Math.floor(today.waterMl / step);
-  const goal = Math.max(1, Math.round(settings.waterGoalMl / step));
   const fraction = Math.min(1, today.waterMl / Math.max(1, settings.waterGoalMl));
   const level = 68 * fraction;
-  // Past sixteen the marks stop being countable at a glance.
-  const marks = Math.min(goal, 16);
 
   return (
     <section className="surface-card grid grid-cols-[44px_1fr_auto] items-center gap-3 p-3">
@@ -383,9 +433,9 @@ function WaterCard({
       </button>
       <div className="min-w-0">
         <p className="text-[13px] font-semibold">
-          {t("focus.water.glasses")
-            .replace("{done}", digits(glasses, numerals))
-            .replace("{goal}", digits(goal, numerals))}
+          {t("focus.water.amount")
+            .replace("{done}", litres(today.waterMl, numerals))
+            .replace("{goal}", litres(settings.waterGoalMl, numerals))}
         </p>
         {/* Wraps rather than truncates: beside Undo there was room only for
             the instruction, and the glass size, the one number, was cut. */}
@@ -394,21 +444,15 @@ function WaterCard({
             ? t("focus.quiet.done-detail")
             : t("focus.water.hint").replace("{n}", digits(waterStepMl, numerals))}
         </p>
-        <div className="mt-2 flex gap-[3px]" aria-hidden="true">
-          {Array.from({ length: marks }, (_, index) => (
-            <span
-              // biome-ignore lint/suspicious/noArrayIndexKey: marks have no identity
-              key={index}
-              className="h-[5px] flex-1 rounded-[2px] transition-colors duration-300"
-              style={{
-                maxWidth: 14,
-                background:
-                  index < Math.round((glasses / goal) * marks)
-                    ? "var(--color-weather-tint)"
-                    : "var(--color-divider)",
-              }}
-            />
-          ))}
+        {/* Litres, not glasses: the goal is set in litres, so progress is too. */}
+        <div
+          className="mt-2 h-[5px] overflow-hidden rounded-full bg-[color:var(--color-divider)]"
+          aria-hidden="true"
+        >
+          <div
+            className="h-full rounded-full bg-[color:var(--color-weather-tint)] transition-[width] duration-300"
+            style={{ width: `${fraction * 100}%` }}
+          />
         </div>
       </div>
       {today.waterMl > 0 && (

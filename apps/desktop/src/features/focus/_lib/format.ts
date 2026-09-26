@@ -130,3 +130,40 @@ export function upcoming(snapshot: FocusSnapshot): NextBreak[] {
     .filter((item) => item.enabled && item.minutesLeft !== null)
     .sort((a, b) => (a.minutesLeft ?? 0) - (b.minutesLeft ?? 0));
 }
+
+const DAY_SHORT = [
+  "focus.days.short.0",
+  "focus.days.short.1",
+  "focus.days.short.2",
+  "focus.days.short.3",
+  "focus.days.short.4",
+  "focus.days.short.5",
+  "focus.days.short.6",
+] as const satisfies readonly I18nKey[];
+
+/**
+ * The work days as a person says them: "Sun–Fri", "Mon, Wed, Fri",
+ * "every day". Sunday first, and a run may wrap past Saturday.
+ */
+export function workDaysText(days: readonly boolean[], t: TFn): string {
+  const on = days.filter(Boolean).length;
+  if (on === 7) return t("focus.days.every");
+  if (on === 0) return t("focus.days.none");
+  // Start just after a day off, so a run over the weekend stays whole.
+  const start = (days.indexOf(false) + 1) % 7;
+  const runs: number[][] = [];
+  for (let step = 0; step < 7; step++) {
+    const day = (start + step) % 7;
+    if (!days[day]) continue;
+    const last = runs.at(-1);
+    const previous = (day + 6) % 7;
+    if (last && last.at(-1) === previous) last.push(day);
+    else runs.push([day]);
+  }
+  const name = (day: number) => t(DAY_SHORT[day] ?? "focus.days.short.0");
+  return runs
+    .map((run) =>
+      run.length >= 3 ? `${name(run[0] ?? 0)}–${name(run.at(-1) ?? 0)}` : run.map(name).join(", "),
+    )
+    .join(", ");
+}

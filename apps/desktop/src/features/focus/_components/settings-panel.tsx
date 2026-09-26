@@ -144,7 +144,7 @@ export function SettingsPanel({
         </div>
       </Group>
 
-      <Group title={t("focus.style")}>
+      <Group title={t("focus.style")} note={t("focus.style-shared")}>
         <Segmented<ReminderStyle>
           label={t("focus.style")}
           value={settings.style}

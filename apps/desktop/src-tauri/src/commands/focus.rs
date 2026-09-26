@@ -205,29 +205,6 @@ struct Announce {
     chime: bool,
     /// Title and body of each notification, in the notification style.
     notifications: Vec<(String, String)>,
-    /// A heads-up beside the tray date while a break is a minute away.
-    soon: Option<String>,
-}
-
-/// "👀 1m" while the next break is a minute of use away, so it never
-/// arrives from nowhere; nothing otherwise.
-fn heads_up(snapshot: &FocusSnapshot) -> Option<String> {
-    if snapshot.status != focus::FocusStatus::Active || snapshot.active_break.is_some() {
-        return None;
-    }
-    snapshot
-        .breaks
-        .iter()
-        .filter(|item| item.minutes_left.is_some_and(|left| left <= 1))
-        .min_by_key(|item| item.minutes_left)
-        .map(|item| {
-            let mark = match item.kind {
-                focus::BreakKind::Move => "🚶",
-                focus::BreakKind::Water => "💧",
-                _ => "👀",
-            };
-            format!("{mark} 1m")
-        })
 }
 
 /// One measurement: advance the tracker and announce whatever came due.
@@ -274,10 +251,8 @@ fn measure(app: &AppHandle<Wry>) {
         Announce {
             chime: settings.chime && !due.is_empty(),
             notifications,
-            soon: heads_up(&view(tracker)),
         }
     });
-    crate::tray::set_note(app, announce.soon);
 
     if announce.chime {
         crate::system::chime::play(app);

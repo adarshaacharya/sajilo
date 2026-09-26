@@ -238,46 +238,7 @@ fn today(app: &AppHandle) -> Option<(NepaliDate, NumeralStyle, String)> {
             title::clock(sajilo_core::nepal_time::now(), numerals)
         );
     }
-    if let Some(note) = note(app) {
-        label = format!("{label} · {note}");
-    }
     Some((date, numerals, label))
-}
-
-/// A short note after the date for as long as it applies: a break a minute
-/// away. Set by Focus on each tick.
-#[derive(Default)]
-struct TitleNote(std::sync::Mutex<Option<String>>);
-
-fn note(app: &AppHandle) -> Option<String> {
-    app.try_state::<TitleNote>()?
-        .0
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .clone()
-}
-
-/// Shows `note` beside the tray date, or takes it away; redraws only when it
-/// changed.
-pub fn set_note(app: &AppHandle, note: Option<String>) {
-    if app.try_state::<TitleNote>().is_none() {
-        app.manage(TitleNote::default());
-    }
-    let Some(state) = app.try_state::<TitleNote>() else {
-        return;
-    };
-    let changed = {
-        let mut current = state
-            .0
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let changed = *current != note;
-        *current = note;
-        changed
-    };
-    if changed {
-        refresh_title(app);
-    }
 }
 
 /// The tray menu's date row, for the one call that needs the text alone.
