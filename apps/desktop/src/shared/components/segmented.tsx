@@ -1,9 +1,12 @@
 import { motion } from "motion/react";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { spring } from "../lib/motion";
-import { scrollIntoBox } from "../lib/scroll";
+import { scrollIntoBoxIfNeeded } from "../lib/scroll";
 import { Icon, type IconName } from "./icon";
 import { useWheelScroll } from "./scroll-row";
+
+const thumbClass = (small: boolean) =>
+  `seg-thumb absolute inset-0 z-0 ${small ? "rounded-[4px]" : "rounded-[6px]"}`;
 
 type Option<T extends string> = { id: T; label: string; icon?: IconName };
 
@@ -34,17 +37,12 @@ export function Segmented<T extends string>({
   const track = useRef<HTMLDivElement>(null);
   const more = useHiddenSides(track, scroll);
   useWheelScroll(track, scroll);
-
-  // A tab picked while half off the edge, or arriving selected from a link,
-  // comes fully into view. Instantly, not smoothly: a strip that scrolls while
-  // the thumb is sliding is the one case WebKit still repaints black for a
-  // frame (why Fuel, already in view, never flashed and the others did).
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!scroll) return;
     const selected = track.current?.querySelector<HTMLElement>(
       `[data-segment="${CSS.escape(value)}"]`,
     );
-    if (selected) scrollIntoBox(selected, "x", "nearest");
+    if (selected) scrollIntoBoxIfNeeded(selected, "x", "nearest");
   }, [scroll, value]);
 
   const radius = small ? "rounded-[6px]" : "rounded-[8px]";
@@ -74,23 +72,26 @@ export function Segmented<T extends string>({
               // No z-index on the segment itself: that would give each one its own
               // layer, and the thumb, which belongs to the picked segment, would
               // slide over the labels of the segments it passes.
-              className={`seg-segment relative flex h-full items-center justify-center gap-1 ${small ? "rounded-[4px] px-2 text-[10px]" : "rounded-[6px] text-[11px]"} ${scroll ? "min-w-0 px-2.5" : small ? "" : "px-1"} font-medium transition-colors duration-150 ${
+              className={`seg-segment relative flex h-full items-center justify-center gap-1 ${small ? "rounded-[4px] px-2 text-[10px]" : "rounded-[6px] text-[11px]"} ${scroll ? "min-w-0 px-2.5" : small ? "" : "px-1"} font-medium ${
                 scroll ? "shrink-0" : "flex-1"
               } ${selected ? "text-text" : "text-text-secondary hover:text-text"}`}
             >
-              {selected && (
-                <motion.span
-                  layoutId={`seg-thumb-${label}`}
-                  layout="position"
-                  className={`seg-thumb absolute inset-0 z-0 ${small ? "rounded-[4px]" : "rounded-[6px]"}`}
-                  transition={spring.tab}
-                />
-              )}
+              {selected &&
+                (scroll ? (
+                  <span className={thumbClass(small)} />
+                ) : (
+                  <motion.span
+                    layoutId={`seg-thumb-${label}`}
+                    layout="position"
+                    className={thumbClass(small)}
+                    transition={spring.tab}
+                  />
+                ))}
               <span className="relative z-[2] flex min-w-0 items-center gap-1">
                 {option.icon && (
                   <Icon
                     name={option.icon}
-                    className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : ""}`}
+                    className={`size-3 shrink-0 ${selected ? "text-[color:var(--color-accent-mark)]" : "text-current"}`}
                   />
                 )}
                 <span className="whitespace-nowrap">{option.label}</span>

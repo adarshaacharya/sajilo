@@ -4,6 +4,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -79,7 +80,7 @@ export function ScrollRow({
   // Keep the chosen item on screen. Scrolls only the row, never the page
   // (or, on the landing site, the page around the frame).
   const chosen = useChosenKey(ref);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const row = ref.current;
     if (!row || chosen === null) return;
     const item = row.querySelector<HTMLElement>(SELECTED);

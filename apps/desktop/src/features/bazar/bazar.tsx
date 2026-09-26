@@ -3,7 +3,7 @@ import { useLocation } from "react-router";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
-import { Segmented } from "../../shared/components/segmented";
+import { FilterPills } from "../../shared/components/filter-pills";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
 import { TabStrip } from "../../shared/components/tab-strip";
 import { useSettings } from "../../shared/context/settings-context";
@@ -243,20 +243,18 @@ export function Bazar() {
 
   return (
     <div className="min-w-0 space-y-2.5">
-      <Segmented
+      <FilterPills
         label={t("screen.bazar")}
         value={tab}
         onChange={setTab}
         options={[
-          { id: "stocks", label: t("bazar.stocks"), icon: "interest" as const },
-          // Hidden with the module: a Settings switch that turns Forex off
-          // should leave nothing of it behind.
+          { id: "stocks", label: t("bazar.stocks"), icon: "interest" },
           ...(modules.forexEnabled
             ? [{ id: "forex" as const, label: t("feature.forex"), icon: "forex" as const }]
             : []),
-          { id: "metals", label: t("bazar.metals"), icon: "gold" as const },
-          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" as const },
-          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" as const },
+          { id: "metals", label: t("bazar.metals"), icon: "gold" },
+          { id: "fuel", label: t("bazar.fuel"), icon: "fuel" },
+          { id: "vegetables", label: t("bazar.vegetables"), icon: "vegetables" },
         ]}
       />
 

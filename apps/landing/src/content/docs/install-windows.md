@@ -1,7 +1,7 @@
 ---
 title: Install on Windows
 nav: Windows
-description: Install Sajilo on Windows 10 or 11, get past the SmartScreen warning, and pin the Nepal flag to your taskbar.
+description: Install Sajilo on Windows 10 or 11, keep the download when the browser warns about it, get past the SmartScreen warning, and pin the Nepal flag to your taskbar.
 section: start
 order: 1
 ---
@@ -11,12 +11,15 @@ Sajilo runs on **Windows 10 and 11, 64-bit**. Installing takes about a minute.
 ## Download and run the installer
 
 1. [Download Sajilo for Windows](/dl/windows) (**Sajilo-windows-x64.exe**).
-2. Open the file you downloaded.
-3. Windows may show **“Windows protected your PC”**. This is SmartScreen: beta builds are not code-signed yet, so Windows doesn't recognise the publisher. Click **More info**, then **Run anyway**.
+2. Your browser may warn that **“Sajilo-windows-x64.exe isn't commonly downloaded”**. New apps get this until enough people have downloaded them. To keep the file:
+   - **Edge:** in the Downloads panel, point at the file, click **…** (More actions), then **Keep**. If Edge asks again, click **Show more**, then **Keep anyway**.
+   - **Chrome:** in the Downloads panel, click **Keep** (or the **⋮** next to the file, then **Keep dangerous file**).
+3. Open the file you downloaded.
+4. Windows may show **“Windows protected your PC”**. This is SmartScreen: beta builds are not code-signed yet, so Windows doesn't recognise the publisher. Click **More info**, then **Run anyway**.
 
 > **Only do this for a file you downloaded from sajilo.fyi or Sajilo's GitHub releases.** If the file came from anywhere else, delete it.
 
-4. Follow the installer. It installs for your account only, so it normally won't ask for an administrator password.
+5. Follow the installer. It installs for your account only, so it normally won't ask for an administrator password.
 
 On some Windows 10 computers the installer first downloads **Microsoft Edge WebView2**, which Sajilo uses to draw its window. Stay online until it finishes.
 

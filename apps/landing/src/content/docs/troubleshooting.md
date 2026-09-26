@@ -25,6 +25,10 @@ On **Ubuntu 22.04, Linux Mint 21, Pop!_OS 22.04** and similar, **Sajilo 0.1.28 a
 
 To check, run `sajilo-desktop` in a terminal: if you see `GLIBC_2.39 not found`, this is the problem.
 
+## The browser says the file “isn't commonly downloaded”
+
+Edge and Chrome say this about new apps until enough people have downloaded them; it doesn't mean anything was found in the file. Keep it from the browser's Downloads panel: in **Edge**, point at the file, click **…**, then **Keep** (and **Show more › Keep anyway** if asked); in **Chrome**, click **Keep**. Do this **only** for a file from sajilo.fyi or Sajilo's GitHub releases. [Full Windows steps](/docs/install-windows.html).
+
 ## Windows says “Windows protected your PC”
 
 That's SmartScreen. Sajilo's beta builds aren't code-signed yet, so Windows doesn't recognise the publisher. Click **More info**, then **Run anyway**, **only** for a file from sajilo.fyi or Sajilo's GitHub releases.

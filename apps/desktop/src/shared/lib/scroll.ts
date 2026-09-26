@@ -36,6 +36,20 @@ export function scrollIntoBox(
   box.scrollTo({ [axis === "x" ? "left" : "top"]: current + offset, behavior });
 }
 
+/** Scrolls when needed; returns whether the scroll position changed. */
+export function scrollIntoBoxIfNeeded(
+  element: HTMLElement,
+  axis: "x" | "y",
+  align: "nearest" | "center",
+): boolean {
+  const box = scrollingAncestor(element, axis);
+  if (!box) return false;
+  const before = axis === "x" ? box.scrollLeft : box.scrollTop;
+  scrollIntoBox(element, axis, align);
+  const after = axis === "x" ? box.scrollLeft : box.scrollTop;
+  return after !== before;
+}
+
 function scrollingAncestor(element: HTMLElement, axis: "x" | "y"): HTMLElement | null {
   for (let node = element.parentElement; node; node = node.parentElement) {
     const style = getComputedStyle(node);
