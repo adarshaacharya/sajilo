@@ -22,6 +22,8 @@ export type Website = {
   descriptionNe: string;
   type: WebsiteType;
   url: string;
+  /** Shown on the Tools page itself: web services people look up most. */
+  featured?: boolean;
 };
 
 export const CONTACTS: readonly Contact[] = [
@@ -249,6 +251,7 @@ export const WEBSITES: readonly Website[] = [
     descriptionNe: "कार्डको अवस्था हेर्नुहोस् र eNID डाउनलोड गर्नुहोस्",
     type: "checker",
     url: "https://citizenportal.donidcr.gov.np/ne",
+    featured: true,
   },
   {
     name: "Passport application",
@@ -265,6 +268,7 @@ export const WEBSITES: readonly Website[] = [
     descriptionNe: "ई-पासपोर्ट कहाँ पुग्यो हेर्नुहोस्",
     type: "checker",
     url: "https://nepalpassport.gov.np/en?post_type=dispatchedstatus",
+    featured: true,
   },
   {
     name: "Driving licence application",
@@ -289,6 +293,7 @@ export const WEBSITES: readonly Website[] = [
     descriptionNe: "प्यान, भ्याट, रिटर्न र कर",
     type: "portal",
     url: "https://taxpayerportal.ird.gov.np/taxpayer/app.html",
+    featured: true,
   },
   {
     name: "Health Insurance e-Portal",
@@ -313,6 +318,7 @@ export const WEBSITES: readonly Website[] = [
     descriptionNe: "चारित्रिक प्रमाणपत्रको अनलाइन फारम",
     type: "portal",
     url: "https://opcr.nepalpolice.gov.np/",
+    featured: true,
   },
   {
     name: "Election Commission",

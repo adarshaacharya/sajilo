@@ -2,10 +2,11 @@ import type { CSSProperties } from "react";
 import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
+import { openExternalLink } from "../../../shared/lib/external-link";
 import { api } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
-import { CONTACTS } from "../_lib/directory";
+import { CONTACTS, type DirectorySection, WEBSITES } from "../_lib/directory";
 
 export type ToolId = "date" | "land" | "weight" | "vat" | "interest" | "clock" | "emergency";
 
@@ -16,12 +17,18 @@ const tinted = (tint: string) => ({ "--tint": tint }) as CSSProperties;
 /**
  * Tools' front page. The two everyday tools show their answer before they
  * are opened: today in both calendars, and the time in the city you follow.
- * The emergency numbers are readable right here, because nobody should have
- * to tap twice to find 100. Calculators sit below, each in its own colour so
+ * The Directory shows what it holds: the emergency numbers, readable right
+ * here because nobody should tap twice to find 100, and the official sites
+ * people look up most, one tap from opening. Calculators sit below, each in its own colour so
  * they read as four different things rather than one repeated tile.
  */
-export function ToolsHome({ onOpen }: { onOpen: (tool: ToolId) => void }) {
-  const { t, language } = useSettings();
+export function ToolsHome({
+  onOpen,
+}: {
+  /** `section` picks which half of the Directory a link lands on. */
+  onOpen: (tool: ToolId, section?: DirectorySection) => void;
+}) {
+  const { t } = useSettings();
 
   const calculators: readonly Calculator[] = [
     {
@@ -54,8 +61,6 @@ export function ToolsHome({ onOpen }: { onOpen: (tool: ToolId) => void }) {
     },
   ];
 
-  const emergency = CONTACTS.filter((contact) => contact.category === "emergency").slice(0, 3);
-
   return (
     <div className="space-y-3 pt-0.5">
       <div className="grid grid-cols-2 gap-2">
@@ -63,33 +68,7 @@ export function ToolsHome({ onOpen }: { onOpen: (tool: ToolId) => void }) {
         <ClockCard onOpen={() => onOpen("clock")} />
       </div>
 
-      <button
-        type="button"
-        onClick={() => onOpen("emergency")}
-        className="tool-card tool-emergency w-full"
-        style={tinted("var(--color-holiday)")}
-      >
-        <span className="flex items-center gap-2">
-          <span className="tool-card__icon">
-            <Icon name="phone" className="size-3.5" />
-          </span>
-          <span className="min-w-0 flex-1 text-[12px] font-semibold">
-            {t("tools.emergency-title")}
-          </span>
-          <span className="flex items-center gap-0.5 text-[10px] text-text-muted">
-            {t("tools.directory")}
-            <Icon name="chevronLeft" className="size-2.5 rotate-180" />
-          </span>
-        </span>
-        <span className="grid grid-cols-3 gap-1.5">
-          {emergency.map((contact) => (
-            <span key={contact.number} className="tool-emergency__number">
-              <b>{contact.number}</b>
-              <span className="truncate">{language === "ne" ? contact.nameNe : contact.name}</span>
-            </span>
-          ))}
-        </span>
-      </button>
+      <DirectoryCard onOpen={(section) => onOpen("emergency", section)} />
 
       <section aria-labelledby="tools-calculators" className="space-y-1.5">
         <h2 id="tools-calculators" className="px-0.5 text-[11px] font-semibold text-text-secondary">
@@ -203,5 +182,93 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
         </span>
       </span>
     </button>
+  );
+}
+
+/**
+ * The Directory at a glance: how much is in it, the three numbers that
+ * matter in a hurry, and the official web services people reach for most.
+ * Each part opens the matching half of the full Directory.
+ */
+function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void }) {
+  const { t, language } = useSettings();
+  const ne = language === "ne";
+  const emergency = CONTACTS.filter((contact) => contact.category === "emergency").slice(0, 3);
+  const featured = WEBSITES.filter((site) => site.featured);
+
+  return (
+    <section
+      aria-labelledby="tools-directory"
+      className="tool-card tool-directory"
+      style={tinted("var(--color-holiday)")}
+    >
+      <button
+        type="button"
+        onClick={() => onOpen("phones")}
+        className="flex w-full items-center gap-2 text-left"
+      >
+        <span className="tool-card__icon">
+          <Icon name="directory" className="size-3.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span id="tools-directory" className="block text-[12px] font-semibold">
+            {t("tools.directory")}
+          </span>
+          <span className="block truncate text-[10px] text-text-muted">
+            {t("tools.directory-counts")
+              .replace("{numbers}", String(CONTACTS.length))
+              .replace("{sites}", String(WEBSITES.length))}
+          </span>
+        </span>
+        <Icon name="chevronLeft" className="size-3 shrink-0 rotate-180 text-text-muted" />
+      </button>
+
+      <div className="grid grid-cols-3 gap-1.5">
+        {emergency.map((contact) => (
+          <button
+            key={contact.number}
+            type="button"
+            onClick={() => onOpen("phones")}
+            className="tool-emergency__number text-left"
+          >
+            <b>{contact.number}</b>
+            <span className="truncate">{ne ? contact.nameNe : contact.name}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-baseline justify-between gap-2">
+          <p className="text-[10px] font-semibold tracking-wide text-text-muted uppercase">
+            {t("tools.online-services")}
+          </p>
+          <button
+            type="button"
+            onClick={() => onOpen("websites")}
+            className="flex shrink-0 items-center gap-0.5 text-[10px] font-semibold text-accent-mark hover:underline"
+          >
+            {t("tools.all-sites").replace("{n}", String(WEBSITES.length))}
+            <Icon name="chevronLeft" className="size-2.5 rotate-180" />
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {featured.map((site) => (
+            <button
+              key={site.url}
+              type="button"
+              onClick={() => openExternalLink(site.url)}
+              title={ne ? site.descriptionNe : site.description}
+              className="tool-site"
+            >
+              <Icon
+                name={site.type === "app" ? "phone" : "openExternal"}
+                className="size-3 shrink-0 opacity-70"
+              />
+              {ne ? site.nameNe : site.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

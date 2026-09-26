@@ -944,6 +944,8 @@
   "keeper.welcome": "नवीकरण अब नछुटोस्",
   "keeper.start-with": "यहाँबाट सुरु गर्नुहोस्",
   "keeper.see-all-types": "सबै प्रकार हेर्नुहोस्",
-  "tools.emergency-title": "इमर्जेन्सी नम्बर",
-  "tools.clock-add": "सहर छान्नुहोस्"
+  "tools.clock-add": "सहर छान्नुहोस्",
+  "tools.directory-counts": "{numbers} फोन नम्बर · {sites} वेबसाइट र एप",
+  "tools.online-services": "धेरै चलाइने अनलाइन सेवा",
+  "tools.all-sites": "सबै {n}"
 }

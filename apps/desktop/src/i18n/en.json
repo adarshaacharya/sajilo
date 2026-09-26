@@ -944,6 +944,8 @@
   "keeper.welcome": "Never miss a renewal again",
   "keeper.start-with": "Start with one",
   "keeper.see-all-types": "See all types",
-  "tools.emergency-title": "Emergency numbers",
-  "tools.clock-add": "Pick a city"
+  "tools.clock-add": "Pick a city",
+  "tools.directory-counts": "{numbers} phone numbers · {sites} sites and apps",
+  "tools.online-services": "Popular online services",
+  "tools.all-sites": "All {n}"
 }

@@ -1686,6 +1686,35 @@ button.row-line + button.row-line::before {
   );
 }
 
+.tool-directory {
+  gap: 10px;
+}
+
+.tool-directory:active {
+  transform: none;
+}
+
+.tool-site {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.tool-site:hover {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, var(--color-border));
+}
+
 .tool-emergency__number {
   display: grid;
   gap: 1px;
@@ -1695,6 +1724,10 @@ button.row-line + button.row-line::before {
   font-size: 10px;
   color: var(--color-text-secondary);
   background: color-mix(in srgb, var(--tint) 8%, transparent);
+}
+
+.tool-emergency__number:hover {
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
 }
 
 .tool-emergency__number b {

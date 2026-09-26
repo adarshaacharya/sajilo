@@ -10,12 +10,14 @@ import { LandTab } from "./_components/land-tab";
 import { type ToolId, ToolsHome } from "./_components/tools-home";
 import { VatTab } from "./_components/vat-tab";
 import { WeightTab } from "./_components/weight-tab";
+import type { DirectorySection } from "./_lib/directory";
 
 type Tab = ToolId;
 
 export function Tools() {
   const { t } = useSettings();
   const [tab, setTab] = useState<Tab | null>(null);
+  const [directorySection, setDirectorySection] = useState<DirectorySection>("phones");
   useEffect(() => {
     if (tab) track(`tab.tools.${tab}`);
   }, [tab]);
@@ -34,7 +36,12 @@ export function Tools() {
   return (
     <div className="min-w-0 space-y-2.5">
       {tab === null ? (
-        <ToolsHome onOpen={setTab} />
+        <ToolsHome
+          onOpen={(tool, section) => {
+            setDirectorySection(section ?? "phones");
+            setTab(tool);
+          }}
+        />
       ) : (
         <>
           {tab === "date" && <Converter />}
@@ -43,7 +50,7 @@ export function Tools() {
           {tab === "vat" && <VatTab />}
           {tab === "interest" && <InterestTab />}
           {tab === "clock" && <ClockTab />}
-          {tab === "emergency" && <EmergencyTab />}
+          {tab === "emergency" && <EmergencyTab initialSection={directorySection} />}
         </>
       )}
     </div>

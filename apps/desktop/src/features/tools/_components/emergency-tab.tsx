@@ -11,10 +11,15 @@ import {
   type WebsiteType,
 } from "../_lib/directory";
 
-export function EmergencyTab() {
+export function EmergencyTab({
+  initialSection = "phones",
+}: {
+  /** Where the Tools page's link landed: the numbers, or the websites. */
+  initialSection?: DirectorySection;
+}) {
   const { language, t } = useSettings();
   const [query, setQuery] = useState("");
-  const [section, setSection] = useState<DirectorySection>("phones");
+  const [section, setSection] = useState<DirectorySection>(initialSection);
   const [category, setCategory] = useState<Category | "all">("all");
   const [websiteType, setWebsiteType] = useState<WebsiteType | "all">("all");
   const isNepali = language === "ne";
