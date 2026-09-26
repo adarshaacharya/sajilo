@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "record": "node record.mjs",
+    "music": "bun src/cues.ts > public/cues.json && python3 music.py",
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts Tour out/sajilo-tour.mp4",
     "typecheck": "tsc --noEmit"

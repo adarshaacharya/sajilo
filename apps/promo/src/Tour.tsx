@@ -4,6 +4,7 @@ import "@fontsource/mukta/700.css";
 import "@fontsource/mukta/800.css";
 import {
   AbsoluteFill,
+  Audio,
   Img,
   interpolate,
   Sequence,
@@ -25,6 +26,7 @@ import {
 } from "./scene";
 import { color, font, s } from "./theme";
 import {
+  BAR,
   CARD,
   CHAPTERS,
   type Chapter,
@@ -40,6 +42,8 @@ import {
 export function Tour() {
   return (
     <AbsoluteFill style={{ background: color.canvas }}>
+      {/* Composed to this edit by music.py. */}
+      <Audio src={staticFile("music.wav")} />
       <Series>
         <Series.Sequence durationInFrames={OPEN}>
           <Opening />
@@ -62,9 +66,10 @@ export function Tour() {
 /** A quiet desktop; the cursor finds the date and the panel springs open. */
 function Opening() {
   const frame = useCurrentFrame();
-  const click = s(1.2);
+  // The click lands on the second bar's downbeat, with the music.
+  const click = BAR;
   const open = useEnter(click + 2, 16);
-  const travel = interpolate(frame, [s(0.2), click], [0, 1], {
+  const travel = interpolate(frame, [s(0.4), click], [0, 1], {
     ...clamp,
     easing: (t) => 1 - (1 - t) ** 3,
   });
@@ -74,7 +79,7 @@ function Opening() {
   return (
     <Desktop date={facts.menuBarDate} active={frame >= click}>
       {frame >= click && <Panel clip={openingClip} name="calendar" open={open} still />}
-      <Captions label="Sajilo" cues={[{ start: s(1.8), title: "Nepal, one click away.", line: "A tiny app that lives in your menu bar." }]} />
+      <Captions label="Sajilo" cues={[{ start: BAR + 20, title: "Nepal, one click away.", line: "A tiny app that lives in your menu bar." }]} />
       {frame >= click && pulse < 1 && (
         <div
           style={{
@@ -116,7 +121,11 @@ function ChapterScene({ chapter, number }: { chapter: Chapter; number: number })
     <AbsoluteFill>
       <Desktop date={facts.menuBarDate} active={!chapter.notification}>
         {clips.map(({ name, clip, start }, index) => (
-          <Sequence key={name} from={start} durationInFrames={clip.frames + (index < clips.length - 1 ? CUT : 0)}>
+          <Sequence
+            key={name}
+            from={start}
+            durationInFrames={index < clips.length - 1 ? clip.frames + CUT : chapterLength(chapter) - start}
+          >
             <Panel clip={clip} name={name} zoomFrom={index === 0 ? 1 : 1.34} />
           </Sequence>
         ))}

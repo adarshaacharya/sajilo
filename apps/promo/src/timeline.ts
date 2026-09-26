@@ -202,21 +202,31 @@ export const CHAPTERS: Chapter[] = [
   },
 ];
 
+/**
+ * The music's bar: 6/8 at 75 dotted crotchets a minute, 1.6 seconds, 48
+ * frames. Every section starts on a bar, so each problem card lands on a
+ * downbeat; footage that ends mid-bar holds its last frame.
+ */
+export const BAR = 48;
+export const bars = (frames: number) => Math.ceil(frames / BAR) * BAR;
+
 /** Opening, per-chapter card, and closing lengths. */
-export const OPEN = s(4);
-export const CARD = s(1.8);
-export const END = s(6);
+export const OPEN = 3 * BAR;
+export const CARD = BAR;
+export const END = 4 * BAR;
 /** Frames between one clip and the next inside a chapter. */
 export const CUT = 8;
 
 export const footageLength = (chapter: Chapter) =>
-  chapter.notification
-    ? s(chapter.notification.seconds)
-    : chapter.clips.reduce((sum, { clip }) => sum + clip.frames, 0);
+  bars(
+    chapter.notification
+      ? s(chapter.notification.seconds)
+      : chapter.clips.reduce((sum, { clip }) => sum + clip.frames, 0),
+  );
 
 export const chapterLength = (chapter: Chapter) => CARD + footageLength(chapter);
 
 export const TOTAL =
   OPEN + CHAPTERS.reduce((sum, chapter) => sum + chapterLength(chapter), 0) + END;
 
-export { calendar as openingClip, facts };
+export { calendar as openingClip, facts, s };

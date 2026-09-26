@@ -179,7 +179,14 @@ export function Panel({
           background: color.surface,
         }}
       >
-        {still ? <Freeze frame={0}>{video}</Freeze> : video}
+        {still ? (
+          <Freeze frame={0}>{video}</Freeze>
+        ) : frame >= clip.frames ? (
+          // Footage shorter than its bar holds its last frame.
+          <Freeze frame={clip.frames - 1}>{video}</Freeze>
+        ) : (
+          video
+        )}
       </div>
       {!still && (
         <>
