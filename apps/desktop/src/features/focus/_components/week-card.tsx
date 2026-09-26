@@ -47,7 +47,6 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
   const week = snapshot.summary;
   if (week.trackedDays === 0) return null;
 
-  const today = week.days.find((day) => day.today);
   const several = week.trackedDays > 1;
   const letters = language === "en" ? WEEKDAYS_EN : WEEKDAYS_NE;
   const tallest = Math.max(...week.days.map((day) => day.screenSeconds), 1);
@@ -126,10 +125,7 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
       )}
 
       <div className="mt-1.5 divide-y divide-divider">
-        <Row
-          label={t("focus.week.today-screen")}
-          value={duration(today?.screenSeconds ?? 0, numerals, t)}
-        />
+        {/* Today's screen time has its own tile above the card. */}
         {several && (
           <Row
             label={t("focus.week.average-row")}

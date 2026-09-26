@@ -906,5 +906,22 @@
   "setup.digits": "अङ्क",
   "setup.done": "भयो",
   "focus.pause-title": "रिमाइन्डर केही बेर रोक्नुहोस्",
-  "focus.settings-link": "दिनचर्या सेटिङ"
+  "focus.settings-link": "दिनचर्या सेटिङ",
+  "focus.tiles.title": "रिमाइन्डर",
+  "focus.tiles.hint": "थिचेर अन वा अफ गर्नुहोस्",
+  "focus.tiles.every": "हरेक {n} मिनेट",
+  "focus.tiles.off": "बन्द",
+  "focus.ring.now": "अहिले",
+  "focus.ring.card-open": "ब्रेक कार्ड खुला छ",
+  "focus.ring.comes-back": "रिमाइन्डर फेरि सुरु हुन्छ",
+  "focus.ring.until": "अर्को ब्रेकसम्म",
+  "focus.pause": "रोक्नुहोस्",
+  "focus.today.screen": "आजको स्क्रिन",
+  "focus.today.breaks": "ब्रेक",
+  "focus.today.water": "पानी",
+  "focus.litres-short": "लि",
+  "focus.ml-unit": "मिलि",
+  "focus.water.title": "{goal} मध्ये {done} लिटर",
+  "focus.water.hint": "पानी पिउँदा गिलास थिच्नुहोस्।",
+  "focus.water.undo": "फिर्ता"
 }

@@ -906,5 +906,22 @@
   "setup.digits": "Digits",
   "setup.done": "Done",
   "focus.pause-title": "Pause reminders",
-  "focus.settings-link": "Routine settings"
+  "focus.settings-link": "Routine settings",
+  "focus.tiles.title": "Reminders",
+  "focus.tiles.hint": "Tap to turn on or off",
+  "focus.tiles.every": "Every {n} min",
+  "focus.tiles.off": "Off",
+  "focus.ring.now": "Now",
+  "focus.ring.card-open": "Your break card is open",
+  "focus.ring.comes-back": "Reminders come back",
+  "focus.ring.until": "until the next break",
+  "focus.pause": "Pause",
+  "focus.today.screen": "Screen today",
+  "focus.today.breaks": "Breaks",
+  "focus.today.water": "Water",
+  "focus.litres-short": "L",
+  "focus.ml-unit": "ml",
+  "focus.water.title": "{done} of {goal} litres",
+  "focus.water.hint": "Tap the glass each time you drink.",
+  "focus.water.undo": "Undo"
 }
