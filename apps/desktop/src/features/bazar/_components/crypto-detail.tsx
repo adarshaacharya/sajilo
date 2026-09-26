@@ -67,7 +67,17 @@ function NumberField({
 
 function Rupees({ dollars, rate }: { dollars: number; rate: number | null }) {
   if (rate == null) return null;
-  return <>≈ Rs {money0.format(dollars * rate)}</>;
+  // Whole rupees for a coin worth rupees; a coin worth paisa keeps enough
+  // digits to show something other than "Rs 0".
+  const rupees = dollars * rate;
+  const size = Math.abs(rupees);
+  const text =
+    size >= 100 || size === 0
+      ? money0.format(rupees)
+      : new Intl.NumberFormat("en-IN", {
+          maximumFractionDigits: size >= 1 ? 2 : size >= 0.01 ? 4 : 8,
+        }).format(rupees);
+  return <>≈ Rs {text}</>;
 }
 
 export function CryptoDetail({

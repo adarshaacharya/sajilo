@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use chrono::Utc;
-use sajilo_api::crypto::{CryptoChart, CryptoSnapshot};
+use sajilo_api::crypto::{CryptoChart, CryptoCoin, CryptoSearchHit, CryptoSnapshot};
 use sajilo_api::load_state::LoadState;
 use sajilo_providers::{HttpClient, crypto};
 use tauri::{AppHandle, Manager, Wry};
@@ -94,4 +94,27 @@ pub async fn get_crypto_chart(
         crypto::fetch_chart(client, &id, days, now)
     })
     .await
+}
+
+/// Market data for named coins, whatever their rank: starred coins that fell
+/// out of the top list, and a coin opened from search. Live, not cached: the
+/// list above covers almost every coin, so this is the rare case.
+#[tauri::command]
+pub async fn get_crypto_coins(app: AppHandle<Wry>, ids: Vec<String>) -> LoadState<Vec<CryptoCoin>> {
+    let cache = app.state::<CryptoCache>();
+    match crypto::fetch_coins(&cache.client, &ids).await {
+        Ok(coins) => LoadState::Fresh(coins),
+        Err(error) => LoadState::Failed(error.to_string()),
+    }
+}
+
+/// Every coin CoinGecko knows whose name or ticker matches, for the search
+/// box once the loaded list has no match.
+#[tauri::command]
+pub async fn search_crypto(app: AppHandle<Wry>, query: String) -> LoadState<Vec<CryptoSearchHit>> {
+    let cache = app.state::<CryptoCache>();
+    match crypto::search(&cache.client, &query).await {
+        Ok(hits) => LoadState::Fresh(hits),
+        Err(error) => LoadState::Failed(error.to_string()),
+    }
 }

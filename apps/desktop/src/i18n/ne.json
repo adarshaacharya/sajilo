@@ -1030,5 +1030,9 @@
   "crypto.cost": "औसत किन्दाको मूल्य",
   "crypto.worth": "अहिलेको मूल्य",
   "crypto.paid": "तिरेको {amount}",
-  "crypto.on-device": "यही डिभाइसमा मात्र रहन्छ।"
+  "crypto.on-device": "यही डिभाइसमा मात्र रहन्छ।",
+  "crypto.more-coins": "अरू कोइन",
+  "crypto.searching": "सबै कोइनमा खोज्दै…",
+  "crypto.coin-unavailable": "अहिले यो कोइन खुल्न सकेन। एकछिनपछि फेरि हेर्नुहोस्।",
+  "crypto.back": "पछाडि"
 }

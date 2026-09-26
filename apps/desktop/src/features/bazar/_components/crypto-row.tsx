@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Sparkline } from "../../../shared/components/sparkline";
 import type { CryptoCoin } from "../../../types/api/CryptoCoin";
+import type { CryptoSearchHit } from "../../../types/api/CryptoSearchHit";
 import { usd } from "../_lib/crypto";
 import { ChangeBadge } from "./change-badge";
 import { FollowButton } from "./follow-button";
@@ -104,5 +105,26 @@ export function CryptoRow({
       </button>
       <FollowButton followed={followed} onToggle={onToggle} />
     </div>
+  );
+}
+
+/** A coin found by searching every coin, before its prices are fetched:
+ * mark, name, ticker and rank. Opening it loads the rest. */
+export function SearchHitRow({ hit, onOpen }: { hit: CryptoSearchHit; onOpen: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-2 text-left transition-colors hover:bg-surface-hover"
+    >
+      <CoinLogo url={hit.imageUrl} symbol={hit.symbol} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[12px] font-medium">{hit.name}</span>
+        <span className="block text-[10px] text-text-muted">{hit.symbol}</span>
+      </span>
+      {hit.rank != null && (
+        <span className="shrink-0 text-[10px] tabular-nums text-text-muted">#{hit.rank}</span>
+      )}
+    </button>
   );
 }

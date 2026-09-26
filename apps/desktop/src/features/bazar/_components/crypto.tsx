@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
@@ -25,7 +25,7 @@ import {
 } from "../_lib/crypto";
 import { money0, sourceStamp } from "../_lib/format";
 import { CryptoDetail } from "./crypto-detail";
-import { CryptoRow } from "./crypto-row";
+import { CryptoRow, SearchHitRow } from "./crypto-row";
 
 const COINGECKO_LINK = "https://www.coingecko.com/";
 const SOURCE_LINKS: Record<string, string> = {
@@ -78,11 +78,62 @@ export function Crypto({
   const [open, setOpen] = useState<string | null>(linkedCoin ?? null);
 
   const coins = snapshot?.coins ?? [];
-  const byId = useMemo(() => new Map(coins.map((coin) => [coin.id, coin])), [coins]);
+  const listedById = useMemo(() => new Map(coins.map((coin) => [coin.id, coin])), [coins]);
+
+  // Coins the list doesn't carry but the user needs: starred ones that fell
+  // out of the top list, and the one being opened from search or a link.
+  // Asked for by id, so a starred coin never silently disappears.
+  const wanted = useMemo(() => {
+    const ids = Object.keys(holdings).filter((id) => !listedById.has(id));
+    if (open && !listedById.has(open) && !ids.includes(open)) ids.push(open);
+    return ids.sort();
+  }, [holdings, listedById, open]);
+  const { data: extra } = useSWR(
+    snapshot && wanted.length > 0 ? ["crypto-coins", wanted.join(",")] : null,
+    () => api.getCryptoCoins(wanted),
+  );
+  const byId = useMemo(() => {
+    const merged = new Map(listedById);
+    for (const coin of loadedValue(extra) ?? [])
+      if (!merged.has(coin.id)) merged.set(coin.id, coin);
+    return merged;
+  }, [listedById, extra]);
+
   const listed = useMemo(() => listCoins(coins, list), [coins, list]);
   const matches = useMemo(() => (query.trim() ? searchCoins(coins, query) : []), [coins, query]);
 
+  // Searching every coin waits for a pause in typing, so each keystroke
+  // doesn't become a request.
+  const typed = useDebounced(query.trim(), 350);
+  const { data: found, isLoading: searching } = useSWR(
+    typed.length >= 2 ? ["crypto-search", typed.toLowerCase()] : null,
+    () => api.searchCrypto(typed),
+  );
+  const more = useMemo(() => {
+    const shown = new Set(matches.map((coin) => coin.id));
+    return (loadedValue(found) ?? []).filter((hit) => !shown.has(hit.id));
+  }, [found, matches]);
+
   const openCoin = open ? byId.get(open) : undefined;
+  if (open && !openCoin && wanted.includes(open)) {
+    // A coin from outside the list, still on its way.
+    const failed = extra?.status === "failed" || (extra && !loadedValue(extra)?.length);
+    return (
+      <section className="surface-card space-y-2 p-3">
+        <button
+          type="button"
+          onClick={() => setOpen(null)}
+          className="flex items-center gap-1 text-[11px] text-text-secondary hover:text-text"
+        >
+          <Icon name="chevronLeft" className="size-3" />
+          {t("crypto.back")}
+        </button>
+        <p className="text-[12px] text-text-secondary">
+          {failed ? t("crypto.coin-unavailable") : t("state.loading")}
+        </p>
+      </section>
+    );
+  }
   if (openCoin) {
     return (
       <CryptoDetail
@@ -117,10 +168,24 @@ export function Crypto({
 
             {query.trim() ? (
               <section className="surface-card p-2.5">
-                {matches.length === 0 ? (
-                  <p className="text-[11px] text-text-secondary">{t("crypto.no-match")}</p>
-                ) : (
-                  matches.map((coin) => row(coin))
+                {matches.map((coin) => row(coin))}
+                {/* Beyond the loaded list: every coin CoinGecko knows. */}
+                {more.length > 0 && (
+                  <>
+                    <p className="px-1.5 pt-2 pb-1 text-[10px] font-semibold text-text-muted">
+                      {t("crypto.more-coins")}
+                    </p>
+                    {more.map((hit) => (
+                      <SearchHitRow key={hit.id} hit={hit} onOpen={() => setOpen(hit.id)} />
+                    ))}
+                  </>
+                )}
+                {matches.length === 0 && more.length === 0 && (
+                  <p className="px-1.5 py-1 text-[11px] text-text-secondary">
+                    {searching || typed !== query.trim()
+                      ? t("crypto.searching")
+                      : t("crypto.no-match")}
+                  </p>
                 )}
               </section>
             ) : (
@@ -253,4 +318,14 @@ function YourCoins({
       )}
     </section>
   );
+}
+
+/** `value`, once it has stopped changing for `delay` milliseconds. */
+function useDebounced<T>(value: T, delay: number): T {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setSettled(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return settled;
 }

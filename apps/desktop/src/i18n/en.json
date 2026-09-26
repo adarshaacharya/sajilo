@@ -1030,5 +1030,9 @@
   "crypto.cost": "Avg. buy price",
   "crypto.worth": "Worth now",
   "crypto.paid": "Paid {amount}",
-  "crypto.on-device": "Stays on this device."
+  "crypto.on-device": "Stays on this device.",
+  "crypto.more-coins": "More coins",
+  "crypto.searching": "Searching every coin…",
+  "crypto.coin-unavailable": "Couldn't load this coin right now. Try again in a minute.",
+  "crypto.back": "Back"
 }

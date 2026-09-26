@@ -1,6 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
 import type { CryptoChart } from "../../types/api/CryptoChart";
+import type { CryptoCoin } from "../../types/api/CryptoCoin";
+import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
 import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
@@ -759,6 +761,11 @@ export const api = {
   /** The top coins by market value, in US dollars, from CoinGecko or Kraken; `refresh` forces a live pull. */
   getCrypto: (refresh = false) => invoke<LoadState<CryptoSnapshot>>("get_crypto", { refresh }),
   /** One coin's price over the last 1, 7, 30 or 365 days. */
+  /** Named coins whatever their rank: starred ones outside the list, and one
+   * opened from search. */
+  getCryptoCoins: (ids: string[]) => invoke<LoadState<CryptoCoin[]>>("get_crypto_coins", { ids }),
+  /** Every coin CoinGecko knows, by name or ticker. */
+  searchCrypto: (query: string) => invoke<LoadState<CryptoSearchHit[]>>("search_crypto", { query }),
   getCryptoChart: (id: string, days: number) =>
     invoke<LoadState<CryptoChart>>("get_crypto_chart", { id, days }),
   /** Every fund's SIP payment schedule, soonest first. Each change below

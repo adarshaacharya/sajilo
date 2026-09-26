@@ -11,7 +11,9 @@
 //! at.
 
 use chrono::{DateTime, Utc};
-use sajilo_api::crypto::{CryptoChart, CryptoCoin, CryptoPricePoint, CryptoSnapshot};
+use sajilo_api::crypto::{
+    CryptoChart, CryptoCoin, CryptoPricePoint, CryptoSearchHit, CryptoSnapshot,
+};
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -22,12 +24,25 @@ use crate::http::HttpClient;
 pub const COINGECKO_SOURCE: &str = "CoinGecko";
 pub const KRAKEN_SOURCE: &str = "Kraken";
 
-/// The top coins by market value, with a week of hourly prices each.
+/// The top coins by market value, with a week of hourly prices each. 250 is
+/// CoinGecko's largest page, still one request, and covers nearly any coin
+/// someone in Nepal actually follows.
 const COINGECKO_MARKETS: &str = "https://api.coingecko.com/api/v3/coins/markets\
-?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=true\
+?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true\
 &price_change_percentage=24h,7d";
+/// The same market data for named coins, whatever their rank: a starred coin
+/// that slipped out of the top list, or one opened from search.
+const COINGECKO_MARKETS_BY_ID: &str = "https://api.coingecko.com/api/v3/coins/markets\
+?vs_currency=usd&sparkline=true&price_change_percentage=24h,7d";
+/// Every coin CoinGecko knows, by name or ticker.
+const COINGECKO_SEARCH: &str = "https://api.coingecko.com/api/v3/search";
 const COINGECKO_CHART: &str = "https://api.coingecko.com/api/v3/coins";
 const KRAKEN_TICKER: &str = "https://api.kraken.com/0/public/Ticker";
+
+/// How many coins one by-id request may name, and how many search hits are
+/// kept: enough for anyone's starred list, short enough for one small reply.
+pub const MAX_COINS_BY_ID: usize = 50;
+pub const MAX_SEARCH_HITS: usize = 20;
 
 /// The spans a chart can be asked for, in days.
 pub const CHART_DAYS: [u32; 4] = [1, 7, 30, 365];
@@ -83,12 +98,48 @@ pub async fn fetch_chart(
             format!("unsupported chart span: {days} days"),
         ));
     }
-    if id.is_empty() || !id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-') {
+    if !valid_id(id) {
         return Err(ProviderError::parse(COINGECKO_SOURCE, "invalid coin id"));
     }
     let url = format!("{COINGECKO_CHART}/{id}/market_chart?vs_currency=usd&days={days}");
     let body = client.get_text(COINGECKO_SOURCE, &url).await?;
     parse_chart(&body, id, days, now)
+}
+
+/// A CoinGecko coin id: lower case letters, digits and dashes. Anything else
+/// never reaches a URL.
+fn valid_id(id: &str) -> bool {
+    !id.is_empty() && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
+}
+
+/// Market data for these coins, whatever their rank. Unknown or malformed ids
+/// are dropped rather than failing the rest.
+pub async fn fetch_coins(client: &HttpClient, ids: &[String]) -> Result<Vec<CryptoCoin>> {
+    let ids: Vec<&str> = ids
+        .iter()
+        .map(String::as_str)
+        .filter(|id| valid_id(id))
+        .take(MAX_COINS_BY_ID)
+        .collect();
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
+    let url = format!("{COINGECKO_MARKETS_BY_ID}&ids={}", ids.join(","));
+    let body = client.get_text(COINGECKO_SOURCE, &url).await?;
+    parse_coingecko_coins(&body)
+}
+
+/// Coins whose name or ticker matches, across everything CoinGecko lists.
+/// Fewer than two characters matches too much to be useful, so asks nothing.
+pub async fn search(client: &HttpClient, query: &str) -> Result<Vec<CryptoSearchHit>> {
+    let query = query.trim();
+    if query.chars().count() < 2 {
+        return Ok(Vec::new());
+    }
+    let url = reqwest::Url::parse_with_params(COINGECKO_SEARCH, &[("query", query)])
+        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
+    let body = client.get_text(COINGECKO_SOURCE, url.as_str()).await?;
+    parse_search(&body)
 }
 
 // CoinGecko's and Kraken's payloads, modelled separately from the DTO so a
@@ -123,6 +174,22 @@ struct Sparkline {
 }
 
 #[derive(Deserialize)]
+struct CoinGeckoSearch {
+    #[serde(default)]
+    coins: Vec<CoinGeckoSearchCoin>,
+}
+
+#[derive(Deserialize)]
+struct CoinGeckoSearchCoin {
+    id: String,
+    name: String,
+    symbol: String,
+    market_cap_rank: Option<u32>,
+    large: Option<String>,
+    thumb: Option<String>,
+}
+
+#[derive(Deserialize)]
 struct CoinGeckoChart {
     prices: Vec<(f64, Option<f64>)>,
 }
@@ -147,9 +214,15 @@ struct KrakenTicker {
 }
 
 pub fn parse_coingecko(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
+    snapshot(parse_coingecko_coins(body)?, COINGECKO_SOURCE, now)
+}
+
+/// CoinGecko's market list as coins. An empty list is an answer here, not an
+/// error: a by-id request for coins it no longer knows returns one.
+pub fn parse_coingecko_coins(body: &str) -> Result<Vec<CryptoCoin>> {
     let coins: Vec<CoinGeckoCoin> = serde_json::from_str(body)
         .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
-    let coins = coins
+    Ok(coins
         .into_iter()
         .filter_map(|coin| {
             let price = coin.current_price.filter(|price| *price > 0.0)?;
@@ -179,8 +252,7 @@ pub fn parse_coingecko(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot>
                     .unwrap_or_default(),
             })
         })
-        .collect();
-    snapshot(coins, COINGECKO_SOURCE, now)
+        .collect())
 }
 
 pub fn parse_kraken(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
@@ -262,6 +334,28 @@ pub fn parse_chart(body: &str, id: &str, days: u32, now: DateTime<Utc>) -> Resul
         source: COINGECKO_SOURCE.to_owned(),
         freshness: Freshness::new(now),
     })
+}
+
+/// CoinGecko's search, coins only, best match first as it ranks them.
+pub fn parse_search(body: &str) -> Result<Vec<CryptoSearchHit>> {
+    let response: CoinGeckoSearch = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
+    Ok(response
+        .coins
+        .into_iter()
+        .filter(|coin| valid_id(&coin.id))
+        .take(MAX_SEARCH_HITS)
+        .map(|coin| CryptoSearchHit {
+            id: coin.id,
+            symbol: coin.symbol.to_uppercase(),
+            name: coin.name,
+            rank: coin.market_cap_rank,
+            image_url: coin
+                .large
+                .or(coin.thumb)
+                .filter(|url| url.starts_with("https://")),
+        })
+        .collect())
 }
 
 fn snapshot(

@@ -51,6 +51,18 @@ dto! {
         pub price: f64,
     }
 
+    /// A coin found by name or ticker across every coin the source knows,
+    /// not only the ones in the market list. Opening one asks for its prices.
+    pub struct CryptoSearchHit {
+        pub id: String,
+        /// Ticker, upper case: `PEPE`.
+        pub symbol: String,
+        pub name: String,
+        /// Position by market value; `None` for coins too small to rank.
+        pub rank: Option<u32>,
+        pub image_url: Option<String>,
+    }
+
     /// A coin's price over a span of days.
     pub struct CryptoChart {
         pub id: String,

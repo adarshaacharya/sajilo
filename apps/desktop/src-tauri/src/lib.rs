@@ -256,6 +256,8 @@ pub fn run() {
             commands::mutual_funds::get_mutual_funds,
             commands::crypto::get_crypto,
             commands::crypto::get_crypto_chart,
+            commands::crypto::get_crypto_coins,
+            commands::crypto::search_crypto,
             commands::sips::sip_statuses,
             commands::sips::set_sip,
             commands::sips::remove_sip,
