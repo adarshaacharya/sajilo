@@ -10,9 +10,15 @@ export const color = {
   holiday: "#ff6a52",
 };
 
+/**
+ * The video's own voice: Bricolage Grotesque for English, bold and a little
+ * quirky, and Mukta for Nepali, which sits beside it at the same weight.
+ * The app inside keeps its own face.
+ */
 export const font = {
-  latin: "Manrope, sans-serif",
-  nepali: "'Noto Sans Devanagari', Manrope, sans-serif",
+  display: "'Bricolage Grotesque Variable', sans-serif",
+  nepali: "Mukta, 'Bricolage Grotesque Variable', sans-serif",
+  ui: "'Bricolage Grotesque Variable', sans-serif",
 };
 
 export const FPS = 30;

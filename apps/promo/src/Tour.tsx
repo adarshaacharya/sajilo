@@ -1,3 +1,7 @@
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource/mukta/500.css";
+import "@fontsource/mukta/700.css";
+import "@fontsource/mukta/800.css";
 import {
   AbsoluteFill,
   Img,
@@ -7,22 +11,29 @@ import {
   staticFile,
   useCurrentFrame,
 } from "remotion";
-import "@fontsource/manrope/600.css";
-import "@fontsource/manrope/700.css";
-import "@fontsource/manrope/800.css";
-import "@fontsource/noto-sans-devanagari/500.css";
-import "@fontsource/noto-sans-devanagari/700.css";
-import { Caption, clamp, DATE_X, Desktop, faceFor, MENU_BAR, Panel, useEnter } from "./scene";
+import {
+  Captions,
+  type Cue,
+  Cursor,
+  clamp,
+  DATE_X,
+  Desktop,
+  MENU_BAR,
+  Panel,
+  Rise,
+  useEnter,
+} from "./scene";
 import { color, font, s } from "./theme";
 import {
   CARD,
   CHAPTERS,
   type Chapter,
   chapterLength,
-  DEFAULT_BEAT,
+  CUT,
   END,
   facts,
   OPEN,
+  openingClip,
 } from "./timeline";
 
 /** The whole film: an opening, one chapter per everyday problem, the ending. */
@@ -51,88 +62,71 @@ export function Tour() {
 /** A quiet desktop; the cursor finds the date and the panel springs open. */
 function Opening() {
   const frame = useCurrentFrame();
-  const click = s(1.6);
+  const click = s(1.2);
   const open = useEnter(click + 2, 16);
-  const travel = interpolate(frame, [s(0.3), click], [0, 1], {
+  const travel = interpolate(frame, [s(0.2), click], [0, 1], {
     ...clamp,
     easing: (t) => 1 - (1 - t) ** 3,
   });
-  const x = interpolate(travel, [0, 1], [980, DATE_X]);
-  const y = interpolate(travel, [0, 1], [640, MENU_BAR / 2 + 4]);
-  const pulse = interpolate(frame, [click, click + 10], [0, 1], clamp);
+  const x = interpolate(travel, [0, 1], [900, DATE_X]);
+  const y = interpolate(travel, [0, 1], [700, MENU_BAR / 2 + 4]);
+  const pulse = interpolate(frame, [click, click + 12], [0, 1], clamp);
   return (
     <Desktop date={facts.menuBarDate} active={frame >= click}>
-      {frame >= click && <Panel shots={[["today", 0]]} open={open} />}
-      <Caption label="Sajilo" title="Your day in Nepal, one click away." start={s(2.2)} />
-      <Cursor x={x} y={y} pulse={frame >= click ? pulse : 0} hidden={frame > click + s(1.2)} />
-    </Desktop>
-  );
-}
-
-function Cursor({ x, y, pulse, hidden }: { x: number; y: number; pulse: number; hidden: boolean }) {
-  if (hidden) return null;
-  return (
-    <>
-      {pulse > 0 && pulse < 1 && (
+      {frame >= click && <Panel clip={openingClip} name="calendar" open={open} still />}
+      <Captions label="Sajilo" cues={[{ start: s(1.8), title: "Nepal, one click away.", line: "A tiny app that lives in your menu bar." }]} />
+      {frame >= click && pulse < 1 && (
         <div
           style={{
             position: "absolute",
-            left: x - 30,
-            top: y - 30,
-            width: 60,
-            height: 60,
-            borderRadius: 30,
+            left: DATE_X - 34,
+            top: MENU_BAR / 2 - 30,
+            width: 68,
+            height: 68,
+            borderRadius: 34,
             border: `3px solid ${color.gold}`,
             opacity: 1 - pulse,
             transform: `scale(${0.4 + pulse})`,
           }}
         />
       )}
-      <svg
-        width="30"
-        height="40"
-        viewBox="0 0 30 40"
-        style={{ position: "absolute", left: x - 4, top: y - 2 }}
-        aria-hidden
-      >
-        <path d="M3 2 L3 32 L10.5 25 L16 37 L21 35 L15.5 23.5 L26 23.5 Z" fill="#fff" stroke="#000" strokeWidth="2" strokeLinejoin="round" />
-      </svg>
-    </>
+      {frame < click + s(0.8) && <Cursor x={x} y={y} pressed={frame >= click && frame < click + 3} />}
+    </Desktop>
   );
 }
 
 // ---------------------------------------------------------------- chapters
 
-/** The problem on its own, then the app answering it beat by beat. */
+/** The problem on its own, then someone using the app to answer it. */
 function ChapterScene({ chapter, number }: { chapter: Chapter; number: number }) {
   let at = CARD;
-  const beats = chapter.beats.map((beat) => {
+  const clips = chapter.clips.map((entry) => {
     const start = at;
-    at += s(beat.seconds ?? DEFAULT_BEAT);
-    return { ...beat, start };
+    at += entry.clip.frames;
+    return { ...entry, start };
   });
-  const shots = beats.map((beat) => [beat.shot, beat.start] as [string, number]);
+  const cues: Cue[] = chapter.notification
+    ? chapter.notification.beats.map((beat) => ({ ...beat, start: CARD }))
+    : clips.flatMap(({ clip, beats, start }) =>
+        beats.map((beat) => ({ ...beat, start: start + (clip.marks[beat.at] ?? 0) })),
+      );
+  if (cues[0]) cues[0] = { ...cues[0], start: CARD };
 
   return (
     <AbsoluteFill>
-      <Sequence from={CARD - 6}>
-        {/* A reminder arrives with the panel closed: nobody had to open the app. */}
-        <Desktop date={facts.menuBarDate} active={!chapter.notification}>
-          {!chapter.notification && (
-            <Panel shots={shots.map(([name, start]) => [name, start - (CARD - 6)])} />
-          )}
-          {beats.map((beat) => (
-            <Sequence key={`${beat.shot}-${beat.start}`} from={beat.start - (CARD - 6)} durationInFrames={s(beat.seconds ?? DEFAULT_BEAT)}>
-              <Caption label={chapter.label} title={beat.title} line={beat.line} start={0} />
-            </Sequence>
-          ))}
-          {chapter.notification && (
-            <Sequence from={s(1)}>
-              <Notification title={chapter.notification.title} body={chapter.notification.body} />
-            </Sequence>
-          )}
-        </Desktop>
-      </Sequence>
+      <Desktop date={facts.menuBarDate} active={!chapter.notification}>
+        {clips.map(({ name, clip, start }, index) => (
+          <Sequence key={name} from={start} durationInFrames={clip.frames + (index < clips.length - 1 ? CUT : 0)}>
+            <Panel clip={clip} name={name} zoomFrom={index === 0 ? 1 : 1.34} />
+          </Sequence>
+        ))}
+        {chapter.notification && (
+          <Sequence from={CARD + s(0.6)}>
+            <Notification title={chapter.notification.title} body={chapter.notification.body} />
+          </Sequence>
+        )}
+        <Captions label={chapter.label} cues={cues} />
+      </Desktop>
       <Sequence durationInFrames={CARD}>
         <ProblemCard number={number} ne={chapter.problemNe} en={chapter.problemEn} />
       </Sequence>
@@ -140,11 +134,12 @@ function ChapterScene({ chapter, number }: { chapter: Chapter; number: number })
   );
 }
 
-/** Full screen, the problem in Nepali and English. Fades out into the answer. */
+/** Full screen, the problem in Nepali and English, word by word. */
 function ProblemCard({ number, ne, en }: { number: number; ne: string; en: string }) {
   const frame = useCurrentFrame();
-  const enter = useEnter(0, 22);
-  const out = interpolate(frame, [CARD - 8, CARD], [1, 0], clamp);
+  const out = interpolate(frame, [CARD - 7, CARD], [1, 0], clamp);
+  const lift = interpolate(frame, [CARD - 7, CARD], [0, -40], clamp);
+  const numberIn = useEnter(0, 22);
   return (
     <AbsoluteFill
       style={{
@@ -152,30 +147,48 @@ function ProblemCard({ number, ne, en }: { number: number; ne: string; en: strin
         opacity: out,
         justifyContent: "center",
         alignItems: "center",
-        gap: 30,
-        textAlign: "center",
       }}
     >
-      <span style={{ color: color.gold, fontFamily: font.latin, fontWeight: 700, fontSize: 28, opacity: enter }}>
-        {String(number).padStart(2, "0")}
-      </span>
-      <span
+      <div
         style={{
-          color: color.text,
-          fontFamily: faceFor(ne),
-          fontWeight: 700,
-          fontSize: 104,
-          lineHeight: 1.25,
-          maxWidth: 1500,
-          opacity: enter,
-          transform: `translateY(${interpolate(enter, [0, 1], [30, 0])}px)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 18,
+          transform: `translateY(${lift}px)`,
         }}
       >
-        {ne}
-      </span>
-      <span style={{ color: color.secondary, fontFamily: font.latin, fontWeight: 600, fontSize: 40, opacity: useEnter(8, 22) }}>
-        {en}
-      </span>
+        <span style={{ color: color.gold, fontFamily: font.display, fontWeight: 700, fontSize: 30, opacity: numberIn }}>
+          {String(number).padStart(2, "0")}
+        </span>
+        <Rise
+          text={ne}
+          start={2}
+          stagger={3}
+          style={{
+            color: color.text,
+            fontFamily: font.nepali,
+            fontWeight: 800,
+            fontSize: 124,
+            lineHeight: 1.2,
+            justifyContent: "center",
+            maxWidth: 1600,
+          }}
+        />
+        <Rise
+          text={en}
+          start={12}
+          stagger={1.5}
+          style={{
+            color: color.secondary,
+            fontFamily: font.display,
+            fontWeight: 600,
+            fontSize: 46,
+            letterSpacing: "-0.02em",
+            justifyContent: "center",
+          }}
+        />
+      </div>
     </AbsoluteFill>
   );
 }
@@ -189,23 +202,23 @@ function Notification({ title, body }: { title: string; body: string }) {
         position: "absolute",
         top: MENU_BAR + 20,
         right: 40,
-        width: 560,
+        width: 600,
         display: "flex",
         gap: 20,
         alignItems: "center",
-        padding: "20px 24px",
+        padding: "22px 26px",
         borderRadius: 22,
         background: "rgba(40,40,44,0.97)",
         border: `1px solid ${color.border}`,
         boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
-        transform: `translateX(${interpolate(enter, [0, 1], [620, 0])}px)`,
+        transform: `translateX(${interpolate(enter, [0, 1], [660, 0])}px)`,
       }}
     >
-      <Img src={staticFile("icon.png")} style={{ width: 60, height: 60, borderRadius: 14 }} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0 }}>
-        <span style={{ color: color.secondary, fontFamily: font.latin, fontWeight: 700, fontSize: 20 }}>Sajilo</span>
-        <span style={{ color: color.text, fontFamily: font.nepali, fontWeight: 700, fontSize: 28 }}>{title}</span>
-        <span style={{ color: color.secondary, fontFamily: font.latin, fontWeight: 600, fontSize: 22 }}>{body}</span>
+      <Img src={staticFile("icon.png")} style={{ width: 64, height: 64, borderRadius: 14 }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+        <span style={{ color: color.secondary, fontFamily: font.display, fontWeight: 600, fontSize: 21 }}>Sajilo</span>
+        <span style={{ color: color.text, fontFamily: font.nepali, fontWeight: 700, fontSize: 32 }}>{title}</span>
+        <span style={{ color: color.secondary, fontFamily: font.display, fontWeight: 500, fontSize: 24 }}>{body}</span>
       </div>
     </div>
   );
@@ -215,32 +228,33 @@ function Notification({ title, body }: { title: string; body: string }) {
 
 function Ending() {
   const logo = useEnter(0, 18);
-  const line = useEnter(s(0.5), 20);
-  const cta = useEnter(s(1.3), 20);
+  const cta = useEnter(s(1.4), 20);
   return (
-    <AbsoluteFill style={{ background: color.canvas, justifyContent: "center", alignItems: "center", gap: 34 }}>
+    <AbsoluteFill style={{ background: color.canvas, justifyContent: "center", alignItems: "center", gap: 36 }}>
       <Img
         src={staticFile("icon.png")}
-        style={{ width: 150, height: 150, opacity: logo, transform: `scale(${interpolate(logo, [0, 1], [0.85, 1])})` }}
+        style={{ width: 150, height: 150, opacity: logo, transform: `scale(${interpolate(logo, [0, 1], [0.8, 1])})` }}
       />
-      <span
+      <Rise
+        text="Nepal, in your menu bar."
+        start={s(0.4)}
+        stagger={3}
         style={{
           color: color.text,
-          fontFamily: font.latin,
+          fontFamily: font.display,
           fontWeight: 800,
-          fontSize: 96,
-          letterSpacing: "-0.03em",
-          opacity: line,
-          transform: `translateY(${interpolate(line, [0, 1], [24, 0])}px)`,
+          fontSize: 120,
+          letterSpacing: "-0.045em",
+          justifyContent: "center",
         }}
-      >
-        Nepal, in your menu bar.
-      </span>
-      <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, opacity: cta }}>
-        <span style={{ color: color.secondary, fontFamily: font.latin, fontWeight: 600, fontSize: 36 }}>
+      />
+      <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, opacity: cta }}>
+        <span style={{ color: color.secondary, fontFamily: font.display, fontWeight: 500, fontSize: 38 }}>
           Free for Mac, Windows and Linux
         </span>
-        <span style={{ color: color.gold, fontFamily: font.latin, fontWeight: 800, fontSize: 48 }}>sajilo.fyi</span>
+        <span style={{ color: color.gold, fontFamily: font.display, fontWeight: 800, fontSize: 54, letterSpacing: "-0.02em" }}>
+          sajilo.fyi
+        </span>
       </span>
     </AbsoluteFill>
   );

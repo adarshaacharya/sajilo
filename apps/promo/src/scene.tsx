@@ -1,18 +1,21 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import {
   AbsoluteFill,
-  Img,
+  Freeze,
   interpolate,
+  OffthreadVideo,
   spring,
   staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import { color, font } from "./theme";
+import type { Clip } from "./timeline";
 
-const DEVANAGARI = /[ऀ-ॿ]/;
-/** Nepali text gets the Devanagari face; everything else Manrope. */
-export const faceFor = (text: string) => (DEVANAGARI.test(text) ? font.nepali : font.latin);
+/** A caption and the frame it lands on. */
+export type Cue = { start: number; title: string; line?: string };
+
+export const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
 /** A 0 to 1 spring from `start` frames in. */
 export function useEnter(start = 0, damping = 18) {
@@ -38,13 +41,14 @@ export function Desktop({
   children?: ReactNode;
 }) {
   return (
-    <AbsoluteFill style={{ background: color.canvas }}>
+    <AbsoluteFill style={{ background: color.canvas, overflow: "hidden" }}>
+      {children}
       <div
         style={{
           position: "absolute",
           inset: "0 0 auto 0",
           height: MENU_BAR,
-          background: "rgba(255,255,255,0.045)",
+          background: "rgba(22,22,25,0.92)",
           borderBottom: `1px solid ${color.border}`,
           display: "flex",
           alignItems: "center",
@@ -52,18 +56,20 @@ export function Desktop({
           gap: 34,
           paddingRight: 40,
           color: color.secondary,
-          fontFamily: font.latin,
+          fontFamily: font.ui,
+          fontWeight: 500,
           fontSize: 19,
         }}
       >
         <span
           style={{
             fontFamily: font.nepali,
-            fontWeight: 500,
+            fontWeight: 600,
+            fontSize: 20,
             color: active ? color.text : color.secondary,
             background: active ? "rgba(255,255,255,0.14)" : "transparent",
             borderRadius: 7,
-            padding: "3px 12px",
+            padding: "2px 12px",
           }}
         >
           {date}
@@ -71,7 +77,6 @@ export function Desktop({
         <StatusIcons />
         <span style={{ fontVariantNumeric: "tabular-nums" }}>Wed 8:05 PM</span>
       </div>
-      {children}
     </AbsoluteFill>
   );
 }
@@ -93,93 +98,219 @@ function StatusIcons() {
   );
 }
 
-// ---------------------------------------------------------------- the app panel
+// ---------------------------------------------------------------- the panel
 
-/** The captures are the popover at 3x: 1140 by 1920 pixels. */
-const SHOT_W = 1140;
-const SHOT_H = 1920;
 export const PANEL_H = 920;
-export const PANEL_W = Math.round((SHOT_W / SHOT_H) * PANEL_H);
 export const PANEL_TOP = MENU_BAR + 14;
-/** Centres the panel under the date. */
-export const PANEL_RIGHT = 100;
+/** Where the panel's centre sits: under the date. */
+const PANEL_CX = 1510;
+/** How far the camera leans in while someone is using the app. */
+const ZOOM = 1.34;
 
 /**
- * Sajilo's panel, hanging under its date. `shots` fade into each other:
- * each is [shot name, frame it appears].
+ * Sajilo's popover playing a recorded clip, with the recorded cursor drawn
+ * over it and a camera that leans in and follows the cursor, the way you
+ * watch someone else's screen.
  */
 export function Panel({
-  shots,
+  clip,
+  name,
   open = 1,
-  style,
+  still = false,
+  zoomFrom = 1,
 }: {
-  shots: [string, number][];
+  clip: Clip;
+  name: string;
   /** 0 closed, 1 open: the spring the panel opens on. */
   open?: number;
-  style?: CSSProperties;
+  /** Hold the first frame, for the panel opening. */
+  still?: boolean;
+  /** The zoom the camera starts from; it eases to ZOOM. */
+  zoomFrom?: number;
 }) {
   const frame = useCurrentFrame();
+  const px = PANEL_H / clip.height;
+  const width = clip.width * px;
+  const at = Math.min(Math.max(frame, 0), clip.frames - 1);
+
+  const zoom = still
+    ? 1
+    : interpolate(frame, [0, 24], [zoomFrom, ZOOM], {
+        ...clamp,
+        easing: (t) => 1 - (1 - t) ** 3,
+      });
+  const followY = smoothY(clip, at) * px;
+  const top = Math.min(
+    PANEL_TOP,
+    Math.max(Math.min(PANEL_TOP, 1080 - 26 - PANEL_H * zoom), 560 - followY * zoom),
+  );
+  const left = PANEL_CX - (width / 2) * zoom;
+  const [cx = 0, cy = 0, down = 0] = clip.cursor[at] ?? [];
+
+  const video = (
+    <OffthreadVideo
+      src={staticFile(`clips/${name}.mp4`)}
+      muted
+      style={{ width: "100%", height: "100%", display: "block" }}
+    />
+  );
+
   return (
     <div
       style={{
         position: "absolute",
-        top: PANEL_TOP,
-        right: PANEL_RIGHT,
-        width: PANEL_W,
+        left,
+        top,
+        width,
         height: PANEL_H,
-        borderRadius: 18,
-        overflow: "hidden",
-        border: `1px solid ${color.border}`,
-        boxShadow: "0 40px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.03)",
-        transformOrigin: "78% 0%",
-        transform: `scale(${interpolate(open, [0, 1], [0.92, 1])})`,
+        transformOrigin: "0 0",
+        transform: `scale(${zoom * interpolate(open, [0, 1], [0.94, 1])})`,
         opacity: open,
-        background: color.surface,
-        ...style,
       }}
     >
-      {shots.map(([name, at], index) => {
-        const next = shots[index + 1];
-        const fadeIn = index === 0 ? 1 : interpolate(frame, [at, at + 8], [0, 1], clamp);
-        const fadeOut = next ? interpolate(frame, [next[1], next[1] + 8], [1, 0], clamp) : 1;
-        const visible = frame >= at - 1 && (!next || frame <= next[1] + 9);
-        if (!visible) return null;
-        return (
-          <Img
-            key={`${name}-${at}`}
-            src={staticFile(`shots/${name}.png`)}
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              opacity: Math.min(fadeIn, fadeOut),
-            }}
-          />
-        );
-      })}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 18,
+          overflow: "hidden",
+          border: `1px solid ${color.border}`,
+          boxShadow: "0 40px 90px rgba(0,0,0,0.6)",
+          background: color.surface,
+        }}
+      >
+        {still ? <Freeze frame={0}>{video}</Freeze> : video}
+      </div>
+      {!still && (
+        <>
+          {clip.clicks.map((click) => {
+            const point = clip.cursor[click];
+            if (!point || frame < click || frame >= click + 14) return null;
+            return <Ripple key={click} x={(point[0] ?? 0) * px} y={(point[1] ?? 0) * px} progress={(frame - click) / 14} />;
+          })}
+          <Cursor x={cx * px} y={cy * px} pressed={down === 1} scale={1 / zoom} />
+        </>
+      )}
     </div>
   );
 }
 
-export const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
+/** The cursor's height, averaged over a second, so the camera glides. */
+function smoothY(clip: Clip, at: number) {
+  const span = 22;
+  let sum = 0;
+  let count = 0;
+  for (let i = at - span; i <= at + span; i++) {
+    const point = clip.cursor[Math.min(Math.max(i, 0), clip.frames - 1)];
+    if (!point) continue;
+    sum += point[1] ?? 0;
+    count++;
+  }
+  return count ? sum / count : clip.height / 2;
+}
+
+function Ripple({ x, y, progress }: { x: number; y: number; progress: number }) {
+  const size = 26 + progress * 40;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: x - size / 2,
+        top: y - size / 2,
+        width: size,
+        height: size,
+        borderRadius: size,
+        border: `3px solid ${color.gold}`,
+        opacity: 1 - progress,
+      }}
+    />
+  );
+}
+
+/** A plain arrow cursor. `scale` keeps it the same size while the camera zooms. */
+export function Cursor({
+  x,
+  y,
+  pressed = false,
+  scale = 1,
+}: {
+  x: number;
+  y: number;
+  pressed?: boolean;
+  scale?: number;
+}) {
+  return (
+    <svg
+      width="30"
+      height="40"
+      viewBox="0 0 30 40"
+      style={{
+        position: "absolute",
+        left: x - 4,
+        top: y - 2,
+        transformOrigin: "4px 2px",
+        transform: `scale(${scale * (pressed ? 0.86 : 1)})`,
+        filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.45))",
+      }}
+      aria-hidden
+    >
+      <path d="M3 2 L3 32 L10.5 25 L16 37 L21 35 L15.5 23.5 L26 23.5 Z" fill="#fff" stroke="#000" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 // ---------------------------------------------------------------- words
 
-/** The left column: a small label, the beat's title, and a line under it. */
-export function Caption({
-  label,
-  title,
-  line,
-  start,
+/** Words that rise into place one after another. */
+export function Rise({
+  text,
+  start = 0,
+  stagger = 2.5,
+  style,
 }: {
-  label: string;
-  title: string;
-  line?: string;
-  start: number;
+  text: string;
+  start?: number;
+  stagger?: number;
+  style?: React.CSSProperties;
 }) {
-  const enter = useEnter(start, 20);
-  const lift = interpolate(enter, [0, 1], [26, 0]);
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  return (
+    <span style={{ display: "flex", flexWrap: "wrap", columnGap: "0.24em", ...style }}>
+      {text.split(" ").map((word, index) => {
+        const enter = spring({
+          frame: frame - start - index * stagger,
+          fps,
+          config: { damping: 16, mass: 0.7 },
+        });
+        return (
+          <span key={`${word}-${index}`} style={{ display: "inline-block", overflow: "hidden", paddingBottom: "0.12em", marginBottom: "-0.12em" }}>
+            <span
+              style={{
+                display: "inline-block",
+                transform: `translateY(${interpolate(enter, [0, 1], [105, 0])}%)`,
+                opacity: interpolate(enter, [0, 0.4], [0, 1], clamp),
+              }}
+            >
+              {word}
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+/**
+ * The left column: the chapter's name, then the caption for whatever is
+ * happening in the footage right now.
+ */
+export function Captions({ label, cues }: { label: string; cues: Cue[] }) {
+  const frame = useCurrentFrame();
+  const labelIn = useEnter(0, 22);
+  const current = [...cues].reverse().find((cue) => frame >= cue.start) ?? cues[0];
+  if (!current) return null;
+  const start = current.start;
   return (
     <div
       style={{
@@ -187,34 +318,52 @@ export function Caption({
         left: 150,
         top: 0,
         bottom: 0,
-        width: 860,
+        width: 900,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        gap: 22,
-        opacity: enter,
-        transform: `translateY(${lift}px)`,
+        gap: 26,
       }}
     >
-      <span style={{ color: color.gold, fontFamily: font.latin, fontWeight: 700, fontSize: 26 }}>
-        {label}
-      </span>
       <span
         style={{
-          color: color.text,
-          fontFamily: faceFor(title),
-          fontWeight: 800,
-          fontSize: 66,
-          lineHeight: 1.12,
-          letterSpacing: "-0.02em",
+          color: color.gold,
+          fontFamily: font.display,
+          fontWeight: 600,
+          fontSize: 30,
+          opacity: labelIn,
         }}
       >
-        {title}
+        {label}
       </span>
-      {line && (
-        <span style={{ color: color.secondary, fontFamily: faceFor(line), fontWeight: 600, fontSize: 32, lineHeight: 1.35 }}>
-          {line}
-        </span>
+      <Rise
+        key={`t-${start}`}
+        text={current.title}
+        start={start}
+        style={{
+          color: color.text,
+          fontFamily: font.display,
+          fontWeight: 800,
+          fontSize: 88,
+          lineHeight: 1.02,
+          letterSpacing: "-0.035em",
+        }}
+      />
+      {current.line && (
+        <Rise
+          key={`l-${start}`}
+          text={current.line}
+          start={start + 6}
+          stagger={1.5}
+          style={{
+            color: color.secondary,
+            fontFamily: font.display,
+            fontWeight: 500,
+            fontSize: 36,
+            lineHeight: 1.3,
+            letterSpacing: "-0.01em",
+          }}
+        />
       )}
     </div>
   );

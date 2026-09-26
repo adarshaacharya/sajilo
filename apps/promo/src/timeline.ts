@@ -1,30 +1,49 @@
+import bazar from "../public/clips/bazar.json";
+import calendar from "../public/clips/calendar.json";
+import converter from "../public/clips/converter.json";
+import keeper from "../public/clips/keeper.json";
+import news from "../public/clips/news.json";
+import routine from "../public/clips/routine.json";
+import tools from "../public/clips/tools.json";
+import weather from "../public/clips/weather.json";
+import yours from "../public/clips/yours.json";
 import facts from "../public/facts.json";
 import { s } from "./theme";
 
 /**
- * The film, as data: every chapter is a problem people recognise, then the
- * part of Sajilo that answers it. Changing the story means editing this list;
- * the scenes read it.
+ * The film, as data: every chapter is a problem people recognise, then someone
+ * using Sajilo to answer it. The footage is `bun run record`'s; each caption
+ * lands on a mark the recording set at the moment the thing happens.
  */
 
+export type Clip = {
+  width: number;
+  height: number;
+  frames: number;
+  /** Per frame: cursor x, y in the popover's CSS pixels, and 1 while pressed. */
+  cursor: number[][];
+  clicks: number[];
+  marks: Record<string, number>;
+};
+
 export type Beat = {
-  /** A capture in `public/shots/`, without `.png`. */
-  shot: string;
+  /** A mark in the clip; the caption lands there. */
+  at: string;
   title: string;
   line?: string;
-  seconds?: number;
 };
 
 export type Chapter = {
   id: string;
-  /** Shown small above each beat's title. */
+  /** Shown small above each caption. */
   label: string;
   /** The problem, in Nepali first and English under it. */
   problemNe: string;
   problemEn: string;
-  beats: Beat[];
-  /** A system notification slides in during this chapter. */
-  notification?: { title: string; body: string };
+  /** The footage, played in the panel, one after another. */
+  clips: { name: string; clip: Clip; beats: Beat[] }[];
+  /** Instead of footage: a system notification, with the panel closed. */
+  notification?: { title: string; body: string; seconds: number; beats: Beat[] };
 };
 
 const gold = new Intl.NumberFormat("en-IN").format(facts.goldPerTola);
@@ -38,12 +57,22 @@ export const CHAPTERS: Chapter[] = [
     label: "Calendar",
     problemNe: "आज कति गते?",
     problemEn: "What's the date today?",
-    beats: [
-      { shot: "today", title: "Today's date, always in your menu bar.", line: "One click opens the month." },
-      { shot: "today-scrolled", title: "Festivals and holidays, coming up.", line: "Plus your own plans for the day." },
-      { shot: "day", title: "Tithi, panchang, sunrise, Rahu Kaal.", line: "Everything about any day." },
-      { shot: "events", title: "Every festival and public holiday.", line: "Years of the Bikram Sambat calendar, offline." },
-      { shot: "converter", title: "BS ⇄ AD in a second.", line: "Copy it in Nepali or English numbers." },
+    clips: [
+      {
+        name: "calendar",
+        clip: calendar,
+        beats: [
+          { at: "today", title: "Today's date, always one click away.", line: "Bikram Sambat and AD, side by side." },
+          { at: "upNext", title: "What's coming up.", line: "Festivals, holidays and your own bills." },
+          { at: "dashain", title: "Flip through the months.", line: "Every festival and holiday, offline." },
+          { at: "day", title: "Everything about a day.", line: "Tithi, Rahu Kaal, chaughadiya, panchang." },
+        ],
+      },
+      {
+        name: "converter",
+        clip: converter,
+        beats: [{ at: "converter", title: "BS to AD, and back.", line: "Copy it in Nepali or English numbers." }],
+      },
     ],
   },
   {
@@ -51,12 +80,12 @@ export const CHAPTERS: Chapter[] = [
     label: "Reminders",
     problemNe: "बिदा छुट्यो?",
     problemEn: "Missed a holiday again?",
-    beats: [
-      { shot: "today", title: "Sajilo tells you before it comes.", line: "Holidays, festivals and your own plans.", seconds: 5 },
-    ],
+    clips: [],
     notification: {
       title: facts.holiday.name,
       body: `Public holiday in ${facts.holiday.daysAway} days`,
+      seconds: 4.5,
+      beats: [{ at: "start", title: "Sajilo tells you first.", line: "Without you opening anything." }],
     },
   },
   {
@@ -64,15 +93,17 @@ export const CHAPTERS: Chapter[] = [
     label: "Bazar",
     problemNe: "एउटा भाउ हेर्न पाँचवटा साइट",
     problemEn: "Five websites to check one price.",
-    beats: [
-      { shot: "nepse", title: `NEPSE at a glance: ${nepse}.`, line: "Index, turnover and the day's chart.", seconds: 2.6 },
-      { shot: "nepse-scrolled", title: "Gainers, losers, sectors.", line: "And the companies you follow.", seconds: 2.6 },
-      { shot: "ipos", title: "Open IPOs, with the closing day.", seconds: 2.4 },
-      { shot: "funds", title: "Mutual funds and your SIP.", seconds: 2.4 },
-      { shot: "forex", title: `Dollar at NRB: Rs ${facts.usdBuy}.`, line: "Every currency, with a converter.", seconds: 2.6 },
-      { shot: "metals", title: `Gold: Rs ${gold} per tola.`, line: "Silver too, with a calculator.", seconds: 2.6 },
-      { shot: "fuel", title: "Petrol, diesel, gas cylinder.", seconds: 2.2 },
-      { shot: "vegetables", title: "Today's Kalimati prices.", seconds: 2.4 },
+    clips: [
+      {
+        name: "bazar",
+        clip: bazar,
+        beats: [
+          { at: "nepse", title: `NEPSE ${nepse}.`, line: "Gainers, losers, IPOs and your funds." },
+          { at: "forex", title: `Dollar Rs ${facts.usdBuy}.`, line: "NRB's rates for every currency." },
+          { at: "gold", title: `Gold Rs ${gold} a tola.`, line: "And silver, per tola and 10 grams." },
+          { at: "vegetables", title: "Kalimati prices, today.", line: "Every vegetable and fruit." },
+        ],
+      },
     ],
   },
   {
@@ -80,8 +111,12 @@ export const CHAPTERS: Chapter[] = [
     label: "News",
     problemNe: "दसवटा साइट, एउटै खबर",
     problemEn: "Ten sites for the same news.",
-    beats: [
-      { shot: "news", title: "Ten newsrooms, one list.", line: "What you've read fades. Government notices included.", seconds: 4 },
+    clips: [
+      {
+        name: "news",
+        clip: news,
+        beats: [{ at: "news", title: "Ten newsrooms, one list.", line: "What you've read fades away." }],
+      },
     ],
   },
   {
@@ -89,8 +124,12 @@ export const CHAPTERS: Chapter[] = [
     label: "Weather",
     problemNe: "आज पानी पर्छ?",
     problemEn: "Will it rain today?",
-    beats: [
-      { shot: "weather", title: "Weather for any district.", line: "Air quality and the week ahead.", seconds: 4 },
+    clips: [
+      {
+        name: "weather",
+        clip: weather,
+        beats: [{ at: "weather", title: "Any district, any town.", line: "Air quality and the week ahead." }],
+      },
     ],
   },
   {
@@ -98,9 +137,16 @@ export const CHAPTERS: Chapter[] = [
     label: "Keeper",
     problemNe: "पासपोर्टको म्याद कहिले सकिन्छ?",
     problemEn: "When does your passport expire?",
-    beats: [
-      { shot: "keeper", title: "Electricity bill due in 3 days.", line: "Sajilo keeps the dates you'd forget.", seconds: 3.4 },
-      { shot: "keeper-scrolled", title: "Passport, licence, bluebook tax.", line: "With how to renew each one. All on your device.", seconds: 3.6 },
+    clips: [
+      {
+        name: "keeper",
+        clip: keeper,
+        beats: [
+          { at: "bill", title: "Electricity bill, 3 days left.", line: "Sajilo keeps the dates you'd forget." },
+          { at: "paid", title: "Paid. See you next month." },
+          { at: "papers", title: "Passport, licence, bluebook.", line: "Kept on your device, never uploaded." },
+        ],
+      },
     ],
   },
   {
@@ -108,10 +154,16 @@ export const CHAPTERS: Chapter[] = [
     label: "Routine",
     problemNe: "आठ घण्टा स्क्रिनमा, एउटा पनि ब्रेक छैन",
     problemEn: "Eight hours at the screen. Not one break.",
-    beats: [
-      { shot: "focus", title: "Rest your eyes. Stand up. Drink water.", line: "Gentle reminders while you work.", seconds: 3.4 },
-      { shot: "focus-scrolled", title: "It waits while you're in a call.", line: "Meals, bedtime and a nudge to stop work.", seconds: 3.2 },
-      { shot: "focus-week", title: "See your week at the screen.", seconds: 2.8 },
+    clips: [
+      {
+        name: "routine",
+        clip: routine,
+        beats: [
+          { at: "breaks", title: "Rest your eyes. Stand up. Drink water.", line: "Gentle nudges while you work." },
+          { at: "calls", title: "It waits while you're in a call." },
+          { at: "week", title: "Your week at the screen.", line: "Days off counted apart." },
+        ],
+      },
     ],
   },
   {
@@ -119,36 +171,52 @@ export const CHAPTERS: Chapter[] = [
     label: "And the small things",
     problemNe: "सधैं गुगल गर्ने सानातिना कुरा",
     problemEn: "The small things you always google.",
-    beats: [
-      { shot: "tools", title: "Ropani, tola, VAT, interest.", line: "Emergency numbers and official sites, one tap away.", seconds: 3.4 },
-      { shot: "today", title: "A second clock for family abroad.", seconds: 2.6 },
-      { shot: "rashifal", title: "Your rashifal, every morning.", seconds: 2.6 },
-      { shot: "radio", title: "Nepali FM radio, a click away.", seconds: 2.6 },
+    clips: [
+      {
+        name: "tools",
+        clip: tools,
+        beats: [
+          { at: "tools", title: "Ropani, tola, VAT, interest.", line: "Emergency numbers, one tap away." },
+          { at: "rashifal", title: "Your rashifal, every morning." },
+          { at: "radio", title: "Nepali FM, a click away." },
+        ],
+      },
     ],
   },
   {
     id: "yours",
-    label: "Made for you",
+    label: "Made yours",
     problemNe: "नेपाली कि अङ्ग्रेजी?",
     problemEn: "Nepali or English?",
-    beats: [
-      { shot: "setup-en", title: "English or नेपाली.", line: "1 2 3 or १ २ ३. Your choice.", seconds: 2.4 },
-      { shot: "setup-ne", title: "English or नेपाली.", line: "1 2 3 or १ २ ३. Your choice.", seconds: 2.4 },
-      { shot: "today-light", title: "Light or dark.", line: "Works offline. No account. No ads.", seconds: 3.2 },
+    clips: [
+      {
+        name: "yours",
+        clip: yours,
+        beats: [
+          { at: "language", title: "नेपाली or English." },
+          { at: "numerals", title: "१ २ ३ or 1 2 3." },
+          { at: "theme", title: "Light or dark.", line: "No account. No ads. Works offline." },
+        ],
+      },
     ],
   },
 ];
 
 /** Opening, per-chapter card, and closing lengths. */
-export const OPEN = s(5);
-export const CARD = s(2.2);
+export const OPEN = s(4);
+export const CARD = s(1.8);
 export const END = s(6);
-export const DEFAULT_BEAT = 3;
+/** Frames between one clip and the next inside a chapter. */
+export const CUT = 8;
 
-export const chapterLength = (chapter: Chapter) =>
-  CARD + chapter.beats.reduce((sum, beat) => sum + s(beat.seconds ?? DEFAULT_BEAT), 0);
+export const footageLength = (chapter: Chapter) =>
+  chapter.notification
+    ? s(chapter.notification.seconds)
+    : chapter.clips.reduce((sum, { clip }) => sum + clip.frames, 0);
+
+export const chapterLength = (chapter: Chapter) => CARD + footageLength(chapter);
 
 export const TOTAL =
   OPEN + CHAPTERS.reduce((sum, chapter) => sum + chapterLength(chapter), 0) + END;
 
-export { facts };
+export { calendar as openingClip, facts };
