@@ -345,6 +345,38 @@ fn personal(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
 
 /// Every remote module, parsed out of the recorded upstream responses in
 /// `fixtures/` by the parsers that read the live ones.
+/// The crypto view's market list, and bitcoin's charts at every range. Only
+/// bitcoin's are recorded; any other coin shows the same "unavailable" line
+/// the app shows when a chart can't be reached.
+fn record_crypto(
+    commands: &mut BTreeMap<String, Value>,
+    read: &dyn Fn(&str) -> String,
+    now: DateTime<Utc>,
+) {
+    commands.insert(
+        "get_crypto".to_owned(),
+        load_state(crypto::parse_coingecko(
+            &read("coingecko/markets.json"),
+            now,
+        )),
+    );
+    for days in crypto::CHART_DAYS {
+        commands.insert(
+            format!("get_crypto_chart:bitcoin:{days}"),
+            load_state(crypto::parse_chart(
+                &read(&format!("coingecko/market-chart-bitcoin-{days}.json")),
+                "bitcoin",
+                days,
+                now,
+            )),
+        );
+    }
+    commands.insert(
+        "get_crypto_chart".to_owned(),
+        json!({ "status": "unavailable" }),
+    );
+}
+
 fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Utc>) {
     let read = |relative: &str| -> String {
         std::fs::read_to_string(root.join("fixtures").join(relative))
@@ -424,30 +456,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
             now,
         )),
     );
-    commands.insert(
-        "get_crypto".to_owned(),
-        load_state(crypto::parse_coingecko(
-            &read("coingecko/markets.json"),
-            now,
-        )),
-    );
-    // Only bitcoin's charts are recorded; any other coin shows the same
-    // "unavailable" line the app shows when a chart can't be reached.
-    for days in crypto::CHART_DAYS {
-        commands.insert(
-            format!("get_crypto_chart:bitcoin:{days}"),
-            load_state(crypto::parse_chart(
-                &read(&format!("coingecko/market-chart-bitcoin-{days}.json")),
-                "bitcoin",
-                days,
-                now,
-            )),
-        );
-    }
-    commands.insert(
-        "get_crypto_chart".to_owned(),
-        json!({ "status": "unavailable" }),
-    );
+    record_crypto(commands, &read, now);
     commands.insert(
         "get_forex".to_owned(),
         load_state(nrb::parse(&read("nrb/rates.json"), now)),

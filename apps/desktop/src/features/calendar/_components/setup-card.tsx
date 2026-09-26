@@ -15,9 +15,6 @@ import { WEEKDAYS_NE_LONG } from "./date-summary-panel";
  * Sajilo never see this; cleared by Done. */
 const PENDING_KEY = "setupCardPending";
 
-/** Dev builds: show welcome card on Today until you set this to false. */
-const DEV_ALWAYS_SHOW_SETUP = import.meta.env.DEV;
-
 export const SETUP_PREVIEW_SESSION_KEY = "sajilo-preview-setup";
 export const SETUP_PREVIEW_EVENT = "sajilo-preview-setup";
 
@@ -30,8 +27,8 @@ export function triggerSetupPreview() {
 
 /** Whether the one-time setup card is due, and the way to put it away. */
 export function useSetupCard() {
-  const [visible, setVisible] = useState(() => import.meta.env.DEV && DEV_ALWAYS_SHOW_SETUP);
-  const previewRef = useRef(import.meta.env.DEV && DEV_ALWAYS_SHOW_SETUP);
+  const [visible, setVisible] = useState(false);
+  const previewRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +44,7 @@ export function useSetupCard() {
 
     if (sessionPreview) {
       show();
-    } else if (!DEV_ALWAYS_SHOW_SETUP) {
+    } else {
       api
         .getSetting<boolean>(PENDING_KEY)
         .then((pending) => {
@@ -71,7 +68,7 @@ export function useSetupCard() {
   const dismiss = () => {
     track("action.setup-done");
     setVisible(false);
-    if (previewRef.current || (import.meta.env.DEV && DEV_ALWAYS_SHOW_SETUP)) {
+    if (previewRef.current) {
       previewRef.current = false;
       sessionStorage.removeItem(SETUP_PREVIEW_SESSION_KEY);
       return;

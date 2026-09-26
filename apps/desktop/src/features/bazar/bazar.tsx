@@ -21,6 +21,7 @@ import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import { ForexRates } from "../forex/forex";
 import { Crypto } from "./_components/crypto";
+import { FuelSkeleton, MetalsSkeleton, VegetablesSkeleton } from "./_components/feed-skeletons";
 import { FuelTab } from "./_components/fuel";
 import { FundsLink } from "./_components/funds-link";
 import { MetalsTab } from "./_components/metals";
@@ -330,6 +331,7 @@ export function Bazar() {
         <StateBanner
           state={banner(feeds?.metals, fetchedAtLabel(metals?.freshness))}
           onRetry={() => load(true)}
+          skeleton={<MetalsSkeleton />}
         >
           {metals && <MetalsTab snapshot={metals} />}
         </StateBanner>
@@ -339,6 +341,7 @@ export function Bazar() {
         <StateBanner
           state={banner(feeds?.fuel, fetchedAtLabel(fuel?.freshness))}
           onRetry={() => load(true)}
+          skeleton={<FuelSkeleton />}
         >
           {fuel && <FuelTab snapshot={fuel} />}
         </StateBanner>
@@ -350,6 +353,7 @@ export function Bazar() {
         <StateBanner
           state={banner(feeds?.vegetables, fetchedAtLabel(vegetables?.freshness))}
           onRetry={() => load(true)}
+          skeleton={<VegetablesSkeleton />}
         >
           {vegetables && <VegetablesTab snapshot={vegetables} />}
         </StateBanner>

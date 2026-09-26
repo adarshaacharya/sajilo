@@ -37,6 +37,7 @@ import { IpoList } from "./ipo-list";
 import { MoverRow } from "./mover-row";
 import { QuoteRow } from "./quote-row";
 import { StatementRow } from "./statement";
+import { StocksSkeleton } from "./stocks-skeleton";
 
 const WATCHLIST_KEY = "stockWatchlist";
 const WATCHLIST_LIMIT = 12;
@@ -200,7 +201,11 @@ export function Stocks({
   if (!snapshot) {
     return (
       <div className="space-y-2.5">
-        <StateBanner state={banner(state)} onRetry={onRetry} />
+        <StateBanner
+          state={banner(state)}
+          onRetry={onRetry}
+          skeleton={<StocksSkeleton watching={watchlist.length} />}
+        />
         {heldPositions(portfolio).length > 0 && portfolio && (
           <OfflinePortfolio portfolio={portfolio} />
         )}
