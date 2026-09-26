@@ -276,6 +276,6 @@ export const focus = {
   waterEvery: focusSettings.water.everyMinutes,
   /** Litres a day. */
   waterGoal: focusSettings.waterGoalMl / 1000,
-  workStart: focusSettings.workStart,
-  workEnd: focusSettings.workEnd,
+  /** When the stop-work card comes on a work day. */
+  stopWorkAt: focusSettings.stopWorkAt,
 };

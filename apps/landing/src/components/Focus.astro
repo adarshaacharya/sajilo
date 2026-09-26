@@ -105,19 +105,19 @@ const rx: Rx[] = [
             <span class="sign-scrawl" aria-hidden="true">Sajilo</span>
             <span class="sign-name">Not a doctor. Has seen your screen time.</span>
           </div>
-          <span class="parchi-stamp" lang="ne" aria-label="Closed on public holidays">
-            बिदामा<br />बन्द
+          <span class="parchi-stamp" lang="ne" aria-label="Lighter on public holidays">
+            बिदामा<br />हल्का
           </span>
         </footer>
       </article>
 
       <p class="focus-foot reveal">
         It counts only the time you're actually at the keyboard, and five minutes away counts as a break,
-        even if you spent them doomscrolling on your phone. We won't tell. Reminders keep to your work hours
-        ({String(focus.workStart.hour).padStart(2, "0")}:{String(focus.workStart.minute).padStart(2, "0")} to
-        {String(focus.workEnd.hour).padStart(2, "0")}:{String(focus.workEnd.minute).padStart(2, "0")} unless
-        you say otherwise) and go quiet on Saturdays and every public holiday in the calendar, because nobody
-        should be told to hydrate on Dashain. Sajilo never records which apps you use. Frankly, we don't want
+        even if you spent them doomscrolling on your phone. We won't tell. At
+        {String(focus.stopWorkAt.hour).padStart(2, "0")}:{String(focus.stopWorkAt.minute).padStart(2, "0")}
+        on a work day it tells you to stop working. Saturdays and every public holiday in the calendar are
+        lighter: it still rests your eyes, but nobody should be told to stand up and stretch on Dashain.
+        Sajilo never records which apps you use. Frankly, we don't want
         to know what you search at 2 a.m.
       </p>
     </div>
