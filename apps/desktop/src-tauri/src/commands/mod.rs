@@ -3,6 +3,7 @@ pub mod attachments;
 pub mod backup;
 pub mod bazar;
 pub mod calendar;
+pub mod crypto;
 pub mod dividends;
 pub mod external;
 pub mod focus;

@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
+import type { CryptoChart } from "../../types/api/CryptoChart";
+import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
@@ -754,6 +756,11 @@ export const api = {
   /** Every mutual fund's latest NAV, from ShareHub or ShareSansar; `refresh` forces a live pull. */
   getMutualFunds: (refresh = false) =>
     invoke<LoadState<MutualFundSnapshot>>("get_mutual_funds", { refresh }),
+  /** The top coins by market value, in US dollars, from CoinGecko or Kraken; `refresh` forces a live pull. */
+  getCrypto: (refresh = false) => invoke<LoadState<CryptoSnapshot>>("get_crypto", { refresh }),
+  /** One coin's price over the last 1, 7, 30 or 365 days. */
+  getCryptoChart: (id: string, days: number) =>
+    invoke<LoadState<CryptoChart>>("get_crypto_chart", { id, days }),
   /** Every fund's SIP payment schedule, soonest first. Each change below
    * answers with the same list, already updated. */
   sipStatuses: () => invoke<SipStatus[]>("sip_statuses"),

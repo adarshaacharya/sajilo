@@ -11,6 +11,7 @@ import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
+import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
@@ -19,6 +20,7 @@ import type { LoadState } from "../../types/api/LoadState";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import { ForexRates } from "../forex/forex";
+import { Crypto } from "./_components/crypto";
 import { FuelTab } from "./_components/fuel";
 import { FundsLink } from "./_components/funds-link";
 import { MetalsTab } from "./_components/metals";
@@ -33,9 +35,9 @@ type Tab = "stocks" | "metals" | "fuel" | "vegetables" | "forex";
  * tray, the landing page — can open it on the panel it means. */
 const TABS: Tab[] = ["stocks", "forex", "metals", "fuel", "vegetables"];
 
-/** The stocks tab's two halves; `?view=` opens either, and the last one used is remembered. */
-type StocksView = "nepse" | "funds";
-const STOCKS_VIEWS: StocksView[] = ["nepse", "funds"];
+/** The stocks tab's markets; `?view=` opens any, and the last one used is remembered. */
+type StocksView = "nepse" | "funds" | "crypto";
+const STOCKS_VIEWS: StocksView[] = ["nepse", "funds", "crypto"];
 const STOCKS_VIEW_KEY = "stocksView";
 
 function banner<T>(state: LoadState<T> | undefined, freshness?: string): LoadStatus {
@@ -60,6 +62,10 @@ function fetchDividends(refresh = false): Promise<LoadState<DividendSnapshot>> {
 
 function fetchMutualFunds(refresh = false): Promise<LoadState<MutualFundSnapshot>> {
   return catchAsFailed(api.getMutualFunds(refresh));
+}
+
+function fetchCrypto(refresh = false): Promise<LoadState<CryptoSnapshot>> {
+  return catchAsFailed(api.getCrypto(refresh));
 }
 
 function fetchForex(refresh = false): Promise<LoadState<ForexSnapshot>> {
@@ -148,6 +154,19 @@ export function Bazar() {
     mutate: mutateFunds,
   } = useSWR(tab === "stocks" ? "bazar-mutual-funds" : null, () => fetchMutualFunds(false));
 
+  // Only asked while the crypto view is showing: nothing else on the screen needs it.
+  const {
+    data: crypto,
+    isValidating: loadingCrypto,
+    mutate: mutateCrypto,
+  } = useSWR(tab === "stocks" && view === "crypto" ? "bazar-crypto" : null, () =>
+    fetchCrypto(false),
+  );
+  const retryCrypto = useCallback(
+    () => void mutateCrypto(fetchCrypto(true), { revalidate: false }),
+    [mutateCrypto],
+  );
+
   const retryFunds = useCallback(
     () => void mutateFunds(fetchMutualFunds(true), { revalidate: false }),
     [mutateFunds],
@@ -179,7 +198,9 @@ export function Bazar() {
     tab === "stocks"
       ? view === "funds"
         ? loadingFunds
-        : loadingStocks || loadingIpos || loadingDividends || loadingIntraday
+        : view === "crypto"
+          ? loadingCrypto
+          : loadingStocks || loadingIpos || loadingDividends || loadingIntraday
       : tab === "forex"
         ? loadingForex
         : loadingFeeds;
@@ -196,6 +217,7 @@ export function Bazar() {
           mutateDividends(fetchDividends(true), { revalidate: false });
           mutateIntraday(fetchIntraday(true), { revalidate: false });
           mutateFunds(fetchMutualFunds(true), { revalidate: false });
+          if (view === "crypto") mutateCrypto(fetchCrypto(true), { revalidate: false });
         }
         if (tab === "forex") mutateForex(fetchForex(true), { revalidate: false });
       } else {
@@ -205,10 +227,12 @@ export function Bazar() {
         mutateDividends();
         mutateIntraday();
         mutateFunds();
+        mutateCrypto();
         mutateForex();
       }
     },
     [
+      mutateCrypto,
       mutateDividends,
       mutateFeeds,
       mutateForex,
@@ -217,6 +241,7 @@ export function Bazar() {
       mutateIpos,
       mutateStocks,
       tab,
+      view,
     ],
   );
 
@@ -268,6 +293,7 @@ export function Bazar() {
           tabs={[
             { id: "nepse" as const, label: t("stocks.view-nepse") },
             { id: "funds" as const, label: t("stocks.view-funds") },
+            { id: "crypto" as const, label: t("stocks.view-crypto") },
           ]}
         />
       )}
@@ -281,6 +307,8 @@ export function Bazar() {
           settingUpSip={linked.get("setup") === "sip"}
         />
       )}
+
+      {tab === "stocks" && view === "crypto" && <Crypto state={crypto} onRetry={retryCrypto} />}
 
       {tab === "stocks" && view === "nepse" && (
         <Stocks

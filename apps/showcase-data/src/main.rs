@@ -30,8 +30,8 @@ use sajilo_core::calendar::month::month;
 use sajilo_core::calendar::weekly_holiday::weekly_holiday;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
-    cdsc, dividends, fenegosida, hamropatro, kalimati, kantipur, market_status, mutual_funds,
-    nepse_intraday, noc, nrb, open_meteo, ratopati, rss, sharesansar,
+    cdsc, crypto, dividends, fenegosida, hamropatro, kalimati, kantipur, market_status,
+    mutual_funds, nepse_intraday, noc, nrb, open_meteo, ratopati, rss, sharesansar,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -423,6 +423,30 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
             &read("sharehub/nepse-intraday.json"),
             now,
         )),
+    );
+    commands.insert(
+        "get_crypto".to_owned(),
+        load_state(crypto::parse_coingecko(
+            &read("coingecko/markets.json"),
+            now,
+        )),
+    );
+    // Only bitcoin's charts are recorded; any other coin shows the same
+    // "unavailable" line the app shows when a chart can't be reached.
+    for days in crypto::CHART_DAYS {
+        commands.insert(
+            format!("get_crypto_chart:bitcoin:{days}"),
+            load_state(crypto::parse_chart(
+                &read(&format!("coingecko/market-chart-bitcoin-{days}.json")),
+                "bitcoin",
+                days,
+                now,
+            )),
+        );
+    }
+    commands.insert(
+        "get_crypto_chart".to_owned(),
+        json!({ "status": "unavailable" }),
     );
     commands.insert(
         "get_forex".to_owned(),

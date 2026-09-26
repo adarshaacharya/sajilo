@@ -124,31 +124,34 @@ export function SetupCard({ onDone }: { onDone: () => void }) {
       </p>
 
       {/* Each choice says what it is: "1 2 3" alone does not. */}
-      <div className="grid grid-cols-2 gap-2">
-        <SetupField label={t("setup.language")}>
-          <Segmented
-            label={t("setup.language")}
-            size="sm"
-            value={language}
-            onChange={setLanguage}
-            options={[
-              { id: "en", label: "English" },
-              { id: "ne", label: "नेपाली" },
-            ]}
-          />
-        </SetupField>
-        <SetupField label={t("setup.digits")}>
-          <Segmented
-            label={t("setup.digits")}
-            size="sm"
-            value={numerals}
-            onChange={setNumerals}
-            options={[
-              { id: "latin", label: "1 2 3" },
-              { id: "devanagari", label: "१ २ ३" },
-            ]}
-          />
-        </SetupField>
+      <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-2">
+          <SetupField label={t("setup.language")}>
+            <Segmented
+              label={t("setup.language")}
+              size="sm"
+              value={language}
+              onChange={setLanguage}
+              options={[
+                { id: "en", label: "English" },
+                { id: "ne", label: "नेपाली" },
+              ]}
+            />
+          </SetupField>
+          <SetupField label={t("setup.digits")}>
+            <Segmented
+              label={t("setup.digits")}
+              size="sm"
+              value={numerals}
+              onChange={setNumerals}
+              options={[
+                { id: "latin", label: "1 2 3" },
+                { id: "devanagari", label: "१ २ ३" },
+              ]}
+            />
+          </SetupField>
+        </div>
+        <p className="text-[10px] text-text-muted">{t("setup.recommend")}</p>
       </div>
 
       <PlaceRow />

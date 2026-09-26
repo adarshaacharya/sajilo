@@ -153,6 +153,7 @@ pub fn run() {
             app.manage(commands::ipos::IposCache::default());
             app.manage(commands::dividends::DividendsCache::default());
             app.manage(commands::mutual_funds::MutualFundsCache::default());
+            app.manage(commands::crypto::CryptoCache::default());
             app.manage(commands::nepse_intraday::NepseIntradayCache::default());
             app.manage(commands::rashifal::RashifalCache::default());
             app.manage(commands::radio::RadioCache::default());
@@ -263,6 +264,8 @@ pub fn run() {
             commands::ipos::get_ipos,
             commands::dividends::get_dividends,
             commands::mutual_funds::get_mutual_funds,
+            commands::crypto::get_crypto,
+            commands::crypto::get_crypto_chart,
             commands::sips::sip_statuses,
             commands::sips::set_sip,
             commands::sips::remove_sip,

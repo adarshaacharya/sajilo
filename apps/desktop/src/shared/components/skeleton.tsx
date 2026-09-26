@@ -14,6 +14,21 @@ export function SkeletonBlock({ className }: { className?: string }) {
   );
 }
 
+/**
+ * One line of placeholder text. The bar sits inside a block carrying the real
+ * line's type classes, so the line is exactly as tall as the text it stands in
+ * for, and a skeleton built from these lands at the loaded screen's height.
+ */
+export function SkeletonLine({ className, bar = "w-3/5" }: { className?: string; bar?: string }) {
+  return (
+    <div className={className}>
+      <span
+        className={`inline-block h-[0.75em] animate-pulse rounded bg-surface-hover align-middle ${bar}`}
+      />
+    </div>
+  );
+}
+
 /** A card-shaped placeholder — the same padding and radius as `surface-card`. */
 export function SkeletonCard({
   className,

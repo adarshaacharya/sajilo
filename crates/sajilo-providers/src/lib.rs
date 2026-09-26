@@ -7,6 +7,7 @@
 
 pub mod annapurna_dates;
 pub mod cdsc;
+pub mod crypto;
 pub mod dividends;
 pub mod error;
 pub mod fenegosida;

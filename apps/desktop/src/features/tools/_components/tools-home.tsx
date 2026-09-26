@@ -202,6 +202,7 @@ function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void
     <section
       aria-labelledby="tools-directory"
       className="tool-card flex flex-col gap-2.5 active:transform-none"
+      style={tinted("var(--color-holiday)")}
     >
       <div className="flex items-center gap-2">
         <span className="tool-card__icon" style={tinted("var(--color-holiday)")}>

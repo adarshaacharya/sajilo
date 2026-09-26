@@ -26,10 +26,13 @@ export type LoadStatus =
 export function StateBanner({
   state,
   onRetry,
+  skeleton,
   children,
 }: {
   state: LoadStatus;
   onRetry?: () => void;
+  /** The screen's own loading shape; generic rows when a screen has none. */
+  skeleton?: ReactNode;
   children?: ReactNode;
 }) {
   const { t } = useSettings();
@@ -39,7 +42,7 @@ export function StateBanner({
   if (state.status === "loading") {
     return (
       <div role="status" aria-busy="true" aria-label={t("state.loading")}>
-        <SkeletonRows rows={5} />
+        {skeleton ?? <SkeletonRows rows={5} />}
       </div>
     );
   }

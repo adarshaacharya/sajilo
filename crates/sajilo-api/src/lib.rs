@@ -49,6 +49,7 @@ macro_rules! dto_enum {
 pub mod announcement;
 pub mod bazar;
 pub mod bundle;
+pub mod crypto;
 pub mod dividends;
 pub mod forex;
 pub mod ipos;

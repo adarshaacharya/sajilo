@@ -1,4 +1,5 @@
 import { Icon } from "../../../shared/components/icon";
+import { SkeletonBlock, SkeletonLine } from "../../../shared/components/skeleton";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Freshness } from "../../../types/api/Freshness";
 import type { Rashifal } from "../../../types/api/Rashifal";
@@ -11,15 +12,13 @@ export function ReadingCard({
   reading,
   freshness,
   isMine,
-  onChangeSign,
-  onBackToMine,
+  onSetMine,
 }: {
   sign: RashiSign;
   reading: Rashifal | undefined;
   freshness: Freshness | undefined;
   isMine: boolean;
-  onChangeSign: () => void;
-  onBackToMine: () => void;
+  onSetMine: () => void;
 }) {
   const { t } = useSettings();
   const meta = signMeta(sign);
@@ -54,9 +53,33 @@ export function ReadingCard({
         </p>
       )}
 
-      <button type="button" onClick={isMine ? onChangeSign : onBackToMine} className="settings-btn">
-        {isMine ? t("rashifal.change-sign") : t("rashifal.back-to-mine")}
-      </button>
+      {!isMine && (
+        <button type="button" onClick={onSetMine} className="settings-btn">
+          <Icon name="star" className="size-3 text-accent-mark" />
+          {t("rashifal.set-mine")}
+        </button>
+      )}
+    </section>
+  );
+}
+
+/** The reading card while the day's readings load: same header, four lines of text. */
+export function ReadingCardSkeleton() {
+  return (
+    <section className="surface-card space-y-2.5 p-3">
+      <div className="flex items-center gap-3">
+        <SkeletonBlock className="size-12 shrink-0 rounded-[14px]" />
+        <div className="min-w-0 flex-1">
+          <SkeletonLine className="text-[18px] leading-tight" bar="w-2/5" />
+          <SkeletonLine className="mt-0.5 text-[11px]" bar="w-1/3" />
+        </div>
+      </div>
+      <div>
+        {["w-full", "w-11/12", "w-full", "w-3/5"].map((bar, line) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder lines
+          <SkeletonLine key={line} className="text-[13px] leading-[1.65]" bar={bar} />
+        ))}
+      </div>
     </section>
   );
 }

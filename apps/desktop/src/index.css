@@ -829,6 +829,49 @@ button.row-line + button.row-line::before {
   background: color-mix(in srgb, var(--color-accent-fill) 12%, var(--color-surface-raised));
 }
 
+/* Own rashi keeps a quiet accent even while another sign is being read. */
+.rashi-tile--mine {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, var(--color-border));
+}
+
+.rashi-tile-wrap {
+  position: relative;
+}
+
+/* Corner star: faint until the tile is hovered, lit on the reader's rashi. */
+.rashi-pin {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  opacity: 0.45;
+  transition:
+    opacity 0.12s ease,
+    color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.rashi-tile-wrap:hover .rashi-pin,
+.rashi-pin:focus-visible {
+  opacity: 1;
+}
+
+button.rashi-pin:hover {
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+}
+
+.rashi-pin--on {
+  color: var(--color-accent-mark);
+  opacity: 1;
+  pointer-events: none;
+}
+
 .rashi-search {
   display: flex;
   align-items: center;
@@ -1809,6 +1852,9 @@ button.row-line + button.row-line::before {
 
 /* Tools — every card carries its own --tint: the icon's colour and wash. */
 .tool-card {
+  /* A card that forgets its own tint still mixes with something: an unset
+     tint made the hover border fall back to the text colour, bright white. */
+  --tint: var(--color-accent-mark);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1825,7 +1871,10 @@ button.row-line + button.row-line::before {
     transform 0.1s ease;
 }
 
-.tool-card:hover {
+/* Only a card that is itself a button lights up: the Directory card holds
+   buttons of its own, and a border on the whole of it promised a click that
+   did nothing. */
+:is(button, a).tool-card:hover {
   border-color: color-mix(in srgb, var(--tint) 40%, var(--color-border));
 }
 

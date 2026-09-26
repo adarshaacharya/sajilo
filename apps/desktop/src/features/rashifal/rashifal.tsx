@@ -16,11 +16,11 @@ import { track } from "../../shared/lib/usage";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
 import { SourceNote } from "../bazar/_components/source-note";
-import { ReadingCard } from "./_components/reading-card";
+import { ReadingCard, ReadingCardSkeleton } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
 import { SignGrid } from "./_components/sign-grid";
 import { publishedStamp } from "./_lib/format";
-import { SIGNS, validSign } from "./_lib/signs";
+import { validSign } from "./_lib/signs";
 
 const STORAGE_KEY = "selectedRashi";
 
@@ -39,7 +39,6 @@ export function Rashifal() {
   const [storedSign, setStoredSign] = usePersistedString(STORAGE_KEY);
   const mine = validSign(storedSign);
   const [viewing, setViewing] = useState<RashiSign | null>(null);
-  const [picking, setPicking] = useState(false);
 
   const loading = isValidating;
   const snapshot = loadedValue(state);
@@ -70,45 +69,40 @@ export function Rashifal() {
     track("action.rashi-pick");
     setStoredSign(id);
     setViewing(null);
-    setPicking(false);
   };
 
-  if (!mine || picking) {
+  if (!mine) {
     return (
       <div className="space-y-2.5">
-        <SignFinder
-          current={mine}
-          onChoose={choose}
-          onCancel={mine ? () => setPicking(false) : undefined}
-        />
+        <SignFinder onChoose={choose} />
       </div>
     );
   }
 
   return (
     <div className="space-y-2.5">
-      <StateBanner state={banner} onRetry={() => load(true)}>
+      <StateBanner state={banner} onRetry={() => load(true)} skeleton={<ReadingCardSkeleton />}>
         {shown && (
           <ReadingCard
             sign={shown}
             reading={reading}
             freshness={snapshot?.freshness}
             isMine={isMine}
-            onChangeSign={() => setPicking(true)}
-            onBackToMine={() => setViewing(null)}
+            onSetMine={() => choose(shown)}
           />
         )}
       </StateBanner>
 
-      {/* Everyone else's sign, one tap away — for looking up family. */}
+      {/* Every sign, one tap away for looking up family; the star pins one as yours. */}
       <section className="space-y-1.5">
         <h2 className="px-0.5 text-[11px] font-semibold text-text-secondary">
-          {t("rashifal.other-signs")}
+          {t("rashifal.all-signs")}
         </h2>
         <SignGrid
-          signs={SIGNS.filter((sign) => sign.id !== mine)}
-          pressed={viewing}
-          onSelect={(id) => setViewing(id === viewing ? null : id)}
+          pressed={shown}
+          mine={mine}
+          onSelect={(id) => setViewing(id === mine || id === viewing ? null : id)}
+          onPin={choose}
         />
       </section>
 
