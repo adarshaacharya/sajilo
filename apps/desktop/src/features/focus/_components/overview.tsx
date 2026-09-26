@@ -2,7 +2,13 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { SwitchVisual } from "../../../shared/components/switch";
 import { useSettings } from "../../../shared/context/settings-context";
-import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../../../shared/lib/ipc";
+import type {
+  BreakKind,
+  FocusSettings,
+  FocusSnapshot,
+  PauseChoice,
+  PlanTime,
+} from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import {
   clock,
@@ -26,8 +32,15 @@ const PAUSES = [
 const TILE_KINDS = ["eyes", "move", "water", "custom"] as const;
 type TileKind = (typeof TILE_KINDS)[number];
 
-/** Screen time that fills the Today tile: a full working day. */
-const FULL_DAY_SECONDS = 8 * 60 * 60;
+/** Screen time that fills the Today tile: your working day, as set in work
+ * hours. Screen time itself counts all day; the tile just scales to the part
+ * of it you planned to be at the screen. */
+function workDaySeconds(start: PlanTime, end: PlanTime): number {
+  const minutes = (end.hour * 60 + end.minute - (start.hour * 60 + start.minute) + 1440) % 1440;
+  // Start and end the same means "all day"; a working day of 24 h would keep
+  // the meter nearly empty, so it falls back to a usual eight hours.
+  return (minutes === 0 ? 8 * 60 : minutes) * 60;
+}
 
 const RADIUS = 52;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -361,7 +374,10 @@ function TodayTiles({ snapshot }: { snapshot: FocusSnapshot }) {
         <p className="text-[15px] font-bold tabular-nums">
           {duration(today.screenSeconds, numerals, t)}
         </p>
-        <Meter fraction={today.screenSeconds / FULL_DAY_SECONDS} color="var(--color-accent-mark)" />
+        <Meter
+          fraction={today.screenSeconds / workDaySeconds(settings.workStart, settings.workEnd)}
+          color="var(--color-accent-mark)"
+        />
       </Tile>
       <Tile label={t("focus.today.breaks")}>
         <p className="text-[15px] font-bold tabular-nums">
