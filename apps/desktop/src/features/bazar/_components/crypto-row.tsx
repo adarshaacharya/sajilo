@@ -6,8 +6,9 @@ import { ChangeBadge } from "./change-badge";
 import { FollowButton } from "./follow-button";
 
 /**
- * A coin's own round mark. Coin logos are drawn for any background, so unlike
- * fund logos they need no plate. Offline, or from the Kraken fallback, which
+ * A coin's own round mark, on a white disc: most logos fill the circle and
+ * hide it, while the few drawn in black on transparent (Ethena, Ondo) would
+ * otherwise vanish into the dark card. Offline, or from the Kraken fallback, which
  * sends none, the ticker's first letter stands in at the same size.
  */
 export function CoinLogo({
@@ -28,7 +29,7 @@ export function CoinLogo({
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
-        className="shrink-0 rounded-full object-contain"
+        className="shrink-0 rounded-full bg-white object-contain"
         style={box}
       />
     );
@@ -47,9 +48,9 @@ export function CoinLogo({
 /** The day's move as a percent badge; blank where the source gave none. */
 export function DayChange({ coin }: { coin: CryptoCoin }) {
   if (coin.change24h == null) return null;
-  return (
-    <ChangeBadge change={coin.change24h} previous={100} percent={coin.change24h} percentOnly />
-  );
+  // A move that rounds to nothing reads 0.00%, not -0.00%.
+  const change = Math.abs(coin.change24h) < 0.005 ? 0 : coin.change24h;
+  return <ChangeBadge change={change} previous={100} percent={change} percentOnly />;
 }
 
 /**

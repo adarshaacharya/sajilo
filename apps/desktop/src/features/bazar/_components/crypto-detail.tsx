@@ -13,7 +13,6 @@ import {
   usdCompact,
 } from "../_lib/crypto";
 import { money0 } from "../_lib/format";
-import { issueDate } from "../_lib/ipo";
 import { CryptoChart } from "./crypto-chart";
 import { CoinLogo, DayChange } from "./crypto-row";
 import { FollowButton } from "./follow-button";
@@ -98,8 +97,14 @@ export function CryptoDetail({
     coin.low24h != null && coin.high24h != null
       ? `${usd(coin.low24h)} – ${usd(coin.high24h)}`
       : null;
+  // The year matters here: a coin's high can be years behind it.
   const athDate = coin.allTimeHighDate
-    ? (issueDate(coin.allTimeHighDate, language) ?? coin.allTimeHighDate)
+    ? new Intl.DateTimeFormat(language === "ne" ? "ne-NP-u-nu-latn" : "en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      }).format(new Date(`${coin.allTimeHighDate}T00:00:00Z`))
     : null;
 
   type Fact = { label: string; value: string; tone?: string; note?: string };

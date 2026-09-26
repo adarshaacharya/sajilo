@@ -131,8 +131,6 @@ function shift(value: unknown, drift: number): unknown {
 }
 
 export async function invoke<T>(command: string, args?: Args): Promise<T> {
-  // TEMP-SKELETON-HOLD: remove before commit.
-  if ((sessionStorage.getItem("hold") ?? "").split(",").includes(command)) return new Promise<T>(() => {});
   // Personal portfolio rows are intentionally absent from the public showcase.
   // Return the real command's empty-state shape rather than inventing holdings.
   if (

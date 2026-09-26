@@ -27,6 +27,7 @@ import {
 import { nepalToday } from "../_lib/ipo";
 import { FundDetail } from "./fund-detail";
 import { FundRow } from "./fund-row";
+import { FundsSkeleton } from "./funds-skeleton";
 import { SourceLink, SourceNote } from "./source-note";
 
 const SHAREHUB_LINK = "https://sharehubnepal.com/company/mutual-fund-nav/open-end";
@@ -132,7 +133,11 @@ export function MutualFunds({
   );
 
   return (
-    <StateBanner state={banner(state)} onRetry={onRetry}>
+    <StateBanner
+      state={banner(state)}
+      onRetry={onRetry}
+      skeleton={<FundsSkeleton held={Object.keys(holdings).length} />}
+    >
       {snapshot && (
         <div className="space-y-2.5">
           {settingUpSip && (
