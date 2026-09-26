@@ -1585,22 +1585,49 @@ button.row-line + button.row-line::before {
   min-width: 0;
 }
 
-.scroll-row__track[data-more="end"] {
-  mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
+/* The track sits on its own compositing layer: WebKit otherwise repaints a
+   scrolling box with composited children black for a frame. */
+.scroll-row__track,
+.seg-track--scroll {
+  transform: translateZ(0);
 }
 
-.scroll-row__track[data-more="start"] {
-  mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent);
+.scroll-row::before,
+.scroll-row::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: var(--scroll-row-edge-bottom, 0px);
+  z-index: 2;
+  width: 44px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
-.scroll-row__track[data-more="both"] {
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 44px,
-    #000 calc(100% - 44px),
-    transparent
-  );
+.scroll-row::before {
+  left: 0;
+  background: linear-gradient(to right, var(--scroll-row-bg, var(--color-canvas)) 30%, transparent);
+}
+
+.scroll-row::after {
+  right: 0;
+  background: linear-gradient(to left, var(--scroll-row-bg, var(--color-canvas)) 30%, transparent);
+}
+
+.scroll-row[data-more="start"]::before,
+.scroll-row[data-more="both"]::before,
+.scroll-row[data-more="end"]::after,
+.scroll-row[data-more="both"]::after {
+  opacity: 1;
+}
+
+.surface-card .scroll-row {
+  --scroll-row-bg: var(--color-surface-raised);
+}
+
+.scroll-row:has(> .tab-strip) {
+  --scroll-row-edge-bottom: 1px;
 }
 
 .scroll-row__edge {

@@ -28,7 +28,9 @@ const LINE = 16;
  *   view, so returning to a screen never leaves the selection off-screen.
  *
  * `className` styles the scrolling row itself (its flex gap, padding, border).
- * The fade is a mask on the row, so it works on the page and on a card alike.
+ * The fades are drawn over the row, not masked into it: WebKit repaints a
+ * masked box that scrolls without its content for a frame (see `Segmented`).
+ * Inside a card they take the card's colour; set `--scroll-row-bg` elsewhere.
  */
 export function ScrollRow({
   children,
@@ -82,7 +84,7 @@ export function ScrollRow({
     if (!row || chosen === null) return;
     const item = row.querySelector<HTMLElement>(SELECTED);
     // Centred rather than nearest: at the edge it would sit under the fade.
-    if (item) scrollIntoBox(item, "x", "center", "smooth");
+    if (item) scrollIntoBox(item, "x", "center");
   }, [chosen]);
 
   const page = (direction: 1 | -1) => {
@@ -95,10 +97,9 @@ export function ScrollRow({
     edges.left && edges.right ? "both" : edges.left ? "start" : edges.right ? "end" : undefined;
 
   return (
-    <div className="scroll-row">
+    <div className="scroll-row" data-more={more}>
       <div
         ref={ref}
-        data-more={more}
         className={`scroll-row__track overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`}
         {...rest}
       >

@@ -36,13 +36,15 @@ export function Segmented<T extends string>({
   useWheelScroll(track, scroll);
 
   // A tab picked while half off the edge, or arriving selected from a link,
-  // slides fully into view.
+  // comes fully into view. Instantly, not smoothly: a strip that scrolls while
+  // the thumb is sliding is the one case WebKit still repaints black for a
+  // frame (why Fuel, already in view, never flashed and the others did).
   useEffect(() => {
     if (!scroll) return;
     const selected = track.current?.querySelector<HTMLElement>(
       `[data-segment="${CSS.escape(value)}"]`,
     );
-    if (selected) scrollIntoBox(selected, "x", "nearest", "smooth");
+    if (selected) scrollIntoBox(selected, "x", "nearest");
   }, [scroll, value]);
 
   const radius = small ? "rounded-[6px]" : "rounded-[8px]";
