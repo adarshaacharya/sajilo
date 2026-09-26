@@ -125,10 +125,7 @@ fn position_at_tray(window: &WebviewWindow) {
     #[cfg(target_os = "windows")]
     let placed = above_taskbar(window);
     #[cfg(target_os = "macos")]
-    let placed = {
-        tell_positioner_where_the_tray_is(window);
-        false
-    };
+    let placed = under_menu_bar_icon(window);
 
     if !placed {
         let placement = if cfg!(target_os = "macos") {
@@ -143,29 +140,58 @@ fn position_at_tray(window: &WebviewWindow) {
     }
 }
 
-/// Hands the positioner the tray icon's current frame, read from macOS.
+/// Hangs the popover from the menu-bar icon, centred under it, in screen
+/// points.
 ///
-/// The positioner only learns where the icon is from tray events, and Sajilo
-/// opens itself at launch before any has happened, so that first popover
-/// landed in the wrong place and only the second click put it under the icon.
-/// Asking for the frame on every open fixes the first one, and keeps later
-/// ones right as the date beside the icon changes width. The event is built,
-/// not received: it carries the same frame a hover over the icon would.
+/// Points, not pixels, because Macs mix screens: a Retina laptop at 2× beside
+/// an external display at 1× is common. The icon's frame arrives in its own
+/// screen's pixels, and the positioner plugin places the window in the pixels
+/// of whichever screen the window was last on — so a popover last shown on the
+/// 1× display opened well to the side of an icon on the 2× one. Every screen
+/// shares one space in points, so converting once, with the icon's own screen,
+/// puts it right on all of them.
 #[cfg(target_os = "macos")]
-fn tell_positioner_where_the_tray_is(window: &WebviewWindow) {
+fn under_menu_bar_icon(window: &WebviewWindow) -> bool {
+    use tauri::LogicalPosition;
+
     let app = window.app_handle();
-    let Some(tray) = app.tray_by_id("main") else {
-        return;
+    let Some(Ok(Some(rect))) = app.tray_by_id("main").map(|tray| tray.rect()) else {
+        return false;
     };
-    let Ok(Some(rect)) = tray.rect() else {
-        return;
+    let Ok(monitors) = app.available_monitors() else {
+        return false;
     };
-    let event = tauri::tray::TrayIconEvent::Move {
-        id: tray.id().clone(),
-        position: rect.position.to_physical(1.0),
-        rect,
-    };
-    tauri_plugin_positioner::on_tray_event(app, &event);
+    let pixels = rect.position.to_physical::<f64>(1.0);
+    let pixel_size = rect.size.to_physical::<f64>(1.0);
+    let width = window
+        .outer_size()
+        .ok()
+        .and_then(|size| {
+            window
+                .scale_factor()
+                .ok()
+                .map(|scale| f64::from(size.width) / scale)
+        })
+        .unwrap_or(380.0);
+
+    for monitor in monitors {
+        let scale = monitor.scale_factor();
+        let left = f64::from(monitor.position().x) / scale;
+        let top = f64::from(monitor.position().y) / scale;
+        let right = left + f64::from(monitor.size().width) / scale;
+        let (x, y) = (pixels.x / scale, pixels.y / scale);
+        let (icon_width, icon_height) = (pixel_size.width / scale, pixel_size.height / scale);
+        // The icon's screen is the one whose menu-bar strip holds it.
+        if x < left || x >= right || y < top || y >= top + 60.0 {
+            continue;
+        }
+        // Centred under the icon, kept on its screen near the edges.
+        let wanted = x + icon_width / 2.0 - width / 2.0;
+        let at_x = wanted.clamp(left + 8.0, (right - width - 8.0).max(left + 8.0));
+        let _ = window.set_position(LogicalPosition::new(at_x, y + icon_height));
+        return true;
+    }
+    false
 }
 
 /// The menu-bar icon's frame, in whole physical pixels, once it has a real
