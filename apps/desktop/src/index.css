@@ -1704,27 +1704,6 @@ button.row-line + button.row-line::before {
   transform: none;
 }
 
-.tool-site {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  max-width: 100%;
-  padding: 4px 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  white-space: nowrap;
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
-  transition:
-    color 0.12s ease,
-    border-color 0.12s ease;
-}
-
-.tool-site:hover {
-  color: var(--color-text);
-  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, var(--color-border));
-}
-
 .tool-emergency__number {
   display: grid;
   gap: 1px;

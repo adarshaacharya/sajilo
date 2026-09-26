@@ -205,11 +205,15 @@ function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void
           <span id="tools-directory" className="block text-[12px] font-semibold">
             {t("tools.directory")}
           </span>
-          <span className="block text-[10px] text-text-muted">{t("tools.directory-hint-short")}</span>
+          <span className="block text-[10px] text-text-muted">
+            {t("tools.directory-hint-short")}
+          </span>
         </span>
       </div>
 
-      <p className="px-0.5 text-[10px] font-medium text-text-muted">{t("tools.directory-emergency")}</p>
+      <p className="px-0.5 text-[10px] font-medium text-text-muted">
+        {t("tools.directory-emergency")}
+      </p>
       <div className="-mt-1 grid grid-cols-3 gap-1.5 rounded-md border border-border bg-canvas p-2">
         {emergency.map((contact) => (
           <button
