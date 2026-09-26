@@ -6793,6 +6793,7 @@
       }
     },
     "get_setting": null,
+    "get_setting:numeralStyle": "latin",
     "get_stations": {
       "status": "fresh",
       "value": {
