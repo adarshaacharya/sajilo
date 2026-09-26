@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { triggerSetupPreview } from "../../calendar/_components/setup-card";
 import { Icon } from "../../../shared/components/icon";
 import { Segmented } from "../../../shared/components/segmented";
 import { Toggle } from "../../../shared/components/toggle";
@@ -12,6 +11,7 @@ import {
   type PermissionState,
   type ReminderStyle,
 } from "../../../shared/lib/ipc";
+import { triggerSetupPreview } from "../../calendar/_components/setup-card";
 import { SettingsSection } from "./settings-section";
 
 function anyReminder(options: NotificationOptions): boolean {

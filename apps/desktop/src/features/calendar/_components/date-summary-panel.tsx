@@ -4,7 +4,15 @@ import { digits } from "../../../shared/lib/numerals";
 import { gregorianLongText } from "../_lib/copy-formats";
 import { CompactCopyRow } from "./compact-copy-row";
 
-const WEEKDAYS_NE = ["आइतबार", "सोमबार", "मंगलबार", "बुधबार", "बिहिबार", "शुक्रबार", "शनिबार"];
+export const WEEKDAYS_NE_LONG = [
+  "आइतबार",
+  "सोमबार",
+  "मंगलबार",
+  "बुधबार",
+  "बिहिबार",
+  "शुक्रबार",
+  "शनिबार",
+];
 const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 /**
@@ -29,7 +37,7 @@ export function DateSummaryPanel({
   const weekly = conversion.weeklyHoliday ?? null;
   const holiday = Boolean(event?.is_public_holiday);
   const weekday =
-    language === "en" ? WEEKDAYS_EN[conversion.weekday] : WEEKDAYS_NE[conversion.weekday];
+    language === "en" ? WEEKDAYS_EN[conversion.weekday] : WEEKDAYS_NE_LONG[conversion.weekday];
 
   return (
     <section className="surface-card p-3">
