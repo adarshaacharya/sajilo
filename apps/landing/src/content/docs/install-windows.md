@@ -10,7 +10,7 @@ Sajilo runs on **Windows 10 and 11, 64-bit**. Installing takes about a minute.
 
 ## Download and run the installer
 
-1. Download **Sajilo-windows-x64.exe** from the [download section](/#download).
+1. [Download Sajilo for Windows](/dl/windows) (**Sajilo-windows-x64.exe**).
 2. Open the file you downloaded.
 3. Windows may show **“Windows protected your PC”**. This is SmartScreen: beta builds are not code-signed yet, so Windows doesn't recognise the publisher. Click **More info**, then **Run anyway**.
 

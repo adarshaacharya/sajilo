@@ -16,7 +16,7 @@ Sajilo runs on **64-bit (x86_64) Linux**, on **Ubuntu 22.04 or newer** and distr
 
 ## With the .deb
 
-Download **Sajilo-linux-amd64.deb** from the [download section](/#download), then install it from the folder you saved it in:
+[Download the .deb](/dl/linux-deb) (**Sajilo-linux-amd64.deb**), then install it from the folder you saved it in:
 
 ```bash
 sudo apt install ./Sajilo-linux-amd64.deb
@@ -26,7 +26,7 @@ sudo apt install ./Sajilo-linux-amd64.deb
 
 ## With the .rpm
 
-Download **Sajilo-linux-x86_64.rpm** from the [download section](/#download), then install it from the folder you saved it in.
+[Download the .rpm](/dl/linux-rpm) (**Sajilo-linux-x86_64.rpm**), then install it from the folder you saved it in.
 
 On Fedora:
 
@@ -44,7 +44,7 @@ Either one installs what Sajilo needs along with it.
 
 ## With the AppImage
 
-Download **Sajilo-linux-x86_64.AppImage**, make it executable, and run it:
+[Download the AppImage](/dl/linux-appimage) (**Sajilo-linux-x86_64.AppImage**), make it executable, and run it:
 
 ```bash
 chmod +x Sajilo-linux-x86_64.AppImage

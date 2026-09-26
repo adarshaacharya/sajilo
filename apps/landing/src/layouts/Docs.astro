@@ -394,6 +394,32 @@ const groups = SECTIONS.map((s) => ({
   .prose :global(pre) {
     margin-top: 14px;
   }
+  /* A download is a button, not a word in a sentence: `[Download …](/dl/…)`
+     in any page downloads the file right there, and reads as the thing to
+     press. Several in one paragraph sit side by side. */
+  .prose :global(a[href^="/dl/"]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 4px 8px 4px 0;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: transform 0.2s var(--ease), filter 0.2s;
+  }
+  .prose :global(a[href^="/dl/"])::before {
+    content: "↓";
+    font-weight: 700;
+  }
+  .prose :global(a[href^="/dl/"]:hover) {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+  }
   .prose :global(h2 + p),
   .prose :global(h3 + p) {
     margin-top: 10px;

@@ -38,6 +38,8 @@ In the update window, untick **Automatically download and install future updates
 
 ## Update by hand
 
-You can always download the latest version from the [download section](/#download) and install it over the one you have: your dates, plans and settings are kept.
+You can always install the latest version over the one you have: your dates, plans and settings are kept.
+
+[Download the latest Sajilo](/dl/auto)
 
 > **Stuck on an old version?** If Sajilo never starts on your computer, it can't update itself either. Install the latest version by hand. On Linux, see [it installs, but never opens](/docs/troubleshooting.html#linux-it-installs-but-never-opens).

@@ -19,7 +19,11 @@ Opening Sajilo again from the Start menu, Launchpad or your applications menu br
 
 On **Ubuntu 22.04, Linux Mint 21, Pop!_OS 22.04** and similar, **Sajilo 0.1.28 and older can't start**: they were built for newer systems. The installer doesn't warn you, so it looks like nothing happens.
 
-**Fix:** download the latest version from the [download section](/#download) and install it over the old one. To check, run `sajilo-desktop` in a terminal: if you see `GLIBC_2.39 not found`, this is the problem.
+**Fix:** install the latest version over the old one:
+
+[Download the .deb](/dl/linux-deb) [Download the .rpm](/dl/linux-rpm) [Download the AppImage](/dl/linux-appimage)
+
+To check, run `sajilo-desktop` in a terminal: if you see `GLIBC_2.39 not found`, this is the problem.
 
 ## Windows says “Windows protected your PC”
 

@@ -12,7 +12,9 @@ Beta builds are not signed with an Apple certificate yet, so macOS asks you to c
 
 ## Install
 
-1. Download **Sajilo** for your Mac from the [download section](/#download) and open the `.dmg`.
+1. Download Sajilo for your Mac, then open the `.dmg`:
+
+   [Mac with Apple chip (M1 or newer)](/dl/macos-arm64) [Intel Mac](/dl/macos-x64)
 2. Drag **Sajilo** onto the **Applications** shortcut.
 
 ![Dragging Sajilo onto the Applications shortcut](/assets/install/0-drag-to-applications.png)
