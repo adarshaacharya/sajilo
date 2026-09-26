@@ -49,6 +49,31 @@ pub fn hide(window: &WebviewWindow) {
 
 pub fn show(window: &WebviewWindow) {
     crate::commands::telemetry::record(window.app_handle(), "action.popover-open");
+    // Opened at launch, the popover can come up before macOS has placed the
+    // menu-bar icon, whose frame then reads as a corner of the screen and
+    // drops the popover at the bottom of it. Wait for the icon — it takes a
+    // few frames — rather than show it in the wrong place.
+    #[cfg(target_os = "macos")]
+    if !tray_is_placed(window) {
+        let window = window.clone();
+        tauri::async_runtime::spawn(async move {
+            for _ in 0..20 {
+                let pause = tauri::async_runtime::spawn_blocking(|| {
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                });
+                if pause.await.is_err() || tray_is_placed(&window) {
+                    break;
+                }
+            }
+            let target = window.clone();
+            let _ = window.run_on_main_thread(move || show_now(&target));
+        });
+        return;
+    }
+    show_now(window);
+}
+
+fn show_now(window: &WebviewWindow) {
     position_at_tray(window);
     // Re-assert clear + vibrancy each open — some macOS builds repaint opaque after hide.
     let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
@@ -122,6 +147,35 @@ fn tell_positioner_where_the_tray_is(window: &WebviewWindow) {
         rect,
     };
     tauri_plugin_positioner::on_tray_event(app, &event);
+}
+
+/// Whether the menu-bar icon has a real place yet: a frame in the top strip
+/// of one of the screens, where menu bars are. Before macOS lays the icon out
+/// its frame is at the screen's origin, which is not.
+#[cfg(target_os = "macos")]
+fn tray_is_placed(window: &WebviewWindow) -> bool {
+    let app = window.app_handle();
+    let Some(Ok(Some(rect))) = app.tray_by_id("main").map(|tray| tray.rect()) else {
+        return false;
+    };
+    let size = rect.size.to_physical::<f64>(1.0);
+    let position = rect.position.to_physical::<f64>(1.0);
+    if size.width <= 0.0 || size.height <= 0.0 {
+        return false;
+    }
+    let Ok(monitors) = app.available_monitors() else {
+        return false;
+    };
+    monitors.iter().any(|monitor| {
+        let origin = monitor.position();
+        let area = monitor.size();
+        let left = f64::from(origin.x);
+        let top = f64::from(origin.y);
+        position.x >= left
+            && position.x < left + f64::from(area.width)
+            && position.y >= top
+            && position.y < top + 120.0 * monitor.scale_factor()
+    })
 }
 
 /// Opens the popover under the pointer, which on Linux means under the tray
