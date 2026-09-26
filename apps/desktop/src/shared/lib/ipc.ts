@@ -298,13 +298,20 @@ export interface WeekBar {
   weekday: number;
   screenSeconds: number;
   today: boolean;
+  /** One of the user's work days; days off are drawn lighter. */
+  workDay: boolean;
 }
 
 /** The week in a few numbers, added up by the engine. */
 export interface WeekSummary {
   days: WeekBar[];
   trackedDays: number;
+  /** Work days with screen time, and their average. */
+  workDaysTracked: number;
   averageScreenSeconds: number;
+  /** Days off with screen time, and their own average. */
+  offDaysTracked: number;
+  offAverageScreenSeconds: number;
   breaksReminded: number;
   breaksTaken: number;
   waterGoalDays: number;

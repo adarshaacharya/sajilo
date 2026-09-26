@@ -828,48 +828,58 @@
             "date": "2026-08-20",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 4
+            "weekday": 4,
+            "workDay": true
           },
           {
             "date": "2026-08-21",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 5
+            "weekday": 5,
+            "workDay": true
           },
           {
             "date": "2026-08-22",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 6
+            "weekday": 6,
+            "workDay": false
           },
           {
             "date": "2026-08-23",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 0
+            "weekday": 0,
+            "workDay": true
           },
           {
             "date": "2026-08-24",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 1
+            "weekday": 1,
+            "workDay": true
           },
           {
             "date": "2026-08-25",
             "screenSeconds": 0,
             "today": false,
-            "weekday": 2
+            "weekday": 2,
+            "workDay": true
           },
           {
             "date": "2026-08-26",
             "screenSeconds": 0,
             "today": true,
-            "weekday": 3
+            "weekday": 3,
+            "workDay": true
           }
         ],
         "longestStretch": null,
+        "offAverageScreenSeconds": 0,
+        "offDaysTracked": 0,
         "trackedDays": 0,
-        "waterGoalDays": 0
+        "waterGoalDays": 0,
+        "workDaysTracked": 0
       },
       "today": {
         "date": "2026-08-26",

@@ -967,5 +967,10 @@
   "break.hands-off": "Hands off the mouse and it finishes by itself.",
   "break.after.call": "That was a {n}-min call",
   "break.after.fullscreen": "After {n} min in fullscreen",
-  "break.after.dnd": "After {n} min of Do Not Disturb"
+  "break.after.dnd": "After {n} min of Do Not Disturb",
+  "focus.week.average-work": "Work days, on average",
+  "focus.week.average-off": "Days off, on average",
+  "focus.week.day-off": "day off",
+  "focus.week.chart-off": "Screen time by day · days off are lighter",
+  "focus.week.average-day": "over {n} day"
 }

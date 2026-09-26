@@ -1414,6 +1414,9 @@ pub struct WeekBar {
     pub weekday: u32,
     pub screen_seconds: u32,
     pub today: bool,
+    /// Whether this weekday is one of the user's work days. Days off are
+    /// drawn apart on the chart and averaged on their own.
+    pub work_day: bool,
 }
 
 /// The longest stretch at the computer without stepping away, and its day.
@@ -1433,7 +1436,13 @@ pub struct WeekSummary {
     pub days: Vec<WeekBar>,
     /// Days with any screen time.
     pub tracked_days: u32,
+    /// Work days with any screen time, and their average. A Saturday spent on
+    /// a film would otherwise read as a heavy work week, or hide if dropped.
+    pub work_days_tracked: u32,
     pub average_screen_seconds: u32,
+    /// Days off with any screen time, and their own average.
+    pub off_days_tracked: u32,
+    pub off_average_screen_seconds: u32,
     /// Eye and stand-up breaks: reminders sent, and breaks taken.
     pub breaks_reminded: u32,
     pub breaks_taken: u32,
@@ -1443,19 +1452,33 @@ pub struct WeekSummary {
     pub longest_stretch: Option<Stretch>,
 }
 
-/// Adds up the week the Focus screen shows.
-pub fn summarise(week: &[FocusDay], goal_ml: u32, today: NaiveDate) -> WeekSummary {
+/// Adds up the week the Focus screen shows. `work_days` is the user's
+/// setting, Sunday first: work days and days off are averaged apart.
+pub fn summarise(
+    week: &[FocusDay],
+    goal_ml: u32,
+    today: NaiveDate,
+    work_days: &[bool; 7],
+) -> WeekSummary {
+    let is_work_day =
+        |day: &FocusDay| work_days[day.date.weekday().num_days_from_sunday() as usize];
     let tracked: Vec<&FocusDay> = week.iter().filter(|day| day.screen_seconds > 0).collect();
     let tracked_days = u32::try_from(tracked.len()).unwrap_or(u32::MAX);
-    let total: u64 = tracked
-        .iter()
-        .map(|day| u64::from(day.screen_seconds))
-        .sum();
-    let average_screen_seconds = if tracked_days == 0 {
-        0
-    } else {
-        u32::try_from(total / u64::from(tracked_days)).unwrap_or(u32::MAX)
+    let (work, off): (Vec<&FocusDay>, Vec<&FocusDay>) =
+        tracked.iter().partition(|day| is_work_day(day));
+    let average = |days: &[&FocusDay]| -> (u32, u32) {
+        let count = u32::try_from(days.len()).unwrap_or(u32::MAX);
+        if count == 0 {
+            return (0, 0);
+        }
+        let total: u64 = days.iter().map(|day| u64::from(day.screen_seconds)).sum();
+        (
+            count,
+            u32::try_from(total / u64::from(count)).unwrap_or(u32::MAX),
+        )
     };
+    let (work_days_tracked, average_screen_seconds) = average(&work);
+    let (off_days_tracked, off_average_screen_seconds) = average(&off);
     let longest_stretch = week
         .iter()
         .filter(|day| day.longest_stretch_seconds >= 60)
@@ -1474,10 +1497,14 @@ pub fn summarise(week: &[FocusDay], goal_ml: u32, today: NaiveDate) -> WeekSumma
                 weekday: day.date.weekday().num_days_from_sunday(),
                 screen_seconds: day.screen_seconds,
                 today: day.date == today,
+                work_day: is_work_day(day),
             })
             .collect(),
         tracked_days,
+        work_days_tracked,
         average_screen_seconds,
+        off_days_tracked,
+        off_average_screen_seconds,
         breaks_reminded: week
             .iter()
             .map(|day| day.eyes.reminded + day.move_break.reminded)
@@ -1558,7 +1585,12 @@ pub fn snapshot(
         hold_support: HoldSupport::default(),
         settings: settings.clone(),
         status,
-        summary: summarise(&days, settings.water_goal_ml, today.date),
+        summary: summarise(
+            &days,
+            settings.water_goal_ml,
+            today.date,
+            &settings.work_days,
+        ),
         week: days,
         today,
         breaks,

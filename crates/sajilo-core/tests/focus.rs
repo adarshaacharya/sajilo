@@ -1021,11 +1021,38 @@ fn the_week_adds_up() {
     assert!(week.days[6].today);
     assert_eq!(week.days[6].weekday, 2, "Tuesday");
     assert_eq!(week.tracked_days, 2);
+    assert_eq!(week.work_days_tracked, 2);
+    assert_eq!(week.off_days_tracked, 0);
     assert!((85 * 60..=95 * 60).contains(&week.average_screen_seconds));
     assert!(week.breaks_reminded >= 8);
     assert_eq!(week.water_goal_days, 1);
     let stretch = week.longest_stretch.clone().expect("a stretch");
     assert!(stretch.today);
+}
+
+/// A day off is averaged on its own: Saturday's film doesn't make the work
+/// week look heavy, and it isn't hidden either.
+#[test]
+fn days_off_are_averaged_apart() {
+    let settings = FocusSettings::default();
+    assert!(!settings.work_days[6], "Saturday is off by default");
+    let mut state = FocusState::default();
+    let friday = monday_at(10) + Duration::days(4);
+    run(&mut state, &settings, friday, 60, busy);
+    let saturday = friday + Duration::days(1);
+    run(&mut state, &settings, saturday, 180, busy);
+
+    let view = snapshot(&mut state, &settings, saturday, saturday.naive_utc());
+    let week = &view.summary;
+    assert_eq!(week.tracked_days, 2);
+    assert_eq!(week.work_days_tracked, 1);
+    assert_eq!(week.off_days_tracked, 1);
+    assert!((55 * 60..=65 * 60).contains(&week.average_screen_seconds));
+    assert!((175 * 60..=185 * 60).contains(&week.off_average_screen_seconds));
+    let today = week.days.last().unwrap();
+    assert_eq!(today.weekday, 6, "Saturday");
+    assert!(!today.work_day);
+    assert!(week.days[5].work_day, "Friday");
 }
 
 // ------------------------------------------------------------------ jokes

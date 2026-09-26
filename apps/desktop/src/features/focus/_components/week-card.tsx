@@ -76,10 +76,14 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
                   ? Math.max(EMPTY_BAR * 2, Math.round((day.screenSeconds / tallest) * BAR_HEIGHT))
                   : EMPTY_BAR;
               const active = hovered === index;
+              // Days off are drawn lighter: counted, but not part of the
+              // work week the average describes.
               const idle = day.today
-                ? "var(--color-accent-fill)"
+                ? day.workDay
+                  ? "var(--color-accent-fill)"
+                  : "color-mix(in srgb, var(--color-accent-fill) 45%, transparent)"
                 : day.screenSeconds > 0
-                  ? "color-mix(in srgb, var(--color-text) 22%, transparent)"
+                  ? `color-mix(in srgb, var(--color-text) ${day.workDay ? 22 : 10}%, transparent)`
                   : "var(--color-divider)";
               const lit = day.today
                 ? "var(--color-accent-fill)"
@@ -119,18 +123,37 @@ export function WeekCard({ snapshot }: { snapshot: FocusSnapshot }) {
             })}
           </div>
           <figcaption className="mt-1 text-center text-[10px] text-text-muted">
-            {t((hoveredDay && DAY_NAMES[hoveredDay.weekday]) || "focus.week.chart")}
+            {hoveredDay
+              ? `${t(DAY_NAMES[hoveredDay.weekday] ?? "focus.week.chart")}${
+                  hoveredDay.workDay ? "" : ` · ${t("focus.week.day-off")}`
+                }`
+              : t(week.offDaysTracked > 0 ? "focus.week.chart-off" : "focus.week.chart")}
           </figcaption>
         </figure>
       )}
 
       <div className="mt-1.5 divide-y divide-divider">
         {/* Today's screen time has its own tile above the card. */}
-        {several && (
+        {/* Work days and days off are averaged apart, so a long Saturday
+            neither inflates the work week nor disappears. */}
+        {several && week.workDaysTracked > 0 && (
           <Row
-            label={t("focus.week.average-row")}
+            label={t(
+              week.offDaysTracked > 0 ? "focus.week.average-work" : "focus.week.average-row",
+            )}
             value={duration(week.averageScreenSeconds, numerals, t)}
-            note={t("focus.week.average-days").replace("{n}", digits(week.trackedDays, numerals))}
+            note={t(
+              week.workDaysTracked === 1 ? "focus.week.average-day" : "focus.week.average-days",
+            ).replace("{n}", digits(week.workDaysTracked, numerals))}
+          />
+        )}
+        {several && week.offDaysTracked > 0 && (
+          <Row
+            label={t("focus.week.average-off")}
+            value={duration(week.offAverageScreenSeconds, numerals, t)}
+            note={t(
+              week.offDaysTracked === 1 ? "focus.week.average-day" : "focus.week.average-days",
+            ).replace("{n}", digits(week.offDaysTracked, numerals))}
           />
         )}
         {week.breaksReminded > 0 && (

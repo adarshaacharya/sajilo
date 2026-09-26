@@ -967,5 +967,10 @@
   "break.hands-off": "माउस नछोए आफैं सकिन्छ।",
   "break.after.call": "{n} मिनेटको कल सकियो",
   "break.after.fullscreen": "{n} मिनेट फुलस्क्रिनपछि",
-  "break.after.dnd": "{n} मिनेट डु नट डिस्टर्बपछि"
+  "break.after.dnd": "{n} मिनेट डु नट डिस्टर्बपछि",
+  "focus.week.average-work": "कामको दिन, औसतमा",
+  "focus.week.average-off": "बिदाको दिन, औसतमा",
+  "focus.week.day-off": "बिदा",
+  "focus.week.chart-off": "दिनअनुसार स्क्रिन समय · बिदाका दिन हल्का रङमा",
+  "focus.week.average-day": "{n} दिनको"
 }
