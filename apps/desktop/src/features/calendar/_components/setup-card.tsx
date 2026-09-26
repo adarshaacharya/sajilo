@@ -1,14 +1,13 @@
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
-import { Icon } from "../../../shared/components/icon";
-import { SearchField } from "../../../shared/components/search-field";
 import { Segmented } from "../../../shared/components/segmented";
+import { Select } from "../../../shared/components/select";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { spring, useMotionEnabled } from "../../../shared/lib/motion";
 import { digits } from "../../../shared/lib/numerals";
-import { districtName, placeName, searchPlaces, usePlaces } from "../../../shared/lib/places";
+import { placeName, usePlaces } from "../../../shared/lib/places";
 import { track } from "../../../shared/lib/usage";
 import { WEEKDAYS_NE_LONG } from "./date-summary-panel";
 
@@ -86,9 +85,6 @@ export function useSetupCard() {
 /** Short in English so the preview stays on one line in both languages. */
 const WEEKDAYS_EN_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-/** How many matches the inline place search lists. */
-const PLACE_RESULTS = 6;
-
 /**
  * The first-run card, kept quiet: one line of text, today's date large, and
  * the choices that change it. Flipping language or digits flips only the
@@ -113,11 +109,11 @@ export function SetupCard({ onDone }: { onDone: () => void }) {
 
   return (
     <section className="surface-card space-y-3 p-3" aria-labelledby="setup-title">
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 id="setup-title" className="text-[12px] font-semibold">
+      <div>
+        <h2 id="setup-title" className="text-[13px] font-semibold">
           {t("setup.title")}
         </h2>
-        <span className="text-[10px] text-text-muted">{t("setup.body")}</span>
+        <p className="mt-0.5 text-[10px] text-text-muted">{t("setup.body")}</p>
       </div>
 
       <p className="setup-preview" aria-live="polite">
@@ -127,37 +123,56 @@ export function SetupCard({ onDone }: { onDone: () => void }) {
         ))}
       </p>
 
+      {/* Each choice says what it is: "1 2 3" alone does not. */}
       <div className="grid grid-cols-2 gap-2">
-        <Segmented
-          label={t("setup.language")}
-          size="sm"
-          value={language}
-          onChange={setLanguage}
-          options={[
-            { id: "en", label: "English" },
-            { id: "ne", label: "नेपाली" },
-          ]}
-        />
-        <Segmented
-          label={t("setup.digits")}
-          size="sm"
-          value={numerals}
-          onChange={setNumerals}
-          options={[
-            { id: "latin", label: "1 2 3" },
-            { id: "devanagari", label: "१ २ ३" },
-          ]}
-        />
+        <SetupField label={t("setup.language")}>
+          <Segmented
+            label={t("setup.language")}
+            size="sm"
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { id: "en", label: "English" },
+              { id: "ne", label: "नेपाली" },
+            ]}
+          />
+        </SetupField>
+        <SetupField label={t("setup.digits")}>
+          <Segmented
+            label={t("setup.digits")}
+            size="sm"
+            value={numerals}
+            onChange={setNumerals}
+            options={[
+              { id: "latin", label: "1 2 3" },
+              { id: "devanagari", label: "१ २ ३" },
+            ]}
+          />
+        </SetupField>
       </div>
 
-      <PlaceRow
-        done={
-          <button type="button" onClick={onDone} className="settings-btn shrink-0">
-            {t("setup.done")}
-          </button>
-        }
-      />
+      <PlaceRow />
+
+      {/* The one way out, full width and in the accent: the card is done
+          when this is pressed, and it should look like the end. */}
+      <button
+        type="button"
+        onClick={onDone}
+        className="settings-btn settings-btn--accent w-full justify-center py-1.5 text-[12px]"
+      >
+        {t("setup.done")}
+      </button>
     </section>
+  );
+}
+
+/** A small label over one of the card's choices. */
+function SetupField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <p className="text-[10px] font-medium text-text-muted">{label}</p>
+      {children}
+    </div>
   );
 }
 
@@ -184,73 +199,35 @@ function FlipWord({ text }: { text: string }) {
   );
 }
 
-/** The weather place as one slim row; tapping it searches every town in
- * place, rather than scrolling a list of seventy-seven. */
-function PlaceRow({ done }: { done: ReactNode }) {
+/** The weather place as a plain dropdown of every town, alphabetical: one
+ * click opens it, and typing a letter jumps there, as any dropdown does. */
+function PlaceRow() {
   const { t, language, modules, setModules } = useSettings();
   const places = usePlaces();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const current = places.find((place) => place.id === modules.weatherLocation);
-  const results = useMemo(
-    () => (query.trim() ? searchPlaces(places, query).slice(0, PLACE_RESULTS) : []),
-    [places, query],
+  const options = useMemo(
+    () =>
+      places
+        .map((place) => ({ id: place.id, label: placeName(place, language) }))
+        .sort((a, b) => a.label.localeCompare(b.label, language === "ne" ? "ne" : "en")),
+    [places, language],
   );
 
-  if (places.length === 0) return <div className="flex justify-end">{done}</div>;
-
-  const pick = (id: string) => {
-    setModules((prefs) => ({
-      ...prefs,
-      weatherLocation: id,
-      weatherPins: [id, ...prefs.weatherPins.filter((pin) => pin !== id)],
-    }));
-    setOpen(false);
-    setQuery("");
-  };
+  if (places.length === 0) return null;
 
   return (
-    <div className="space-y-1.5">
-      {/* Done shares the place's line: the card's last row, not a row of its own. */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-expanded={open}
-          onClick={() => setOpen((shown) => !shown)}
-          className="flex min-w-0 flex-1 items-center gap-1.5 text-left text-[11px]"
-        >
-          <span className="shrink-0 text-text-secondary">{t("setup.place")}</span>
-          <span className="truncate font-semibold">
-            {current ? placeName(current, language) : ""}
-          </span>
-          <Icon
-            name="chevronDown"
-            className={`size-3 shrink-0 text-text-muted transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </button>
-        {done}
-      </div>
-      {open && (
-        <div className="space-y-0.5">
-          <SearchField value={query} onChange={setQuery} placeholder={t("weather.search-places")} />
-          {results.map((place) => (
-            <button
-              key={place.id}
-              type="button"
-              onClick={() => pick(place.id)}
-              className="flex w-full items-baseline gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-surface-hover"
-            >
-              <span className="text-[12px] font-medium">{placeName(place, language)}</span>
-              <span className="truncate text-[10px] text-text-muted">
-                {districtName(place, language)}
-              </span>
-            </button>
-          ))}
-          {query.trim() && results.length === 0 && (
-            <p className="px-2 py-1 text-[11px] text-text-muted">{t("weather.no-place")}</p>
-          )}
-        </div>
-      )}
-    </div>
+    <SetupField label={t("setup.place")}>
+      <Select
+        ariaLabel={t("setup.place")}
+        value={modules.weatherLocation}
+        onChange={(id) =>
+          setModules((prefs) => ({
+            ...prefs,
+            weatherLocation: id,
+            weatherPins: [id, ...prefs.weatherPins.filter((pin) => pin !== id)],
+          }))
+        }
+        options={options}
+      />
+    </SetupField>
   );
 }
