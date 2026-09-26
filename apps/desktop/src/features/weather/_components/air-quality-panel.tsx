@@ -11,6 +11,23 @@ const BANDS: AqiCategory[] = [
   "hazardous",
 ];
 
+/** The scale's bands, equal width on the gauge though not in AQI points. */
+const EDGES = [0, 50, 100, 150, 200, 300, 500];
+
+const GAUGE = `linear-gradient(90deg, ${BANDS.map(
+  (band, index) =>
+    `${aqiColor(band)} ${(index / BANDS.length) * 100}% ${((index + 1) / BANDS.length) * 100}%`,
+).join(", ")})`;
+
+/** Where a reading sits on the gauge, 0–1, within its own band's segment. */
+function gaugePosition(aqi: number): number {
+  const band = EDGES.findIndex((edge, index) => index > 0 && aqi <= edge);
+  if (band === -1) return 1;
+  const low = EDGES[band - 1] ?? 0;
+  const high = EDGES[band] ?? 500;
+  return (band - 1 + (aqi - low) / (high - low)) / BANDS.length;
+}
+
 export function AirQualityPanel({
   airQuality,
   title,
@@ -27,11 +44,12 @@ export function AirQualityPanel({
   pm10Label: string;
 }) {
   const category = aqiCategory(airQuality.usAqi);
-  const tint = aqiColor(category);
-  const position = Math.min(airQuality.usAqi / 500, 1);
+  // Pulled toward the text colour so yellow stays legible on a light card.
+  const tint = `color-mix(in srgb, ${aqiColor(category)} 72%, var(--color-text))`;
+  const position = gaugePosition(airQuality.usAqi);
 
   return (
-    <section className="surface-card p-2.5">
+    <section className="surface-card p-3">
       <div className="flex items-baseline justify-between gap-2">
         <span className="text-[11px] font-semibold text-text-secondary">{title}</span>
         <div className="flex items-baseline gap-1.5">
@@ -44,22 +62,10 @@ export function AirQualityPanel({
         </div>
       </div>
 
-      <div className="relative mt-2 h-1.5 overflow-hidden rounded-full">
-        <div className="flex h-full gap-px">
-          {BANDS.map((band) => (
-            <div
-              key={band}
-              className="h-full flex-1"
-              style={{
-                background: aqiColor(band),
-                opacity: band === category ? 0.95 : 0.28,
-              }}
-            />
-          ))}
-        </div>
+      <div className="relative mt-2.5 h-2 rounded-full" style={{ background: GAUGE }}>
         <div
-          className="absolute top-1/2 h-2.5 w-0.5 -translate-y-1/2 rounded-full bg-white shadow"
-          style={{ left: `calc(${position * 100}% - 1px)` }}
+          className="aqi-marker absolute -top-1 h-4 w-1 rounded-full"
+          style={{ left: `calc(${position * 100}% - 2px)` }}
         />
       </div>
 

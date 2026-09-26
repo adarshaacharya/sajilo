@@ -61,6 +61,11 @@
   /* Feature identity comes from the icon and the data, not a background wash.
      These two survive only as icon tints. */
   --color-weather-tint: #6aa9dd;
+  --sky-day: linear-gradient(170deg, #1d3f6e, #3a6ea8);
+  --sky-night: linear-gradient(170deg, #121a30, #262c52);
+  --sky-dawn: linear-gradient(170deg, #4b3f66, #a8675a);
+  --sky-dusk: linear-gradient(170deg, #3c3460, #9c5752);
+  --sky-ink: #fff;
   --color-forex-tint: #5cc79b;
 
   --color-control-bg: #0e0e10;
@@ -109,6 +114,11 @@
     --color-positive: #0f7a3d;
     --color-negative: #c93a22;
     --color-weather-tint: #2f6fa8;
+    --sky-day: linear-gradient(170deg, #cfe3f5, #eef5fb);
+    --sky-night: linear-gradient(170deg, #d7dbee, #eef0f8);
+    --sky-dawn: linear-gradient(170deg, #ecdbe6, #faeee6);
+    --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
+    --sky-ink: #1c2b45;
     --color-forex-tint: #1a7f52;
     --color-control-bg: #ffffff;
     --color-control-border: #c8c8c3;
@@ -141,6 +151,11 @@
   --color-positive: #0f7a3d;
   --color-negative: #c93a22;
   --color-weather-tint: #2f6fa8;
+  --sky-day: linear-gradient(170deg, #cfe3f5, #eef5fb);
+  --sky-night: linear-gradient(170deg, #d7dbee, #eef0f8);
+  --sky-dawn: linear-gradient(170deg, #ecdbe6, #faeee6);
+  --sky-dusk: linear-gradient(170deg, #e2dbee, #f6e4dd);
+  --sky-ink: #1c2b45;
   --color-forex-tint: #1a7f52;
   --color-control-bg: #ffffff;
   --color-control-border: #c8c8c3;
@@ -1228,26 +1243,71 @@ button.row-line + button.row-line::before {
 
 /* Controls over the weather hero image — the one place a translucent white
    control is right, because it sits on artwork rather than on a surface. */
-.weather-glass-btn {
+/* Weather — the sky card follows the theme: deep gradients with white ink on
+   dark, pale washes with dark ink on light, each tinted by the time of day. */
+.sky-card {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--sky-day);
+  color: var(--sky-ink);
+}
+
+.sky-card[data-phase="night"] { background: var(--sky-night); }
+.sky-card[data-phase="dawn"] { background: var(--sky-dawn); }
+.sky-card[data-phase="dusk"] { background: var(--sky-dusk); }
+
+.sky-btn {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
   flex-shrink: 0;
-  border-radius: 6px;
-  color: #fff;
-  background: rgb(0 0 0 / 28%);
-  border: 1px solid rgb(255 255 255 / 18%);
-  transition: background 0.12s ease;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: inherit;
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  transition: background-color 0.12s ease;
 }
 
-.weather-glass-btn:hover:not(:disabled) {
-  background: rgb(0 0 0 / 40%);
+.sky-btn:hover {
+  background: color-mix(in srgb, currentColor 20%, transparent);
 }
 
-.weather-glass-btn:disabled {
-  opacity: 0.6;
+.place-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  font-size: 11px;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease,
+    background-color 0.12s ease;
+}
+
+.place-chip:hover {
+  color: var(--color-text);
+}
+
+.place-chip--on {
+  border-color: var(--color-weather-tint);
+  background: color-mix(in srgb, var(--color-weather-tint) 14%, transparent);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.weather-range {
+  background: linear-gradient(90deg, #6aa9dd, #f0b24a);
+}
+
+.aqi-marker {
+  background: var(--color-text);
+  box-shadow: 0 0 0 2px var(--color-surface-raised);
 }
 
 /* Station logos — most sit on white, so a hairline and (on dark) a slight

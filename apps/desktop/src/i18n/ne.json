@@ -719,7 +719,6 @@
   "weather.pinned": "पिन गरिएका ठाउँ",
   "weather.places": "ठाउँहरू",
   "weather.search-places": "सहर वा जिल्ला खोज्नुहोस्",
-  "weather.tomorrow": "भोलि",
   "weather.unpin": "पिन हटाउनुहोस्",
   "error.render-failed": "यो स्क्रिनमा केही बिग्रियो",
   "error.render-failed-hint": "सजिलोका अरू भाग चलिरहेका छन्।",
@@ -932,5 +931,9 @@
   "rashifal.search-placeholder": "नामको सुरुको अक्षर, जस्तै सु, वा Leo",
   "rashifal.no-match": "यो अक्षरबाट कुनै राशि सुरु हुँदैन। पहिलो अक्षर मात्र लेख्नुहोस्।",
   "rashifal.yours": "आजको तपाईंको राशिफल",
-  "rashifal.looking-up": "आज"
+  "rashifal.looking-up": "आज",
+  "weather.feels-like": "महसुस {t}",
+  "weather.rain-chance": "पानी {n}",
+  "weather.next-days": "आउँदा {n} दिन",
+  "weather.today": "आज"
 }

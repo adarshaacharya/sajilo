@@ -3,9 +3,9 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
 
 /**
- * The pinned places as tabs, home first and marked with a house; the one on
- * screen is lit. Every tab but home closes with its ×: the home screen always
- * needs a place, so home changes first, with the house in the header.
+ * The pinned places as chips, home first and marked with a house; the one on
+ * screen is lit. Every chip but home closes with its ×: the home screen always
+ * needs a place, so home changes first, from the sky card.
  */
 export function PinnedPlaces({
   pins,
@@ -25,54 +25,41 @@ export function PinnedPlaces({
   const home = pins[0];
 
   return (
-    <section className="surface-card p-2" aria-label={t("weather.pinned")}>
-      <div className="flex gap-1.5 overflow-x-auto [scrollbar-width:none]">
-        {pins.map((id) => {
-          const active = id === viewing;
-          const name = placeLabel(places, id, language);
-          return (
-            <div
-              key={id}
-              className={`flex shrink-0 items-center rounded-md text-[11px] font-medium transition-colors ${
-                active
-                  ? "bg-[color-mix(in_srgb,var(--color-weather-tint)_22%,transparent)] text-text"
-                  : "bg-surface text-text-secondary hover:text-text"
-              }`}
+    <nav
+      aria-label={t("weather.pinned")}
+      className="-mx-0.5 flex gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {pins.map((id) => {
+        const active = id === viewing;
+        const name = placeLabel(places, id, language);
+        return (
+          <span key={id} className={`place-chip ${active ? "place-chip--on" : ""}`}>
+            <button
+              type="button"
+              onClick={() => onView(id)}
+              aria-current={active}
+              className={`flex items-center gap-1 py-1 pl-2.5 ${id === home ? "pr-2.5" : "pr-1"}`}
             >
+              {id === home && <Icon name="house" className="size-3" />}
+              {name}
+            </button>
+            {id !== home && (
               <button
                 type="button"
-                onClick={() => onView(id)}
-                aria-current={active}
-                className={`flex items-center gap-1 py-1 pl-2 ${id === home ? "pr-2" : "pr-1"}`}
+                onClick={() => onRemove(id)}
+                aria-label={`${t("weather.unpin")} ${name}`}
+                className="flex items-center self-stretch pr-2 pl-0.5 text-[10px] opacity-60 hover:opacity-100"
               >
-                {id === home && (
-                  <Icon name="house" className="size-3 text-[color:var(--color-weather-tint)]" />
-                )}
-                {name}
+                ✕
               </button>
-              {id !== home && (
-                <button
-                  type="button"
-                  onClick={() => onRemove(id)}
-                  aria-label={`${t("weather.unpin")} ${name}`}
-                  className="flex h-full items-center rounded-r-md py-1 pr-1.5 pl-0.5 text-[10px] text-text-muted hover:text-text"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          );
-        })}
-        <button
-          type="button"
-          onClick={onAdd}
-          aria-label={t("weather.add-place")}
-          className="flex shrink-0 items-center gap-1 rounded-md bg-surface px-2 py-1 text-[11px] text-text-secondary hover:text-text"
-        >
-          <Icon name="plus" className="size-3" />
-          {t("weather.add-place")}
-        </button>
-      </div>
-    </section>
+            )}
+          </span>
+        );
+      })}
+      <button type="button" onClick={onAdd} className="place-chip gap-1 px-2.5 py-1">
+        <Icon name="plus" className="size-3" />
+        {t("weather.add-place")}
+      </button>
+    </nav>
   );
 }

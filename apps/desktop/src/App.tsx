@@ -119,12 +119,10 @@ function Shell() {
             path={route.path}
             element={
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                {route.path !== "/" && route.path !== "/weather" && (
-                  <Header title={t(route.titleKey)} />
-                )}
+                {route.path !== "/" && <Header title={t(route.titleKey)} />}
                 <main
                   className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
-                    route.path === "/" ? "p-3" : route.path === "/weather" ? "" : "p-2.5"
+                    route.path === "/" ? "p-3" : "p-2.5"
                   }`}
                 >
                   <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>

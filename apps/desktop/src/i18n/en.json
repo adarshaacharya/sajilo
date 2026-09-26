@@ -719,7 +719,6 @@
   "weather.pinned": "Pinned places",
   "weather.places": "Places",
   "weather.search-places": "Search town or district",
-  "weather.tomorrow": "Tomorrow",
   "weather.unpin": "Unpin",
   "error.render-failed": "Something broke on this screen",
   "error.render-failed-hint": "The rest of Sajilo is still working.",
@@ -932,5 +931,9 @@
   "rashifal.search-placeholder": "Start of your name, e.g. सु, or Leo",
   "rashifal.no-match": "No sign starts with that. Try just the first letter.",
   "rashifal.yours": "Your rashi today",
-  "rashifal.looking-up": "Today"
+  "rashifal.looking-up": "Today",
+  "weather.feels-like": "Feels like {t}",
+  "weather.rain-chance": "Rain {n}",
+  "weather.next-days": "Next {n} days",
+  "weather.today": "Today"
 }

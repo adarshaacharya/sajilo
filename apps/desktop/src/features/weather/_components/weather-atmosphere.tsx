@@ -7,7 +7,7 @@ function noise(index: number, salt: number): number {
   return x - Math.floor(x);
 }
 
-/** Animated rain/snow streaks over the weather hero — Swift WeatherAtmosphereView. */
+/** Animated rain/snow streaks over the sky card — Swift WeatherAtmosphereView. */
 export function WeatherAtmosphere({ condition }: { condition: WeatherCondition }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -35,6 +35,10 @@ export function WeatherAtmosphere({ condition }: { condition: WeatherCondition }
     const observer = new ResizeObserver(resize);
     observer.observe(parent);
 
+    // Streaks take the card's own ink: white on a night sky, dark on a
+    // light-theme morning, where white rain would vanish.
+    const ink = getComputedStyle(parent).color;
+
     const draw = (time: number) => {
       const { width, height } = canvas;
       ctx.clearRect(0, 0, width, height);
@@ -48,7 +52,8 @@ export function WeatherAtmosphere({ condition }: { condition: WeatherCondition }
         const y = travel * (height + len) - len;
         const opacity = 0.15 + noise(i, 3) * 0.3;
 
-        ctx.strokeStyle = `rgba(255,255,255,${opacity})`;
+        ctx.globalAlpha = opacity;
+        ctx.strokeStyle = ink;
         ctx.lineWidth = isSnow ? 1.2 : 0.9;
         ctx.beginPath();
         if (isSnow) {

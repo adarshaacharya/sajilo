@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
-import { useGoBack } from "../../shared/components/back-button";
+import { useHeaderInner, useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
@@ -13,19 +13,13 @@ import {
 import { placeLabel, usePlaces } from "../../shared/lib/places";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 import { AirQualityPanel } from "./_components/air-quality-panel";
-import { ForecastRow } from "./_components/forecast-row";
+import { ForecastDays } from "./_components/forecast-days";
 import { PinnedPlaces } from "./_components/pinned-places";
 import { PlacePicker } from "./_components/place-picker";
 import { WeatherAtmosphere } from "./_components/weather-atmosphere";
 import { WeatherIcon } from "./_components/weather-icon";
-import {
-  aqiCategory,
-  conditionTitle,
-  forecastWeekday,
-  formatCelsius,
-  formatPercent,
-} from "./_lib/format";
-import { currentSkyPhase, skyGradient } from "./_lib/sky-phase";
+import { aqiCategory, conditionTitle, formatCelsius, formatPercent } from "./_lib/format";
+import { currentSkyPhase } from "./_lib/sky-phase";
 
 const AQI_KEYS = {
   good: "aqi.good",
@@ -47,7 +41,6 @@ const AQI_ADVICE = {
 
 export function Weather() {
   const { t, language, modules, setModules } = useSettings();
-  const goBack = useGoBack();
   const places = usePlaces();
   // The home place until another is picked; a place looked at from the
   // picker stays on screen without having to be pinned.
@@ -116,190 +109,155 @@ export function Weather() {
   const snapshot = loaded?.placeId === viewing ? loaded : undefined;
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
   const phase = currentSkyPhase(snapshot?.sunrise ?? null, snapshot?.sunset ?? null);
-  const tomorrow = snapshot && snapshot.daily.length > 1 ? snapshot.daily[1] : null;
 
-  // The place on screen, and whether it is the one the home screen shows:
-  // a labelled pill beside the temperature it is about, not an icon to decode.
-  const isHome = viewing === modules.weatherLocation;
-  const homePill = isHome ? (
-    <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-white/80">
-      <Icon name="house" className="size-3" />
-      {t("weather.home-place")}
-    </span>
-  ) : (
-    <button
-      type="button"
-      onClick={() => makeHome(viewing)}
-      className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm transition-colors duration-150 hover:bg-white/25 active:scale-[0.98]"
-    >
-      <Icon name="house" className="size-3" />
-      {t("weather.make-home")}
-    </button>
-  );
-
-  const heroToolbar = useMemo(
-    () => (
-      <div className="relative z-[2] flex items-center gap-1.5">
-        <button
-          type="button"
-          onClick={goBack}
-          aria-label={t("action.back")}
-          className="weather-glass-btn"
-        >
-          <Icon name="chevronLeft" className="size-3.5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => setPicking(true)}
-          aria-label={t("weather.places")}
-          className="flex min-w-0 flex-1 items-center gap-1 text-left text-[13px] font-semibold text-white"
-        >
-          <span className="truncate">{placeLabel(places, viewing, language)}</span>
-          <Icon name="chevronDown" className="size-3 shrink-0 opacity-80" />
-        </button>
+  const refreshButton = useMemo(
+    () =>
+      picking ? null : (
         <button
           type="button"
           onClick={() => load(true)}
           disabled={loading}
           aria-label={t("action.refresh")}
-          className="weather-glass-btn"
+          className="icon-btn shrink-0"
         >
           <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
         </button>
-      </div>
-    ),
-    [places, viewing, language, t, goBack, load, loading],
+      ),
+    [load, loading, picking, t],
   );
+  useHeaderSlot(refreshButton);
+  useHeaderInner(picking ? { title: t("weather.places"), onBack: () => setPicking(false) } : null);
 
   if (picking) {
     return (
       <PlacePicker
         pins={modules.weatherPins}
         onPick={(id) => {
-          // Picking a place adds it as a tab: that is what "Add" promises.
+          // Picking a place adds it as a chip: that is what "Add" promises.
           addPin(id);
           setPicked(id);
           setPicking(false);
         }}
         onTogglePin={togglePin}
-        onBack={() => setPicking(false)}
       />
     );
   }
 
+  // The place on screen, and whether it is the one the home screen shows:
+  // a labelled pill, not an icon to decode.
+  const isHome = viewing === modules.weatherLocation;
+  const homePill = isHome ? (
+    <span className="flex shrink-0 items-center gap-1 text-[11px] font-medium opacity-75">
+      <Icon name="house" className="size-3" />
+      {t("weather.home-place")}
+    </span>
+  ) : (
+    <button type="button" onClick={() => makeHome(viewing)} className="sky-btn">
+      <Icon name="house" className="size-3" />
+      {t("weather.make-home")}
+    </button>
+  );
+
   return (
-    <div className="flex min-h-full flex-col">
-      <section
-        className="relative h-[210px] shrink-0 overflow-hidden text-white"
-        style={{ background: skyGradient(phase) }}
-      >
+    <div className="space-y-2.5">
+      <PinnedPlaces
+        pins={modules.weatherPins}
+        viewing={viewing}
+        onView={setPicked}
+        onAdd={() => setPicking(true)}
+        onRemove={removePin}
+      />
+
+      <section className="sky-card relative overflow-hidden" data-phase={phase}>
         {snapshot && <WeatherAtmosphere condition={snapshot.condition} />}
-        <div className="relative z-[2] flex h-full flex-col p-2.5">
-          {heroToolbar}
-          <div className="mt-2 flex flex-1 flex-col justify-end">
-            {snapshot ? (
-              <>
-                {banner.status === "stale" && (
-                  <p className="mb-1 text-[10px] opacity-80">
-                    {banner.since ? `${t("state.stale-since")} ${banner.since}` : t("state.stale")}
-                  </p>
-                )}
-                <p className="text-[54px] font-semibold leading-none tracking-tight">
+        <div className="relative z-[2] p-3.5">
+          {snapshot ? (
+            <>
+              {banner.status === "stale" && (
+                <p className="mb-1 text-[10px] opacity-75">
+                  {banner.since ? `${t("state.stale-since")} ${banner.since}` : t("state.stale")}
+                </p>
+              )}
+              <div className="flex items-start gap-3">
+                <p className="text-[54px] font-bold leading-none tracking-[-0.03em]">
                   {formatCelsius(snapshot.temperatureCelsius)}
                 </p>
-                {/* The pill shares the condition's line, low in the hero where
-                    the eye finishes reading; the line below is too long to share. */}
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <span className="flex min-w-0 items-center gap-1.5 text-[13px] font-medium">
-                    <WeatherIcon
-                      condition={snapshot.condition}
-                      className="size-4 shrink-0 opacity-90"
-                    />
-                    <span className="truncate">{conditionTitle(snapshot.condition)}</span>
-                  </span>
-                  {homePill}
+                <div className="mt-1.5 min-w-0 space-y-0.5">
+                  <p className="flex items-center gap-1.5 text-[13px] font-semibold">
+                    <WeatherIcon condition={snapshot.condition} className="size-4 shrink-0" />
+                    <span className="truncate">{conditionTitle(snapshot.condition, language)}</span>
+                  </p>
+                  <p className="text-[11px] opacity-75">
+                    {t("weather.feels-like").replace(
+                      "{t}",
+                      formatCelsius(snapshot.apparentTemperatureCelsius),
+                    )}{" "}
+                    · H {formatCelsius(snapshot.highCelsius)} L {formatCelsius(snapshot.lowCelsius)}
+                  </p>
+                  <p className="text-[11px] opacity-75">
+                    {t("weather.rain-chance").replace(
+                      "{n}",
+                      formatPercent(snapshot.precipitationChance),
+                    )}
+                  </p>
                 </div>
-                <p className="mt-0.5 text-[11px] opacity-85">
-                  Feels like {formatCelsius(snapshot.apparentTemperatureCelsius)} · H{" "}
-                  {formatCelsius(snapshot.highCelsius)} L {formatCelsius(snapshot.lowCelsius)} ·
-                  Rain {formatPercent(snapshot.precipitationChance)}
-                </p>
-              </>
-            ) : loading ? (
-              <p className="text-[34px] font-semibold leading-none">{t("state.loading")}</p>
-            ) : (
-              <>
-                <p className="text-[34px] font-semibold leading-none">{t("state.unavailable")}</p>
-                {/* Plain words on screen, like every other feed; the raw
-                    error stays in the tooltip for bug reports. */}
-                <p
-                  className="mt-1 text-[11px] opacity-85"
-                  title={banner.status === "failed" ? banner.message : undefined}
-                >
-                  {banner.status === "failed" ? t("state.failed-hint") : t("state.not-yet")}
-                </p>
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => load(true)}
-                    className="weather-glass-btn min-w-max whitespace-nowrap px-2 text-[11px]"
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-[28px] font-semibold leading-none">
+                {loading ? t("state.loading") : t("state.unavailable")}
+              </p>
+              {/* Plain words on screen, like every other feed; the raw
+                  error stays in the tooltip for bug reports. */}
+              {!loading && (
+                <div className="mt-2 flex items-center gap-2">
+                  <p
+                    className="min-w-0 flex-1 text-[11px] opacity-75"
+                    title={banner.status === "failed" ? banner.message : undefined}
                   >
+                    {banner.status === "failed" ? t("state.failed-hint") : t("state.not-yet")}
+                  </p>
+                  <button type="button" onClick={() => load(true)} className="sky-btn">
                     {t("action.retry")}
                   </button>
-                  {homePill}
                 </div>
-              </>
-            )}
+              )}
+            </>
+          )}
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-[color:color-mix(in_srgb,currentColor_14%,transparent)] pt-2.5">
+            <span className="flex min-w-0 items-center gap-1 text-[12px] font-semibold">
+              <Icon name="pin" className="size-3 shrink-0 opacity-75" />
+              <span className="truncate">{placeLabel(places, viewing, language)}</span>
+            </span>
+            {homePill}
           </div>
         </div>
       </section>
 
-      <div className="flex-1 space-y-2.5 p-2.5">
-        <PinnedPlaces
-          pins={modules.weatherPins}
-          viewing={viewing}
-          onView={setPicked}
-          onAdd={() => setPicking(true)}
-          onRemove={removePin}
+      {snapshot?.airQuality && (
+        <AirQualityPanel
+          airQuality={snapshot.airQuality}
+          title={t("aqi.title")}
+          categoryLabel={t(AQI_KEYS[aqiCategory(snapshot.airQuality.usAqi)])}
+          advice={t(AQI_ADVICE[aqiCategory(snapshot.airQuality.usAqi)])}
+          pm25Label={t("aqi.pm25")}
+          pm10Label={t("aqi.pm10")}
         />
+      )}
 
-        {snapshot?.airQuality && (
-          <AirQualityPanel
-            airQuality={snapshot.airQuality}
-            title={t("aqi.title")}
-            categoryLabel={t(AQI_KEYS[aqiCategory(snapshot.airQuality.usAqi)])}
-            advice={t(AQI_ADVICE[aqiCategory(snapshot.airQuality.usAqi)])}
-            pm25Label={t("aqi.pm25")}
-            pm10Label={t("aqi.pm10")}
-          />
-        )}
+      {snapshot && snapshot.daily.length > 0 && (
+        <section className="space-y-1.5">
+          <h2 className="px-0.5 text-[11px] font-semibold text-text-secondary">
+            {t("weather.next-days").replace("{n}", String(snapshot.daily.length))}
+          </h2>
+          <ForecastDays days={snapshot.daily} />
+        </section>
+      )}
 
-        {tomorrow && (
-          <section className="surface-card p-2.5">
-            <p className="mb-1 text-[11px] font-semibold text-text-secondary">
-              {t("weather.tomorrow")}
-            </p>
-            <ForecastRow forecast={tomorrow} dayLabel="" />
-          </section>
-        )}
-
-        {snapshot && snapshot.daily.length > 0 && (
-          <section className="surface-card p-2.5">
-            <p className="mb-1 text-[11px] font-semibold text-text-secondary">
-              Next {snapshot.daily.length} days
-            </p>
-            <div>
-              {snapshot.daily.map((day) => (
-                <ForecastRow key={day.date} forecast={day} dayLabel={forecastWeekday(day.date)} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {snapshot && (
-          <p className="text-[10px] text-text-muted">{fetchedAtLabel(snapshot.freshness)}</p>
-        )}
-      </div>
+      {snapshot && (
+        <p className="px-0.5 text-[10px] text-text-muted">{fetchedAtLabel(snapshot.freshness)}</p>
+      )}
     </div>
   );
 }

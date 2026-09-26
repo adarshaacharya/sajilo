@@ -28,16 +28,3 @@ function fallbackPhase(now: Date): SkyPhase {
   if (hour < 17) return "day";
   return "dusk";
 }
-
-export function skyGradient(phase: SkyPhase): string {
-  switch (phase) {
-    case "night":
-      return "linear-gradient(180deg, #0f1728 0%, #1a1f3d 100%)";
-    case "dawn":
-      return "linear-gradient(180deg, #5c4d75 0%, #d98266 100%)";
-    case "day":
-      return "linear-gradient(180deg, #3878c7 0%, #87bce6 100%)";
-    case "dusk":
-      return "linear-gradient(180deg, #473d6b 0%, #c76b5c 100%)";
-  }
-}

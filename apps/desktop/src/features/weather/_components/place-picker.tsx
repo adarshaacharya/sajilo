@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { BackButton } from "../../../shared/components/back-button";
 import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
 import { useSettings } from "../../../shared/context/settings-context";
@@ -9,18 +8,16 @@ import type { Place } from "../../../types/api/Place";
 /**
  * Every place weather can be shown for, searchable by town or district in
  * either script. Tapping a row shows its weather; the pin keeps it in the
- * strip above the forecast.
+ * strip above the forecast. The app header carries its title and back.
  */
 export function PlacePicker({
   pins,
   onPick,
   onTogglePin,
-  onBack,
 }: {
   pins: string[];
   onPick: (id: string) => void;
   onTogglePin: (id: string) => void;
-  onBack: () => void;
 }) {
   const { t, language } = useSettings();
   const places = usePlaces();
@@ -47,12 +44,7 @@ export function PlacePicker({
   const empty = groups.every((group) => group.places.length === 0);
 
   return (
-    <div className="flex min-h-full flex-col gap-2.5 p-2.5">
-      <div className="flex items-center gap-2">
-        <BackButton onClick={onBack} />
-        <p className="flex-1 text-[13px] font-semibold">{t("weather.places")}</p>
-      </div>
-
+    <div className="flex flex-col gap-2.5">
       <SearchField value={query} onChange={setQuery} placeholder={t("weather.search-places")} />
 
       <section className="surface-card p-2.5">
