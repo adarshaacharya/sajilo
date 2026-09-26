@@ -149,6 +149,45 @@ function StationList({
   );
 }
 
+/** The stations someone pinned, as tiles: one tap plays, a second pauses. */
+function PinnedTiles({
+  stations,
+  state,
+  onPlay,
+  t,
+}: {
+  stations: RadioStation[];
+  state: ReturnType<typeof player.getState>;
+  onPlay: (station: RadioStation) => void;
+  t: ReturnType<typeof useSettings>["t"];
+}) {
+  return (
+    <section className="mt-2 space-y-1.5">
+      <p className="px-0.5 text-[11px] font-semibold text-text-secondary">{t("radio.pinned")}</p>
+      <div className="grid grid-cols-4 gap-2">
+        {stations.slice(0, 8).map((station) => {
+          const isCurrent = state.nowPlaying?.slug === station.slug;
+          return (
+            <button
+              key={station.slug}
+              type="button"
+              data-station={station.slug}
+              aria-pressed={isCurrent}
+              onClick={() => onPlay(station)}
+              className={`surface-card flex min-w-0 cursor-pointer flex-col items-center gap-1.5 px-1 py-2 transition-[border-color,transform] active:scale-[0.97] ${
+                isCurrent ? "border-[color:var(--color-accent-mark)]" : ""
+              }`}
+            >
+              <StationArt station={station} isPlaying={isCurrent && state.isPlaying} size={36} />
+              <span className="w-full truncate text-center text-[10px]">{station.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function Radio() {
   const { t } = useSettings();
   const [state, setState] = useState(player.getState());
@@ -297,34 +336,18 @@ export function Radio() {
     <div ref={rootRef} className="space-y-2.5">
       {current && (
         <div ref={nowBarRef} className="radio-now-bar" data-stuck={stuck || undefined}>
-          <section className="surface-card p-2.5">
-            <div className="flex items-center gap-2.5">
-              <StationArt station={current} isPlaying={state.isPlaying} />
+          <section className="surface-card space-y-2.5 p-3">
+            <div className="flex items-center gap-3">
+              <StationArt station={current} isPlaying={state.isPlaying} size={48} />
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold text-text-secondary">
-                  {t("radio.now-playing")}
+                <p className="text-[10px] text-text-muted">
+                  {t(state.isPlaying ? "radio.now-playing" : "radio.paused")}
                 </p>
-                <p className="truncate text-[14px] font-semibold leading-tight">{current.name}</p>
+                <p className="truncate text-[15px] font-semibold leading-tight">{current.name}</p>
                 {current.frequency && (
                   <p className="text-[11px] text-text-muted">{current.frequency}</p>
                 )}
               </div>
-              <RadioVolumeControl className="shrink-0" />
-              <button
-                type="button"
-                aria-label={state.isPlaying ? "Pause" : "Play"}
-                disabled={state.isLoading || resolving === current.slug}
-                onClick={() => player.togglePlayback()}
-                className="icon-btn shrink-0"
-              >
-                {state.isLoading || resolving === current.slug ? (
-                  <Icon name="refresh" className="size-3.5 animate-spin" />
-                ) : state.isPlaying ? (
-                  <Icon name="pause" className="size-3.5" />
-                ) : (
-                  <Icon name="play" className="size-3.5" />
-                )}
-              </button>
               <button
                 type="button"
                 aria-label={t("radio.stop")}
@@ -333,6 +356,24 @@ export function Radio() {
               >
                 <Icon name="stop" className="size-3.5" />
               </button>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                aria-label={state.isPlaying ? t("radio.pause") : t("radio.play")}
+                disabled={state.isLoading || resolving === current.slug}
+                onClick={() => player.togglePlayback()}
+                className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[color:var(--color-accent-fill)] text-[color:var(--color-accent-ink)] transition-transform active:scale-95 disabled:opacity-60"
+              >
+                {state.isLoading || resolving === current.slug ? (
+                  <Icon name="refresh" className="size-4 animate-spin" />
+                ) : state.isPlaying ? (
+                  <Icon name="pause" className="size-4" />
+                ) : (
+                  <Icon name="play" className="size-4" />
+                )}
+              </button>
+              <RadioVolumeControl className="radio-volume--wide min-w-0 flex-1" />
             </div>
           </section>
         </div>
@@ -349,9 +390,14 @@ export function Radio() {
           </p>
         ) : (
           <>
+            {/* Pinned stations as big tiles while browsing; in a search they
+                stay rows, so results read as one list. */}
+            {!needle && pinned.length > 0 && (
+              <PinnedTiles stations={pinned} state={state} onPlay={toggleStation} t={t} />
+            )}
             <StationList
-              title={pinned.length > 0 ? t("radio.pinned") : undefined}
-              stations={pinned}
+              title={needle && pinned.length > 0 ? t("radio.pinned") : undefined}
+              stations={needle ? pinned : []}
               pins={pins}
               state={state}
               resolving={resolving}

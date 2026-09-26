@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Equalizer } from "../../../shared/components/equalizer";
-import { Icon } from "../../../shared/components/icon";
 
 export function StationArt({
   station,
@@ -30,12 +29,35 @@ export function StationArt({
     );
   }
 
+  // No logo, or one that failed: the station's initial on a colour of its
+  // own, so a list of logo-less stations still tells them apart. While it
+  // plays, the equaliser takes the letter's place.
+  const hue = hueOf(station.name);
   return (
     <span
-      className="flex shrink-0 items-center justify-center bg-surface-hover text-[color:var(--color-accent-mark)]"
-      style={{ width: size, height: size, borderRadius: rounded }}
+      className="flex shrink-0 items-center justify-center font-bold text-white"
+      style={{
+        width: size,
+        height: size,
+        borderRadius: rounded,
+        background: `hsl(${hue} 55% 42%)`,
+        fontSize: Math.round(size * 0.42),
+      }}
     >
-      {isPlaying ? <Equalizer isPlaying /> : <Icon name="radio" className="size-3.5" />}
+      {isPlaying ? <Equalizer isPlaying /> : initialOf(station.name)}
     </span>
   );
+}
+
+/** "Radio Kantipur" → "K": the word that names the station, not "Radio". */
+function initialOf(name: string): string {
+  const words = name.split(/\s+/).filter((word) => !/^(radio|fm|रेडियो|एफएम)$/i.test(word));
+  return Array.from(words[0] ?? name)[0]?.toUpperCase() ?? "•";
+}
+
+/** A steady hue per station name, so the same station keeps its colour. */
+function hueOf(name: string): number {
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + (char.codePointAt(0) ?? 0)) % 360;
+  return hash;
 }

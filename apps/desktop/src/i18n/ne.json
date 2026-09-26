@@ -923,5 +923,8 @@
   "focus.ml-unit": "मिलि",
   "focus.water.title": "{goal} मध्ये {done} लिटर",
   "focus.water.hint": "पानी पिउँदा गिलास थिच्नुहोस्।",
-  "focus.water.undo": "फिर्ता"
+  "focus.water.undo": "फिर्ता",
+  "radio.paused": "रोकिएको",
+  "radio.play": "बजाउनुहोस्",
+  "radio.pause": "रोक्नुहोस्"
 }

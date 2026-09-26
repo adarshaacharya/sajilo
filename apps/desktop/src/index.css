@@ -1257,6 +1257,13 @@ button.row-line + button.row-line::before {
   cursor: pointer;
 }
 
+/* The now-playing card's slider fills its row; the mini player keeps 52px. */
+.radio-volume--wide .radio-volume-slider {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
 .radio-volume-slider:focus-visible {
   outline: none;
 }

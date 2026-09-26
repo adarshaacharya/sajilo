@@ -923,5 +923,8 @@
   "focus.ml-unit": "ml",
   "focus.water.title": "{done} of {goal} litres",
   "focus.water.hint": "Tap the glass each time you drink.",
-  "focus.water.undo": "Undo"
+  "focus.water.undo": "Undo",
+  "radio.paused": "Paused",
+  "radio.play": "Play",
+  "radio.pause": "Pause"
 }
