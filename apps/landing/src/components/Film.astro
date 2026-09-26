@@ -1,0 +1,178 @@
+---
+// The tour video: the real app, recorded frame by frame against the same
+// showcase data this page reads, answering one everyday question after another.
+// It is a recording, so unlike the live panels on this page it can fall behind
+// the app — the caption dates it from that data rather than hiding the fact.
+//
+// Nothing loads until someone presses play: the poster is the only request.
+import { today } from "../data/showcase";
+import { ne } from "../lib/format";
+
+export const YOUTUBE_ID = "96Qk1Cn4NyY";
+
+const recorded = `${today.nepaliMonthName} ${ne(today.nepali.day)}, ${ne(today.nepali.year)}`;
+---
+
+<section class="film wrap" id="watch" aria-labelledby="film-title">
+  <div class="section-head reveal">
+    <p class="film-mark">
+      <span lang="ne">हेर्नुहोस्</span>
+      <span class="film-mark-en">Watch</span>
+    </p>
+    <h2 id="film-title">Watch it answer <em>your whole morning.</em></h2>
+    <p class="lede">
+      The date, holidays, panchang, NEPSE and IPOs, gold and Kalimati prices, news, a second clock for
+      family abroad, FM radio and break reminders, each answering a question you ask every day.
+    </p>
+  </div>
+
+  <figure class="film-frame reveal">
+    <video
+      class="film-video"
+      id="film-video"
+      poster="/assets/film/sajilo-tour.jpg"
+      preload="none"
+      playsinline
+      aria-label="Sajilo tour: the app answering everyday questions, from the Nepali date to break reminders"
+    >
+      <source src="/assets/film/sajilo-tour.mp4" type="video/mp4" />
+    </video>
+    <button class="film-play" id="film-play" type="button" aria-controls="film-video">
+      <span class="film-play-disc" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.9-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z" /></svg>
+      </span>
+      <span class="film-play-label">Watch the tour</span>
+    </button>
+  </figure>
+  <p class="film-caption reveal">
+    Recorded from the app on <span lang="ne">{recorded}</span>. The panels further down are the app itself, live.
+    <a class="film-yt" href={`https://youtu.be/${YOUTUBE_ID}`} rel="noopener">Watch on YouTube ↗</a>
+  </p>
+</section>
+
+<style>
+  .film {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(64px, 9vw, 120px);
+  }
+  .film-mark {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--accent-2);
+  }
+  .film-mark-en {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+
+  .film-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 18px;
+    overflow: hidden;
+    background: var(--ink-2);
+    box-shadow:
+      0 0 0 1px var(--line-2),
+      0 40px 90px rgb(0 0 0 / 0.45);
+  }
+  .film-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--ink-2);
+  }
+
+  .film-play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    background: linear-gradient(180deg, rgb(20 17 14 / 0) 40%, rgb(20 17 14 / 0.55));
+    transition: opacity 0.35s var(--ease);
+  }
+  .film-play-disc {
+    display: grid;
+    place-items: center;
+    width: clamp(64px, 8vw, 92px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 12px 40px rgb(0 0 0 / 0.45);
+    transition: transform 0.35s var(--spring);
+  }
+  .film-play-disc svg {
+    width: 38%;
+    height: 38%;
+    margin-left: 6%;
+  }
+  .film-play-label {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--paper);
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.6);
+  }
+  .film-play:hover .film-play-disc {
+    transform: scale(1.06);
+  }
+  .film-play:active .film-play-disc {
+    transform: scale(0.97);
+  }
+  .film.is-playing .film-play {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .film-caption {
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: var(--paper-3);
+  }
+
+  .film-yt {
+    margin-left: 6px;
+    color: var(--gilt-2);
+    white-space: nowrap;
+  }
+  .film-yt:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 560px) {
+    .film-frame {
+      border-radius: 12px;
+    }
+    .film-play-label {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  // The poster is a button until pressed; after that the browser's own controls
+  // take over, so seeking, fullscreen and volume behave the way people expect.
+  const section = document.getElementById("watch");
+  const video = document.getElementById("film-video") as HTMLVideoElement | null;
+  const play = document.getElementById("film-play");
+  if (section && video && play) {
+    play.addEventListener("click", () => {
+      section.classList.add("is-playing");
+      video.controls = true;
+      void video.play().catch(() => {
+        // Autoplay with sound refused: leave the controls for a manual start.
+      });
+      video.focus();
+    });
+  }
+</script>

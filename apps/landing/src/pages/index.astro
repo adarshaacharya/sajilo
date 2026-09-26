@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Hero from "../components/Hero.astro";
 import Ticker from "../components/Ticker.astro";
+import Film, { YOUTUBE_ID } from "../components/Film.astro";
 import PatroLeaf from "../components/PatroLeaf.astro";
 import Tour from "../components/Tour.astro";
 import Stocks from "../components/Stocks.astro";
@@ -37,12 +38,28 @@ const jsonLd = {
   privacyPolicy: "https://sajilo.fyi/privacy.html",
   downloadUrl: "https://github.com/adarshaacharya/sajilo/releases/latest",
 };
+
+// The tour video in the Watch section, so search can show it as a video result.
+const videoLd = {
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  name: "Sajilo: everything Nepali, one click away",
+  description:
+    "A tour of Sajilo, the Nepali menu bar app: calendar and festivals, panchang, NEPSE and IPOs, SIP NAVs, gold, fuel and Kalimati prices, news, weather, a second clock, FM radio, rashifal, Routine and Keeper.",
+  thumbnailUrl: "https://sajilo.fyi/assets/film/sajilo-tour.jpg",
+  contentUrl: "https://sajilo.fyi/assets/film/sajilo-tour.mp4",
+  embedUrl: `https://www.youtube.com/embed/${YOUTUBE_ID}`,
+  uploadDate: "2026-09-26",
+  duration: "PT1M24S",
+};
 ---
 
 <Base title="Sajilo: Nepal in your menu bar" description={description}>
   <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+  <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(videoLd)} />
   <Hero />
   <Ticker />
+  <Film />
   <PatroLeaf />
   <Chhutti />
   <Weather />
