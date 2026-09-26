@@ -363,6 +363,9 @@ export interface FocusSnapshot {
   usualScreenSeconds: number | null;
   /** Which holds this computer can see at all. */
   holdSupport: HoldRules;
+  /** The microphone or camera has been on longer than a call lasts, so it no
+   * longer holds breaks. */
+  callIgnored: boolean;
 }
 
 export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "resume";

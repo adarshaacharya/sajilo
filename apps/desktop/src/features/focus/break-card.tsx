@@ -224,11 +224,6 @@ export function BreakCard() {
               {waterLine}
             </p>
           )}
-          {card.seconds > 0 && !cheer && (
-            <p className="break-card__meta" data-tauri-drag-region>
-              {t("break.hands-off")}
-            </p>
-          )}
         </div>
         {card.seconds > 0 && <Countdown remaining={remaining} seconds={card.seconds} />}
       </div>

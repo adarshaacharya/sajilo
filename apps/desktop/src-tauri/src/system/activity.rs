@@ -685,7 +685,10 @@ mod platform {
 #[cfg(target_os = "linux")]
 mod platform {
     use std::fs;
-    use std::path::Path;
+    use std::io::Read;
+    use std::path::{Path, PathBuf};
+    use std::process::{Command, Stdio};
+    use std::time::{Duration, Instant};
 
     use zbus::zvariant::{OwnedValue, Value};
 
@@ -708,8 +711,8 @@ mod platform {
 
     /// Some ALSA capture substream is running. PipeWire and PulseAudio hold
     /// the device open while anything records, so this sees them too; a
-    /// Bluetooth headset's microphone, which never touches ALSA, it does not.
-    /// Cameras have no such shared record and are not asked.
+    /// Bluetooth headset's microphone, which never touches ALSA, it does not
+    /// (see [`sound_server_recording`]).
     fn capture_running() -> bool {
         let card = |name: &str| {
             name.strip_prefix("card").is_some_and(|number| {
@@ -725,6 +728,73 @@ mod platform {
                 fs::read_to_string(sub.path().join("status"))
                     .is_ok_and(|status| status.lines().any(|line| line.trim() == "state: RUNNING"))
             })
+    }
+
+    /// Some app is recording through the sound server, from any microphone,
+    /// Bluetooth included: PipeWire and PulseAudio both answer `pactl`, and a
+    /// recording stream is a "source output". `None` where `pactl` is not
+    /// installed or does not answer within half a second.
+    fn sound_server_recording() -> Option<bool> {
+        let mut child = Command::new("pactl")
+            .args(["list", "short", "source-outputs"])
+            .stdin(Stdio::null())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .ok()?;
+        let deadline = Instant::now() + Duration::from_millis(500);
+        loop {
+            match child.try_wait() {
+                Ok(Some(status)) if status.success() => {
+                    let mut listing = String::new();
+                    child.stdout.take()?.read_to_string(&mut listing).ok()?;
+                    return Some(listing.lines().any(|line| !line.trim().is_empty()));
+                }
+                Ok(None) if Instant::now() < deadline => {
+                    std::thread::sleep(Duration::from_millis(10));
+                }
+                Ok(None) => {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return None;
+                }
+                _ => return None,
+            }
+        }
+    }
+
+    /// The sound server itself keeps camera devices open to watch them, so
+    /// its processes are not "an app using the camera".
+    const CAMERA_WATCHERS: [&str; 2] = ["pipewire", "wireplumber"];
+
+    /// Some app has a camera open. Linux keeps no shared "camera in use"
+    /// record, but every process's open files are listed under /proc, and a
+    /// video call holds `/dev/videoN` open for as long as it runs. Only this
+    /// user's processes can be read, which are the ones that matter.
+    fn camera_open() -> bool {
+        let cameras: Vec<PathBuf> = entries(Path::new("/dev"), |name| name.starts_with("video"))
+            .map(|entry| entry.path())
+            .collect();
+        if cameras.is_empty() {
+            return false;
+        }
+        let own = std::process::id().to_string();
+        let process = move |name: &str| {
+            !name.is_empty() && name.bytes().all(|b| b.is_ascii_digit()) && name != own
+        };
+        entries(Path::new("/proc"), process)
+            .filter(|proc_dir| {
+                fs::read_to_string(proc_dir.path().join("comm"))
+                    .map(|comm| !CAMERA_WATCHERS.contains(&comm.trim()))
+                    .unwrap_or(false)
+            })
+            .flat_map(|proc_dir| {
+                fs::read_dir(proc_dir.path().join("fd"))
+                    .into_iter()
+                    .flatten()
+                    .flatten()
+            })
+            .any(|fd| fs::read_link(fd.path()).is_ok_and(|target| cameras.contains(&target)))
     }
 
     /// A boolean however deeply D-Bus wrapped it in variants.
@@ -774,17 +844,20 @@ mod platform {
 
     pub fn moment() -> Moment {
         Moment {
-            call: capture_running(),
-            // Neither X11 nor Wayland says so over anything this app links.
-            fullscreen: false,
+            call: sound_server_recording().unwrap_or(false) || capture_running() || camera_open(),
+            // Neither X11 nor Wayland says which window is fullscreen, but
+            // a fullscreen video or a slideshow asks the desktop to keep the
+            // screen awake, which GNOME and KDE both report: the same moment,
+            // asked another way.
+            fullscreen: super::super::display::held_awake(),
             do_not_disturb: quiet().unwrap_or(false),
         }
     }
 
     pub fn supported() -> Supported {
         Supported {
-            call: Path::new(ASOUND).is_dir(),
-            fullscreen: false,
+            call: true,
+            fullscreen: true,
             do_not_disturb: quiet().is_some(),
         }
     }

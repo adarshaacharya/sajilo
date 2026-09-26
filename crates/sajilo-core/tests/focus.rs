@@ -1362,7 +1362,8 @@ fn call(state: &mut FocusState, settings: &FocusSettings, minutes: i64) -> Vec<B
 /// back comes the moment it ends, and says why.
 #[test]
 fn a_call_holds_breaks_and_they_come_when_it_ends() {
-    let settings = move_only();
+    let mut settings = move_only();
+    settings.hold.calls = true;
     let mut state = FocusState::default();
     assert!(call(&mut state, &settings, 45).is_empty());
     assert!(state.active_break.is_none());
@@ -1385,7 +1386,8 @@ fn a_call_holds_breaks_and_they_come_when_it_ends() {
 
 #[test]
 fn a_card_on_screen_goes_away_when_a_call_starts() {
-    let settings = eyes_only();
+    let mut settings = eyes_only();
+    settings.hold.calls = true;
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(9), 20, busy);
     assert!(state.active_break.is_some());
@@ -1451,4 +1453,43 @@ fn a_usual_day_is_the_average_before_today() {
     let view = snapshot(&mut state, &settings, now, now.naive_utc());
     let usual = view.usual_screen_seconds.expect("two days before today");
     assert!((85 * 60..=95 * 60).contains(&usual), "{usual}");
+}
+
+/// Holding breaks is opt-in: every signal is a guess about the moment.
+#[test]
+fn nothing_holds_breaks_until_the_user_chooses() {
+    let hold = FocusSettings::default().hold;
+    assert!(!hold.calls && !hold.fullscreen && !hold.do_not_disturb);
+    // A call with holding off: the stand-up still comes on time.
+    let settings = move_only();
+    let mut state = FocusState::default();
+    assert!(!call(&mut state, &settings, 65).is_empty());
+}
+
+/// A microphone left open all afternoon (dictation, a noise filter) is not a
+/// call: after two hours it stops holding breaks and stops counting time
+/// away as time at the computer, and the screen can say so.
+#[test]
+fn a_microphone_open_for_hours_stops_being_a_call() {
+    let mut settings = move_only();
+    settings.hold.calls = true;
+    let mut state = FocusState::default();
+    let start = monday_at(9);
+    let mut now = start;
+    let mut due = Vec::new();
+    // Hands on the keyboard, microphone on the whole time.
+    while now <= start + Duration::hours(3) {
+        due.extend(tick(&mut state, &settings, in_call(now, 5)));
+        now += Duration::seconds(STEP);
+    }
+    assert!(
+        due.contains(&BreakKind::Move),
+        "breaks resume after two hours"
+    );
+    let view = snapshot(&mut state, &settings, now, now.naive_utc());
+    assert!(view.call_ignored);
+
+    // The microphone is released: the next call is believed again.
+    tick(&mut state, &settings, at(now + Duration::seconds(STEP), 5));
+    assert_eq!(state.call_since, None);
 }

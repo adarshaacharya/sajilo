@@ -91,6 +91,13 @@ export function SettingsPanel({
             }
           />
         ))}
+        {/* The safety net, said out loud: otherwise breaks that stopped
+            waiting look like the switch is broken. */}
+        {settings.hold.calls && snapshot.callIgnored && (
+          <p className="text-[10px] leading-snug text-[color:var(--color-holiday)]">
+            {t("focus.hold.calls-stuck")}
+          </p>
+        )}
       </Group>
 
       <Group title={t("focus.days.title")}>

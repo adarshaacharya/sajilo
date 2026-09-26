@@ -300,8 +300,9 @@ pub enum DaysOff {
     Off,
 }
 
-/// Which moments hold a due break until they pass. Each can be switched off
-/// for someone whose microphone is always open, say.
+/// Which moments hold a due break until they pass. All start off: each
+/// signal is a guess about the moment (an app can keep a microphone open for
+/// hours), so holding breaks is something the user chooses.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct HoldRules {
@@ -313,9 +314,9 @@ pub struct HoldRules {
 impl Default for HoldRules {
     fn default() -> Self {
         Self {
-            calls: true,
-            fullscreen: true,
-            do_not_disturb: true,
+            calls: false,
+            fullscreen: false,
+            do_not_disturb: false,
         }
     }
 }
@@ -645,6 +646,9 @@ pub struct FocusState {
     pub snoozed: [bool; TIMED],
     /// The moment holding breaks back now, and since when.
     pub held: Option<Held>,
+    /// Since when the microphone or camera has been in use without a break;
+    /// `None` while neither is.
+    pub call_since: Option<DateTime<Utc>>,
     /// A hold that just ended, for the next card to mention.
     pub after_hold: Option<AfterHold>,
     /// When a break came due while the user was typing; it waits for a
@@ -960,6 +964,26 @@ fn active_part(elapsed: u32, idle: u32) -> u32 {
     }
 }
 
+/// A microphone or camera in use for longer than this is not taken as a call:
+/// meetings end, and something that stays open all afternoon is more likely
+/// dictation, a noise filter or a voice channel left open. Believed forever,
+/// it would hold every break and read time away as time at the computer.
+pub const CALL_TRUST_HOURS: i64 = 2;
+
+/// `moment`, with a call that has lasted past [`CALL_TRUST_HOURS`] no longer
+/// believed. The count restarts the moment the microphone is released.
+fn trusted(state: &mut FocusState, moment: Moment, now: DateTime<Utc>) -> Moment {
+    if !moment.call {
+        state.call_since = None;
+        return moment;
+    }
+    let since = *state.call_since.get_or_insert(now);
+    Moment {
+        call: now - since <= Duration::hours(CALL_TRUST_HOURS),
+        ..moment
+    }
+}
+
 /// Advances the tracker by one measurement and returns the breaks now due, for
 /// the shell to announce.
 pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec<BreakKind> {
@@ -973,7 +997,8 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     // input, so the time counts and the eye timer keeps running through a
     // film. So is a call, with nobody touching the keyboard. Where idle
     // cannot be measured at all, it stays unmeasured.
-    let input_idle = if tick.display_held || tick.moment.call {
+    let moment = trusted(state, tick.moment, tick.now);
+    let input_idle = if tick.display_held || moment.call {
         tick.idle_seconds.map(|_| 0)
     } else {
         tick.idle_seconds
@@ -1018,7 +1043,7 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         state.since_break[1] = 0;
     }
 
-    track_hold(state, settings.hold_reason(tick.moment), tick.now);
+    track_hold(state, settings.hold_reason(moment), tick.now);
     let held = state.held.is_some();
 
     if !held {
@@ -1403,6 +1428,9 @@ pub struct FocusSnapshot {
     pub usual_screen_seconds: Option<u32>,
     /// Which holds this platform can see. The shell fills it in.
     pub hold_support: HoldSupport,
+    /// The microphone or camera has been in use for longer than a call
+    /// lasts, so it no longer holds breaks; Settings says so.
+    pub call_ignored: bool,
 }
 
 /// One day's bar on the week chart.
@@ -1583,6 +1611,9 @@ pub fn snapshot(
         day_off,
         usual_screen_seconds,
         hold_support: HoldSupport::default(),
+        call_ignored: state
+            .call_since
+            .is_some_and(|since| now - since > Duration::hours(CALL_TRUST_HOURS)),
         settings: settings.clone(),
         status,
         summary: summarise(
