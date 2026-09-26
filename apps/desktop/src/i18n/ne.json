@@ -213,10 +213,9 @@
   "radio.volume": "आवाज",
   "radio.minimize": "प्लेयर लुकाउनुहोस्",
   "radio.unplayable": "यो स्टेसनको बजाउन मिल्ने स्ट्रिम छैन।",
-  "rashifal.all-signs": "सबै राशि",
   "rashifal.back-to-mine": "मेरो राशि",
-  "rashifal.change-sign": "बदल्नुहोस्",
-  "rashifal.pick-hint": "आफ्नो नाम सुरु हुने अक्षर खोज्नुहोस्। राशि नाम वा जन्मकुण्डलीबाट आउँछ, जन्म महिनाबाट होइन।",
+  "rashifal.change-sign": "राशि बदल्नुहोस्",
+  "rashifal.pick-hint": "राशि नामको पहिलो अक्षरबाट आउँछ, जन्म महिनाबाट होइन।",
   "rashifal.pick-sign": "आफ्नो राशि छान्नुहोस्",
   "rashifal.source": "हाम्रो पात्रो",
   "rashifal.stale": "यो राशिफल अघिल्लो दिनको हो।",
@@ -928,5 +927,10 @@
   "radio.play": "बजाउनुहोस्",
   "radio.pause": "रोक्नुहोस्",
   "news.notices-title": "सरकारी सूचना",
-  "news.notices-new": "{n} नयाँ"
+  "news.notices-new": "{n} नयाँ",
+  "rashifal.other-signs": "अरू राशि",
+  "rashifal.search-placeholder": "नामको सुरुको अक्षर, जस्तै सु, वा Leo",
+  "rashifal.no-match": "यो अक्षरबाट कुनै राशि सुरु हुँदैन। पहिलो अक्षर मात्र लेख्नुहोस्।",
+  "rashifal.yours": "आजको तपाईंको राशिफल",
+  "rashifal.looking-up": "आज"
 }

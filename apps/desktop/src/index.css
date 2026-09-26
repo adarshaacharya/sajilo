@@ -287,7 +287,6 @@ html {
   .update-header-btn,
   .copy-chip,
   .toggle-chip,
-  .rashifal-sign-cell,
   .settings-btn,
   .update-window__automatic
 ) { font-size: var(--text-size-11); }
@@ -718,53 +717,88 @@ button.row-line + button.row-line::before {
   background: var(--color-surface-hover);
 }
 
-/* Rashifal — reading card + sign strip. */
-/* Tiles are the card's own colour with a hairline, so twelve of them read as
-   choices on a card rather than a wall of grey; hover is the one fill step. */
-.rashifal-pick-tile {
+/* Rashifal — sign tiles, the search box and the reading's symbol. */
+.rashi-tile {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
   border-radius: var(--radius-md);
-  padding: 8px;
+  padding: 7px 2px 6px;
   border: 1px solid var(--color-border);
   background: var(--color-surface-raised);
   transition:
+    opacity 0.2s ease,
     background-color 0.12s ease,
-    border-color 0.12s ease;
+    border-color 0.12s ease,
+    transform 0.1s ease;
 }
 
-.rashifal-pick-tile:hover {
+.rashi-tile:hover {
   background: color-mix(in srgb, var(--color-text) 4%, var(--color-surface-raised));
   border-color: color-mix(in srgb, var(--color-text) 12%, var(--color-border));
 }
 
-.rashifal-pick-tile-active,
-.rashifal-pick-tile-active:hover {
+.rashi-tile:active {
+  transform: scale(0.96);
+}
+
+.rashi-tile__glyph {
+  font-size: 17px;
+  line-height: 1.15;
+  color: var(--color-accent-mark);
+}
+
+.rashi-tile--dim {
+  opacity: 0.3;
+}
+
+.rashi-tile--hit,
+.rashi-tile[aria-pressed="true"] {
   border-color: var(--color-accent-mark);
   background: color-mix(in srgb, var(--color-accent-fill) 12%, var(--color-surface-raised));
 }
 
-.rashifal-sign-cell {
-  border-radius: var(--radius-sm);
-  padding: 6px 2px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  transition:
-    background-color 0.12s ease,
-    color 0.12s ease;
-}
-
-.rashifal-sign-cell:hover {
+.rashi-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
   background: var(--color-surface-hover);
-  color: var(--color-text);
+  padding: 7px 10px;
+  transition: border-color 0.12s ease;
 }
 
-.rashifal-sign-cell-active {
-  color: var(--color-accent-ink);
-  background: var(--color-accent-fill);
+/* The box carries the focus ring, so the field inside doesn't draw another. */
+.rashi-search:focus-within {
+  border-color: var(--color-accent-mark);
+  box-shadow: 0 0 0 1px var(--color-accent-mark);
 }
 
-.rashifal-sign-cell-mine {
-  box-shadow: inset 0 0 0 1px var(--color-accent-mark);
+.rashi-search input:focus-visible {
+  outline: none;
+}
+
+.rashi-glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 25px;
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rashi-tile {
+    transition: none;
+  }
+
+  .rashi-tile:active {
+    transform: none;
+  }
 }
 
 .settings-btn {

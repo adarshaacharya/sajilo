@@ -18,9 +18,9 @@ import type { RashiSign } from "../../types/api/RashiSign";
 import { SourceLink, SourceNote } from "../bazar/_components/source-note";
 import { ReadingCard } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
-import { SignStrip } from "./_components/sign-strip";
+import { SignGrid } from "./_components/sign-grid";
 import { publishedStamp } from "./_lib/format";
-import { validSign } from "./_lib/signs";
+import { SIGNS, validSign } from "./_lib/signs";
 
 const STORAGE_KEY = "selectedRashi";
 
@@ -76,7 +76,11 @@ export function Rashifal() {
   if (!mine || picking) {
     return (
       <div className="space-y-2.5">
-        <SignFinder highlight={mine} onChoose={choose} />
+        <SignFinder
+          current={mine}
+          onChoose={choose}
+          onCancel={mine ? () => setPicking(false) : undefined}
+        />
       </div>
     );
   }
@@ -96,7 +100,17 @@ export function Rashifal() {
         )}
       </StateBanner>
 
-      <SignStrip shown={shown} mine={mine} onSelect={(id) => setViewing(id === mine ? null : id)} />
+      {/* Everyone else's sign, one tap away — for looking up family. */}
+      <section className="space-y-1.5">
+        <h2 className="px-0.5 text-[11px] font-semibold text-text-secondary">
+          {t("rashifal.other-signs")}
+        </h2>
+        <SignGrid
+          signs={SIGNS.filter((sign) => sign.id !== mine)}
+          pressed={viewing}
+          onSelect={(id) => setViewing(id === viewing ? null : id)}
+        />
+      </section>
 
       {published && (
         <SourceNote label={t("bazar.published")} stamp={published}>

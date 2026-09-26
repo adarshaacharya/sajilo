@@ -213,10 +213,9 @@
   "radio.volume": "Volume",
   "radio.minimize": "Hide player",
   "radio.unplayable": "This station has no playable stream.",
-  "rashifal.all-signs": "All signs",
   "rashifal.back-to-mine": "My rashi",
-  "rashifal.change-sign": "Change",
-  "rashifal.pick-hint": "Find the syllable your name begins with. Your rashi comes from your name or birth chart, not your birth month.",
+  "rashifal.change-sign": "Change rashi",
+  "rashifal.pick-hint": "Your rashi comes from the first syllable of your name, not your birth month.",
   "rashifal.pick-sign": "Choose your rashi",
   "rashifal.source": "Hamro Patro",
   "rashifal.stale": "This reading was published for an earlier day.",
@@ -928,5 +927,10 @@
   "radio.play": "Play",
   "radio.pause": "Pause",
   "news.notices-title": "Government notices",
-  "news.notices-new": "{n} new"
+  "news.notices-new": "{n} new",
+  "rashifal.other-signs": "Other signs",
+  "rashifal.search-placeholder": "Start of your name, e.g. सु, or Leo",
+  "rashifal.no-match": "No sign starts with that. Try just the first letter.",
+  "rashifal.yours": "Your rashi today",
+  "rashifal.looking-up": "Today"
 }
