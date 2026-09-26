@@ -785,8 +785,7 @@ mod platform {
         entries(Path::new("/proc"), process)
             .filter(|proc_dir| {
                 fs::read_to_string(proc_dir.path().join("comm"))
-                    .map(|comm| !CAMERA_WATCHERS.contains(&comm.trim()))
-                    .unwrap_or(false)
+                    .is_ok_and(|comm| !CAMERA_WATCHERS.contains(&comm.trim()))
             })
             .flat_map(|proc_dir| {
                 fs::read_dir(proc_dir.path().join("fd"))
@@ -814,7 +813,9 @@ mod platform {
         let reply = session()?
             .call_method(Some(service), path, Some(interface), method, body)
             .ok()?;
-        as_bool(&reply.body().deserialize::<OwnedValue>().ok()?)
+        // Bound first: `&OwnedValue` derefs to `&Value`, but not through `?`.
+        let value: OwnedValue = reply.body().deserialize().ok()?;
+        as_bool(&value)
     }
 
     /// Do Not Disturb, where the desktop says. KDE's notification server
