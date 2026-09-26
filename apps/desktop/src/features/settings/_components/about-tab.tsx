@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
+import { Icon, type IconName } from "../../../shared/components/icon";
 import { TrayPinTip } from "../../../shared/components/tray-pin-tip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
@@ -13,16 +14,33 @@ const WEBSITE_URL = "https://sajilo.fyi";
 const PRIVACY_URL = `${WEBSITE_URL}/privacy.html`;
 const DOCS_URL = `${WEBSITE_URL}/docs.html`;
 const CONTACT_EMAIL = "contact@sajilo.fyi";
-const SUPPORT_URL = "https://buymemomo.com/adarsha";
+// The website's Support page, not a payment link: ways to give can be added
+// or changed there without a new release reaching everyone first.
+const SUPPORT_URL = "https://sajilo.fyi/support.html";
 
-function QuietLink({ label, href }: { label: string; href: string }) {
+/** One way out of the app, as a settings row: what it is, and an arrow
+ * saying it opens outside. */
+function LinkRow({
+  icon,
+  label,
+  detail,
+  href,
+}: {
+  icon: IconName;
+  label: string;
+  detail?: string;
+  href: string;
+}) {
   return (
     <button
       type="button"
       onClick={() => openExternalLink(href)}
-      className="text-[11px] text-text-secondary transition-colors hover:text-text-primary hover:underline"
+      className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-surface-hover"
     >
-      {label}
+      <Icon name={icon} className="size-3.5 shrink-0 text-text-muted" />
+      <span className="min-w-0 flex-1 truncate text-[12px]">{label}</span>
+      {detail && <span className="shrink-0 text-[11px] text-text-muted">{detail}</span>}
+      <Icon name="openExternal" className="size-2.5 shrink-0 text-text-muted" />
     </button>
   );
 }
@@ -85,8 +103,8 @@ function AboutUpdate() {
   }
 
   return (
-    <div className="mt-3 flex flex-col items-center gap-1.5">
-      <p className="text-[10px] text-text-muted">{message}</p>
+    <div className="flex items-center justify-between gap-2 border-t border-divider px-3 py-2">
+      <p className="min-w-0 truncate text-[11px] text-text-secondary">{message}</p>
       {control}
     </div>
   );
@@ -105,66 +123,75 @@ export function AboutTab() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-1 px-2 pt-6 pb-2 text-center">
-      <img src={appIcon} alt="" className="size-16" draggable={false} />
+    <div className="space-y-2.5">
+      {/* Who and which version, in one card: no centred stack to scroll. */}
+      <section className="surface-card overflow-hidden">
+        <div className="flex items-center gap-3 p-3">
+          <img src={appIcon} alt="" className="size-11 shrink-0" draggable={false} />
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] font-semibold tracking-tight">Sajilo</p>
+            <p className="text-[11px] leading-snug text-text-secondary">{t("about.tagline")}</p>
+          </div>
+          {version && (
+            <span className="shrink-0 rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] font-medium tabular-nums text-accent">
+              {version}
+            </span>
+          )}
+        </div>
+        <AboutUpdate />
+      </section>
 
-      <p className="mt-2 text-[17px] font-semibold tracking-tight">Sajilo</p>
-      <p className="text-[11px] text-text-secondary">{t("about.tagline")}</p>
-      <QuietLink label="sajilo.fyi" href={WEBSITE_URL} />
-      {version && (
-        <p className="mt-1 inline-flex items-center gap-1 rounded-full border border-accent/25 bg-accent/10 px-2 py-0.5 text-[10px] text-text-muted">
-          {t("about.version")}
-          <span className="font-medium tabular-nums text-accent">{version}</span>
-        </p>
-      )}
-      <AboutUpdate />
-
-      <p className="mt-5 max-w-[240px] text-[10px] leading-relaxed text-text-muted">
-        {t("about.feedback")}
-      </p>
-      <div className="mt-1.5 flex flex-wrap items-center justify-center gap-1.5">
-        <QuietLink label={t("about.docs")} href={DOCS_URL} />
-        <span className="text-[10px] text-text-muted">·</span>
-        <QuietLink label="GitHub" href={REPO_URL} />
-        <span className="text-[10px] text-text-muted">·</span>
-        <QuietLink label={t("about.report-issue")} href={ISSUES_URL} />
-        <span className="text-[10px] text-text-muted">·</span>
-        <QuietLink label={CONTACT_EMAIL} href={`mailto:${CONTACT_EMAIL}`} />
-      </div>
+      {/* Every way out, as rows: nothing to read before finding the one. */}
+      <section className="surface-card divide-y divide-divider overflow-hidden">
+        <LinkRow icon="directory" label={t("about.docs")} href={DOCS_URL} />
+        <LinkRow icon="warning" label={t("about.report-issue")} href={ISSUES_URL} />
+        <LinkRow
+          icon="mail"
+          label={t("about.contact")}
+          detail={CONTACT_EMAIL}
+          href={`mailto:${CONTACT_EMAIL}`}
+        />
+        <LinkRow icon="link" label={t("about.website")} detail="sajilo.fyi" href={WEBSITE_URL} />
+        <LinkRow icon="link" label="GitHub" href={REPO_URL} />
+      </section>
 
       {/* Said once, here, where people look for it: never a prompt or a badge. */}
-      <p className="mt-5 max-w-[240px] text-[10px] leading-relaxed text-text-muted">
-        {t("about.support-note")}
-      </p>
       <button
         type="button"
         onClick={() => openExternalLink(SUPPORT_URL)}
-        className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[11px] font-medium text-[color:var(--color-accent-mark)] transition-colors hover:bg-accent/20"
+        className="about-momo flex w-full items-center gap-3 p-3 text-left"
       >
-        <span aria-hidden="true">🥟</span>
-        {t("about.support-button")}
+        <span className="text-[24px] leading-none" aria-hidden="true">
+          🥟
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[12px] font-semibold text-[color:var(--color-accent-mark)]">
+            {t("about.support-button")}
+          </span>
+          <span className="mt-0.5 block text-[10px] leading-snug text-text-muted">
+            {t("about.support-note")}
+          </span>
+        </span>
+        <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
       </button>
 
       {/* The first-launch card, on demand — for anyone who pressed "Got it"
           before actually moving the icon. */}
       {isWindows &&
         (pinHelp ? (
-          <div className="mt-4 w-full text-left">
-            <TrayPinTip onDismiss={() => setPinHelp(false)} />
-          </div>
+          <TrayPinTip onDismiss={() => setPinHelp(false)} />
         ) : (
           <button
             type="button"
             onClick={() => setPinHelp(true)}
-            className="mt-3 text-[11px] text-[color:var(--color-accent-mark)] hover:underline"
+            className="w-full text-center text-[11px] text-[color:var(--color-accent-mark)] hover:underline"
           >
             {t("tray-pin.help")}
           </button>
         ))}
 
-      <p className="mt-6 text-[10px] leading-relaxed text-text-muted">
-        {t("about.made-in-nepal")}
-        <br />© 2026{" "}
+      <p className="px-2 pt-1 text-center text-[10px] leading-relaxed text-text-muted">
+        {t("about.made-in-nepal")} · © 2026{" "}
         <button
           type="button"
           onClick={() => openExternalLink("https://adarsha.dev")}
@@ -172,7 +199,7 @@ export function AboutTab() {
         >
           Adarsha Acharya
         </button>
-        {" · "}
+        <br />
         <button
           type="button"
           onClick={() => openExternalLink(LICENSE_URL)}

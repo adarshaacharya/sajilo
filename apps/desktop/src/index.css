@@ -1435,6 +1435,17 @@ button.row-line + button.row-line::before {
   color: var(--color-text);
 }
 
+/* About's one ask: a card of its own, tinted, never louder than that. */
+.about-momo {
+  border-radius: var(--radius-card);
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 30%, var(--color-border));
+  background: color-mix(in srgb, var(--color-accent-mark) 7%, var(--color-surface-raised));
+  transition: background-color 0.15s ease;
+}
+.about-momo:hover {
+  background: color-mix(in srgb, var(--color-accent-mark) 12%, var(--color-surface-raised));
+}
+
 .focus-customise-btn {
   display: inline-flex;
   flex-shrink: 0;
