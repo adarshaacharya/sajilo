@@ -20,6 +20,7 @@ Dealers' Association (FENEGOSIDA).
 - **Vegetable prices:** the Kalimati Fruits and Vegetable Market
 Development Board.
 - **Weather and air quality:** [Open-Meteo](https://open-meteo.com), licensed [CC BY 4.0](https://open-meteo.com/en/license).
+- **Crypto prices:** Data provided by [CoinGecko](https://www.coingecko.com), with [Kraken](https://www.kraken.com)'s public ticker as a backup when CoinGecko is unreachable.
 
 
 

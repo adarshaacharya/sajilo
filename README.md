@@ -35,49 +35,8 @@ click, and works in Nepali or English.
   showing nothing.
 - **No account, no API keys.** Sajilo reads only public sources.
 
-## Features
-
-### Calendar and planning
-
-- Bikram Sambat calendar with tithi, festivals, and public holidays
-- BS ↔ AD date conversion and detailed day information
-- Upcoming events and personal day plans
-- **Keeper**: offline reminders for passports, bills, vehicle renewals, documents
-  with expiry dates, and family occasions
-- Notifications the evening before festivals and public holidays, and on IPO
-  closing days
-
-### Markets and prices
-
-- NEPSE index, sector sub-indices, share prices, and a personal watchlist
-- Open IPOs from CDSC
-- Nepal Rastra Bank exchange rates
-- **Bazar**: gold and silver, fuel prices, and Kalimati vegetable prices
-
-### News and information
-
-- Headlines from Nepali and English newsrooms, including Kantipur, OnlineKhabar,
-  The Kathmandu Post, Ratopati, and Gorkhapatra
-- Official updates from the Government of Nepal, readable in the app
-- Daily rashifal
-- FM radio stations from across Nepal
-
-### Weather and time
-
-- Weather and air quality for Kathmandu, Lalitpur, and Pokhara
-- World clocks alongside Nepal time
-
-### Everyday tools
-
-- Land area (hill and Terai systems), weight, VAT, and simple interest calculators
-- A directory of emergency numbers and government services
-
-### Made for Nepali users
-
-- Full Nepali and English interface
-- Devanagari or Latin numerals
-- A configurable BS date in the menu bar or tray
-- Launch at login, automatic updates, and local backup and restore
+Everything Sajilo does, with the real app beside each feature, is on
+[sajilo.fyi](https://sajilo.fyi).
 
 ## Download
 
@@ -88,6 +47,7 @@ click, and works in Nepali or English.
 | Windows               | [Sajilo-windows-x64.exe](https://sajilo.fyi/dl/windows)            |
 | Linux (.deb)          | [Sajilo-linux-amd64.deb](https://sajilo.fyi/dl/linux-deb)          |
 | Linux (AppImage)      | [Sajilo-linux-x86_64.AppImage](https://sajilo.fyi/dl/linux-appimage) |
+| Linux (.rpm)          | [Sajilo-linux-x86_64.rpm](https://sajilo.fyi/dl/linux-rpm)         |
 
 Each link always serves the latest release. Older versions and release notes are on
 the [releases page](https://github.com/adarshaacharya/sajilo/releases).
@@ -140,6 +100,7 @@ fetched.
 | Open IPOs                   | CDS and Clearing Ltd. (CDSC)                            |
 | Gold and silver             | Federation of Nepal Gold and Silver Dealers' Association |
 | Fuel prices                 | Nepal Oil Corporation                                   |
+| Crypto prices               | [CoinGecko](https://www.coingecko.com), with Kraken as a backup |
 | Vegetable prices            | Kalimati Fruits and Vegetable Market Development Board  |
 | Weather and air quality     | [Open-Meteo](https://open-meteo.com) (CC BY 4.0)        |
 | Rashifal                    | Hamro Patro                                             |
