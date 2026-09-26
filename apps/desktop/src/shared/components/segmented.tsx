@@ -3,6 +3,7 @@ import { type RefObject, useEffect, useRef, useState } from "react";
 import { spring } from "../lib/motion";
 import { scrollIntoBox } from "../lib/scroll";
 import { Icon, type IconName } from "./icon";
+import { useWheelScroll } from "./scroll-row";
 
 type Option<T extends string> = { id: T; label: string; icon?: IconName };
 
@@ -32,6 +33,7 @@ export function Segmented<T extends string>({
   const small = size === "sm";
   const track = useRef<HTMLDivElement>(null);
   const more = useHiddenSides(track, scroll);
+  useWheelScroll(track, scroll);
 
   // A tab picked while half off the edge, or arriving selected from a link,
   // slides fully into view.

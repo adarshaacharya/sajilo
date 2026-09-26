@@ -1,4 +1,5 @@
 import { Icon } from "../../../shared/components/icon";
+import { ScrollRow } from "../../../shared/components/scroll-row";
 import { useSettings } from "../../../shared/context/settings-context";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
 
@@ -25,41 +26,40 @@ export function PinnedPlaces({
   const home = pins[0];
 
   return (
-    <nav
-      aria-label={t("weather.pinned")}
-      className="-mx-0.5 flex gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-    >
-      {pins.map((id) => {
-        const active = id === viewing;
-        const name = placeLabel(places, id, language);
-        return (
-          <span key={id} className={`place-chip ${active ? "place-chip--on" : ""}`}>
-            <button
-              type="button"
-              onClick={() => onView(id)}
-              aria-current={active}
-              className={`flex items-center gap-1 py-1 pl-2.5 ${id === home ? "pr-2.5" : "pr-1"}`}
-            >
-              {id === home && <Icon name="house" className="size-3" />}
-              {name}
-            </button>
-            {id !== home && (
+    <nav aria-label={t("weather.pinned")}>
+      <ScrollRow className="-mx-0.5 flex gap-1.5 px-0.5 pb-0.5">
+        {pins.map((id) => {
+          const active = id === viewing;
+          const name = placeLabel(places, id, language);
+          return (
+            <span key={id} className={`place-chip ${active ? "place-chip--on" : ""}`}>
               <button
                 type="button"
-                onClick={() => onRemove(id)}
-                aria-label={`${t("weather.unpin")} ${name}`}
-                className="flex items-center self-stretch pr-2 pl-0.5 text-[10px] opacity-60 hover:opacity-100"
+                onClick={() => onView(id)}
+                aria-current={active}
+                className={`flex items-center gap-1 py-1 pl-2.5 ${id === home ? "pr-2.5" : "pr-1"}`}
               >
-                ✕
+                {id === home && <Icon name="house" className="size-3" />}
+                {name}
               </button>
-            )}
-          </span>
-        );
-      })}
-      <button type="button" onClick={onAdd} className="place-chip gap-1 px-2.5 py-1">
-        <Icon name="plus" className="size-3" />
-        {t("weather.add-place")}
-      </button>
+              {id !== home && (
+                <button
+                  type="button"
+                  onClick={() => onRemove(id)}
+                  aria-label={`${t("weather.unpin")} ${name}`}
+                  className="flex items-center self-stretch pr-2 pl-0.5 text-[10px] opacity-60 hover:opacity-100"
+                >
+                  ✕
+                </button>
+              )}
+            </span>
+          );
+        })}
+        <button type="button" onClick={onAdd} className="place-chip gap-1 px-2.5 py-1">
+          <Icon name="plus" className="size-3" />
+          {t("weather.add-place")}
+        </button>
+      </ScrollRow>
     </nav>
   );
 }

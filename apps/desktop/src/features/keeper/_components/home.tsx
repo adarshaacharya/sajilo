@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
+import { ScrollRow } from "../../../shared/components/scroll-row";
 import { Segmented } from "../../../shared/components/segmented";
 import type {
   KeeperDate,
@@ -240,7 +241,7 @@ function PeopleRow({
   ];
 
   return (
-    <div className="-mx-0.5 flex gap-2.5 overflow-x-auto px-0.5 pt-1 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <ScrollRow className="-mx-0.5 flex gap-2.5 px-0.5 pt-1 pb-0.5">
       {chips.map((chip) => (
         <button
           key={chip.id ?? "everyone"}
@@ -260,7 +261,7 @@ function PeopleRow({
           <span className="keeper-person__name">{chip.label}</span>
         </button>
       ))}
-    </div>
+    </ScrollRow>
   );
 }
 

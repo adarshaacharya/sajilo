@@ -1570,6 +1570,66 @@ button.row-line + button.row-line::before {
   }
 }
 
+/* ScrollRow — the row fades out on whichever side has more (a mask, so it
+   blends into a page or a card alike), and that side gets a small button that
+   pages it for a mouse without a sideways wheel. */
+.scroll-row {
+  position: relative;
+  min-width: 0;
+}
+
+.scroll-row__track[data-more="end"] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent);
+}
+
+.scroll-row__track[data-more="start"] {
+  mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent);
+}
+
+.scroll-row__track[data-more="both"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 44px,
+    #000 calc(100% - 44px),
+    transparent
+  );
+}
+
+.scroll-row__edge {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  translate: 0 -50%;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  color: var(--color-text-secondary);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 18%);
+  transition: color 0.12s ease;
+}
+
+.scroll-row__edge:hover {
+  color: var(--color-text);
+}
+
+.scroll-row__edge--left {
+  left: 0;
+}
+
+.scroll-row__edge--right {
+  right: 0;
+}
+
+/* A tab strip's buttons centre on its labels, above the divider line. */
+.scroll-row:has(> .tab-strip) .scroll-row__edge {
+  top: calc(50% - 3px);
+}
+
 /* Station logos — most sit on white, so a hairline and (on dark) a slight
    dim keep them from out-shining the controls around them. */
 .station-art {

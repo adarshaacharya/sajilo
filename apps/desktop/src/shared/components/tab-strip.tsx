@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { spring } from "../lib/motion";
+import { ScrollRow } from "./scroll-row";
 
 type Tab<T extends string> = { id: T; label: string };
 
@@ -23,10 +24,10 @@ export function TabStrip<T extends string>({
   label: string;
 }) {
   return (
-    <div
+    <ScrollRow
       role="tablist"
       aria-label={label}
-      className="flex items-stretch gap-4 overflow-x-auto border-b border-[color:var(--color-divider)] [scrollbar-width:none]"
+      className="tab-strip flex items-stretch gap-4 border-b border-[color:var(--color-divider)]"
     >
       {tabs.map((tab) => {
         const selected = tab.id === value;
@@ -52,6 +53,6 @@ export function TabStrip<T extends string>({
           </button>
         );
       })}
-    </div>
+    </ScrollRow>
   );
 }

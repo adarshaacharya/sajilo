@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
+import { ScrollRow } from "../../shared/components/scroll-row";
 import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
@@ -157,32 +158,31 @@ export function News() {
   return (
     <StateBanner state={banner} onRetry={() => load(true)}>
       {/* Every source at once, one tap each, instead of a dropdown. */}
-      <fieldset
-        aria-label={t("news.source")}
-        className="-mx-0.5 mb-2 flex min-w-0 border-0 gap-1.5 overflow-x-auto px-0.5 pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {[{ id: ALL, name: t("news.all-sources") }, ...sources].map((source) => (
-          <button
-            key={source.id}
-            type="button"
-            aria-pressed={selected === source.id}
-            onClick={() => pick(source.id)}
-            className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors ${
-              selected === source.id
-                ? "border-[color:var(--color-accent-mark)] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] font-semibold text-accent-mark"
-                : "border-[color:var(--color-border)] text-text-secondary hover:text-text"
-            }`}
-          >
-            {source.id !== ALL && (
-              <span
-                className="size-1.5 rounded-full"
-                style={{ background: sourceColor(source.id) }}
-                aria-hidden="true"
-              />
-            )}
-            {source.name}
-          </button>
-        ))}
+      <fieldset aria-label={t("news.source")} className="mb-2 min-w-0 border-0">
+        <ScrollRow className="-mx-0.5 flex gap-1.5 px-0.5 pb-0.5">
+          {[{ id: ALL, name: t("news.all-sources") }, ...sources].map((source) => (
+            <button
+              key={source.id}
+              type="button"
+              aria-pressed={selected === source.id}
+              onClick={() => pick(source.id)}
+              className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] whitespace-nowrap transition-colors ${
+                selected === source.id
+                  ? "border-[color:var(--color-accent-mark)] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_12%,transparent)] font-semibold text-accent-mark"
+                  : "border-[color:var(--color-border)] text-text-secondary hover:text-text"
+              }`}
+            >
+              {source.id !== ALL && (
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{ background: sourceColor(source.id) }}
+                  aria-hidden="true"
+                />
+              )}
+              {source.name}
+            </button>
+          ))}
+        </ScrollRow>
       </fieldset>
 
       {selected === ALL && notices.length > 0 && (
