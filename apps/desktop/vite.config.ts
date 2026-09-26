@@ -8,4 +8,7 @@ export default defineConfig({
   // strictPort so a busy port fails loudly instead of silently moving.
   server: { port: 1420, strictPort: true },
   build: { target: "safari15" },
+  // Stamps the saved data cache: data saved by one build is not handed to the
+  // next, whose screens may expect a different shape (see `swr-cache.ts`).
+  define: { __BUILD_ID__: JSON.stringify(new Date().toISOString()) },
 });

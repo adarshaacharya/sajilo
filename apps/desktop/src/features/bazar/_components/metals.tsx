@@ -30,7 +30,9 @@ const CREDITS: Record<MetalSource, { href: string; name: string }> = {
 
 export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
   const { t } = useSettings();
-  const credit = CREDITS[snapshot.source];
+  // A source this build does not know (newer data, or none) drops the credit
+  // line rather than the screen.
+  const credit = CREDITS[snapshot.source] as (typeof CREDITS)[MetalSource] | undefined;
   const headline = headlineMetal(snapshot);
   const published = sourceStamp(snapshot.freshness);
 
@@ -88,7 +90,7 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
       <MetalCalculator snapshot={snapshot} />
 
       <SourceNote label={t("bazar.published")} stamp={published}>
-        <SourceLink href={credit.href}>{credit.name}</SourceLink>
+        {credit && <SourceLink href={credit.href}>{credit.name}</SourceLink>}
       </SourceNote>
     </div>
   );

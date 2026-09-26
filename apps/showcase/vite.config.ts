@@ -59,4 +59,6 @@ export default defineConfig({
     outDir,
     emptyOutDir: true,
   },
+  // The app's saved-data cache is stamped per build; see desktop/vite.config.ts.
+  define: { __BUILD_ID__: JSON.stringify(new Date().toISOString()) },
 });
