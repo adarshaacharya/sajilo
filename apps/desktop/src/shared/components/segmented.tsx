@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { spring } from "../lib/motion";
+import { scrollIntoBox } from "../lib/scroll";
 import { Icon, type IconName } from "./icon";
 
 type Option<T extends string> = { id: T; label: string; icon?: IconName };
@@ -36,9 +37,10 @@ export function Segmented<T extends string>({
   // slides fully into view.
   useEffect(() => {
     if (!scroll) return;
-    track.current
-      ?.querySelector<HTMLElement>(`[data-segment="${CSS.escape(value)}"]`)
-      ?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+    const selected = track.current?.querySelector<HTMLElement>(
+      `[data-segment="${CSS.escape(value)}"]`,
+    );
+    if (selected) scrollIntoBox(selected, "x", "nearest", "smooth");
   }, [scroll, value]);
 
   return (

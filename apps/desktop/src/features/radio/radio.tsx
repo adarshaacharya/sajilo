@@ -10,6 +10,7 @@ import * as player from "../../shared/lib/audio";
 import { api } from "../../shared/lib/ipc";
 import { catchAsFailed } from "../../shared/lib/load-state";
 import { usePersistedList } from "../../shared/lib/persisted";
+import { scrollIntoBox } from "../../shared/lib/scroll";
 import { track } from "../../shared/lib/usage";
 import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
@@ -317,9 +318,10 @@ export function Radio() {
   useEffect(() => {
     if (revealed.current || !arrivedPlaying || stations.length === 0) return;
     revealed.current = true;
-    rootRef.current
-      ?.querySelector(`[data-station="${CSS.escape(arrivedPlaying)}"]`)
-      ?.scrollIntoView({ block: "center" });
+    const station = rootRef.current?.querySelector<HTMLElement>(
+      `[data-station="${CSS.escape(arrivedPlaying)}"]`,
+    );
+    if (station) scrollIntoBox(station, "y", "center");
   }, [arrivedPlaying, stations.length]);
 
   const current = state.nowPlaying
