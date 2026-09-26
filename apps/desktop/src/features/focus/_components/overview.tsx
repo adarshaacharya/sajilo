@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
+import { SwitchVisual } from "../../../shared/components/switch";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
@@ -64,16 +65,16 @@ export function Overview({
       {settings.water.enabled && <WaterGlass snapshot={snapshot} onWater={onWater} />}
 
       <section aria-labelledby="focus-tiles-title" className="space-y-1.5">
-        <div className="flex items-baseline justify-between px-0.5">
-          <h2 id="focus-tiles-title" className="text-[11px] font-semibold text-text-secondary">
-            {t("focus.tiles.title")}
-          </h2>
-          <span className="text-[10px] text-text-muted">{t("focus.tiles.hint")}</span>
-        </div>
-        <div className={`grid gap-2 ${kinds.length === 4 ? "grid-cols-4" : "grid-cols-3"}`}>
-          {kinds.map((kind) => (
+        <h2 id="focus-tiles-title" className="px-0.5 text-[11px] font-semibold text-text-secondary">
+          {t("focus.tiles.title")}
+        </h2>
+        {/* Two across: at four across in this width the names were cut off
+            and the interval wrapped. An odd one out spans the row. */}
+        <div className="grid grid-cols-2 gap-2">
+          {kinds.map((kind, index) => (
             <ReminderTile
               key={kind}
+              wide={kinds.length % 2 === 1 && index === kinds.length - 1}
               kind={kind}
               settings={settings}
               onToggle={(enabled) =>
@@ -512,10 +513,12 @@ function WaterGlass({
 function ReminderTile({
   kind,
   settings,
+  wide,
   onToggle,
 }: {
   kind: TileKind;
   settings: FocusSettings;
+  wide: boolean;
   onToggle: (enabled: boolean) => void;
 }) {
   const { t } = useSettings();
@@ -523,39 +526,46 @@ function ReminderTile({
   const rule = settings[kind];
   const tint = KIND_TINTS[kind];
 
+  // The switch says on or off; colour is kept to the icon, so four tiles
+  // don't become four competing outlines.
   return (
     <button
       type="button"
-      aria-pressed={rule.enabled}
+      role="switch"
+      aria-checked={rule.enabled}
       onClick={() => onToggle(!rule.enabled)}
-      className={`surface-card flex min-w-0 cursor-pointer flex-col items-center gap-1.5 px-1.5 py-2.5 text-center transition-[opacity,border-color,transform] duration-200 active:scale-[0.97] ${
-        rule.enabled ? "" : "opacity-50"
+      className={`surface-card flex min-w-0 cursor-pointer flex-col gap-2 p-2.5 text-left transition-[background-color,transform] duration-150 hover:bg-surface-hover active:scale-[0.98] ${
+        wide ? "col-span-2" : ""
       }`}
-      style={
-        rule.enabled
-          ? { borderColor: `color-mix(in srgb, ${tint} 45%, var(--color-border))` }
-          : undefined
-      }
     >
-      <span
-        className="flex size-8 items-center justify-center rounded-full transition-colors"
-        style={{
-          color: rule.enabled ? tint : "var(--color-text-muted)",
-          background: rule.enabled
-            ? `color-mix(in srgb, ${tint} 16%, transparent)`
-            : "var(--color-divider)",
-        }}
-      >
-        <Icon name={KIND_ICONS[kind]} className="size-3.5" />
+      <span className="flex items-center justify-between">
+        <span
+          className="flex size-7 items-center justify-center rounded-full transition-colors"
+          style={{
+            color: rule.enabled ? tint : "var(--color-text-muted)",
+            background: rule.enabled
+              ? `color-mix(in srgb, ${tint} 16%, transparent)`
+              : "var(--color-divider)",
+          }}
+        >
+          <Icon name={KIND_ICONS[kind]} className="size-3.5" />
+        </span>
+        <SwitchVisual checked={rule.enabled} />
       </span>
-      <span className="w-full truncate text-[12px] font-medium">
-        {kindLabel(kind, settings, t)}
-      </span>
-      <span className="text-[10px] text-text-muted">
-        {t(rule.enabled ? "focus.tiles.every" : "focus.tiles.off").replace(
-          "{n}",
-          digits(rule.everyMinutes, numerals),
-        )}
+      <span className="min-w-0">
+        <span
+          className={`block truncate text-[12px] font-semibold ${
+            rule.enabled ? "" : "text-text-secondary"
+          }`}
+        >
+          {kindLabel(kind, settings, t)}
+        </span>
+        <span className="block truncate text-[10px] text-text-muted">
+          {t(rule.enabled ? "focus.tiles.every" : "focus.tiles.off").replace(
+            "{n}",
+            digits(rule.everyMinutes, numerals),
+          )}
+        </span>
       </span>
     </button>
   );
