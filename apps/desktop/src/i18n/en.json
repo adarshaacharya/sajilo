@@ -877,7 +877,7 @@
   "focus.pause": "Pause",
   "focus.today.screen": "on screen",
   "focus.today.breaks": "breaks taken",
-  "focus.water.hint": "Tap the glass when you drink · {n} ml",
+  "focus.water.hint": "{n} ml a glass. Tap it when you drink.",
   "focus.water.undo": "Undo",
   "radio.paused": "Paused",
   "radio.play": "Play",

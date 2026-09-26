@@ -387,7 +387,9 @@ function WaterCard({
             .replace("{done}", digits(glasses, numerals))
             .replace("{goal}", digits(goal, numerals))}
         </p>
-        <p className="mt-0.5 truncate text-[11px] text-text-muted">
+        {/* Wraps rather than truncates: beside Undo there was room only for
+            the instruction, and the glass size, the one number, was cut. */}
+        <p className="mt-0.5 text-[11px] leading-snug text-text-muted">
           {fraction >= 1
             ? t("focus.quiet.done-detail")
             : t("focus.water.hint").replace("{n}", digits(waterStepMl, numerals))}

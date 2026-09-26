@@ -877,7 +877,7 @@
   "focus.pause": "रोक्नुहोस्",
   "focus.today.screen": "स्क्रिनमा",
   "focus.today.breaks": "ब्रेक लिइयो",
-  "focus.water.hint": "पिउँदा गिलास थिच्नुहोस् · {n} मिलि",
+  "focus.water.hint": "एक गिलास {n} मिलि। पिउँदा गिलास थिच्नुहोस्।",
   "focus.water.undo": "फिर्ता",
   "radio.paused": "रोकिएको",
   "radio.play": "बजाउनुहोस्",
