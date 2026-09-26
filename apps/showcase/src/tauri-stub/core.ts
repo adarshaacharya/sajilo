@@ -130,7 +130,24 @@ function shift(value: unknown, drift: number): unknown {
   return out;
 }
 
+/**
+ * Answers the promo video's capture script may set before the app loads
+ * (`apps/promo/capture.mjs`), keyed like the recording. Only for what belongs
+ * to a viewer and so can never be recorded: their Keeper documents, their
+ * Routine, a first-run flag. Market data, news and weather always come from
+ * the recording. The public site never sets this.
+ */
+function promoAnswer(command: string, args?: Args): unknown {
+  const promo = (globalThis as { __SAJILO_PROMO__?: Record<string, unknown> }).__SAJILO_PROMO__;
+  if (!promo) return undefined;
+  const exact = promo[key(command, args)];
+  return exact === undefined ? promo[command] : exact;
+}
+
 export async function invoke<T>(command: string, args?: Args): Promise<T> {
+  const promo = promoAnswer(command, args);
+  if (promo !== undefined) return promo as T;
+
   // Personal portfolio rows are intentionally absent from the public showcase.
   // Return the real command's empty-state shape rather than inventing holdings.
   if (

@@ -1,0 +1,5 @@
+node_modules/
+out/
+# Regenerated from the showcase by `bun run capture`.
+public/shots/
+public/facts.json
