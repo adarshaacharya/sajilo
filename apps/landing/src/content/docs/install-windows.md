@@ -12,6 +12,9 @@ Sajilo runs on **Windows 10 and 11, 64-bit**. Installing takes about a minute.
 
 1. [Download Sajilo for Windows](/dl/windows) (**Sajilo-windows-x64.exe**).
 2. Your browser may warn that **“Sajilo-windows-x64.exe isn't commonly downloaded”**. New apps get this until enough people have downloaded them. To keep the file:
+
+   ![Edge's Downloads panel: “Sajilo-windows-x64.exe isn't commonly downloaded. Make sure you trust Sajilo-windows-x64.exe before you open it.”](/assets/docs/windows-edge-not-commonly-downloaded.jpg)
+
    - **Edge:** in the Downloads panel, point at the file, click **…** (More actions), then **Keep**. If Edge asks again, click **Show more**, then **Keep anyway**.
    - **Chrome:** in the Downloads panel, click **Keep** (or the **⋮** next to the file, then **Keep dangerous file**).
 3. Open the file you downloaded.

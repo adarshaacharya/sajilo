@@ -27,6 +27,8 @@ To check, run `sajilo-desktop` in a terminal: if you see `GLIBC_2.39 not found`,
 
 ## The browser says the file “isn't commonly downloaded”
 
+![Edge's Downloads panel warning that Sajilo-windows-x64.exe isn't commonly downloaded](/assets/docs/windows-edge-not-commonly-downloaded.jpg)
+
 Edge and Chrome say this about new apps until enough people have downloaded them; it doesn't mean anything was found in the file. Keep it from the browser's Downloads panel: in **Edge**, point at the file, click **…**, then **Keep** (and **Show more › Keep anyway** if asked); in **Chrome**, click **Keep**. Do this **only** for a file from sajilo.fyi or Sajilo's GitHub releases. [Full Windows steps](/docs/install-windows.html).
 
 ## Windows says “Windows protected your PC”
