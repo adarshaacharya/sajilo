@@ -2,11 +2,10 @@ import type { CSSProperties } from "react";
 import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
-import { openExternalLink } from "../../../shared/lib/external-link";
 import { api } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
-import { CONTACTS, type DirectorySection, WEBSITES } from "../_lib/directory";
+import { CONTACTS, type DirectorySection } from "../_lib/directory";
 
 export type ToolId = "date" | "land" | "weight" | "vat" | "interest" | "clock" | "emergency";
 
@@ -17,9 +16,8 @@ const tinted = (tint: string) => ({ "--tint": tint }) as CSSProperties;
 /**
  * Tools' front page. The two everyday tools show their answer before they
  * are opened: today in both calendars, and the time in the city you follow.
- * The Directory shows what it holds: the emergency numbers, readable right
- * here because nobody should tap twice to find 100, and the official sites
- * people look up most, one tap from opening. Calculators sit below, each in its own colour so
+ * The Directory shows 100/101/102 on the card; the full list and official
+ * sites open from there. Calculators sit below, each in its own colour so
  * they read as four different things rather than one repeated tile.
  */
 export function ToolsHome({
@@ -186,88 +184,63 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
 }
 
 /**
- * The Directory at a glance: how much is in it, the three numbers that
- * matter in a hurry, and the official web services people reach for most.
- * Each part opens the matching half of the full Directory.
+ * The Directory at a glance: emergency lines up front; the rest is one tap
+ * away under numbers or sites.
  */
 function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void }) {
   const { t, language } = useSettings();
   const ne = language === "ne";
   const emergency = CONTACTS.filter((contact) => contact.category === "emergency").slice(0, 3);
-  const featured = WEBSITES.filter((site) => site.featured);
 
   return (
     <section
       aria-labelledby="tools-directory"
-      className="tool-card tool-directory"
-      style={tinted("var(--color-holiday)")}
+      className="tool-card flex flex-col gap-2.5 active:transform-none"
     >
-      <button
-        type="button"
-        onClick={() => onOpen("phones")}
-        className="flex w-full items-center gap-2 text-left"
-      >
-        <span className="tool-card__icon">
+      <div className="flex items-center gap-2">
+        <span className="tool-card__icon" style={tinted("var(--color-holiday)")}>
           <Icon name="directory" className="size-3.5" />
         </span>
         <span className="min-w-0 flex-1">
           <span id="tools-directory" className="block text-[12px] font-semibold">
             {t("tools.directory")}
           </span>
-          <span className="block truncate text-[10px] text-text-muted">
-            {t("tools.directory-counts")
-              .replace("{numbers}", String(CONTACTS.length))
-              .replace("{sites}", String(WEBSITES.length))}
-          </span>
+          <span className="block text-[10px] text-text-muted">{t("tools.directory-hint-short")}</span>
         </span>
-        <Icon name="chevronLeft" className="size-3 shrink-0 rotate-180 text-text-muted" />
-      </button>
+      </div>
 
-      <div className="grid grid-cols-3 gap-1.5">
+      <p className="px-0.5 text-[10px] font-medium text-text-muted">{t("tools.directory-emergency")}</p>
+      <div className="-mt-1 grid grid-cols-3 gap-1.5 rounded-md border border-border bg-canvas p-2">
         {emergency.map((contact) => (
           <button
             key={contact.number}
             type="button"
             onClick={() => onOpen("phones")}
-            className="tool-emergency__number text-left"
+            className="grid min-w-0 gap-0.5 rounded-sm px-0.5 py-1 text-center text-[10px] leading-tight text-text-muted transition-colors hover:bg-surface-hover"
           >
-            <b>{contact.number}</b>
+            <span className="text-[17px] font-bold leading-none tabular-nums text-holiday">
+              {contact.number}
+            </span>
             <span className="truncate">{ne ? contact.nameNe : contact.name}</span>
           </button>
         ))}
       </div>
 
-      <div className="space-y-1.5">
-        <div className="flex items-baseline justify-between gap-2">
-          <p className="text-[10px] font-semibold tracking-wide text-text-muted uppercase">
-            {t("tools.online-services")}
-          </p>
-          <button
-            type="button"
-            onClick={() => onOpen("websites")}
-            className="flex shrink-0 items-center gap-0.5 text-[10px] font-semibold text-accent-mark hover:underline"
-          >
-            {t("tools.all-sites").replace("{n}", String(WEBSITES.length))}
-            <Icon name="chevronLeft" className="size-2.5 rotate-180" />
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {featured.map((site) => (
-            <button
-              key={site.url}
-              type="button"
-              onClick={() => openExternalLink(site.url)}
-              title={ne ? site.descriptionNe : site.description}
-              className="tool-site"
-            >
-              <Icon
-                name={site.type === "app" ? "phone" : "openExternal"}
-                className="size-3 shrink-0 opacity-70"
-              />
-              {ne ? site.nameNe : site.name}
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        <button
+          type="button"
+          onClick={() => onOpen("phones")}
+          className="rounded-md border border-border bg-canvas px-2 py-1.5 text-left text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+        >
+          {t("tools.directory-more-numbers")}
+        </button>
+        <button
+          type="button"
+          onClick={() => onOpen("websites")}
+          className="rounded-md border border-border bg-canvas px-2 py-1.5 text-left text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
+        >
+          {t("tools.directory-more-sites")}
+        </button>
       </div>
     </section>
   );
