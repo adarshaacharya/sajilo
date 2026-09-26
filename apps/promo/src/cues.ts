@@ -1,7 +1,7 @@
 /**
- * Prints the film's timing for the music: where each section starts, how
- * many bars it runs, and every click and notification, in frames. `music.py`
- * composes to this, so the soundtrack follows the edit exactly.
+ * Prints the film's timing: where each section starts, how many bars it
+ * runs, and every click and notification, in frames. `sounds.py` puts its
+ * ticks and chime on these frames.
  *
  *   bun src/cues.ts > public/cues.json
  */

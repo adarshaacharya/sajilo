@@ -203,9 +203,9 @@ export const CHAPTERS: Chapter[] = [
 ];
 
 /**
- * The music's bar: 6/8 at 75 dotted crotchets a minute, 1.6 seconds, 48
- * frames. Every section starts on a bar, so each problem card lands on a
- * downbeat; footage that ends mid-bar holds its last frame.
+ * The edit's bar: 1.6 seconds, 48 frames (6/8 at 75, or 4/4 at 150). Every
+ * section starts on a bar, so a track at a matching tempo puts each problem
+ * card on a downbeat; footage that ends mid-bar holds its last frame.
  */
 export const BAR = 48;
 export const bars = (frames: number) => Math.ceil(frames / BAR) * BAR;

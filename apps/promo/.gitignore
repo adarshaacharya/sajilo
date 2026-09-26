@@ -3,4 +3,5 @@ out/
 public/clips/
 public/facts.json
 public/cues.json
-public/music.wav
+public/sounds.wav
+public/track.*

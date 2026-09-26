@@ -36,14 +36,32 @@ import {
   facts,
   OPEN,
   openingClip,
+  TOTAL,
 } from "./timeline";
 
+export type TourProps = {
+  /**
+   * A licensed music track in `public/`, e.g. "track.mp3", or null for none.
+   * Pass it with `--props='{"track":"track.mp3"}'`.
+   */
+  track: string | null;
+};
+
 /** The whole film: an opening, one chapter per everyday problem, the ending. */
-export function Tour() {
+export function Tour({ track }: TourProps) {
   return (
     <AbsoluteFill style={{ background: color.canvas }}>
-      {/* Composed to this edit by music.py. */}
-      <Audio src={staticFile("music.wav")} />
+      {/* Clicks and the reminder's chime, from sounds.py. */}
+      <Audio src={staticFile("sounds.wav")} />
+      {track && (
+        <Audio
+          src={staticFile(track)}
+          volume={(frame) =>
+            0.8 *
+            interpolate(frame, [0, 12, TOTAL - s(2.5), TOTAL], [0, 1, 1, 0], clamp)
+          }
+        />
+      )}
       <Series>
         <Series.Sequence durationInFrames={OPEN}>
           <Opening />
