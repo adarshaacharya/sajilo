@@ -1,0 +1,60 @@
+---
+import Base from "../layouts/Base.astro";
+import PlatformCards from "../components/PlatformCards.astro";
+---
+
+<Base
+  title="Download Sajilo"
+  description="Download Sajilo for macOS, Windows or Linux: every installer on one page, with the steps to get past the first-run warning."
+  path="/download.html"
+>
+  <main class="wrap download" id="main">
+    <p class="download-kicker" lang="ne">डाउनलोड</p>
+    <h1 class="download-title">Download Sajilo</h1>
+    <p class="download-lede">
+      Free, with no account. Pick your system: yours is marked, and every other download is right
+      beside it. Beta builds aren't code-signed yet, so your system shows a warning the first time you
+      open Sajilo; each card says what to click.
+    </p>
+
+    <PlatformCards level="h2" />
+
+    <p class="download-more">
+      Older versions and what changed in each are on the <a href="/releases.html">releases page</a>.
+    </p>
+  </main>
+</Base>
+
+<style>
+  .download {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(40px, 7vw, 90px);
+  }
+  .download-kicker {
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--gilt);
+  }
+  .download-title {
+    margin-top: 6px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+  }
+  .download-lede {
+    max-width: 62ch;
+    margin: 16px 0 36px;
+    color: var(--paper-2);
+    font-size: 17px;
+  }
+  .download-more {
+    margin-top: 28px;
+    color: var(--paper-2);
+    font-size: 15px;
+  }
+  .download-more a {
+    color: var(--gilt);
+  }
+</style>

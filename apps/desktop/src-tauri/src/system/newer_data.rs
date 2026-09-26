@@ -8,7 +8,7 @@ use tauri::{AppHandle, Wry};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_opener::OpenerExt;
 
-const DOWNLOAD_URL: &str = "https://sajilo.fyi/install";
+const DOWNLOAD_URL: &str = "https://sajilo.fyi/download.html";
 
 pub fn explain_and_quit(app: &AppHandle<Wry>) {
     let handle = app.clone();

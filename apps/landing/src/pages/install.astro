@@ -1,10 +1,9 @@
 ---
 import Base from "../layouts/Base.astro";
 
-// Installing now lives in the docs, one page per system. This address stays
-// because links to it are out on the web (install.html#windows and so on):
-// it forwards to the matching page, by the #system in the link or, without
-// one, by the visitor's own system.
+// Downloads and the first steps now live on /download.html, with a guide
+// per system in the docs. This address stays because links to it are out on
+// the web (install.html#windows and so on): it forwards, keeping the #system.
 const pages = [
   { id: "windows", name: "Windows", href: "/docs/install-windows.html" },
   { id: "macos", name: "macOS", href: "/docs/install-macos.html" },
@@ -19,22 +18,14 @@ const pages = [
   noindex
 >
   <script is:inline slot="head">
-    (function () {
-      var pages = {
-        windows: "/docs/install-windows.html",
-        macos: "/docs/install-macos.html",
-        linux: "/docs/install-linux.html",
-      };
-      var os = location.hash.slice(1);
-      if (!pages[os]) {
-        var ua = navigator.userAgent;
-        os = /Windows/.test(ua) ? "windows" : /Mac/.test(ua) ? "macos" : /Linux/.test(ua) ? "linux" : "";
-      }
-      location.replace(pages[os] || "/docs.html");
-    })();
+    // Every download now lives on one page, with nothing guessed away: the
+    // #system in an old link (install.html#windows) carries over, so the
+    // page opens on that card.
+    location.replace("/download.html" + location.hash);
   </script>
   <main class="wrap moved" id="main">
-    <h1>Installing Sajilo has moved to the docs</h1>
+    <h1>Installing Sajilo has moved</h1>
+    <p><a href="/download.html">Download Sajilo</a></p>
     <ul>
       {pages.map((page) => <li><a href={page.href}>Install on {page.name}</a></li>)}
     </ul>

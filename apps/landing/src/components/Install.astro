@@ -1,34 +1,5 @@
 ---
-const platforms = [
-  {
-    id: "macos",
-    name: "macOS",
-    step: "Drag to Applications, open it, then click Open Anyway under Privacy & Security.",
-    find: "At the top of your screen, in the menu bar. There's no Dock icon.",
-    link: { href: "/docs/install-macos.html", label: "Step-by-step with screenshots" },
-    dl: [{ id: "macos-arm64", label: "Apple Silicon" }, { id: "macos-x64", label: "Intel" }],
-  },
-  {
-    id: "windows",
-    name: "Windows",
-    step: "SmartScreen shows a warning. Click More info, then Run anyway.",
-    find: "Bottom right, next to the clock. Not there? Click the ^ arrow and drag the Nepal flag out beside the clock.",
-    link: { href: "/docs/install-windows.html", label: "Install and find the tray icon" },
-    dl: [{ id: "windows", label: "Installer (.exe)" }],
-  },
-  {
-    id: "linux",
-    name: "Linux",
-    step: "The .deb for Ubuntu and Mint, the .rpm for Fedora and openSUSE, or the AppImage anywhere else, Arch included.",
-    find: "In your top bar. No top bar, or nothing there? Open Sajilo from your apps menu.",
-    link: { href: "/docs/install-linux.html", label: "Commands and tray setup" },
-    dl: [
-      { id: "linux-deb", label: ".deb" },
-      { id: "linux-rpm", label: ".rpm" },
-      { id: "linux-appimage", label: "AppImage" },
-    ],
-  },
-];
+import PlatformCards from "./PlatformCards.astro";
 ---
 
 <section class="install wrap" id="install">
@@ -41,24 +12,7 @@ const platforms = [
     </p>
   </div>
 
-  <ul class="platform-grid">
-    {platforms.map((p, i) => (
-      <li class="platform reveal" style={`--d:${i * 90}ms`}>
-        <h3>{p.name}</h3>
-        <p class="platform-step">{p.step}</p>
-        <p class="platform-find"><span>Where it lives</span>{p.find}</p>
-        <div class="platform-dl">
-          {p.dl.map((d) => (
-            <a class="btn btn--ghost btn--sm" href={`/dl/${d.id}`}>
-              <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
-              {d.label}
-            </a>
-          ))}
-        </div>
-        {p.link && <a class="platform-link" href={p.link.href}>{p.link.label} →</a>}
-      </li>
-    ))}
-  </ul>
+  <PlatformCards />
 </section>
 
 <style>
@@ -66,69 +20,5 @@ const platforms = [
     position: relative;
     z-index: 1;
     padding-top: clamp(80px, 11vw, 160px);
-  }
-  .platform-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  .platform {
-    display: grid;
-    gap: 14px;
-    align-content: start;
-    padding: 28px 26px 30px;
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    background: var(--ink-2);
-    transition: border-color 0.3s, transform 0.4s var(--ease);
-  }
-  .platform:hover {
-    border-color: var(--line-2);
-    transform: translateY(-2px);
-  }
-  .platform h3 {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 34px;
-    line-height: 1;
-  }
-  .platform-step {
-    color: var(--paper-2);
-    font-size: 15px;
-    min-height: 3lh;
-  }
-  .platform-find {
-    display: grid;
-    gap: 4px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: var(--ink);
-    border: 1px solid var(--line);
-    color: var(--paper);
-    font-size: 14px;
-    line-height: 1.45;
-  }
-  .platform-find span {
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--gilt);
-  }
-  .platform-dl {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .platform-link {
-    font-size: 14px;
-    color: var(--gilt);
-    width: fit-content;
-  }
-  .platform-link:hover {
-    color: var(--gilt-2);
-  }
-  @media (max-width: 760px) {
-    .platform-grid { grid-template-columns: 1fr; }
-    .platform-step { min-height: 0; }
   }
 </style>
