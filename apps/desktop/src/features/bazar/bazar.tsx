@@ -105,6 +105,10 @@ export function Bazar() {
   const view: StocksView =
     pickedView ??
     (STOCKS_VIEWS.includes(savedView as StocksView) ? (savedView as StocksView) : "nepse");
+  // Which market inside Stocks is looked at, counted each time it is shown.
+  useEffect(() => {
+    if (tab === "stocks") track(`tab.stocks.${view}`);
+  }, [tab, view]);
   const pickView = (next: StocksView) => {
     setPickedView(next);
     saveView(next);
