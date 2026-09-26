@@ -935,5 +935,15 @@
   "weather.feels-like": "महसुस {t}",
   "weather.rain-chance": "पानी {n}",
   "weather.next-days": "आउँदा {n} दिन",
-  "weather.today": "आज"
+  "weather.today": "आज",
+  "keeper.attention": "ध्यान दिनुपर्ने",
+  "keeper.next-up": "अब आउने",
+  "keeper.days-left": "दिन बाँकी",
+  "keeper.days-late-long": "दिन ढिला",
+  "keeper.mark-paid": "तिरेँ",
+  "keeper.details": "विवरण",
+  "keeper.status.valid": "चालु छ",
+  "keeper.welcome": "नवीकरण अब नछुटोस्",
+  "keeper.start-with": "यहाँबाट सुरु गर्नुहोस्",
+  "keeper.see-all-types": "सबै प्रकार हेर्नुहोस्"
 }

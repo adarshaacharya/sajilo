@@ -935,5 +935,15 @@
   "weather.feels-like": "Feels like {t}",
   "weather.rain-chance": "Rain {n}",
   "weather.next-days": "Next {n} days",
-  "weather.today": "Today"
+  "weather.today": "Today",
+  "keeper.attention": "Needs attention",
+  "keeper.next-up": "Next up",
+  "keeper.days-left": "days left",
+  "keeper.days-late-long": "days late",
+  "keeper.mark-paid": "Mark paid",
+  "keeper.details": "Details",
+  "keeper.status.valid": "Valid",
+  "keeper.welcome": "Never miss a renewal again",
+  "keeper.start-with": "Start with one",
+  "keeper.see-all-types": "See all types"
 }

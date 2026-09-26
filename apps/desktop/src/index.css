@@ -1310,6 +1310,266 @@ button.row-line + button.row-line::before {
   box-shadow: 0 0 0 2px var(--color-surface-raised);
 }
 
+/* Keeper — the header's Add, family faces, the next-up card, wallet cards.
+   `--tone` is set per element from the one urgency scale. */
+.keeper-add-btn {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+  transition: filter 0.12s ease;
+}
+
+.keeper-add-btn:hover {
+  filter: brightness(1.06);
+}
+
+.keeper-person {
+  display: grid;
+  flex-shrink: 0;
+  justify-items: center;
+  gap: 4px;
+  min-width: 44px;
+}
+
+.keeper-person__face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-raised);
+  border: 2px solid var(--color-border);
+  transition:
+    border-color 0.15s ease,
+    transform 0.12s ease;
+}
+
+.keeper-person:active .keeper-person__face {
+  transform: scale(0.95);
+}
+
+.keeper-person[aria-pressed="true"] .keeper-person__face {
+  border-color: var(--color-accent-fill);
+  color: var(--color-text);
+}
+
+.keeper-person__late {
+  position: absolute;
+  top: -4px;
+  right: -5px;
+  display: grid;
+  place-items: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-holiday);
+}
+
+.keeper-person__name {
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.keeper-person[aria-pressed="true"] .keeper-person__name {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.keeper-due-big {
+  flex: none;
+  width: 60px;
+  padding: 7px 0;
+  border-radius: 12px;
+  text-align: center;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+}
+
+.keeper-due-big b {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.keeper-due-big span {
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+.keeper-runway {
+  background: var(--tone);
+  transition: width 0.5s ease;
+}
+
+.keeper-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+  transition:
+    background-color 0.12s ease,
+    transform 0.1s ease;
+}
+
+.keeper-pill:active {
+  transform: scale(0.97);
+}
+
+.keeper-pill--primary {
+  border-color: transparent;
+  font-weight: 600;
+  background: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+}
+
+.keeper-flash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-positive);
+  background: color-mix(in srgb, var(--color-positive) 14%, var(--color-surface-raised));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.keeper-flash--on {
+  opacity: 1;
+}
+
+.keeper-doc {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 10px 10px 10px 12px;
+  text-align: left;
+  transition:
+    background-color 0.12s ease,
+    transform 0.1s ease;
+}
+
+.keeper-doc::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--tone);
+}
+
+.keeper-doc:hover {
+  background: var(--color-surface-hover);
+}
+
+.keeper-doc:active {
+  transform: scale(0.98);
+}
+
+.keeper-doc__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-hover);
+}
+
+.keeper-doc__chip {
+  justify-self: start;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 13%, transparent);
+}
+
+.keeper-doc--add {
+  place-content: center;
+  justify-items: center;
+  border-radius: var(--radius-card);
+  border: 1px dashed color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-accent-mark);
+}
+
+.keeper-doc--add::before {
+  display: none;
+}
+
+.keeper-starter {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  text-align: left;
+  border: 1px solid var(--color-border);
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+
+.keeper-starter:hover {
+  background: var(--color-surface-hover);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, var(--color-border));
+}
+
+.keeper-welcome-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keeper-runway,
+  .keeper-flash,
+  .keeper-doc,
+  .keeper-pill,
+  .keeper-person__face {
+    transition: none;
+  }
+}
+
 /* Station logos — most sit on white, so a hairline and (on dark) a slight
    dim keep them from out-shining the controls around them. */
 .station-art {
