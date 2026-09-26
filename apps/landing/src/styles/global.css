@@ -59,6 +59,8 @@ html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  /* Every #anchor lands below the sticky nav, not under it. */
+  scroll-padding-top: 84px;
   color-scheme: dark;
 }
 

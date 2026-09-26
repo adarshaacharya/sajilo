@@ -25,6 +25,21 @@ fn database_path(app: &AppHandle<Wry>) -> Result<PathBuf> {
     Ok(directory.join(DATABASE_FILE))
 }
 
+/// The schema version of data a newer Sajilo wrote, if the database on disk
+/// is ahead of this build. Read without migrating anything, so an older app
+/// opened by mistake leaves the data exactly as it found it.
+pub fn written_by_newer(app: &AppHandle<Wry>) -> Option<i64> {
+    let path = database_path(app).ok()?;
+    if !path.exists() {
+        return None;
+    }
+    let connection =
+        Connection::open_with_flags(&path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).ok()?;
+    schema_version(&connection)
+        .ok()
+        .filter(|version| *version > SCHEMA_VERSION)
+}
+
 pub fn open(app: &AppHandle<Wry>) -> Result<Connection> {
     let connection = Connection::open(database_path(app)?).map_err(|error| error.to_string())?;
     connection

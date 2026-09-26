@@ -137,6 +137,13 @@ pub fn run() {
 
     builder
         .setup(|app| {
+            // Data saved by a newer Sajilo: say so and offer the download,
+            // instead of failing to start. Nothing below runs, so the data is
+            // left untouched for the newer app to open.
+            if db::written_by_newer(app.handle()).is_some() {
+                system::newer_data::explain_and_quit(app.handle());
+                return Ok(());
+            }
             // Create and migrate the single local database before any tray or
             // notification code reads user-owned state.
             db::open(app.handle()).map_err(std::io::Error::other)?;
@@ -352,7 +359,7 @@ pub fn run() {
             system::update_restart::update_installed,
             system::update_restart::set_audio_playing,
         ])
-        .build(tauri::generate_context!())
+        .build(context())
         .expect("error while building Sajilo")
         .run(|app, event| {
             // macOS never starts a second copy: opening Sajilo again from
@@ -368,4 +375,20 @@ pub fn run() {
             #[cfg(not(target_os = "macos"))]
             let _ = (app, event);
         });
+}
+
+/// Identifier for debug builds. `tauri dev` however it is started — a launch
+/// config, a terminal, an editor — then keeps its own database, settings,
+/// login item and single-instance lock, and can never migrate the installed
+/// Sajilo's data to a version that app cannot read.
+const DEV_IDENTIFIER: &str = "com.sajilo.dev";
+
+fn context() -> tauri::Context<tauri::Wry> {
+    let mut context = tauri::generate_context!();
+    if cfg!(debug_assertions) {
+        let config = context.config_mut();
+        DEV_IDENTIFIER.clone_into(&mut config.identifier);
+        config.product_name = Some("Sajilo Dev".to_owned());
+    }
+    context
 }
