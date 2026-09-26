@@ -159,7 +159,9 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
           <span className="truncate text-[11px] font-semibold">{t("tools.clock")}</span>
         </span>
         {zone && reading && reading.dayOffset !== 0 && (
-          <span className="shrink-0 text-[10px] text-text-muted">{formatDayOffset(reading.dayOffset)}</span>
+          <span className="shrink-0 text-[10px] text-text-muted">
+            {formatDayOffset(reading.dayOffset)}
+          </span>
         )}
       </span>
       <span className="min-w-0">

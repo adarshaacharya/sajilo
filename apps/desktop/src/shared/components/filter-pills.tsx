@@ -1,5 +1,5 @@
-import { ScrollRow } from "./scroll-row";
 import { Icon, type IconName } from "./icon";
+import { ScrollRow } from "./scroll-row";
 
 export type FilterPillOption<T extends string> = {
   id: T;

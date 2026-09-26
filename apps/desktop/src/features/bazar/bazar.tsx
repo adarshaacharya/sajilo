@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 import useSWR from "swr";
+import { FilterPills } from "../../shared/components/filter-pills";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
-import { FilterPills } from "../../shared/components/filter-pills";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
 import { TabStrip } from "../../shared/components/tab-strip";
 import { useSettings } from "../../shared/context/settings-context";
