@@ -15,7 +15,7 @@ import { usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
-import { SourceLink, SourceNote } from "../bazar/_components/source-note";
+import { SourceNote } from "../bazar/_components/source-note";
 import { ReadingCard } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
 import { SignGrid } from "./_components/sign-grid";
@@ -112,11 +112,7 @@ export function Rashifal() {
         />
       </section>
 
-      {published && (
-        <SourceNote label={t("bazar.published")} stamp={published}>
-          <SourceLink href="https://www.hamropatro.com/rashifal">{t("rashifal.source")}</SourceLink>
-        </SourceNote>
-      )}
+      {published && <SourceNote label={t("bazar.published")} stamp={published} />}
     </div>
   );
 }
