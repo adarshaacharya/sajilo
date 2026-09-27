@@ -1,0 +1,234 @@
+# The popover window: opening, closing, pinning and dragging
+
+Sajilo lives in one small window, the popover, that hangs from its tray or
+menu-bar icon. This page is how that window behaves on each platform, why, and
+how to test it. The code is in `apps/desktop/src-tauri/src/window.rs` unless
+said otherwise.
+
+## One rule: hidden, never closed
+
+The popover is hidden when it goes away, never closed. Closing destroys the
+webview, and with it every loaded feed, every scroll position and a radio
+stream mid-play. Hiding keeps all of that, so the next open is instant. Every
+way of putting it away goes through `window::hide`.
+
+## Opening
+
+The tray icon, the tray menu (Linux) or a second launch of the app shows it
+through `window::show`. Where it appears depends on the platform:
+
+| Platform | Where it opens | How it knows |
+|---|---|---|
+| macOS | Centred under the menu-bar icon | The icon's frame, from the tray (`under_menu_bar_icon`) |
+| Windows | Against the taskbar, lined up with the icon | Where the icon was clicked (`above_taskbar`) |
+| Linux | Against the panel, under the tray icon | The work area and the pointer (`center_under_cursor`) |
+
+Linux trays tell an app nothing about where its icon is, so Sajilo works it
+out:
+
+- **Which edge the panel is on** comes from the work area. A panel reserves a
+  strip of the screen, so the work area is inset at the top (GNOME) or the
+  bottom (KDE, Cinnamon, most tiling bars). The popover hangs from that edge.
+  Only when no panel reserves space (one that hides itself) does the pointer's
+  half of the screen decide.
+- **Where along the panel** comes from the pointer, but only when the open came
+  from the tray, with the pointer near the panel. Any other open, such as
+  Sajilo showing itself at first launch with the pointer anywhere, takes the
+  right-hand end of the panel, where trays sit.
+
+A pinned popover skips all of this and opens where it was left (see below).
+
+## Closing
+
+| Way | macOS | Windows | Linux |
+|---|---|---|---|
+| Click anywhere outside | Yes | Yes | Yes (see below) |
+| Escape | Yes | Yes | Yes |
+| Click the tray icon | Yes | Yes | Yes |
+| Open a link | Yes, so the browser comes to the front | Yes | Yes |
+
+A pinned popover ignores clicks outside and links, but Escape and the tray
+still put it away. While the popover shows a dialog of its own (a file picker,
+a "delete this?" prompt), it is held open so the dialog's focus does not count
+as a click away (`set_pinned`, from the page's `pinPopover`).
+
+### Clicking outside on Linux
+
+On macOS and Windows a focus-out means the user clicked somewhere else, and the
+popover hides. Linux is less reliable: GNOME has been seen to take focus from
+an undecorated, always-on-top window on its own, with nobody touching anything.
+Hiding on that made the app look like it opened to nothing. So on Linux a
+focus-out counts only when it looks like a real click away
+(`click_away_on_linux`):
+
+1. the popover had focus at some point since it opened,
+2. it has been open at least 400 ms,
+3. focus is still gone 250 ms later, so a flicker that snaps back does not count,
+4. the pointer is outside the popover,
+5. it is not held open for a dialog.
+
+A focus drop the user did not cause, while they are looking at the window,
+fails 3 or 4.
+
+Whether the pointer is outside (`pointer_inside`) is known three ways, in
+order:
+
+1. **The page's own report.** The page sees the pointer enter and leave the
+   window on every platform and session, and tells the shell
+   (`ReportPointer` in `App.tsx`, the `popover_pointer` command). This is exact.
+2. **Asking X11,** before the page has reported anything. On X11 the shell can
+   read the pointer anywhere on screen. A failed read counts as inside, so it
+   never closes anything by mistake.
+3. **On Wayland,** before the page has reported, the pointer counts as away. A
+   Wayland session never tells an app where the pointer is, and this way a
+   click elsewhere still closes a popover that was never hovered.
+
+## Keeping it open: the pin
+
+The pin sits in the header, beside Settings, on every screen: in `Header`
+(`shared/components/header.tsx`) and in Today's own header (`DateHeader` in
+`features/calendar/_components/date-header.tsx`). The button is
+`KeepOpenButton`.
+
+**Pinned:**
+
+- A click outside does not close it.
+- Opening a link does not close it (`external-link.ts` checks `isKept()`).
+- It drags by its header, like a title bar.
+- It reopens where it was left, across restarts too.
+- Escape and the tray still put it away, so there is always a way out.
+- The pin shows the accent colour on a faint wash of it
+  (`.icon-btn[aria-pressed="true"]` in `index.css`). The colour lives in CSS
+  because the unlayered `.icon-btn` rule overrides a Tailwind colour class.
+
+**Unpinned,** it is the tray popover again: it closes on a click away and opens
+at the tray. Unpinning forgets the saved place.
+
+### How it is stored
+
+- In the shell: `KEPT_OPEN` (on or off) and `KEPT_PLACE` (the last position,
+  in logical pixels, so it survives a change of display scale).
+- On disk: the settings key `popover.keptOpen.v1`. It holds `null` when not
+  pinned, `{ "x": .., "y": .. }` when pinned with a place, and `{}` when pinned
+  before it has been moved.
+- It is read at startup, before anything can show the window
+  (`window::load_kept` in `lib.rs`).
+- A drag reports every step (`WindowEvent::Moved` calls `remember_move`). The
+  place is kept in memory and written to disk when the popover is put away, not
+  on every step.
+- On reopen, the saved place is used only if a connected screen still shows
+  the top of the window. A spot on an unplugged monitor falls back to the tray.
+
+### How dragging works
+
+The header gets a native `mousedown` listener while pinned (`useDragWhenKept`
+in `shared/lib/popover-kept.ts`) that calls Tauri's `startDragging`, which
+hands the move to the window manager. Presses on the header's own controls
+(buttons, links, fields, tabs) are left alone, so the pin, Back and Settings
+still work while pinned. It is a native listener rather than a React
+`onMouseDown` because it is window chrome, not a page control: moving a window
+from the keyboard is the operating system's own shortcut. The
+`core:window:allow-start-dragging` permission is already in
+`capabilities/default.json`. The header shows a grab cursor while pinned.
+
+### The page's side
+
+`shared/lib/popover-kept.ts` holds one value for the whole page. It is read
+from the shell once (`popover_kept`) and changed only by the pin
+(`set_popover_kept`), so every header shows the same state.
+
+## Known limits
+
+- **Pure Wayland placement.** On a Wayland session without XWayland the
+  compositor decides where windows go, and a normal app window cannot choose.
+  Only the layer-shell protocol allows that, and Tauri does not support it.
+  Everything else works, including closing on a click outside and dragging
+  while pinned.
+- **Tiling window managers** tile the popover like any window unless told to
+  float it. `INSTALLATION_INSTRUCTIONS.md` has the one-line rule for Hyprland,
+  sway and i3, matched on the window's fixed title, `Sajilo`.
+- **Shown at launch without focus.** When Sajilo shows itself at launch, some
+  window managers refuse it focus, as they do for any app that opens itself.
+  With no focus to lose, a click elsewhere does nothing until the user has
+  clicked inside it once. A launch from the app menu normally carries a token
+  that grants focus.
+- **KDE shows no date text** beside the tray icon. Sajilo sends it, but Plasma
+  draws tray icons only.
+
+## Testing on Linux
+
+The container Claude Code runs in, and any Linux machine, can run the real app
+on a virtual screen with a bottom panel. What you need: `Xvfb`, `openbox`,
+`stalonetray`, `xdotool`, `x11-utils` and `dbus-x11`
+(`apt-get install openbox stalonetray dbus-x11 x11-utils`). The app's tray
+library falls back to a classic tray icon when no StatusNotifier host runs,
+and `stalonetray` hosts that.
+
+```bash
+# The frontend, and a debug build of the app
+(cd apps/desktop && bun run dev &)
+cargo build -p sajilo-desktop
+
+# A 1280x720 screen, a window manager, and a tray docked bottom right
+# that reserves its strip like a real panel
+export DISPLAY=:99
+Xvfb :99 -screen 0 1280x720x24 &
+eval "$(dbus-launch --sh-syntax)"
+openbox &
+stalonetray --geometry 6x1-0-0 --window-strut bottom --icon-size 28 \
+  --grow-gravity E --icon-gravity E &
+target/debug/sajilo-desktop &
+```
+
+Then drive it with `xdotool` and read the window's state with `xwininfo`:
+
+```bash
+W=$(xdotool search --name '^Sajilo$' | head -1)
+xwininfo -id "$W" | grep -E 'Map State|Absolute'   # IsViewable or IsUnMapped, and where
+xdotool mousemove 1266 706 click 1                  # the tray icon (opens its menu)
+xdotool mousemove 250 400 click 1                   # a click on the desktop
+import -window root screen.png                      # a screenshot
+```
+
+Things that will trip you up:
+
+- `xdotool windowkill` kills the whole app, not one window. Close a break card
+  with its own Skip button.
+- `pkill -f sajilo-desktop` can match your own shell's command line. Use
+  `kill $(pidof sajilo-desktop)`.
+- Clicking a `<select>` opens its dropdown, and Escape then closes the dropdown
+  rather than the popover. Click plain text before pressing Escape.
+- Launched from a shell, Sajilo gets no focus when it shows itself at start.
+  Click inside it once before testing a click away.
+- To take the Wayland path while still drawing through X11, start the app with
+  `GDK_BACKEND=wayland,x11`. GTK falls back to X11, but Sajilo sees a
+  non-X11 backend and relies on the page's pointer report alone.
+
+What to check, in order, before shipping a change to this window:
+
+| # | Step | Expect |
+|---|---|---|
+| 1 | Launch | Opens against the panel, by the tray |
+| 2 | Click inside, then on the desktop | Closes |
+| 3 | Open from the tray menu | Opens by the tray |
+| 4 | Focus another window with the pointer over the popover | Stays open |
+| 5 | Escape | Closes |
+| 6 | Click the tray icon while open | Closes; the menu offers Open |
+| 7 | Pin, then click the desktop | Stays open |
+| 8 | Drag Today's header | Moves |
+| 9 | Escape, then open from the tray | Reopens where it was dragged |
+| 10 | Restart the app | Still pinned, same place |
+| 11 | Drag another screen's header (News) | Moves |
+| 12 | Unpin, then click the desktop | Closes |
+| 13 | Open from the tray | Opens by the tray again |
+| 14 | Restart | Opens by the tray, not pinned |
+| 15 | Run 1 to 6 again with `GDK_BACKEND=wayland,x11` | Same results |
+
+Also try a break card from Routine, "Show me an example": it should open at the
+top centre without taking focus, and the popover should stay up under it. To
+hear whether the chime plays without a sound card, point ALSA at a file
+(`~/.asoundrc`: `pcm.!default { type file; slave.pcm "null"; file "/tmp/out.raw"; format "raw" }`)
+and install `alsa-utils`; the file fills when it plays.
+
+The pin and dragging use the same code on macOS and Windows, but the window
+move itself belongs to each system, so try a pin and a drag there by hand too.
