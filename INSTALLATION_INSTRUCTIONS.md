@@ -135,8 +135,9 @@ again to go back.
 
 ### Tiling window managers (Hyprland, sway, i3)
 
-A tiling manager tiles every new window, the popover included. Tell it to
-float Sajilo instead. The window's title is always `Sajilo`:
+Most tiling managers float Sajilo by themselves, because its size is fixed. If
+yours tiles it, tell it to float Sajilo instead. The window's title is always
+`Sajilo`:
 
 - **Hyprland** (`hyprland.conf`): `windowrulev2 = float, title:^(Sajilo)$`
 - **sway** or **i3** (`config`): `for_window [title="^Sajilo$"] floating enable`

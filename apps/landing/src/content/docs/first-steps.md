@@ -15,7 +15,7 @@ Sajilo is a small window that opens from your **menu bar** (Mac), **system tray*
 |---|---|---|
 | **Windows** | Click the Nepal flag next to the clock | Click the flag again, or click anywhere else |
 | **macOS** | Click the Nepali date in the menu bar | Click the date again, or click anywhere else |
-| **Linux** | Click the date in the top bar, then **Open Sajilo** | Choose **Hide Sajilo** from the same menu |
+| **Linux** | Click the date in the top bar, then **Open Sajilo** | Click anywhere else, or choose **Hide Sajilo** from the same menu |
 
 On every system, **Esc** closes it too. Closing only hides the window: Sajilo keeps running, so the radio keeps playing and reminders still arrive.
 
@@ -24,6 +24,21 @@ On Windows and macOS, **right-click** the tray icon for a short menu with the da
 > **Opening it from the Start menu, Launchpad or your applications menu** also works, any time. If Sajilo is already running, its window just comes to the front.
 
 On Linux you can also bind a key to `sajilo-desktop --toggle`, which opens and closes Sajilo; see [tiling window managers](/docs/install-linux.html#on-a-tiling-window-manager).
+
+## Keeping it open
+
+Want Sajilo to stay on screen while you work, with the radio playing, NEPSE in view or the converter handy? Press the **pin** at the top right of the window, next to the gear. It turns gold.
+
+While it's pinned:
+
+- It stays open when you click somewhere else, and opening a news link doesn't hide it.
+- **Drag it by its top bar** to put it anywhere on your screen. On the Today screen, that's the area with the date.
+- It opens in the same place next time, even after a restart.
+- **Esc** or the tray icon still puts it away.
+
+Press the pin again to go back to normal: it closes when you click away, and opens by the tray icon again.
+
+> The pin is in **Sajilo 0.1.30** and newer. See [updating](/docs/updating.html).
 
 ## The tabs
 
@@ -44,7 +59,7 @@ Along the bottom of the window:
 
 ## Settings and quitting
 
-On the **Today** screen, the icons at the top right are **Settings** (the gear) and **Quit** (the power button). Quit closes Sajilo completely, until you open it again or restart the computer.
+On the **Today** screen, the icons at the top right are **Keep open** (the pin), **Settings** (the gear) and **Quit** (the power button). Other screens have the pin and the gear at the top right too. Quit closes Sajilo completely, until you open it again or restart the computer.
 
 ## Starting with your computer
 

@@ -61,7 +61,7 @@ Sajilo shows the Nepali date in your top bar, in the area where other apps put t
 - **Ubuntu** has the extension it needs turned on already.
 - **Other GNOME desktops** (Fedora, Debian, plain GNOME) need the **AppIndicator and KStatusNotifierItem Support** extension. Install it from GNOME Extensions, then log out and back in.
 
-Linux doesn't pass a click on a top-bar icon through to the app, so **click the date and choose Open Sajilo** from its menu.
+Linux doesn't pass a click on a top-bar icon through to the app, so **click the date and choose Open Sajilo** from its menu. To close it, click anywhere else, press **Esc**, or choose **Hide Sajilo**. To keep it on screen and move it around, use the [pin](/docs/first-steps.html#keeping-it-open).
 
 > **No top bar icon at all?** Sajilo still works: opening it from your applications menu always brings up its window.
 
@@ -81,7 +81,17 @@ bind = $mainMod, N, exec, sajilo-desktop --toggle
 
 Waybar and swaybar show Sajilo's date in their tray, if your bar has a tray enabled. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
 
-If a Sajilo window does get tiled on your setup, add a floating rule for it. Find the window's class with `swaymsg -t get_tree`, `hyprctl clients` or `xprop`.
+If the Sajilo window does get tiled on your setup, add a floating rule for it. Its title is always `Sajilo`:
+
+```bash
+# i3 or sway
+for_window [title="^Sajilo$"] floating enable
+
+# Hyprland
+windowrulev2 = float, title:^(Sajilo)$
+```
+
+On a Wayland session without XWayland, your compositor decides where windows open, so Sajilo may not appear right under its icon there. Everything else works the same.
 
 ### Reminders on a tiling setup
 
