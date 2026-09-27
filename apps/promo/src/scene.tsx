@@ -100,12 +100,16 @@ function StatusIcons() {
 
 // ---------------------------------------------------------------- the panel
 
-export const PANEL_H = 920;
+/** As tall as the screen allows, so the whole app is always in view. */
+export const PANEL_H = 1080 - MENU_BAR - 14 - 26;
 export const PANEL_TOP = MENU_BAR + 14;
 /** Where the panel's centre sits: under the date. */
 const PANEL_CX = 1510;
-/** How far the camera leans in while someone is using the app. */
-const ZOOM = 1.34;
+/**
+ * No camera zoom: a viewer on a phone must see the whole app, not a detail
+ * of it. The panel is already as large as the frame allows.
+ */
+const ZOOM = 1;
 
 /**
  * Sajilo's popover playing a recorded clip, with the recorded cursor drawn
@@ -263,6 +267,65 @@ export function Cursor({
     >
       <path d="M3 2 L3 32 L10.5 25 L16 37 L21 35 L15.5 23.5 L26 23.5 Z" fill="#fff" stroke="#000" strokeWidth="2" strokeLinejoin="round" />
     </svg>
+  );
+}
+
+// ---------------------------------------------------------------- cards
+
+/**
+ * One of Sajilo's card windows (a reminder, a break): top centre, just under
+ * the menu bar, where the app opens them. It appears as a window does, and
+ * goes once it has been dealt with or the clip ends.
+ */
+export function CardWindow({ clip, name }: { clip: Clip; name: string }) {
+  const frame = useCurrentFrame();
+  const at = Math.min(frame, clip.frames - 1);
+  // Larger than the panel's scale: a card is the whole point of its moment.
+  const px = 1.9;
+  const width = clip.width * px;
+  const height = (clip.heights?.[at] ?? clip.height) * px;
+  const lastClick = clip.clicks[clip.clicks.length - 1];
+  // A card closes when its button is pressed; the cheer, if any, plays out.
+  const closeAt = clip.frames - 6;
+  const enter = interpolate(frame, [0, 6], [0, 1], clamp);
+  const leave = interpolate(frame, [closeAt, clip.frames], [1, 0], clamp);
+  const [cx = 0, cy = 0, down = 0] = clip.cursor[at] ?? [];
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: (1920 - width) / 2,
+        top: MENU_BAR + 14 * px,
+        width,
+        height,
+        opacity: Math.min(enter, leave),
+        transform: `translateY(${interpolate(enter, [0, 1], [-12, 0])}px)`,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 14 * px,
+          overflow: "hidden",
+          boxShadow: "0 30px 70px rgba(0,0,0,0.55)",
+        }}
+      >
+        <OffthreadVideo
+          src={staticFile(`clips/${name}.mp4`)}
+          muted
+          style={{ width, height: clip.height * px, display: "block" }}
+        />
+      </div>
+      {clip.pointer && lastClick !== undefined && (
+        <>
+          {frame >= lastClick && frame < lastClick + 14 && (
+            <Ripple x={cx * px} y={cy * px} progress={(frame - lastClick) / 14} />
+          )}
+          <Cursor x={cx * px} y={cy * px} pressed={down === 1} />
+        </>
+      )}
+    </div>
   );
 }
 

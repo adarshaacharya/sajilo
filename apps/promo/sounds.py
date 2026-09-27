@@ -1,6 +1,6 @@
 """
-The promo's interface sounds: a soft tick on every click in the footage and a
-chime when the reminder arrives. The music is a separate, licensed track.
+The promo's interface sounds: a soft tick on every click in the footage, and
+the app's own chime (the file it bundles) as each of its cards opens. The music is a separate, licensed track.
 
     bun src/cues.ts > public/cues.json
     python3 sounds.py            # needs numpy and scipy
@@ -39,14 +39,11 @@ def tick():
 
 
 def chime():
-    """A notification: two soft bells, D6 then A6."""
-    t = seconds(1.6)
-    out = np.zeros_like(t)
-    for freq, delay in ((1174.66, 0.0), (1760.0, 0.12)):
-        later = np.clip(t - delay, 0, None)
-        for ratio, weight in ((1, 1), (2.76, 0.3), (5.4, 0.12)):
-            out += (t >= delay) * np.sin(2 * np.pi * freq * ratio * later) * np.exp(-later / (0.7 / ratio)) * weight
-    return out
+    """The app's own reminder sound, the file it bundles and plays."""
+    with wave.open(str(HERE / "../desktop/src-tauri/resources/chime.wav"), "rb") as file:
+        assert file.getframerate() == SR and file.getsampwidth() == 2
+        data = np.frombuffer(file.readframes(file.getnframes()), "<i2") / 32767
+        return data.reshape(-1, file.getnchannels()).mean(axis=1)
 
 
 track = np.zeros((2, int(LENGTH * SR)))
@@ -63,7 +60,7 @@ def add(at, sound, gain, pan):
 for frame in cues["clicks"]:
     add(frame / cues["fps"], tick(), 0.18, 0.4)
 for frame in cues["chimes"]:
-    add(frame / cues["fps"], chime(), 0.22, 0.4)
+    add(frame / cues["fps"], chime(), 0.8, 0.0)
 
 out = HERE / "public" / "sounds.wav"
 with wave.open(str(out), "wb") as file:
@@ -71,4 +68,4 @@ with wave.open(str(out), "wb") as file:
     file.setsampwidth(2)
     file.setframerate(SR)
     file.writeframes((np.clip(track, -1, 1).T * 32767).astype("<i2").tobytes())
-print(f"wrote {out.relative_to(HERE)}: {len(cues['clicks'])} clicks, {len(cues['chimes'])} chime")
+print(f"wrote {out.relative_to(HERE)}: {len(cues['clicks'])} clicks, {len(cues['chimes'])} chimes")

@@ -1,11 +1,11 @@
 /**
  * Prints the film's timing: where each section starts, how many bars it
- * runs, and every click and notification, in frames. `sounds.py` puts its
+ * runs, every click, and every card the app chimes for, in frames. `sounds.py` puts its
  * ticks and chime on these frames.
  *
  *   bun src/cues.ts > public/cues.json
  */
-import { BAR, CARD, CHAPTERS, chapterLength, END, OPEN, s, TOTAL } from "./timeline";
+import { BAR, CARD, CARD_GAP, CHAPTERS, chapterLength, END, OPEN, TOTAL } from "./timeline";
 
 type Section = { kind: string; id: string; start: number; bars: number };
 
@@ -18,13 +18,18 @@ for (const chapter of CHAPTERS) {
   sections.push({ kind: "card", id: chapter.id, start: at, bars: CARD / BAR });
   const footage = at + CARD;
   sections.push({
-    kind: chapter.notification ? "notification" : "footage",
+    kind: "footage",
     id: chapter.id,
     start: footage,
     bars: (chapterLength(chapter) - CARD) / BAR,
   });
-  if (chapter.notification) chimes.push(footage + s(0.6));
   let clipStart = footage;
+  for (const { clip } of chapter.cards ?? []) {
+    // The app chimes as it opens one of its cards.
+    chimes.push(clipStart);
+    for (const click of clip.clicks) clicks.push(clipStart + click);
+    clipStart += clip.frames + CARD_GAP;
+  }
   for (const { clip } of chapter.clips) {
     for (const click of clip.clicks) clicks.push(clipStart + click);
     clipStart += clip.frames;

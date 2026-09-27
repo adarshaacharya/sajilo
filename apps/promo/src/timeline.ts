@@ -1,8 +1,11 @@
 import bazar from "../public/clips/bazar.json";
+import breakEyes from "../public/clips/break-eyes.json";
+import breakWater from "../public/clips/break-water.json";
 import calendar from "../public/clips/calendar.json";
 import converter from "../public/clips/converter.json";
 import keeper from "../public/clips/keeper.json";
 import news from "../public/clips/news.json";
+import reminder from "../public/clips/reminder.json";
 import routine from "../public/clips/routine.json";
 import tools from "../public/clips/tools.json";
 import weather from "../public/clips/weather.json";
@@ -20,10 +23,14 @@ export type Clip = {
   width: number;
   height: number;
   frames: number;
+  /** False when the mouse was never touched: no cursor is drawn. */
+  pointer?: boolean;
   /** Per frame: cursor x, y in the popover's CSS pixels, and 1 while pressed. */
   cursor: number[][];
   clicks: number[];
   marks: Record<string, number>;
+  /** For a card: its height each frame, in CSS pixels. */
+  heights?: number[];
 };
 
 export type Beat = {
@@ -40,10 +47,16 @@ export type Chapter = {
   /** The problem, in Nepali first and English under it. */
   problemNe: string;
   problemEn: string;
+  /**
+   * Sajilo's own cards (a reminder, a break), each its own small window at
+   * the top of the screen, played first with the panel closed. Each arrives
+   * with the app's chime.
+   */
+  cards?: { name: string; clip: Clip; beats: Beat[] }[];
   /** The footage, played in the panel, one after another. */
   clips: { name: string; clip: Clip; beats: Beat[] }[];
-  /** Instead of footage: a system notification, with the panel closed. */
-  notification?: { title: string; body: string; seconds: number; beats: Beat[] };
+  /** The menu bar's date, when the scene is another day. */
+  date?: string;
 };
 
 const gold = new Intl.NumberFormat("en-IN").format(facts.goldPerTola);
@@ -80,13 +93,15 @@ export const CHAPTERS: Chapter[] = [
     label: "Reminders",
     problemNe: "बिदा छुट्यो?",
     problemEn: "Missed a holiday again?",
+    date: facts.eveDate,
+    cards: [
+      {
+        name: "reminder",
+        clip: reminder,
+        beats: [{ at: "start", title: "Sajilo tells you the evening before.", line: "Holidays, festivals, IPOs and your bills." }],
+      },
+    ],
     clips: [],
-    notification: {
-      title: facts.holiday.name,
-      body: `Public holiday in ${facts.holiday.daysAway} days`,
-      seconds: 4.5,
-      beats: [{ at: "start", title: "Sajilo tells you first.", line: "Without you opening anything." }],
-    },
   },
   {
     id: "bazar",
@@ -98,7 +113,8 @@ export const CHAPTERS: Chapter[] = [
         name: "bazar",
         clip: bazar,
         beats: [
-          { at: "nepse", title: `NEPSE ${nepse}.`, line: "Gainers, losers, IPOs and your funds." },
+          { at: "nepse", title: `NEPSE ${nepse}.`, line: "Gainers, losers, sectors and your funds." },
+          { at: "ipos", title: "Every IPO, and when it opens.", line: "A reminder on closing day, so you never miss one." },
           { at: "forex", title: `Dollar Rs ${facts.usdBuy}.`, line: "NRB's rates for every currency." },
           { at: "gold", title: `Gold Rs ${gold} a tola.`, line: "And silver, per tola and 10 grams." },
           { at: "vegetables", title: "Kalimati prices, today.", line: "Every vegetable and fruit." },
@@ -154,12 +170,24 @@ export const CHAPTERS: Chapter[] = [
     label: "Routine",
     problemNe: "आठ घण्टा स्क्रिनमा, एउटा पनि ब्रेक छैन",
     problemEn: "Eight hours at the screen. Not one break.",
+    cards: [
+      {
+        name: "break-eyes",
+        clip: breakEyes,
+        beats: [{ at: "start", title: "Look away.", line: "Take your hands off the mouse and the ring runs down." }],
+      },
+      {
+        name: "break-water",
+        clip: breakWater,
+        beats: [{ at: "start", title: "Drink some water.", line: "One tap, and a joke in Nepali or English." }],
+      },
+    ],
     clips: [
       {
         name: "routine",
         clip: routine,
         beats: [
-          { at: "breaks", title: "Rest your eyes. Stand up. Drink water.", line: "Gentle nudges while you work." },
+          { at: "breaks", title: "Set it once.", line: "Eyes, water, standing up, meals, bedtime." },
           { at: "calls", title: "It waits while you're in a call." },
           { at: "week", title: "Your week at the screen.", line: "Days off counted apart." },
         ],
@@ -178,7 +206,7 @@ export const CHAPTERS: Chapter[] = [
         beats: [
           { at: "tools", title: "Ropani, tola, VAT, interest.", line: "Emergency numbers, one tap away." },
           { at: "rashifal", title: "Your rashifal, every morning." },
-          { at: "radio", title: "Nepali FM, a click away." },
+          { at: "radio", title: "Nepali FM, a click away.", line: "Kantipur, Ujyaalo, Radio Nepal and more." },
         ],
       },
     ],
@@ -217,12 +245,14 @@ export const END = 4 * BAR;
 /** Frames between one clip and the next inside a chapter. */
 export const CUT = 8;
 
+/** Frames between one card and the next, the desktop empty. */
+export const CARD_GAP = 10;
+
+export const cardsLength = (chapter: Chapter) =>
+  (chapter.cards ?? []).reduce((sum, { clip }) => sum + clip.frames + CARD_GAP, 0);
+
 export const footageLength = (chapter: Chapter) =>
-  bars(
-    chapter.notification
-      ? s(chapter.notification.seconds)
-      : chapter.clips.reduce((sum, { clip }) => sum + clip.frames, 0),
-  );
+  bars(cardsLength(chapter) + chapter.clips.reduce((sum, { clip }) => sum + clip.frames, 0));
 
 export const chapterLength = (chapter: Chapter) => CARD + footageLength(chapter);
 

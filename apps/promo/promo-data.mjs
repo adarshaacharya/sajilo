@@ -167,3 +167,66 @@ export const facts = {
   usdBuy: usd.buy,
 };
 
+
+// ---------------------------------------------------------------- cards
+
+/**
+ * A joke exactly as the engine deals it: the English line looked up in
+ * `sajilo-core`'s decks, with the Nepali that sits beside it. A line the
+ * engine doesn't have is an error, not a stand-in.
+ */
+const JOKES = readFileSync(join(here, "../../crates/sajilo-core/src/focus/jokes.rs"), "utf8");
+function joke(en) {
+  const escaped = en.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = JOKES.match(new RegExp(`"${escaped}",\\s*"([^"]+)"`));
+  if (!match) throw new Error(`not one of the engine's lines: ${en}`);
+  return { en, ne: match[1] };
+}
+
+/**
+ * Routine with a break card up, the way the engine hands it to the card
+ * window. It starts when the recording does, after three seconds of loading.
+ */
+export function withBreak(kind) {
+  const snap = focusOn();
+  const startedAt = new Date(Date.parse(RECORDED_AT) + 3000).toISOString();
+  snap.activeBreak =
+    kind === "eyes"
+      ? {
+          kind,
+          startedAt,
+          seconds: 20,
+          preview: false,
+          joke: joke("Rest your eyes. NEPSE will still be red when you look back."),
+          cheer: null,
+          canSnooze: false,
+          afterHold: null,
+        }
+      : {
+          kind,
+          startedAt,
+          seconds: 0,
+          preview: false,
+          joke: joke("Water is the one thing in Kathmandu not stuck in traffic. Drink it."),
+          cheer: joke("Well done. You've earned a chiya. Kidding. Water."),
+          canSnooze: true,
+          afterHold: null,
+        };
+  return snap;
+}
+
+/** The holiday's reminder, as the engine plans it for the evening before. */
+export const HOLIDAY_REMINDER = {
+  reminder: {
+    id: `festival:${holiday.date.year}-${holiday.date.month}-${holiday.date.day}`,
+    kind: "holiday",
+    title: "Public holiday tomorrow",
+    body: holiday.name,
+    fireAt: RECORDED_AT,
+  },
+  waiting: 0,
+  preview: false,
+};
+
+/** The menu bar on the reminder's evening, the day before the holiday. */
+facts.eveDate = `${today.nepaliMonthName} ${deva(holiday.date.day - 1)}, ${deva(holiday.date.year)}`;

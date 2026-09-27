@@ -13,6 +13,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import {
+  CardWindow,
   Captions,
   type Cue,
   Cursor,
@@ -28,6 +29,7 @@ import { color, font, s } from "./theme";
 import {
   BAR,
   CARD,
+  CARD_GAP,
   CHAPTERS,
   type Chapter,
   chapterLength,
@@ -120,38 +122,46 @@ function Opening() {
 
 // ---------------------------------------------------------------- chapters
 
-/** The problem on its own, then someone using the app to answer it. */
+/**
+ * The problem on its own; then any of Sajilo's own cards arriving over the
+ * desktop; then someone using the app to answer it.
+ */
 function ChapterScene({ chapter, number }: { chapter: Chapter; number: number }) {
   let at = CARD;
+  const cards = (chapter.cards ?? []).map((entry) => {
+    const start = at;
+    at += entry.clip.frames + CARD_GAP;
+    return { ...entry, start };
+  });
   const clips = chapter.clips.map((entry) => {
     const start = at;
     at += entry.clip.frames;
     return { ...entry, start };
   });
-  const cues: Cue[] = chapter.notification
-    ? chapter.notification.beats.map((beat) => ({ ...beat, start: CARD }))
-    : clips.flatMap(({ clip, beats, start }) =>
-        beats.map((beat) => ({ ...beat, start: start + (clip.marks[beat.at] ?? 0) })),
-      );
+  const cues: Cue[] = [...cards, ...clips].flatMap(({ clip, beats, start }) =>
+    beats.map((beat) => ({ ...beat, start: start + (clip.marks[beat.at] ?? 0) })),
+  );
   if (cues[0]) cues[0] = { ...cues[0], start: CARD };
+  const panelFrom = clips[0]?.start ?? Number.POSITIVE_INFINITY;
+  const frame = useCurrentFrame();
 
   return (
     <AbsoluteFill>
-      <Desktop date={facts.menuBarDate} active={!chapter.notification}>
+      <Desktop date={chapter.date ?? facts.menuBarDate} active={frame >= panelFrom}>
         {clips.map(({ name, clip, start }, index) => (
           <Sequence
             key={name}
             from={start}
             durationInFrames={index < clips.length - 1 ? clip.frames + CUT : chapterLength(chapter) - start}
           >
-            <Panel clip={clip} name={name} zoomFrom={index === 0 ? 1 : 1.34} />
+            <Panel clip={clip} name={name} zoomFrom={1} />
           </Sequence>
         ))}
-        {chapter.notification && (
-          <Sequence from={CARD + s(0.6)}>
-            <Notification title={chapter.notification.title} body={chapter.notification.body} />
+        {cards.map(({ name, clip, start }) => (
+          <Sequence key={name} from={start} durationInFrames={clip.frames}>
+            <CardWindow clip={clip} name={name} />
           </Sequence>
-        )}
+        ))}
         <Captions label={chapter.label} cues={cues} />
       </Desktop>
       <Sequence durationInFrames={CARD}>
@@ -217,37 +227,6 @@ function ProblemCard({ number, ne, en }: { number: number; ne: string; en: strin
         />
       </div>
     </AbsoluteFill>
-  );
-}
-
-/** A system notification, the way Sajilo's holiday reminder arrives. */
-function Notification({ title, body }: { title: string; body: string }) {
-  const enter = useEnter(0, 16);
-  return (
-    <div
-      style={{
-        position: "absolute",
-        top: MENU_BAR + 20,
-        right: 40,
-        width: 600,
-        display: "flex",
-        gap: 20,
-        alignItems: "center",
-        padding: "22px 26px",
-        borderRadius: 22,
-        background: "rgba(40,40,44,0.97)",
-        border: `1px solid ${color.border}`,
-        boxShadow: "0 24px 60px rgba(0,0,0,0.5)",
-        transform: `translateX(${interpolate(enter, [0, 1], [660, 0])}px)`,
-      }}
-    >
-      <Img src={staticFile("icon.png")} style={{ width: 64, height: 64, borderRadius: 14 }} />
-      <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-        <span style={{ color: color.secondary, fontFamily: font.display, fontWeight: 600, fontSize: 21 }}>Sajilo</span>
-        <span style={{ color: color.text, fontFamily: font.nepali, fontWeight: 700, fontSize: 32 }}>{title}</span>
-        <span style={{ color: color.secondary, fontFamily: font.display, fontWeight: 500, fontSize: 24 }}>{body}</span>
-      </div>
-    </div>
   );
 }
 

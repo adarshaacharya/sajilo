@@ -20,7 +20,15 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
-import { BASE_PROMO, dismissRoutineTip, facts, PAID, RECORDED_AT } from "./promo-data.mjs";
+import {
+  BASE_PROMO,
+  dismissRoutineTip,
+  facts,
+  HOLIDAY_REMINDER,
+  PAID,
+  RECORDED_AT,
+  withBreak,
+} from "./promo-data.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const CLIPS = join(here, "public", "clips");
@@ -51,12 +59,50 @@ const FONT_CSS = `
 :root, :root[data-platform] { --font-ui: "Promo UI", "Promo Deva", sans-serif !important; }
 `;
 
+/**
+ * A card surface (break, reminder) is its own small window over the desktop:
+ * the page behind it is the film's desktop colour, and its arrival animation
+ * waits for the recording to start rather than playing while it loads.
+ */
+const CARD_CSS = `html, body { background: #0c0c0e !important; }`;
+const HOLD_CSS = `*, *::before, *::after { animation-play-state: paused !important; }`;
+
+/**
+ * What a radio stream answers with during recording: half a minute of
+ * silence. The player really starts and shows "Now playing"; no station's
+ * broadcast is fetched or used.
+ */
+const SILENT_STREAM = "https://radio.promo.invalid/silence.wav";
+
+function silence(seconds = 30, rate = 8000) {
+  const data = rate * seconds * 2;
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + data, 4);
+  header.write("WAVEfmt ", 8);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
+  header.writeUInt32LE(rate, 24);
+  header.writeUInt32LE(rate * 2, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(data, 40);
+  return Buffer.concat([header, Buffer.alloc(data)]);
+}
+
 // ---------------------------------------------------------------- the director
 
 class Director {
-  constructor(page, name) {
+  constructor(page, name, region = null) {
     this.page = page;
     this.name = name;
+    /** The part of the page recorded, for a card: its box. */
+    this.region = region;
+    this.moved = false;
+    /** A card's height each frame: its window shrinks to fit, as the app's does. */
+    this.heights = [];
     this.dir = join(CLIPS, `${name}-frames`);
     rmSync(this.dir, { recursive: true, force: true });
     mkdirSync(this.dir, { recursive: true });
@@ -86,8 +132,21 @@ class Director {
     const index = this.frames.length;
     await this.page.screenshot({
       path: join(this.dir, `${String(index).padStart(5, "0")}.png`),
+      ...(this.region ? { clip: this.region } : {}),
     });
-    this.frames.push([round(this.cursor[0]), round(this.cursor[1]), this.down ? 1 : 0]);
+    if (this.region) {
+      this.heights.push(
+        await this.page.evaluate(
+          () => document.querySelector(".break-card")?.getBoundingClientRect().height ?? 0,
+        ),
+      );
+    }
+    const [dx, dy] = this.region ? [this.region.x, this.region.y] : [0, 0];
+    this.frames.push([
+      round(this.cursor[0] - dx),
+      round(this.cursor[1] - dy),
+      this.down ? 1 : 0,
+    ]);
   }
 
   async hold(seconds) {
@@ -114,6 +173,7 @@ class Director {
     const [x0, y0] = this.cursor;
     const [x1, y1] = await this.point(target);
     const steps = Math.max(1, Math.round(seconds * FPS));
+    this.moved = true;
     for (let i = 1; i <= steps; i++) {
       const e = ease(i / steps);
       this.cursor = [x0 + (x1 - x0) * e, y0 + (y1 - y0) * e];
@@ -187,12 +247,15 @@ class Director {
     writeFileSync(
       join(CLIPS, `${this.name}.json`),
       `${JSON.stringify({
-        width: WIDTH,
-        height: HEIGHT,
+        width: this.region?.width ?? WIDTH,
+        height: this.region?.height ?? HEIGHT,
+        /** False when nobody touched the mouse: no cursor is drawn. */
+        pointer: this.moved,
         frames: this.frames.length,
         cursor: this.frames,
         clicks: this.clicks,
         marks: this.marks,
+        ...(this.region ? { heights: this.heights.map(round) } : {}),
       })}\n`,
     );
     rmSync(this.dir, { recursive: true, force: true });
@@ -214,6 +277,38 @@ const tabButton = (d, name) => d.page.getByRole("tab", { name, exact: true }).fi
  * in the video does. Marks name the moments captions land on.
  */
 const CLIP_LIST = [
+  {
+    name: "reminder",
+    surface: "reminder",
+    promo: { current_reminder: HOLIDAY_REMINDER },
+    act: async (d) => {
+      d.cursor = [300, 190];
+      await d.hold(1.4);
+      await d.click(button(d, "Got it"), 0.7);
+      await d.hold(0.3);
+    },
+  },
+  {
+    name: "break-eyes",
+    surface: "break",
+    promo: { focus_snapshot: withBreak("eyes") },
+    // Nobody touches the mouse: that is how a look away is taken.
+    act: async (d) => {
+      await d.hold(3.4);
+    },
+  },
+  {
+    name: "break-water",
+    surface: "break",
+    promo: { focus_snapshot: withBreak("water") },
+    act: async (d) => {
+      d.cursor = [300, 200];
+      await d.hold(1.2);
+      await d.click(button(d, /\+250/), 0.6);
+      d.mark("cheer");
+      await d.hold(1.7);
+    },
+  },
   {
     name: "calendar",
     route: "/",
@@ -268,6 +363,11 @@ const CLIP_LIST = [
       await d.scroll(520, 1.4);
       await d.hold(0.8);
       await d.scroll(-520, 0.6);
+      d.mark("ipos");
+      await d.click(button(d, /^All\s*1/), 0.6);
+      await d.hold(1.8);
+      await d.click(button(d, "Back"), 0.5);
+      await d.hold(0.2);
       d.mark("forex");
       await d.click(tabButton(d, "Forex"), 0.5);
       await d.hold(1.8);
@@ -353,6 +453,10 @@ const CLIP_LIST = [
   {
     name: "tools",
     route: "/tools",
+    radio: true,
+    // The app looks a station's stream up as it starts; here that answer is
+    // the silent stream above.
+    promo: { station_stream: SILENT_STREAM },
     act: async (d) => {
       await d.hold(0.4);
       d.mark("tools");
@@ -364,7 +468,10 @@ const CLIP_LIST = [
       await d.hold(1.8);
       d.mark("radio");
       await d.click(tab(d, "Radio"), 0.6);
-      await d.hold(1.8);
+      await d.hold(0.6);
+      await d.click(button(d, /Radio Kantipur|रेडियो कान्तिपुर/), 0.6);
+      d.mark("playing");
+      await d.hold(2.6);
     },
   },
   {
@@ -392,7 +499,12 @@ const CLIP_LIST = [
 
 mkdirSync(CLIPS, { recursive: true });
 writeFileSync(join(here, "public", "facts.json"), `${JSON.stringify(facts, null, 2)}\n`);
-const browser = await chromium.launch({ executablePath: CHROME });
+const browser = await chromium.launch({
+  executablePath: CHROME,
+  // The radio starts on a click, as it does in the app; headless Chrome
+  // would otherwise refuse any sound.
+  args: ["--autoplay-policy=no-user-gesture-required"],
+});
 const only = process.argv[2];
 
 for (const clip of CLIP_LIST) {
@@ -411,6 +523,12 @@ for (const clip of CLIP_LIST) {
       contentType: "font/woff2",
     });
   });
+  if (clip.radio) {
+    const quiet = silence();
+    await page.route(`${SILENT_STREAM}*`, (route) =>
+      route.fulfill({ body: quiet, contentType: "audio/wav" }),
+    );
+  }
   await page.clock.install({ time: new Date(RECORDED_AT) });
   await page.addInitScript(
     ([answers, css]) => {
@@ -421,12 +539,23 @@ for (const clip of CLIP_LIST) {
         document.head.append(style);
       });
     },
-    [{ ...BASE_PROMO, ...clip.promo }, FONT_CSS],
+    [{ ...BASE_PROMO, ...clip.promo }, FONT_CSS + (clip.surface ? CARD_CSS : "")],
   );
+  if (clip.surface) {
+    await page.addInitScript((css) => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const style = document.createElement("style");
+        style.id = "promo-hold";
+        style.textContent = css;
+        document.head.append(style);
+      });
+    }, HOLD_CSS);
+  }
 
   const url = new URL(BASE);
-  url.searchParams.set("route", clip.route);
+  url.searchParams.set("route", clip.route ?? "/");
   url.searchParams.set("theme", "dark");
+  if (clip.surface) url.searchParams.set("surface", clip.surface);
   await page.goto(url.toString());
   // Let the app load and settle: real time for modules and fonts, the fake
   // clock for its own timers.
@@ -437,7 +566,21 @@ for (const clip of CLIP_LIST) {
   await page.evaluate(() => document.fonts.ready);
   if (clip.setup) await clip.setup(page);
 
-  const director = new Director(page, clip.name);
+  let region = null;
+  if (clip.surface) {
+    const box = await page.locator(".break-card").boundingBox();
+    if (!box) throw new Error(`${clip.name}: no card on screen`);
+    // Whole pixels, and an even count of them at 3x for the encoder.
+    const even = (n) => Math.ceil(n / 2) * 2;
+    region = {
+      x: Math.floor(box.x),
+      y: Math.floor(box.y),
+      width: even(box.width),
+      height: even(box.height + 1),
+    };
+    await page.evaluate(() => document.getElementById("promo-hold")?.remove());
+  }
+  const director = new Director(page, clip.name, region);
   await clip.act(director);
   director.finish();
   await context.close();
