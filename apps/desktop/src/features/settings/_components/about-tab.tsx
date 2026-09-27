@@ -8,9 +8,9 @@ import { openExternalLink } from "../../../shared/lib/external-link";
 import { isWindows } from "../../../shared/lib/platform";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
-const ISSUES_URL = `${REPO_URL}/issues`;
 const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
 const WEBSITE_URL = "https://sajilo.fyi";
+const REPORT_URL = `${WEBSITE_URL}/report`;
 const PRIVACY_URL = `${WEBSITE_URL}/privacy.html`;
 const DOCS_URL = `${WEBSITE_URL}/docs.html`;
 const CONTACT_EMAIL = "contact@sajilo.fyi";
@@ -144,7 +144,7 @@ export function AboutTab() {
       {/* Every way out, as rows: nothing to read before finding the one. */}
       <section className="surface-card divide-y divide-divider overflow-hidden">
         <LinkRow icon="directory" label={t("about.docs")} href={DOCS_URL} />
-        <LinkRow icon="warning" label={t("about.report-issue")} href={ISSUES_URL} />
+        <LinkRow icon="warning" label={t("about.report-issue")} href={REPORT_URL} />
         <LinkRow
           icon="mail"
           label={t("about.contact")}
