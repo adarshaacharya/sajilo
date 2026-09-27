@@ -15,11 +15,11 @@ in a small tray app for macOS, Windows, and Linux.
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)
 
-<a href="https://youtu.be/96Qk1Cn4NyY">
+<a href="https://youtu.be/fpuhyNWzHFg">
   <img src="apps/landing/public/assets/film/sajilo-tour.jpg" alt="Watch the Sajilo tour on YouTube" width="720" />
 </a>
 
-[▶ Watch the tour on YouTube](https://youtu.be/96Qk1Cn4NyY)
+[▶ Watch the tour on YouTube](https://youtu.be/fpuhyNWzHFg)
 
 </div>
 
