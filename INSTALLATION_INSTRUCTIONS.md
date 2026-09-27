@@ -127,3 +127,18 @@ Sajilo shows the Nepali date in your top bar through the StatusNotifier
 
 Linux trays don't pass clicks to apps, so open Sajilo from the tray icon's
 menu: click the date, then **Open Sajilo**.
+
+To close it, click anywhere outside it, press **Esc**, or click the tray icon
+again.
+
+### Tiling window managers (Hyprland, sway, i3)
+
+A tiling manager tiles every new window, the popover included. Tell it to
+float Sajilo instead. The window's title is always `Sajilo`:
+
+- **Hyprland** (`hyprland.conf`): `windowrulev2 = float, title:^(Sajilo)$`
+- **sway** or **i3** (`config`): `for_window [title="^Sajilo$"] floating enable`
+
+On a Wayland session without XWayland, the compositor decides where windows
+open, so the popover may not appear right under the tray icon there. Everything
+else, including closing it with a click outside, works the same.

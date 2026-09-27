@@ -27,6 +27,14 @@ pub fn hide_popover(app: AppHandle<Wry>) {
     }
 }
 
+/// The page saw the pointer enter or leave the popover. On Linux this is how
+/// the shell tells a click away from a focus drop nobody asked for; see
+/// `window::hide_on_blur`.
+#[tauri::command]
+pub fn popover_pointer(over: bool) {
+    crate::window::set_pointer_over(over);
+}
+
 /// Keeps the popover open while it shows a dialog of its own, and hands focus
 /// back to it when the dialog closes.
 #[tauri::command]

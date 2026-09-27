@@ -349,6 +349,7 @@ pub fn run() {
             commands::tray::refresh_tray,
             commands::tray::quit_app,
             commands::tray::hide_popover,
+            commands::tray::popover_pointer,
             commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,

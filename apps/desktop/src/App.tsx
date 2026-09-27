@@ -73,6 +73,26 @@ function TrayNavigation() {
   return null;
 }
 
+/** Tells the shell when the pointer enters or leaves the popover. The page
+ * always knows, even where the shell cannot read the pointer (a Wayland
+ * session), and the shell needs it to tell a click away from a stray
+ * focus-out; see `window::hide_on_blur`. */
+function ReportPointer() {
+  useEffect(() => {
+    const root = document.documentElement;
+    const enter = () => api.popoverPointer(true).catch(() => {});
+    const leave = () => api.popoverPointer(false).catch(() => {});
+    root.addEventListener("mouseenter", enter);
+    root.addEventListener("mouseleave", leave);
+    return () => {
+      root.removeEventListener("mouseenter", enter);
+      root.removeEventListener("mouseleave", leave);
+    };
+  }, []);
+
+  return null;
+}
+
 /** Counts each screen as it opens, for the daily usage report. */
 function TrackScreens() {
   const { pathname } = useLocation();
@@ -110,6 +130,7 @@ function Shell() {
     <div className="app-window flex flex-col">
       <TrayNavigation />
       <DismissOnEscape />
+      <ReportPointer />
       <TrackScreens />
       <Routes location={location}>
         {ROUTES.map((route) => (

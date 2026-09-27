@@ -820,5 +820,8 @@ export const api = {
    * external link or it buries the newly opened browser window. */
   openExternalUrl: (url: string) => invoke<void>("open_external_url", { url }),
   hidePopover: () => invoke<void>("hide_popover"),
+  /** Whether the pointer is over the popover; the shell weighs it before
+   * reading a focus-out as a click away. */
+  popoverPointer: (over: boolean) => invoke<void>("popover_pointer", { over }),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
 };

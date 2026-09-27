@@ -5,7 +5,7 @@
 //! feed, every scroll position, the radio stream mid-play — and makes the next
 //! tray click pay a cold start. Hiding keeps all of it.
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 
 use tauri::{AppHandle, Manager, WebviewWindow};
 
@@ -28,6 +28,23 @@ static FOCUSED_SINCE_SHOWN: AtomicBool = AtomicBool::new(false);
 
 pub fn set_pinned(pinned: bool) {
     PINNED.store(pinned, Ordering::SeqCst);
+}
+
+/// Whether the pointer is over the popover, as its page last reported:
+/// [`POINTER_UNKNOWN`] until the page sees it enter or leave after an open.
+/// The page always knows, on every platform and session, including a Wayland
+/// one where the shell cannot read the pointer at all.
+static POINTER_OVER: AtomicU8 = AtomicU8::new(POINTER_UNKNOWN);
+const POINTER_UNKNOWN: u8 = 0;
+const POINTER_IN: u8 = 1;
+const POINTER_OUT: u8 = 2;
+
+/// The page's report that the pointer entered or left the popover.
+pub fn set_pointer_over(over: bool) {
+    POINTER_OVER.store(
+        if over { POINTER_IN } else { POINTER_OUT },
+        Ordering::SeqCst,
+    );
 }
 
 pub const MAIN: &str = "main";
@@ -109,6 +126,7 @@ fn show_now(window: &WebviewWindow) {
     #[cfg(target_os = "linux")]
     {
         FOCUSED_SINCE_SHOWN.store(false, Ordering::SeqCst);
+        POINTER_OVER.store(POINTER_UNKNOWN, Ordering::SeqCst);
         if let Ok(mut shown) = SHOWN_AT.lock() {
             *shown = Some(std::time::Instant::now());
         }
@@ -413,8 +431,9 @@ const OPEN_GRACE: std::time::Duration = std::time::Duration::from_millis(400);
 
 /// Hides the popover after a focus-out that looks like the user clicking
 /// somewhere else: it had focus since it opened, it has been up a moment, the
-/// focus stays gone, and the pointer is outside it. A focus drop the user did
-/// not cause, while they look at the window, fails the last two.
+/// focus stays gone, and the pointer is outside it (see [`pointer_inside`]).
+/// A focus drop the user did not cause, while they look at the window, fails
+/// the last two.
 #[cfg(target_os = "linux")]
 fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
     if focused {
@@ -449,10 +468,23 @@ fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
     });
 }
 
-/// Whether the pointer is over the popover. Unknown counts as inside, so a
-/// failure to read it never dismisses anything.
+/// Whether the pointer is over the popover.
+///
+/// The page's own report comes first: it is exact everywhere. Before the page
+/// has seen the pointer enter or leave, X11 can still be asked where the
+/// pointer is. A Wayland session cannot be asked, and there an unknown pointer
+/// counts as away, so a click elsewhere still closes a popover that was never
+/// hovered; on X11 a failed read counts as inside, so it never dismisses.
 #[cfg(target_os = "linux")]
 fn pointer_inside(window: &WebviewWindow) -> bool {
+    match POINTER_OVER.load(Ordering::SeqCst) {
+        POINTER_IN => return true,
+        POINTER_OUT => return false,
+        _ => {}
+    }
+    if !on_x11() {
+        return false;
+    }
     let (Ok(cursor), Ok(origin), Ok(size)) = (
         window.cursor_position(),
         window.outer_position(),
@@ -466,6 +498,17 @@ fn pointer_inside(window: &WebviewWindow) -> bool {
         && cursor.x < left + f64::from(size.width)
         && cursor.y >= top
         && cursor.y < top + f64::from(size.height)
+}
+
+/// Whether GTK is drawing through X11 (native, or XWayland as
+/// `prefer_x11_backend` asks for), where the pointer can be read anywhere on
+/// screen. On native Wayland it cannot.
+#[cfg(target_os = "linux")]
+fn on_x11() -> bool {
+    std::env::var("GDK_BACKEND").map_or_else(
+        |_| std::env::var_os("WAYLAND_DISPLAY").is_none(),
+        |backend| backend.split(',').next() == Some("x11"),
+    )
 }
 
 /// Keeps the shadow only where it draws what we want.
