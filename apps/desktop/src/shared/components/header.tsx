@@ -1,17 +1,19 @@
+import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
+import { useDragWhenKept, useKept } from "../lib/popover-kept";
 import { BackButton, useGoBack } from "./back-button";
 import { useHeaderInnerContent, useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
+import { KeepOpenButton } from "./keep-open-button";
 import { TABS } from "./tab-bar";
 import { UpdateHeaderButton } from "./update-header-button";
 
 /**
- * The popover has no title bar of its own — the window is undecorated — and it
- * is deliberately not draggable either. It is anchored under the tray icon, the
- * way a menu-bar popover is: dragging it somewhere else would leave it stranded
- * away from the icon that opens it, and it would still reposition on the next
- * open. No drag region, so it stays put.
+ * The popover has no title bar of its own — the window is undecorated. It is
+ * anchored under the tray icon, the way a menu-bar popover is, and only moves
+ * once the pin keeps it open: then this bar drags it, like a title bar, and it
+ * reopens where it was left.
  *
  * Settings lives here rather than in the tab bar: it is visited rarely, and a
  * seventh tab would cost every other tab the width its label needs.
@@ -30,13 +32,21 @@ export function Header({ title }: { title: string }) {
   const inner = useHeaderInnerContent();
   const isTabRoot = TABS.some((tab) => tab.to === pathname);
   const back = inner ? inner.onBack : isTabRoot ? null : goBack;
+  const kept = useKept();
+  const bar = useRef<HTMLElement>(null);
+  useDragWhenKept(bar);
 
   return (
-    <header className="header-bar flex h-10 shrink-0 items-center gap-1.5 px-2.5">
+    <header
+      ref={bar}
+      className="header-bar flex h-10 shrink-0 items-center gap-1.5 px-2.5"
+      data-kept={kept || undefined}
+    >
       {back && <BackButton onClick={back} />}
       <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{inner?.title ?? title}</h1>
       {slot}
       <UpdateHeaderButton />
+      <KeepOpenButton iconClassName="size-3.5" />
       {pathname !== "/settings" && (
         <button
           type="button"

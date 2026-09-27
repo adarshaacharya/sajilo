@@ -35,6 +35,21 @@ pub fn popover_pointer(over: bool) {
     crate::window::set_pointer_over(over);
 }
 
+/// Whether the popover is kept open with the header's pin.
+#[tauri::command]
+pub fn popover_kept() -> bool {
+    crate::window::is_kept()
+}
+
+/// The header's pin: keep the popover open and movable, or let it close on a
+/// click away and open at the tray again.
+#[tauri::command]
+pub fn set_popover_kept(app: AppHandle<Wry>, kept: bool) {
+    if let Some(window) = crate::window::main_window(&app) {
+        crate::window::set_kept(&window, kept);
+    }
+}
+
 /// Keeps the popover open while it shows a dialog of its own, and hands focus
 /// back to it when the dialog closes.
 #[tauri::command]

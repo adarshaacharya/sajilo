@@ -39,6 +39,117 @@ const POINTER_UNKNOWN: u8 = 0;
 const POINTER_IN: u8 = 1;
 const POINTER_OUT: u8 = 2;
 
+/// Kept open with the header's pin: a click away no longer dismisses it, it
+/// can be dragged anywhere, and it reopens where it was left. Escape and the
+/// tray still put it away.
+static KEPT_OPEN: AtomicBool = AtomicBool::new(false);
+
+/// Where a kept popover was last moved to, in logical pixels.
+static KEPT_PLACE: std::sync::Mutex<Option<Place>> = std::sync::Mutex::new(None);
+
+/// Stored as `{ "x": .., "y": .. }`: see [`save_kept`].
+const KEPT_KEY: &str = "popover.keptOpen.v1";
+
+#[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
+struct Place {
+    x: f64,
+    y: f64,
+}
+
+/// Reads whether the popover was left kept open, and where, at launch.
+pub fn load_kept(app: &AppHandle) {
+    let Ok(Some(value)) = crate::db::get_json(app, KEPT_KEY) else {
+        return;
+    };
+    if value.is_null() {
+        return;
+    }
+    KEPT_OPEN.store(true, Ordering::SeqCst);
+    if let (Ok(place), Ok(mut kept)) = (serde_json::from_value::<Place>(value), KEPT_PLACE.lock()) {
+        *kept = Some(place);
+    }
+}
+
+pub fn is_kept() -> bool {
+    KEPT_OPEN.load(Ordering::SeqCst)
+}
+
+/// The pin. Pinning keeps the popover where it is now; unpinning forgets the
+/// place, so the next open is back under the tray icon.
+pub fn set_kept(window: &WebviewWindow, kept: bool) {
+    KEPT_OPEN.store(kept, Ordering::SeqCst);
+    let place = kept.then(|| current_place(window)).flatten();
+    if let Ok(mut stored) = KEPT_PLACE.lock() {
+        *stored = place;
+    }
+    save_kept(window.app_handle());
+}
+
+/// Follows a kept popover as it is dragged. Kept in memory; written when it
+/// is put away, not on every step of a drag.
+pub fn remember_move(window: &WebviewWindow) {
+    if !is_kept() {
+        return;
+    }
+    if let (Some(place), Ok(mut stored)) = (current_place(window), KEPT_PLACE.lock()) {
+        *stored = Some(place);
+    }
+}
+
+fn current_place(window: &WebviewWindow) -> Option<Place> {
+    let position = window.outer_position().ok()?;
+    let scale = window.scale_factor().ok()?;
+    Some(Place {
+        x: f64::from(position.x) / scale,
+        y: f64::from(position.y) / scale,
+    })
+}
+
+/// `null` when not kept; the place when kept, or `{}` before it has one.
+fn save_kept(app: &AppHandle) {
+    let value = if is_kept() {
+        KEPT_PLACE
+            .lock()
+            .ok()
+            .and_then(|place| *place)
+            .and_then(|place| serde_json::to_value(place).ok())
+            .unwrap_or_else(|| serde_json::json!({}))
+    } else {
+        serde_json::Value::Null
+    };
+    let _ = crate::db::set_json(app, KEPT_KEY, &value);
+}
+
+/// Puts a kept popover back where it was left, if a connected screen still
+/// shows that spot; otherwise it opens at the tray like any other.
+fn place_kept(window: &WebviewWindow) -> bool {
+    if !is_kept() {
+        return false;
+    }
+    let Some(place) = KEPT_PLACE.lock().ok().and_then(|place| *place) else {
+        return false;
+    };
+    let Ok(monitors) = window.available_monitors() else {
+        return false;
+    };
+    let visible = monitors.iter().any(|monitor| {
+        let scale = monitor.scale_factor();
+        let left = f64::from(monitor.position().x) / scale;
+        let top = f64::from(monitor.position().y) / scale;
+        let right = left + f64::from(monitor.size().width) / scale;
+        let bottom = top + f64::from(monitor.size().height) / scale;
+        // Enough of the header on screen to grab it again.
+        place.x + 60.0 >= left
+            && place.x + 60.0 <= right
+            && place.y >= top
+            && place.y + 40.0 <= bottom
+    });
+    visible
+        && window
+            .set_position(tauri::LogicalPosition::new(place.x, place.y))
+            .is_ok()
+}
+
 /// The page's report that the pointer entered or left the popover.
 pub fn set_pointer_over(over: bool) {
     POINTER_OVER.store(
@@ -71,6 +182,9 @@ pub fn toggle(app: &AppHandle) {
 /// Every dismissal goes through here so the tray menu can say what the next
 /// click will do — see [`crate::tray::set_popover_shown`].
 pub fn hide(window: &WebviewWindow) {
+    if is_kept() {
+        save_kept(window.app_handle());
+    }
     let _ = window.hide();
     #[cfg(target_os = "linux")]
     crate::tray::set_popover_shown(window.app_handle(), false);
@@ -118,7 +232,9 @@ pub fn show(window: &WebviewWindow) {
 }
 
 fn show_now(window: &WebviewWindow) {
-    position_at_tray(window);
+    if !place_kept(window) {
+        position_at_tray(window);
+    }
     // Re-assert clear + vibrancy each open — some macOS builds repaint opaque after hide.
     let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
     #[cfg(target_os = "macos")]
@@ -415,7 +531,8 @@ fn above_taskbar(window: &WebviewWindow) -> bool {
         .is_ok()
 }
 
-/// Dismiss on blur, the way a menu-bar popover is expected to behave.
+/// Dismiss on blur, the way a menu-bar popover is expected to behave, unless
+/// it is kept open (see [`set_kept`]).
 ///
 /// Set `SAJILO_NO_BLUR_HIDE=1` to keep the window up when it loses focus: with
 /// devtools open, clicking into the inspector blurs the popover and would
@@ -429,7 +546,13 @@ fn above_taskbar(window: &WebviewWindow) -> bool {
 /// popover closes. So there a focus-out counts only when it looks like a
 /// click away: see [`click_away_on_linux`].
 pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
-    if std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
+    // Counted even while kept open, so a popover unpinned later knows it has
+    // had focus and a click away closes it straight away.
+    #[cfg(target_os = "linux")]
+    if focused {
+        FOCUSED_SINCE_SHOWN.store(true, Ordering::SeqCst);
+    }
+    if is_kept() || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
         return;
     }
 

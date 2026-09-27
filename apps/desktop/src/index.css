@@ -468,6 +468,12 @@ html {
 }
 
 /* Route header — flat chrome, hairline rule. */
+/* A popover kept open with the pin drags by its header, like a title bar. */
+.header-bar[data-kept],
+.date-header[data-kept] {
+  cursor: grab;
+}
+
 .header-bar {
   border-bottom: 1px solid var(--color-divider);
   background: var(--color-chrome);
@@ -549,6 +555,13 @@ button.row-line + button.row-line::before {
 .icon-btn:hover {
   background: var(--color-surface-hover);
   color: var(--color-text);
+}
+
+/* A toggle that is on, like the header's pin: the accent, on a faint wash of
+   it, so "kept open" reads at a glance next to the plain icons. */
+.icon-btn[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-accent-fill) 18%, transparent);
+  color: var(--color-accent-mark);
 }
 
 .icon-btn:disabled {

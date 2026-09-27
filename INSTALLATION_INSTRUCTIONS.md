@@ -129,7 +129,9 @@ Linux trays don't pass clicks to apps, so open Sajilo from the tray icon's
 menu: click the date, then **Open Sajilo**.
 
 To close it, click anywhere outside it, press **Esc**, or click the tray icon
-again.
+again. To keep it on screen instead, press the pin at the top: it then stays
+open, moves when you drag its top bar, and opens there next time. Press the pin
+again to go back.
 
 ### Tiling window managers (Hyprland, sway, i3)
 

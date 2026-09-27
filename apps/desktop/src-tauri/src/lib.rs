@@ -147,6 +147,9 @@ pub fn run() {
             // Create and migrate the single local database before any tray or
             // notification code reads user-owned state.
             db::open(app.handle()).map_err(std::io::Error::other)?;
+            // Before anything can show the popover: a kept one opens where it
+            // was left.
+            window::load_kept(app.handle());
             // Menu-bar utility by default: no Dock icon, no taskbar entry.
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::stocks::StocksCache::default());
@@ -235,6 +238,11 @@ pub fn run() {
                     }
                 } else {
                     let _ = window.hide();
+                }
+            }
+            WindowEvent::Moved(_) if window.label() == window::MAIN => {
+                if let Some(main) = window.get_webview_window(window::MAIN) {
+                    window::remember_move(&main);
                 }
             }
             WindowEvent::Focused(focused) if window.label() == window::MAIN => {
@@ -350,6 +358,8 @@ pub fn run() {
             commands::tray::quit_app,
             commands::tray::hide_popover,
             commands::tray::popover_pointer,
+            commands::tray::popover_kept,
+            commands::tray::set_popover_kept,
             commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,

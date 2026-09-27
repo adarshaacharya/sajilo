@@ -1,10 +1,12 @@
 import { isTauri } from "@tauri-apps/api/core";
 import { api } from "./ipc";
+import { isKept } from "./popover-kept";
 
 /**
  * Opens `url` in the system's default browser. The popover is `alwaysOnTop`,
  * so it stays in front of the newly opened window unless it hides itself —
- * the link opens, it just looks like nothing happened.
+ * the link opens, it just looks like nothing happened. A popover the user
+ * pinned open stays: they asked for it to.
  */
 export async function openExternalLink(url: string) {
   // The showcase and ordinary browser development do not have native IPC.
@@ -15,7 +17,7 @@ export async function openExternalLink(url: string) {
 
   try {
     await api.openExternalUrl(url);
-    await api.hidePopover().catch(() => {});
+    if (!isKept()) await api.hidePopover().catch(() => {});
   } catch (error) {
     // Keep the popover visible when the browser hand-off fails. Previously it
     // disappeared into the tray, which made a failed Linux launcher look like

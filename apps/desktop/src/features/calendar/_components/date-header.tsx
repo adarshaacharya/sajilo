@@ -1,9 +1,12 @@
+import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
+import { KeepOpenButton } from "../../../shared/components/keep-open-button";
 import { UpdateHeaderButton } from "../../../shared/components/update-header-button";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Today } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
+import { useDragWhenKept, useKept } from "../../../shared/lib/popover-kept";
 import { useNepalClock } from "../_lib/nepal-clock";
 
 const WEEKDAYS_NE = ["आइत", "सोम", "मंगल", "बुध", "बिहि", "शुक्र", "शनि"];
@@ -34,10 +37,17 @@ export function DateHeader({ today }: { today: Today }) {
   const navigate = useNavigate();
   const weekday = language === "en" ? WEEKDAYS_EN[today.weekday] : WEEKDAYS_NE[today.weekday];
   const clock = useNepalClock();
+  const kept = useKept();
+  const bar = useRef<HTMLDivElement>(null);
+  useDragWhenKept(bar);
   const clockText = `${digits(clock.hour, numerals, 2)}:${digits(clock.minute, numerals, 2)}:${digits(clock.second, numerals, 2)}`;
 
   return (
-    <div className="flex items-start gap-3 px-0.5 pt-0.5">
+    <div
+      ref={bar}
+      className="date-header flex items-start gap-3 px-0.5 pt-0.5"
+      data-kept={kept || undefined}
+    >
       <button
         type="button"
         onClick={() =>
@@ -65,6 +75,7 @@ export function DateHeader({ today }: { today: Today }) {
 
       <div className="flex shrink-0 gap-0.5 pt-0.5">
         <UpdateHeaderButton />
+        <KeepOpenButton />
         <button
           type="button"
           onClick={() => navigate("/settings")}

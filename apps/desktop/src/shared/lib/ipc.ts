@@ -823,5 +823,8 @@ export const api = {
   /** Whether the pointer is over the popover; the shell weighs it before
    * reading a focus-out as a click away. */
   popoverPointer: (over: boolean) => invoke<void>("popover_pointer", { over }),
+  /** The header's pin: whether the popover is kept open and movable. */
+  popoverKept: () => invoke<boolean>("popover_kept"),
+  setPopoverKept: (kept: boolean) => invoke<void>("set_popover_kept", { kept }),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
 };
