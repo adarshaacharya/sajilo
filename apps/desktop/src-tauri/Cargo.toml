@@ -27,7 +27,9 @@ uuid = { version = "1", default-features = false, features = ["v4", "std"] }
 serde.workspace = true
 serde_json.workspace = true
 rusqlite.workspace = true
-tauri = { version = "2", features = ["macos-private-api", "tray-icon"] }
+# 2.12 at least: it brings tray-icon 0.25.1, without which a left click on the
+# macOS 27 tray opens the menu instead of the popover.
+tauri = { version = "2.12", features = ["macos-private-api", "tray-icon"] }
 tauri-plugin-notification = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
