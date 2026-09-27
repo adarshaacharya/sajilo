@@ -73,3 +73,6 @@ apps/desktop/src-tauri/gen/
 # Astro generated types (apps/landing)
 .astro/
 
+brag-output-*/
+
+apps/promo/**/*
