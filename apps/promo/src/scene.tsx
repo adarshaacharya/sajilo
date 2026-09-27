@@ -277,11 +277,24 @@ export function Cursor({
  * the menu bar, where the app opens them. It appears as a window does, and
  * goes once it has been dealt with or the clip ends.
  */
-export function CardWindow({ clip, name }: { clip: Clip; name: string }) {
+export function CardWindow({
+  clip,
+  name,
+  px = 1.9,
+  stageWidth = 1920,
+  top,
+}: {
+  clip: Clip;
+  name: string;
+  /** Screen pixels per CSS pixel. Larger than the panel's by default: a card
+   * is the whole point of its moment. */
+  px?: number;
+  stageWidth?: number;
+  /** Where the card's top sits; under the menu bar unless given. */
+  top?: number;
+}) {
   const frame = useCurrentFrame();
   const at = Math.min(frame, clip.frames - 1);
-  // Larger than the panel's scale: a card is the whole point of its moment.
-  const px = 1.9;
   const width = clip.width * px;
   const height = (clip.heights?.[at] ?? clip.height) * px;
   const lastClick = clip.clicks[clip.clicks.length - 1];
@@ -294,8 +307,8 @@ export function CardWindow({ clip, name }: { clip: Clip; name: string }) {
     <div
       style={{
         position: "absolute",
-        left: (1920 - width) / 2,
-        top: MENU_BAR + 14 * px,
+        left: (stageWidth - width) / 2,
+        top: top ?? MENU_BAR + 14 * px,
         width,
         height,
         opacity: Math.min(enter, leave),

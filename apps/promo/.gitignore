@@ -5,3 +5,5 @@ public/facts.json
 public/cues.json
 public/sounds.wav
 public/track.*
+public/cues-vertical.json
+public/sounds-vertical.wav

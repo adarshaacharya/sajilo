@@ -9,6 +9,7 @@ Reads the film's timing from public/cues.json; writes public/sounds.wav.
 """
 
 import json
+import sys
 import wave
 from pathlib import Path
 
@@ -19,7 +20,12 @@ HERE = Path(__file__).parent
 SR = 44100
 RNG = np.random.default_rng(2083)
 
-cues = json.loads((HERE / "public" / "cues.json").read_text())
+# The landscape tour by default; the vertical cut passes its own files:
+#   python3 sounds.py public/cues-vertical.json public/sounds-vertical.wav
+CUES = HERE / (sys.argv[1] if len(sys.argv) > 1 else "public/cues.json")
+OUT = HERE / (sys.argv[2] if len(sys.argv) > 2 else "public/sounds.wav")
+
+cues = json.loads(CUES.read_text())
 LENGTH = cues["total"] / cues["fps"]
 
 
@@ -62,7 +68,7 @@ for frame in cues["clicks"]:
 for frame in cues["chimes"]:
     add(frame / cues["fps"], chime(), 0.8, 0.0)
 
-out = HERE / "public" / "sounds.wav"
+out = OUT
 with wave.open(str(out), "wb") as file:
     file.setnchannels(2)
     file.setsampwidth(2)

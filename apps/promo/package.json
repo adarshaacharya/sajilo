@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "record": "node record.mjs",
-    "sounds": "bun src/cues.ts > public/cues.json && python3 sounds.py",
+    "sounds": "bun src/cues.ts > public/cues.json && python3 sounds.py && bun src/vertical-cues.ts > public/cues-vertical.json && python3 sounds.py public/cues-vertical.json public/sounds-vertical.wav",
     "studio": "remotion studio src/index.ts",
     "render": "remotion render src/index.ts Tour out/sajilo-tour.mp4 --props='{\"track\":\"track.mp3\"}'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "render:vertical": "remotion render src/index.ts Vertical out/sajilo-vertical.mp4"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
