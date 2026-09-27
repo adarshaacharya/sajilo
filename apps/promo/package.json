@@ -7,7 +7,7 @@
     "record": "node record.mjs",
     "sounds": "bun src/cues.ts > public/cues.json && python3 sounds.py",
     "studio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts Tour out/sajilo-tour.mp4",
+    "render": "remotion render src/index.ts Tour out/sajilo-tour.mp4 --props='{\"track\":\"track.mp3\"}'",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

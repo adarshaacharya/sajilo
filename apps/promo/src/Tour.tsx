@@ -25,6 +25,7 @@ import {
   Rise,
   useEnter,
 } from "./scene";
+import cues from "../public/cues.json";
 import { color, font, s } from "./theme";
 import {
   BAR,
@@ -40,6 +41,23 @@ import {
   openingClip,
   TOTAL,
 } from "./timeline";
+
+/** Where the app's chime plays, from `bun run sounds`'s timing. */
+const CHIMES: number[] = cues.chimes;
+
+/**
+ * The music under everything: in over half a second, out over the last two
+ * and a half, and dipped while the app's chime plays so the chime is what
+ * you hear.
+ */
+function musicVolume(frame: number) {
+  const edges = interpolate(frame, [0, 15, TOTAL - s(2.5), TOTAL], [0, 1, 1, 0], clamp);
+  const dip = CHIMES.reduce((least, at) => {
+    const d = interpolate(frame, [at - 4, at, at + s(1), at + s(1.6)], [1, 0.45, 0.45, 1], clamp);
+    return Math.min(least, d);
+  }, 1);
+  return 0.6 * edges * dip;
+}
 
 export type TourProps = {
   /**
@@ -58,10 +76,7 @@ export function Tour({ track }: TourProps) {
       {track && (
         <Audio
           src={staticFile(track)}
-          volume={(frame) =>
-            0.8 *
-            interpolate(frame, [0, 12, TOTAL - s(2.5), TOTAL], [0, 1, 1, 0], clamp)
-          }
+          volume={(frame) => musicVolume(frame)}
         />
       )}
       <Series>
