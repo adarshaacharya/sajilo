@@ -67,7 +67,7 @@ Linux doesn't pass a click on a top-bar icon through to the app, so **click the 
 
 ## On a tiling window manager
 
-Sajilo works on i3, sway, Hyprland and other tiling window managers. Its windows have a fixed size, which most of them float by themselves instead of tiling.
+Sajilo works on i3, sway, Hyprland, niri and other tiling window managers. Its windows have a fixed size, which most of them float by themselves instead of tiling.
 
 With no top bar to click, open it from a **keyboard shortcut** instead. `sajilo-desktop --toggle` opens Sajilo, and running it again closes it. For example:
 
@@ -79,19 +79,49 @@ bindsym $mod+n exec sajilo-desktop --toggle
 bind = $mainMod, N, exec, sajilo-desktop --toggle
 ```
 
-Waybar and swaybar show Sajilo's date in their tray, if your bar has a tray enabled. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
-
-If the Sajilo window does get tiled on your setup, add a floating rule for it. Its title is always `Sajilo`:
-
-```bash
-# i3 or sway
-for_window [title="^Sajilo$"] floating enable
-
-# Hyprland
-windowrulev2 = float, title:^(Sajilo)$
+```kdl
+// niri: ~/.config/niri/config.kdl, inside binds { }
+Mod+N { spawn "sajilo-desktop" "--toggle"; }
 ```
 
-On a Wayland session without XWayland, your compositor decides where windows open, so Sajilo may not appear right under its icon there. Everything else works the same.
+Waybar and swaybar show Sajilo's date in their tray, if your bar has a tray enabled. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
+
+### Keep it floating, under your bar
+
+On Wayland (sway, Hyprland, niri), the compositor decides where every window opens, and apps can't choose. So Sajilo can't put itself under its icon there, and a pinned Sajilo opens where the compositor says, not where you left it. A window rule fixes both. Sajilo's title is always `Sajilo`.
+
+**sway** (`~/.config/sway/config`) or **i3**:
+
+```bash
+for_window [title="^Sajilo$"] floating enable, sticky enable
+```
+
+`sticky` keeps it on every workspace. On i3, which runs on X11, Sajilo places itself under the tray icon, so the rule is only needed if i3 tiles it.
+
+**Hyprland** (`~/.config/hypr/hyprland.conf`):
+
+```bash
+windowrulev2 = float, title:^(Sajilo)$
+windowrulev2 = move 1500 56, title:^(Sajilo)$
+windowrulev2 = noborder, title:^(Sajilo)$
+windowrulev2 = pin, title:^(Sajilo)$
+```
+
+For `move`, use your screen's width minus about 420 for the first number, and your bar's height plus a little for the second. `pin` shows it on every workspace.
+
+**niri** (`~/.config/niri/config.kdl`):
+
+```kdl
+window-rule {
+    match title="^Sajilo$"
+    open-floating true
+    default-floating-position x=16 y=8 relative-to="top-right"
+    focus-ring { off; }
+    border { off; }
+}
+```
+
+Floating windows need niri 25.01 or newer.
 
 ### Reminders on a tiling setup
 

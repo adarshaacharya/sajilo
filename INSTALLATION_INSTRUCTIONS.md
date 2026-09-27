@@ -133,15 +133,25 @@ again. To keep it on screen instead, press the pin at the top: it then stays
 open, moves when you drag its top bar, and opens there next time. Press the pin
 again to go back.
 
-### Tiling window managers (Hyprland, sway, i3)
+### Tiling window managers (Hyprland, sway, i3, niri)
 
-Most tiling managers float Sajilo by themselves, because its size is fixed. If
-yours tiles it, tell it to float Sajilo instead. The window's title is always
-`Sajilo`:
+Most tiling managers float Sajilo by themselves, because its size is fixed. On
+Wayland the compositor also decides where it opens, so Sajilo can't put itself
+under its tray icon there. A window rule floats it and places it; the window's
+title is always `Sajilo`:
 
-- **Hyprland** (`hyprland.conf`): `windowrulev2 = float, title:^(Sajilo)$`
-- **sway** or **i3** (`config`): `for_window [title="^Sajilo$"] floating enable`
+- **sway** or **i3** (`config`): `for_window [title="^Sajilo$"] floating enable, sticky enable`
+- **Hyprland** (`hyprland.conf`): `windowrulev2 = float, title:^(Sajilo)$`, plus
+  `windowrulev2 = move 1500 56, title:^(Sajilo)$` (your screen width minus about
+  420) to put it under the bar
+- **niri** (`config.kdl`):
 
-On a Wayland session without XWayland, the compositor decides where windows
-open, so the popover may not appear right under the tray icon there. Everything
-else, including closing it with a click outside, works the same.
+  ```kdl
+  window-rule {
+      match title="^Sajilo$"
+      open-floating true
+      default-floating-position x=16 y=8 relative-to="top-right"
+  }
+  ```
+
+Everything else, including closing it with a click outside, works the same.
