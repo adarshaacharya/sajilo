@@ -121,7 +121,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     // `TrayIconEvent::Click` branch below never fires on Linux. The menu is
     // therefore the only route to the popover, and the shortest such route is a
     // single item that opens it, then Quit below a separator. Settings stays in
-    // the popover's header. Escape dismisses the popover (Linux skips blur-to-dismiss).
+    // the popover's header. Escape or a click away dismisses the popover.
     //
     // macOS and Windows keep the full menu: there, left click toggles the
     // popover and this menu is the right-click affordance.

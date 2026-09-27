@@ -18,6 +18,14 @@ static PINNED: AtomicBool = AtomicBool::new(false);
 #[cfg(target_os = "macos")]
 static SHOWN_ONCE: AtomicBool = AtomicBool::new(false);
 
+/// When the popover last opened, and whether it has held focus since: the
+/// evidence [`hide_on_blur`] weighs on Linux before reading a focus-out as a
+/// click away.
+#[cfg(target_os = "linux")]
+static SHOWN_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+#[cfg(target_os = "linux")]
+static FOCUSED_SINCE_SHOWN: AtomicBool = AtomicBool::new(false);
+
 pub fn set_pinned(pinned: bool) {
     PINNED.store(pinned, Ordering::SeqCst);
 }
@@ -98,6 +106,13 @@ fn show_now(window: &WebviewWindow) {
     let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
     #[cfg(target_os = "macos")]
     polish_macos_chrome(window);
+    #[cfg(target_os = "linux")]
+    {
+        FOCUSED_SINCE_SHOWN.store(false, Ordering::SeqCst);
+        if let Ok(mut shown) = SHOWN_AT.lock() {
+            *shown = Some(std::time::Instant::now());
+        }
+    }
     let _ = window.show();
     let _ = window.set_focus();
     #[cfg(target_os = "linux")]
@@ -242,8 +257,9 @@ fn tray_frame(window: &WebviewWindow) -> Option<(i64, i64, i64)> {
 /// time, it lands there consistently.
 ///
 /// Clamped to the monitor work area so an icon near an edge cannot shove the
-/// window off-screen, and hung from the top of that area so it sits just under
-/// the panel.
+/// window off-screen. Linux panels sit at the top (GNOME) or the bottom (KDE,
+/// Cinnamon, most tiling bars): the pointer, at the icon, says which, and the
+/// popover hangs from that edge of the work area, against the panel.
 #[cfg(target_os = "linux")]
 fn center_under_cursor(window: &WebviewWindow) -> bool {
     let Ok(cursor) = window.cursor_position() else {
@@ -269,10 +285,19 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
     #[allow(clippy::cast_possible_truncation)]
     let centered = cursor.x.round() as i32 - width / 2;
 
-    let position = tauri::PhysicalPosition::new(
-        centered.clamp(leftmost, rightmost.max(leftmost)),
-        area.position.y,
-    );
+    let height = i32::try_from(size.height).unwrap_or(i32::MAX);
+    let top = area.position.y;
+    let bottom = top + i32::try_from(area.size.height).unwrap_or(i32::MAX);
+    #[allow(clippy::cast_possible_truncation)]
+    let panel_at_bottom = cursor.y.round() as i32 > top + (bottom - top) / 2;
+    let y = if panel_at_bottom {
+        (bottom - height).max(top)
+    } else {
+        top
+    };
+
+    let position =
+        tauri::PhysicalPosition::new(centered.clamp(leftmost, rightmost.max(leftmost)), y);
     window.set_position(position).is_ok()
 }
 
@@ -352,29 +377,95 @@ fn above_taskbar(window: &WebviewWindow) -> bool {
 /// devtools open, clicking into the inspector blurs the popover and would
 /// otherwise dismiss the thing being inspected.
 ///
-/// Linux is exempt entirely. GNOME/Wayland drops keyboard focus from an
-/// undecorated, always-on-top, skip-taskbar popover for reasons the user never
-/// triggered — in testing, focus was lost a couple of seconds after launch with
-/// no interaction at all — so a focus-out is not a reliable "the user clicked
-/// away" signal there. Dismissing on it made the whole app look like it opened
-/// to nothing. On Linux the popover is instead toggled from the tray menu item
-/// (see [`toggle`] and `tray::build`) or dismissed with Escape; macOS and
-/// Windows keep the click-away dismissal.
+/// Linux needs more than a focus-out. GNOME has been seen to drop keyboard
+/// focus from an undecorated, always-on-top, skip-taskbar popover with no
+/// interaction at all, and dismissing on that made the app look like it
+/// opened to nothing. But never dismissing on Linux left people with a window
+/// they could not get rid of by clicking elsewhere, which is how every other
+/// popover closes. So there a focus-out counts only when it looks like a
+/// click away: see [`click_away_on_linux`].
 pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
-    // Linux: never auto-hide; the tray menu is the only dismiss.
+    if std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
+        return;
+    }
+
     #[cfg(target_os = "linux")]
-    let _ = (window, focused);
+    click_away_on_linux(window, focused);
 
     #[cfg(not(target_os = "linux"))]
     {
-        if focused
-            || PINNED.load(Ordering::SeqCst)
-            || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some()
-        {
+        if focused || PINNED.load(Ordering::SeqCst) {
             return;
         }
         hide(window);
     }
+}
+
+/// How long a focus-out has to last before it counts, so a compositor's
+/// flicker of focus that snaps straight back is not a click away.
+#[cfg(target_os = "linux")]
+const BLUR_SETTLE: std::time::Duration = std::time::Duration::from_millis(250);
+
+/// How soon after opening a focus-out is ignored: the open itself can bounce
+/// focus while the window maps.
+#[cfg(target_os = "linux")]
+const OPEN_GRACE: std::time::Duration = std::time::Duration::from_millis(400);
+
+/// Hides the popover after a focus-out that looks like the user clicking
+/// somewhere else: it had focus since it opened, it has been up a moment, the
+/// focus stays gone, and the pointer is outside it. A focus drop the user did
+/// not cause, while they look at the window, fails the last two.
+#[cfg(target_os = "linux")]
+fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
+    if focused {
+        FOCUSED_SINCE_SHOWN.store(true, Ordering::SeqCst);
+        return;
+    }
+    let settled = SHOWN_AT
+        .lock()
+        .ok()
+        .and_then(|shown| *shown)
+        .is_some_and(|shown| shown.elapsed() >= OPEN_GRACE);
+    if PINNED.load(Ordering::SeqCst) || !FOCUSED_SINCE_SHOWN.load(Ordering::SeqCst) || !settled {
+        return;
+    }
+
+    let window = window.clone();
+    tauri::async_runtime::spawn(async move {
+        let pause = tauri::async_runtime::spawn_blocking(|| std::thread::sleep(BLUR_SETTLE));
+        if pause.await.is_err() {
+            return;
+        }
+        let target = window.clone();
+        let _ = window.run_on_main_thread(move || {
+            let still_away = target.is_visible().unwrap_or(false)
+                && !target.is_focused().unwrap_or(true)
+                && !PINNED.load(Ordering::SeqCst)
+                && !pointer_inside(&target);
+            if still_away {
+                hide(&target);
+            }
+        });
+    });
+}
+
+/// Whether the pointer is over the popover. Unknown counts as inside, so a
+/// failure to read it never dismisses anything.
+#[cfg(target_os = "linux")]
+fn pointer_inside(window: &WebviewWindow) -> bool {
+    let (Ok(cursor), Ok(origin), Ok(size)) = (
+        window.cursor_position(),
+        window.outer_position(),
+        window.outer_size(),
+    ) else {
+        return true;
+    };
+    let left = f64::from(origin.x);
+    let top = f64::from(origin.y);
+    cursor.x >= left
+        && cursor.x < left + f64::from(size.width)
+        && cursor.y >= top
+        && cursor.y < top + f64::from(size.height)
 }
 
 /// Keeps the shadow only where it draws what we want.

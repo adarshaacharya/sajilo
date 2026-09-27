@@ -85,10 +85,9 @@ function TrackScreens() {
 
 /** Escape dismisses the popover, the way a menu-bar panel is expected to close.
  *
- * On macOS and Windows clicking away is enough. Linux has no such luxury: the
- * compositor pulls focus from an undecorated always-on-top window on its own,
- * so blur cannot be trusted to mean "the user left" and the popover stays up
- * until something asks it to go. Escape is that something. */
+ * Clicking away closes it too. On Linux the shell reads a focus-out as a click
+ * away only when it looks like one (see `window::hide_on_blur`), so Escape is
+ * the dismissal that never depends on the compositor. */
 function DismissOnEscape() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
