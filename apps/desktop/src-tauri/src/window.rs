@@ -274,49 +274,75 @@ fn tray_frame(window: &WebviewWindow) -> Option<(i64, i64, i64)> {
 /// lands the popover under the icon, and because the gesture is the same every
 /// time, it lands there consistently.
 ///
-/// Clamped to the monitor work area so an icon near an edge cannot shove the
-/// window off-screen. Linux panels sit at the top (GNOME) or the bottom (KDE,
-/// Cinnamon, most tiling bars): the pointer, at the icon, says which, and the
-/// popover hangs from that edge of the work area, against the panel.
+/// The panel's edge comes from the work area rather than the pointer: a panel
+/// reserves its strip of the screen, so the work area is inset at the top
+/// (GNOME) or the bottom (KDE, Cinnamon, most tiling bars), and the popover
+/// hangs from that edge. Only an open that came from the tray, with the
+/// pointer by that panel, is centred on the pointer; any other (Sajilo showing
+/// itself at first launch, with the pointer anywhere) takes the right-hand
+/// end of the panel, where trays sit.
+///
+/// Clamped to the work area so an icon near an edge cannot shove the window
+/// off-screen.
 #[cfg(target_os = "linux")]
 fn center_under_cursor(window: &WebviewWindow) -> bool {
-    let Ok(cursor) = window.cursor_position() else {
-        return false;
-    };
-    // The pointer picks the monitor, so a second screen with its own panel is
-    // handled without special-casing.
-    let monitor = match window.monitor_from_point(cursor.x, cursor.y) {
-        Ok(Some(monitor)) => monitor,
-        _ => match window.primary_monitor() {
-            Ok(Some(monitor)) => monitor,
-            _ => return false,
-        },
-    };
     let Ok(size) = window.outer_size() else {
         return false;
     };
+    let cursor = window.cursor_position().ok();
+    // The pointer picks the monitor, so a second screen with its own panel is
+    // handled without special-casing.
+    let monitor = cursor
+        .and_then(|cursor| window.monitor_from_point(cursor.x, cursor.y).ok().flatten())
+        .or_else(|| window.primary_monitor().ok().flatten());
+    let Some(monitor) = monitor else {
+        return false;
+    };
 
+    let screen_top = monitor.position().y;
+    let screen_bottom = screen_top + i32::try_from(monitor.size().height).unwrap_or(i32::MAX);
     let area = monitor.work_area();
-    let width = i32::try_from(size.width).unwrap_or(i32::MAX);
-    let leftmost = area.position.x;
-    let rightmost = leftmost + i32::try_from(area.size.width).unwrap_or(i32::MAX) - width;
-    #[allow(clippy::cast_possible_truncation)]
-    let centered = cursor.x.round() as i32 - width / 2;
-
-    let height = i32::try_from(size.height).unwrap_or(i32::MAX);
     let top = area.position.y;
     let bottom = top + i32::try_from(area.size.height).unwrap_or(i32::MAX);
+    let width = i32::try_from(size.width).unwrap_or(i32::MAX);
+    let height = i32::try_from(size.height).unwrap_or(i32::MAX);
+    let leftmost = area.position.x;
+    let rightmost =
+        (leftmost + i32::try_from(area.size.width).unwrap_or(i32::MAX) - width).max(leftmost);
+
     #[allow(clippy::cast_possible_truncation)]
-    let panel_at_bottom = cursor.y.round() as i32 > top + (bottom - top) / 2;
+    let pointer = cursor.map(|cursor| (cursor.x.round() as i32, cursor.y.round() as i32));
+    let (inset_top, inset_bottom) = (top - screen_top, screen_bottom - bottom);
+    let panel_at_bottom = match inset_bottom.cmp(&inset_top) {
+        std::cmp::Ordering::Greater => true,
+        std::cmp::Ordering::Less => false,
+        // No panel reserves space (one that hides itself): the pointer's
+        // half of the screen is the best guess left.
+        std::cmp::Ordering::Equal => pointer.is_some_and(|(_, y)| y > top + (bottom - top) / 2),
+    };
     let y = if panel_at_bottom {
         (bottom - height).max(top)
     } else {
         top
     };
 
-    let position =
-        tauri::PhysicalPosition::new(centered.clamp(leftmost, rightmost.max(leftmost)), y);
-    window.set_position(position).is_ok()
+    // By the panel: within a tray menu's reach of its edge.
+    let reach = 160 * i32::try_from(monitor.scale_factor().ceil() as i64).unwrap_or(1);
+    let from_tray = pointer.is_some_and(|(_, py)| {
+        if panel_at_bottom {
+            py >= bottom - reach
+        } else {
+            py <= top + reach
+        }
+    });
+    let x = match pointer {
+        Some((px, _)) if from_tray => (px - width / 2).clamp(leftmost, rightmost),
+        _ => rightmost,
+    };
+
+    window
+        .set_position(tauri::PhysicalPosition::new(x, y))
+        .is_ok()
 }
 
 /// Where the tray icon was last clicked, in physical pixels. Windows only.
