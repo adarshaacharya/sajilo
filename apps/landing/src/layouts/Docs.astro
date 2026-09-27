@@ -386,6 +386,39 @@ const groups = SECTIONS.map((s) => ({
     color: var(--paper);
     scroll-margin-top: 88px;
   }
+  /* The "#" after a heading (src/lib/heading-anchors.mjs): quiet until the
+     heading is hovered, always faintly there where nothing can hover. A click
+     puts the section in the address bar and copies its link. */
+  .prose :global(.heading-anchor) {
+    margin-left: 0.35em;
+    padding: 0 0.15em;
+    color: var(--paper-4);
+    font-weight: 500;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease;
+  }
+  .prose :global(h2:hover .heading-anchor),
+  .prose :global(h3:hover .heading-anchor),
+  .prose :global(.heading-anchor:focus-visible) {
+    opacity: 1;
+  }
+  .prose :global(.heading-anchor:hover) {
+    color: var(--accent);
+  }
+  .prose :global(.heading-anchor[data-copied])::after {
+    content: "Link copied";
+    margin-left: 0.6em;
+    font-family: var(--sans, inherit);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  @media (hover: none) {
+    .prose :global(.heading-anchor) {
+      opacity: 0.6;
+    }
+  }
   .prose :global(p),
   .prose :global(ul),
   .prose :global(ol),
@@ -424,9 +457,20 @@ const groups = SECTIONS.map((s) => ({
   .prose :global(h3 + p) {
     margin-top: 10px;
   }
+  /* The site's reset strips list markers; the docs need them back, or a
+     list reads as a run of indented paragraphs. */
   .prose :global(ul),
   .prose :global(ol) {
     padding-left: 22px;
+  }
+  .prose :global(ul) {
+    list-style: disc;
+  }
+  .prose :global(ol) {
+    list-style: decimal;
+  }
+  .prose :global(li ul) {
+    list-style: circle;
   }
   .prose :global(li + li) {
     margin-top: 6px;
@@ -512,3 +556,19 @@ const groups = SECTIONS.map((s) => ({
     box-shadow: 0 0 0 1px var(--line-2);
   }
 </style>
+
+<script>
+  // A heading's "#": go to the section as any link does, and copy its
+  // address, so sharing a section is one click.
+  for (const anchor of document.querySelectorAll<HTMLAnchorElement>(".prose .heading-anchor")) {
+    anchor.addEventListener("click", () => {
+      navigator.clipboard?.writeText(anchor.href).then(
+        () => {
+          anchor.dataset.copied = "";
+          setTimeout(() => delete anchor.dataset.copied, 1600);
+        },
+        () => {},
+      );
+    });
+  }
+</script>
