@@ -38,8 +38,10 @@ pub struct PlanTime {
 pub struct Reminder(pub u32);
 
 impl Reminder {
-    /// The offsets offered in the editor.
-    pub const CHOICES: [u32; 6] = [0, 5, 10, 15, 30, 60];
+    /// The offsets offered in the editor: up to an hour for the day itself,
+    /// then two hours and the day before, for anything that needs getting
+    /// ready for.
+    pub const CHOICES: [u32; 8] = [0, 5, 10, 15, 30, 60, 120, 1440];
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

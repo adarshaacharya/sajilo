@@ -189,6 +189,8 @@
   "planner.reminder.fifteen-minutes": "15 min before",
   "planner.reminder.five-minutes": "5 min before",
   "planner.reminder.one-hour": "1 hour before",
+  "planner.reminder.two-hours": "2 hours before",
+  "planner.reminder.one-day": "1 day before",
   "planner.reminder.ten-minutes": "10 min before",
   "planner.reminder.thirty-minutes": "30 min before",
   "planner.repeat": "Repeat",

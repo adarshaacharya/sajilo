@@ -116,6 +116,7 @@ pub fn plan_days(app: AppHandle<Wry>, year: i32, month: u32) -> Result<Vec<u32>>
 pub fn save_plan(app: AppHandle<Wry>, plan: DayPlan) -> Result<Vec<DayPlan>> {
     let plan = plan.normalised();
     save(&app, &plan)?;
+    crate::commands::notify::reschedule();
     load(&app)
 }
 
@@ -125,6 +126,7 @@ pub fn delete_plan(app: AppHandle<Wry>, id: String) -> Result<Vec<DayPlan>> {
     connection
         .execute("DELETE FROM day_plans WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     load(&app)
 }
 

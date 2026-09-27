@@ -558,6 +558,7 @@ pub fn save_keeper_person(app: AppHandle<Wry>, person: KeeperPerson) -> Result<K
             ],
         )
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -567,6 +568,7 @@ pub fn delete_keeper_person(app: AppHandle<Wry>, id: String) -> Result<KeeperSna
     connection
         .execute("DELETE FROM keeper_people WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -695,6 +697,7 @@ pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperS
             item.official_url, item.office_location, item.fee, item.application_status, checklist,
             created, updated, completed_at, item.template, repeat_day],
     ).map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -705,6 +708,7 @@ pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnaps
     connection
         .execute("DELETE FROM keeper_items WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -789,6 +793,7 @@ pub fn save_keeper_record(
             ],
         )
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -822,6 +827,7 @@ pub fn complete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSna
             )
             .map_err(|error| error.to_string())?;
     }
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -852,6 +858,7 @@ pub fn advance_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSn
             params![ad.to_string(), bs.year, bs.month, bs.day, now(), id],
         )
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 
@@ -881,6 +888,7 @@ pub fn delete_keeper_record(app: AppHandle<Wry>, id: String) -> Result<KeeperSna
     connection
         .execute("DELETE FROM keeper_records WHERE id = ?1", [id])
         .map_err(|error| error.to_string())?;
+    crate::commands::notify::reschedule();
     keeper_snapshot(app)
 }
 

@@ -265,16 +265,51 @@ fn a_monthly_plan_rolls_forward_to_next_month() {
     assert!(planned[0].id.ends_with(".2083.6"), "got {}", planned[0].id);
 }
 
-/// A plan with no note still needs a body — a blank notification says nothing.
+/// The body says when the plan is, from where the reminder stands, then the
+/// note: the title alone reads as "now", which is wrong a day early.
 #[test]
-fn a_plan_without_a_note_gets_a_default_body() {
-    let planned = plan_day_plans(&[timed_plan("a", 20, 9, 0)], nepal(2026, 8, 1, 9));
-    assert_eq!(planned[0].body, "Sajilo day plan");
+fn the_body_says_when_the_plan_is_then_the_note() {
+    let body = |reminder: u32, note: &str| {
+        let mut plan = timed_plan("a", 20, 9, reminder);
+        plan.note = note.to_owned();
+        plan_day_plans(&[plan], nepal(2026, 8, 1, 9))[0]
+            .body
+            .clone()
+    };
+    assert_eq!(body(0, ""), "Now, 09:00");
+    assert_eq!(body(15, ""), "In 15 min, at 09:00");
+    assert_eq!(body(60, ""), "In 1 hour, at 09:00");
+    assert_eq!(body(120, ""), "In 2 hours, at 09:00");
+    assert_eq!(body(1440, ""), "Tomorrow at 09:00");
+    assert_eq!(
+        body(15, "Bring the documents"),
+        "In 15 min, at 09:00 · Bring the documents"
+    );
+}
 
-    let mut with_note = timed_plan("b", 20, 9, 0);
-    with_note.note = "Bring the documents".to_owned();
-    let planned = plan_day_plans(&[with_note], nepal(2026, 8, 1, 9));
-    assert_eq!(planned[0].body, "Bring the documents");
+/// "1 day before" fires at the same clock time on the day before, and
+/// "2 hours before" two hours early on the day.
+#[test]
+fn the_longer_leads_fire_a_day_or_two_hours_early() {
+    let local = |reminder: u32| {
+        plan_day_plans(&[timed_plan("a", 20, 16, reminder)], nepal(2026, 8, 1, 9))[0]
+            .fire_at
+            .with_timezone(&nepal_time::offset())
+    };
+    let day_before = local(1440);
+    let plan_day = local(0);
+    assert_eq!(plan_day - day_before, Duration::days(1));
+    assert_eq!(chrono::Timelike::hour(&day_before), 16);
+    assert_eq!(chrono::Timelike::hour(&local(120)), 14);
+}
+
+/// Every lead the editor offers schedules something, however early.
+#[test]
+fn every_offered_lead_is_scheduled() {
+    for lead in Reminder::CHOICES {
+        let planned = plan_day_plans(&[timed_plan("a", 20, 9, lead)], nepal(2026, 8, 1, 9));
+        assert_eq!(planned.len(), 1, "lead {lead} scheduled nothing");
+    }
 }
 
 // -------------------------------------------------------- late firing

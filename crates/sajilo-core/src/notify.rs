@@ -17,7 +17,7 @@ use crate::calendar::nepali_date::NepaliDate;
 use crate::calendar::upcoming::UpcomingEvent;
 use crate::focus::ReminderStyle;
 use crate::nepal_time;
-use crate::planner::{DayPlan, Recurrence};
+use crate::planner::{DayPlan, PlanTime, Recurrence};
 
 /// Every reminder starts on: a holiday or festival tomorrow and an IPO closing
 /// today are what people open a Nepali calendar to find out, and each fires at
@@ -430,12 +430,34 @@ fn notification_for(
         kind: ReminderKind::Plan,
         title: plan.title.clone(),
         body: if plan.note.is_empty() {
-            "Sajilo day plan".to_owned()
+            when_line(time, reminder.0)
         } else {
-            plan.note.clone()
+            format!("{} · {}", when_line(time, reminder.0), plan.note)
         },
         fire_at,
     })
+}
+
+/// When the plan is, said from the moment its reminder arrives. The title
+/// alone ("Go to BBSM") reads as "now", which is wrong for a reminder that
+/// comes an hour or a day early.
+fn when_line(time: PlanTime, lead_minutes: u32) -> String {
+    let at = format!("{:02}:{:02}", time.hour, time.minute);
+    let (days, hours, minutes) = (
+        lead_minutes / (24 * 60),
+        lead_minutes / 60 % 24,
+        lead_minutes % 60,
+    );
+    match (days, hours, minutes) {
+        (0, 0, 0) => format!("Now, {at}"),
+        (0, 0, m) => format!("In {m} min, at {at}"),
+        (0, 1, 0) => format!("In 1 hour, at {at}"),
+        (0, h, 0) => format!("In {h} hours, at {at}"),
+        (0, h, m) => format!("In {h} h {m} min, at {at}"),
+        (1, 0, 0) => format!("Tomorrow at {at}"),
+        (d, 0, 0) => format!("In {d} days, at {at}"),
+        _ => format!("At {at}"),
+    }
 }
 
 /// What was last delivered, persisted so a restart cannot re-fire a reminder.

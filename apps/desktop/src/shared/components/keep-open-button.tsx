@@ -19,7 +19,7 @@ export function KeepOpenButton({ iconClassName }: { iconClassName?: string }) {
       title={t(kept ? "popover.kept-hint" : "popover.keep-open-hint")}
       className="icon-btn shrink-0"
     >
-      <Icon name="pin" className={iconClassName} />
+      <Icon name={kept ? "pinFill" : "pin"} className={iconClassName} />
     </button>
   );
 }

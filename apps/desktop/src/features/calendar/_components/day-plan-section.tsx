@@ -16,7 +16,14 @@ const REMINDERS = [
   { id: "15", labelKey: "planner.reminder.fifteen-minutes" as const },
   { id: "30", labelKey: "planner.reminder.thirty-minutes" as const },
   { id: "60", labelKey: "planner.reminder.one-hour" as const },
+  { id: "120", labelKey: "planner.reminder.two-hours" as const },
+  { id: "1440", labelKey: "planner.reminder.one-day" as const },
 ];
+
+/** A plan given a time is reminded unless the user says otherwise: someone
+ * who writes down "4 PM, go to the bank" nearly always wants to hear about
+ * it. Ten minutes is enough to get up and go. */
+const DEFAULT_REMINDER = "10";
 
 const REPEATS = [
   { id: "none", labelKey: "planner.repeat.none" as const },
@@ -49,7 +56,7 @@ function emptyDraft(date: NepaliDate): PlanDraft {
     note: "",
     hasTime: false,
     time: "09:00",
-    reminder: "",
+    reminder: DEFAULT_REMINDER,
     recurrence: "none",
     createdAt: new Date().toISOString(),
   };
@@ -69,6 +76,11 @@ function draftFromPlan(plan: DayPlan): PlanDraft {
     recurrence: plan.recurrence,
     createdAt: plan.createdAt,
   };
+}
+
+/** The reminder's lead, as the editor names it ("10 min before"). */
+function reminderLabelKey(reminder: number) {
+  return REMINDERS.find((item) => item.id === String(reminder))?.labelKey ?? null;
 }
 
 function timeLabel(time: DayPlan["time"]): string | null {
@@ -176,6 +188,7 @@ function PlanRow({
 }) {
   const { t } = useSettings();
   const time = timeLabel(plan.time);
+  const reminder = plan.time && plan.reminder !== null ? reminderLabelKey(plan.reminder) : null;
 
   return (
     <div className="group flex items-start gap-1.5 py-1.5">
@@ -189,12 +202,22 @@ function PlanRow({
         {plan.note && (
           <p className="mt-0.5 line-clamp-2 text-[11px] text-text-muted">{plan.note}</p>
         )}
-        {plan.recurrence !== "none" && (
-          <p className="mt-0.5 text-[10px] text-text-muted">
-            {t(
-              plan.recurrence === "monthlyBikramSambat"
-                ? "planner.repeats-monthly"
-                : "planner.repeats-yearly",
+        {(reminder || plan.recurrence !== "none") && (
+          <p className="mt-0.5 flex items-center gap-2 text-[10px] text-text-muted">
+            {reminder && (
+              <span className="inline-flex items-center gap-1">
+                <Icon name="bell" className="size-2.5" />
+                {t(reminder)}
+              </span>
+            )}
+            {plan.recurrence !== "none" && (
+              <span>
+                {t(
+                  plan.recurrence === "monthlyBikramSambat"
+                    ? "planner.repeats-monthly"
+                    : "planner.repeats-yearly",
+                )}
+              </span>
             )}
           </p>
         )}

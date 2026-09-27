@@ -5,6 +5,7 @@ import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
 import { SFArrowUpLeftAndArrowDownRight } from "sf-symbols-lib/monochrome/SFArrowUpLeftAndArrowDownRight";
 import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
+import { SFBell } from "sf-symbols-lib/monochrome/SFBell";
 import { SFBellSlash } from "sf-symbols-lib/monochrome/SFBellSlash";
 import { SFBolt } from "sf-symbols-lib/monochrome/SFBolt";
 import { SFBook } from "sf-symbols-lib/monochrome/SFBook";
@@ -110,6 +111,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   fullscreen: SFArrowUpLeftAndArrowDownRight,
   moon: SFMoon,
   sun: SFSunMax,
+  bell: SFBell,
   bellOff: SFBellSlash,
   sofa: SFSofa,
   settings: SFGearshape,
@@ -202,6 +204,7 @@ export type IconName =
   | "fullscreen"
   | "moon"
   | "sun"
+  | "bell"
   | "bellOff"
   | "sofa"
   | "settings"

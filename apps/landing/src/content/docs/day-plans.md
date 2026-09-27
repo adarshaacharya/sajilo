@@ -15,12 +15,12 @@ A **day plan** is anything you want to remember on a date: a meeting, a bill, a 
 3. Type what you need to do.
 4. Optionally:
    - turn on **Add a time** and pick the **Time**;
-   - choose a **Reminder**: *At time*, or 5, 10, 15 or 30 minutes, or 1 hour before;
+   - choose a **Reminder**: it starts at *10 min before*. You can pick *At time*; 5, 10, 15 or 30 minutes before; 1 or 2 hours before; *1 day before*; or *No reminder*;
    - choose **Repeat**: *One-time*, *Every BS month* or *Every BS year*;
    - add a **short note**.
 5. Click **Save plan**.
 
-The day now shows a small dot in the calendar.
+The day now shows a small dot in the calendar, and a plan with a reminder shows a small bell and how early it will remind you.
 
 > A **reminder needs a time**. Plans without a time are notes for the day, with no reminder.
 
@@ -37,4 +37,4 @@ Repeats follow the **Nepali calendar**. *Every BS year* suits birthdays and anni
 
 ## When the reminder arrives
 
-The reminder arrives at the time you chose, as a card at the top of your screen or a system notification, depending on **Settings › System › Reminders**. See [Reminders](/docs/reminders.html). Sajilo needs to be running (it can be closed to the tray) for reminders to arrive.
+The reminder arrives at the time you chose, as a card at the top of your screen or a system notification, depending on **Settings › System › Reminders**. It says when the plan is, like *In 10 min, at 16:20* or *Tomorrow at 16:00*, followed by your note. See [Reminders](/docs/reminders.html). Sajilo needs to be running (it can be closed to the tray) for reminders to arrive.

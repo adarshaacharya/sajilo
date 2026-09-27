@@ -185,6 +185,7 @@ pub fn set_notification_options(
 ) -> Result<Vec<PlannedNotification>> {
     let value = serde_json::to_value(options).map_err(|error| error.to_string())?;
     db::set_json(&app, OPTIONS_KEY, &value)?;
+    reschedule();
     Ok(upcoming(&app))
 }
 
@@ -277,6 +278,17 @@ fn tracing_warn(id: &str, message: &str) {
 ///
 /// Recomputed on every wake, so it self-corrects after a laptop sleeps through a
 /// fire time, and picks up plans added since it went to sleep.
+/// Wakes the scheduler to plan again, now. Its sleep runs to the next known
+/// reminder, or up to an hour with none pending; a plan saved in the meantime
+/// for ten minutes from now would otherwise be heard about an hour late, or
+/// never.
+static WAKE: tokio::sync::Notify = tokio::sync::Notify::const_new();
+
+/// Call after anything that adds, moves or removes a reminder.
+pub fn reschedule() {
+    WAKE.notify_one();
+}
+
 pub fn spawn_scheduler(app: AppHandle<Wry>) {
     tauri::async_runtime::spawn(async move {
         // Anything missed while the app was closed, within the late window.
@@ -295,11 +307,9 @@ pub fn spawn_scheduler(app: AppHandle<Wry>) {
                 // it held back arrives then rather than at the next one.
                 .min(hold_remaining().map_or(u64::MAX, |left| left.as_secs() + 1));
 
-            let handle = tauri::async_runtime::spawn_blocking(move || {
-                std::thread::sleep(std::time::Duration::from_secs(wait));
-            });
-            if handle.await.is_err() {
-                return;
+            tokio::select! {
+                () = tokio::time::sleep(std::time::Duration::from_secs(wait)) => {}
+                () = WAKE.notified() => {}
             }
             warm_ipos(&app).await;
             deliver_due(&app);
