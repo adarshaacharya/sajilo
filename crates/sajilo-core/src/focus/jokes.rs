@@ -72,16 +72,27 @@ pub fn deck_name(kind: BreakKind) -> &'static str {
     }
 }
 
-/// The deck for the line a card says once its break is taken.
-pub const DONE_DECK: &str = "done";
+/// The lines a card may say once its break is taken: the kind's own, then
+/// the ones that fit any break. A glass of water is not thanked on behalf of
+/// your spine.
+pub fn done_lines(kind: BreakKind) -> Vec<Line> {
+    let own: &[Line] = match kind {
+        BreakKind::Eyes => EYES_DONE,
+        BreakKind::Move => MOVE_DONE,
+        BreakKind::Water => WATER_DONE,
+        _ => &[],
+    };
+    own.iter().chain(DONE).copied().collect()
+}
+
+/// The deck name `kind`'s done lines are dealt under.
+pub fn done_deck(kind: BreakKind) -> String {
+    format!("done.{}", deck_name(kind))
+}
 
 /// Deals the next line from a deck and moves the deal on; `None` for an
 /// empty deck.
-pub(super) fn deal(
-    told: &mut BTreeMap<String, u32>,
-    deck: &str,
-    lines: &'static [Line],
-) -> Option<Joke> {
+pub(super) fn deal(told: &mut BTreeMap<String, u32>, deck: &str, lines: &[Line]) -> Option<Joke> {
     if lines.is_empty() {
         return None;
     }
@@ -318,8 +329,8 @@ pub const MOVE: &[Line] = &[
         "उठेर दुई मिनेट अन्तै कतै व्यस्त देखिनुहोस्।",
     ),
     (
-        "Stand up. Your knees already sound like a Maruti 800 on Chandragiri.",
-        "उठ्नुहोस्। घुँडा चन्द्रागिरि उक्लँदै गरेको मारुति ८०० जस्तै कराउन थाले।",
+        "Stand up. Your knees already sound like a Maruti 800 on a hill road.",
+        "उठ्नुहोस्। घुँडा उकालो चढ्दै गरेको मारुति ८०० जस्तै कराउन थाले।",
     ),
     (
         "Get up. Sitting all day is how \"gastric\" starts.",
@@ -397,8 +408,8 @@ pub const WATER: &[Line] = &[
         "तुलसीको मोठलाई पनि तपाईंलाई भन्दा धेरै पानी हालिन्छ।",
     ),
     (
-        "Water is the one thing in Kathmandu not stuck in traffic. Drink it.",
-        "काठमाडौंमा जाममा नअड्किने एउटै चीज पानी हो। पिइहाल्नुहोस्।",
+        "Water: no queue, no price hike, no load-shedding. Drink it.",
+        "पानी: न लाइन, न मूल्यवृद्धि, न लोडसेडिङ। पिइहाल्नुहोस्।",
     ),
     (
         "Drink water. It should not come out the colour of chiya.",
@@ -418,42 +429,36 @@ pub const WATER: &[Line] = &[
     ),
 ];
 
-pub const DONE: &[Line] = &[
+/// Said once a look away is done.
+pub const EYES_DONE: &[Line] = &[
+    (
+        "There you go. Your eyes say dhanyabad.",
+        "ल भयो। आँखाले धन्यवाद भनेका छन्।",
+    ),
+    (
+        "Eyes rested. The screen can have you back now.",
+        "आँखाले आराम पाए। अब स्क्रिनले तपाईंलाई फिर्ता पाउन सक्छ।",
+    ),
+    (
+        "Twenty seconds well spent. The chasma shop will have to wait.",
+        "बीस सेकेन्ड सदुपयोग भयो। चस्मा पसल अब पर्खिनुपर्छ।",
+    ),
+    ("Blinking: back in service.", "आँखा झिम्काउने सेवा: फेरि सुचारु।"),
+];
+
+/// Said once a stand-up is done.
+pub const MOVE_DONE: &[Line] = &[
     (
         "Shabash. Your physio's EMI just got harder to pay.",
         "स्याबास। तपाईंको फिजियोलाई EMI तिर्न गाह्रो भयो।",
-    ),
-    (
-        "Nice. Your future self says thank you.",
-        "राम्रो। भविष्यको तपाईंले धन्यवाद भन्नुभयो।",
-    ),
-    (
-        "Well done. Somebody, somewhere, is mildly proud.",
-        "स्याबास। कोही न कोही, कतै न कतै, अलिअलि गर्व गरिरहेको छ।",
     ),
     (
         "Done. Your chair missed you, though.",
         "भयो। तर कुर्सीले चाहिँ तपाईंलाई सम्झियो।",
     ),
     (
-        "Look at you, following instructions. Rare.",
-        "वाह, भनेको मान्नुभयो। यस्तो कहिलेकाहीँ मात्र हुन्छ।",
-    ),
-    (
         "Your spine sends its regards.",
         "तपाईंको ढाडले नमस्कार पठाएको छ।",
-    ),
-    (
-        "There you go. Your eyes say dhanyabad.",
-        "ल भयो। आँखाले धन्यवाद भनेका छन्।",
-    ),
-    (
-        "Proud of you. Don't let it go to your head.",
-        "गर्व लाग्यो। तर धेरै फुर्ती नलगाउनुहोस्।",
-    ),
-    (
-        "Break complete. Your doctor just lost a customer.",
-        "ब्रेक सकियो। तपाईंको डाक्टरले एउटा ग्राहक गुमाए।",
     ),
     (
         "See? Easy. Now don't sit for six hours straight.",
@@ -466,6 +471,51 @@ pub const DONE: &[Line] = &[
     (
         "Back already? The meeting didn't miss you either.",
         "फर्किनुभयो? मिटिङले पनि तपाईंलाई सम्झेन।",
+    ),
+];
+
+/// Said once water is logged from the card.
+pub const WATER_DONE: &[Line] = &[
+    (
+        "Glug glug. Your kidneys have called off the strike.",
+        "गट गट। मिर्गौलाले हडताल फिर्ता लियो।",
+    ),
+    (
+        "That glass counts. The chiya ones never did.",
+        "यो गिलास गनियो। चियाका गिलास त कहिल्यै गनिएनन्।",
+    ),
+    (
+        "Cheers. Water, not chiya. We checked.",
+        "चियर्स। चिया होइन, पानी। हामीले जाँच्यौं।",
+    ),
+    (
+        "Hydrated. The tulsi finally has competition.",
+        "पानी पुग्यो। अब तुलसीको मोठसँग प्रतिस्पर्धा छ।",
+    ),
+];
+
+/// Said once any break is done: these fit a look away, a stand-up, a glass
+/// of water and the user's own reminder alike.
+pub const DONE: &[Line] = &[
+    (
+        "Nice. Your future self says thank you.",
+        "राम्रो। भविष्यको तपाईंले धन्यवाद भन्नुभयो।",
+    ),
+    (
+        "Well done. Somebody, somewhere, is mildly proud.",
+        "स्याबास। कोही न कोही, कतै न कतै, अलिअलि गर्व गरिरहेको छ।",
+    ),
+    (
+        "Look at you, following instructions. Rare.",
+        "वाह, भनेको मान्नुभयो। यस्तो कहिलेकाहीँ मात्र हुन्छ।",
+    ),
+    (
+        "Proud of you. Don't let it go to your head.",
+        "गर्व लाग्यो। तर धेरै फुर्ती नलगाउनुहोस्।",
+    ),
+    (
+        "Break complete. Your doctor just lost a customer.",
+        "ब्रेक सकियो। तपाईंको डाक्टरले एउटा ग्राहक गुमाए।",
     ),
     (
         "Add that to your CV under self-care.",
@@ -495,8 +545,8 @@ pub const END_OF_DAY: &[Line] = &[
         "राति ९ बजेसम्म अनलाइन बसेर कसैको प्रमोसन भएको छैन।",
     ),
     (
-        "Time to go. Beat the Koteshwor jam, or at least join it early.",
-        "जाने बेला भयो। कोटेश्वरको जाम छल्नुहोस्, नभए कम्तीमा चाँडै भेटिनुहोस्।",
+        "Time to go. Beat the evening jam, or at least join it early.",
+        "जाने बेला भयो। बेलुकीको जाम छल्नुहोस्, नभए कम्तीमा चाँडै भेटिनुहोस्।",
     ),
     (
         "Your shift is over. The work isn't, and that's tomorrow's problem.",
@@ -542,8 +592,8 @@ pub const BREAKFAST: &[Line] = &[
         "केही खानुहोस्। स्ट्यान्डअप मिटिङ १० मिनेट तपाईंबिना बाँच्छ।",
     ),
     (
-        "Eat. The pigeons at Basantapur had breakfast hours ago.",
-        "खानुहोस्। बसन्तपुरका परेवाले त घण्टौं अघि नै खाइसके।",
+        "Eat. The pigeons at the temple had breakfast hours ago.",
+        "खानुहोस्। मन्दिरका परेवाले त घण्टौं अघि नै खाइसके।",
     ),
     (
         "Have breakfast. Yesterday's cold chiya doesn't count.",

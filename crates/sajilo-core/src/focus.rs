@@ -52,6 +52,11 @@ const DEFAULT_WATER_GOAL_ML: u32 = 2500;
 /// "In 5 min" on a break card: the reminder comes back after this much more
 /// use.
 pub const SNOOZE_MINUTES: u32 = 5;
+/// One reminder in this many of an interval break says a joke; the rest say
+/// the plain instruction. A look away comes about sixteen times a day, and a
+/// joke heard for the fifth time is worse than none. Meals, bedtime and the
+/// stop-work nudge come once a day, so they always have one.
+pub const JOKE_EVERY: u32 = 3;
 /// Two breaks due in the same moment: the second comes this much more use
 /// after the first, not straight after it.
 pub const STAGGER_MINUTES: u32 = 5;
@@ -638,6 +643,9 @@ pub struct FocusState {
     /// How far each joke deck has been dealt, by [`jokes::deck_name`], so
     /// a line does not come round again until the rest have.
     pub jokes_told: BTreeMap<String, u32>,
+    /// How many reminders of each interval break have gone out, by
+    /// [`jokes::deck_name`], so every [`JOKE_EVERY`]th one says a joke.
+    pub joke_pace: BTreeMap<String, u32>,
     /// Each kind's current reminder has been put off once already; the next
     /// card for it offers no "later".
     #[serde(deserialize_with = "padded")]
@@ -800,6 +808,9 @@ impl ActiveBreak {
         started_at: DateTime<Utc>,
         preview: bool,
     ) -> Self {
+        // An example always shows a joke, so someone deciding whether to keep
+        // them on sees one.
+        let funny = settings.jokes && (preview || joke_turn(state, kind));
         // An example shows the next lines without dealing them, so trying
         // the card out moves nothing on.
         let mut scratch;
@@ -812,11 +823,13 @@ impl ActiveBreak {
         // The cheer is for a break taken. Going to eat or to bed is not one,
         // and "your spine sends its regards" at bedtime reads as a mistake;
         // those cards say their own plain send-off instead.
-        let (joke, cheer) = if settings.jokes {
+        // A plain card closes plainly: the cheer comes with the joke.
+        let (joke, cheer) = if funny {
             (
                 deal_joke(told, kind),
-                kind.slot()
-                    .and_then(|_| jokes::deal(told, jokes::DONE_DECK, jokes::DONE)),
+                kind.slot().and_then(|_| {
+                    jokes::deal(told, &jokes::done_deck(kind), &jokes::done_lines(kind))
+                }),
             )
         } else {
             (None, None)
@@ -852,6 +865,21 @@ fn default_snooze_minutes() -> u32 {
 
 fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<jokes::Joke> {
     jokes::deal(told, jokes::deck_name(kind), jokes::lines(kind))
+}
+
+/// Whether this reminder of `kind` is one that says a joke, counting it.
+/// Once-a-day cards always are.
+fn joke_turn(state: &mut FocusState, kind: BreakKind) -> bool {
+    if kind.slot().is_none() {
+        return true;
+    }
+    let turn = state
+        .joke_pace
+        .entry(jokes::deck_name(kind).to_owned())
+        .or_insert(0);
+    let funny = turn.is_multiple_of(JOKE_EVERY);
+    *turn = turn.wrapping_add(1);
+    funny
 }
 
 /// How a break card was closed.
@@ -1686,10 +1714,9 @@ pub fn litres(ml: u32) -> String {
     text.trim_end_matches('0').trim_end_matches('.').to_owned()
 }
 
-/// The notification for a break. English, like every other Sajilo reminder.
 /// The title and body of a reminder in the notification style. With jokes
-/// on, the body is the next line from the kind's deck; water keeps its
-/// running total under it, since that number is the point.
+/// on, one in [`JOKE_EVERY`] bodies is the next line from the kind's deck;
+/// water keeps its running total under it, since that number is the point.
 pub fn announcement(
     state: &mut FocusState,
     settings: &FocusSettings,
@@ -1698,7 +1725,7 @@ pub fn announcement(
     language: Language,
 ) -> (String, String) {
     let (title, plain) = message(kind, today, settings, language);
-    let joke = if settings.jokes {
+    let joke = if settings.jokes && joke_turn(state, kind) {
         deal_joke(&mut state.jokes_told, kind)
     } else {
         None

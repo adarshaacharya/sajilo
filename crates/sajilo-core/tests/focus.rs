@@ -3,9 +3,9 @@
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
     BreakKind, BreakOutcome, DayOffKind, DaysOff, FocusSettings, FocusState, FocusStatus,
-    HOLD_NOTE_MINUTES, HoldReason, Language, Moment, PauseChoice, ROUTINE_SNOOZE_MINUTES,
-    ReminderStyle, SNOOZE_MINUTES, STAGGER_MINUTES, Tick, announcement, finish_break, jokes,
-    litres, log_water, pause, preview_break, snapshot, tick,
+    HOLD_NOTE_MINUTES, HoldReason, JOKE_EVERY, Language, Moment, PauseChoice,
+    ROUTINE_SNOOZE_MINUTES, ReminderStyle, SNOOZE_MINUTES, STAGGER_MINUTES, Tick, announcement,
+    finish_break, jokes, litres, log_water, pause, preview_break, snapshot, tick,
 };
 use std::collections::HashSet;
 
@@ -978,7 +978,7 @@ fn a_meal_card_has_no_break_cheer_and_a_longer_snooze() {
     assert!(card.joke.is_some());
     assert_eq!(card.cheer, None);
     assert_eq!(card.snooze_minutes, ROUTINE_SNOOZE_MINUTES);
-    assert!(!state.jokes_told.contains_key(jokes::DONE_DECK));
+    assert!(!state.jokes_told.keys().any(|deck| deck.starts_with("done")));
 }
 
 #[test]
@@ -1191,11 +1191,22 @@ const DECKS: [BreakKind; 8] = [
     BreakKind::Bedtime,
 ];
 
-fn every_deck() -> impl Iterator<Item = (&'static str, &'static [jokes::Line])> {
-    DECKS
-        .iter()
-        .map(|kind| (jokes::deck_name(*kind), jokes::lines(*kind)))
-        .chain([(jokes::DONE_DECK, jokes::DONE)])
+fn every_deck() -> Vec<(String, Vec<jokes::Line>)> {
+    let own = DECKS.iter().map(|kind| {
+        (
+            jokes::deck_name(*kind).to_owned(),
+            jokes::lines(*kind).to_vec(),
+        )
+    });
+    let done = [
+        BreakKind::Eyes,
+        BreakKind::Move,
+        BreakKind::Water,
+        BreakKind::Custom,
+    ]
+    .into_iter()
+    .map(|kind| (jokes::done_deck(kind), jokes::done_lines(kind)));
+    own.chain(done).collect()
 }
 
 fn in_deck(deck: &[jokes::Line], joke: &jokes::Joke) -> bool {
@@ -1213,7 +1224,7 @@ fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
         let nepali: HashSet<_> = lines.iter().map(|(_, ne)| ne).collect();
         assert_eq!(english.len(), lines.len(), "{name} repeats an English line");
         assert_eq!(nepali.len(), lines.len(), "{name} repeats a Nepali line");
-        for (en, ne) in lines {
+        for (en, ne) in &lines {
             assert!(
                 !en.trim().is_empty() && !ne.trim().is_empty(),
                 "{name}: {en}"
@@ -1255,7 +1266,7 @@ fn no_joke_mentions_family() {
         "माइजु",
     ];
     for (name, lines) in every_deck() {
-        for (en, ne) in lines {
+        for (en, ne) in &lines {
             let lower = en.to_lowercase();
             for word in ENGLISH {
                 let hit = lower
@@ -1281,7 +1292,7 @@ fn a_deck_deals_every_line_before_repeating_and_never_twice_in_a_row() {
     for (name, lines) in every_deck() {
         let len = lines.len();
         let dealt: Vec<usize> = (0..(len * 6) as u32)
-            .map(|turn| jokes::position(name, turn, len))
+            .map(|turn| jokes::position(&name, turn, len))
             .collect();
         for round in dealt.chunks(len) {
             let seen: HashSet<_> = round.iter().collect();
@@ -1300,21 +1311,27 @@ fn a_deck_deals_every_line_before_repeating_and_never_twice_in_a_row() {
 }
 
 #[test]
-fn each_card_brings_a_new_joke_and_a_cheer_when_jokes_are_on() {
+fn every_third_card_brings_a_new_joke_and_a_cheer_when_jokes_are_on() {
     let settings = eyes_only();
     let mut state = FocusState::default();
     let mut seen = Vec::new();
     let mut now = monday_at(10);
-    for _ in 0..5 {
+    for turn in 0..(jokes::MIN_DECK as u32 * JOKE_EVERY) {
         run(&mut state, &settings, now, 20, busy);
         let card = state
             .active_break
             .clone()
             .expect("a card when it comes due");
-        let joke = card.joke.expect("jokes are on by default");
-        assert!(in_deck(jokes::EYES, &joke));
-        assert!(card.cheer.is_some_and(|line| in_deck(jokes::DONE, &line)));
-        seen.push(joke.en);
+        if turn.is_multiple_of(JOKE_EVERY) {
+            let joke = card.joke.expect("jokes are on by default");
+            assert!(in_deck(jokes::EYES, &joke));
+            let cheer = card.cheer.expect("a joke card closes with a cheer");
+            assert!(in_deck(&jokes::done_lines(BreakKind::Eyes), &cheer));
+            seen.push(joke.en);
+        } else {
+            // A plain card closes plainly.
+            assert_eq!((&card.joke, &card.cheer), (&None, &None), "turn {turn}");
+        }
         finish_break(
             &mut state,
             &settings,
@@ -1356,13 +1373,19 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
     assert_eq!(title, "Time to move");
     assert!(jokes::MOVE.iter().any(|(en, _)| *en == body), "{body}");
     let (_, again) = say(&mut state, &settings, BreakKind::Move, Language::En);
-    assert_ne!(body, again, "two notifications in a row say the same thing");
+    assert!(
+        again.starts_with("60 minutes at the screen."),
+        "the next one is plain: {again}"
+    );
 
     let (_, water) = say(&mut state, &settings, BreakKind::Water, Language::En);
     let (joke, total) = water.split_once('\n').expect("the joke, then the total");
     assert!(jokes::WATER.iter().any(|(en, _)| *en == joke));
     assert_eq!(total, "0 of 2.5 litres today.");
 
+    // Water's own turn would be plain now; start its pace over to hear the
+    // joke again, in Nepali.
+    state.joke_pace.clear();
     let (title, water) = say(&mut state, &settings, BreakKind::Water, Language::Ne);
     assert_eq!(title, "पानी पिउनुहोस्");
     let (joke, total) = water.split_once('\n').expect("the joke, then the total");
