@@ -19,16 +19,19 @@ use crate::focus::ReminderStyle;
 use crate::nepal_time;
 use crate::planner::{DayPlan, PlanTime, Recurrence};
 
-/// Every reminder starts on: a holiday or festival tomorrow and an IPO closing
-/// today are what people open a Nepali calendar to find out, and each fires at
-/// most once a day. Every toggle stays individually configurable, and a choice
-/// the user has saved is always kept.
+/// Almost every reminder starts on: a holiday tomorrow and an IPO closing today
+/// are what people open a Nepali calendar to find out, and each fires at most
+/// once a day. Festivals that are not holidays start off: the calendar names
+/// one most evenings, and a nudge about each is noise. A festival that is also
+/// a public holiday still arrives, under the holiday switch. Every toggle stays
+/// individually configurable, and a choice the user has saved is always kept.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NotificationOptions {
     #[serde(default = "enabled_by_default")]
     pub eve_of_public_holiday: bool,
-    #[serde(default = "enabled_by_default")]
+    /// Festivals that are not public holidays. Off by default.
+    #[serde(default)]
     pub eve_of_festival: bool,
     /// Evening before, in Nepal time. Late enough to read as "tomorrow", early
     /// enough not to arrive after the user has gone to bed.
@@ -62,7 +65,7 @@ impl Default for NotificationOptions {
     fn default() -> Self {
         Self {
             eve_of_public_holiday: enabled_by_default(),
-            eve_of_festival: enabled_by_default(),
+            eve_of_festival: false,
             hour: default_hour(),
             ipo_closing_day: enabled_by_default(),
             sip_payment: enabled_by_default(),

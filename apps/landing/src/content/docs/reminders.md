@@ -30,7 +30,7 @@ On a card, **Open** takes you to the right place in Sajilo and **Got it** dismis
 | **Day plans** | The **Reminder** on each plan | At the plan's time, or the minutes before you chose |
 | **Keeper** | **Remind me before** on each item | 9 am on each day you chose, and once the day after it's due |
 
-The first four are **on by default**. The IPO and SIP reminders need the **Bazar** module on, and Keeper reminders need **Keeper** on: switching a module off in **Settings › Modules** silences its reminders too.
+**Public holiday tomorrow**, **IPO closing day** and **SIP payment due** are **on by default**. **Festival tomorrow** is off, since most evenings have some festival; a festival that is also a public holiday still arrives as a holiday reminder. The IPO and SIP reminders need the **Bazar** module on, and Keeper reminders need **Keeper** on: switching a module off in **Settings › Modules** silences its reminders too.
 
 ### IPO reminders
 
