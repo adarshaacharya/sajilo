@@ -40,32 +40,61 @@ A pinned popover skips all of this and opens where it was left (see below).
 
 ### The Linux tray icon
 
-On Linux the icon is a StatusNotifierItem, the D-Bus protocol KDE, GNOME's
-AppIndicator extension, Cinnamon, Xfce and Waybar all host. Tauri's
-`tray-icon` has two backends for it, and Sajilo uses `ksni` (turned on in
-`apps/desktop/src-tauri/Cargo.toml`), not libappindicator:
+Linux has two kinds of tray icon, and Sajilo picks, per desktop, the one whose
+tray opens Sajilo on a single left click (`tray/linux_host.rs`):
 
-- **A left click reaches the app.** The panel calls the item's `Activate`, which
-  arrives as a left click and toggles the popover. libappindicator marks its
-  item menu-only and has no `Activate`, so every click opened the menu.
-- **The right click is the menu:** Open (or Hide) Sajilo, then Quit.
-- **GNOME's extension is the exception.** It opens the menu on a single left
-  click for every app and calls `Activate` only on a double click. So on
-  Ubuntu the menu still leads with Open.
-- **macOS and Windows** report a press and a release; see `window::tray_press`
-  for why a click on the icon needs both to close the popover. Linux reports
-  one event per click, and the click-away's short wait means the popover is
-  still up when it arrives, so a plain toggle is right there.
+| Tray | Icon | Why |
+|---|---|---|
+| KDE, Cinnamon, Xfce, MATE, Waybar | StatusNotifierItem | The panel calls `Activate` on a left click |
+| GNOME's AppIndicator extension (Ubuntu, Fedora, Pop!_OS) | System Tray (XEmbed) | The extension opens a StatusNotifierItem's menu on a left click and activates only on a double click, for every app. It hands a System Tray icon the click itself |
+| i3bar, polybar, `stalonetray` | System Tray | The only kind they show |
+| Anything, with GTK drawing straight to Wayland | StatusNotifierItem | There is no System Tray without X11 |
 
-`ksni` is patched in `vendor/ksni` (see `PATCHED.md` there) for two things:
-the `XAyatanaLabel` that GNOME draws beside the icon, which is where the date
-shows on Ubuntu, and registering once a panel appears when Sajilo starts
-before it. The label is the tray title; with the flag as the icon, the title
-leaves out its own flag so the top bar does not show two.
+It tells GNOME from the rest by the process that owns
+`org.kde.StatusNotifierWatcher` on the session bus: `gnome-shell`. At login
+the panel may not be up yet, so it looks again every half second, and a
+tray of either kind waits three seconds for the other before it counts (KDE
+on X11 runs both, and its System Tray bridge can come up first).
 
-Trays that only take old XEmbed icons (i3bar, polybar, `stalonetray`) show no
-icon at all; libappindicator used to fall back to XEmbed, `ksni` does not.
-`snixembed` bridges them, and `sajilo-desktop --toggle` needs no tray.
+**The StatusNotifierItem** is Tauri's `tray-icon` through `ksni` (turned on
+in `apps/desktop/src-tauri/Cargo.toml`), not libappindicator, which marks its
+item menu-only so that every click opened the menu. A left click arrives as
+`Activate`; the right click is the menu: Open (or Hide) Sajilo, then Quit.
+`ksni` is patched in `vendor/ksni` (see `PATCHED.md` there) for the
+`XAyatanaLabel`, the date some trays draw beside the icon, and for
+registering once a panel appears when Sajilo starts before it. The label is
+the tray title; with the flag as the icon, the title leaves out its own flag.
+
+**The System Tray icon** (`tray/xembed.rs`) is a small GTK window (a
+`GtkPlug`) that Sajilo asks the tray to take in, as GTK's old `GtkStatusIcon`
+did. A left click on it is a click on Sajilo's own window, so it toggles the
+popover on the release; the right click pops a GTK menu with the same items.
+It works on GNOME under Wayland too, because Sajilo draws through XWayland
+there (`prefer_x11_backend` in `lib.rs`). What it gives up:
+
+- **No date beside it.** The tray gives it a small square, so it carries the
+  icon alone. The date is its tooltip, where the tray passes the pointer on;
+  GNOME's passes the icon only clicks, so there is none there.
+- **Transparency is the tray's call.** A tray that names a 32-bit visual in
+  `_NET_SYSTEM_TRAY_VISUAL` (GNOME, i3bar, polybar) gets see-through
+  corners. Otherwise the icon takes its parent's background
+  (`ParentRelative`) and is drawn straight onto it. `stalonetray` paints its
+  own background rather than leave it to X, so there, after switching the
+  icon in Settings, bits of the old one can show until the tray redraws.
+- **The tray sets its size.** Trays that follow the protocol refuse the
+  icon's own resize requests; GTK makes one after being taken in.
+
+When a tray restarts (GNOME Shell on X11, the extension turned off and on),
+it announces itself with a `MANAGER` message to the root window, and Sajilo
+docks a new icon. Trays keep the old window alive by adding it to their
+save-set, as the protocol asks; one that did not would take it down with
+it, and GTK aborts on the next call to a window it did not expect to lose.
+
+**Clicks on macOS and Windows** report a press and a release; see
+`window::tray_press` for why a click on the icon needs both to close the
+popover. Linux acts on one event per click, the release, and the
+click-away's short wait means the popover is still up when it arrives, so a
+plain toggle is right there.
 
 ## Closing
 
@@ -295,3 +324,39 @@ and install `alsa-utils`; the file fills when it plays.
 
 The pin and dragging use the same code on macOS and Windows, but the window
 move itself belongs to each system, so try a pin and a drag there by hand too.
+
+### The System Tray icon
+
+`stalonetray` (`apt-get install stalonetray`) is a real System Tray, drawn on
+the screen, so the icon can be clicked with the mouse. Start it instead of
+the stand-in panel; with no StatusNotifierItem host, Sajilo docks there after
+its three-second wait:
+
+```bash
+stalonetray --geometry 4x1-0-0 --icon-size 24 -bg '#303030' &
+target/debug/sajilo-desktop &
+# The icon sits at the tray's left end, (1196, 708) on the 1280x720 screen
+xdotool mousemove 1196 708 mousedown 1 sleep 0.12 mouseup 1
+```
+
+Hold each click for a moment, as above: the click-away watch looks for a
+pressed button every 25 ms, and `xdotool click` presses and releases faster
+than that, faster than any hand.
+
+To take GNOME's path, run the stand-in panel under the name `gnome-shell`
+(`cp target/sni-watcher/debug/sni-watcher /tmp/gnome-shell`) alongside
+`stalonetray`: the panel should see nothing register, and the icon dock in
+`stalonetray`. Then check:
+
+| Setup | Expect |
+|---|---|
+| Stand-in panel and `stalonetray` | A StatusNotifierItem; nothing in `stalonetray` |
+| `gnome-shell` and `stalonetray` | The System Tray icon; nothing registers |
+| `gnome-shell` alone | A StatusNotifierItem, after three seconds |
+| `stalonetray` alone, started after the app | The System Tray icon, once it is up |
+| `gnome-shell` and `stalonetray`, app with `GDK_BACKEND=wayland,x11` | A StatusNotifierItem |
+
+With the System Tray icon, run steps 1 to 6 above clicking the icon itself,
+right-click it for the menu, switch the icon in Settings, and restart
+`stalonetray` under the running app: the icon should come back in the new
+tray.

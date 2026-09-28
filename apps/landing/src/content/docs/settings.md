@@ -25,7 +25,7 @@ How the date looks in your menu bar or tray:
 - **Format:** Short, Full (the default), With flag, Gregorian, Numeric, or **Custom…**, where you choose whether to show the Nepal flag and the BS year.
 - **Show time:** adds the time in Nepal.
 
-On Windows the tray shows only the icon, and the date appears when you hover over it. Some Linux desktops, like KDE and Cinnamon, also show only the icon; Ubuntu shows the date beside it.
+On Windows the tray shows only the icon, and the date appears when you hover over it. Most Linux desktops, Ubuntu included, also show only the icon.
 
 ### Startup
 

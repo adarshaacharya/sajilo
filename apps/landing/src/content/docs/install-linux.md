@@ -1,7 +1,7 @@
 ---
 title: Install on Linux
 nav: Linux
-description: Install Sajilo on Ubuntu, Debian, Mint, Fedora, openSUSE, Arch and other 64-bit Linux, make its date show in your top bar, and use it on a tiling window manager.
+description: Install Sajilo on Ubuntu, Debian, Mint, Fedora, openSUSE, Arch and other 64-bit Linux, find it in your top bar, and use it on a tiling window manager.
 section: start
 order: 3
 ---
@@ -53,15 +53,14 @@ chmod +x Sajilo-linux-x86_64.AppImage
 
 If it complains about **FUSE**, install `libfuse2` (on Ubuntu 24.04 the package is called `libfuse2t64`; on Arch, `sudo pacman -S fuse2`).
 
-## Seeing the date in your top bar
+## Finding Sajilo in your top bar
 
-Sajilo puts a **Nepal flag** in your panel, in the area where other apps put their icons. On Ubuntu the Nepali date shows beside it. (You can switch the flag for Sajilo's own icon in **Settings → Display → Menu bar**.)
+Sajilo puts a **Nepal flag** in your panel, in the area where other apps put their icons. (You can switch the flag for Sajilo's own icon in **Settings → Display → Menu bar**.)
 
-- **KDE, Cinnamon, Xfce, MATE and Budgie** show it straight away. They show the icon only; point at it to see the date.
-- **Ubuntu** has the extension it needs turned on already.
+- **Ubuntu, KDE, Cinnamon, Xfce, MATE and Budgie** show it straight away.
 - **Other GNOME desktops** (Fedora, Debian, plain GNOME) need the **AppIndicator and KStatusNotifierItem Support** extension. Install it from GNOME Extensions, then log out and back in.
 
-**Click the flag** to open Sajilo, and click it again to close it. **Right-click** it for a menu with **Open Sajilo** and **Quit Sajilo**. On Ubuntu and other GNOME desktops a single click opens that menu instead, so choose **Open Sajilo** there (or double-click the date). To close it, you can also click anywhere else or press **Esc**. To keep it on screen and move it around, use the [pin](/docs/first-steps.html#keeping-it-open).
+**Click the flag** to open Sajilo, and click it again to close it. **Right-click** it for a menu with **Open Sajilo** and **Quit Sajilo**. To close it, you can also click anywhere else or press **Esc**. To keep it on screen and move it around, use the [pin](/docs/first-steps.html#keeping-it-open).
 
 > **No top bar icon at all?** Sajilo still works: opening it from your applications menu always brings up its window.
 
@@ -84,7 +83,7 @@ bind = $mainMod, N, exec, sajilo-desktop --toggle
 Mod+N { spawn "sajilo-desktop" "--toggle"; }
 ```
 
-Waybar and swaybar show Sajilo's flag in their tray, if your bar has a tray enabled, and a click on it opens Sajilo. **i3bar and polybar** can't show it: their trays take only older-style icons. Run [snixembed](https://git.sr.ht/~steef/snixembed) to bring it into them, or use the shortcut above. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
+Waybar, swaybar, i3bar and polybar show Sajilo's flag in their tray, if your bar has a tray enabled, and a click on it opens Sajilo. (For the AppImage, use the AppImage's path instead of `sajilo-desktop`.)
 
 ### Keep it floating, under your bar
 

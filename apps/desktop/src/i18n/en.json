@@ -519,7 +519,7 @@
   "settings.tray-icon": "Tray icon",
   "settings.tray-icon-app": "Sajilo",
   "settings.tray-icon-flag": "Nepal flag",
-  "settings.tray-note-linux": "Some Linux desktops, like KDE and Cinnamon, show only the icon, not the date beside it. The date is always here in Sajilo.",
+  "settings.tray-note-linux": "Most Linux desktops, Ubuntu included, show only the icon, not the date beside it. The date is always here in Sajilo.",
   "settings.tray-note-windows": "Windows shows only the icon. Point at it or right-click it to see the date.",
   "settings.update-available": "Downloading update to version",
   "settings.update-checking": "Checking…",

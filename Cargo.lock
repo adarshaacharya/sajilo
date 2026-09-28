@@ -3963,6 +3963,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "gdk",
+ "gtk",
  "image",
  "objc2-app-kit",
  "resvg",
@@ -3989,6 +3990,7 @@ dependencies = [
  "url",
  "uuid",
  "window-vibrancy 0.6.0",
+ "x11-dl",
  "zbus",
 ]
 

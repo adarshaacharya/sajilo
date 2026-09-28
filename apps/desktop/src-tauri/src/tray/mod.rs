@@ -1,7 +1,11 @@
 //! The tray icon: Sajilo's only permanent presence on screen.
 
 pub mod icon;
+#[cfg(target_os = "linux")]
+mod linux_host;
 pub mod title;
+#[cfg(target_os = "linux")]
+mod xembed;
 
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
@@ -44,10 +48,29 @@ struct PopoverItem(MenuItem<tauri::Wry>);
 pub fn set_popover_shown(app: &AppHandle, shown: bool) {
     use tauri::Manager as _;
 
+    if host(app) == Some(linux_host::Host::SystemTray) {
+        xembed::set_popover_shown(app, shown);
+        return;
+    }
     let Some(item) = app.try_state::<PopoverItem>() else {
         return;
     };
-    let _ = item.0.set_text(if shown { HIDE_LABEL } else { OPEN_LABEL });
+    let _ = item.0.set_text(popover_label(shown));
+}
+
+/// The menu's first item's label: what it will do next.
+#[cfg(target_os = "linux")]
+fn popover_label(shown: bool) -> &'static str {
+    if shown { HIDE_LABEL } else { OPEN_LABEL }
+}
+
+/// Which kind of tray icon Linux got, once it has one; see `linux_host`.
+#[cfg(target_os = "linux")]
+struct ChosenHost(linux_host::Host);
+
+#[cfg(target_os = "linux")]
+fn host(app: &AppHandle) -> Option<linux_host::Host> {
+    app.try_state::<ChosenHost>().map(|chosen| chosen.0)
 }
 
 /// The date row at the top of the tray menu, kept so `refresh_title` can move
@@ -75,6 +98,11 @@ struct UpdateEntry {
 /// only places them. Placed right under the date on macOS and Windows, where
 /// the eye lands first, and after the open item on Linux.
 pub fn set_update_ready(app: &AppHandle, label: Option<&str>) {
+    #[cfg(target_os = "linux")]
+    if host(app) == Some(linux_host::Host::SystemTray) {
+        xembed::set_update_ready(app, label.map(str::to_owned));
+        return;
+    }
     let Some(entry) = app.try_state::<UpdateEntry>() else {
         return;
     };
@@ -107,7 +135,54 @@ pub fn set_update_ready(app: &AppHandle, label: Option<&str>) {
     }
 }
 
+/// Puts Sajilo in the tray.
+///
+/// On Linux, first works out which kind of tray icon the desktop's tray gives
+/// a left click to (see `linux_host`), which can mean waiting for the panel
+/// at login; the icon appears once it is up.
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
+    #[cfg(target_os = "linux")]
+    {
+        let handle = app.clone();
+        std::thread::spawn(move || {
+            let chosen = linux_host::wait_for_host();
+            let app = handle.clone();
+            let _ = handle.run_on_main_thread(move || start_linux(&app, chosen));
+        });
+        spawn_midnight_rollover(app.clone());
+        Ok(())
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        build_tray_icon(app)?;
+        refresh_title(app);
+        spawn_midnight_rollover(app.clone());
+        Ok(())
+    }
+}
+
+/// Builds the kind of icon `linux_host` chose. Main thread.
+#[cfg(target_os = "linux")]
+fn start_linux(app: &AppHandle, chosen: linux_host::Host) {
+    app.manage(ChosenHost(chosen));
+    match chosen {
+        linux_host::Host::StatusNotifier => {
+            if let Err(err) = build_tray_icon(app) {
+                eprintln!("sajilo: could not build the tray icon: {err}");
+                return;
+            }
+        }
+        linux_host::Host::SystemTray => {
+            xembed::start(app);
+            xembed::watch_for_new_tray(app.clone());
+        }
+    }
+    refresh_title(app);
+}
+
+/// Tauri's tray icon: macOS's menu-bar item, Windows' notification-area
+/// icon, and on Linux the StatusNotifierItem.
+fn build_tray_icon(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let date = MenuItem::with_id(
         app,
@@ -126,9 +201,11 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     // A left click on the icon opens the popover directly: the tray is a
     // StatusNotifierItem (ksni, see vendor/ksni/PATCHED.md) and the panel
     // calls its `Activate`. The menu is the right-click. GNOME's AppIndicator
-    // extension is the exception: it opens the menu on a single left click
-    // for every app and activates only on a double click, which is why the
-    // menu leads with Open. Settings stays in the popover's header.
+    // extension opens the menu on a single left click instead, for every app,
+    // so GNOME gets the System Tray icon (see `linux_host`); where it still
+    // hosts this one (its System Tray turned off, or GTK on Wayland), the
+    // menu leading with Open is what a click finds. Settings stays in the
+    // popover's header.
     //
     // macOS and Windows keep the full menu: there, left click toggles the
     // popover and this menu is the right-click affordance.
@@ -192,8 +269,8 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     builder
         .tooltip("Sajilo")
         // Left click toggles the popover; the menu is the right-click
-        // affordance. GNOME's extension still opens the menu on a single left
-        // click, which is why the menu leads with the date or Open.
+        // affordance. Where GNOME's extension hosts it, a single left click
+        // opens the menu, which is why the menu leads with the date or Open.
         .show_menu_on_left_click(false)
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
@@ -240,9 +317,6 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             }
         })
         .build(app)?;
-
-    refresh_title(app);
-    spawn_midnight_rollover(app.clone());
     Ok(())
 }
 
@@ -282,10 +356,17 @@ fn label(app: &AppHandle) -> Option<String> {
 
 /// Redraws the tray label from the current date and preferences.
 pub fn refresh_title(app: &AppHandle) {
-    let Some(tray) = app.tray_by_id(ID) else {
+    let Some((date, numerals, label)) = today(app) else {
         return;
     };
-    let Some((date, numerals, label)) = today(app) else {
+    // Linux's System Tray icon has no room for text: the date is its tooltip.
+    #[cfg(target_os = "linux")]
+    if host(app) == Some(linux_host::Host::SystemTray) {
+        set_system_tray_picture(app);
+        xembed::set_tooltip(app, label);
+        return;
+    }
+    let Some(tray) = app.tray_by_id(ID) else {
         return;
     };
     // The full date is conveyed in the native title/menu/tooltip. Windows'
@@ -300,7 +381,8 @@ pub fn refresh_title(app: &AppHandle) {
 
     // macOS renders text beside the tray icon natively. On Linux the title is
     // also the Ayatana label, which GNOME's AppIndicator extension draws beside
-    // the icon (Ubuntu's top bar); KDE and Cinnamon show it as the tooltip.
+    // the icon when it hosts this kind; KDE and Cinnamon show it as the
+    // tooltip.
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     let _ = tray.set_title(Some(&label));
 
@@ -341,6 +423,30 @@ fn set_icon(app: &AppHandle, tray: &tauri::tray::TrayIcon) {
             SHOWN_ICON.store(wanted, Ordering::SeqCst);
         }
         let _ = tray.set_icon_as_template(false);
+    }
+}
+
+/// Puts the chosen icon, the flag or Sajilo's, in the System Tray; like
+/// [`set_icon`], only when the choice changes.
+#[cfg(target_os = "linux")]
+fn set_system_tray_picture(app: &AppHandle) {
+    use std::sync::atomic::Ordering;
+
+    let flag = crate::prefs::tray_icon_is_flag(app);
+    let wanted = if flag { 2 } else { 1 };
+    if SHOWN_ICON.load(Ordering::SeqCst) == wanted {
+        return;
+    }
+    let edge = xembed::source_size();
+    let picture = if flag {
+        icon::nepal_flag_at(edge).map(|pixels| (pixels, edge, edge))
+    } else {
+        app.default_window_icon()
+            .map(|image| (image.rgba().to_vec(), image.width(), image.height()))
+    };
+    if let Some((pixels, width, height)) = picture {
+        xembed::set_picture(app, pixels, width, height);
+        SHOWN_ICON.store(wanted, Ordering::SeqCst);
     }
 }
 

@@ -30,27 +30,38 @@ const FLAG_SVG: &[u8] = include_bytes!("../../assets/nepal-flag.svg");
 /// A compact Nepal flag for the tray's tiny slot, rasterised once and
 /// cached — the SVG never changes, so there is nothing to redo on later calls.
 pub fn nepal_flag_icon() -> Option<Vec<u8>> {
-    NEPAL_FLAG.get_or_init(render_nepal_flag).clone()
+    NEPAL_FLAG.get_or_init(|| nepal_flag_at(SIZE)).clone()
 }
 
-fn render_nepal_flag() -> Option<Vec<u8>> {
+/// The flag centred in a transparent square `size` pixels across, as
+/// straight (not premultiplied) RGBA, which is what trays take.
+pub fn nepal_flag_at(size: u32) -> Option<Vec<u8>> {
     let tree = resvg::usvg::Tree::from_data(FLAG_SVG, &resvg::usvg::Options::default()).ok()?;
     let flag_size = tree.size();
 
     // The flag is taller than it is wide (its own irrational aspect ratio, per
     // the construction), so scale to the smaller of the two ratios and centre
     // the result — filling the square would crop the pennants' points.
-    let scale = (SIZE as f32 / flag_size.width()).min(SIZE as f32 / flag_size.height());
-    let offset_x = (SIZE as f32 - flag_size.width() * scale) / 2.0;
-    let offset_y = (SIZE as f32 - flag_size.height() * scale) / 2.0;
+    let scale = (size as f32 / flag_size.width()).min(size as f32 / flag_size.height());
+    let offset_x = (size as f32 - flag_size.width() * scale) / 2.0;
+    let offset_y = (size as f32 - flag_size.height() * scale) / 2.0;
 
-    let mut pixmap = Pixmap::new(SIZE, SIZE)?;
+    let mut pixmap = Pixmap::new(size, size)?;
     resvg::render(
         &tree,
         Transform::from_scale(scale, scale).post_translate(offset_x, offset_y),
         &mut pixmap.as_mut(),
     );
-    Some(pixmap.take())
+    Some(
+        pixmap
+            .pixels()
+            .iter()
+            .flat_map(|pixel| {
+                let color = pixel.demultiply();
+                [color.red(), color.green(), color.blue(), color.alpha()]
+            })
+            .collect(),
+    )
 }
 
 /// The icon's edge length, so callers building a `tauri::image::Image` do not

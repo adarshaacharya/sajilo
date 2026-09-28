@@ -11,7 +11,7 @@ Sajilo is a tray app, so it doesn't open a big window. Look for it:
 
 - **Windows:** a **Nepal flag** next to the clock. If you can't see it, click the **^** arrow; new icons hide there. Drag the flag onto the taskbar to keep it visible. See [Install on Windows](/docs/install-windows.html#put-sajilo-on-your-taskbar).
 - **macOS:** the **Nepali date** in the menu bar at the top right. On a Mac with a notch, crowded menu bar icons can hide behind it; quit a few menu bar apps, or use a menu bar manager.
-- **Linux:** the **Nepal flag** in your panel's tray, with the date beside it on Ubuntu. On GNOME you may need the AppIndicator extension; see [Install on Linux](/docs/install-linux.html#seeing-the-date-in-your-top-bar).
+- **Linux:** the **Nepal flag** in your panel's tray. On GNOME outside Ubuntu you may need the AppIndicator extension; see [Install on Linux](/docs/install-linux.html#finding-sajilo-in-your-top-bar).
 
 Opening Sajilo again from the Start menu, Launchpad or your applications menu brings its window to the front.
 

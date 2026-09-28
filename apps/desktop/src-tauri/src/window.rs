@@ -456,7 +456,12 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
     let Ok(size) = window.outer_size() else {
         return false;
     };
-    let cursor = window.cursor_position().ok();
+    // A click on the System Tray icon says where it was, which beats asking
+    // for the pointer: under GNOME on Wayland, X11 cannot see the pointer over
+    // the top bar.
+    let cursor = recent_tray_click()
+        .map(|(x, y)| tauri::PhysicalPosition::new(f64::from(x), f64::from(y)))
+        .or_else(|| window.cursor_position().ok());
     // The pointer picks the monitor, so a second screen with its own panel is
     // handled without special-casing.
     let monitor = cursor
@@ -510,6 +515,28 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
     window
         .set_position(tauri::PhysicalPosition::new(x, y))
         .is_ok()
+}
+
+/// Where and when the System Tray icon was last clicked, in X11's pixels.
+#[cfg(target_os = "linux")]
+static TRAY_CLICK: std::sync::Mutex<Option<(std::time::Instant, (i32, i32))>> =
+    std::sync::Mutex::new(None);
+
+/// Remembers where the System Tray icon was clicked, for
+/// [`center_under_cursor`].
+#[cfg(target_os = "linux")]
+pub fn remember_tray_click(point: (i32, i32)) {
+    if let Ok(mut click) = TRAY_CLICK.lock() {
+        *click = Some((std::time::Instant::now(), point));
+    }
+}
+
+/// The last click on the System Tray icon, if it is the one opening the
+/// popover now. Some trays pass it on with no position; that counts as none.
+#[cfg(target_os = "linux")]
+fn recent_tray_click() -> Option<(i32, i32)> {
+    let (at, point) = (*TRAY_CLICK.lock().ok()?)?;
+    (at.elapsed() < std::time::Duration::from_secs(1) && point != (0, 0)).then_some(point)
 }
 
 /// Where the tray icon was last clicked, in physical pixels. Windows only.
@@ -861,7 +888,7 @@ fn pointer_inside(window: &WebviewWindow) -> bool {
 /// `prefer_x11_backend` asks for), where the pointer can be read anywhere on
 /// screen. On native Wayland it cannot.
 #[cfg(target_os = "linux")]
-fn on_x11() -> bool {
+pub fn on_x11() -> bool {
     std::env::var("GDK_BACKEND").map_or_else(
         |_| std::env::var_os("WAYLAND_DISPLAY").is_none(),
         |backend| backend.split(',').next() == Some("x11"),

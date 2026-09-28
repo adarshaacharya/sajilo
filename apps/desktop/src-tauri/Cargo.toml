@@ -72,3 +72,8 @@ gdk = "0.18"
 # Tauri enables the libappindicator backend; with both on, tray-icon uses
 # ksni. Same version as Tauri's, so this only adds the feature.
 tray-icon = { version = "0.25", default-features = false, features = ["ksni"] }
+# The System Tray icon (src/tray/xembed.rs), for trays that hand a click to
+# the app where they would open a StatusNotifierItem's menu: GNOME's
+# extension, i3bar, polybar. Both already in the build through Tauri.
+gtk = "0.18"
+x11-dl = "2"
