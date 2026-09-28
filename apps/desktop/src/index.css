@@ -180,13 +180,16 @@
    tokens as the theme, for dark and for light, after the theme rules and one
    attribute more specific, so it wins in either. Every pair was checked for
    contrast: the mark reads at 4.7:1 or better on surface and canvas in both
-   modes, and ink on fill at 4.7:1 or better. Dhaka is a wine crimson and
+   modes, ink on fill at 5.6:1 or better, and the 70% ink of a small
+   second number (the AD date on today) at 4.1:1 or better. A mid-tone
+   fill with near-black ink passes and still looks muddy, so where a colour
+   sits mid-tone the light fill goes deeper and takes white ink instead. Dhaka is a wine crimson and
    Kamal a clear lotus pink, both kept about 20° of hue off the orange-red
    of holidays (and each other): in a patro, red means a day off. */
 :root[data-accent="dhaka"] {
   --color-accent: #e0506f;
   --color-accent-mark: #e0506f;
-  --color-accent-fill: #b8284a;
+  --color-accent-fill: #9a1d3b;
   --color-accent-ink: #ffffff;
 }
 @media (prefers-color-scheme: light) {
@@ -306,22 +309,22 @@
 :root[data-accent="rudraksha"] {
   --color-accent: #d18a5e;
   --color-accent-mark: #d18a5e;
-  --color-accent-fill: #c47a4c;
+  --color-accent-fill: #dc9a6e;
   --color-accent-ink: #1a0d05;
 }
 @media (prefers-color-scheme: light) {
   :root[data-accent="rudraksha"]:not([data-theme="dark"]) {
     --color-accent: #8e4a22;
     --color-accent-mark: #8e4a22;
-    --color-accent-fill: #c47a4c;
-    --color-accent-ink: #1a0d05;
+    --color-accent-fill: #8a4824;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="rudraksha"][data-theme="light"] {
   --color-accent: #8e4a22;
   --color-accent-mark: #8e4a22;
-  --color-accent-fill: #c47a4c;
-  --color-accent-ink: #1a0d05;
+  --color-accent-fill: #8a4824;
+  --color-accent-ink: #ffffff;
 }
 
 html,
