@@ -13,9 +13,14 @@ export function ReadingCard({
   freshness,
   isMine,
   onSetMine,
+  allReadings = [],
 }: {
   sign: RashiSign;
   reading: Rashifal | undefined;
+  /** Every sign's reading today. Laid in the same spot, unseen, so the card
+   * is always as tall as the longest and nothing below it jumps when
+   * switching signs. */
+  allReadings?: readonly Rashifal[];
   freshness: Freshness | undefined;
   isMine: boolean;
   onSetMine: () => void;
@@ -40,11 +45,26 @@ export function ReadingCard({
         </div>
       </div>
 
-      {reading ? (
-        <p className="text-[13px] leading-[1.65] whitespace-pre-line">{reading.prediction}</p>
-      ) : (
-        <p className="text-[12px] text-text-secondary">{t("rashifal.unavailable")}</p>
-      )}
+      <div className="grid">
+        {allReadings.map((other) => (
+          <p
+            key={other.sign}
+            aria-hidden="true"
+            className="invisible col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line"
+          >
+            {other.prediction}
+          </p>
+        ))}
+        {reading ? (
+          <p className="col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line">
+            {reading.prediction}
+          </p>
+        ) : (
+          <p className="col-start-1 row-start-1 text-[12px] text-text-secondary">
+            {t("rashifal.unavailable")}
+          </p>
+        )}
+      </div>
 
       {!fromToday && (
         <p className="flex items-center gap-1.5 text-[10px] text-text-muted">
@@ -53,8 +73,15 @@ export function ReadingCard({
         </p>
       )}
 
-      {!isMine && (
-        <button type="button" onClick={onSetMine} className="settings-btn">
+      {/* The same row either way, so the card keeps its height: a button
+          for another sign, a quiet label for yours. */}
+      {isMine ? (
+        <p className="flex h-[26px] items-center gap-1.5 text-[11px] text-text-secondary">
+          <Icon name="starFill" className="size-3 text-accent-mark" />
+          {t("rashifal.is-mine")}
+        </p>
+      ) : (
+        <button type="button" onClick={onSetMine} className="settings-btn h-[26px]">
           <Icon name="star" className="size-3 text-accent-mark" />
           {t("rashifal.set-mine")}
         </button>

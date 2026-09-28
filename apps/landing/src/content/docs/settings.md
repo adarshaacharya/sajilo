@@ -13,7 +13,7 @@ Open **Settings** with the **gear** at the top right of Sajilo, or from the tray
 ### Appearance
 
 - **Theme:** System, Light or Dark.
-- **Accent colour:** the colour of buttons, today's date and highlights across Sajilo. Marigold (सयपत्री, the gold it starts with), Rudraksha, Dhaka red, Kamal (कमल, lotus pink), Makhamali (मखमली), Himalayan blue, Phewa or Ilam tea. Each works in light and dark.
+- **Accent colour:** the colour of buttons, today's date and highlights across Sajilo. Marigold (सयपत्री, the gold it starts with), Himalayan blue, Chandi (चाँदी, silver, for no colour at all), Phewa, Ilam tea, Makhamali (मखमली), Kamal (कमल, lotus pink), Dhaka red or Rudraksha. Each works in light and dark.
 - **Text size:** Small, Default or Large.
 - **Language:** नेपाली or English.
 - **Numerals:** Devanagari (२०८३) or Latin (2083).

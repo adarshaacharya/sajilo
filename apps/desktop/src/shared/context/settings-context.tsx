@@ -7,16 +7,19 @@ import type { NumeralStyle } from "../lib/numerals";
 export type ThemeMode = "system" | "light" | "dark";
 
 /** The accent presets, each named for something every Nepali knows.
- * Marigold (सयपत्री) is the app's own gilt and the default. */
+ * Marigold (सयपत्री) is the app's own gilt and the default; blue comes next
+ * because it is every OS's default, and Chandi (silver) is for people who
+ * want no colour at all. */
 export const ACCENTS = [
   "marigold",
-  "rudraksha",
-  "dhaka",
-  "kamal",
-  "makhamali",
   "himali",
+  "chandi",
   "phewa",
   "ilam",
+  "makhamali",
+  "kamal",
+  "dhaka",
+  "rudraksha",
 ] as const;
 export type Accent = (typeof ACCENTS)[number];
 export type TextSize = "small" | "default" | "large";

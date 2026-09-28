@@ -98,6 +98,7 @@ export function Rashifal() {
             freshness={snapshot?.freshness}
             isMine={isMine}
             onSetMine={() => choose(shown)}
+            allReadings={snapshot?.readings}
           />
         )}
       </StateBanner>

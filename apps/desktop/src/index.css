@@ -182,8 +182,9 @@
    contrast: the mark reads at 4.7:1 or better on surface and canvas in both
    modes, ink on fill at 5.6:1 or better, and the 70% ink of a small
    second number (the AD date on today) at 4.1:1 or better. A mid-tone
-   fill with near-black ink passes and still looks muddy, so where a colour
-   sits mid-tone the light fill goes deeper and takes white ink instead. Dhaka is a wine crimson and
+   fill with near-black ink passes and still looks muddy, so in light mode
+   every preset but Marigold (the app's own gilt, dark on gold as always)
+   fills deep and takes white ink; dark mode keeps bright fills and dark ink. Dhaka is a wine crimson and
    Kamal a clear lotus pink, both kept about 20° of hue off the orange-red
    of holidays (and each other): in a patro, red means a day off. */
 :root[data-accent="dhaka"] {
@@ -216,15 +217,15 @@
   :root[data-accent="himali"]:not([data-theme="dark"]) {
     --color-accent: #1d5d9c;
     --color-accent-mark: #1d5d9c;
-    --color-accent-fill: #5eaef2;
-    --color-accent-ink: #0b1420;
+    --color-accent-fill: #1d5d9c;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="himali"][data-theme="light"] {
   --color-accent: #1d5d9c;
   --color-accent-mark: #1d5d9c;
-  --color-accent-fill: #5eaef2;
-  --color-accent-ink: #0b1420;
+  --color-accent-fill: #1d5d9c;
+  --color-accent-ink: #ffffff;
 }
 :root[data-accent="kamal"] {
   --color-accent: #f27bbd;
@@ -236,15 +237,15 @@
   :root[data-accent="kamal"]:not([data-theme="dark"]) {
     --color-accent: #b0246f;
     --color-accent-mark: #b0246f;
-    --color-accent-fill: #ec6fb2;
-    --color-accent-ink: #1a0914;
+    --color-accent-fill: #9c1f60;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="kamal"][data-theme="light"] {
   --color-accent: #b0246f;
   --color-accent-mark: #b0246f;
-  --color-accent-fill: #ec6fb2;
-  --color-accent-ink: #1a0914;
+  --color-accent-fill: #9c1f60;
+  --color-accent-ink: #ffffff;
 }
 :root[data-accent="ilam"] {
   --color-accent: #a5c75c;
@@ -256,15 +257,15 @@
   :root[data-accent="ilam"]:not([data-theme="dark"]) {
     --color-accent: #4a6613;
     --color-accent-mark: #4a6613;
-    --color-accent-fill: #a5c75c;
-    --color-accent-ink: #11150a;
+    --color-accent-fill: #4a6613;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="ilam"][data-theme="light"] {
   --color-accent: #4a6613;
   --color-accent-mark: #4a6613;
-  --color-accent-fill: #a5c75c;
-  --color-accent-ink: #11150a;
+  --color-accent-fill: #4a6613;
+  --color-accent-ink: #ffffff;
 }
 :root[data-accent="makhamali"] {
   --color-accent: #b98cf2;
@@ -276,15 +277,15 @@
   :root[data-accent="makhamali"]:not([data-theme="dark"]) {
     --color-accent: #6b3db3;
     --color-accent-mark: #6b3db3;
-    --color-accent-fill: #b98cf2;
-    --color-accent-ink: #150b22;
+    --color-accent-fill: #6b3db3;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="makhamali"][data-theme="light"] {
   --color-accent: #6b3db3;
   --color-accent-mark: #6b3db3;
-  --color-accent-fill: #b98cf2;
-  --color-accent-ink: #150b22;
+  --color-accent-fill: #6b3db3;
+  --color-accent-ink: #ffffff;
 }
 :root[data-accent="phewa"] {
   --color-accent: #3cc4b4;
@@ -296,15 +297,15 @@
   :root[data-accent="phewa"]:not([data-theme="dark"]) {
     --color-accent: #0b6f64;
     --color-accent-mark: #0b6f64;
-    --color-accent-fill: #3cc4b4;
-    --color-accent-ink: #06201c;
+    --color-accent-fill: #095e55;
+    --color-accent-ink: #ffffff;
   }
 }
 :root[data-accent="phewa"][data-theme="light"] {
   --color-accent: #0b6f64;
   --color-accent-mark: #0b6f64;
-  --color-accent-fill: #3cc4b4;
-  --color-accent-ink: #06201c;
+  --color-accent-fill: #095e55;
+  --color-accent-ink: #ffffff;
 }
 :root[data-accent="rudraksha"] {
   --color-accent: #d18a5e;
@@ -324,6 +325,26 @@
   --color-accent: #8e4a22;
   --color-accent-mark: #8e4a22;
   --color-accent-fill: #8a4824;
+  --color-accent-ink: #ffffff;
+}
+:root[data-accent="chandi"] {
+  --color-accent: #c8ccd3;
+  --color-accent-mark: #c8ccd3;
+  --color-accent-fill: #c8ccd3;
+  --color-accent-ink: #111214;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="chandi"]:not([data-theme="dark"]) {
+    --color-accent: #4a4f58;
+    --color-accent-mark: #4a4f58;
+    --color-accent-fill: #4a4f58;
+    --color-accent-ink: #ffffff;
+  }
+}
+:root[data-accent="chandi"][data-theme="light"] {
+  --color-accent: #4a4f58;
+  --color-accent-mark: #4a4f58;
+  --color-accent-fill: #4a4f58;
   --color-accent-ink: #ffffff;
 }
 
@@ -2912,3 +2933,4 @@ input[type="search"]::-webkit-search-decoration {
 .accent-swatch--makhamali { background: #b98cf2; }
 .accent-swatch--phewa { background: #3cc4b4; }
 .accent-swatch--rudraksha { background: #c47a4c; }
+.accent-swatch--chandi { background: #aab0b8; }
