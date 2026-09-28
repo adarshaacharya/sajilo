@@ -210,11 +210,14 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
-                button_state: MouseButtonState::Up,
+                button_state,
                 ..
             } = event
             {
-                window::toggle(tray.app_handle());
+                match button_state {
+                    MouseButtonState::Down => window::tray_press(tray.app_handle()),
+                    MouseButtonState::Up => window::tray_release(tray.app_handle()),
+                }
             }
         })
         .build(app)?;

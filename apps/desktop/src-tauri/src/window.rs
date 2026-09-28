@@ -26,6 +26,15 @@ static SHOWN_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex
 #[cfg(target_os = "linux")]
 static FOCUSED_SINCE_SHOWN: AtomicBool = AtomicBool::new(false);
 
+/// When a focus-out last put the popover away, and whether it was up when the
+/// tray icon was last pressed; see [`tray_press`].
+static BLUR_HIDDEN_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+static UP_AT_PRESS: AtomicBool = AtomicBool::new(false);
+
+/// How close together a focus-out and a press on the tray icon come when they
+/// are one click. Both are the same mouse-down, a few milliseconds apart.
+const PRESS_BLUR: std::time::Duration = std::time::Duration::from_millis(250);
+
 pub fn set_pinned(pinned: bool) {
     PINNED.store(pinned, Ordering::SeqCst);
 }
@@ -166,6 +175,41 @@ pub fn main_window(app: &AppHandle) -> Option<WebviewWindow> {
 }
 
 /// Tray click: show it if hidden, dismiss it if already up.
+/// The tray icon was pressed: notes whether the popover is up, so the release
+/// can put it away rather than open it again.
+///
+/// Pressing the icon takes focus from the popover, and the focus-out hides it
+/// (see [`hide_on_blur`]) before the release arrives. A toggle on the release
+/// then found it hidden and opened it again, so clicking the icon to close
+/// the popover made it blink and stay open. Whichever of the two events comes
+/// first, the popover counts as up if it is visible now or a focus-out has
+/// only just hidden it.
+pub fn tray_press(app: &AppHandle) {
+    let Some(window) = main_window(app) else {
+        return;
+    };
+    let just_hidden = BLUR_HIDDEN_AT
+        .lock()
+        .ok()
+        .and_then(|at| *at)
+        .is_some_and(|at| at.elapsed() < PRESS_BLUR);
+    let up = window.is_visible().unwrap_or(false) || just_hidden;
+    UP_AT_PRESS.store(up, Ordering::SeqCst);
+}
+
+/// The tray icon was released: opens the popover, or puts it away if it was up
+/// when the icon was pressed (see [`tray_press`]).
+pub fn tray_release(app: &AppHandle) {
+    let Some(window) = main_window(app) else {
+        return;
+    };
+    if !UP_AT_PRESS.swap(false, Ordering::SeqCst) {
+        show(&window);
+    } else if window.is_visible().unwrap_or(false) {
+        hide(&window);
+    }
+}
+
 pub fn toggle(app: &AppHandle) {
     let Some(window) = main_window(app) else {
         return;
@@ -235,10 +279,13 @@ fn show_now(window: &WebviewWindow) {
     if !place_kept(window) {
         position_at_tray(window);
     }
-    // Re-assert clear + vibrancy each open — some macOS builds repaint opaque after hide.
+    // Re-assert a clear window each open: some macOS builds repaint opaque
+    // after a hide. The frosted layer behind the page is left alone. It was
+    // once rebuilt here too, and a new one draws a frame or two before it
+    // blurs, which on macOS 27 showed as a flicker on every open.
     let _ = window.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
     #[cfg(target_os = "macos")]
-    polish_macos_chrome(window);
+    clear_macos_background(window);
     #[cfg(target_os = "linux")]
     {
         FOCUSED_SINCE_SHOWN.store(false, Ordering::SeqCst);
@@ -564,6 +611,9 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
         if focused || PINNED.load(Ordering::SeqCst) {
             return;
         }
+        if let Ok(mut at) = BLUR_HIDDEN_AT.lock() {
+            *at = Some(std::time::Instant::now());
+        }
         hide(window);
     }
 }
@@ -676,8 +726,9 @@ pub fn fit_windows_shadow(window: &WebviewWindow) {
 /// Clear NSWindow fill + apply popover vibrancy (Swift Patro / `.regularMaterial`).
 ///
 /// CSS alone cannot frost the desk behind a WKWebView; that needs an
-/// `NSVisualEffectView` behind the web content. Call this from setup and again
-/// on each show — hide/show can leave an opaque plate on some macOS builds.
+/// `NSVisualEffectView` behind the web content. Call this once, from setup:
+/// the effect view survives a hide, and each show only re-clears the window
+/// (see [`show_now`]).
 #[cfg(target_os = "macos")]
 pub fn polish_macos_chrome(window: &WebviewWindow) {
     clear_macos_background(window);
