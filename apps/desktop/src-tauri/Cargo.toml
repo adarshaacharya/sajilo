@@ -64,6 +64,9 @@ window-vibrancy = "0.6"
 # Linux build through the notification plugin, so this adds no new crates.
 [target."cfg(target_os = \"linux\")".dependencies]
 zbus = "5"
+# Asks X11 whether a mouse button is down, to tell a click away from the mouse
+# merely moving focus. Already in the build through Tauri.
+gdk = "0.18"
 # The StatusNotifierItem tray (ksni) rather than libappindicator: it gets a
 # left click on the icon, where libappindicator only ever opens the menu.
 # Tauri enables the libappindicator backend; with both on, tray-icon uses

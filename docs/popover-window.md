@@ -84,20 +84,38 @@ as a click away (`set_pinned`, from the page's `pinPopover`).
 ### Clicking outside on Linux
 
 On macOS and Windows a focus-out means the user clicked somewhere else, and the
-popover hides. Linux is less reliable: GNOME has been seen to take focus from
-an undecorated, always-on-top window on its own, with nobody touching anything.
-Hiding on that made the app look like it opened to nothing. So on Linux a
-focus-out counts only when it looks like a real click away
-(`click_away_on_linux`):
+popover hides. On Linux it often does not:
 
-1. the popover had focus at some point since it opened,
-2. it has been open at least 400 ms,
-3. focus is still gone 250 ms later, so a flicker that snaps back does not count,
-4. the pointer is outside the popover,
-5. it is not held open for a dialog.
+- GNOME has been seen to take focus from an undecorated, always-on-top window
+  on its own, with nobody touching anything.
+- A desktop that moves focus with the mouse (Cinnamon's "sloppy" or "mouse"
+  focus, sway and Hyprland by default, niri's `focus-follows-mouse`) takes it
+  the moment the pointer is over another window. Hiding then closed the
+  popover while someone was only moving the mouse.
 
-A focus drop the user did not cause, while they are looking at the window,
-fails 3 or 4.
+So on Linux a focus-out only starts a watch (`click_away_on_linux`), and only
+if the popover had focus since it opened, has been up at least 400 ms, and is
+not held open for a dialog. What the watch does depends on the session:
+
+- **X11** (and XWayland): every 25 ms it asks X whether a mouse button is down
+  (`mouse_button_down`, through GDK, which can answer for any window). A
+  button down with the pointer outside the popover hides it. That is the click
+  that took focus, or, where focus follows the mouse, the next click anywhere.
+  The watch ends when the popover has focus again or is put away. A click
+  shorter than 25 ms can slip between two checks; a real one lasts longer, but
+  `xdotool click` does not, so tests press and release with a pause between.
+- **Wayland**: no app can see a click outside its own windows. The watch waits
+  250 ms for the focus to stay gone, then hides unless the pointer is over the
+  popover, or the focus-out came within 120 ms of the pointer leaving it
+  (`HOVER_FOCUS`), which is focus following the mouse rather than a click.
+  With focus following the mouse, a later click elsewhere cannot be seen, so
+  the popover stays until Escape, the tray icon, or a click away after
+  clicking back into it.
+
+Clicking the tray icon while the popover is open is itself a click away: the
+press closes it, then the panel sends the click on release. A click on the icon
+within 500 ms of a click away is that same close, not a new open
+(`tray_click_on_linux`).
 
 Whether the pointer is outside (`pointer_inside`) is known three ways, in
 order:
@@ -256,6 +274,7 @@ What to check, in order, before shipping a change to this window:
 | 2 | Click inside, then on the desktop | Closes |
 | 3 | Click the icon (`Activate`) | Opens by the tray |
 | 4 | Focus another window with the pointer over the popover | Stays open |
+| 4b | Turn on focus-follows-mouse (openbox: `<followMouse>yes</followMouse>` in `~/.config/openbox/rc.xml`, then `openbox --reconfigure`), hover another window, then click it | Stays open while hovering; closes on the click |
 | 5 | Escape | Closes |
 | 6 | Click the icon while open | Closes; the menu offers Open |
 | 7 | Pin, then click the desktop | Stays open |

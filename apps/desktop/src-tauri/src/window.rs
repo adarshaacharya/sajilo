@@ -165,6 +165,10 @@ pub fn set_pointer_over(over: bool) {
         if over { POINTER_IN } else { POINTER_OUT },
         Ordering::SeqCst,
     );
+    #[cfg(target_os = "linux")]
+    if !over && let Ok(mut left) = POINTER_LEFT_AT.lock() {
+        *left = Some(std::time::Instant::now());
+    }
 }
 
 pub const MAIN: &str = "main";
@@ -628,16 +632,56 @@ const BLUR_SETTLE: std::time::Duration = std::time::Duration::from_millis(250);
 #[cfg(target_os = "linux")]
 const OPEN_GRACE: std::time::Duration = std::time::Duration::from_millis(400);
 
-/// Hides the popover after a focus-out that looks like the user clicking
-/// somewhere else: it had focus since it opened, it has been up a moment, the
-/// focus stays gone, and the pointer is outside it (see [`pointer_inside`]).
-/// A focus drop the user did not cause, while they look at the window, fails
-/// the last two.
+/// A focus-out this close to the pointer leaving the popover, either way
+/// round, was the pointer's doing: the desktop moves focus to whatever the
+/// mouse is over. A click away comes later, once the pointer has reached what
+/// it clicks.
+#[cfg(target_os = "linux")]
+const HOVER_FOCUS: std::time::Duration = std::time::Duration::from_millis(120);
+
+/// How often, on X11, a popover that lost focus checks for a click outside it.
+#[cfg(target_os = "linux")]
+const CLICK_POLL: std::time::Duration = std::time::Duration::from_millis(25);
+
+/// When the page last saw the pointer leave the popover, and when the popover
+/// last lost focus; see [`HOVER_FOCUS`].
+#[cfg(target_os = "linux")]
+static POINTER_LEFT_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+#[cfg(target_os = "linux")]
+static FOCUS_LOST_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
+
+/// Counts focus changes, so a watch started by an older focus-out stops once a
+/// newer one has taken over.
+#[cfg(target_os = "linux")]
+static BLUR_WATCH: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+/// Hides the popover once the user clicks somewhere else.
+///
+/// A focus-out alone is not enough on Linux. GNOME has been seen to take focus
+/// away with nobody touching anything, and a desktop that moves focus with the
+/// mouse (Cinnamon's "sloppy" focus, sway and Hyprland by default) takes it
+/// the moment the pointer is over another window. Closing on those made the
+/// popover vanish while someone was only moving the mouse. So a focus-out only
+/// starts a watch, and the popover must have had focus since it opened and
+/// been up a moment.
+///
+/// - **On X11** the watch asks X which mouse buttons are down. The popover
+///   hides when one is pressed with the pointer outside it: the click that took
+///   focus, or on a focus-follows-mouse desktop, a later click anywhere. It
+///   watches until the popover has focus again or is put away.
+/// - **On Wayland** no app can see a click outside its own windows. The watch
+///   waits for the focus to stay gone, then hides unless the pointer is over
+///   the popover or the focus-out came with the pointer leaving it
+///   ([`HOVER_FOCUS`]).
 #[cfg(target_os = "linux")]
 fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
+    let watch = BLUR_WATCH.fetch_add(1, Ordering::SeqCst) + 1;
     if focused {
         FOCUSED_SINCE_SHOWN.store(true, Ordering::SeqCst);
         return;
+    }
+    if let Ok(mut lost) = FOCUS_LOST_AT.lock() {
+        *lost = Some(std::time::Instant::now());
     }
     let settled = SHOWN_AT
         .lock()
@@ -649,6 +693,10 @@ fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
     }
 
     let window = window.clone();
+    if on_x11() {
+        std::thread::spawn(move || watch_for_click_away(&window, watch));
+        return;
+    }
     tauri::async_runtime::spawn(async move {
         let pause = tauri::async_runtime::spawn_blocking(|| std::thread::sleep(BLUR_SETTLE));
         if pause.await.is_err() {
@@ -656,15 +704,125 @@ fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
         }
         let target = window.clone();
         let _ = window.run_on_main_thread(move || {
-            let still_away = target.is_visible().unwrap_or(false)
-                && !target.is_focused().unwrap_or(true)
-                && !PINNED.load(Ordering::SeqCst)
-                && !pointer_inside(&target);
-            if still_away {
-                hide(&target);
+            if still_watching(&target, watch) && !pointer_inside(&target) && !hover_took_focus() {
+                hide_on_click_away(&target);
             }
         });
     });
+}
+
+/// The X11 watch: see [`click_away_on_linux`]. Runs on its own thread and
+/// asks the main thread, where GTK lives, every [`CLICK_POLL`].
+#[cfg(target_os = "linux")]
+fn watch_for_click_away(window: &WebviewWindow, watch: u64) {
+    loop {
+        std::thread::sleep(CLICK_POLL);
+        let (done_tx, done_rx) = std::sync::mpsc::sync_channel(1);
+        let target = window.clone();
+        let asked = window.run_on_main_thread(move || {
+            let done = if !still_watching(&target, watch) {
+                true
+            } else if mouse_button_down() && !pointer_inside(&target) {
+                hide_on_click_away(&target);
+                true
+            } else {
+                false
+            };
+            let _ = done_tx.send(done);
+        });
+        if asked.is_err() || done_rx.recv().unwrap_or(true) {
+            return;
+        }
+    }
+}
+
+/// Whether the focus-out that started `watch` still stands: the popover is up
+/// and unfocused, nothing newer has happened, and nothing holds it open.
+#[cfg(target_os = "linux")]
+fn still_watching(window: &WebviewWindow, watch: u64) -> bool {
+    BLUR_WATCH.load(Ordering::SeqCst) == watch
+        && window.is_visible().unwrap_or(false)
+        && !window.is_focused().unwrap_or(true)
+        && !PINNED.load(Ordering::SeqCst)
+        && !is_kept()
+}
+
+/// Whether the last focus-out came with the pointer leaving the popover; see
+/// [`HOVER_FOCUS`].
+#[cfg(target_os = "linux")]
+fn hover_took_focus() -> bool {
+    let at =
+        |stamp: &std::sync::Mutex<Option<std::time::Instant>>| stamp.lock().ok().and_then(|at| *at);
+    let (Some(left), Some(lost)) = (at(&POINTER_LEFT_AT), at(&FOCUS_LOST_AT)) else {
+        return false;
+    };
+    let apart = if left > lost {
+        left - lost
+    } else {
+        lost - left
+    };
+    apart < HOVER_FOCUS
+}
+
+/// Whether a mouse button is down anywhere on screen, which X11 can answer
+/// for any window's pointer. Must run on the main thread.
+#[cfg(target_os = "linux")]
+fn mouse_button_down() -> bool {
+    use gdk::ModifierType;
+    use gdk::prelude::*;
+
+    let Some(display) = gdk::Display::default() else {
+        return false;
+    };
+    let Some(pointer) = display.default_seat().and_then(|seat| seat.pointer()) else {
+        return false;
+    };
+    let Some(root) = display.default_screen().root_window() else {
+        return false;
+    };
+    let (_, _, _, mask) = root.device_position(&pointer);
+    mask.intersects(
+        ModifierType::BUTTON1_MASK | ModifierType::BUTTON2_MASK | ModifierType::BUTTON3_MASK,
+    )
+}
+
+/// Hides after a click away, and notes when: that click may have been on the
+/// tray icon, whose click then arrives to find the popover gone and must not
+/// open it again (see [`tray_click_on_linux`]).
+#[cfg(target_os = "linux")]
+fn hide_on_click_away(window: &WebviewWindow) {
+    if let Ok(mut at) = BLUR_HIDDEN_AT.lock() {
+        *at = Some(std::time::Instant::now());
+    }
+    hide(window);
+}
+
+/// How long after a click away a click on the tray icon is the same click.
+/// The panel sends it on the button's release, which comes after the press
+/// that hid the popover.
+#[cfg(target_os = "linux")]
+const TRAY_AFTER_CLICK_AWAY: std::time::Duration = std::time::Duration::from_millis(500);
+
+/// A left click on the tray icon: opens the popover, or puts it away. When the
+/// press on the icon has just closed it as a click away, the click is that
+/// same close, not a new open.
+#[cfg(target_os = "linux")]
+pub fn tray_click_on_linux(app: &AppHandle) {
+    let Some(window) = main_window(app) else {
+        return;
+    };
+    if window.is_visible().unwrap_or(false) {
+        hide(&window);
+        return;
+    }
+    let just_closed = BLUR_HIDDEN_AT
+        .lock()
+        .ok()
+        .and_then(|at| *at)
+        .is_some_and(|at| at.elapsed() < TRAY_AFTER_CLICK_AWAY);
+    if !just_closed {
+        show(&window);
+    }
 }
 
 /// Whether the pointer is over the popover.

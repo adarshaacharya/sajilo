@@ -228,17 +228,15 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
                     MouseButtonState::Up => window::tray_release(tray.app_handle()),
                 }
             }
-            // Linux reports one event per click, the panel's `Activate`. The
-            // click takes focus from the popover, but a click away waits a
-            // moment before it hides it (`window::hide_on_blur`), so an open
-            // popover is still up here and the click puts it away.
+            // Linux reports one event per click, the panel's `Activate`, on
+            // the release; see `window::tray_click_on_linux`.
             #[cfg(target_os = "linux")]
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
                 ..
             } = event
             {
-                window::toggle(tray.app_handle());
+                window::tray_click_on_linux(tray.app_handle());
             }
         })
         .build(app)?;

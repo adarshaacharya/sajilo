@@ -3962,6 +3962,7 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "futures-util",
+ "gdk",
  "image",
  "objc2-app-kit",
  "resvg",
