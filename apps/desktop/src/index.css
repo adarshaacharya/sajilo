@@ -394,6 +394,44 @@ html {
   font-size: 11.5px;
   color: var(--color-text-secondary);
 }
+/* The second line is a button that switches what it shows. A faint wash
+   and the swap arrows on hover say so. */
+.mini-view__switch {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  /* A little air under the date, so the two lines read as two. */
+  margin: 4px 0 0 -4px;
+  padding: 1px 4px 2px;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.mini-view__switch:hover {
+  background: var(--color-surface-hover);
+}
+.mini-view__switch .mini-view__next {
+  width: 100%;
+  margin-top: 0;
+}
+/* Laid over the end of the line rather than beside it, so a hidden icon
+   never costs the reading its last characters. */
+.mini-view__swap {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  color: var(--color-text-secondary);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.mini-view__switch:hover .mini-view__swap,
+.mini-view__switch:focus-visible .mini-view__swap {
+  opacity: 1;
+}
 .mini-view__muted {
   font-weight: 400;
   color: var(--color-text-muted);

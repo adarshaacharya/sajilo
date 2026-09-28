@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import * as player from "../../../shared/lib/audio";
 import { api, type UpcomingEvent } from "../../../shared/lib/ipc";
@@ -152,23 +153,23 @@ export function MiniLine({ choice }: { choice: Choice }) {
     );
   }
 
+  // Radio with nothing playing would show the festival again, so a click
+  // would seem to do nothing; the cycle passes over it until it plays.
+  const cycle = available.filter((option) => option !== "radio" || radio.nowPlaying);
+
   return (
     <button
       type="button"
-      // Radio with nothing playing would show the festival again, so a click
-      // would seem to do nothing; the cycle passes over it until it plays.
-      onClick={() =>
-        setMiniLine(
-          nextMiniLine(
-            shown,
-            available.filter((option) => option !== "radio" || radio.nowPlaying),
-          ),
-        )
-      }
+      onClick={() => setMiniLine(nextMiniLine(shown, cycle))}
       title={t("mini.change-hint")}
-      className="mini-view__next flex w-full min-w-0 items-center text-left"
+      aria-label={`${t(`mini.line.${shown}`)}. ${t("mini.change-hint")}`}
+      className="mini-view__switch"
     >
-      {content ?? <span className="mini-view__muted">…</span>}
+      <span className="mini-view__next flex min-w-0 items-center">
+        {content ?? <span className="mini-view__muted">…</span>}
+        {/* Shown on hover: this line is a button, and it switches. */}
+        <Icon name="swap" className="mini-view__swap" />
+      </span>
     </button>
   );
 }
