@@ -6,26 +6,35 @@ pub mod title;
 use sajilo_core::NepaliDate;
 use sajilo_core::numerals::NumeralStyle;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
-use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
+#[cfg(not(target_os = "linux"))]
+use tauri::tray::MouseButtonState;
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use crate::window;
+
+/// The tray's id. On Linux it is also the id the panel knows the icon by, so
+/// it names the app there. Elsewhere it stays `main`, as it always was.
+pub const ID: &str = if cfg!(target_os = "linux") {
+    "sajilo"
+} else {
+    "main"
+};
 
 #[cfg(target_os = "linux")]
 const OPEN_LABEL: &str = "Open Sajilo";
 #[cfg(target_os = "linux")]
 const HIDE_LABEL: &str = "Hide Sajilo";
 
-/// The Linux menu's single item, kept so its label can track the popover.
+/// The Linux menu's first item, kept so its label can track the popover.
 #[cfg(target_os = "linux")]
 struct PopoverItem(MenuItem<tauri::Wry>);
 
 /// Names what the menu item will actually do next.
 ///
-/// The item both opens and dismisses the popover, because on Linux it stands in
-/// for the tray click the platform never delivers. A fixed "Open Sajilo" would
-/// therefore be wrong half the time — it would hide a popover that is already
-/// up.
+/// The item both opens and dismisses the popover, like a click on the icon. A
+/// fixed "Open Sajilo" would be wrong half the time: it would hide a popover
+/// that is already up.
 ///
 /// Takes the state being moved *into* rather than reading it back off the
 /// window: GTK maps and unmaps asynchronously, so `is_visible` still reports the
@@ -44,9 +53,9 @@ pub fn set_popover_shown(app: &AppHandle, shown: bool) {
 /// The date row at the top of the tray menu, kept so `refresh_title` can move
 /// it forward with the day.
 ///
-/// macOS and Windows only: Linux's menu is a single toggle item (see `build`),
-/// so there is no date row to move there — the date rides the appindicator
-/// label instead.
+/// macOS and Windows only: Linux's menu is a toggle item and Quit (see
+/// `build`), so there is no date row to move there. The date rides the label
+/// beside the icon instead.
 struct DateItem(MenuItem<Wry>);
 
 /// "Restart to update", which sits in the menu only while an installed update
@@ -112,24 +121,21 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, Some("CmdOrCtrl+Q"))?;
 
-    // Linux gets a one-item menu that opens the app, and nothing else.
+    // Linux gets a short menu: open (or hide) Sajilo, then Quit.
     //
-    // `show_menu_on_left_click(false)` is documented as unsupported there, and
-    // the libappindicator item exposes no `Activate` method, so a
-    // StatusNotifier host (GNOME's AppIndicator extension) has nothing to call
-    // and opens this menu on *every* click — left included, which is why the
-    // `TrayIconEvent::Click` branch below never fires on Linux. The menu is
-    // therefore the only route to the popover, and the shortest such route is a
-    // single item that opens it, then Quit below a separator. Settings stays in
-    // the popover's header. Escape or a click away dismisses the popover.
+    // A left click on the icon opens the popover directly: the tray is a
+    // StatusNotifierItem (ksni, see vendor/ksni/PATCHED.md) and the panel
+    // calls its `Activate`. The menu is the right-click. GNOME's AppIndicator
+    // extension is the exception: it opens the menu on a single left click
+    // for every app and activates only on a double click, which is why the
+    // menu leads with Open. Settings stays in the popover's header.
     //
     // macOS and Windows keep the full menu: there, left click toggles the
     // popover and this menu is the right-click affordance.
     #[cfg(target_os = "linux")]
     let open = MenuItem::with_id(app, "open", OPEN_LABEL, true, None::<&str>)?;
 
-    // Quit too: on Linux the tray menu is what every click opens, so it is
-    // the one place a user looks to close a tray app.
+    // Quit too: the tray menu is where people look to close a tray app.
     #[cfg(target_os = "linux")]
     let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, None::<&str>)?;
     #[cfg(target_os = "linux")]
@@ -166,14 +172,14 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     });
 
     #[cfg_attr(target_os = "macos", allow(unused_mut))]
-    let mut builder = TrayIconBuilder::with_id("main");
+    let mut builder = TrayIconBuilder::with_id(ID);
 
     // macOS carries the date as the tray *title*, like the Swift app did, so it
     // needs no glyph — the app icon is a filled square and a template render of
     // it is an unreadable blob. Elsewhere the tray starts from the app icon,
     // and `refresh_title` swaps in the Nepal flag if Settings asks for it.
-    // Linux always needs one: libayatana-appindicator refuses to show a label
-    // without an icon.
+    // Linux always needs one: GNOME draws the label beside an icon, never on
+    // its own.
     #[cfg(not(target_os = "macos"))]
     {
         builder = builder
@@ -186,13 +192,12 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     builder
         .tooltip("Sajilo")
         // Left click toggles the popover; the menu is the right-click
-        // affordance. Linux ignores this — appindicator opens the menu on any
-        // click — which is the other half of why the menu leads with the date.
+        // affordance. GNOME's extension still opens the menu on a single left
+        // click, which is why the menu leads with the date or Open.
         .show_menu_on_left_click(false)
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
-            // The date row on macOS and Windows; on Linux the single menu item,
-            // standing in for the tray click that platform never delivers.
+            // The date row on macOS and Windows; Open or Hide on Linux.
             "open" => window::toggle(app),
             "settings" => open_settings(app),
             // The update is already installed; a restart is all that is left.
@@ -209,6 +214,9 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
                 window::remember_tray_click(*position);
             }
 
+            // macOS and Windows report the press and the release; see
+            // `window::tray_press` for why both count.
+            #[cfg(not(target_os = "linux"))]
             if let TrayIconEvent::Click {
                 button: MouseButton::Left,
                 button_state,
@@ -219,6 +227,18 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
                     MouseButtonState::Down => window::tray_press(tray.app_handle()),
                     MouseButtonState::Up => window::tray_release(tray.app_handle()),
                 }
+            }
+            // Linux reports one event per click, the panel's `Activate`. The
+            // click takes focus from the popover, but a click away waits a
+            // moment before it hides it (`window::hide_on_blur`), so an open
+            // popover is still up here and the click puts it away.
+            #[cfg(target_os = "linux")]
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                ..
+            } = event
+            {
+                window::toggle(tray.app_handle());
             }
         })
         .build(app)?;
@@ -264,7 +284,7 @@ fn label(app: &AppHandle) -> Option<String> {
 
 /// Redraws the tray label from the current date and preferences.
 pub fn refresh_title(app: &AppHandle) {
-    let Some(tray) = app.tray_by_id("main") else {
+    let Some(tray) = app.tray_by_id(ID) else {
         return;
     };
     let Some((date, numerals, label)) = today(app) else {
@@ -280,9 +300,9 @@ pub fn refresh_title(app: &AppHandle) {
         let _ = item.0.set_text(&label);
     }
 
-    // macOS renders text beside the tray icon natively; Linux does the same
-    // through the libayatana-appindicator label, given a StatusNotifier host
-    // such as GNOME's AppIndicator extension. Both carry the full date.
+    // macOS renders text beside the tray icon natively. On Linux the title is
+    // also the Ayatana label, which GNOME's AppIndicator extension draws beside
+    // the icon (Ubuntu's top bar); KDE and Cinnamon show it as the tooltip.
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     let _ = tray.set_title(Some(&label));
 
@@ -292,8 +312,6 @@ pub fn refresh_title(app: &AppHandle) {
     #[cfg(not(target_os = "macos"))]
     set_icon(app, &tray);
 
-    // A no-op on Linux — `tray-icon`'s GTK backend implements `set_tooltip` as
-    // an empty `Ok(())`, which is why the date row above exists.
     let _ = tray.set_tooltip(Some(&label));
 }
 

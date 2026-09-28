@@ -15,11 +15,11 @@ Sajilo is a small window that opens from your **menu bar** (Mac), **system tray*
 |---|---|---|
 | **Windows** | Click the Nepal flag next to the clock | Click the flag again, or click anywhere else |
 | **macOS** | Click the Nepali date in the menu bar | Click the date again, or click anywhere else |
-| **Linux** | Click the date in the top bar, then **Open Sajilo** | Click anywhere else, or choose **Hide Sajilo** from the same menu |
+| **Linux** | Click the Nepal flag in your panel (on Ubuntu, click the date, then **Open Sajilo**) | Click the flag again, or click anywhere else |
 
 On every system, **Esc** closes it too. Closing only hides the window: Sajilo keeps running, so the radio keeps playing and reminders still arrive.
 
-On Windows and macOS, **right-click** the tray icon for a short menu with the date, **Settings…** and **Quit Sajilo**.
+**Right-click** the tray icon for a short menu: on Windows and macOS the date, **Settings…** and **Quit Sajilo**; on Linux **Open Sajilo** and **Quit Sajilo**.
 
 > **Opening it from the Start menu, Launchpad or your applications menu** also works, any time. If Sajilo is already running, its window just comes to the front.
 

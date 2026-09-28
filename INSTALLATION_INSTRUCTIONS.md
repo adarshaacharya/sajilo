@@ -117,16 +117,20 @@ If it doesn't start and mentions FUSE, install FUSE 2 — on Ubuntu 22.04 that's
 
 ### Find the tray icon
 
-Sajilo shows the Nepali date in your top bar through the StatusNotifier
-(AppIndicator) tray.
+Sajilo puts a Nepal flag in your panel through the StatusNotifier
+(AppIndicator) tray; on Ubuntu the Nepali date shows beside it.
 
 - **KDE Plasma, Cinnamon, XFCE, MATE, Budgie**: works out of the box.
 - **GNOME** (default Ubuntu, Fedora): GNOME has no tray by default. Install
   the **AppIndicator and KStatusNotifierItem Support** extension. Ubuntu ships
   it already enabled.
 
-Linux trays don't pass clicks to apps, so open Sajilo from the tray icon's
-menu: click the date, then **Open Sajilo**.
+Click the flag to open Sajilo, and right-click it for **Open Sajilo** and
+**Quit Sajilo**. On GNOME (Ubuntu, Fedora) a single click opens that menu
+instead, so choose **Open Sajilo** there. i3bar and polybar only take
+older-style tray icons and won't show it; run
+[snixembed](https://git.sr.ht/~steef/snixembed), or open Sajilo with a
+`sajilo-desktop --toggle` keybinding.
 
 To close it, click anywhere outside it, press **Esc**, or click the tray icon
 again. To keep it on screen instead, press the pin at the top: it then stays

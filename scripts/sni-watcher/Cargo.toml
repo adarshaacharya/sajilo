@@ -1,0 +1,13 @@
+# A stand-in tray host, for testing Sajilo's Linux tray without a desktop.
+# See docs/popover-window.md, "Testing on Linux". Not part of the workspace.
+[package]
+name = "sni-watcher"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+zbus = "5"
+async-io = "2"
+
+[workspace]

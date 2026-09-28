@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = ["crates/*", "apps/server", "apps/desktop/src-tauri", "apps/showcase-data"]
+# A patched copy of a dependency, not ours to lint; see vendor/ksni/PATCHED.md.
+exclude = ["vendor/ksni"]
 
 [workspace.package]
 version = "0.1.0"
@@ -83,3 +85,8 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 rusqlite = { version = "0.32", features = ["bundled"] }
 thiserror = "2"
+
+# The Linux tray library, with the date label GNOME shows and a fix for
+# starting before the panel. See vendor/ksni/PATCHED.md.
+[patch.crates-io]
+ksni = { path = "vendor/ksni" }

@@ -351,7 +351,7 @@ fn under_menu_bar_icon(window: &WebviewWindow) -> bool {
     use tauri::LogicalPosition;
 
     let app = window.app_handle();
-    let Some(Ok(Some(rect))) = app.tray_by_id("main").map(|tray| tray.rect()) else {
+    let Some(Ok(Some(rect))) = app.tray_by_id(crate::tray::ID).map(|tray| tray.rect()) else {
         return false;
     };
     let Ok(monitors) = app.available_monitors() else {
@@ -397,7 +397,7 @@ fn under_menu_bar_icon(window: &WebviewWindow) -> bool {
 #[cfg(target_os = "macos")]
 fn tray_frame(window: &WebviewWindow) -> Option<(i64, i64, i64)> {
     let app = window.app_handle();
-    let rect = app.tray_by_id("main")?.rect().ok()??;
+    let rect = app.tray_by_id(crate::tray::ID)?.rect().ok()??;
     let size = rect.size.to_physical::<f64>(1.0);
     let position = rect.position.to_physical::<f64>(1.0);
     if size.width <= 0.0 || size.height <= 0.0 {

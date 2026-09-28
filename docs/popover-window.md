@@ -14,8 +14,8 @@ way of putting it away goes through `window::hide`.
 
 ## Opening
 
-The tray icon, the tray menu (Linux) or a second launch of the app shows it
-through `window::show`. Where it appears depends on the platform:
+A click on the tray icon, Open in the tray menu, or a second launch of the app
+shows it through `window::show`. Where it appears depends on the platform:
 
 | Platform | Where it opens | How it knows |
 |---|---|---|
@@ -23,8 +23,8 @@ through `window::show`. Where it appears depends on the platform:
 | Windows | Against the taskbar, lined up with the icon | Where the icon was clicked (`above_taskbar`) |
 | Linux | Against the panel, under the tray icon | The work area and the pointer (`center_under_cursor`) |
 
-Linux trays tell an app nothing about where its icon is, so Sajilo works it
-out:
+Linux trays tell an app little about where its icon is (a click's
+coordinates, which some panels leave at zero), so Sajilo works it out:
 
 - **Which edge the panel is on** comes from the work area. A panel reserves a
   strip of the screen, so the work area is inset at the top (GNOME) or the
@@ -38,13 +38,42 @@ out:
 
 A pinned popover skips all of this and opens where it was left (see below).
 
+### The Linux tray icon
+
+On Linux the icon is a StatusNotifierItem, the D-Bus protocol KDE, GNOME's
+AppIndicator extension, Cinnamon, Xfce and Waybar all host. Tauri's
+`tray-icon` has two backends for it, and Sajilo uses `ksni` (turned on in
+`apps/desktop/src-tauri/Cargo.toml`), not libappindicator:
+
+- **A left click reaches the app.** The panel calls the item's `Activate`, which
+  arrives as a left click and toggles the popover. libappindicator marks its
+  item menu-only and has no `Activate`, so every click opened the menu.
+- **The right click is the menu:** Open (or Hide) Sajilo, then Quit.
+- **GNOME's extension is the exception.** It opens the menu on a single left
+  click for every app and calls `Activate` only on a double click. So on
+  Ubuntu the menu still leads with Open.
+- **macOS and Windows** report a press and a release; see `window::tray_press`
+  for why a click on the icon needs both to close the popover. Linux reports
+  one event per click, and the click-away's short wait means the popover is
+  still up when it arrives, so a plain toggle is right there.
+
+`ksni` is patched in `vendor/ksni` (see `PATCHED.md` there) for two things:
+the `XAyatanaLabel` that GNOME draws beside the icon, which is where the date
+shows on Ubuntu, and registering once a panel appears when Sajilo starts
+before it. The label is the tray title; with the flag as the icon, the title
+leaves out its own flag so the top bar does not show two.
+
+Trays that only take old XEmbed icons (i3bar, polybar, `stalonetray`) show no
+icon at all; libappindicator used to fall back to XEmbed, `ksni` does not.
+`snixembed` bridges them, and `sajilo-desktop --toggle` needs no tray.
+
 ## Closing
 
 | Way | macOS | Windows | Linux |
 |---|---|---|---|
 | Click anywhere outside | Yes | Yes | Yes (see below) |
 | Escape | Yes | Yes | Yes |
-| Click the tray icon | Yes | Yes | Yes |
+| Click the tray icon | Yes | Yes | Yes (a single click opens the menu on GNOME) |
 | Open a link | Yes, so the browser comes to the front | Yes | Yes |
 
 A pinned popover ignores clicks outside and links, but Escape and the tray
@@ -158,35 +187,49 @@ from the shell once (`popover_kept`) and changed only by the pin
 ## Testing on Linux
 
 The container Claude Code runs in, and any Linux machine, can run the real app
-on a virtual screen with a bottom panel. What you need: `Xvfb`, `openbox`,
-`stalonetray`, `xdotool`, `x11-utils` and `dbus-x11`
-(`apt-get install openbox stalonetray dbus-x11 x11-utils`). The app's tray
-library falls back to a classic tray icon when no StatusNotifier host runs,
-and `stalonetray` hosts that.
+on a virtual screen, with a stand-in panel for its tray icon. What you need:
+`Xvfb`, `openbox`, `xdotool`, `x11-utils` and `dbus-x11`
+(`apt-get install openbox dbus-x11 x11-utils`), and the stand-in panel in
+`scripts/sni-watcher`, which accepts the tray icon and prints its bus name. It
+draws nothing, so you click the icon with `gdbus` instead of the mouse.
 
 ```bash
-# The frontend, and a debug build of the app
+# The frontend, a debug build of the app, and the stand-in panel
 (cd apps/desktop && bun run dev &)
 cargo build -p sajilo-desktop
+cargo build --manifest-path scripts/sni-watcher/Cargo.toml --target-dir target/sni-watcher
 
-# A 1280x720 screen, a window manager, and a tray docked bottom right
-# that reserves its strip like a real panel
-export DISPLAY=:99
+# A 1280x720 screen, a session bus and a window manager
+export DISPLAY=:99 LANG=C.UTF-8
 Xvfb :99 -screen 0 1280x720x24 &
 eval "$(dbus-launch --sh-syntax)"
 openbox &
-stalonetray --geometry 6x1-0-0 --window-strut bottom --icon-size 28 \
-  --grow-gravity E --icon-gravity E &
+
+# Start the app before the panel, as at login: the icon must still register
 target/debug/sajilo-desktop &
+target/sni-watcher/debug/sni-watcher | tee /tmp/watcher.log &
+ITEM=$(awk '/REGISTERED/ {print $2}' /tmp/watcher.log | tail -1)
 ```
 
-Then drive it with `xdotool` and read the window's state with `xwininfo`:
+Then read what the panel sees, click the icon, and read the window's state:
 
 ```bash
+prop() { gdbus call --session -d "$ITEM" -o /StatusNotifierItem \
+  -m org.freedesktop.DBus.Properties.Get org.kde.StatusNotifierItem "$1"; }
+prop Id              # 'sajilo'
+prop ItemIsMenu      # false, so a panel calls Activate on a left click
+prop XAyatanaLabel   # the date GNOME shows beside the icon
+
+click() { gdbus call --session -d "$ITEM" -o /StatusNotifierItem \
+  -m org.kde.StatusNotifierItem.Activate 1250 705; }
+click                # a left click on the icon
+
 W=$(xdotool search --name '^Sajilo$' | head -1)
 xwininfo -id "$W" | grep -E 'Map State|Absolute'   # IsViewable or IsUnMapped, and where
-xdotool mousemove 1266 706 click 1                  # the tray icon (opens its menu)
 xdotool mousemove 250 400 click 1                   # a click on the desktop
+gdbus call --session -d "$ITEM" -o /MenuBar \
+  -m com.canonical.dbusmenu.GetLayout -- 0 -1 '[]' # the right-click menu
+dbus-monitor --session "interface='org.kde.StatusNotifierItem'"  # XAyatanaNewLabel as the date changes
 import -window root screen.png                      # a screenshot
 ```
 
@@ -208,12 +251,13 @@ What to check, in order, before shipping a change to this window:
 
 | # | Step | Expect |
 |---|---|---|
+| 0 | Start the app, then the stand-in panel | The icon registers; `XAyatanaLabel` is the date, with no flag in it |
 | 1 | Launch | Opens against the panel, by the tray |
 | 2 | Click inside, then on the desktop | Closes |
-| 3 | Open from the tray menu | Opens by the tray |
+| 3 | Click the icon (`Activate`) | Opens by the tray |
 | 4 | Focus another window with the pointer over the popover | Stays open |
 | 5 | Escape | Closes |
-| 6 | Click the tray icon while open | Closes; the menu offers Open |
+| 6 | Click the icon while open | Closes; the menu offers Open |
 | 7 | Pin, then click the desktop | Stays open |
 | 8 | Drag Today's header | Moves |
 | 9 | Escape, then open from the tray | Reopens where it was dragged |

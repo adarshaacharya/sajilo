@@ -1,8 +1,8 @@
 //! What the tray actually shows.
 //!
 //! macOS carries this text beside the tray icon, and so does Linux where the
-//! desktop shows AppIndicator labels. Windows has no tray text: it shows a
-//! Nepal flag (`tray/icon.rs`) with this date in the tooltip.
+//! desktop shows AppIndicator labels (Ubuntu's top bar). Windows has no tray
+//! text: it shows an icon (`tray/icon.rs`) with this date in the tooltip.
 
 use sajilo_core::calendar::bikram_sambat as bs;
 use sajilo_core::numerals::NumeralStyle;
