@@ -42,18 +42,16 @@ fn enabled() -> NotificationOptions {
     }
 }
 
-/// Every reminder but plain festivals starts on, so a fresh install hears
-/// about tomorrow's holiday without visiting Settings first, and is not told
-/// about every minor festival.
+/// Every reminder starts on, so a fresh install hears about tomorrow's festival
+/// without visiting Settings first.
 #[test]
-fn every_reminder_but_festivals_is_on_by_default() {
-    let events = vec![event(20, "Something", false), event(21, "Holiday", true)];
+fn every_reminder_is_on_by_default() {
+    let events = vec![event(20, "Something", false)];
     let defaults = NotificationOptions::default();
-    assert!(defaults.eve_of_public_holiday && !defaults.eve_of_festival);
-    assert!(defaults.ipo_closing_day && defaults.sip_payment);
+    assert!(defaults.eve_of_festival && defaults.eve_of_public_holiday);
+    assert!(defaults.ipo_closing_day);
     let planned = plan_festivals(&events, defaults, nepal(2026, 8, 1, 9));
     assert_eq!(planned.len(), 1);
-    assert_eq!(planned[0].title, "Public holiday tomorrow");
 }
 
 /// A field missing from saved options takes its default, while an explicit

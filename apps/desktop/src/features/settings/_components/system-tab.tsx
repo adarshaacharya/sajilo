@@ -37,7 +37,7 @@ export function SystemTab() {
   } = useUpdater();
   const [options, setOptions] = useState<NotificationOptions>({
     eveOfPublicHoliday: true,
-    eveOfFestival: false,
+    eveOfFestival: true,
     hour: 19,
     ipoClosingDay: true,
     sipPayment: true,

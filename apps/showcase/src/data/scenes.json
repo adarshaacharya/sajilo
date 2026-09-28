@@ -22391,7 +22391,7 @@
       }
     },
     "get_notification_options": {
-      "eveOfFestival": false,
+      "eveOfFestival": true,
       "eveOfPublicHoliday": true,
       "hour": 19,
       "ipoClosingDay": true,
