@@ -234,7 +234,18 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 /// range.
 fn today(app: &AppHandle) -> Option<(NepaliDate, NumeralStyle, String)> {
     let date = title::today()?;
-    let (format, numerals, custom, show_time) = crate::prefs::tray_preferences(app);
+    #[cfg_attr(not(target_os = "linux"), allow(unused_mut))]
+    let (mut format, numerals, mut custom, show_time) = crate::prefs::tray_preferences(app);
+    // Linux draws the flag icon right beside the text, so the text leaves out
+    // its own flag rather than show two. Windows shows no text, and macOS no
+    // icon, so both keep the format as chosen.
+    #[cfg(target_os = "linux")]
+    if crate::prefs::tray_icon_is_flag(app) {
+        if matches!(format, title::MenuBarFormat::NepaliFlag) {
+            format = title::MenuBarFormat::NepaliShort;
+        }
+        custom.show_flag = false;
+    }
     let mut label = title::title(date, format, numerals, custom);
     if show_time {
         label = format!(

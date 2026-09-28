@@ -9,7 +9,7 @@ import {
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
-import { hasTrayIcon, isWindows } from "../../../shared/lib/platform";
+import { hasTrayIcon, isLinux, isWindows } from "../../../shared/lib/platform";
 import { SettingsSection } from "./settings-section";
 
 const MENU_BAR_FORMATS = [
@@ -84,6 +84,10 @@ export function DisplayTab({
       .then(() => api.refreshTray())
       .catch(() => {});
   };
+
+  // Linux draws the flag icon beside the date, so the date drops its own flag
+  // and the toggle for it has nothing to do.
+  const iconIsFlag = isLinux && trayIcon === "flag";
 
   const persistTrayIcon = (next: string) => {
     setTrayIcon(next);
@@ -184,14 +188,16 @@ export function DisplayTab({
         />
         {format === "custom" && (
           <>
-            <Toggle
-              label={t("settings.menu-bar-show-flag")}
-              checked={showFlag}
-              onChange={(value) => {
-                setShowFlag(value);
-                persistCustom("customMenuBarShowsFlag", value);
-              }}
-            />
+            {!iconIsFlag && (
+              <Toggle
+                label={t("settings.menu-bar-show-flag")}
+                checked={showFlag}
+                onChange={(value) => {
+                  setShowFlag(value);
+                  persistCustom("customMenuBarShowsFlag", value);
+                }}
+              />
+            )}
             <Toggle
               label={t("settings.menu-bar-show-year")}
               checked={showYear}
