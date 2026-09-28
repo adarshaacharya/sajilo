@@ -170,9 +170,10 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 
     // macOS carries the date as the tray *title*, like the Swift app did, so it
     // needs no glyph — the app icon is a filled square and a template render of
-    // it is an unreadable blob. Elsewhere the tray starts from the app icon:
-    // Windows then swaps in the Nepal flag, and Linux keeps it as-is, since
-    // libayatana-appindicator refuses to show a label without one.
+    // it is an unreadable blob. Elsewhere the tray starts from the app icon,
+    // and `refresh_title` swaps in the Nepal flag if Settings asks for it.
+    // Linux always needs one: libayatana-appindicator refuses to show a label
+    // without an icon.
     #[cfg(not(target_os = "macos"))]
     {
         builder = builder
@@ -274,19 +275,46 @@ pub fn refresh_title(app: &AppHandle) {
     #[cfg(any(target_os = "macos", target_os = "linux"))]
     let _ = tray.set_title(Some(&label));
 
-    // Windows has no tray title, so use a crisp Nepal flag that remains
-    // recognisable at its tiny native size. The full date stays in the tooltip
-    // and the first tray-menu item.
-    #[cfg(target_os = "windows")]
-    if let Some(pixels) = icon::nepal_flag_icon() {
-        let image = tauri::image::Image::new_owned(pixels, icon::size(), icon::size());
-        let _ = tray.set_icon(Some(image));
-        let _ = tray.set_icon_as_template(false);
-    }
+    // Windows and Linux show an icon, the Nepal flag or Sajilo's own, as
+    // chosen in Settings. Windows has no tray title, so there the full date
+    // stays in the tooltip and the first tray-menu item.
+    #[cfg(not(target_os = "macos"))]
+    set_icon(app, &tray);
 
     // A no-op on Linux — `tray-icon`'s GTK backend implements `set_tooltip` as
     // an empty `Ok(())`, which is why the date row above exists.
     let _ = tray.set_tooltip(Some(&label));
+}
+
+/// Which icon the tray last got: 0 none yet, 1 Sajilo's, 2 the flag.
+#[cfg(not(target_os = "macos"))]
+static SHOWN_ICON: std::sync::atomic::AtomicU8 = std::sync::atomic::AtomicU8::new(0);
+
+/// Puts the chosen icon in the tray: the Nepal flag, or Sajilo's app icon.
+///
+/// Only when the choice changes: the label redraws every minute while it shows
+/// the clock, and on Linux each new icon is a file written and reloaded.
+#[cfg(not(target_os = "macos"))]
+fn set_icon(app: &AppHandle, tray: &tauri::tray::TrayIcon) {
+    use std::sync::atomic::Ordering;
+
+    let flag = crate::prefs::tray_icon_is_flag(app);
+    let wanted = if flag { 2 } else { 1 };
+    if SHOWN_ICON.load(Ordering::SeqCst) == wanted {
+        return;
+    }
+    let image = if flag {
+        icon::nepal_flag_icon()
+            .map(|pixels| tauri::image::Image::new_owned(pixels, icon::size(), icon::size()))
+    } else {
+        app.default_window_icon().cloned()
+    };
+    if let Some(image) = image {
+        if tray.set_icon(Some(image)).is_ok() {
+            SHOWN_ICON.store(wanted, Ordering::SeqCst);
+        }
+        let _ = tray.set_icon_as_template(false);
+    }
 }
 
 /// Redraws at Kathmandu midnight — or every minute, while the tray also shows

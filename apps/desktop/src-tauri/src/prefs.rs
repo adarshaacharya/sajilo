@@ -18,6 +18,9 @@ pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
 /// Appends `HH:MM` to whatever date format is already showing — composes with
 /// every `MenuBarFormat`, not a format of its own.
 pub const SHOW_TRAY_TIME: &str = "showTrayTime";
+/// The tray icon on Windows and Linux: `"app"` for Sajilo's own icon, `"flag"`
+/// for the Nepal flag. macOS shows the date alone, with no icon.
+pub const TRAY_ICON: &str = "trayIcon";
 // The same stable key the app uses, so an imported backup lands where the app
 // already looks.
 
@@ -138,6 +141,14 @@ pub fn tray_preferences(
         },
         read_bool(app, SHOW_TRAY_TIME, false),
     )
+}
+
+/// Whether the tray shows the Nepal flag rather than Sajilo's icon. The flag
+/// unless Settings says otherwise.
+#[cfg(not(target_os = "macos"))]
+pub fn tray_icon_is_flag(app: &AppHandle<Wry>) -> bool {
+    let chosen = db::get_json(app, TRAY_ICON).ok().flatten();
+    chosen.as_ref().and_then(serde_json::Value::as_str) != Some("app")
 }
 
 /// The home place. An id this build does not know falls back to Kathmandu.

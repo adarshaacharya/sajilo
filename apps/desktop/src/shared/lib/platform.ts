@@ -5,3 +5,12 @@
  */
 export const isWindows =
   typeof navigator !== "undefined" && navigator.userAgent.includes("Windows");
+
+/** WebKitGTK on Linux reports "Linux" and no "Android". */
+export const isLinux =
+  typeof navigator !== "undefined" &&
+  navigator.userAgent.includes("Linux") &&
+  !navigator.userAgent.includes("Android");
+
+/** Only macOS puts the date in the menu bar with no icon beside it. */
+export const hasTrayIcon = isWindows || isLinux;

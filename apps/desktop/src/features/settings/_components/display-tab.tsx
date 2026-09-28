@@ -9,6 +9,7 @@ import {
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
+import { hasTrayIcon, isWindows } from "../../../shared/lib/platform";
 import { SettingsSection } from "./settings-section";
 
 const MENU_BAR_FORMATS = [
@@ -45,6 +46,8 @@ export function DisplayTab({
   const [showFlag, setShowFlag] = useState(true);
   const [showYear, setShowYear] = useState(true);
   const [showTime, setShowTime] = useState(false);
+  // The flag unless changed, as the shell reads it (`prefs::tray_icon_is_flag`).
+  const [trayIcon, setTrayIcon] = useState<string>("flag");
   const [autostart, setAutostart] = useState(false);
   const [dockIcon, setDockIcon] = useState(false);
 
@@ -54,8 +57,10 @@ export function DisplayTab({
       api.getSetting<boolean>("customMenuBarShowsFlag"),
       api.getSetting<boolean>("customMenuBarShowsYear"),
       api.getSetting<boolean>("showTrayTime"),
+      api.getSetting<string>("trayIcon"),
     ])
-      .then(([saved, flag, year, time]) => {
+      .then(([saved, flag, year, time, icon]) => {
+        if (icon) setTrayIcon(icon);
         if (saved) setFormat(saved);
         if (flag !== null) setShowFlag(flag);
         if (year !== null) setShowYear(year);
@@ -76,6 +81,14 @@ export function DisplayTab({
     setFormat(next);
     api
       .setSetting("menuBarFormat", next)
+      .then(() => api.refreshTray())
+      .catch(() => {});
+  };
+
+  const persistTrayIcon = (next: string) => {
+    setTrayIcon(next);
+    api
+      .setSetting("trayIcon", next)
       .then(() => api.refreshTray())
       .catch(() => {});
   };
@@ -136,7 +149,25 @@ export function DisplayTab({
         />
       </SettingsSection>
 
-      <SettingsSection title={t("settings.menu-bar")}>
+      <SettingsSection
+        title={t("settings.menu-bar")}
+        footnote={
+          hasTrayIcon
+            ? t(isWindows ? "settings.tray-note-windows" : "settings.tray-note-linux")
+            : undefined
+        }
+      >
+        {hasTrayIcon && (
+          <Select
+            label={t("settings.tray-icon")}
+            value={trayIcon}
+            onChange={persistTrayIcon}
+            options={[
+              { id: "app", label: t("settings.tray-icon-app") },
+              { id: "flag", label: t("settings.tray-icon-flag") },
+            ]}
+          />
+        )}
         <Select
           label={t("settings.format")}
           value={format}

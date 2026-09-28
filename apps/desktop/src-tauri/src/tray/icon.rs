@@ -1,9 +1,9 @@
-//! The Windows tray icon: a compact Nepal flag.
+//! The Nepal flag tray icon, one of the two Settings offers on Windows and
+//! Linux (the other is Sajilo's own icon).
 //!
-//! macOS and Linux carry the date as text beside the tray icon
-//! (`tray/title.rs`). Windows has no tray text and its icon is a fixed small
-//! square, too small for a legible date, so it shows the flag and keeps the
-//! full date in the tooltip and the first tray-menu item.
+//! It is the default. On Windows, which has no tray text and whose icon is a
+//! fixed small square too small for a legible date, the full date stays in the
+//! tooltip and the first tray-menu item.
 
 use std::sync::OnceLock;
 
@@ -27,7 +27,7 @@ static NEPAL_FLAG: OnceLock<Option<Vec<u8>>> = OnceLock::new();
 /// constitution, not from arbitrary coordinates.
 const FLAG_SVG: &[u8] = include_bytes!("../../assets/nepal-flag.svg");
 
-/// A compact Nepal flag for Windows' tiny tray slot, rasterised once and
+/// A compact Nepal flag for the tray's tiny slot, rasterised once and
 /// cached — the SVG never changes, so there is nothing to redo on later calls.
 pub fn nepal_flag_icon() -> Option<Vec<u8>> {
     NEPAL_FLAG.get_or_init(render_nepal_flag).clone()

@@ -21,10 +21,11 @@ Open **Settings** with the **gear** at the top right of Sajilo, or from the tray
 
 How the date looks in your menu bar or tray:
 
+- **Tray icon** (Windows and Linux): the **Nepal flag** (the default) or the **Sajilo** icon.
 - **Format:** Short, Full (the default), With flag, Gregorian, Numeric, or **Custom…**, where you choose whether to show the Nepal flag and the BS year.
 - **Show time:** adds the time in Nepal.
 
-On Windows the tray shows the Nepal flag, and the date appears when you hover over it.
+On Windows the tray shows only the icon, and the date appears when you hover over it. Some Linux desktops, like KDE and Cinnamon, also show only the icon; Ubuntu shows the date beside it.
 
 ### Startup
 
