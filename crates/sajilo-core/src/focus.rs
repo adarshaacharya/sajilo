@@ -52,6 +52,14 @@ const DEFAULT_WATER_GOAL_ML: u32 = 2500;
 /// "In 5 min" on a break card: the reminder comes back after this much more
 /// use.
 pub const SNOOZE_MINUTES: u32 = 5;
+/// Two breaks due in the same moment: the second comes this much more use
+/// after the first, not straight after it.
+pub const STAGGER_MINUTES: u32 = 5;
+/// "In 15 min" on a meal or bedtime card: five minutes is not long enough to
+/// finish what was on screen and get to the table.
+pub const ROUTINE_SNOOZE_MINUTES: u32 = 15;
+/// The second water button logs a bottle: this many of [`WATER_STEP_ML`].
+pub const WATER_BOTTLE_STEPS: i32 = 2;
 /// A card left alone this long past its countdown was ignored; it goes away
 /// on its own rather than sitting on screen all afternoon.
 const CARD_TIMEOUT_SECONDS: i64 = 120;
@@ -772,6 +780,10 @@ pub struct ActiveBreak {
     /// away, which takes less time than deciding to put it off.
     #[serde(default)]
     pub can_snooze: bool,
+    /// How long "later" puts it off: minutes of use for an interval break,
+    /// minutes on the clock for one at a time of day.
+    #[serde(default = "default_snooze_minutes")]
+    pub snooze_minutes: u32,
     /// The call (or film, or quiet hour) this break waited out, when it was
     /// long enough to mention.
     #[serde(default)]
@@ -797,10 +809,14 @@ impl ActiveBreak {
         } else {
             &mut state.jokes_told
         };
+        // The cheer is for a break taken. Going to eat or to bed is not one,
+        // and "your spine sends its regards" at bedtime reads as a mistake;
+        // those cards say their own plain send-off instead.
         let (joke, cheer) = if settings.jokes {
             (
                 deal_joke(told, kind),
-                jokes::deal(told, jokes::DONE_DECK, jokes::DONE),
+                kind.slot()
+                    .and_then(|_| jokes::deal(told, jokes::DONE_DECK, jokes::DONE)),
             )
         } else {
             (None, None)
@@ -820,9 +836,18 @@ impl ActiveBreak {
             joke,
             cheer,
             can_snooze,
+            snooze_minutes: if routine_slot(kind).is_some() {
+                ROUTINE_SNOOZE_MINUTES
+            } else {
+                SNOOZE_MINUTES
+            },
             after_hold: None,
         }
     }
+}
+
+fn default_snooze_minutes() -> u32 {
+    SNOOZE_MINUTES
 }
 
 fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<jokes::Joke> {
@@ -838,8 +863,10 @@ pub enum BreakOutcome {
     Skip,
     /// Ask again after [`SNOOZE_MINUTES`] more of use.
     Snooze,
-    /// Water logged from the card.
+    /// A glass of water logged from the card: [`WATER_STEP_ML`].
     Drank,
+    /// A bottle logged from the card: [`WATER_BOTTLE_STEPS`] glasses.
+    DrankBottle,
 }
 
 /// One measurement from the shell.
@@ -1056,8 +1083,10 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         return Vec::new();
     }
 
+    // A card already up keeps what came due waiting rather than marking it
+    // reminded behind the card's back, where it would never be seen.
     let mut due = count_towards_breaks(state, settings, date, active);
-    if held || due.is_empty() {
+    if held || due.is_empty() || card_showing(state, settings) {
         state.due_since = None;
         return Vec::new();
     }
@@ -1072,45 +1101,50 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     }
     state.due_since = None;
 
-    mark_reminded(state, date, tick.now, &mut due);
-
-    if let Some(kind) = due.first().copied() {
-        open_card(state, settings, kind, tick.now);
-        let after_hold = state.after_hold.take();
-        if let Some(card) = state.active_break.as_mut()
-            && card.started_at == tick.now
-        {
-            card.after_hold = after_hold;
-        }
-    }
-    due
-}
-
-/// Records `due` as reminded now and restarts their timers. Standing up rests
-/// the eyes too: when both come due together, the movement break is the one
-/// asked for.
-fn mark_reminded(
-    state: &mut FocusState,
-    date: NaiveDate,
-    now: DateTime<Utc>,
-    due: &mut Vec<BreakKind>,
-) {
-    for kind in due.iter() {
-        let Some(index) = kind.slot() else {
-            continue;
-        };
-        state.since_break[index] = 0;
-        state.awaiting[index] = Some(now);
-        if let Some(count) = state.day_mut(date).count_mut(*kind) {
-            count.reminded += 1;
-        }
-    }
-
+    // Standing up rests the eyes too: when both come due together, the
+    // movement break is the one asked for and the eye timer starts over.
     if due.contains(&BreakKind::Move) && due.contains(&BreakKind::Eyes) {
         due.retain(|kind| *kind != BreakKind::Eyes);
-        state.awaiting[0] = None;
-        let today = state.day_mut(date);
-        today.eyes.reminded = today.eyes.reminded.saturating_sub(1);
+        state.since_break[0] = 0;
+    }
+    // One break at a time. The rest come a few minutes of use later rather
+    // than stacked behind it: stand-up and water both default to an hour.
+    let kind = due[0];
+    for later in &due[1..] {
+        stagger(state, settings, *later);
+    }
+    mark_reminded(state, date, tick.now, kind);
+
+    open_card(state, settings, kind, tick.now);
+    let after_hold = state.after_hold.take();
+    if let Some(card) = state.active_break.as_mut()
+        && card.started_at == tick.now
+    {
+        card.after_hold = after_hold;
+    }
+    vec![kind]
+}
+
+/// Records `kind` as reminded now and restarts its timer.
+fn mark_reminded(state: &mut FocusState, date: NaiveDate, now: DateTime<Utc>, kind: BreakKind) {
+    let Some(index) = kind.slot() else {
+        return;
+    };
+    state.since_break[index] = 0;
+    state.awaiting[index] = Some(now);
+    if let Some(count) = state.day_mut(date).count_mut(kind) {
+        count.reminded += 1;
+    }
+}
+
+/// Puts `kind` off until [`STAGGER_MINUTES`] more of use, because another
+/// break came due in the same moment and went first.
+fn stagger(state: &mut FocusState, settings: &FocusSettings, kind: BreakKind) {
+    if let Some(index) = kind.slot() {
+        state.since_break[index] = settings
+            .rule(kind)
+            .every_seconds()
+            .saturating_sub(STAGGER_MINUTES * 60);
     }
 }
 
@@ -1241,10 +1275,10 @@ pub fn finish_break(
     }
     let date = local.date();
     let Some(index) = card.kind.slot() else {
-        // Timed cards keep no timer. Put off, they ask again in five
-        // minutes; otherwise they are done for the day.
+        // Timed cards keep no timer. Put off, they ask again once the card's
+        // snooze has passed on the clock; otherwise they are done for the day.
         if outcome == BreakOutcome::Snooze && card.can_snooze {
-            let after = Some(card.started_at + Duration::minutes(i64::from(SNOOZE_MINUTES)));
+            let after = Some(card.started_at + Duration::minutes(i64::from(card.snooze_minutes)));
             if let Some(slot) = routine_slot(card.kind) {
                 state.routine[slot] = RoutineSent { on: None, after };
             } else {
@@ -1271,13 +1305,14 @@ pub fn finish_break(
             state.since_break[index] = settings
                 .rule(card.kind)
                 .every_seconds()
-                .saturating_sub(SNOOZE_MINUTES * 60);
+                .saturating_sub(card.snooze_minutes * 60);
             // Put off, not missed: the reminder that comes back is this one.
             if let Some(count) = state.day_mut(date).count_mut(card.kind) {
                 count.reminded = count.reminded.saturating_sub(1);
             }
         }
         BreakOutcome::Drank => log_water(state, local, 1),
+        BreakOutcome::DrankBottle => log_water(state, local, WATER_BOTTLE_STEPS),
     }
 }
 
@@ -1393,6 +1428,8 @@ pub struct FocusSnapshot {
     pub paused_until: Option<DateTime<Utc>>,
     /// What one tap on + logs, and the goal's limits, in ml.
     pub water_step_ml: u32,
+    /// What the break card's second water button logs, in ml.
+    pub water_bottle_ml: u32,
     pub water_goal_min_ml: u32,
     pub water_goal_max_ml: u32,
     /// What "later" on a break card means, in minutes of use.
@@ -1618,6 +1655,7 @@ pub fn snapshot(
         paused_until: state.paused_until.filter(|until| now < *until),
         idle_supported: state.last_idle.is_some() || state.last_tick.is_none(),
         water_step_ml: WATER_STEP_ML,
+        water_bottle_ml: WATER_STEP_ML * WATER_BOTTLE_STEPS.unsigned_abs(),
         water_goal_min_ml: WATER_GOAL_MIN_ML,
         water_goal_max_ml: WATER_GOAL_MAX_ML,
         snooze_minutes: SNOOZE_MINUTES,

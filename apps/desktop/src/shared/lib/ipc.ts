@@ -268,6 +268,9 @@ export interface ActiveBreak {
   cheer: Joke | null;
   /** Whether "later" is on offer: once per reminder, never for a look away. */
   canSnooze: boolean;
+  /** What "later" means on this card: 5 min of use for a break, 15 on the
+   * clock for a meal or bedtime. */
+  snoozeMinutes: number;
   /** The call or fullscreen stretch this break waited out, when long enough to say. */
   afterHold: AfterHold | null;
 }
@@ -278,7 +281,7 @@ export interface Joke {
   ne: string;
 }
 
-export type BreakOutcome = "done" | "skip" | "snooze" | "drank";
+export type BreakOutcome = "done" | "skip" | "snooze" | "drank" | "drankBottle";
 
 export interface BreakCount {
   reminded: number;
@@ -351,6 +354,8 @@ export interface FocusSnapshot {
   idleSupported: boolean;
   /** What one tap on + logs, and the goal's limits, in millilitres. */
   waterStepMl: number;
+  /** What the break card's second water button logs. */
+  waterBottleMl: number;
   waterGoalMinMl: number;
   waterGoalMaxMl: number;
   /** What "later" on a break card means, in minutes of use. */

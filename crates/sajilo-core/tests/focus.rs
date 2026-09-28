@@ -3,9 +3,9 @@
 use chrono::{DateTime, Datelike, Duration, NaiveDate, TimeZone, Utc, Weekday};
 use sajilo_core::focus::{
     BreakKind, BreakOutcome, DayOffKind, DaysOff, FocusSettings, FocusState, FocusStatus,
-    HOLD_NOTE_MINUTES, HoldReason, Language, Moment, PauseChoice, ReminderStyle, SNOOZE_MINUTES,
-    Tick, announcement, finish_break, jokes, litres, log_water, pause, preview_break, snapshot,
-    tick,
+    HOLD_NOTE_MINUTES, HoldReason, Language, Moment, PauseChoice, ROUTINE_SNOOZE_MINUTES,
+    ReminderStyle, SNOOZE_MINUTES, STAGGER_MINUTES, Tick, announcement, finish_break, jokes,
+    litres, log_water, pause, preview_break, snapshot, tick,
 };
 use std::collections::HashSet;
 
@@ -867,7 +867,7 @@ fn a_meal_missed_by_over_an_hour_is_let_go() {
 }
 
 #[test]
-fn a_put_off_meal_comes_back_in_five_minutes() {
+fn a_put_off_meal_comes_back_in_fifteen_minutes() {
     let settings = with_lunch();
     let mut state = FocusState::default();
     run(&mut state, &settings, monday_at(13), 0, busy);
@@ -885,12 +885,135 @@ fn a_put_off_meal_comes_back_in_five_minutes() {
         &mut state,
         &settings,
         monday_at(13) + Duration::minutes(1),
-        10,
+        20,
         busy,
     );
     assert_eq!(
         due,
-        [(monday_at(13) + Duration::minutes(5), BreakKind::Lunch)]
+        [(
+            monday_at(13) + Duration::minutes(i64::from(ROUTINE_SNOOZE_MINUTES)),
+            BreakKind::Lunch
+        )]
+    );
+}
+
+/// Stand-up and water both default to an hour, so they come due together.
+/// The stand-up goes first and water follows a few minutes of use later, as
+/// its own card, rather than being marked sent behind the stand-up's card.
+#[test]
+fn breaks_due_together_come_one_after_another() {
+    let settings = FocusSettings::default().with_recommended_breaks();
+    let mut state = FocusState::default();
+    let start = monday_at(9);
+    let due: Vec<_> = run(&mut state, &settings, start, 75, busy)
+        .into_iter()
+        .filter(|(_, kind)| *kind != BreakKind::Eyes)
+        .collect();
+    assert_eq!(due.len(), 2, "{due:?}");
+    let (move_at, water_at) = (due[0], due[1]);
+    assert_eq!(move_at.1, BreakKind::Move);
+    assert_eq!(water_at.1, BreakKind::Water);
+    let gap = water_at.0 - move_at.0;
+    assert!(
+        gap >= Duration::minutes(i64::from(STAGGER_MINUTES)),
+        "water came {gap} after the stand-up"
+    );
+    assert!(
+        gap <= Duration::minutes(10),
+        "water came {gap} after the stand-up"
+    );
+}
+
+/// A notification never comes with a second one stacked on it.
+#[test]
+fn one_notification_at_a_time() {
+    let mut settings = FocusSettings::default().with_recommended_breaks();
+    settings.style = ReminderStyle::Notification;
+    let mut state = FocusState::default();
+    let mut now = monday_at(9);
+    while now <= monday_at(13) {
+        assert!(tick(&mut state, &settings, at(now, 5)).len() <= 1);
+        now += Duration::seconds(STEP);
+    }
+}
+
+/// A break that comes due while another card is up waits for it to close
+/// instead of counting as sent.
+#[test]
+fn a_break_due_behind_a_card_waits_for_it() {
+    let mut settings = FocusSettings::default();
+    settings.water.enabled = true;
+    settings.water.every_minutes = 20;
+    let mut state = FocusState::default();
+    // Water is due at 10:20; a card goes up at 10:19 and is still there.
+    let card_at = monday_at(10) + Duration::minutes(19);
+    assert!(run(&mut state, &settings, monday_at(10), 18, busy).is_empty());
+    preview_break(&mut state, &settings, BreakKind::Eyes, card_at);
+    let due = run(&mut state, &settings, card_at, 2, busy);
+    assert!(due.is_empty(), "{due:?}");
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::Skip,
+        card_at.naive_utc(),
+    );
+    let due = run(
+        &mut state,
+        &settings,
+        card_at + Duration::minutes(2) + Duration::seconds(STEP),
+        1,
+        busy,
+    );
+    assert_eq!(due.first().map(|(_, kind)| *kind), Some(BreakKind::Water));
+}
+
+/// "Going to eat" is not a break taken: no cheer from the break deck, and
+/// the card offers the meal's own longer "later".
+#[test]
+fn a_meal_card_has_no_break_cheer_and_a_longer_snooze() {
+    let settings = with_lunch();
+    let mut state = FocusState::default();
+    run(&mut state, &settings, monday_at(13), 0, busy);
+    let card = state.active_break.expect("the lunch card is up");
+    assert!(card.joke.is_some());
+    assert_eq!(card.cheer, None);
+    assert_eq!(card.snooze_minutes, ROUTINE_SNOOZE_MINUTES);
+    assert!(!state.jokes_told.contains_key(jokes::DONE_DECK));
+}
+
+#[test]
+fn a_bottle_from_the_card_logs_two_glasses() {
+    let mut settings = FocusSettings::default();
+    settings.water.enabled = true;
+    let mut state = FocusState::default();
+    preview_break(&mut state, &settings, BreakKind::Water, monday_at(10));
+    // An example counts for nothing.
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::DrankBottle,
+        monday_at(10).naive_utc(),
+    );
+    assert_eq!(state.today.as_ref().map_or(0, |day| day.water_ml), 0);
+
+    let due = run(&mut state, &settings, monday_at(10), 61, busy);
+    assert!(due.iter().any(|(_, kind)| *kind == BreakKind::Water));
+    finish_break(
+        &mut state,
+        &settings,
+        BreakOutcome::DrankBottle,
+        (monday_at(11) + Duration::minutes(1)).naive_utc(),
+    );
+    assert_eq!(state.today.map(|day| day.water_ml), Some(500));
+    assert_eq!(
+        snapshot(
+            &mut FocusState::default(),
+            &settings,
+            monday_at(10),
+            monday_at(10).naive_utc()
+        )
+        .water_bottle_ml,
+        500
     );
 }
 

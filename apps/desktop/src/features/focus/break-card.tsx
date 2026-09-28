@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
+import type { translate } from "../../shared/lib/i18n";
 import {
   type ActiveBreak,
   api,
+  type BreakKind,
   type BreakOutcome,
   type FocusSnapshot,
   type Joke,
@@ -35,11 +37,42 @@ const BODIES = {
   bedtime: "break.bedtime.body",
 } as const;
 
+type TranslationKey = Parameters<typeof translate>[0];
+
+/** What the main button says where "Done" would not fit the moment. */
+const DONE_LABELS: Partial<Record<BreakKind, TranslationKey>> = {
+  endOfDay: "break.endOfDay.done",
+  breakfast: "break.meal.done",
+  lunch: "break.meal.done",
+  dinner: "break.meal.done",
+  bedtime: "break.bedtime.done",
+};
+
+/** A plain line to leave on: going to eat or to bed is not a break taken, so
+ * these cards get no cheer from the engine. */
+const SEND_OFFS: Partial<Record<BreakKind, TranslationKey>> = {
+  endOfDay: "break.endOfDay.send-off",
+  breakfast: "break.meal.send-off",
+  lunch: "break.meal.send-off",
+  dinner: "break.meal.send-off",
+  bedtime: "break.bedtime.send-off",
+};
+
+/** Said in place of the body while hands are on the keyboard or mouse, since
+ * that is what holds the ring back. */
+const HINTS: Partial<Record<BreakKind, TranslationKey>> = {
+  eyes: "break.eyes.hint",
+  move: "break.move.hint",
+};
+
 const RING = 2 * Math.PI * 17;
 /** How long the "done" line stays before the card closes. */
 const CHEER_MS = 1600;
 /** A card still waiting after this long shakes once more. */
 const NUDGE_MS = 30_000;
+/** How long the hands-off hint stays after the last input, so it does not
+ * flicker while the mouse moves in bursts. */
+const TOUCH_HINT_MS = 2000;
 
 const HOLD_NOTES = {
   call: "break.after.call",
@@ -52,10 +85,14 @@ const HOLD_NOTES = {
  * countdown runs while hands are off the keyboard and mouse, so looking away
  * finishes the break by itself and a keystroke starts it over. Where input
  * idle can't be read, it runs on the clock instead.
+ *
+ * `touched` is true while input is holding the ring back: a ring that jumps
+ * back to full with no word of why looks broken.
  */
-function useRemaining(startedAt: string | undefined, seconds: number) {
+function useCountdown(startedAt: string | undefined, seconds: number) {
   const [now, setNow] = useState(() => Date.now());
   const [idle, setIdle] = useState<number | null>(null);
+  const [touchedAt, setTouchedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!startedAt || seconds === 0) return;
     let live = true;
@@ -64,7 +101,10 @@ function useRemaining(startedAt: string | undefined, seconds: number) {
       api
         .focusIdleSeconds()
         .then((value) => {
-          if (live) setIdle(typeof value === "number" ? value : null);
+          if (!live) return;
+          const next = typeof value === "number" ? value : null;
+          setIdle(next);
+          if (next === 0) setTouchedAt(Date.now());
         })
         .catch(() => {
           if (live) setIdle(null);
@@ -75,11 +115,14 @@ function useRemaining(startedAt: string | undefined, seconds: number) {
       window.clearInterval(timer);
     };
   }, [startedAt, seconds]);
-  if (!startedAt) return seconds;
+  if (!startedAt) return { remaining: seconds, touched: false };
   const elapsed = Math.max(0, (now - Date.parse(startedAt)) / 1000);
   // Idle from before the card opened is not part of this break.
   const handsOff = idle === null ? elapsed : Math.min(idle, elapsed);
-  return Math.max(0, seconds - handsOff);
+  const remaining = Math.max(0, seconds - handsOff);
+  const touched =
+    seconds > 0 && remaining > 0 && touchedAt !== null && now - touchedAt < TOUCH_HINT_MS;
+  return { remaining, touched };
 }
 
 /** The main button: the one that counts the break. A look away has none:
@@ -87,6 +130,27 @@ function useRemaining(startedAt: string | undefined, seconds: number) {
 function mainAction(card: ActiveBreak): "done" | "drank" | null {
   if (card.kind === "eyes") return null;
   return card.kind === "water" ? "drank" : "done";
+}
+
+/** Today's water against the goal. Logging from the card fills it to the new
+ * total before the card goes, so the tap has something to show for it. */
+function WaterBar({ ml, goalMl }: { ml: number; goalMl: number }) {
+  const { t } = useSettings();
+  const numerals = useSentenceNumerals();
+  const share = goalMl > 0 ? Math.min(1, ml / goalMl) : 0;
+  const amount = t("focus.water.amount")
+    .replace("{done}", litres(ml, numerals))
+    .replace("{goal}", litres(goalMl, numerals));
+  return (
+    <div className="break-card__water" data-tauri-drag-region>
+      <span className="break-card__water-track" data-tauri-drag-region>
+        <span className="break-card__water-fill" style={{ transform: `scaleX(${share})` }} />
+      </span>
+      <span className="break-card__water-amount tabular-nums" data-tauri-drag-region>
+        {amount}
+      </span>
+    </div>
+  );
 }
 
 function Countdown({ remaining, seconds }: { remaining: number; seconds: number }) {
@@ -135,7 +199,7 @@ export function BreakCard() {
   }, []);
 
   const card = snapshot?.activeBreak ?? null;
-  const remaining = useRemaining(card?.startedAt, card?.seconds ?? 0);
+  const { remaining, touched } = useCountdown(card?.startedAt, card?.seconds ?? 0);
 
   // The card shakes as it arrives, and once more if it is still waiting, the
   // way a mistyped password shakes: noticed out of the corner of an eye
@@ -147,13 +211,19 @@ export function BreakCard() {
     return () => window.clearTimeout(timer);
   }, [card]);
 
-  // A break taken earns a line before the card goes; skipping or putting it
-  // off just closes it. The shell closes this window once the tracker has no
-  // card.
-  // Both lines were dealt by the engine when the card opened, so they stay
-  // put for as long as it is up.
+  // A break taken earns a line before the card goes: the engine's cheer, a
+  // meal's plain send-off, or water's bar filling to the new total. Skipping
+  // or putting it off just closes it. The shell closes this window once the
+  // tracker has no card.
+  // The cheer was dealt by the engine when the card opened, so it stays put
+  // for as long as the card is up.
+  const [taken, setTaken] = useState(false);
   const [cheer, setCheer] = useState<Joke | null>(null);
+  const [drankMl, setDrankMl] = useState(0);
   const cardCheer = card?.cheer ?? null;
+  const kind = card?.kind;
+  const glassMl = snapshot?.waterStepMl ?? 0;
+  const bottleMl = snapshot?.waterBottleMl ?? 0;
   const finish = useCallback(
     (outcome: BreakOutcome) => {
       if (finishing.current) return;
@@ -161,15 +231,24 @@ export function BreakCard() {
       const close = () =>
         api.finishFocusBreak(outcome).catch(() => {
           finishing.current = false;
+          setTaken(false);
+          setCheer(null);
+          setDrankMl(0);
         });
-      if (cardCheer && (outcome === "done" || outcome === "drank")) {
+      const logged = outcome === "drank" ? glassMl : outcome === "drankBottle" ? bottleMl : 0;
+      const lingers =
+        (outcome === "done" || logged > 0) &&
+        (cardCheer !== null || logged > 0 || (kind !== undefined && kind in SEND_OFFS));
+      if (lingers) {
+        setTaken(true);
         setCheer(cardCheer);
+        setDrankMl(logged);
         window.setTimeout(close, CHEER_MS);
       } else {
         void close();
       }
     },
-    [cardCheer],
+    [cardCheer, kind, glassMl, bottleMl],
   );
 
   useEffect(() => {
@@ -178,14 +257,26 @@ export function BreakCard() {
 
   if (!snapshot || !card) return null;
 
-  const waterLeft = Math.max(0, snapshot.settings.waterGoalMl - snapshot.today.waterMl);
-  const waterLine = t("break.water.body").replace("{left}", litres(waterLeft, numerals));
+  const goalMl = snapshot.settings.waterGoalMl;
+  const waterMl = snapshot.today.waterMl + drankMl;
+  const waterLeft = Math.max(0, goalMl - waterMl);
+  const waterLine =
+    waterLeft > 0
+      ? t("break.water.body").replace("{left}", litres(waterLeft, numerals))
+      : t("break.water.goal-met");
   const plain = card.kind === "water" ? waterLine : t(BODIES[card.kind]);
-  const said = cheer ?? card.joke;
-  const body = said ? said[language] : plain;
+  const sendOff = SEND_OFFS[card.kind];
+  const body = taken
+    ? (cheer?.[language] ?? (sendOff ? t(sendOff) : plain))
+    : (card.joke?.[language] ?? plain);
+  const hint = HINTS[card.kind];
   const title =
     card.kind === "custom" ? kindLabel(card.kind, snapshot.settings, t) : t(TITLES[card.kind]);
-  const later = t("break.snooze").replace("{n}", digits(snapshot.snoozeMinutes, numerals));
+  // Water's row carries two drink buttons, so its "later" says less.
+  const later = t(card.kind === "water" ? "break.snooze-short" : "break.snooze").replace(
+    "{n}",
+    digits(card.snoozeMinutes, numerals),
+  );
   const main = mainAction(card);
   const heldNote = card.afterHold
     ? t(HOLD_NOTES[card.afterHold.reason]).replace("{n}", digits(card.afterHold.minutes, numerals))
@@ -215,22 +306,34 @@ export function BreakCard() {
             {title}
             {card.preview && <span className="break-card__example">{t("break.example")}</span>}
           </p>
-          <p className="break-card__body" data-tauri-drag-region>
-            {body}
-          </p>
-          {/* A joke replaces the instruction, but never the number that matters. */}
-          {card.joke && !cheer && card.kind === "water" && (
-            <p className="break-card__meta" data-tauri-drag-region>
-              {waterLine}
+          {/* The hint and the body share one cell, so trading one for the
+              other never moves the buttons under a reaching mouse. */}
+          <div className="break-card__swap" data-tauri-drag-region>
+            <p
+              className={`break-card__body${touched && hint ? " is-hidden" : ""}`}
+              data-tauri-drag-region
+            >
+              {body}
             </p>
-          )}
+            {hint && (
+              <p
+                className={`break-card__body break-card__hint${touched ? "" : " is-hidden"}`}
+                aria-hidden={!touched}
+                data-tauri-drag-region
+              >
+                {t(hint)}
+              </p>
+            )}
+          </div>
+          {/* A joke replaces the instruction, but never the number that matters. */}
+          {card.kind === "water" && <WaterBar ml={waterMl} goalMl={goalMl} />}
         </div>
         {card.seconds > 0 && <Countdown remaining={remaining} seconds={card.seconds} />}
       </div>
 
       {/* Laid out like a Mac dialog: the way out on the left, and the main
           action — the one that counts the break — on the far right. */}
-      <div className="break-card__actions" hidden={cheer !== null} data-tauri-drag-region>
+      <div className="break-card__actions" hidden={taken} data-tauri-drag-region>
         <button type="button" onClick={() => finish("skip")} className="btn-ghost mr-auto">
           {t("break.skip")}
         </button>
@@ -244,13 +347,22 @@ export function BreakCard() {
           </button>
         )}
         {main === "drank" && (
-          <button
-            type="button"
-            onClick={() => finish("drank")}
-            className="break-card__button break-card__button--main"
-          >
-            {t("break.drank").replace("{n}", digits(snapshot.waterStepMl, numerals))}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={() => finish("drank")}
+              className="break-card__button break-card__button--main"
+            >
+              {t("break.drank").replace("{n}", digits(glassMl, numerals))}
+            </button>
+            <button
+              type="button"
+              onClick={() => finish("drankBottle")}
+              className="break-card__button break-card__button--main"
+            >
+              {t("break.drank").replace("{n}", digits(bottleMl, numerals))}
+            </button>
+          </>
         )}
         {main === "done" && (
           <button
@@ -258,7 +370,7 @@ export function BreakCard() {
             onClick={() => finish("done")}
             className="break-card__button break-card__button--main"
           >
-            {t(card.kind === "endOfDay" ? "break.endOfDay.done" : "break.done")}
+            {t(DONE_LABELS[card.kind] ?? "break.done")}
           </button>
         )}
       </div>

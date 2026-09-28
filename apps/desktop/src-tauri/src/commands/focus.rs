@@ -180,7 +180,9 @@ pub fn finish_focus_break(app: AppHandle<Wry>, outcome: BreakOutcome) -> Result<
             crate::commands::telemetry::record(
                 &app,
                 match outcome {
-                    BreakOutcome::Done | BreakOutcome::Drank => "action.break-done",
+                    BreakOutcome::Done | BreakOutcome::Drank | BreakOutcome::DrankBottle => {
+                        "action.break-done"
+                    }
                     BreakOutcome::Skip => "action.break-skip",
                     BreakOutcome::Snooze => "action.break-snooze",
                 },

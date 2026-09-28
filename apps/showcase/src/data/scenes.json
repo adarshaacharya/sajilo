@@ -897,6 +897,7 @@
         "waterMl": 0
       },
       "usualScreenSeconds": null,
+      "waterBottleMl": 500,
       "waterGoalMaxMl": 8000,
       "waterGoalMinMl": 500,
       "waterStepMl": 250,
