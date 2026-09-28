@@ -7,7 +7,7 @@
 
 use std::sync::atomic::{AtomicBool, AtomicU8, Ordering};
 
-use tauri::{AppHandle, Manager, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, WebviewWindow};
 
 /// Set while the popover has opened a dialog of its own (a file picker, a
 /// "delete this?" prompt). The dialog takes focus, and a focus-out is
@@ -59,6 +59,14 @@ static KEPT_PLACE: std::sync::Mutex<Option<Place>> = std::sync::Mutex::new(None)
 /// Stored as `{ "x": .., "y": .. }`: see [`save_kept`].
 const KEPT_KEY: &str = "popover.keptOpen.v1";
 
+/// The mini view: a kept popover shrunk to a strip with the date, the time
+/// and what is next, to leave on the desktop. Only ever kept; see [`set_mini`].
+static MINI: AtomicBool = AtomicBool::new(false);
+const MINI_KEY: &str = "popover.mini.v1";
+/// The popover's two sizes, in logical pixels. Full matches `tauri.conf.json`.
+const FULL_SIZE: (f64, f64) = (380.0, 560.0);
+const MINI_SIZE: (f64, f64) = (320.0, 72.0);
+
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Place {
     x: f64,
@@ -67,6 +75,9 @@ struct Place {
 
 /// Reads whether the popover was left kept open, and where, at launch.
 pub fn load_kept(app: &AppHandle) {
+    if let Ok(Some(mini)) = crate::db::get_json(app, MINI_KEY) {
+        MINI.store(mini.as_bool() == Some(true), Ordering::SeqCst);
+    }
     let Ok(Some(value)) = crate::db::get_json(app, KEPT_KEY) else {
         return;
     };
@@ -92,6 +103,40 @@ pub fn set_kept(window: &WebviewWindow, kept: bool) {
         *stored = place;
     }
     save_kept(window.app_handle());
+    // Mini is a way of keeping it; let go, it is the full popover again.
+    if !kept && MINI.load(Ordering::SeqCst) {
+        store_mini(window.app_handle(), false);
+    }
+    apply_window_kind(window);
+}
+
+pub fn is_mini() -> bool {
+    MINI.load(Ordering::SeqCst) && is_kept()
+}
+
+/// Also tells the page, which draws the strip or the full app accordingly.
+fn store_mini(app: &AppHandle, mini: bool) {
+    MINI.store(mini, Ordering::SeqCst);
+    let _ = crate::db::set_json(app, MINI_KEY, &serde_json::Value::Bool(mini));
+    let _ = app.emit("sajilo://popover-mini", mini);
+}
+
+/// The mini button. Shrinking keeps the popover too, in one click: a strip
+/// that closed on a click away would be no use on the desktop.
+pub fn set_mini(window: &WebviewWindow, mini: bool) {
+    if mini && !is_kept() {
+        set_kept(window, true);
+    }
+    store_mini(window.app_handle(), mini);
+    apply_window_kind(window);
+}
+
+/// Gives the window the size of the full popover or the mini strip. The
+/// top-left corner stays put, so the strip shrinks toward where it was
+/// dragged.
+pub fn apply_window_kind(window: &WebviewWindow) {
+    let (width, height) = if is_mini() { MINI_SIZE } else { FULL_SIZE };
+    let _ = window.set_size(tauri::LogicalSize::new(width, height));
 }
 
 /// Follows a kept popover as it is dragged. Kept in memory; written when it

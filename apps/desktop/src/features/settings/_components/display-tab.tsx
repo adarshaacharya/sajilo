@@ -8,6 +8,7 @@ import {
 } from "../../../shared/context/settings-context";
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
+import { MINI_LINES, setMiniLine, useMiniLine } from "../../../shared/lib/mini-line";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
 import { hasTrayIcon, isLinux, isWindows } from "../../../shared/lib/platform";
 import { SettingsSection } from "./settings-section";
@@ -42,6 +43,7 @@ export function DisplayTab({
   setNumerals: (value: NumeralStyle) => void;
 }) {
   const { t, theme, setTheme, textSize, setTextSize } = useSettings();
+  const miniLine = useMiniLine();
   const [format, setFormat] = useState<string>("nepaliLong");
   const [showFlag, setShowFlag] = useState(true);
   const [showYear, setShowYear] = useState(true);
@@ -208,6 +210,15 @@ export function DisplayTab({
             />
           </>
         )}
+      </SettingsSection>
+
+      <SettingsSection title={t("settings.mini-view")} footnote={t("settings.mini-view-note")}>
+        <Select
+          label={t("settings.mini-view-shows")}
+          value={miniLine}
+          onChange={setMiniLine}
+          options={MINI_LINES.map((id) => ({ id, label: t(`mini.line.${id}`) }))}
+        />
       </SettingsSection>
 
       <SettingsSection title={t("settings.startup")}>

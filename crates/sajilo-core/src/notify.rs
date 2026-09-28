@@ -42,6 +42,11 @@ pub struct NotificationOptions {
     /// only the switch that silences them all at once.
     #[serde(default = "enabled_by_default")]
     pub sip_payment: bool,
+    /// Today's rashifal for the user's own sign, when they first sit down in
+    /// the morning. Off until asked for: it only means anything once a sign
+    /// is chosen, and the Rashifal tab offers it then.
+    #[serde(default)]
+    pub daily_rashifal: bool,
     /// How every reminder arrives — these and Breaks alike. A card is the
     /// default: a corner notification is gone before it is read.
     #[serde(default)]
@@ -66,6 +71,7 @@ impl Default for NotificationOptions {
             hour: default_hour(),
             ipo_closing_day: enabled_by_default(),
             sip_payment: enabled_by_default(),
+            daily_rashifal: false,
             style: ReminderStyle::default(),
         }
     }
@@ -103,6 +109,7 @@ pub enum ReminderKind {
     Ipo,
     Sip,
     Keeper,
+    Rashifal,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.

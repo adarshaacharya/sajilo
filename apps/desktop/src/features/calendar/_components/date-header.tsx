@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { KeepOpenButton } from "../../../shared/components/keep-open-button";
+import { MiniViewButton } from "../../../shared/components/mini-view-button";
 import { UpdateHeaderButton } from "../../../shared/components/update-header-button";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Today } from "../../../shared/lib/ipc";
@@ -75,6 +76,7 @@ export function DateHeader({ today }: { today: Today }) {
 
       <div className="flex shrink-0 gap-0.5 pt-0.5">
         <UpdateHeaderButton />
+        <MiniViewButton />
         <KeepOpenButton />
         <button
           type="button"

@@ -570,11 +570,14 @@ export interface NotificationOptions {
   ipoClosingDay: boolean;
   /** Master switch for SIP payment reminders; each fund's is opt-in. */
   sipPayment: boolean;
+  /** Today's rashifal for the user's sign, when they first sit down in the
+   * morning. Off until asked for. */
+  dailyRashifal: boolean;
   /** How every reminder arrives, Routine's included. */
   style: ReminderStyle;
 }
 
-export type ReminderKind = "plan" | "festival" | "holiday" | "ipo" | "sip" | "keeper";
+export type ReminderKind = "plan" | "festival" | "holiday" | "ipo" | "sip" | "keeper" | "rashifal";
 
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {
@@ -699,6 +702,8 @@ export const api = {
   notificationPermission: () => invoke<PermissionState>("notification_permission"),
   requestNotificationPermission: () => invoke<PermissionState>("request_notification_permission"),
   getNotificationOptions: () => invoke<NotificationOptions>("get_notification_options"),
+  /** The user saw today's reading for their sign: no morning reminder today. */
+  rashifalRead: () => invoke<void>("rashifal_read"),
   setNotificationOptions: (options: NotificationOptions) =>
     invoke<PlannedNotification[]>("set_notification_options", { options }),
   pendingNotifications: () => invoke<PlannedNotification[]>("pending_notifications"),
@@ -831,5 +836,7 @@ export const api = {
   /** The header's pin: whether the popover is kept open and movable. */
   popoverKept: () => invoke<boolean>("popover_kept"),
   setPopoverKept: (kept: boolean) => invoke<void>("set_popover_kept", { kept }),
+  popoverMini: () => invoke<boolean>("popover_mini"),
+  setPopoverMini: (mini: boolean) => invoke<void>("set_popover_mini", { mini }),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
 };

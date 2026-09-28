@@ -176,6 +176,8 @@ pub fn run() {
                 window::polish_macos_chrome(&main);
                 #[cfg(target_os = "windows")]
                 window::fit_windows_shadow(&main);
+                // Left pinned, or mini, last time: the same floating and size.
+                window::apply_window_kind(&main);
             }
             if let Some(update) = app.get_webview_window(window::UPDATE) {
                 let _ = update.set_background_color(Some(tauri::window::Color(0, 0, 0, 0)));
@@ -195,6 +197,7 @@ pub fn run() {
             commands::notify::spawn_scheduler(app.handle().clone());
             background_refresh::spawn(app.handle().clone());
             commands::focus::spawn(app.handle().clone());
+            commands::rashifal::reminder::spawn(app.handle().clone());
 
             // Opened on purpose, Sajilo shows itself; started at login, it
             // waits in the tray. Before this, only the very first launch
@@ -273,6 +276,7 @@ pub fn run() {
             commands::sips::remind_sip_tomorrow,
             commands::nepse_intraday::get_nepse_intraday,
             commands::rashifal::get_rashifal,
+            commands::rashifal::reminder::rashifal_read,
             commands::radio::get_stations,
             commands::radio::station_stream,
             commands::weather::get_weather,
@@ -360,6 +364,8 @@ pub fn run() {
             commands::tray::popover_pointer,
             commands::tray::popover_kept,
             commands::tray::set_popover_kept,
+            commands::tray::popover_mini,
+            commands::tray::set_popover_mini,
             commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,

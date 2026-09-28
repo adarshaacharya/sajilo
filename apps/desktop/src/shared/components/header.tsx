@@ -6,6 +6,7 @@ import { BackButton, useGoBack } from "./back-button";
 import { useHeaderInnerContent, useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
 import { KeepOpenButton } from "./keep-open-button";
+import { MiniViewButton } from "./mini-view-button";
 import { TABS } from "./tab-bar";
 import { UpdateHeaderButton } from "./update-header-button";
 
@@ -46,6 +47,7 @@ export function Header({ title }: { title: string }) {
       <h1 className="min-w-0 flex-1 truncate text-[13px] font-semibold">{inner?.title ?? title}</h1>
       {slot}
       <UpdateHeaderButton />
+      <MiniViewButton iconClassName="size-3.5" />
       <KeepOpenButton iconClassName="size-3.5" />
       {pathname !== "/settings" && (
         <button

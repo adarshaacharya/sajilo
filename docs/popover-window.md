@@ -315,6 +315,12 @@ What to check, in order, before shipping a change to this window:
 | 13 | Open from the tray | Opens by the tray again |
 | 14 | Restart | Opens by the tray, not pinned |
 | 15 | Run 1 to 6 again with `GDK_BACKEND=wayland,x11` | Same results |
+| 16 | Unpinned, press Mini view | Shrinks to the strip in place, and the pin is on |
+| 17 | Drag the strip; click the desktop | Moves; stays open |
+| 18 | Escape, then the tray | Back as the strip, where it was dragged |
+| 19 | Restart | Still the strip, same place |
+| 20 | Open a reminder card's Open while mini | The full view opens on that screen |
+| 21 | Strip's expand button, then unpin | Full view, still pinned; then the tray popover |
 
 Also try a break card from Routine, "Show me an example": it should open at the
 top centre without taking focus, and the popover should stay up under it. To

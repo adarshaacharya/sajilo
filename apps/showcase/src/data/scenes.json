@@ -22391,6 +22391,7 @@
       }
     },
     "get_notification_options": {
+      "dailyRashifal": false,
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
       "hour": 19,

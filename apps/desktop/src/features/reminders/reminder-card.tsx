@@ -13,6 +13,7 @@ const ICONS: Record<ReminderKind, IconName> = {
   ipo: "interest",
   sip: "banknote",
   keeper: "keeper",
+  rashifal: "rashifal",
 };
 
 /** Where "Open" takes the popover for each kind of reminder. */
@@ -23,6 +24,7 @@ const ROUTES: Record<ReminderKind, string> = {
   ipo: "/bazar",
   sip: "/bazar",
   keeper: "/keeper",
+  rashifal: "/rashifal",
 };
 
 const KIND_LABELS = {
@@ -32,6 +34,7 @@ const KIND_LABELS = {
   ipo: "reminder.kind.ipo",
   sip: "reminder.kind.sip",
   keeper: "reminder.kind.keeper",
+  rashifal: "reminder.kind.rashifal",
 } as const satisfies Record<ReminderKind, string>;
 
 /** Festival and holiday titles are ours, so they follow the language; the
@@ -102,6 +105,9 @@ export function ReminderCard() {
       ? TRANSLATED_TITLES[reminder.kind]
       : null;
 
+  // The reading is the point of this card, so its button says so.
+  const openLabel = reminder.kind === "rashifal" ? "reminder.read" : "reminder.open";
+
   const dismiss = (open: boolean) => {
     if (busy) return;
     setBusy(true);
@@ -146,7 +152,7 @@ export function ReminderCard() {
           disabled={busy}
           className="break-card__button break-card__button--quiet"
         >
-          {t("reminder.open")}
+          {t(openLabel)}
         </button>
         <button
           type="button"

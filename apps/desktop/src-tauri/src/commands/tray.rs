@@ -50,6 +50,20 @@ pub fn set_popover_kept(app: AppHandle<Wry>, kept: bool) {
     }
 }
 
+/// Whether the popover is the mini strip.
+#[tauri::command]
+pub fn popover_mini() -> bool {
+    crate::window::is_mini()
+}
+
+/// The mini button, and the strip's expand button. Shrinking pins it too.
+#[tauri::command]
+pub fn set_popover_mini(app: AppHandle<Wry>, mini: bool) {
+    if let Some(window) = crate::window::main_window(&app) {
+        crate::window::set_mini(&window, mini);
+    }
+}
+
 /// Keeps the popover open while it shows a dialog of its own, and hands focus
 /// back to it when the dialog closes.
 #[tauri::command]

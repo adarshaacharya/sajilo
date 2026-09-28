@@ -38,6 +38,15 @@ While it's pinned:
 
 Press the pin again to go back to normal: it closes when you click away, and opens by the tray icon again.
 
+## Mini view
+
+Want the date on your desktop without the whole window? Press **Mini view** (the two inward arrows, next to the pin). Sajilo shrinks to a small strip with today's date in BS and AD, Nepal time and one more line, the next festival or holiday to start with. It pins itself, so it stays put; drag it anywhere.
+
+- **Click the second line** to show something else: the next festival or holiday, the weather, the NEPSE index, the dollar rate, or the radio station while it's playing. The same choice is in **Settings › Display › Mini view**.
+- Press the **outward arrows** on the strip to open the full view again. It stays pinned.
+- Unpin, and it's back to the normal popover.
+- It remembers mini or full, and where you put it, after a restart.
+
 > The pin is in **Sajilo 0.1.30** and newer. See [updating](/docs/updating.html).
 
 ## The tabs

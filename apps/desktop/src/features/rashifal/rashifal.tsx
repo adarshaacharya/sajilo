@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
@@ -16,16 +16,17 @@ import { track } from "../../shared/lib/usage";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
 import { SourceNote } from "../bazar/_components/source-note";
+import { DailyOffer } from "./_components/daily-offer";
 import { ReadingCard, ReadingCardSkeleton } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
 import { SignGrid } from "./_components/sign-grid";
 import { publishedStamp } from "./_lib/format";
-import { validSign } from "./_lib/signs";
+import { SIGNS, validSign } from "./_lib/signs";
 
 const STORAGE_KEY = "selectedRashi";
 
 export function Rashifal() {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const {
     data: state,
     isValidating,
@@ -38,6 +39,7 @@ export function Rashifal() {
   );
   const [storedSign, setStoredSign] = usePersistedString(STORAGE_KEY);
   const mine = validSign(storedSign);
+  const mineInfo = SIGNS.find((sign) => sign.id === mine);
   const [viewing, setViewing] = useState<RashiSign | null>(null);
 
   const loading = isValidating;
@@ -64,6 +66,13 @@ export function Rashifal() {
   );
 
   useHeaderSlot(refreshButton);
+
+  // Reading your own sign here is this morning's rashifal read: the daily
+  // reminder has nothing left to say today.
+  const readMine = isMine && reading !== undefined;
+  useEffect(() => {
+    if (readMine) api.rashifalRead().catch(() => {});
+  }, [readMine]);
 
   const choose = (id: RashiSign) => {
     track("action.rashi-pick");
@@ -92,6 +101,8 @@ export function Rashifal() {
           />
         )}
       </StateBanner>
+
+      <DailyOffer signName={(language === "ne" ? mineInfo?.ne : mineInfo?.en) ?? ""} />
 
       {/* Every sign, one tap away for looking up family; the star pins one as yours. */}
       <section className="space-y-1.5">

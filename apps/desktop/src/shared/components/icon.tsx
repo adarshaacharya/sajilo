@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { SFArrowClockwise } from "sf-symbols-lib/monochrome/SFArrowClockwise";
+import { SFArrowDownRightAndArrowUpLeft } from "sf-symbols-lib/monochrome/SFArrowDownRightAndArrowUpLeft";
 import { SFArrowLeftArrowRight } from "sf-symbols-lib/monochrome/SFArrowLeftArrowRight";
 import { SFArrowUpForward } from "sf-symbols-lib/monochrome/SFArrowUpForward";
 import { SFArrowUpLeftAndArrowDownRight } from "sf-symbols-lib/monochrome/SFArrowUpLeftAndArrowDownRight";
@@ -146,6 +147,8 @@ const GLYPHS: Record<IconName, SFComp> = {
   pause: SFPauseFill,
   pin: SFPin,
   pinFill: SFPinFill,
+  shrink: SFArrowDownRightAndArrowUpLeft,
+  expand: SFArrowUpLeftAndArrowDownRight,
   stop: SFStopFill,
   speaker: SFSpeakerWave2,
   speakerMute: SFSpeakerSlash,
@@ -239,6 +242,8 @@ export type IconName =
   | "pause"
   | "pin"
   | "pinFill"
+  | "shrink"
+  | "expand"
   | "stop"
   | "speaker"
   | "speakerMute"

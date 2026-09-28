@@ -19,7 +19,8 @@ function anyReminder(options: NotificationOptions): boolean {
     options.eveOfFestival ||
     options.eveOfPublicHoliday ||
     options.ipoClosingDay ||
-    options.sipPayment
+    options.sipPayment ||
+    options.dailyRashifal
   );
 }
 
@@ -41,8 +42,12 @@ export function SystemTab() {
     hour: 19,
     ipoClosingDay: true,
     sipPayment: true,
+    dailyRashifal: false,
     style: "card",
   });
+  // The daily rashifal needs a sign; without one its switch says where to
+  // pick it.
+  const [hasSign, setHasSign] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("unknown");
   const [message, setMessage] = useState<string | null>(null);
   const [usageInsightsEnabled, setUsageInsightsEnabled] = useState(false);
@@ -51,6 +56,10 @@ export function SystemTab() {
     api
       .getNotificationOptions()
       .then(setOptions)
+      .catch(() => {});
+    api
+      .getSetting<string>("selectedRashi")
+      .then((sign) => setHasSign(typeof sign === "string" && sign.length > 0))
       .catch(() => {});
     api
       .notificationPermission()
@@ -220,6 +229,13 @@ export function SystemTab() {
           label={t("reminder.sip-payment")}
           checked={options.sipPayment}
           onChange={(value) => updateOptions({ ...options, sipPayment: value })}
+        />
+        <Toggle
+          label={t("reminder.daily-rashifal")}
+          note={t(hasSign ? "reminder.daily-rashifal-note" : "reminder.daily-rashifal-no-sign")}
+          checked={options.dailyRashifal && hasSign}
+          disabled={!hasSign}
+          onChange={(value) => updateOptions({ ...options, dailyRashifal: value })}
         />
       </SettingsSection>
 

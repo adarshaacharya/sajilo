@@ -195,6 +195,13 @@ pub fn finish_focus_break(app: AppHandle<Wry>, outcome: BreakOutcome) -> Result<
     .inspect(|_| sync_card(&app))
 }
 
+/// Whether a call, a fullscreen app or Do Not Disturb is holding reminders
+/// back right now, by the user's own hold settings. Current only while Focus
+/// is measuring.
+pub fn holding(app: &AppHandle<Wry>) -> bool {
+    with_tracker(app, |tracker| tracker.state.held.is_some())
+}
+
 /// Seconds since the last keyboard or mouse input, for the break card: its
 /// countdown runs while hands are off, so a look away finishes by itself.
 #[tauri::command]

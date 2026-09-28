@@ -39,7 +39,62 @@ export function useKept() {
 
 export function setKept(next: boolean) {
   publish(next);
+  // Letting go of the pin is letting go of the mini strip too; the shell does
+  // the same.
+  if (!next) publishMini(false);
   api.setPopoverKept(next).catch(() => publish(!next));
+}
+
+/**
+ * The mini view: the kept popover shrunk to a strip of date, time and what's
+ * next. Read once from the shell, then followed through its event, since the
+ * shell also expands it (a reminder's "Open" needs the full app).
+ */
+let mini = false;
+let miniLoaded = false;
+const miniListeners = new Set<() => void>();
+const MINI_EVENT = "sajilo://popover-mini";
+
+function publishMini(next: boolean) {
+  if (next === mini) return;
+  mini = next;
+  for (const listener of miniListeners) listener();
+}
+
+function subscribeMini(listener: () => void) {
+  miniListeners.add(listener);
+  if (!miniLoaded) {
+    miniLoaded = true;
+    api
+      .popoverMini()
+      .then((value) => publishMini(value === true))
+      .catch(() => {});
+    if (isTauri()) {
+      import("@tauri-apps/api/event")
+        .then(({ listen }) => listen<boolean>(MINI_EVENT, (event) => publishMini(event.payload)))
+        .catch(() => {});
+    }
+  }
+  return () => miniListeners.delete(listener);
+}
+
+export function isMini() {
+  return mini;
+}
+
+export function useMini() {
+  return useSyncExternalStore(
+    subscribeMini,
+    () => mini,
+    () => false,
+  );
+}
+
+/** Shrinking pins it too, in the same click; the shell does the same. */
+export function setMini(next: boolean) {
+  publishMini(next);
+  if (next) publish(true);
+  api.setPopoverMini(next).catch(() => publishMini(!next));
 }
 
 /** What a press on a header must leave alone: its own controls. */

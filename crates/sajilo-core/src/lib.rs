@@ -14,6 +14,7 @@ pub mod numerals;
 pub mod places;
 pub mod planner;
 pub mod portfolio;
+pub mod rashifal;
 pub mod sip;
 pub mod tools;
 

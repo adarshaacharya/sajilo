@@ -27,6 +27,7 @@ On a card, **Open** takes you to the right place in Sajilo and **Got it** dismis
 | **Festival tomorrow** | Settings › System › Reminders | 7 pm Nepal time, the evening before |
 | **IPO closing day** | Settings › System › Reminders | 10 am Nepal time on the closing day |
 | **SIP payment due** | Settings › System › Reminders, and each fund's own switch in Bazar | 9 am Nepal time, on the days you chose |
+| **Daily rashifal** | Settings › System › Reminders, once you've chosen your sign | A few minutes after you first sit down each morning, never after noon |
 | **Day plans** | The **Reminder** on each plan | At the plan's time, or the minutes before you chose |
 | **Keeper** | **Remind me before** on each item | 9 am on each day you chose, and once the day after it's due |
 

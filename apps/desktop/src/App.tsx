@@ -6,6 +6,7 @@ import { Converter } from "./features/calendar/converter";
 import { Dashboard } from "./features/calendar/dashboard";
 import { DayDetail } from "./features/calendar/day-detail";
 import { Events } from "./features/calendar/events";
+import { MiniView } from "./features/calendar/mini-view";
 import { BreakCard } from "./features/focus/break-card";
 import { Focus } from "./features/focus/focus";
 import { Keeper } from "./features/keeper/keeper";
@@ -29,6 +30,7 @@ import { SettingsProvider, useSettings } from "./shared/context/settings-context
 import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
 import { api } from "./shared/lib/ipc";
+import { isMini, setMini, useMini } from "./shared/lib/popover-kept";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
 import { track } from "./shared/lib/usage";
 
@@ -61,7 +63,14 @@ function TrayNavigation() {
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     import("@tauri-apps/api/event")
-      .then(({ listen }) => listen<string>("sajilo://navigate", (event) => navigate(event.payload)))
+      .then(({ listen }) =>
+        listen<string>("sajilo://navigate", (event) => {
+          // A screen was asked for (a reminder's Open, the tray menu): the
+          // mini strip has no screens, so it opens the full view first.
+          if (isMini()) setMini(false);
+          navigate(event.payload);
+        }),
+      )
       .then((stop) => {
         unlisten = stop;
       })
@@ -125,6 +134,7 @@ function DismissOnEscape() {
 function Shell() {
   const { t } = useSettings();
   const location = useLocation();
+  const mini = useMini();
 
   return (
     <div className="app-window flex flex-col">
@@ -132,28 +142,33 @@ function Shell() {
       <DismissOnEscape />
       <ReportPointer />
       <TrackScreens />
-      <Routes location={location}>
-        {ROUTES.map((route) => (
-          <Route
-            key={route.path}
-            path={route.path}
-            element={
-              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                {route.path !== "/" && <Header title={t(route.titleKey)} />}
-                <main
-                  className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
-                    route.path === "/" ? "p-3" : "p-2.5"
-                  }`}
-                >
-                  <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
-                </main>
-              </div>
-            }
-          />
-        ))}
-      </Routes>
-      <RadioMiniPlayer />
-      <TabBar />
+      {mini && <MiniView />}
+      {/* Hidden rather than unmounted while mini, like the window itself:
+          the radio keeps playing and every screen is as it was left. */}
+      <div className="flex min-h-0 flex-1 flex-col" hidden={mini}>
+        <Routes location={location}>
+          {ROUTES.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                  {route.path !== "/" && <Header title={t(route.titleKey)} />}
+                  <main
+                    className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
+                      route.path === "/" ? "p-3" : "p-2.5"
+                    }`}
+                  >
+                    <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
+                  </main>
+                </div>
+              }
+            />
+          ))}
+        </Routes>
+        <RadioMiniPlayer />
+        <TabBar />
+      </div>
     </div>
   );
 }
