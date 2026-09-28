@@ -7,6 +7,7 @@ import { ClockTab } from "./_components/clock-tab";
 import { EmergencyTab } from "./_components/emergency-tab";
 import { InterestTab } from "./_components/interest-tab";
 import { LandTab } from "./_components/land-tab";
+import { StopwatchTab } from "./_components/stopwatch-tab";
 import { type ToolId, ToolsHome } from "./_components/tools-home";
 import { VatTab } from "./_components/vat-tab";
 import { WeightTab } from "./_components/weight-tab";
@@ -25,6 +26,7 @@ export function Tools() {
   const titles: Record<Tab, string> = {
     emergency: t("tools.directory"),
     clock: t("tools.clock"),
+    stopwatch: t("tools.stopwatch"),
     date: t("tools.date"),
     land: t("tools.land"),
     weight: t("tools.weight"),
@@ -50,6 +52,7 @@ export function Tools() {
           {tab === "vat" && <VatTab />}
           {tab === "interest" && <InterestTab />}
           {tab === "clock" && <ClockTab />}
+          {tab === "stopwatch" && <StopwatchTab />}
           {tab === "emergency" && <EmergencyTab initialSection={directorySection} />}
         </>
       )}

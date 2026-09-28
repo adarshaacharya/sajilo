@@ -4,10 +4,20 @@ import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
+import * as stopwatch from "../../../shared/lib/stopwatch";
 import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
 import { CONTACTS, type DirectorySection } from "../_lib/directory";
+import { clockText } from "./stopwatch-tab";
 
-export type ToolId = "date" | "land" | "weight" | "vat" | "interest" | "clock" | "emergency";
+export type ToolId =
+  | "date"
+  | "land"
+  | "weight"
+  | "vat"
+  | "interest"
+  | "clock"
+  | "stopwatch"
+  | "emergency";
 
 type Calculator = { id: ToolId; label: string; hint: string; icon: IconName; tint: string };
 
@@ -66,6 +76,8 @@ export function ToolsHome({
         <ClockCard onOpen={() => onOpen("clock")} />
       </div>
 
+      <StopwatchCard onOpen={() => onOpen("stopwatch")} />
+
       <DirectoryCard onOpen={(section) => onOpen("emergency", section)} />
 
       <section aria-labelledby="tools-calculators" className="space-y-1.5">
@@ -92,6 +104,57 @@ export function ToolsHome({
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+/**
+ * The stopwatch, live on its card while it has time on it, so a run started
+ * earlier is visible from the Tools page. The play button starts or pauses it
+ * without opening the tool.
+ */
+function StopwatchCard({ onOpen }: { onOpen: () => void }) {
+  const { t, numerals } = useSettings();
+  const watch = stopwatch.useStopwatch();
+  const ms = stopwatch.useElapsed(watch, 4);
+  const running = stopwatch.isRunning(watch);
+  const started = running || ms > 0;
+  return (
+    <div
+      className="tool-card tool-feature flex-row items-center gap-2.5"
+      style={tinted("var(--color-accent-mark)")}
+    >
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+      >
+        <span className="tool-card__icon">
+          <Icon name="clock" className="size-4" />
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate text-[12px] font-semibold">{t("tools.stopwatch")}</span>
+          <span
+            className={`block truncate text-[10px] ${started ? "tabular-nums text-text" : "text-text-muted"}`}
+          >
+            {started ? clockText(ms, numerals) : t("tools.stopwatch-hint")}
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={() => stopwatch.toggle()}
+        aria-label={t(
+          running
+            ? "stopwatch.tap-pause"
+            : started
+              ? "stopwatch.tap-resume"
+              : "stopwatch.tap-start",
+        )}
+        className="icon-btn shrink-0"
+      >
+        <Icon name={running ? "pause" : "play"} className="size-3.5" />
+      </button>
     </div>
   );
 }

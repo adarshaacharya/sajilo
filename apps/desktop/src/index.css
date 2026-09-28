@@ -432,6 +432,24 @@ html {
 .mini-view__switch:focus-visible .mini-view__swap {
   opacity: 1;
 }
+.mini-view__watch {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  transform: rotate(-90deg);
+}
+.mini-view__watch-track {
+  fill: none;
+  stroke: var(--color-surface-hover);
+  stroke-width: 2;
+}
+.mini-view__watch-arc {
+  fill: none;
+  stroke: var(--color-accent-mark);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
 .mini-view__muted {
   font-weight: 400;
   color: var(--color-text-muted);
@@ -2514,5 +2532,199 @@ input[type="search"]::-webkit-search-decoration {
   .focus-ring--due .focus-ring__fill,
   .focus-glass__splash {
     animation: none;
+  }
+}
+
+/* Tools › Stopwatch. The dial is the start/pause button: a gold arc sweeps
+   once a minute with a dot on its tip, laps leave notches on the ring, the
+   digits breathe while paused, and the arc winds back on Reset. Motion is
+   the fun here, not colour; it all stops for reduced motion. */
+.stopwatch-dial {
+  position: relative;
+  display: block;
+  width: 212px;
+  height: 212px;
+  margin: 0 auto;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.stopwatch-dial:active {
+  transform: scale(0.97);
+}
+.stopwatch-dial svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.stopwatch-dial__track {
+  fill: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  stroke: color-mix(in srgb, var(--color-accent-mark) 14%, var(--color-surface-hover));
+  stroke-width: 6;
+}
+.stopwatch-dial__mark {
+  stroke: var(--color-text-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.stopwatch-dial__arc {
+  fill: none;
+  stroke: var(--color-accent-mark);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 100px 100px;
+}
+.stopwatch-dial__arc.is-unwinding {
+  transition: stroke-dashoffset 450ms cubic-bezier(0.55, 0, 0.45, 1);
+}
+.stopwatch-dial__tip {
+  fill: var(--color-accent-mark);
+  filter: drop-shadow(0 0 4px var(--color-accent-mark));
+}
+.stopwatch-dial.is-paused .stopwatch-dial__tip {
+  filter: none;
+  opacity: 0.7;
+}
+.stopwatch-dial__notch {
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.75;
+  animation: stopwatch-notch 260ms ease-out;
+}
+@keyframes stopwatch-notch {
+  from {
+    opacity: 0;
+    stroke-width: 5;
+  }
+}
+.stopwatch-dial__flash,
+.stopwatch-dial__pulse {
+  fill: none;
+  stroke: var(--color-accent-mark);
+  stroke-width: 6;
+  transform-origin: 100px 100px;
+  pointer-events: none;
+}
+.stopwatch-dial__flash {
+  animation: stopwatch-flash 700ms ease-out forwards;
+}
+@keyframes stopwatch-flash {
+  from {
+    opacity: 0.9;
+    stroke-width: 10;
+  }
+  to {
+    opacity: 0;
+    stroke-width: 6;
+  }
+}
+.stopwatch-dial__pulse {
+  animation: stopwatch-pulse 520ms ease-out forwards;
+}
+@keyframes stopwatch-pulse {
+  from {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+.stopwatch-dial__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.stopwatch-dial__time {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.5px;
+  color: var(--color-text);
+}
+.stopwatch-dial__hundredths {
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+.stopwatch-dial__hint {
+  margin-top: 10px;
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+.stopwatch-dial.is-paused .stopwatch-dial__time,
+.stopwatch-dial.is-paused .stopwatch-dial__hundredths {
+  animation: stopwatch-breathe 1.8s ease-in-out infinite;
+}
+@keyframes stopwatch-breathe {
+  50% {
+    opacity: 0.45;
+  }
+}
+.stopwatch-key {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 9.5px;
+  color: var(--color-text-muted);
+}
+.settings-btn.is-pressed {
+  transform: scale(0.96);
+  filter: brightness(1.25);
+}
+.stopwatch-lap {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 14px;
+  padding: 7px 12px;
+  font-size: 12px;
+  animation: stopwatch-lap-in 240ms ease-out;
+}
+@keyframes stopwatch-lap-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+.stopwatch-lap--current {
+  color: var(--color-text-secondary);
+  animation: none;
+}
+.stopwatch-lap--fastest {
+  background: color-mix(in srgb, var(--color-positive) 12%, transparent);
+  color: var(--color-positive);
+}
+.stopwatch-lap--slowest {
+  background: color-mix(in srgb, var(--color-negative) 12%, transparent);
+  color: var(--color-negative);
+}
+@media (prefers-reduced-motion: reduce) {
+  .stopwatch-dial__flash,
+  .stopwatch-dial__pulse,
+  .stopwatch-dial__notch,
+  .stopwatch-lap {
+    animation: none;
+  }
+  .stopwatch-dial__flash,
+  .stopwatch-dial__pulse {
+    display: none;
+  }
+  .stopwatch-dial.is-paused .stopwatch-dial__time,
+  .stopwatch-dial.is-paused .stopwatch-dial__hundredths {
+    animation: none;
+    opacity: 0.6;
+  }
+  .stopwatch-dial__arc.is-unwinding {
+    transition: none;
   }
 }

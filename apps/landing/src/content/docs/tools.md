@@ -1,6 +1,6 @@
 ---
 title: Tools
-description: The date converter, world clocks, emergency numbers and useful websites, and calculators for land, gold weight, VAT and interest.
+description: The date converter, world clocks, a stopwatch, emergency numbers and useful websites, and calculators for land, gold weight, VAT and interest.
 section: features
 order: 13
 screen: /tools
@@ -27,6 +27,16 @@ Keep an eye on family and colleagues abroad.
 2. Click it to add it. Added cities show their local time, and **+1** or **−1** when they're on another day.
 
 Your cities also appear on the **Today** screen under the date. Click **✕** to remove one.
+
+### Stopwatch
+
+Tap the **dial** to start, and tap it again to pause. The gold arc goes round once a minute.
+
+- **Lap** marks a lap: it leaves a notch on the dial and a row in the list, with that lap's time and the total. From three laps on, the fastest is green and the slowest red.
+- **Reset** winds it back to zero.
+- On a keyboard: **Space** starts and pauses, **L** laps, **R** resets.
+- It keeps running when Sajilo is closed, and after a restart. The Stopwatch card on the Tools page shows the time and has its own play/pause button.
+- In the [mini view](/docs/first-steps.html#mini-view), a stopwatch with time on it takes the second line; click it to pause or carry on. Reset it and the strip goes back to what you chose.
 
 ### Date Converter
 

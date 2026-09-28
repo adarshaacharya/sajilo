@@ -7,12 +7,14 @@ import { loadedValue } from "../../../shared/lib/load-state";
 import { type MiniLine as Choice, nextMiniLine, setMiniLine } from "../../../shared/lib/mini-line";
 import { digits } from "../../../shared/lib/numerals";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
+import * as stopwatch from "../../../shared/lib/stopwatch";
 import type { ForexSnapshot } from "../../../types/api/ForexSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
 import type { WeatherSnapshot } from "../../../types/api/WeatherSnapshot";
 import { money } from "../../bazar/_lib/format";
 import { changeTone } from "../../bazar/_lib/stock-tone";
+import { clockText } from "../../tools/_components/stopwatch-tab";
 import { formatCelsius } from "../../weather/_lib/format";
 
 /** Asked again this often, so the strip stays current left on the desktop. */
@@ -169,6 +171,48 @@ export function MiniLine({ choice }: { choice: Choice }) {
         {content ?? <span className="mini-view__muted">…</span>}
         {/* Shown on hover: this line is a button, and it switches. */}
         <Icon name="swap" className="mini-view__swap" />
+      </span>
+    </button>
+  );
+}
+
+/**
+ * While the stopwatch has time on it, the strip's second line is the
+ * stopwatch: a small arc filling once a minute, the time, and whether it
+ * runs. Clicking it starts or pauses; Reset stays in Tools.
+ */
+export function StopwatchLine() {
+  const { t, numerals } = useSettings();
+  const watch = stopwatch.useStopwatch();
+  const ms = stopwatch.useElapsed(watch, 4);
+  const running = stopwatch.isRunning(watch);
+  const share = (ms % 60_000) / 60_000;
+  const ring = 2 * Math.PI * 5;
+  return (
+    <button
+      type="button"
+      onClick={() => stopwatch.toggle()}
+      title={t(running ? "stopwatch.tap-pause" : "stopwatch.tap-resume")}
+      className="mini-view__switch"
+    >
+      <span className="mini-view__next flex min-w-0 items-center">
+        <svg viewBox="0 0 14 14" className="mini-view__watch" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" className="mini-view__watch-track" />
+          <circle
+            cx="7"
+            cy="7"
+            r="5"
+            className="mini-view__watch-arc"
+            strokeDasharray={ring}
+            strokeDashoffset={ring * (1 - share)}
+          />
+        </svg>
+        <span className={`tabular-nums${running ? "" : " mini-view__muted"}`}>
+          {clockText(ms, numerals)}
+        </span>
+        <span className="mini-view__muted">
+          &nbsp;· {t(running ? "mini.playing" : "mini.paused")}
+        </span>
       </span>
     </button>
   );

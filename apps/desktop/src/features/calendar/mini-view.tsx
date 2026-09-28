@@ -5,7 +5,8 @@ import { api, type Today } from "../../shared/lib/ipc";
 import { useMiniLine } from "../../shared/lib/mini-line";
 import { digits } from "../../shared/lib/numerals";
 import { setMini, useDragWhenKept } from "../../shared/lib/popover-kept";
-import { MiniLine } from "./_components/mini-line";
+import * as stopwatch from "../../shared/lib/stopwatch";
+import { MiniLine, StopwatchLine } from "./_components/mini-line";
 import { useNepalClock } from "./_lib/nepal-clock";
 
 const WEEKDAYS_NE = ["आइत", "सोम", "मंगल", "बुध", "बिहि", "शुक्र", "शनि"];
@@ -36,6 +37,9 @@ export function MiniView() {
   const clock = useNepalClock();
   const [today, setToday] = useState<Today | null>(null);
   const line = useMiniLine();
+  // A stopwatch with time on it takes the second line until it is reset.
+  const watch = stopwatch.useStopwatch();
+  const timing = stopwatch.isRunning(watch) || watch.banked > 0;
   const strip = useRef<HTMLDivElement>(null);
   useDragWhenKept(strip);
 
@@ -71,7 +75,7 @@ export function MiniView() {
             </>
           )}
         </p>
-        <MiniLine choice={line} />
+        {timing ? <StopwatchLine /> : <MiniLine choice={line} />}
       </div>
 
       <span className="mini-view__clock tabular-nums">
