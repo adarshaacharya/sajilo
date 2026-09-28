@@ -175,6 +175,155 @@
   color-scheme: dark;
 }
 
+/* Accent presets, picked in Settings › Display. Marigold (सयपत्री) is the
+   default gilt above and needs no attribute. Each preset sets the same four
+   tokens as the theme, for dark and for light, after the theme rules and one
+   attribute more specific, so it wins in either. Every pair was checked for
+   contrast: the mark reads at 4.7:1 or better on surface and canvas in both
+   modes, and ink on fill at 4.7:1 or better. Dhaka is a wine crimson and
+   Kamal a clear lotus pink, both kept about 20° of hue off the orange-red
+   of holidays (and each other): in a patro, red means a day off. */
+:root[data-accent="dhaka"] {
+  --color-accent: #e0506f;
+  --color-accent-mark: #e0506f;
+  --color-accent-fill: #b8284a;
+  --color-accent-ink: #ffffff;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="dhaka"]:not([data-theme="dark"]) {
+    --color-accent: #9b1b3c;
+    --color-accent-mark: #9b1b3c;
+    --color-accent-fill: #a8213f;
+    --color-accent-ink: #ffffff;
+  }
+}
+:root[data-accent="dhaka"][data-theme="light"] {
+  --color-accent: #9b1b3c;
+  --color-accent-mark: #9b1b3c;
+  --color-accent-fill: #a8213f;
+  --color-accent-ink: #ffffff;
+}
+:root[data-accent="himali"] {
+  --color-accent: #5eaef2;
+  --color-accent-mark: #5eaef2;
+  --color-accent-fill: #5eaef2;
+  --color-accent-ink: #0b1420;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="himali"]:not([data-theme="dark"]) {
+    --color-accent: #1d5d9c;
+    --color-accent-mark: #1d5d9c;
+    --color-accent-fill: #5eaef2;
+    --color-accent-ink: #0b1420;
+  }
+}
+:root[data-accent="himali"][data-theme="light"] {
+  --color-accent: #1d5d9c;
+  --color-accent-mark: #1d5d9c;
+  --color-accent-fill: #5eaef2;
+  --color-accent-ink: #0b1420;
+}
+:root[data-accent="kamal"] {
+  --color-accent: #f27bbd;
+  --color-accent-mark: #f27bbd;
+  --color-accent-fill: #f27bbd;
+  --color-accent-ink: #1a0914;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="kamal"]:not([data-theme="dark"]) {
+    --color-accent: #b0246f;
+    --color-accent-mark: #b0246f;
+    --color-accent-fill: #ec6fb2;
+    --color-accent-ink: #1a0914;
+  }
+}
+:root[data-accent="kamal"][data-theme="light"] {
+  --color-accent: #b0246f;
+  --color-accent-mark: #b0246f;
+  --color-accent-fill: #ec6fb2;
+  --color-accent-ink: #1a0914;
+}
+:root[data-accent="ilam"] {
+  --color-accent: #a5c75c;
+  --color-accent-mark: #a5c75c;
+  --color-accent-fill: #a5c75c;
+  --color-accent-ink: #11150a;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="ilam"]:not([data-theme="dark"]) {
+    --color-accent: #4a6613;
+    --color-accent-mark: #4a6613;
+    --color-accent-fill: #a5c75c;
+    --color-accent-ink: #11150a;
+  }
+}
+:root[data-accent="ilam"][data-theme="light"] {
+  --color-accent: #4a6613;
+  --color-accent-mark: #4a6613;
+  --color-accent-fill: #a5c75c;
+  --color-accent-ink: #11150a;
+}
+:root[data-accent="makhamali"] {
+  --color-accent: #b98cf2;
+  --color-accent-mark: #b98cf2;
+  --color-accent-fill: #b98cf2;
+  --color-accent-ink: #150b22;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="makhamali"]:not([data-theme="dark"]) {
+    --color-accent: #6b3db3;
+    --color-accent-mark: #6b3db3;
+    --color-accent-fill: #b98cf2;
+    --color-accent-ink: #150b22;
+  }
+}
+:root[data-accent="makhamali"][data-theme="light"] {
+  --color-accent: #6b3db3;
+  --color-accent-mark: #6b3db3;
+  --color-accent-fill: #b98cf2;
+  --color-accent-ink: #150b22;
+}
+:root[data-accent="phewa"] {
+  --color-accent: #3cc4b4;
+  --color-accent-mark: #3cc4b4;
+  --color-accent-fill: #3cc4b4;
+  --color-accent-ink: #06201c;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="phewa"]:not([data-theme="dark"]) {
+    --color-accent: #0b6f64;
+    --color-accent-mark: #0b6f64;
+    --color-accent-fill: #3cc4b4;
+    --color-accent-ink: #06201c;
+  }
+}
+:root[data-accent="phewa"][data-theme="light"] {
+  --color-accent: #0b6f64;
+  --color-accent-mark: #0b6f64;
+  --color-accent-fill: #3cc4b4;
+  --color-accent-ink: #06201c;
+}
+:root[data-accent="rudraksha"] {
+  --color-accent: #d18a5e;
+  --color-accent-mark: #d18a5e;
+  --color-accent-fill: #c47a4c;
+  --color-accent-ink: #1a0d05;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-accent="rudraksha"]:not([data-theme="dark"]) {
+    --color-accent: #8e4a22;
+    --color-accent-mark: #8e4a22;
+    --color-accent-fill: #c47a4c;
+    --color-accent-ink: #1a0d05;
+  }
+}
+:root[data-accent="rudraksha"][data-theme="light"] {
+  --color-accent: #8e4a22;
+  --color-accent-mark: #8e4a22;
+  --color-accent-fill: #c47a4c;
+  --color-accent-ink: #1a0d05;
+}
+
 html,
 body,
 #root {
@@ -2728,3 +2877,35 @@ input[type="search"]::-webkit-search-decoration {
     transition: none;
   }
 }
+
+/* Settings › Display › Accent. Each dot shows its own preset whatever the
+   current accent is, so its colour is written here, matching the preset's
+   fill above; the chosen one gets a ring in the current text colour. */
+.accent-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.accent-swatch:hover {
+  transform: scale(1.1);
+}
+.accent-swatch:has(input:checked) {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+.accent-swatch:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent-mark);
+  outline-offset: 3px;
+}
+.accent-swatch--marigold { background: #d4a84a; }
+.accent-swatch--dhaka { background: #b8284a; }
+.accent-swatch--himali { background: #5eaef2; }
+.accent-swatch--kamal { background: #ec6fb2; }
+.accent-swatch--ilam { background: #a5c75c; }
+.accent-swatch--makhamali { background: #b98cf2; }
+.accent-swatch--phewa { background: #3cc4b4; }
+.accent-swatch--rudraksha { background: #c47a4c; }

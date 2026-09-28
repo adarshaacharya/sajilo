@@ -315,7 +315,7 @@ export function PhotoBadge({
         className="size-full rounded-[6px] border border-divider object-cover"
       />
       {summary.count > 1 && (
-        <span className="absolute -right-1 -bottom-1 min-w-3.5 rounded-full border border-[color:var(--color-surface)] bg-[color:var(--color-accent-mark)] px-1 text-center text-[8px] font-semibold leading-[13px] tabular-nums text-[#1a1408]">
+        <span className="absolute -right-1 -bottom-1 min-w-3.5 rounded-full border border-[color:var(--color-surface)] bg-accent-fill px-1 text-center text-[8px] font-semibold leading-[13px] tabular-nums text-accent-ink">
           {summary.count}
         </span>
       )}

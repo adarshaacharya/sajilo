@@ -11,6 +11,7 @@ import { api } from "../../../shared/lib/ipc";
 import { MINI_LINES, setMiniLine, useMiniLine } from "../../../shared/lib/mini-line";
 import { digits, type NumeralStyle } from "../../../shared/lib/numerals";
 import { hasTrayIcon, isLinux, isWindows } from "../../../shared/lib/platform";
+import { AccentPicker } from "./accent-picker";
 import { SettingsSection } from "./settings-section";
 
 const MENU_BAR_FORMATS = [
@@ -122,6 +123,7 @@ export function DisplayTab({
             { id: "dark", label: t("theme.dark") },
           ]}
         />
+        <AccentPicker />
         <Select
           label={t("settings.text-size")}
           value={textSize}

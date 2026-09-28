@@ -5,6 +5,20 @@ import { api } from "../lib/ipc";
 import type { NumeralStyle } from "../lib/numerals";
 
 export type ThemeMode = "system" | "light" | "dark";
+
+/** The accent presets, each named for something every Nepali knows.
+ * Marigold (सयपत्री) is the app's own gilt and the default. */
+export const ACCENTS = [
+  "marigold",
+  "rudraksha",
+  "dhaka",
+  "kamal",
+  "makhamali",
+  "himali",
+  "phewa",
+  "ilam",
+] as const;
+export type Accent = (typeof ACCENTS)[number];
 export type TextSize = "small" | "default" | "large";
 
 export interface ModulePrefs {
@@ -58,11 +72,13 @@ interface Settings {
   language: Language;
   numerals: NumeralStyle;
   theme: ThemeMode;
+  accent: Accent;
   textSize: TextSize;
   modules: ModulePrefs;
   setLanguage: (value: Language) => void;
   setNumerals: (value: NumeralStyle) => void;
   setTheme: (value: ThemeMode) => void;
+  setAccent: (value: Accent) => void;
   setTextSize: (value: TextSize) => void;
   setModules: (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => void;
   t: (key: Parameters<typeof translate>[0]) => string;
@@ -73,6 +89,11 @@ const SettingsContext = createContext<Settings | null>(null);
 function applyTheme(theme: ThemeMode) {
   if (theme === "system") delete document.documentElement.dataset.theme;
   else document.documentElement.dataset.theme = theme;
+}
+
+function applyAccent(accent: Accent) {
+  if (accent === "marigold") delete document.documentElement.dataset.accent;
+  else document.documentElement.dataset.accent = accent;
 }
 
 function applyTextSize(textSize: TextSize) {
@@ -88,10 +109,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [numerals, setNumerals] = useState<NumeralStyle>("devanagari");
   const [theme, setThemeState] = useState<ThemeMode>("system");
+  const [accent, setAccentState] = useState<Accent>("marigold");
   const [textSize, setTextSizeState] = useState<TextSize>("default");
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
 
   useEffect(() => applyTheme(theme), [theme]);
+  useEffect(() => applyAccent(accent), [accent]);
   useEffect(() => applyTextSize(textSize), [textSize]);
 
   // Mirrored for the outermost error boundary, which renders above this
@@ -118,6 +141,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<string[]>("clocks"),
       api.getSetting<boolean>("keeperEnabled"),
       api.getSetting<boolean>("focusEnabled"),
+      api.getSetting<string>("accent"),
     ])
       .then(
         ([
@@ -138,6 +162,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           clocks,
           keeperEnabled,
           focusEnabled,
+          storedAccent,
         ]) => {
           if (cancelled) return;
           if (storedLanguage) setLanguage(storedLanguage);
@@ -145,6 +170,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
             setThemeState(storedTheme);
           }
+          if (ACCENTS.includes(storedAccent as Accent)) setAccentState(storedAccent as Accent);
           if (
             storedTextSize === "small" ||
             storedTextSize === "default" ||
@@ -222,6 +248,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     language,
     numerals,
     theme,
+    accent,
     textSize,
     modules,
     setLanguage: (next) => {
@@ -235,6 +262,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setTheme: (next) => {
       setThemeState(next);
       persist("theme", next);
+    },
+    setAccent: (next) => {
+      setAccentState(next);
+      persist("accent", next);
     },
     setTextSize: (next) => {
       setTextSizeState(next);

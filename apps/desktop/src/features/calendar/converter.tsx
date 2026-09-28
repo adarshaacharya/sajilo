@@ -278,7 +278,7 @@ export function Converter() {
         <button
           type="button"
           onClick={convert}
-          className="rounded-md bg-[color:var(--color-accent)] px-3 py-1.5 text-[11px] font-semibold text-[#fffaf0] transition-opacity hover:opacity-90 active:opacity-75"
+          className="rounded-md bg-accent-fill px-3 py-1.5 text-[11px] font-semibold text-accent-ink transition-opacity hover:opacity-90 active:opacity-75"
         >
           {t("action.convert")}
         </button>
