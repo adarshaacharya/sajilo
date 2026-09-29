@@ -19,6 +19,9 @@
 //! only notices a new extension at the next login, so until then the tray
 //! works as before and Sajilo says so once.
 
+// zbus hands every D-Bus property getter `&self`, whether it needs it or not.
+#![allow(clippy::unused_self)]
+
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -142,8 +145,7 @@ impl Panel {
     fn icon(&self) -> String {
         SHOWN
             .lock()
-            .map(|shown| shown.1.to_owned())
-            .unwrap_or_else(|_| "flag".to_owned())
+            .map_or_else(|_| "flag".to_owned(), |shown| shown.1.to_owned())
     }
 
     /// Bumped if the interface ever changes, so an extension left over from an
