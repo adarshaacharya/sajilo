@@ -1,0 +1,332 @@
+{
+ "currencies": [
+  {
+   "id": "pepe-pepe",
+   "name": "Pepe",
+   "symbol": "PEPE",
+   "rank": 58,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11042761,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x6982508145454ce325ddbe47a25d4ec3d2311933"
+    },
+    {
+     "type": "BEP20",
+     "address": "0x25d887ce7a35172c62febfd67a1856f20faebb00"
+    },
+    {
+     "type": "Other",
+     "address": "0x25d887ce7a35172c62febfd67a1856f20faebb00"
+    }
+   ]
+  },
+  {
+   "id": "pepecoin-pepecoin",
+   "name": "pepeCoin",
+   "symbol": "PEPECOIN",
+   "rank": 739,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11070627,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0xa9e8acf069c58aec8825542845fd754e41a9489a"
+    }
+   ]
+  },
+  {
+   "id": "pepecat2-pepecat",
+   "name": "PEPECAT",
+   "symbol": "PEPECAT",
+   "rank": 944,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11331799,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "CRAMvzDsSpXYsFpcoDr6vFLJMBeftez1E7277xwPpump"
+    }
+   ]
+  },
+  {
+   "id": "purpe-purple-pepe",
+   "name": "Purple Pepe",
+   "symbol": "PURPE",
+   "rank": 999,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11417177,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "HBoNJ5v8g71s2boRivrHnfSB5MVPLDHHyVjruPfhGkvL"
+    }
+   ]
+  },
+  {
+   "id": "pork-pepefork",
+   "name": "PepeFork",
+   "symbol": "PORK",
+   "rank": 1104,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11137539,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0xb9f599ce614feb2e1bbe58f180f370d05b39344e"
+    }
+   ]
+  },
+  {
+   "id": "pepu-pepe-unchained-new",
+   "name": "Pepe Unchained (New)",
+   "symbol": "PEPU",
+   "rank": 1563,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 3156274834,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x93aA0ccD1e5628d3A841C4DbdF602D9eb04085d6"
+    }
+   ]
+  },
+  {
+   "id": "zeus-pepes-dog",
+   "name": "Pepes Dog",
+   "symbol": "ZEUS",
+   "rank": 1664,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11442295,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x0f7dc5d02cc1e1f5ee47854d534d332a1081ccc8"
+    }
+   ]
+  },
+  {
+   "id": "skop-skull-of-pepe-token",
+   "name": "Skull of Pepe Token",
+   "symbol": "SKOP",
+   "rank": 1707,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11271887,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "0x6d3B8C76c5396642960243Febf736C6BE8b60562"
+    }
+   ]
+  },
+  {
+   "id": "babypepe8-baby-pepe",
+   "name": "Baby Pepe",
+   "symbol": "BABYPEPE",
+   "rank": 1786,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11392479,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x69babe9811cc86dcfc3b8f9a14de6470dd18eda4"
+    }
+   ]
+  },
+  {
+   "id": "pepe-the-original-pepe",
+   "name": "The Original Pepe",
+   "symbol": "PEPE",
+   "rank": 1862,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11136507,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x4dfae3690b93c47470b03036a17b23c1be05127c"
+    }
+   ]
+  },
+  {
+   "id": "peezy-young-peezy-aka-pepe",
+   "name": "Young Peezy AKA Pepe",
+   "symbol": "PEEZY",
+   "rank": 2015,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11143593,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "0x1b6a569dd61edce3c383f6d565e2f79ec3a12980"
+    }
+   ]
+  },
+  {
+   "id": "pepec3-pepe-clanker",
+   "name": "Pepe Clanker",
+   "symbol": "PEPEC",
+   "rank": 2077,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11334939,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "0x1196c6704789620514fd25632abe15f69a50bc4f"
+    }
+   ]
+  },
+  {
+   "id": "yelpe-yellow-pepe",
+   "name": "Yellow Pepe",
+   "symbol": "YELPE",
+   "rank": 2187,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11331297,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "3JVxH5QT9z3v7Gi2z4K4N69Bma6PHj8uovX8tYdQpump"
+    }
+   ]
+  },
+  {
+   "id": "yepe1-yellow-pepe",
+   "name": "Yellow Pepe",
+   "symbol": "YEPE",
+   "rank": 2397,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 14652269,
+   "contract_address": [
+    {
+     "type": "BEP20",
+     "address": "0xe9e3d8609e50c333b7e8fafb1a06f5443cb64444"
+    }
+   ]
+  },
+  {
+   "id": "apepe3-angel-pepe",
+   "name": "Angel Pepe",
+   "symbol": "APEPE",
+   "rank": 2437,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11280543,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "CJMzsCjdpbhVubQUWojED2MhZo9FWLz653kVdp2apump"
+    }
+   ]
+  },
+  {
+   "id": "pepe16-pepe-solana",
+   "name": "Pepe Solana",
+   "symbol": "PEPE",
+   "rank": 3211,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11281251,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "B5WTLaRwaUQpKk7ir1wniNB6m5o8GgMrimhKMYan2R6B"
+    }
+   ]
+  },
+  {
+   "id": "pew-pepe-in-a-memes-world",
+   "name": "pepe in a memes world",
+   "symbol": "PEW",
+   "rank": 3364,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11267439,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x382ea807a61a418479318efd96f1efbc5c1f2c21"
+    }
+   ]
+  },
+  {
+   "id": "pepes-mcpepes",
+   "name": "McPepe's",
+   "symbol": "PEPES",
+   "rank": 3378,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11035165,
+   "contract_address": [
+    {
+     "type": "ERC20",
+     "address": "0x6bf765c43030387a983f429c1438e9d2025b7e12"
+    }
+   ]
+  },
+  {
+   "id": "pepemusk-pepemusk",
+   "name": "PepeMusk",
+   "symbol": "PEPEMUSK",
+   "rank": 3399,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11424129,
+   "contract_address": [
+    {
+     "type": "BEP20",
+     "address": "0x0dcd05357b83bf100e668f152bf14bf96b679cd1"
+    }
+   ]
+  },
+  {
+   "id": "pepe-pepe-on-sui",
+   "name": "Pepe On Sui",
+   "symbol": "PEPE",
+   "rank": 3492,
+   "is_new": false,
+   "is_active": true,
+   "type": "token",
+   "rev": 11411625,
+   "contract_address": [
+    {
+     "type": "Other",
+     "address": "0x288710173f12f677ac38b0c2b764a0fea8108cb5e32059c3dd8f650d65e2cb25::pepe::PEPE"
+    }
+   ]
+  }
+ ]
+}

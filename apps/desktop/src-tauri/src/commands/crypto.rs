@@ -1,4 +1,5 @@
-//! Crypto prices from CoinGecko, with Kraken behind it, and each coin's chart.
+//! Crypto prices from CoinPaprika, with Binance behind it, and each coin's
+//! chart from Binance.
 //! Shown for information: see `sajilo_providers::crypto`.
 
 use std::borrow::Cow;
@@ -108,7 +109,7 @@ pub async fn get_crypto_coins(app: AppHandle<Wry>, ids: Vec<String>) -> LoadStat
     }
 }
 
-/// Every coin CoinGecko knows whose name or ticker matches, for the search
+/// Every coin CoinPaprika knows whose name or ticker matches, for the search
 /// box once the loaded list has no match.
 #[tauri::command]
 pub async fn search_crypto(app: AppHandle<Wry>, query: String) -> LoadState<Vec<CryptoSearchHit>> {
@@ -117,4 +118,18 @@ pub async fn search_crypto(app: AppHandle<Wry>, query: String) -> LoadState<Vec<
         Ok(hits) => LoadState::Fresh(hits),
         Err(error) => LoadState::Failed(error.to_string()),
     }
+}
+
+/// New ids for coins starred under their old CoinGecko ids (`bitcoin` →
+/// `btc-bitcoin`), found against the current list; ids already current, or
+/// that can't be matched, are left out.
+#[tauri::command]
+pub async fn crypto_current_ids(app: AppHandle<Wry>, ids: Vec<String>) -> HashMap<String, String> {
+    let state = get_crypto(app, None).await;
+    let Some(snapshot) = state.value() else {
+        return HashMap::new();
+    };
+    ids.into_iter()
+        .filter_map(|id| crypto::current_id(&id, &snapshot.coins).map(|new| (id, new)))
+        .collect()
 }

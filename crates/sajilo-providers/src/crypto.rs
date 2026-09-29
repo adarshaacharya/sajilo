@@ -1,91 +1,160 @@
-//! Crypto prices, from CoinGecko with Kraken behind it.
+//! Crypto prices, from CoinPaprika with Binance behind it, and charts from
+//! Binance.
 //!
-//! CoinGecko aggregates hundreds of exchanges into one market list: price,
-//! market value, volume, the all-time high and a week of hourly prices, for
-//! the top coins in one request and without a key. Kraken's public ticker is
-//! an exchange's own price for a fixed set of major coins; it has no market
-//! value or week of prices, so it only stands in when CoinGecko is down.
+//! CoinPaprika aggregates the market into one ranked list: price, market
+//! value, volume, the 24-hour and 7-day moves and the all-time high, for the
+//! top coins in one request and without a key. Binance's website list (the one
+//! its own markets page reads) carries much the same, ranked, with each coin's
+//! logo; it stands in when CoinPaprika is down, and lends its logos to
+//! CoinPaprika's list, whose own logos only load on coinpaprika.com.
+//!
+//! Charts come from Binance's public market API: an exchange's own trades,
+//! hourly for a week and daily for a year. A coin Binance doesn't trade gets
+//! CoinPaprika's daily prices instead.
+//!
+//! CoinGecko was the source until it began refusing price requests from
+//! Nepali networks (403 for markets and prices, while search still answered).
+//! Both sources here were checked from Kathmandu.
 //!
 //! Every figure is in US dollars. Buying, selling or holding crypto is not
 //! legal in Nepal, and a rupee price would read like one a Nepali could trade
 //! at.
 
-use chrono::{DateTime, Utc};
+use std::collections::HashMap;
+
+use chrono::{DateTime, Duration, Utc};
 use sajilo_api::crypto::{
     CryptoChart, CryptoCoin, CryptoPricePoint, CryptoSearchHit, CryptoSnapshot,
 };
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
-use std::collections::HashMap;
 
 use crate::error::{ProviderError, Result};
 use crate::http::HttpClient;
 
-pub const COINGECKO_SOURCE: &str = "CoinGecko";
-pub const KRAKEN_SOURCE: &str = "Kraken";
+pub const COINPAPRIKA_SOURCE: &str = "CoinPaprika";
+pub const BINANCE_SOURCE: &str = "Binance";
 
-/// The top coins by market value, with a week of hourly prices each. 250 is
-/// CoinGecko's largest page, still one request, and covers nearly any coin
-/// someone in Nepal actually follows.
-const COINGECKO_MARKETS: &str = "https://api.coingecko.com/api/v3/coins/markets\
-?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=true\
-&price_change_percentage=24h,7d";
-/// The same market data for named coins, whatever their rank: a starred coin
-/// that slipped out of the top list, or one opened from search.
-const COINGECKO_MARKETS_BY_ID: &str = "https://api.coingecko.com/api/v3/coins/markets\
-?vs_currency=usd&sparkline=true&price_change_percentage=24h,7d";
-/// Every coin CoinGecko knows, by name or ticker.
-const COINGECKO_SEARCH: &str = "https://api.coingecko.com/api/v3/search";
-const COINGECKO_CHART: &str = "https://api.coingecko.com/api/v3/coins";
-const KRAKEN_TICKER: &str = "https://api.kraken.com/0/public/Ticker";
+/// The top coins by market value. 250 covers nearly any coin someone in
+/// Nepal actually follows, in one request.
+const PAPRIKA_TICKERS: &str = "https://api.coinpaprika.com/v1/tickers?quotes=USD&limit=250";
+const PAPRIKA_TICKER: &str = "https://api.coinpaprika.com/v1/tickers";
+const PAPRIKA_SEARCH: &str = "https://api.coinpaprika.com/v1/search/";
+/// Binance's markets page list: every coin it trades, ranked, with names,
+/// logos and market values. Not a documented API, so only ever a stand-in.
+const BINANCE_LIST: &str = "https://www.binance.com/bapi/composite/v1/public/marketing/symbol/list";
+const BINANCE_KLINES: &str = "https://api.binance.com/api/v3/klines";
 
-/// How many coins one by-id request may name, and how many search hits are
-/// kept: enough for anyone's starred list, short enough for one small reply.
+/// How many coins the list keeps, how many one by-id request may name, and
+/// how many search hits are kept.
+pub const LIST_SIZE: usize = 250;
 pub const MAX_COINS_BY_ID: usize = 50;
 pub const MAX_SEARCH_HITS: usize = 20;
 
 /// The spans a chart can be asked for, in days.
 pub const CHART_DAYS: [u32; 4] = [1, 7, 30, 365];
 
-/// The coins Kraken is asked for when CoinGecko is down: its pair, and the
-/// CoinGecko id, ticker and name the list is keyed by. Kraken answers under
-/// its own names for the older pairs (`XXBTZUSD` for `XBTUSD`), so both are
-/// kept.
-const KRAKEN_COINS: [(&str, &str, &str, &str, &str); 12] = [
-    ("XBTUSD", "XXBTZUSD", "bitcoin", "BTC", "Bitcoin"),
-    ("ETHUSD", "XETHZUSD", "ethereum", "ETH", "Ethereum"),
-    ("XRPUSD", "XXRPZUSD", "ripple", "XRP", "XRP"),
-    ("SOLUSD", "SOLUSD", "solana", "SOL", "Solana"),
-    ("DOGEUSD", "XDGUSD", "dogecoin", "DOGE", "Dogecoin"),
-    ("ADAUSD", "ADAUSD", "cardano", "ADA", "Cardano"),
-    ("TRXUSD", "TRXUSD", "tron", "TRX", "TRON"),
-    ("LINKUSD", "LINKUSD", "chainlink", "LINK", "Chainlink"),
-    ("AVAXUSD", "AVAXUSD", "avalanche-2", "AVAX", "Avalanche"),
-    ("XLMUSD", "XXLMZUSD", "stellar", "XLM", "Stellar"),
-    ("LTCUSD", "XLTCZUSD", "litecoin", "LTC", "Litecoin"),
-    ("DOTUSD", "DOTUSD", "polkadot", "DOT", "Polkadot"),
+/// CoinGecko ids saved before the switch whose CoinPaprika id doesn't end in
+/// them; the rest are found by that ending (`bitcoin` → `btc-bitcoin`).
+const RENAMED: [(&str, &str); 10] = [
+    ("ripple", "xrp-xrp"),
+    ("binancecoin", "bnb-binance-coin"),
+    ("avalanche-2", "avax-avalanche"),
+    ("the-open-network", "ton-toncoin"),
+    ("matic-network", "matic-polygon"),
+    ("staked-ether", "steth-lido-staked-ether"),
+    ("usd-coin", "usdc-usd-coin"),
+    ("bitcoin-cash", "bch-bitcoin-cash"),
+    ("crypto-com-chain", "cro-cryptocom-chain"),
+    ("internet-computer", "icp-internet-computer"),
 ];
 
+/// The list: CoinPaprika's, with Binance's logos where the coins match, or
+/// Binance's own when CoinPaprika is down.
 pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
-    let primary = match client.get_text(COINGECKO_SOURCE, COINGECKO_MARKETS).await {
-        Ok(body) => parse_coingecko(&body, now),
-        Err(error) => Err(error),
-    };
-    if primary.is_ok() {
-        return primary;
-    }
-    let pairs: Vec<&str> = KRAKEN_COINS.iter().map(|coin| coin.0).collect();
-    let url = format!("{KRAKEN_TICKER}?pair={}", pairs.join(","));
-    let fallback = match client.get_text(KRAKEN_SOURCE, &url).await {
-        Ok(body) => parse_kraken(&body, now),
-        Err(error) => Err(error),
-    };
-    // Both down: the primary's reason is the one worth reporting.
-    fallback.or(primary)
+    let (paprika, binance) = tokio::join!(
+        client.get_text(COINPAPRIKA_SOURCE, PAPRIKA_TICKERS),
+        client.get_text(BINANCE_SOURCE, BINANCE_LIST),
+    );
+    list(
+        paprika.and_then(|body| parse_paprika_coins(&body)),
+        binance.and_then(|body| parse_binance_coins(&body)),
+        now,
+    )
 }
 
-/// One coin's price over `days`: CoinGecko's hourly points for up to 90 days,
-/// daily beyond. `days` must be one of [`CHART_DAYS`].
+/// The list from both sources' answers: CoinPaprika's with Binance's logos
+/// lent where the coins match, or Binance's own when CoinPaprika failed.
+pub fn list(
+    paprika: Result<Vec<CryptoCoin>>,
+    binance: Result<Vec<CryptoCoin>>,
+    now: DateTime<Utc>,
+) -> Result<CryptoSnapshot> {
+    match paprika {
+        Ok(mut coins) => {
+            if let Ok(listed) = &binance {
+                lend_logos(&mut coins, listed);
+            }
+            snapshot(coins, COINPAPRIKA_SOURCE, now)
+        }
+        // Both down: CoinPaprika's reason is the one worth reporting.
+        Err(error) => binance
+            .map_err(|_| error)
+            .and_then(|coins| snapshot(coins, BINANCE_SOURCE, now)),
+    }
+}
+
+/// Market data for these coins, whatever their rank: a starred coin that
+/// slipped out of the top list, or one opened from search. Each comes with a
+/// week of hourly prices from Binance where it trades there, for its line.
+/// Unknown or malformed ids are dropped rather than failing the rest.
+pub async fn fetch_coins(client: &HttpClient, ids: &[String]) -> Result<Vec<CryptoCoin>> {
+    let mut lookups = tokio::task::JoinSet::new();
+    for (order, id) in ids
+        .iter()
+        .filter(|id| valid_id(id))
+        .take(MAX_COINS_BY_ID)
+        .enumerate()
+    {
+        let (client, id) = (client.clone(), id.clone());
+        lookups.spawn(async move {
+            let url = format!("{PAPRIKA_TICKER}/{id}?quotes=USD");
+            let body = client.get_text(COINPAPRIKA_SOURCE, &url).await.ok()?;
+            let mut coin = parse_paprika_coin(&body).ok()?;
+            if let Some(symbol) = symbol_of(&coin.id)
+                && let Ok(week) = binance_klines(&client, &symbol, "1h", 168).await
+            {
+                coin.sparkline = week.into_iter().map(|point| point.price).collect();
+            }
+            Some((order, coin))
+        });
+    }
+    let mut found: Vec<(usize, CryptoCoin)> =
+        lookups.join_all().await.into_iter().flatten().collect();
+    // In the order asked for, whichever answered first.
+    found.sort_by_key(|(order, _)| *order);
+    Ok(found.into_iter().map(|(_, coin)| coin).collect())
+}
+
+/// Coins whose name or ticker matches, across everything CoinPaprika lists.
+/// Fewer than two characters matches too much to be useful, so asks nothing.
+pub async fn search(client: &HttpClient, query: &str) -> Result<Vec<CryptoSearchHit>> {
+    let query = query.trim();
+    if query.chars().count() < 2 {
+        return Ok(Vec::new());
+    }
+    let url = reqwest::Url::parse_with_params(
+        PAPRIKA_SEARCH,
+        &[("q", query), ("c", "currencies"), ("limit", "20")],
+    )
+    .map_err(|error| ProviderError::parse(COINPAPRIKA_SOURCE, error.to_string()))?;
+    let body = client.get_text(COINPAPRIKA_SOURCE, url.as_str()).await?;
+    parse_search(&body)
+}
+
+/// One coin's price over `days`, from Binance's trades where it trades
+/// there, else CoinPaprika's daily prices. `days` must be one of
+/// [`CHART_DAYS`].
 pub async fn fetch_chart(
     client: &HttpClient,
     id: &str,
@@ -94,202 +163,284 @@ pub async fn fetch_chart(
 ) -> Result<CryptoChart> {
     if !CHART_DAYS.contains(&days) {
         return Err(ProviderError::parse(
-            COINGECKO_SOURCE,
+            BINANCE_SOURCE,
             format!("unsupported chart span: {days} days"),
         ));
     }
     if !valid_id(id) {
-        return Err(ProviderError::parse(COINGECKO_SOURCE, "invalid coin id"));
+        return Err(ProviderError::parse(BINANCE_SOURCE, "invalid coin id"));
     }
-    let url = format!("{COINGECKO_CHART}/{id}/market_chart?vs_currency=usd&days={days}");
-    let body = client.get_text(COINGECKO_SOURCE, &url).await?;
-    parse_chart(&body, id, days, now)
+    let (interval, count) = chart_steps(days);
+    if let Some(symbol) = symbol_of(id)
+        && let Ok(points) = binance_klines(client, &symbol, interval, count).await
+    {
+        return Ok(chart(id, days, points, BINANCE_SOURCE, now));
+    }
+    // CoinPaprika's free history: hourly for the last day, daily within the
+    // last year (a day short of it, to stay inside the allowance).
+    let (start, step) = if days == 1 {
+        (now - Duration::days(1), "1h")
+    } else {
+        (now - Duration::days(i64::from(days.min(364))), "1d")
+    };
+    let url = format!(
+        "{PAPRIKA_TICKER}/{id}/historical?start={}&interval={step}",
+        start.format("%Y-%m-%dT%H:%M:%SZ")
+    );
+    let body = client.get_text(COINPAPRIKA_SOURCE, &url).await?;
+    parse_paprika_chart(&body, id, days, now)
 }
 
-/// A CoinGecko coin id: lower case letters, digits and dashes. Anything else
-/// never reaches a URL.
+/// Binance candles for a span: a day in quarter hours, a week by the hour,
+/// a month in four-hour steps, a year by the day.
+fn chart_steps(days: u32) -> (&'static str, u32) {
+    match days {
+        1 => ("15m", 96),
+        7 => ("1h", 168),
+        30 => ("4h", 180),
+        _ => ("1d", 365),
+    }
+}
+
+async fn binance_klines(
+    client: &HttpClient,
+    symbol: &str,
+    interval: &str,
+    count: u32,
+) -> Result<Vec<CryptoPricePoint>> {
+    let url = format!("{BINANCE_KLINES}?symbol={symbol}USDT&interval={interval}&limit={count}");
+    let body = client.get_text(BINANCE_SOURCE, &url).await?;
+    parse_binance_klines(&body)
+}
+
+/// The ticker a coin trades under on Binance, from its id's first part
+/// (`btc-bitcoin` → `BTC`). None for dollar stablecoins, which Binance prices
+/// against themselves.
+fn symbol_of(id: &str) -> Option<String> {
+    let symbol = id.split('-').next()?.to_ascii_uppercase();
+    (!symbol.is_empty() && !matches!(symbol.as_str(), "USDT" | "USDC" | "DAI" | "FDUSD"))
+        .then_some(symbol)
+}
+
+/// A coin id: lower case letters, digits and dashes. Anything else never
+/// reaches a URL.
 fn valid_id(id: &str) -> bool {
     !id.is_empty() && id.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
 }
 
-/// Market data for these coins, whatever their rank. Unknown or malformed ids
-/// are dropped rather than failing the rest.
-pub async fn fetch_coins(client: &HttpClient, ids: &[String]) -> Result<Vec<CryptoCoin>> {
-    let ids: Vec<&str> = ids
-        .iter()
-        .map(String::as_str)
-        .filter(|id| valid_id(id))
-        .take(MAX_COINS_BY_ID)
+/// A CoinPaprika-style id for a coin known only by ticker and name, so a coin
+/// from Binance's list keeps the same id (and its star) as from CoinPaprika's:
+/// `BTC`, `Bitcoin` → `btc-bitcoin`.
+pub fn id_for(symbol: &str, name: &str) -> String {
+    let slug: String = name
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
         .collect();
-    if ids.is_empty() {
-        return Ok(Vec::new());
-    }
-    let url = format!("{COINGECKO_MARKETS_BY_ID}&ids={}", ids.join(","));
-    let body = client.get_text(COINGECKO_SOURCE, &url).await?;
-    parse_coingecko_coins(&body)
+    let slug = slug
+        .split('-')
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("-");
+    format!("{}-{slug}", symbol.to_lowercase())
 }
 
-/// Coins whose name or ticker matches, across everything CoinGecko lists.
-/// Fewer than two characters matches too much to be useful, so asks nothing.
-pub async fn search(client: &HttpClient, query: &str) -> Result<Vec<CryptoSearchHit>> {
-    let query = query.trim();
-    if query.chars().count() < 2 {
-        return Ok(Vec::new());
+/// The CoinPaprika id for a coin starred under its old CoinGecko id, if
+/// `coins` has it. `None` when `id` is already current or can't be matched.
+pub fn current_id(id: &str, coins: &[CryptoCoin]) -> Option<String> {
+    if coins.iter().any(|coin| coin.id == id) {
+        return None;
     }
-    let url = reqwest::Url::parse_with_params(COINGECKO_SEARCH, &[("query", query)])
-        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
-    let body = client.get_text(COINGECKO_SOURCE, url.as_str()).await?;
-    parse_search(&body)
+    if let Some((_, renamed)) = RENAMED.iter().find(|(old, _)| *old == id) {
+        return Some((*renamed).to_owned());
+    }
+    let ending = format!("-{id}");
+    coins
+        .iter()
+        .find(|coin| coin.id.ends_with(&ending))
+        .map(|coin| coin.id.clone())
 }
 
-// CoinGecko's and Kraken's payloads, modelled separately from the DTO so a
-// field rename upstream cannot reach into the contract the app is built on.
+/// Gives CoinPaprika's coins Binance's logos, where a coin on both has the
+/// same ticker and a matching name. A shared ticker alone can be two
+/// different coins; names differ in small ways (`Chainlink`, `ChainLink`;
+/// `Polygon`, `Polygon Ecosystem Token`), so one name starting with the
+/// other, letters and digits only, counts as a match.
+fn lend_logos(coins: &mut [CryptoCoin], binance: &[CryptoCoin]) {
+    let plain = |name: &str| -> String {
+        name.chars()
+            .filter(char::is_ascii_alphanumeric)
+            .collect::<String>()
+            .to_ascii_lowercase()
+    };
+    let logos: HashMap<&str, (String, &str)> = binance
+        .iter()
+        .filter_map(|coin| {
+            let logo = coin.image_url.as_deref()?;
+            Some((coin.symbol.as_str(), (plain(&coin.name), logo)))
+        })
+        .collect();
+    for coin in coins.iter_mut().filter(|coin| coin.image_url.is_none()) {
+        let Some((name, logo)) = logos.get(coin.symbol.as_str()) else {
+            continue;
+        };
+        let ours = plain(&coin.name);
+        if !ours.is_empty() && (name.starts_with(&ours) || ours.starts_with(name.as_str())) {
+            coin.image_url = Some((*logo).to_owned());
+        }
+    }
+}
+
+// The sources' payloads, modelled separately from the DTO so a field rename
+// upstream cannot reach into the contract the app is built on.
 
 #[derive(Deserialize)]
-struct CoinGeckoCoin {
+struct PaprikaTicker {
     id: String,
-    symbol: String,
     name: String,
-    image: Option<String>,
-    market_cap_rank: Option<u32>,
-    current_price: Option<f64>,
-    market_cap: Option<f64>,
-    total_volume: Option<f64>,
-    high_24h: Option<f64>,
-    low_24h: Option<f64>,
-    price_change_percentage_24h_in_currency: Option<f64>,
-    price_change_percentage_7d_in_currency: Option<f64>,
+    symbol: String,
+    rank: Option<u32>,
     circulating_supply: Option<f64>,
     max_supply: Option<f64>,
-    ath: Option<f64>,
-    ath_change_percentage: Option<f64>,
+    quotes: HashMap<String, PaprikaQuote>,
+}
+
+#[derive(Deserialize)]
+struct PaprikaQuote {
+    price: Option<f64>,
+    volume_24h: Option<f64>,
+    market_cap: Option<f64>,
+    percent_change_24h: Option<f64>,
+    percent_change_7d: Option<f64>,
+    ath_price: Option<f64>,
     ath_date: Option<String>,
-    sparkline_in_7d: Option<Sparkline>,
+    percent_from_price_ath: Option<f64>,
 }
 
 #[derive(Deserialize)]
-struct Sparkline {
+struct PaprikaSearch {
     #[serde(default)]
-    price: Vec<Option<f64>>,
+    currencies: Vec<PaprikaSearchCoin>,
 }
 
 #[derive(Deserialize)]
-struct CoinGeckoSearch {
-    #[serde(default)]
-    coins: Vec<CoinGeckoSearchCoin>,
-}
-
-#[derive(Deserialize)]
-struct CoinGeckoSearchCoin {
+struct PaprikaSearchCoin {
     id: String,
     name: String,
     symbol: String,
-    market_cap_rank: Option<u32>,
-    large: Option<String>,
-    thumb: Option<String>,
+    rank: Option<u32>,
+    #[serde(default = "active")]
+    is_active: bool,
+}
+
+const fn active() -> bool {
+    true
 }
 
 #[derive(Deserialize)]
-struct CoinGeckoChart {
-    prices: Vec<(f64, Option<f64>)>,
+struct PaprikaPoint {
+    timestamp: DateTime<Utc>,
+    price: Option<f64>,
 }
 
 #[derive(Deserialize)]
-struct KrakenResponse {
-    #[serde(default)]
-    error: Vec<String>,
-    result: Option<HashMap<String, KrakenTicker>>,
+struct BinanceList {
+    data: Option<Vec<BinanceCoin>>,
 }
 
-/// Kraken's ticker, as strings: `c` last trade `[price, lot]`; `h` and `l`
-/// high and low `[today, last 24 hours]`; `v` volume and `p` volume-weighted
-/// price, both `[today, last 24 hours]`.
 #[derive(Deserialize)]
-struct KrakenTicker {
-    c: Vec<String>,
-    h: Vec<String>,
-    l: Vec<String>,
-    v: Vec<String>,
-    p: Vec<String>,
+#[serde(rename_all = "camelCase")]
+struct BinanceCoin {
+    /// The ticker, `BTC`; `symbol` is the pair, `BTCUSDT`.
+    name: String,
+    symbol: String,
+    full_name: Option<String>,
+    logo: Option<String>,
+    rank: Option<u32>,
+    price: Option<f64>,
+    day_change: Option<f64>,
+    market_cap: Option<f64>,
+    volume: Option<f64>,
+    circulating_supply: Option<f64>,
+    max_supply: Option<f64>,
 }
 
-pub fn parse_coingecko(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
-    snapshot(parse_coingecko_coins(body)?, COINGECKO_SOURCE, now)
+/// Coins in CoinPaprika's list, best rank first. Coins with no price are
+/// left out.
+pub fn parse_paprika_coins(body: &str) -> Result<Vec<CryptoCoin>> {
+    let tickers: Vec<PaprikaTicker> = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(COINPAPRIKA_SOURCE, error.to_string()))?;
+    Ok(tickers.into_iter().filter_map(paprika_coin).collect())
 }
 
-/// CoinGecko's market list as coins. An empty list is an answer here, not an
-/// error: a by-id request for coins it no longer knows returns one.
-pub fn parse_coingecko_coins(body: &str) -> Result<Vec<CryptoCoin>> {
-    let coins: Vec<CoinGeckoCoin> = serde_json::from_str(body)
-        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
-    Ok(coins
+/// One coin from CoinPaprika's by-id ticker.
+pub fn parse_paprika_coin(body: &str) -> Result<CryptoCoin> {
+    let ticker: PaprikaTicker = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(COINPAPRIKA_SOURCE, error.to_string()))?;
+    paprika_coin(ticker).ok_or_else(|| ProviderError::parse(COINPAPRIKA_SOURCE, "no price"))
+}
+
+fn paprika_coin(ticker: PaprikaTicker) -> Option<CryptoCoin> {
+    let quote = ticker.quotes.get("USD")?;
+    let price = quote.price.filter(|price| *price > 0.0)?;
+    Some(CryptoCoin {
+        id: ticker.id,
+        symbol: ticker.symbol.to_uppercase(),
+        name: ticker.name,
+        image_url: None,
+        rank: ticker.rank.filter(|rank| *rank > 0),
+        price,
+        change_24h: quote.percent_change_24h,
+        change_7d: quote.percent_change_7d,
+        market_cap: quote.market_cap.filter(|cap| *cap > 0.0),
+        volume_24h: quote.volume_24h,
+        // CoinPaprika gives no 24-hour high and low.
+        high_24h: None,
+        low_24h: None,
+        circulating_supply: ticker.circulating_supply.filter(|supply| *supply > 0.0),
+        max_supply: ticker.max_supply.filter(|supply| *supply > 0.0),
+        all_time_high: quote.ath_price,
+        from_all_time_high: quote.percent_from_price_ath,
+        all_time_high_date: quote
+            .ath_date
+            .as_deref()
+            .and_then(|date| date.get(..10).map(str::to_owned)),
+        sparkline: Vec::new(),
+    })
+}
+
+/// The coins in Binance's list that trade against the dollar, best rank
+/// first, up to [`LIST_SIZE`].
+pub fn parse_binance_coins(body: &str) -> Result<Vec<CryptoCoin>> {
+    let list: BinanceList = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(BINANCE_SOURCE, error.to_string()))?;
+    let mut coins: Vec<CryptoCoin> = list
+        .data
+        .unwrap_or_default()
         .into_iter()
+        .filter(|coin| coin.symbol.ends_with("USDT"))
         .filter_map(|coin| {
-            let price = coin.current_price.filter(|price| *price > 0.0)?;
+            let price = coin.price.filter(|price| *price > 0.0)?;
+            let symbol = coin.name.to_uppercase();
+            let name = coin
+                .full_name
+                .filter(|name| !name.trim().is_empty())
+                .unwrap_or_else(|| symbol.clone());
             Some(CryptoCoin {
-                id: coin.id,
-                symbol: coin.symbol.to_uppercase(),
-                name: coin.name,
-                image_url: coin.image.filter(|url| url.starts_with("https://")),
-                rank: coin.market_cap_rank,
+                id: id_for(&symbol, &name),
+                symbol,
+                name,
+                image_url: coin.logo.filter(|url| url.starts_with("https://")),
+                rank: coin.rank.filter(|rank| *rank > 0),
                 price,
-                change_24h: coin.price_change_percentage_24h_in_currency,
-                change_7d: coin.price_change_percentage_7d_in_currency,
+                change_24h: coin.day_change,
+                change_7d: None,
                 market_cap: coin.market_cap.filter(|cap| *cap > 0.0),
-                volume_24h: coin.total_volume,
-                high_24h: coin.high_24h,
-                low_24h: coin.low_24h,
+                volume_24h: coin.volume,
+                high_24h: None,
+                low_24h: None,
                 circulating_supply: coin.circulating_supply,
                 max_supply: coin.max_supply,
-                all_time_high: coin.ath,
-                from_all_time_high: coin.ath_change_percentage,
-                all_time_high_date: coin
-                    .ath_date
-                    .and_then(|date| date.get(..10).map(str::to_owned)),
-                sparkline: coin
-                    .sparkline_in_7d
-                    .map(|line| line.price.into_iter().flatten().collect())
-                    .unwrap_or_default(),
-            })
-        })
-        .collect())
-}
-
-pub fn parse_kraken(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
-    let response: KrakenResponse = serde_json::from_str(body)
-        .map_err(|error| ProviderError::parse(KRAKEN_SOURCE, error.to_string()))?;
-    if !response.error.is_empty() {
-        return Err(ProviderError::parse(
-            KRAKEN_SOURCE,
-            response.error.join("; "),
-        ));
-    }
-    let tickers = response.result.unwrap_or_default();
-    let number =
-        |values: &[String], index: usize| -> Option<f64> { values.get(index)?.parse::<f64>().ok() };
-    let coins = KRAKEN_COINS
-        .iter()
-        .filter_map(|(pair, answered_as, id, symbol, name)| {
-            let ticker = tickers.get(*answered_as).or_else(|| tickers.get(*pair))?;
-            let price = number(&ticker.c, 0).filter(|price| *price > 0.0)?;
-            let volume = number(&ticker.v, 1).zip(number(&ticker.p, 1));
-            Some(CryptoCoin {
-                id: (*id).to_owned(),
-                symbol: (*symbol).to_owned(),
-                name: (*name).to_owned(),
-                image_url: None,
-                rank: None,
-                price,
-                // Kraken's day starts at midnight UTC rather than 24 hours
-                // ago, so there is no honest 24-hour change to give.
-                change_24h: None,
-                change_7d: None,
-                market_cap: None,
-                volume_24h: volume.map(|(amount, average)| amount * average),
-                high_24h: number(&ticker.h, 1),
-                low_24h: number(&ticker.l, 1),
-                circulating_supply: None,
-                max_supply: None,
                 all_time_high: None,
                 from_all_time_high: None,
                 all_time_high_date: None,
@@ -297,63 +448,117 @@ pub fn parse_kraken(body: &str, now: DateTime<Utc>) -> Result<CryptoSnapshot> {
             })
         })
         .collect();
-    snapshot(coins, KRAKEN_SOURCE, now)
+    coins.sort_by_key(|coin| coin.rank.unwrap_or(u32::MAX));
+    coins.truncate(LIST_SIZE);
+    Ok(coins)
 }
 
-pub fn parse_chart(body: &str, id: &str, days: u32, now: DateTime<Utc>) -> Result<CryptoChart> {
-    let chart: CoinGeckoChart = serde_json::from_str(body)
-        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
-    let mut points: Vec<CryptoPricePoint> = chart
-        .prices
-        .into_iter()
-        .filter_map(|(millis, price)| {
-            let price = price.filter(|price| *price > 0.0)?;
-            let seconds = (millis / 1000.0).round();
-            if !(0.0..=f64::from(u32::MAX)).contains(&seconds) {
-                return None;
-            }
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-            let time = seconds as u32;
-            Some(CryptoPricePoint { time, price })
+/// A chart from Binance candles.
+pub fn parse_binance_chart(
+    body: &str,
+    id: &str,
+    days: u32,
+    now: DateTime<Utc>,
+) -> Result<CryptoChart> {
+    Ok(chart(
+        id,
+        days,
+        parse_binance_klines(body)?,
+        BINANCE_SOURCE,
+        now,
+    ))
+}
+
+/// Binance candles as prices at each candle's close: `[open time, open,
+/// high, low, close, …]`, times in milliseconds and prices as strings.
+pub fn parse_binance_klines(body: &str) -> Result<Vec<CryptoPricePoint>> {
+    let candles: Vec<Vec<serde_json::Value>> = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(BINANCE_SOURCE, error.to_string()))?;
+    let points = candles
+        .iter()
+        .filter_map(|candle| {
+            let millis = candle.first()?.as_f64()?;
+            let price = candle.get(4)?.as_str()?.parse::<f64>().ok()?;
+            point(millis / 1000.0, price)
         })
         .collect();
-    // A chart needs strictly increasing times; the last point can repeat the
-    // one before it to the second.
+    tidy(points, BINANCE_SOURCE)
+}
+
+pub fn parse_paprika_chart(
+    body: &str,
+    id: &str,
+    days: u32,
+    now: DateTime<Utc>,
+) -> Result<CryptoChart> {
+    let history: Vec<PaprikaPoint> = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(COINPAPRIKA_SOURCE, error.to_string()))?;
+    #[allow(clippy::cast_precision_loss)]
+    let points = history
+        .into_iter()
+        .filter_map(|entry| point(entry.timestamp.timestamp() as f64, entry.price?))
+        .collect();
+    Ok(chart(
+        id,
+        days,
+        tidy(points, COINPAPRIKA_SOURCE)?,
+        COINPAPRIKA_SOURCE,
+        now,
+    ))
+}
+
+fn point(seconds: f64, price: f64) -> Option<CryptoPricePoint> {
+    let seconds = seconds.round();
+    if price <= 0.0 || !(0.0..=f64::from(u32::MAX)).contains(&seconds) {
+        return None;
+    }
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let time = seconds as u32;
+    Some(CryptoPricePoint { time, price })
+}
+
+/// A chart needs strictly increasing times and at least two of them.
+fn tidy(mut points: Vec<CryptoPricePoint>, source: &'static str) -> Result<Vec<CryptoPricePoint>> {
     points.sort_by_key(|point| point.time);
     points.dedup_by_key(|point| point.time);
     if points.len() < 2 {
-        return Err(ProviderError::parse(
-            COINGECKO_SOURCE,
-            "chart has no prices",
-        ));
+        return Err(ProviderError::parse(source, "chart has no prices"));
     }
-    Ok(CryptoChart {
+    Ok(points)
+}
+
+fn chart(
+    id: &str,
+    days: u32,
+    points: Vec<CryptoPricePoint>,
+    source: &'static str,
+    now: DateTime<Utc>,
+) -> CryptoChart {
+    CryptoChart {
         id: id.to_owned(),
         days,
         points,
-        source: COINGECKO_SOURCE.to_owned(),
+        source: source.to_owned(),
         freshness: Freshness::new(now),
-    })
+    }
 }
 
-/// CoinGecko's search, coins only, best match first as it ranks them.
+/// CoinPaprika's search, active coins only, best match first as it ranks
+/// them. It carries no logos.
 pub fn parse_search(body: &str) -> Result<Vec<CryptoSearchHit>> {
-    let response: CoinGeckoSearch = serde_json::from_str(body)
-        .map_err(|error| ProviderError::parse(COINGECKO_SOURCE, error.to_string()))?;
+    let response: PaprikaSearch = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(COINPAPRIKA_SOURCE, error.to_string()))?;
     Ok(response
-        .coins
+        .currencies
         .into_iter()
-        .filter(|coin| valid_id(&coin.id))
+        .filter(|coin| coin.is_active && valid_id(&coin.id))
         .take(MAX_SEARCH_HITS)
         .map(|coin| CryptoSearchHit {
             id: coin.id,
             symbol: coin.symbol.to_uppercase(),
             name: coin.name,
-            rank: coin.market_cap_rank,
-            image_url: coin
-                .large
-                .or(coin.thumb)
-                .filter(|url| url.starts_with("https://")),
+            rank: coin.rank.filter(|rank| *rank > 0),
+            image_url: None,
         })
         .collect())
 }
@@ -371,99 +576,4 @@ fn snapshot(
         source: source.to_owned(),
         freshness: Freshness::new(now),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use chrono::TimeZone;
-
-    const MARKETS: &str = include_str!("../../../fixtures/coingecko/markets.json");
-    const CHART_1: &str = include_str!("../../../fixtures/coingecko/market-chart-bitcoin-1.json");
-    const CHART_365: &str =
-        include_str!("../../../fixtures/coingecko/market-chart-bitcoin-365.json");
-    const KRAKEN: &str = include_str!("../../../fixtures/kraken/ticker.json");
-
-    fn now() -> DateTime<Utc> {
-        Utc.with_ymd_and_hms(2026, 9, 26, 12, 0, 0).unwrap()
-    }
-
-    #[test]
-    fn the_market_list_reads_every_coin_with_its_week() {
-        let snapshot = parse_coingecko(MARKETS, now()).unwrap();
-        assert_eq!(snapshot.source, COINGECKO_SOURCE);
-        assert_eq!(snapshot.coins.len(), 50);
-        let bitcoin = &snapshot.coins[0];
-        assert_eq!(
-            (bitcoin.id.as_str(), bitcoin.symbol.as_str(), bitcoin.rank),
-            ("bitcoin", "BTC", Some(1))
-        );
-        assert!(bitcoin.price > 1000.0);
-        assert!(bitcoin.market_cap.is_some() && bitcoin.change_24h.is_some());
-        assert!(bitcoin.sparkline.len() > 100, "a week of hourly prices");
-        assert_eq!(
-            bitcoin.all_time_high_date.as_deref().map(str::len),
-            Some(10)
-        );
-        assert!(
-            snapshot
-                .coins
-                .iter()
-                .all(|coin| coin.symbol == coin.symbol.to_uppercase())
-        );
-    }
-
-    #[test]
-    fn kraken_stands_in_with_the_major_coins() {
-        let snapshot = parse_kraken(KRAKEN, now()).unwrap();
-        assert_eq!(snapshot.source, KRAKEN_SOURCE);
-        assert_eq!(snapshot.coins.len(), KRAKEN_COINS.len());
-        let bitcoin = snapshot
-            .coins
-            .iter()
-            .find(|coin| coin.id == "bitcoin")
-            .unwrap();
-        assert_eq!(bitcoin.symbol, "BTC");
-        assert!(bitcoin.price > 1000.0);
-        assert!(bitcoin.change_24h.is_none(), "no honest 24-hour change");
-        assert!(bitcoin.volume_24h.is_some_and(|volume| volume > 0.0));
-    }
-
-    #[test]
-    fn both_sources_agree_on_bitcoin_within_a_few_percent() {
-        let gecko = parse_coingecko(MARKETS, now()).unwrap();
-        let kraken = parse_kraken(KRAKEN, now()).unwrap();
-        let price = |snapshot: &CryptoSnapshot| {
-            snapshot
-                .coins
-                .iter()
-                .find(|coin| coin.id == "bitcoin")
-                .unwrap()
-                .price
-        };
-        let (a, b) = (price(&gecko), price(&kraken));
-        assert!((a - b).abs() / a < 0.05, "{a} vs {b}");
-    }
-
-    #[test]
-    fn a_chart_reads_as_rising_seconds() {
-        let day = parse_chart(CHART_1, "bitcoin", 1, now()).unwrap();
-        assert!(day.points.len() > 200);
-        assert!(
-            day.points
-                .windows(2)
-                .all(|pair| pair[0].time < pair[1].time)
-        );
-        let year = parse_chart(CHART_365, "bitcoin", 365, now()).unwrap();
-        let span = year.points.last().unwrap().time - year.points[0].time;
-        assert!(span > 300 * 86_400, "a year of daily prices");
-    }
-
-    #[test]
-    fn junk_and_errors_are_rejected() {
-        assert!(parse_coingecko("<html>", now()).is_err());
-        assert!(parse_coingecko("[]", now()).is_err());
-        assert!(parse_kraken(r#"{"error":["EGeneral:Too many requests"]}"#, now()).is_err());
-        assert!(parse_chart(r#"{"prices":[]}"#, "bitcoin", 7, now()).is_err());
-    }
 }

@@ -1117,7 +1117,7 @@
   "crypto.no-limit": "सीमा छैन",
   "crypto.ath": "सर्वकालीन उच्च",
   "crypto.npr-rate": "राष्ट्र बैंकको डलर दरमा",
-  "crypto.open-coingecko": "CoinGecko मा खोल्नुहोस्",
+  "crypto.open-source": "CoinPaprika मा खोल्नुहोस्",
   "crypto.holding": "तपाईंसँग भएको",
   "crypto.amount": "परिमाण ({symbol})",
   "crypto.cost": "औसत किन्दाको मूल्य",

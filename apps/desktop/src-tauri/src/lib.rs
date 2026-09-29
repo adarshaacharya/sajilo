@@ -269,6 +269,7 @@ pub fn run() {
             commands::crypto::get_crypto_chart,
             commands::crypto::get_crypto_coins,
             commands::crypto::search_crypto,
+            commands::crypto::crypto_current_ids,
             commands::sips::sip_statuses,
             commands::sips::set_sip,
             commands::sips::remove_sip,

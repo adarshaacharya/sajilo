@@ -797,13 +797,16 @@ export const api = {
   /** Every mutual fund's latest NAV, from ShareHub or ShareSansar; `refresh` forces a live pull. */
   getMutualFunds: (refresh = false) =>
     invoke<LoadState<MutualFundSnapshot>>("get_mutual_funds", { refresh }),
-  /** The top coins by market value, in US dollars, from CoinGecko or Kraken; `refresh` forces a live pull. */
+  /** The top coins by market value, in US dollars, from CoinPaprika or Binance; `refresh` forces a live pull. */
   getCrypto: (refresh = false) => invoke<LoadState<CryptoSnapshot>>("get_crypto", { refresh }),
   /** One coin's price over the last 1, 7, 30 or 365 days. */
   /** Named coins whatever their rank: starred ones outside the list, and one
    * opened from search. */
   getCryptoCoins: (ids: string[]) => invoke<LoadState<CryptoCoin[]>>("get_crypto_coins", { ids }),
-  /** Every coin CoinGecko knows, by name or ticker. */
+  /** Every coin CoinPaprika knows, by name or ticker. */
+  /** New ids for coins starred under CoinGecko's old ones, `{ old: new }`. */
+  cryptoCurrentIds: (ids: string[]) =>
+    invoke<Record<string, string>>("crypto_current_ids", { ids }),
   searchCrypto: (query: string) => invoke<LoadState<CryptoSearchHit[]>>("search_crypto", { query }),
   getCryptoChart: (id: string, days: number) =>
     invoke<LoadState<CryptoChart>>("get_crypto_chart", { id, days }),

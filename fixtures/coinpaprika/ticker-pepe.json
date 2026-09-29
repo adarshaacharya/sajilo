@@ -1,0 +1,32 @@
+{
+ "id": "pepe-pepe",
+ "name": "Pepe",
+ "symbol": "PEPE",
+ "rank": 58,
+ "total_supply": 420690000000000,
+ "max_supply": 420690000000000,
+ "beta_value": 1.84053,
+ "first_data_at": "2023-04-19T00:00:00Z",
+ "last_updated": "2026-09-29T16:37:15Z",
+ "quotes": {
+  "USD": {
+   "price": 4.2337948854366014e-06,
+   "volume_24h": 204297864.80743277,
+   "volume_24h_change_24h": -14.529999732971191,
+   "market_cap": 1781115170,
+   "market_cap_change_24h": 0,
+   "percent_change_15m": -0.20999999344348907,
+   "percent_change_30m": -0.20999999344348907,
+   "percent_change_1h": -0.8399999737739563,
+   "percent_change_6h": -0.7099999785423279,
+   "percent_change_12h": 1.9700000286102295,
+   "percent_change_24h": 0,
+   "percent_change_7d": -13.550000190734863,
+   "percent_change_30d": 0,
+   "percent_change_1y": 0,
+   "ath_price": 2.828524785117254e-05,
+   "ath_date": "2024-12-09T16:33:23Z",
+   "percent_from_price_ath": -85.07
+  }
+ }
+}

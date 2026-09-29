@@ -90,7 +90,7 @@ Switch **Stocks** to **Crypto** at the top for the 50 largest coins by market va
 - Open a coin for its chart over **1D**, **7D**, **1M** or **1Y**, and its market value, 24-hour range, supply and all-time high.
 - Under **What you hold**, enter the amount and, if you like, your average buy price, to see what it's worth and your gain or loss. This stays on this computer.
 
-Trading crypto is illegal in Nepal. Sajilo only shows prices, from CoinGecko, or Kraken when CoinGecko can't be reached; it can't buy or sell anything.
+Trading crypto is illegal in Nepal. Sajilo only shows prices, from CoinPaprika, or Binance when CoinPaprika can't be reached, with charts from Binance; it can't buy or sell anything.
 
 ## Freshness
 

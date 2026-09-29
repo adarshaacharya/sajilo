@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
@@ -27,10 +27,10 @@ import { money0, sourceStamp } from "../_lib/format";
 import { CryptoDetail } from "./crypto-detail";
 import { CryptoRow, SearchHitRow } from "./crypto-row";
 
-const COINGECKO_LINK = "https://www.coingecko.com/";
+const COINPAPRIKA_LINK = "https://coinpaprika.com/";
 const SOURCE_LINKS: Record<string, string> = {
-  CoinGecko: COINGECKO_LINK,
-  Kraken: "https://www.kraken.com/prices",
+  CoinPaprika: COINPAPRIKA_LINK,
+  Binance: "https://www.binance.com/en/markets/overview",
 };
 
 const LISTS = [
@@ -64,12 +64,12 @@ export function Crypto({
 }: {
   state: LoadState<CryptoSnapshot> | undefined;
   onRetry: () => void;
-  /** `?coin=` opens that coin's page, by its CoinGecko id. */
+  /** `?coin=` opens that coin's page, by its CoinPaprika id (`btc-bitcoin`). */
   linkedCoin?: string | null;
 }) {
   const { t } = useSettings();
   const snapshot = loadedValue(state);
-  const { holdings, toggle, set } = useCryptoHoldings();
+  const { holdings, toggle, set, rename } = useCryptoHoldings();
   // The same cache the Forex tab reads, so this rarely asks NRB itself.
   const { data: forex } = useSWR("forex", () => catchAsFailed(api.getForex(false)));
   const nprRate = nprPerUsd(loadedValue(forex));
@@ -80,11 +80,12 @@ export function Crypto({
   const coins = snapshot?.coins ?? [];
   const listedById = useMemo(() => new Map(coins.map((coin) => [coin.id, coin])), [coins]);
 
-  // Coins the list doesn't carry but the user needs: starred ones that fell
-  // out of the top list, and the one being opened from search or a link.
-  // Asked for by id, so a starred coin never silently disappears.
+  // Starred coins, asked for by id: those that fell out of the top list
+  // would otherwise silently disappear, and every starred one gets its week
+  // line this way (the list itself carries none). Plus the coin being opened
+  // from search or a link.
   const wanted = useMemo(() => {
-    const ids = Object.keys(holdings).filter((id) => !listedById.has(id));
+    const ids = Object.keys(holdings);
     if (open && !listedById.has(open) && !ids.includes(open)) ids.push(open);
     return ids.sort();
   }, [holdings, listedById, open]);
@@ -94,10 +95,30 @@ export function Crypto({
   );
   const byId = useMemo(() => {
     const merged = new Map(listedById);
-    for (const coin of loadedValue(extra) ?? [])
-      if (!merged.has(coin.id)) merged.set(coin.id, coin);
+    for (const coin of loadedValue(extra) ?? []) {
+      const listedCoin = merged.get(coin.id);
+      // The list's figures are the ones everything else is drawn from; only
+      // the week line comes from the by-id answer.
+      merged.set(coin.id, listedCoin ? { ...listedCoin, sparkline: coin.sparkline } : coin);
+    }
     return merged;
   }, [listedById, extra]);
+
+  // Coins starred before the switch to CoinPaprika carry CoinGecko's ids
+  // (`bitcoin`); the shell finds their new ones (`btc-bitcoin`) once.
+  const renamed = useRef(false);
+  useEffect(() => {
+    if (!snapshot || renamed.current) return;
+    const stale = Object.keys(holdings).filter((id) => !listedById.has(id));
+    if (stale.length === 0) return;
+    renamed.current = true;
+    api
+      .cryptoCurrentIds(stale)
+      .then((map) => {
+        if (Object.keys(map).length > 0) rename(map);
+      })
+      .catch(() => {});
+  }, [snapshot, holdings, listedById, rename]);
 
   const listed = useMemo(() => listCoins(coins, list), [coins, list]);
   const matches = useMemo(() => (query.trim() ? searchCoins(coins, query) : []), [coins, query]);
@@ -169,7 +190,7 @@ export function Crypto({
             {query.trim() ? (
               <section className="surface-card p-2.5">
                 {matches.map((coin) => row(coin))}
-                {/* Beyond the loaded list: every coin CoinGecko knows. */}
+                {/* Beyond the loaded list: every coin CoinPaprika knows. */}
                 {more.length > 0 && (
                   <>
                     <p className="px-1.5 pt-2 pb-1 text-[10px] font-semibold text-text-muted">
@@ -233,7 +254,9 @@ export function Crypto({
                 {t("crypto.updated")} {sourceStamp(snapshot.freshness)} ·{" "}
                 <button
                   type="button"
-                  onClick={() => openExternalLink(SOURCE_LINKS[snapshot.source] ?? COINGECKO_LINK)}
+                  onClick={() =>
+                    openExternalLink(SOURCE_LINKS[snapshot.source] ?? COINPAPRIKA_LINK)
+                  }
                   className="text-[color:var(--color-accent-mark)] hover:underline"
                 >
                   {snapshot.source}

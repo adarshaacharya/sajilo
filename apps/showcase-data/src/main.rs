@@ -355,17 +355,18 @@ fn record_crypto(
 ) {
     commands.insert(
         "get_crypto".to_owned(),
-        load_state(crypto::parse_coingecko(
-            &read("coingecko/markets.json"),
+        load_state(crypto::list(
+            crypto::parse_paprika_coins(&read("coinpaprika/tickers.json")),
+            crypto::parse_binance_coins(&read("binance/symbol-list.json")),
             now,
         )),
     );
     for days in crypto::CHART_DAYS {
         commands.insert(
-            format!("get_crypto_chart:bitcoin:{days}"),
-            load_state(crypto::parse_chart(
-                &read(&format!("coingecko/market-chart-bitcoin-{days}.json")),
-                "bitcoin",
+            format!("get_crypto_chart:btc-bitcoin:{days}"),
+            load_state(crypto::parse_binance_chart(
+                &read(&format!("binance/klines-btc-{days}.json")),
+                "btc-bitcoin",
                 days,
                 now,
             )),

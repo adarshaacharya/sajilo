@@ -9,7 +9,7 @@ import { FollowButton } from "./follow-button";
 /**
  * A coin's own round mark, on a white disc: most logos fill the circle and
  * hide it, while the few drawn in black on transparent (Ethena, Ondo) would
- * otherwise vanish into the dark card. Offline, or from the Kraken fallback, which
+ * otherwise vanish into the dark card. Offline, or for a coin Binance has no logo for, which
  * sends none, the ticker's first letter stands in at the same size.
  */
 export function CoinLogo({
@@ -29,6 +29,10 @@ export function CoinLogo({
         src={url}
         alt=""
         loading="lazy"
+        // Binance's image host refuses a logo asked for from another site,
+        // and the app's page counts as one; asked for with no referrer, it
+        // serves it.
+        referrerPolicy="no-referrer"
         onError={() => setFailed(true)}
         className="shrink-0 rounded-full bg-white object-contain"
         style={box}

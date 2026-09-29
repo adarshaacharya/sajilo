@@ -163,5 +163,13 @@ export function useCryptoHoldings() {
       return { ...current, [id]: { amount, cost: cost && cost > 0 ? cost : null } };
     });
 
-  return { holdings, toggle, set };
+  /** Moves holdings to new ids, keeping what was entered under the old. */
+  const rename = (map: Record<string, string>) =>
+    update((current) => {
+      const next: Record<string, CryptoHolding> = {};
+      for (const [id, holding] of Object.entries(current)) next[map[id] ?? id] = holding;
+      return next;
+    });
+
+  return { holdings, toggle, set, rename };
 }

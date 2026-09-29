@@ -1117,7 +1117,7 @@
   "crypto.no-limit": "No limit",
   "crypto.ath": "All-time high",
   "crypto.npr-rate": "at NRB's dollar rate",
-  "crypto.open-coingecko": "Open on CoinGecko",
+  "crypto.open-source": "Open on CoinPaprika",
   "crypto.holding": "What you hold",
   "crypto.amount": "Amount ({symbol})",
   "crypto.cost": "Avg. buy price",

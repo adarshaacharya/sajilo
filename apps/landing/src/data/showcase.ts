@@ -188,7 +188,7 @@ export const mutualFunds = {
 /** Crypto: how many coins the list carries, the top few with their week as a
  * line, and how far bitcoin sits below its all-time high. */
 const coins = c.get_crypto.value.coins;
-const bitcoin = coins.find((coin) => coin.id === "bitcoin")!;
+const bitcoin = coins.find((coin) => coin.id === "btc-bitcoin")!;
 export const crypto = {
   count: coins.length,
   source: c.get_crypto.value.source,

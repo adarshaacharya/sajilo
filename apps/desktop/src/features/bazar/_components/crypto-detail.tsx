@@ -198,10 +198,10 @@ export function CryptoDetail({
 
         <button
           type="button"
-          onClick={() => openExternalLink(`https://www.coingecko.com/en/coins/${coin.id}`)}
+          onClick={() => openExternalLink(`https://coinpaprika.com/coin/${coin.id}/`)}
           className="mt-2 text-[11px] text-[color:var(--color-accent-mark)] hover:opacity-80"
         >
-          {t("crypto.open-coingecko")}
+          {t("crypto.open-source")}
         </button>
       </section>
 
