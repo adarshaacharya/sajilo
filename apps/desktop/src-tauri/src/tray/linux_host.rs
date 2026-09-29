@@ -74,6 +74,12 @@ pub fn pick(settled: bool) -> Option<Host> {
     }
 }
 
+/// Whether GNOME Shell hosts the tray icons: there a single left click opens
+/// an icon's menu, and a double click opens the app. Blocking (D-Bus).
+pub fn is_gnome() -> bool {
+    watcher_program().is_some_and(|program| program == "gnome-shell")
+}
+
 /// The program that hosts StatusNotifierItems, by its process name, or
 /// `None` when nothing does. An empty name when it runs but cannot be named.
 fn watcher_program() -> Option<String> {

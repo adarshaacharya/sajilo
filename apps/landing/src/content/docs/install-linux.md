@@ -60,7 +60,7 @@ Sajilo puts a **Nepal flag** in your panel, in the area where other apps put the
 - **Ubuntu, KDE, Cinnamon, Xfce, MATE and Budgie** show it straight away.
 - **Other GNOME desktops** (Fedora, Debian, plain GNOME) need the **AppIndicator and KStatusNotifierItem Support** extension. Install it from GNOME Extensions, then log out and back in.
 
-**Click the flag** to open Sajilo, and click it again to close it. **Right-click** it for a menu with **Open Sajilo** and **Quit Sajilo**. On Ubuntu and other GNOME desktops a single click opens that menu instead, so choose **Open Sajilo** there (or double-click the date). To close it, you can also click anywhere else or press **Esc**. To keep it on screen and move it around, use the [pin](/docs/first-steps.html#keeping-it-open).
+**Click the flag** to open Sajilo, and click it again to close it. **Right-click** it for a menu with **Open Sajilo** and **Quit Sajilo**. On Ubuntu and other GNOME desktops a single click opens that menu instead: it shows today's date and the next festival or holiday, and **Open Sajilo** is right below. **Double-click** the flag to open Sajilo straight away. To close it, you can also click anywhere else or press **Esc**. To keep it on screen and move it around, use the [pin](/docs/first-steps.html#keeping-it-open).
 
 > **No top bar icon at all?** Sajilo still works: opening it from your applications menu always brings up its window.
 

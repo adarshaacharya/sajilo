@@ -74,12 +74,82 @@ fn host(app: &AppHandle) -> Option<linux_host::Host> {
 }
 
 /// The date row at the top of the tray menu, kept so `refresh_title` can move
-/// it forward with the day.
-///
-/// macOS and Windows only: Linux's menu is a toggle item and Quit (see
-/// `build`), so there is no date row to move there. The date rides the label
-/// beside the icon instead.
+/// it forward with the day. macOS and Windows; Linux has [`LinuxInfoItems`].
 struct DateItem(MenuItem<Wry>);
+
+/// The Linux menu's two read-only rows: today in full, and the next festival
+/// or holiday. On GNOME a single click opens this menu, so it should answer
+/// something on its own.
+#[cfg(target_os = "linux")]
+struct LinuxInfoItems {
+    date: MenuItem<Wry>,
+    next: MenuItem<Wry>,
+}
+
+#[cfg(target_os = "linux")]
+const WEEKDAYS_EN: [&str; 7] = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+];
+#[cfg(target_os = "linux")]
+const WEEKDAYS_NE: [&str; 7] = [
+    "आइतबार",
+    "सोमबार",
+    "मंगलबार",
+    "बुधबार",
+    "बिहीबार",
+    "शुक्रबार",
+    "शनिबार",
+];
+
+/// "असोज १३, २०८३ · मंगलबार", and "Next: Dashain · in 4 days", in the app's
+/// language and numerals.
+#[cfg(target_os = "linux")]
+fn linux_info(
+    date: NepaliDate,
+    numerals: NumeralStyle,
+    language: sajilo_core::focus::Language,
+) -> (String, String) {
+    use chrono::Datelike;
+    use sajilo_core::focus::Language;
+
+    let weekday = sajilo_core::nepal_time::today()
+        .weekday()
+        .num_days_from_sunday() as usize;
+    let day = title::title(
+        date,
+        title::MenuBarFormat::NepaliLong,
+        numerals,
+        title::CustomMenuBar::default(),
+    );
+    let day = format!(
+        "{day} · {}",
+        match language {
+            Language::En => WEEKDAYS_EN[weekday],
+            Language::Ne => WEEKDAYS_NE[weekday],
+        }
+    );
+    let next = sajilo_core::calendar::upcoming::events(date, 1, 180)
+        .into_iter()
+        .next()
+        .map_or_else(String::new, |event| {
+            let n = numerals.format(event.days_away, None);
+            match (language, event.days_away) {
+                (Language::En, 0) => format!("Today: {}", event.name),
+                (Language::En, 1) => format!("Tomorrow: {}", event.name),
+                (Language::En, _) => format!("Next: {} · in {n} days", event.name),
+                (Language::Ne, 0) => format!("आज: {}", event.name),
+                (Language::Ne, 1) => format!("भोलि: {}", event.name),
+                (Language::Ne, _) => format!("अर्को: {} · {n} दिनमा", event.name),
+            }
+        });
+    (day, next)
+}
 
 /// "Restart to update", which sits in the menu only while an installed update
 /// is waiting for a restart. Menu items cannot be hidden, so it is inserted and
@@ -146,8 +216,9 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         let handle = app.clone();
         std::thread::spawn(move || {
             let chosen = linux_host::wait_for_host();
+            let gnome = linux_host::is_gnome();
             let app = handle.clone();
-            let _ = handle.run_on_main_thread(move || start_linux(&app, chosen));
+            let _ = handle.run_on_main_thread(move || start_linux(&app, chosen, gnome));
         });
         spawn_midnight_rollover(app.clone());
         Ok(())
@@ -163,8 +234,11 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 
 /// Builds the kind of icon `linux_host` chose. Main thread.
 #[cfg(target_os = "linux")]
-fn start_linux(app: &AppHandle, chosen: linux_host::Host) {
+fn start_linux(app: &AppHandle, chosen: linux_host::Host, gnome: bool) {
     app.manage(ChosenHost(chosen));
+    if gnome {
+        tell_gnome_how_to_open(app);
+    }
     match chosen {
         linux_host::Host::StatusNotifier => {
             if let Err(err) = build_tray_icon(app) {
@@ -178,6 +252,40 @@ fn start_linux(app: &AppHandle, chosen: linux_host::Host) {
         }
     }
     refresh_title(app);
+}
+
+/// Once per install on GNOME: a single click on the flag opens its menu there,
+/// not Sajilo, which reads as broken unless someone says so. A notification
+/// rather than a card, because someone who can't open Sajilo can't see a card.
+#[cfg(target_os = "linux")]
+fn tell_gnome_how_to_open(app: &AppHandle) {
+    use sajilo_core::focus::Language;
+    use tauri_plugin_notification::NotificationExt;
+
+    const SHOWN: &str = "gnomeOpenTipShown";
+    if crate::db::get_json(app, SHOWN).ok().flatten().is_some() {
+        return;
+    }
+    let (title, body) = match crate::prefs::language(app) {
+        Language::En => (
+            "Sajilo is in your top bar",
+            "Double-click the flag to open Sajilo, or click it once and choose Open Sajilo.",
+        ),
+        Language::Ne => (
+            "सजिलो माथिल्लो बारमा छ",
+            "सजिलो खोल्न झण्डामा दुईपटक क्लिक गर्नुहोस्, वा एकपटक क्लिक गरेर Open Sajilo छान्नुहोस्।",
+        ),
+    };
+    if app
+        .notification()
+        .builder()
+        .title(title)
+        .body(body)
+        .show()
+        .is_ok()
+    {
+        let _ = crate::db::set_json(app, SHOWN, &serde_json::Value::Bool(true));
+    }
 }
 
 /// Tauri's tray icon: macOS's menu-bar item, Windows' notification-area
@@ -196,27 +304,44 @@ fn build_tray_icon(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(not(target_os = "linux"))]
     let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, Some("CmdOrCtrl+Q"))?;
 
-    // Linux gets a short menu: open (or hide) Sajilo, then Quit.
+    // Linux gets a short menu: today's date and what comes next, then open
+    // (or hide) Sajilo, then Quit.
     //
-    // A left click on the icon opens the popover directly: the tray is a
-    // StatusNotifierItem (ksni, see vendor/ksni/PATCHED.md) and the panel
-    // calls its `Activate`. The menu is the right-click. GNOME's AppIndicator
-    // extension opens the menu on a single left click instead, for every app,
-    // so GNOME gets the System Tray icon (see `linux_host`); where it still
-    // hosts this one (its System Tray turned off, or GTK on Wayland), the
-    // menu leading with Open is what a click finds. Settings stays in the
-    // popover's header.
+    // A left click on the icon opens the popover directly where the panel
+    // calls the StatusNotifierItem's `Activate` (KDE, Cinnamon, Xfce). GNOME's
+    // AppIndicator extension opens this menu on a single left click instead,
+    // for every app, and activates only on a double click; it can't be given
+    // one-click safely (see `linux_host`). So the menu is made worth the
+    // click: the date and the next festival or holiday are right there, and
+    // Open Sajilo is one more click. Settings stays in the popover's header.
     //
     // macOS and Windows keep the full menu: there, left click toggles the
     // popover and this menu is the right-click affordance.
     #[cfg(target_os = "linux")]
     let open = MenuItem::with_id(app, "open", OPEN_LABEL, true, None::<&str>)?;
+    // Read-only rows, filled in by `refresh_title` like the label.
+    #[cfg(target_os = "linux")]
+    let date = MenuItem::with_id(app, "date", "", false, None::<&str>)?;
+    #[cfg(target_os = "linux")]
+    let next = MenuItem::with_id(app, "next", "", false, None::<&str>)?;
 
     // Quit too: the tray menu is where people look to close a tray app.
     #[cfg(target_os = "linux")]
     let quit = MenuItem::with_id(app, "quit", "Quit Sajilo", true, None::<&str>)?;
     #[cfg(target_os = "linux")]
-    let menu = Menu::with_items(app, &[&open, &PredefinedMenuItem::separator(app)?, &quit])?;
+    let menu = Menu::with_items(
+        app,
+        &[
+            &date,
+            &next,
+            &PredefinedMenuItem::separator(app)?,
+            &open,
+            &PredefinedMenuItem::separator(app)?,
+            &quit,
+        ],
+    )?;
+    #[cfg(target_os = "linux")]
+    app.manage(LinuxInfoItems { date, next });
 
     // Kept so the label can follow the popover; see `set_popover_shown`.
     #[cfg(target_os = "linux")]
@@ -377,6 +502,12 @@ pub fn refresh_title(app: &AppHandle) {
     // row (its menu is the toggle item) and carries the date in the label below.
     if let Some(item) = app.try_state::<DateItem>() {
         let _ = item.0.set_text(&label);
+    }
+    #[cfg(target_os = "linux")]
+    if let Some(items) = app.try_state::<LinuxInfoItems>() {
+        let (day, next) = linux_info(date, numerals, crate::prefs::language(app));
+        let _ = items.date.set_text(&day);
+        let _ = items.next.set_text(&next);
     }
 
     // macOS renders text beside the tray icon natively. On Linux the title is
