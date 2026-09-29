@@ -360,6 +360,8 @@ pub fn run() {
             system::autostart::is_dock_icon_visible,
             commands::tray::refresh_tray,
             commands::tray::quit_app,
+            commands::tray::gnome_button,
+            commands::tray::set_gnome_button,
             commands::tray::hide_popover,
             commands::tray::popover_pointer,
             commands::tray::popover_kept,

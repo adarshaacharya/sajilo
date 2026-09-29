@@ -1,6 +1,6 @@
 # One-click open on GNOME — plan
 
-Status: plan, not built. Target: Ubuntu 24.04–26.04 and Fedora (GNOME 46–50).
+Status: built (tray/gnome_panel.rs, apps/gnome-extension); awaiting a real-GNOME test. Target: Ubuntu 24.04–26.04 and Fedora (GNOME 46–50).
 
 ## Why one click opens a menu today
 

@@ -73,7 +73,7 @@
       "icons/icon.ico"
     ],
     "publisher": "Adarsha Acharya",
-    "copyright": "\u00a9 2026 Adarsha Acharya",
+    "copyright": "© 2026 Adarsha Acharya",
     "homepage": "https://sajilo.fyi",
     "category": "Utility",
     "shortDescription": "Nepali calendar and daily essentials",
@@ -90,12 +90,26 @@
           "libc6 (>= 2.35)",
           "libwebkit2gtk-4.1-0",
           "libayatana-appindicator3-1 | libappindicator3-1"
-        ]
+        ],
+        "files": {
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/metadata.json": "../../gnome-extension/metadata.json",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/extension.js": "../../gnome-extension/extension.js",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/stylesheet.css": "../../gnome-extension/stylesheet.css",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/icons/flag.svg": "../../gnome-extension/icons/flag.svg",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/icons/sajilo.png": "../../gnome-extension/icons/sajilo.png"
+        }
       },
       "rpm": {
         "depends": [
           "libc.so.6(GLIBC_2.35)(64bit)"
-        ]
+        ],
+        "files": {
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/metadata.json": "../../gnome-extension/metadata.json",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/extension.js": "../../gnome-extension/extension.js",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/stylesheet.css": "../../gnome-extension/stylesheet.css",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/icons/flag.svg": "../../gnome-extension/icons/flag.svg",
+          "/usr/share/gnome-shell/extensions/sajilo@sajilo.fyi/icons/sajilo.png": "../../gnome-extension/icons/sajilo.png"
+        }
       }
     }
   },

@@ -823,6 +823,10 @@ export const api = {
 
   /** Redraws the menu-bar label after a preference it reads has changed. */
   refreshTray: () => invoke<void>("refresh_tray"),
+  /** Sajilo's own GNOME top-bar button: `null` outside GNOME, else whether it's on. */
+  gnomeButton: () => invoke<boolean | null>("gnome_button"),
+  /** Switches the GNOME top-bar button; resolves to whether it took. */
+  setGnomeButton: (on: boolean) => invoke<boolean>("set_gnome_button", { on }),
   /** Shows "Restart to update" in the tray menu, or removes it with `null`. */
   setTrayUpdate: (label: string | null) => invoke<void>("set_tray_update", { label }),
 

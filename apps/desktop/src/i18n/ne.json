@@ -556,6 +556,8 @@
   "settings.tray-icon-app": "सजिलो",
   "settings.tray-icon-flag": "नेपालको झण्डा",
   "settings.tray-note-linux": "केही Linux डेस्कटप (जस्तै KDE र Cinnamon) मा आइकन मात्र देखिन्छ, छेउमा मिति देखिँदैन। मिति सजिलो भित्र सधैं हुन्छ।",
+  "settings.gnome-button": "माथिल्लो बारमा एक क्लिकको बटन",
+  "settings.gnome-button-note": "GNOME को माथिल्लो बारमा सजिलोको आफ्नै बटन: एकपटक क्लिक गर्दा सजिलो खुल्छ। भर्खर इन्स्टल गर्नुभयो? एकपटक लगआउट गरेर फेरि लगइन गरेपछि देखिन्छ।",
   "settings.tray-note-windows": "Windows मा आइकन मात्र देखिन्छ। मिति हेर्न आइकनमा माउस लैजानुहोस् वा राइट-क्लिक गर्नुहोस्।",
   "settings.update-available": "डाउनलोड हुँदै: भर्सन",
   "settings.update-checking": "जाँच गर्दै…",

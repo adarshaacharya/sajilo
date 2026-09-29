@@ -53,6 +53,8 @@ export function DisplayTab({
   const [trayIcon, setTrayIcon] = useState<string>("flag");
   const [autostart, setAutostart] = useState(false);
   const [dockIcon, setDockIcon] = useState(false);
+  // Only on GNOME, where Sajilo has its own top-bar button; null hides it.
+  const [gnomeButton, setGnomeButton] = useState<boolean | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -73,6 +75,10 @@ export function DisplayTab({
     api
       .isAutostartEnabled()
       .then(setAutostart)
+      .catch(() => {});
+    api
+      .gnomeButton()
+      .then(setGnomeButton)
       .catch(() => {});
     api
       .isDockIconVisible()
@@ -174,6 +180,22 @@ export function DisplayTab({
               { id: "app", label: t("settings.tray-icon-app") },
               { id: "flag", label: t("settings.tray-icon-flag") },
             ]}
+          />
+        )}
+        {gnomeButton !== null && (
+          <Toggle
+            label={t("settings.gnome-button")}
+            note={t("settings.gnome-button-note")}
+            checked={gnomeButton}
+            onChange={(on) => {
+              setGnomeButton(on);
+              api
+                .setGnomeButton(on)
+                .then((took) => {
+                  if (!took) setGnomeButton(!on);
+                })
+                .catch(() => setGnomeButton(!on));
+            }}
           />
         )}
         <Select

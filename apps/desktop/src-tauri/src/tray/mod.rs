@@ -1,5 +1,7 @@
 //! The tray icon: Sajilo's only permanent presence on screen.
 
+#[cfg(target_os = "linux")]
+pub mod gnome_panel;
 pub mod icon;
 #[cfg(target_os = "linux")]
 mod linux_host;
@@ -140,12 +142,18 @@ pub fn set_update_ready(app: &AppHandle, label: Option<&str>) {
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
     #[cfg(target_os = "linux")]
     {
+        // GNOME's own top-bar button (see `gnome_panel`), apart from the tray:
+        // GNOME without the AppIndicator extension (as Fedora ships) has no
+        // tray at all, and the button still works there.
+        if gnome_panel::is_gnome_session() {
+            let handle = app.clone();
+            std::thread::spawn(move || gnome_panel::run(&handle, linux_host::is_gnome()));
+        }
         let handle = app.clone();
         std::thread::spawn(move || {
             let chosen = linux_host::wait_for_host();
-            let gnome = linux_host::is_gnome();
             let app = handle.clone();
-            let _ = handle.run_on_main_thread(move || start_linux(&app, chosen, gnome));
+            let _ = handle.run_on_main_thread(move || start_linux(&app, chosen));
         });
         spawn_midnight_rollover(app.clone());
         Ok(())
@@ -161,16 +169,19 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
 
 /// Builds the kind of icon `linux_host` chose. Main thread.
 #[cfg(target_os = "linux")]
-fn start_linux(app: &AppHandle, chosen: linux_host::Host, gnome: bool) {
+fn start_linux(app: &AppHandle, chosen: linux_host::Host) {
     app.manage(ChosenHost(chosen));
-    if gnome {
-        tell_gnome_how_to_open(app);
-    }
     match chosen {
         linux_host::Host::StatusNotifier => {
             if let Err(err) = build_tray_icon(app) {
                 eprintln!("sajilo: could not build the tray icon: {err}");
                 return;
+            }
+            // The top-bar button may have come up first; one icon, not two.
+            if gnome_panel::button_up()
+                && let Some(tray) = app.tray_by_id(ID)
+            {
+                let _ = tray.set_visible(false);
             }
         }
         linux_host::Host::SystemTray => {
@@ -179,40 +190,6 @@ fn start_linux(app: &AppHandle, chosen: linux_host::Host, gnome: bool) {
         }
     }
     refresh_title(app);
-}
-
-/// Once per install on GNOME: a single click on the flag opens its menu there,
-/// not Sajilo, which reads as broken unless someone says so. A notification
-/// rather than a card, because someone who can't open Sajilo can't see a card.
-#[cfg(target_os = "linux")]
-fn tell_gnome_how_to_open(app: &AppHandle) {
-    use sajilo_core::focus::Language;
-    use tauri_plugin_notification::NotificationExt;
-
-    const SHOWN: &str = "gnomeOpenTipShown";
-    if crate::db::get_json(app, SHOWN).ok().flatten().is_some() {
-        return;
-    }
-    let (title, body) = match crate::prefs::language(app) {
-        Language::En => (
-            "Sajilo is in your top bar",
-            "Double-click the flag to open Sajilo, or click it once and choose Open Sajilo.",
-        ),
-        Language::Ne => (
-            "सजिलो माथिल्लो बारमा छ",
-            "सजिलो खोल्न झण्डामा दुईपटक क्लिक गर्नुहोस्, वा एकपटक क्लिक गरेर Open Sajilo छान्नुहोस्।",
-        ),
-    };
-    if app
-        .notification()
-        .builder()
-        .title(title)
-        .body(body)
-        .show()
-        .is_ok()
-    {
-        let _ = crate::db::set_json(app, SHOWN, &serde_json::Value::Bool(true));
-    }
 }
 
 /// Tauri's tray icon: macOS's menu-bar item, Windows' notification-area
@@ -236,9 +213,9 @@ fn build_tray_icon(app: &AppHandle) -> tauri::Result<()> {
     // A left click on the icon opens the popover directly where the panel
     // calls the StatusNotifierItem's `Activate` (KDE, Cinnamon, Xfce). GNOME's
     // AppIndicator extension opens this menu on a single left click instead,
-    // for every app, and activates only on a double click; it can't be given
-    // one-click safely (see `linux_host`). So the menu stays short, with Open
-    // first, and GNOME is told once to double-click (`tell_gnome_how_to_open`).
+    // for every app, and activates only on a double click. So the menu stays
+    // short, with Open first; GNOME gets its own one-click button in the top
+    // bar instead (`gnome_panel`), and this icon only until that is up.
     // The date is already beside the icon there. Settings stays in the
     // popover's header.
     //
@@ -394,6 +371,8 @@ pub fn refresh_title(app: &AppHandle) {
     let Some((date, numerals, label)) = today(app) else {
         return;
     };
+    #[cfg(target_os = "linux")]
+    gnome_panel::show(&label, crate::prefs::tray_icon_is_flag(app));
     // Linux's System Tray icon has no room for text: the date is its tooltip.
     #[cfg(target_os = "linux")]
     if host(app) == Some(linux_host::Host::SystemTray) {

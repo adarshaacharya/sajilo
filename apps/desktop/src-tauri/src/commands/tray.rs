@@ -11,6 +11,36 @@ pub fn refresh_tray(app: AppHandle<Wry>) {
     crate::tray::refresh_title(&app);
 }
 
+/// Sajilo's own top-bar button on GNOME: `None` outside GNOME, where Settings
+/// shows no switch; otherwise whether it is on. See `tray::gnome_panel`.
+#[tauri::command]
+pub async fn gnome_button() -> Option<bool> {
+    #[cfg(target_os = "linux")]
+    if crate::tray::gnome_panel::is_gnome_session() {
+        return tauri::async_runtime::spawn_blocking(crate::tray::gnome_panel::is_on)
+            .await
+            .ok();
+    }
+    None
+}
+
+/// The Settings switch for the GNOME top-bar button. Whether it took.
+#[cfg(target_os = "linux")]
+#[tauri::command]
+pub async fn set_gnome_button(app: AppHandle<Wry>, on: bool) -> bool {
+    tauri::async_runtime::spawn_blocking(move || crate::tray::gnome_panel::set_on(&app, on))
+        .await
+        .unwrap_or(false)
+}
+
+/// No GNOME button outside Linux.
+#[cfg(not(target_os = "linux"))]
+#[tauri::command]
+pub fn set_gnome_button(on: bool) -> bool {
+    let _ = on;
+    false
+}
+
 #[tauri::command]
 pub fn quit_app(app: AppHandle<Wry>) {
     app.exit(0);

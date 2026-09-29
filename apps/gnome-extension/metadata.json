@@ -1,0 +1,8 @@
+{
+  "uuid": "sajilo@sajilo.fyi",
+  "name": "Sajilo",
+  "description": "Opens Sajilo, the Nepali calendar, with one click on its button in the top bar. Needs the Sajilo app (sajilo.fyi); the button shows only while Sajilo runs.",
+  "shell-version": ["46", "47", "48", "49", "50"],
+  "url": "https://sajilo.fyi",
+  "version-name": "1"
+}
