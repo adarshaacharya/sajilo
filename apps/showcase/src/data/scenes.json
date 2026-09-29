@@ -761,7 +761,13 @@
           "doNotDisturb": false,
           "fullscreen": false
         },
+        "jokeEdits": {},
         "jokes": true,
+        "messages": {
+          "eyes": "",
+          "move": "",
+          "water": ""
+        },
         "move": {
           "enabled": false,
           "everyMinutes": 60
