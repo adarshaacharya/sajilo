@@ -183,25 +183,37 @@ fn place_kept(window: &WebviewWindow) -> bool {
     let Some(place) = KEPT_PLACE.lock().ok().and_then(|place| *place) else {
         return false;
     };
+    on_a_screen(window, place)
+        && window
+            .set_position(tauri::LogicalPosition::new(place.x, place.y))
+            .is_ok()
+}
+
+/// Whether a connected screen still shows enough of the header at `place` to
+/// grab it again. False once the screen it sat on has been unplugged.
+fn on_a_screen(window: &WebviewWindow, place: Place) -> bool {
     let Ok(monitors) = window.available_monitors() else {
-        return false;
+        return true;
     };
-    let visible = monitors.iter().any(|monitor| {
+    monitors.iter().any(|monitor| {
         let scale = monitor.scale_factor();
         let left = f64::from(monitor.position().x) / scale;
         let top = f64::from(monitor.position().y) / scale;
         let right = left + f64::from(monitor.size().width) / scale;
         let bottom = top + f64::from(monitor.size().height) / scale;
-        // Enough of the header on screen to grab it again.
         place.x + 60.0 >= left
             && place.x + 60.0 <= right
             && place.y >= top
             && place.y + 40.0 <= bottom
-    });
-    visible
-        && window
-            .set_position(tauri::LogicalPosition::new(place.x, place.y))
-            .is_ok()
+    })
+}
+
+/// Visible, and on a screen the user can see. A popover left on an external
+/// monitor stays "visible" after that monitor is unplugged, so a tray click
+/// that only asked `is_visible` put it away instead of bringing it back.
+fn seen(window: &WebviewWindow) -> bool {
+    window.is_visible().unwrap_or(false)
+        && current_place(window).is_none_or(|place| on_a_screen(window, place))
 }
 
 /// The page's report that the pointer entered or left the popover.
@@ -242,7 +254,7 @@ pub fn tray_press(app: &AppHandle) {
         .ok()
         .and_then(|at| *at)
         .is_some_and(|at| at.elapsed() < PRESS_BLUR);
-    let up = window.is_visible().unwrap_or(false) || just_hidden;
+    let up = seen(&window) || just_hidden;
     UP_AT_PRESS.store(up, Ordering::SeqCst);
 }
 
@@ -263,7 +275,7 @@ pub fn toggle(app: &AppHandle) {
     let Some(window) = main_window(app) else {
         return;
     };
-    if window.is_visible().unwrap_or(false) {
+    if seen(&window) {
         hide(&window);
     } else {
         show(&window);
@@ -419,6 +431,14 @@ fn under_menu_bar_icon(window: &WebviewWindow) -> bool {
         })
         .unwrap_or(380.0);
 
+    // The icon's screen is the one whose menu-bar strip holds it. Each screen
+    // reads the frame at its own scale, so with a 1× display beside a 2×
+    // laptop the icon can seem to sit in both strips: a laptop icon 2800 px
+    // across reads as 2800 points on the 1× screen, which lies right of the
+    // laptop. The popover then opened on the external display, and was lost
+    // once it was unplugged. Only the icon's own screen gives it the height
+    // of a menu bar, 24 points or 37 beside a notch.
+    let mut first = None;
     for monitor in monitors {
         let scale = monitor.scale_factor();
         let left = f64::from(monitor.position().x) / scale;
@@ -426,17 +446,24 @@ fn under_menu_bar_icon(window: &WebviewWindow) -> bool {
         let right = left + f64::from(monitor.size().width) / scale;
         let (x, y) = (pixels.x / scale, pixels.y / scale);
         let (icon_width, icon_height) = (pixel_size.width / scale, pixel_size.height / scale);
-        // The icon's screen is the one whose menu-bar strip holds it.
         if x < left || x >= right || y < top || y >= top + 60.0 {
             continue;
         }
-        // Centred under the icon, kept on its screen near the edges.
-        let wanted = x + icon_width / 2.0 - width / 2.0;
-        let at_x = wanted.clamp(left + 8.0, (right - width - 8.0).max(left + 8.0));
-        let _ = window.set_position(LogicalPosition::new(at_x, y + icon_height));
-        return true;
+        let spot = (left, right, x, y, icon_width, icon_height);
+        if (18.0..=44.0).contains(&icon_height) {
+            first = Some(spot);
+            break;
+        }
+        first.get_or_insert(spot);
     }
-    false
+    let Some((left, right, x, y, icon_width, icon_height)) = first else {
+        return false;
+    };
+    // Centred under the icon, kept on its screen near the edges.
+    let wanted = x + icon_width / 2.0 - width / 2.0;
+    let at_x = wanted.clamp(left + 8.0, (right - width - 8.0).max(left + 8.0));
+    let _ = window.set_position(LogicalPosition::new(at_x, y + icon_height));
+    true
 }
 
 /// The menu-bar icon's frame, in whole physical pixels, once it has a real
