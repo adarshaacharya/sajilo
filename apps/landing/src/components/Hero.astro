@@ -66,6 +66,17 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
           Security. <a href="/docs/install-macos.html">Screenshots ↗</a>
         </span>
       </p>
+      <!-- Every OS has its own first-run step (Open Anyway, SmartScreen, the
+           Linux tray), and the guides cover them; this points at all three
+           for everyone, next to where they click Download. -->
+      <p class="install-guides">
+        New to Sajilo? Read the install guide for your computer first:
+        <a href="/docs/install-macos.html">macOS</a>
+        <span aria-hidden="true">·</span>
+        <a href="/docs/install-windows.html">Windows</a>
+        <span aria-hidden="true">·</span>
+        <a href="/docs/install-linux.html">Linux</a>
+      </p>
     </div>
 
     <div class="hero-stage" aria-hidden="true">
@@ -176,6 +187,23 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
   }
   .platforms {
     position: relative;
+  }
+  .install-guides {
+    max-width: 46ch;
+    margin-top: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--paper-3);
+    animation: rise 1s var(--ease) 0.36s both;
+  }
+  .install-guides a {
+    color: var(--paper);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-underline-offset: 3px;
+  }
+  .install-guides a:hover {
+    text-decoration-color: currentColor;
   }
   .mac-note {
     max-width: 46ch;

@@ -13,7 +13,7 @@ Open **Settings** with the **gear** at the top right of Sajilo, or from the tray
 ### Appearance
 
 - **Theme:** System, Light or Dark.
-- **Accent colour:** the colour of buttons, today's date and highlights across Sajilo. Marigold (सयपत्री, the gold it starts with), Himalayan blue, Chandi (चाँदी, silver, for no colour at all), Phewa, Ilam tea, Makhamali (मखमली), Kamal (कमल, lotus pink), Dhaka red or Rudraksha. Each works in light and dark.
+- **Accent colour:** the colour of buttons, today's date and highlights across Sajilo ([all nine](/docs/make-it-yours.html#accent-colour)). Marigold (सयपत्री, the gold it starts with), Himalayan blue, Chandi (चाँदी, silver, for no colour at all), Phewa, Ilam tea, Makhamali (मखमली), Kamal (कमल, lotus pink), Dhaka red or Rudraksha. Each works in light and dark.
 - **Text size:** Small, Default or Large.
 - **Language:** नेपाली or English.
 - **Numerals:** Devanagari (२०८३) or Latin (2083).
@@ -26,7 +26,11 @@ How the date looks in your menu bar or tray:
 - **Format:** Short, Full (the default), With flag, Gregorian, Numeric, or **Custom…**, where you choose whether to show the Nepal flag and the BS year.
 - **Show time:** adds the time in Nepal.
 
-On Windows the tray shows only the icon, and the date appears when you hover over it. Most Linux desktops, Ubuntu included, also show only the icon.
+On Windows the tray shows only the icon, and the date appears when you hover over it. Some Linux desktops, like KDE and Cinnamon, also show only the icon; Ubuntu shows the date beside it.
+
+### Mini view
+
+**Second line shows** picks what the [mini view](/docs/make-it-yours.html#mini-view) strip shows under the date: the next festival or holiday, weather, the NEPSE index, the dollar rate, or the radio while it plays. You can also click that line on the strip to change it.
 
 ### Startup
 
