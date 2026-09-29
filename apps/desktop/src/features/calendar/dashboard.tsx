@@ -13,6 +13,7 @@ import {
   type Today,
   type UpcomingEvent,
 } from "../../shared/lib/ipc";
+import { useNepalDay } from "../../shared/lib/nepal-day";
 import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
@@ -121,6 +122,10 @@ export function Dashboard() {
   const [planDays, setPlanDays] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
 
+  // A new day reloads today, the grid and Up next: the popover outlives
+  // midnight, and yesterday must not stay highlighted.
+  const day = useNepalDay();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `day` is the trigger
   const reload = useCallback(() => {
     setError(null);
     api
@@ -133,7 +138,7 @@ export function Dashboard() {
       .upcomingEvents(40, 180)
       .then(setUpcoming)
       .catch(() => setUpcoming([]));
-  }, []);
+  }, [day]);
 
   useEffect(reload, [reload]);
 
@@ -154,6 +159,8 @@ export function Dashboard() {
       .catch(() => setPlanDays(new Set()));
   }, [cursorYear, cursorMonth]);
 
+  // The grid marks today, so a new day asks for it again.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `day` is the trigger
   useEffect(() => {
     if (!cursorYear || !cursorMonth) return;
     api
@@ -174,7 +181,7 @@ export function Dashboard() {
         setMonthSpan(gregorianSpan(a.gregorian, b.gregorian));
       })
       .catch((cause) => setError(String(cause)));
-  }, [cursorYear, cursorMonth]);
+  }, [cursorYear, cursorMonth, day]);
 
   // `replace`, so paging months never piles up entries that Back would replay.
   const step = (offset: number) => {

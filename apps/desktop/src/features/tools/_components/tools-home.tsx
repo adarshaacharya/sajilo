@@ -3,6 +3,7 @@ import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
+import { useNepalDay } from "../../../shared/lib/nepal-day";
 import { digits } from "../../../shared/lib/numerals";
 import * as stopwatch from "../../../shared/lib/stopwatch";
 import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
@@ -162,7 +163,8 @@ function StopwatchCard({ onOpen }: { onOpen: () => void }) {
 /** Today in both calendars — the converter's most common answer, given free. */
 function DateCard({ onOpen }: { onOpen: () => void }) {
   const { t, numerals } = useSettings();
-  const { data: today } = useSWR("tools:today", () => api.today());
+  const day = useNepalDay();
+  const { data: today } = useSWR(["tools:today", day], () => api.today());
   const ad = today
     ? new Intl.DateTimeFormat("en-US", {
         month: "short",
