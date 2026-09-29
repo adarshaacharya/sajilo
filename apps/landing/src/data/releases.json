@@ -1,5 +1,109 @@
 [
   {
+    "version": "v0.1.33",
+    "name": "Sajilo v0.1.33",
+    "publishedAt": "2026-09-29T05:48:33Z",
+    "body": "## Important fix for Ubuntu 26.04\r\n\r\n**If Sajilo 0.1.32 kept logging you out on Ubuntu, this fixes it.** On Ubuntu 26.04, the new top-bar icon in 0.1.32 could crash GNOME a few seconds after login, and because Sajilo starts at login, it happened every time. Sorry about that.\r\n\r\nOn GNOME, Sajilo is back to the icon it had before, with the Nepali date beside it. **Double-click** the flag to open Sajilo, or click it once and choose **Open Sajilo**. The first time you run it on GNOME, Sajilo reminds you with a notification.\r\n\r\n**Stuck in the loop?** Press Ctrl+Alt+F3, log in, remove Sajilo (`sudo apt remove sajilo`), reboot, then install 0.1.33.\r\n\r\n## Your rashifal every morning\r\n\r\nChoose your sign in **Rashifal**, and Sajilo can show today's reading when you first sit down at your computer.\r\n\r\n- It comes after a few minutes of use, not at a fixed time, so it doesn't land while you're logging in.\r\n- Once a day, and never after noon. If you've already read it in the Rashifal tab, it doesn't come.\r\n- Turn it on from the Rashifal tab, or in **Settings › System › Reminders › Daily rashifal**.\r\n\r\n## Mini view\r\n\r\nPress the new button beside the pin to shrink Sajilo into a small strip you can leave on your desktop: today's date in BS and AD, Nepal time, and one more line.\r\n\r\n- **Click that line** to switch between the next festival or holiday, the weather, NEPSE, the dollar rate and the radio. The same choice is in **Settings › Display › Mini view**.\r\n- It stays open and remembers where you put it. The arrows on the strip open the full view again.\r\n\r\n## Stopwatch\r\n\r\nA new **Stopwatch** in Tools. Tap the dial to start and pause.\r\n\r\n- **Lap** leaves a mark on the dial. The fastest lap turns green and the slowest red.\r\n- It keeps running when Sajilo is closed, and shows on the mini view while it runs.\r\n- Keyboard: **Space** to start or pause, **L** for a lap, **R** to reset.\r\n\r\n## Accent colours\r\n\r\n**Settings › Display › Accent colour** now has nine colours, each named for something from home: **Marigold** (सयपत्री, the gold Sajilo always had), **Himalayan blue**, **Chandi** (चाँदी, for no colour at all), **Phewa**, **Ilam tea**, **Makhamali** (मखमली), **Kamal** (कमल), **Dhaka red** and **Rudraksha**. Each one works in both light and dark mode.\r\n\r\n## Break reminders\r\n\r\n- **Water:** see today's progress on the card, and log a glass (+250 ml) or a bottle (+500 ml).\r\n- **Meals and bedtime:** \"Going to eat\" and \"Going to sleep\" buttons, and \"Remind in 15 min\" instead of 5.\r\n- **Look away:** if the countdown ring isn't moving, the card tells you why: hands off the mouse and keyboard.\r\n- Jokes come every few reminders, so they stay funny for longer.\r\n\r\n## Fixes\r\n\r\n- **Festival reminders** are on by default again.\r\n- The stand-up and water reminders no longer arrive at the same moment and hide each other.\r\n- Switching signs in **Rashifal** no longer makes the page jump.\r\n- Today's date is easier to read on the calendar highlight, whichever accent colour you pick.",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.33",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-macos-arm64.dmg",
+        "size": 10361279
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-macos-x64.dmg",
+        "size": 10987605
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-windows-x64.exe",
+        "size": 7672507
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-linux-amd64.deb",
+        "size": 14053416
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-linux-x86_64.AppImage",
+        "size": 159455736
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.33/Sajilo-linux-x86_64.rpm",
+        "size": 14053132
+      }
+    ]
+  },
+  {
+    "version": "v0.1.32",
+    "name": "Sajilo v0.1.32",
+    "publishedAt": "2026-09-28T15:17:41Z",
+    "body": "## Break reminders that react to you\r\n\r\n- **Look away:** if the countdown ring isn't moving, the card now tells you why: keep your hands off the mouse and keys, and it counts down while you look away.\r\n- **Water:** the card shows how much you've had today. Log a glass (+250 ml) or a bottle (+500 ml) and watch the bar fill.\r\n- **Meals and bedtime:** the buttons now say \"Going to eat\" and \"Going to sleep\", and \"Remind in 15 min\" instead of 5.\r\n- Jokes now come every third reminder, so they stay funny for longer. The line after a break fits the break: drinking water gets thanked for the water, not for your back.\r\n\r\n## The Nepal flag in your tray\r\n\r\n- Windows and Linux now show the Nepal flag in the tray. Prefer Sajilo's own icon? Choose it in **Settings › Menu bar**.\r\n\r\n## Linux: one click opens Sajilo\r\n\r\n- A left click on the tray icon now opens Sajilo on KDE, Cinnamon, Xfce, MATE, Waybar, GNOME (Ubuntu, Fedora, Pop!_OS) and i3/polybar. Right-click still shows the menu.\r\n- On Ubuntu's top bar the icon now shows without the date beside it.\r\n\r\n## Changed\r\n\r\n- **Festival tomorrow** reminders are now off for new installs, since most evenings have some festival. Public holidays still remind you, including festivals that are holidays. Turn festivals on in **Settings › System › Reminders**.\r\n\r\n## Fixes\r\n\r\n- The stand-up and water reminders came due at the same moment, and the water one never showed. Now they come one after the other.\r\n- **Linux:** moving the mouse off Sajilo no longer closes it (Cinnamon, sway, Hyprland).\r\n- **Linux:** the tray shows one flag, not two.\r\n- **macOS:** no more flicker when Sajilo opens, and clicking the menu-bar date while Sajilo is open now closes it.",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.32",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-macos-arm64.dmg",
+        "size": 10353363
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-macos-x64.dmg",
+        "size": 10957226
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-windows-x64.exe",
+        "size": 7664090
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-linux-amd64.deb",
+        "size": 14022180
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-linux-x86_64.AppImage",
+        "size": 159418872
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.32/Sajilo-linux-x86_64.rpm",
+        "size": 14023130
+      }
+    ]
+  },
+  {
     "version": "v0.1.31",
     "name": "Sajilo v0.1.31",
     "publishedAt": "2026-09-27T16:27:05Z",
