@@ -209,6 +209,8 @@ pub struct FocusSettings {
     pub custom: CustomBreak,
     /// The user's own words for the look-away, stand-up and water cards.
     pub messages: BreakMessages,
+    /// The user's changes to each deck of jokes.
+    pub joke_edits: jokes::JokeEdits,
     /// One card at [`Self::stop_work_at`] on a work day, if still at the
     /// computer.
     pub end_of_day: bool,
@@ -433,6 +435,7 @@ impl Default for FocusSettings {
             jokes: true,
             custom: CustomBreak::default(),
             messages: BreakMessages::default(),
+            joke_edits: jokes::JokeEdits::default(),
             end_of_day: true,
             routine: Routine::default(),
             routine_asked: false,
@@ -531,6 +534,7 @@ impl FocusSettings {
         ] {
             *text = text.trim().chars().take(MESSAGE_MAX).collect();
         }
+        jokes::normalise(&mut self.joke_edits);
         let rounded = (self.water_goal_ml + 25) / 50 * 50;
         self.water_goal_ml = rounded.clamp(WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML);
         for rule in [
@@ -866,9 +870,13 @@ impl ActiveBreak {
         // A plain card closes plainly: the cheer comes with the joke.
         let (joke, cheer) = if funny {
             (
-                deal_joke(told, kind),
+                deal_joke(told, kind, settings),
                 kind.slot().and_then(|_| {
-                    jokes::deal(told, &jokes::done_deck(kind), &jokes::done_lines(kind))
+                    let done: Vec<jokes::Joke> = jokes::done_lines(kind)
+                        .into_iter()
+                        .map(jokes::Joke::from)
+                        .collect();
+                    jokes::deal(told, &jokes::done_deck(kind), &done)
                 }),
             )
         } else {
@@ -903,8 +911,16 @@ fn default_snooze_minutes() -> u32 {
     SNOOZE_MINUTES
 }
 
-fn deal_joke(told: &mut BTreeMap<String, u32>, kind: BreakKind) -> Option<jokes::Joke> {
-    jokes::deal(told, jokes::deck_name(kind), jokes::lines(kind))
+fn deal_joke(
+    told: &mut BTreeMap<String, u32>,
+    kind: BreakKind,
+    settings: &FocusSettings,
+) -> Option<jokes::Joke> {
+    jokes::deal(
+        told,
+        jokes::deck_name(kind),
+        &jokes::deck(kind, &settings.joke_edits),
+    )
 }
 
 /// Whether this reminder of `kind` is one that says a joke, counting it.
@@ -1765,8 +1781,9 @@ pub fn announcement(
     language: Language,
 ) -> (String, String) {
     let (title, plain) = message(kind, today, settings, language);
-    let joke = if settings.jokes && joke_turn(state, kind) {
-        deal_joke(&mut state.jokes_told, kind)
+    let joke = if settings.jokes && settings.messages.get(kind).is_none() && joke_turn(state, kind)
+    {
+        deal_joke(&mut state.jokes_told, kind, settings)
     } else {
         None
     };

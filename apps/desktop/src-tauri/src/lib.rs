@@ -303,6 +303,7 @@ pub fn run() {
             commands::plans::save_plan,
             commands::plans::delete_plan,
             commands::focus::focus_snapshot,
+            commands::focus::focus_joke_decks,
             commands::focus::set_focus_settings,
             commands::focus::enable_recommended_breaks,
             commands::focus::disable_breaks,

@@ -92,6 +92,28 @@ fn view(tracker: &mut Tracker) -> FocusSnapshot {
     snapshot
 }
 
+/// One deck of jokes as Sajilo ships it, for the message editor; the user's
+/// changes travel in the settings (`jokeEdits`).
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JokeDeck {
+    kind: sajilo_core::focus::BreakKind,
+    lines: Vec<sajilo_core::focus::jokes::Joke>,
+}
+
+/// Every deck the user can edit, in the editor's order.
+#[tauri::command]
+pub fn focus_joke_decks() -> Vec<JokeDeck> {
+    use sajilo_core::focus::jokes;
+    jokes::EDITABLE
+        .iter()
+        .map(|&kind| JokeDeck {
+            kind,
+            lines: jokes::lines(kind).iter().map(|&line| line.into()).collect(),
+        })
+        .collect()
+}
+
 #[tauri::command]
 pub fn focus_snapshot(app: AppHandle<Wry>) -> FocusSnapshot {
     with_tracker(&app, view)

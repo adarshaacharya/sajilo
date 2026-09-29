@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { BackButton } from "../../../shared/components/back-button";
+import { Icon } from "../../../shared/components/icon";
 import { WEEKDAYS_NE } from "../../../shared/components/month-grid";
 import { Segmented } from "../../../shared/components/segmented";
 import { Toggle } from "../../../shared/components/toggle";
@@ -79,11 +80,13 @@ export function SettingsPanel({
   onSettings,
   onTurnOff,
   onBack,
+  onMessages,
 }: {
   snapshot: FocusSnapshot;
   onSettings: (settings: FocusSettings) => void;
   onTurnOff: () => void;
   onBack: () => void;
+  onMessages: () => void;
 }) {
   const { t, language } = useSettings();
   const { settings, holdSupport } = snapshot;
@@ -241,6 +244,21 @@ export function SettingsPanel({
             checked={settings.jokes}
             onChange={(jokes) => onSettings({ ...settings, jokes })}
           />
+          {/* A row that leads to a page, like a macOS settings row: the name,
+              then a chevron. */}
+          <button
+            type="button"
+            onClick={onMessages}
+            className="-mx-1 flex w-[calc(100%+0.5rem)] items-center gap-3 rounded-md px-1 py-0.5 text-left hover:bg-surface-hover"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block text-[12px] text-text">{t("focus.messages.open")}</span>
+              <span className="mt-0.5 block text-[10px] leading-snug text-text-muted">
+                {t("focus.messages.open-note")}
+              </span>
+            </span>
+            <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+          </button>
           <Toggle
             label={t("focus.chime")}
             checked={settings.chime}

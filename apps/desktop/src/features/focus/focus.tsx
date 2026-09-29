@@ -4,6 +4,7 @@ import { StateBanner } from "../../shared/components/state-banner";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
 import { Intro } from "./_components/intro";
+import { MessagesPanel } from "./_components/messages-panel";
 import { Overview } from "./_components/overview";
 import { RoutineAsk, routineOn } from "./_components/routine";
 import { SettingsPanel } from "./_components/settings-panel";
@@ -27,6 +28,7 @@ export function Focus() {
   const { t } = useSettings();
   const { load, refresh, act } = useFocus();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(false);
 
   if (load.status === "loading") return <FocusSkeleton />;
   if (load.status === "failed") {
@@ -41,6 +43,16 @@ export function Focus() {
   const { snapshot } = load;
   const save = (settings: typeof snapshot.settings) => act(() => api.setFocusSettings(settings));
 
+  if (settingsOpen && messagesOpen) {
+    return (
+      <MessagesPanel
+        settings={snapshot.settings}
+        onSettings={save}
+        onBack={() => setMessagesOpen(false)}
+      />
+    );
+  }
+
   if (settingsOpen) {
     return (
       <SettingsPanel
@@ -52,6 +64,7 @@ export function Focus() {
           act(api.disableBreaks);
         }}
         onBack={() => setSettingsOpen(false)}
+        onMessages={() => setMessagesOpen(true)}
       />
     );
   }

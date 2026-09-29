@@ -207,12 +207,33 @@ export interface FocusSettings {
   custom: CustomBreak;
   /** The user's own words for these cards, in place of Sajilo's; empty is Sajilo's. */
   messages: BreakMessages;
+  /** The user's changes to each deck of jokes, by kind. */
+  jokeEdits: Record<string, DeckEdits>;
   /** One card at the stop-work time on a work day, if still at the computer. */
   endOfDay: boolean;
   /** Meals and bedtime, each at the user's own time. */
   routine: Routine;
   /** Whether "when do you eat and sleep?" has been asked yet. */
   routineAsked: boolean;
+}
+
+/** One line, in both languages; the user's may leave one empty. */
+export interface Joke {
+  en: string;
+  ne: string;
+}
+
+/** The user's changes to one deck: Sajilo's lines are named by their English. */
+export interface DeckEdits {
+  off: string[];
+  edited: Record<string, Joke>;
+  added: Joke[];
+}
+
+/** A deck of jokes as Sajilo ships it. */
+export interface JokeDeck {
+  kind: BreakKind;
+  lines: Joke[];
 }
 
 export interface BreakMessages {
@@ -639,6 +660,7 @@ export const api = {
   logFocusWater: (delta: 1 | -1) => invoke<FocusSnapshot>("log_focus_water", { delta }),
   pauseFocus: (choice: PauseChoice) => invoke<FocusSnapshot>("pause_focus", { choice }),
   previewFocusBreak: (kind: BreakKind) => invoke<FocusSnapshot>("preview_focus_break", { kind }),
+  focusJokeDecks: () => invoke<JokeDeck[]>("focus_joke_decks"),
   finishFocusBreak: (outcome: BreakOutcome) =>
     invoke<FocusSnapshot>("finish_focus_break", { outcome }),
 

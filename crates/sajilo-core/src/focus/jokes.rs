@@ -7,7 +7,7 @@
 //! deal has got to is kept in [`super::FocusState`], so a restart does not
 //! start the deck over.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 
@@ -32,13 +32,130 @@ pub struct Joke {
     pub ne: String,
 }
 
+impl From<Line> for Joke {
+    fn from((en, ne): Line) -> Self {
+        Self {
+            en: en.to_owned(),
+            ne: ne.to_owned(),
+        }
+    }
+}
+
 impl Joke {
+    /// Either language standing in for the other where it is empty.
+    fn filled(mut self) -> Self {
+        if self.en.is_empty() {
+            self.en.clone_from(&self.ne);
+        } else if self.ne.is_empty() {
+            self.ne.clone_from(&self.en);
+        }
+        self
+    }
+
     pub fn text(&self, language: Language) -> &str {
         match language {
             Language::En => &self.en,
             Language::Ne => &self.ne,
         }
     }
+}
+
+/// Fewest lines a deck the user edits may keep switched on, so their card
+/// still rotates rather than saying one line over and over.
+pub const MIN_LINES: usize = 5;
+
+/// Longest line of the user's own; a little more room than ours.
+pub const MAX_OWN_LINE: usize = 120;
+
+/// The decks the user can edit, in the order the editor lists them.
+pub const EDITABLE: [BreakKind; 8] = [
+    BreakKind::Eyes,
+    BreakKind::Move,
+    BreakKind::Water,
+    BreakKind::Breakfast,
+    BreakKind::Lunch,
+    BreakKind::Dinner,
+    BreakKind::Bedtime,
+    BreakKind::EndOfDay,
+];
+
+/// The user's changes to one deck. Sajilo's lines stay built in and are
+/// named by their English text, so an update that adds lines keeps every
+/// edit, and a line reworded in an update simply drops its old edit.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct DeckEdits {
+    /// Sajilo's lines switched off.
+    pub off: BTreeSet<String>,
+    /// Sajilo's lines in the user's words.
+    pub edited: BTreeMap<String, Joke>,
+    /// The user's own lines. Either language may be left empty.
+    pub added: Vec<Joke>,
+}
+
+/// Every deck's edits, by [`deck_name`].
+pub type JokeEdits = BTreeMap<String, DeckEdits>;
+
+/// The lines `kind`'s card deals from: Sajilo's, as the user edited them,
+/// then the user's own. A line written in one language only is said in that
+/// one in both. Should edits leave fewer than [`MIN_LINES`] on (only a
+/// hand-edited file could), the switched-off lines come back.
+pub fn deck(kind: BreakKind, edits: &JokeEdits) -> Vec<Joke> {
+    let Some(deck_edits) = edits.get(deck_name(kind)) else {
+        return lines(kind).iter().map(|&line| Joke::from(line)).collect();
+    };
+    let build = |honour_off: bool| -> Vec<Joke> {
+        lines(kind)
+            .iter()
+            .filter(|(en, _)| !(honour_off && deck_edits.off.contains(*en)))
+            .map(|&(en, ne)| {
+                deck_edits
+                    .edited
+                    .get(en)
+                    .cloned()
+                    .unwrap_or_else(|| Joke::from((en, ne)))
+            })
+            .chain(deck_edits.added.iter().cloned())
+            .map(Joke::filled)
+            .filter(|joke| !joke.en.is_empty())
+            .collect()
+    };
+    let deck = build(true);
+    if deck.len() >= MIN_LINES {
+        deck
+    } else {
+        build(false)
+    }
+}
+
+/// Tidies stored edits: trims and shortens lines, drops empty ones, edits of
+/// lines this build no longer has, edits that match the original, and decks
+/// nobody can edit.
+pub fn normalise(edits: &mut JokeEdits) {
+    let tidy = |text: &str| text.trim().chars().take(MAX_OWN_LINE).collect::<String>();
+    edits.retain(|name, deck_edits| {
+        let Some(kind) = EDITABLE.iter().find(|kind| deck_name(**kind) == name) else {
+            return false;
+        };
+        let known: BTreeMap<&str, &str> = lines(*kind).iter().copied().collect();
+        deck_edits.off.retain(|en| known.contains_key(en.as_str()));
+        deck_edits.edited.retain(|en, joke| {
+            joke.en = tidy(&joke.en);
+            joke.ne = tidy(&joke.ne);
+            known.get(en.as_str()).is_some_and(|ne| {
+                (joke.en.as_str(), joke.ne.as_str()) != (en.as_str(), *ne)
+                    && !(joke.en.is_empty() && joke.ne.is_empty())
+            })
+        });
+        for joke in &mut deck_edits.added {
+            joke.en = tidy(&joke.en);
+            joke.ne = tidy(&joke.ne);
+        }
+        deck_edits
+            .added
+            .retain(|joke| !(joke.en.is_empty() && joke.ne.is_empty()));
+        *deck_edits != DeckEdits::default()
+    });
 }
 
 /// The deck for `kind`. The user's own reminder is their words, not ours, so
@@ -92,17 +209,14 @@ pub fn done_deck(kind: BreakKind) -> String {
 
 /// Deals the next line from a deck and moves the deal on; `None` for an
 /// empty deck.
-pub(super) fn deal(told: &mut BTreeMap<String, u32>, deck: &str, lines: &[Line]) -> Option<Joke> {
+pub(super) fn deal(told: &mut BTreeMap<String, u32>, deck: &str, lines: &[Joke]) -> Option<Joke> {
     if lines.is_empty() {
         return None;
     }
     let turn = told.entry(deck.to_owned()).or_insert(0);
-    let (en, ne) = lines[position(deck, *turn, lines.len())];
+    let joke = lines[position(deck, *turn, lines.len())].clone();
     *turn = turn.wrapping_add(1);
-    Some(Joke {
-        en: en.to_owned(),
-        ne: ne.to_owned(),
-    })
+    Some(joke)
 }
 
 /// Which line the `turn`th deal from a deck of `len` lines lands on.

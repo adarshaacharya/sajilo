@@ -1671,3 +1671,68 @@ fn a_message_of_ones_own_replaces_the_line_and_the_jokes() {
     preview_break(&mut state, &settings, BreakKind::Eyes, monday_at(11));
     assert!(state.active_break.expect("a card").joke.is_some());
 }
+
+/// The user's changes to a deck: lines switched off, reworded and added, in
+/// either language, never leaving fewer than five to rotate.
+#[test]
+fn a_deck_takes_the_users_edits_and_keeps_five_lines() {
+    let built = jokes::lines(BreakKind::Bedtime);
+    let mut edits = jokes::JokeEdits::new();
+    let deck_edits = edits.entry("bedtime".to_owned()).or_default();
+    deck_edits.off.insert(built[0].0.to_owned());
+    deck_edits.edited.insert(
+        built[1].0.to_owned(),
+        jokes::Joke {
+            en: "  Sleep, the reels will wait.  ".to_owned(),
+            ne: String::new(),
+        },
+    );
+    deck_edits.added.push(jokes::Joke {
+        en: String::new(),
+        ne: "सुत्नुहोस्, भोलि पनि इन्टरनेट हुन्छ।".to_owned(),
+    });
+    deck_edits.added.push(jokes::Joke {
+        en: "   ".to_owned(),
+        ne: String::new(),
+    });
+    // An edit of a line this build doesn't have, and a deck nobody edits.
+    deck_edits.edited.insert(
+        "gone".to_owned(),
+        jokes::Joke {
+            en: "x".to_owned(),
+            ne: "x".to_owned(),
+        },
+    );
+    edits
+        .entry("done.eyes".to_owned())
+        .or_default()
+        .off
+        .insert("x".to_owned());
+    jokes::normalise(&mut edits);
+    assert_eq!(edits.len(), 1);
+    assert_eq!(edits["bedtime"].added.len(), 1, "the blank line is dropped");
+
+    let deck = jokes::deck(BreakKind::Bedtime, &edits);
+    assert_eq!(deck.len(), built.len(), "one off, one added");
+    assert!(deck.iter().all(|joke| joke.en != built[0].0));
+    let reworded = deck
+        .iter()
+        .find(|joke| joke.en == "Sleep, the reels will wait.")
+        .unwrap();
+    assert_eq!(
+        reworded.ne, reworded.en,
+        "one language stands in for the other"
+    );
+    let own = deck.last().unwrap();
+    assert_eq!(own.en, own.ne);
+
+    // Switching off all but three brings Sajilo's lines back.
+    let deck_edits = edits.get_mut("bedtime").unwrap();
+    deck_edits.added.clear();
+    deck_edits.off = built
+        .iter()
+        .skip(3)
+        .map(|(en, _)| (*en).to_owned())
+        .collect();
+    assert_eq!(jokes::deck(BreakKind::Bedtime, &edits).len(), built.len());
+}
