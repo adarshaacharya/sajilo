@@ -5,9 +5,14 @@
 //! This is the freedesktop System Tray protocol, the older of Linux's two
 //! kinds of tray icon: a small window of Sajilo's that the tray takes into
 //! itself (XEmbed). A click on it is a click on that window, so one left
-//! click opens the popover. GNOME's extension hosts the newer kind, the
-//! StatusNotifierItem, too, but opens its menu on a left click for every app;
-//! this kind it hands the click to. i3bar and polybar host only this kind.
+//! click opens the popover. i3bar and polybar host only this kind. GNOME is
+//! never given one: see `linux_host` for the crash that decided that.
+//!
+//! A tray is another program holding Sajilo's window, so the window must not
+//! vanish while the tray may still be taking it in: a replaced icon is
+//! destroyed only after [`RETIRE_AFTER`], an icon still docked is never
+//! replaced, and a tray that keeps restarting stops being docked into after
+//! [`MAX_REDOCKS`] in [`REDOCK_WINDOW`] rather than being fed icon after icon.
 //!
 //! What it cannot do is show text: the tray gives it a small square, so it
 //! carries the icon alone, with the date as its tooltip where the tray passes
@@ -29,6 +34,14 @@ use x11_dl::xlib;
 /// `SYSTEM_TRAY_REQUEST_DOCK`, the tray protocol's only request Sajilo sends.
 const REQUEST_DOCK: c_long = 0;
 
+/// How long a replaced icon window lives on before it is destroyed, so a tray
+/// still taking it in never finds it gone (`BadWindow`).
+const RETIRE_AFTER: std::time::Duration = std::time::Duration::from_secs(10);
+/// Re-docks allowed in [`REDOCK_WINDOW`]; past that the tray is taken to be
+/// crashing, and is left alone rather than handed another window.
+const MAX_REDOCKS: usize = 2;
+const REDOCK_WINDOW: std::time::Duration = std::time::Duration::from_secs(60);
+
 /// Edge of the icon before it is scaled into the tray's slot. Large, so a
 /// 2× or 3× panel still gets a sharp flag.
 const SOURCE_SIZE: u32 = 128;
@@ -47,6 +60,8 @@ thread_local! {
     /// kept here rather than in Tauri's state. Everything that touches it
     /// runs on the main thread (see [`on_main`]).
     static ICON: RefCell<Option<Icon>> = const { RefCell::new(None) };
+    /// When the icon was last re-docked into a tray that announced itself.
+    static REDOCKS: RefCell<Vec<std::time::Instant>> = const { RefCell::new(Vec::new()) };
 }
 
 /// A connection of Sajilo's own to the X server, for the tray protocol's few
@@ -216,6 +231,11 @@ pub fn tray_running() -> bool {
 /// Puts the icon in the tray, and puts it back whenever a tray starts again
 /// (GNOME Shell restarting, the extension turned off and on). Main thread.
 pub fn start(app: &AppHandle) {
+    // Still in a tray: the announcement changed nothing for this icon, and a
+    // replacement would only give the tray a window to lose.
+    if ICON.with_borrow(|icon| icon.as_ref().is_some_and(|icon| icon.plug.is_embedded())) {
+        return;
+    }
     let Some(x) = X::open() else {
         return;
     };
@@ -250,8 +270,15 @@ pub fn start(app: &AppHandle) {
 
     ICON.with_borrow_mut(|icon| {
         if let Some(old) = icon.take() {
-            // SAFETY: the old window is done with; nothing else holds it.
-            unsafe { old.plug.destroy() };
+            // Not destroyed now: the tray may still be taking it in, and a
+            // window gone from under it is a `BadWindow` in the tray's own
+            // process. Hidden now, destroyed once the tray is long done.
+            old.plug.hide();
+            let plug = old.plug.clone();
+            gtk::glib::timeout_add_local_once(RETIRE_AFTER, move || {
+                // SAFETY: nothing of Sajilo's holds it any more.
+                unsafe { plug.destroy() };
+            });
         }
         *icon = Some(Icon {
             plug,
@@ -291,10 +318,28 @@ pub fn watch_for_new_tray(app: AppHandle) {
             let selection = message.data.get_long(1) as c_ulong;
             if message.message_type == manager && selection == x.selection {
                 let handle = app.clone();
-                let _ = app.run_on_main_thread(move || start(&handle));
+                let _ = app.run_on_main_thread(move || redock(&handle));
             }
         }
     });
+}
+
+/// Docks again into a tray that announced itself, unless the tray has done so
+/// [`MAX_REDOCKS`] times inside [`REDOCK_WINDOW`]: a tray restarting over and
+/// over may be restarting because of the icon, and feeding it another would
+/// make a loop of it. Main thread.
+fn redock(app: &AppHandle) {
+    let now = std::time::Instant::now();
+    let allowed = REDOCKS.with_borrow_mut(|recent| {
+        recent.retain(|at| now.duration_since(*at) < REDOCK_WINDOW);
+        recent.push(now);
+        recent.len() <= MAX_REDOCKS
+    });
+    if allowed {
+        start(app);
+    } else {
+        eprintln!("sajilo: the system tray keeps restarting; not docking into it again");
+    }
 }
 
 /// The window the tray takes in: draws the icon, and takes the clicks. The

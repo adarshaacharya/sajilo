@@ -46,9 +46,20 @@ tray opens Sajilo on a single left click (`tray/linux_host.rs`):
 | Tray | Icon | Why |
 |---|---|---|
 | KDE, Cinnamon, Xfce, MATE, Waybar | StatusNotifierItem | The panel calls `Activate` on a left click |
-| GNOME's AppIndicator extension (Ubuntu, Fedora, Pop!_OS) | System Tray (XEmbed) | The extension opens a StatusNotifierItem's menu on a left click and activates only on a double click, for every app. It hands a System Tray icon the click itself |
+| GNOME's AppIndicator extension (Ubuntu, Fedora, Pop!_OS) | StatusNotifierItem | Never a System Tray icon; see below. A left click opens the menu, a double click opens Sajilo |
 | i3bar, polybar, `stalonetray` | System Tray | The only kind they show |
 | Anything, with GTK drawing straight to Wayland | StatusNotifierItem | There is no System Tray without X11 |
+
+**Why GNOME never gets the System Tray icon.** 0.1.32 gave it one, because
+the extension hands a System Tray icon the left click. On Ubuntu 26.04
+(GNOME on Wayland, Sajilo on XWayland) GNOME Shell then aborted on
+`BadWindow (request_code 2)` about three seconds after login: the shell went
+to change the attributes of Sajilo's icon window while taking it in, found it
+gone, and GDK's X error handler ended the process, and with it the session.
+Sajilo starts at login, so every login did it again, until the user removed
+Sajilo from a recovery shell. A StatusNotifierItem is a D-Bus object and
+hands GNOME no X window, so it cannot fail that way. The single click is the
+price.
 
 It tells GNOME from the rest by the process that owns
 `org.kde.StatusNotifierWatcher` on the session bus: `gnome-shell`. At login
@@ -69,8 +80,8 @@ the tray title; with the flag as the icon, the title leaves out its own flag.
 `GtkPlug`) that Sajilo asks the tray to take in, as GTK's old `GtkStatusIcon`
 did. A left click on it is a click on Sajilo's own window, so it toggles the
 popover on the release; the right click pops a GTK menu with the same items.
-It works on GNOME under Wayland too, because Sajilo draws through XWayland
-there (`prefer_x11_backend` in `lib.rs`). What it gives up:
+It is used only where no StatusNotifierItem host exists (i3bar, polybar,
+`stalonetray`), never on GNOME. What it gives up:
 
 - **No date beside it.** The tray gives it a small square, so it carries the
   icon alone. The date is its tooltip, where the tray passes the pointer on;
@@ -84,9 +95,17 @@ there (`prefer_x11_backend` in `lib.rs`). What it gives up:
 - **The tray sets its size.** Trays that follow the protocol refuse the
   icon's own resize requests; GTK makes one after being taken in.
 
-When a tray restarts (GNOME Shell on X11, the extension turned off and on),
-it announces itself with a `MANAGER` message to the root window, and Sajilo
-docks a new icon. Trays keep the old window alive by adding it to their
+When a tray restarts (i3 reloading, a bar restarted), it announces itself
+with a `MANAGER` message to the root window, and Sajilo docks a new icon, but
+carefully, since a tray is another program holding Sajilo's window:
+
+- An icon still embedded is left alone; the announcement changed nothing.
+- A replaced icon is hidden and destroyed only ten seconds later, so a tray
+  still taking it in never finds it gone.
+- After two re-docks inside a minute the tray is taken to be crashing and is
+  not docked into again, rather than fed icon after icon.
+
+ Trays keep the old window alive by adding it to their
 save-set, as the protocol asks; one that did not would take it down with
 it, and GTK aborts on the next call to a window it did not expect to lose.
 
@@ -102,7 +121,7 @@ plain toggle is right there.
 |---|---|---|---|
 | Click anywhere outside | Yes | Yes | Yes (see below) |
 | Escape | Yes | Yes | Yes |
-| Click the tray icon | Yes | Yes | Yes (a single click opens the menu on GNOME) |
+| Click the tray icon | Yes | Yes | Yes (a single click opens the menu on GNOME; double-click opens Sajilo) |
 | Open a link | Yes, so the browser comes to the front | Yes | Yes |
 
 A pinned popover ignores clicks outside and links, but Escape and the tray

@@ -4,8 +4,16 @@
 //! | Tray | Kind | Why |
 //! |---|---|---|
 //! | KDE, Cinnamon, Xfce, MATE, Waybar | StatusNotifierItem | The panel calls `Activate` on a left click, and shows the date beside the icon |
-//! | GNOME's AppIndicator extension (Ubuntu, Fedora, Pop!_OS) | System Tray ([`super::xembed`]) | The extension opens a StatusNotifierItem's menu on a left click, but hands a System Tray icon the click |
-//! | i3bar, polybar and other bars without a StatusNotifierItem host | System Tray | The only kind they show |
+//! | GNOME's AppIndicator extension (Ubuntu, Fedora, Pop!_OS) | StatusNotifierItem | See below: never a System Tray icon |
+//! | i3bar, polybar and other bars without a StatusNotifierItem host | System Tray ([`super::xembed`]) | The only kind they show |
+//!
+//! GNOME gets the StatusNotifierItem even though its extension would hand a
+//! System Tray icon the left click. In 0.1.32 it got the System Tray icon, and
+//! on Ubuntu 26.04 (GNOME on Wayland, with Sajilo on XWayland) GNOME Shell
+//! aborted on a `BadWindow` a few seconds after login, taking the session with
+//! it; autostart then did it again at every login. A StatusNotifierItem is a
+//! D-Bus object and hands GNOME no X window at all, so it cannot fail that
+//! way. One left click opens the menu there, a double click opens Sajilo.
 //!
 //! Without X11 (GDK drawing straight to Wayland) there is no System Tray, so
 //! it is always the StatusNotifierItem.
@@ -57,16 +65,8 @@ pub fn wait_for_host() -> Host {
 pub fn pick(settled: bool) -> Option<Host> {
     let system_tray = crate::window::on_x11() && super::xembed::tray_running();
     match watcher_program() {
-        Some(program) if program == "gnome-shell" => {
-            // The extension starts its System Tray alongside its
-            // StatusNotifierItem host; give it a moment to, and fall back to
-            // the StatusNotifierItem where it is turned off in its settings.
-            if system_tray {
-                Some(Host::SystemTray)
-            } else {
-                settled.then_some(Host::StatusNotifier)
-            }
-        }
+        // GNOME, and every other StatusNotifierItem host: never an X window
+        // for the shell to embed (see the module docs).
         Some(_) => Some(Host::StatusNotifier),
         None if !crate::window::on_x11() => Some(Host::StatusNotifier),
         None if system_tray && settled => Some(Host::SystemTray),
