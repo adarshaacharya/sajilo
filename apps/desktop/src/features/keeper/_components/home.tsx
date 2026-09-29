@@ -9,6 +9,7 @@ import type {
   KeeperRecord,
   KeeperSnapshot,
 } from "../../../shared/lib/ipc";
+import { LIMITS } from "../../../shared/lib/limits";
 import type { SipStatus } from "../../../types/api/SipStatus";
 import { documentSpec, personName, recordName } from "../_lib/documents";
 import { groupDocuments, groupItems, groupName, itemGroupName } from "../_lib/groups";
@@ -179,6 +180,7 @@ export function Home({
             <Icon name="search" className="size-3 text-text-muted" />
             <input
               value={search}
+              maxLength={LIMITS.SEARCH}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={t("keeper.search-placeholder")}
               aria-label={t("keeper.search-placeholder")}

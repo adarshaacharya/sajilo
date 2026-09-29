@@ -10,6 +10,7 @@ import type {
   KeeperRecord,
   KeeperRecordInput,
 } from "../../../shared/lib/ipc";
+import { LIMITS } from "../../../shared/lib/limits";
 import {
   documentSpec,
   fieldValue,
@@ -114,6 +115,7 @@ export function RecordEditor({
             ) : (
               <input
                 value={fieldValue(record, field.key)}
+                maxLength={LIMITS.SHORT}
                 onChange={(event) => setField(field.key, event.target.value)}
                 placeholder={t(field.label)}
                 aria-label={t(field.label)}
@@ -195,6 +197,7 @@ export function RecordEditor({
       {spec.office && (
         <input
           value={record.office}
+          maxLength={LIMITS.SHORT}
           onChange={(event) => onChange({ ...record, office: event.target.value })}
           placeholder={t(spec.office)}
           aria-label={t(spec.office)}
@@ -206,6 +209,7 @@ export function RecordEditor({
 
       <textarea
         value={record.note}
+        maxLength={LIMITS.NOTE}
         onChange={(event) => onChange({ ...record, note: event.target.value })}
         placeholder={t("keeper.note-placeholder")}
         aria-label={t("keeper.note-placeholder")}
@@ -278,6 +282,7 @@ function VehiclePicker({
       {typing && (
         <input
           value={record.details.insured ?? ""}
+          maxLength={LIMITS.SHORT}
           onChange={(event) =>
             onChange({ ...record, details: { ...record.details, insured: event.target.value } })
           }
@@ -319,6 +324,7 @@ function CustomFields({
         <div key={index} className="flex items-center gap-1">
           <input
             value={field.label}
+            maxLength={LIMITS.FIELD_LABEL}
             onChange={(event) => update(index, { label: event.target.value })}
             placeholder={t("keeper.custom.field-label")}
             aria-label={t("keeper.custom.field-label")}
@@ -326,6 +332,7 @@ function CustomFields({
           />
           <input
             value={field.value}
+            maxLength={LIMITS.FIELD_VALUE}
             onChange={(event) => update(index, { value: event.target.value })}
             placeholder={t("keeper.custom.field-value")}
             aria-label={t("keeper.custom.field-value")}

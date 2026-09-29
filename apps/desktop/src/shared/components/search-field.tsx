@@ -1,3 +1,4 @@
+import { LIMITS } from "../lib/limits";
 import { CONTROL } from "./control";
 import { Icon } from "./icon";
 
@@ -27,6 +28,7 @@ export function SearchField({
         autoCorrect="off"
         spellCheck={false}
         value={value}
+        maxLength={LIMITS.SEARCH}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}

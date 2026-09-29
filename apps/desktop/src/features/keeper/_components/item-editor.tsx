@@ -4,6 +4,7 @@ import { RemindDays } from "../../../shared/components/remind-days";
 import { Select } from "../../../shared/components/select";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperItem, KeeperPerson } from "../../../shared/lib/ipc";
+import { LIMITS } from "../../../shared/lib/limits";
 import { isMonthly } from "../_lib/documents";
 import { REMINDER_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
@@ -49,6 +50,7 @@ export function ItemEditor({
         />
         <input
           value={item.title}
+          maxLength={LIMITS.TITLE}
           onChange={(event) => onChange({ ...item, title: event.target.value })}
           placeholder={t("keeper.what-should-remember")}
           aria-label={t("keeper.what-should-remember")}
@@ -109,6 +111,7 @@ export function ItemEditor({
 
         <textarea
           value={item.note}
+          maxLength={LIMITS.NOTE}
           onChange={(event) => onChange({ ...item, note: event.target.value })}
           placeholder={t("keeper.note-placeholder")}
           aria-label={t("keeper.note-placeholder")}

@@ -52,6 +52,9 @@ export function ToolTextField({
         type="text"
         inputMode="numeric"
         value={value}
+        // A number typed as text (min/max don't bound text): no real value
+        // in these tools needs more digits.
+        maxLength={12}
         min={min}
         max={max}
         onChange={(event) => onChange(event.target.value)}

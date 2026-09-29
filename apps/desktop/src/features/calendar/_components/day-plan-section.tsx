@@ -6,6 +6,7 @@ import { TimeField } from "../../../shared/components/time-field";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api, type DayPlan, type NepaliDate, type PlanRecurrence } from "../../../shared/lib/ipc";
+import { LIMITS } from "../../../shared/lib/limits";
 import { track } from "../../../shared/lib/usage";
 
 const REMINDERS = [
@@ -111,6 +112,7 @@ function PlanEditor({
       <input
         ref={titleInputRef}
         value={draft.title}
+        maxLength={LIMITS.TITLE}
         onChange={(e) => onChange({ ...draft, title: e.target.value })}
         placeholder={t("planner.title-field")}
         className={`${CONTROL} w-full`}
@@ -155,6 +157,7 @@ function PlanEditor({
 
       <input
         value={draft.note}
+        maxLength={LIMITS.NOTE}
         onChange={(e) => onChange({ ...draft, note: e.target.value })}
         placeholder={t("planner.note-field")}
         className={`${CONTROL} w-full`}

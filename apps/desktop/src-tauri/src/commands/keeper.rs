@@ -3,6 +3,7 @@
 //! Dates are deliberately resolved here. The frontend can display both AD and
 //! Bikram Sambat, but it never owns a second copy of the calendar engine.
 
+use sajilo_core::limits::{self, clip};
 use std::collections::BTreeMap;
 
 use chrono::{Datelike, Duration, Months, NaiveDate, TimeZone, Utc};
@@ -537,8 +538,10 @@ pub fn resolve_keeper_date(input: KeeperDateInput) -> Result<KeeperDate> {
 }
 
 #[tauri::command]
-pub fn save_keeper_person(app: AppHandle<Wry>, person: KeeperPerson) -> Result<KeeperSnapshot> {
-    if person.name.trim().is_empty() {
+pub fn save_keeper_person(app: AppHandle<Wry>, mut person: KeeperPerson) -> Result<KeeperSnapshot> {
+    person.name = clip(&person.name, limits::NAME);
+    person.relationship = clip(&person.relationship, limits::SHORT);
+    if person.name.is_empty() {
         return Err("A family member needs a name.".to_owned());
     }
     let connection = db::open(&app)?;
@@ -642,8 +645,18 @@ fn kept_repeat_day(
 }
 
 #[tauri::command]
-pub fn save_keeper_item(app: AppHandle<Wry>, item: KeeperItem) -> Result<KeeperSnapshot> {
-    if item.title.trim().is_empty() {
+pub fn save_keeper_item(app: AppHandle<Wry>, mut item: KeeperItem) -> Result<KeeperSnapshot> {
+    item.title = clip(&item.title, limits::TITLE);
+    item.note = clip(&item.note, limits::NOTE);
+    item.official_url = clip(&item.official_url, limits::URL);
+    item.office_location = clip(&item.office_location, limits::SHORT);
+    item.fee = clip(&item.fee, limits::SHORT);
+    item.application_status = clip(&item.application_status, limits::SHORT);
+    item.checklist.truncate(limits::CHECKLIST_ITEMS);
+    for step in &mut item.checklist {
+        step.label = clip(&step.label, limits::CHECKLIST_ITEM);
+    }
+    if item.title.is_empty() {
         return Err("Give this reminder a name first.".to_owned());
     }
     let due_input = item.due_date.as_ref().map(|date| KeeperDateInput {
@@ -715,8 +728,19 @@ pub fn delete_keeper_item(app: AppHandle<Wry>, id: String) -> Result<KeeperSnaps
 #[tauri::command]
 pub fn save_keeper_record(
     app: AppHandle<Wry>,
-    record: KeeperRecordInput,
+    mut record: KeeperRecordInput,
 ) -> Result<KeeperSnapshot> {
+    record.number = clip(&record.number, limits::SHORT);
+    record.office = clip(&record.office, limits::SHORT);
+    record.note = clip(&record.note, limits::NOTE);
+    for value in record.details.values_mut() {
+        *value = clip(value, limits::FIELD_VALUE);
+    }
+    record.custom_fields.truncate(limits::FIELDS);
+    for field in &mut record.custom_fields {
+        field.label = clip(&field.label, limits::FIELD_LABEL);
+        field.value = clip(&field.value, limits::FIELD_VALUE);
+    }
     if let Some(message) = missing_identity(&record) {
         return Err(message.to_owned());
     }

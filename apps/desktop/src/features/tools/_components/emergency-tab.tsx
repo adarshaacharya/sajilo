@@ -3,6 +3,7 @@ import { Icon } from "../../../shared/components/icon";
 import { Segmented } from "../../../shared/components/segmented";
 import { useSettings } from "../../../shared/context/settings-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
+import { LIMITS } from "../../../shared/lib/limits";
 import {
   type Category,
   CONTACTS,
@@ -111,6 +112,7 @@ export function EmergencyTab({
         />
         <input
           value={query}
+          maxLength={LIMITS.SEARCH}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={placeholder}
           aria-label={placeholder}

@@ -90,6 +90,8 @@ impl DayPlan {
     /// A reminder without a time has nothing to count back from, so the two are
     /// kept consistent at the one place plans are built.
     pub fn normalised(mut self) -> Self {
+        self.title = crate::limits::clip(&self.title, crate::limits::TITLE);
+        self.note = crate::limits::clip(&self.note, crate::limits::NOTE);
         if self.time.is_none() {
             self.reminder = None;
         }

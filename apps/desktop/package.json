@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "lint": "biome check .",
+    "lint": "biome check . && bun scripts/check-input-limits.ts",
     "format": "biome check --write .",
     "typecheck": "tsc --noEmit"
   },

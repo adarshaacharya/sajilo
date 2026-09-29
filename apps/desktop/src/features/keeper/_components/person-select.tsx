@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CONTROL } from "../../../shared/components/control";
 import { Segmented } from "../../../shared/components/segmented";
 import type { KeeperPerson } from "../../../shared/lib/ipc";
+import { LIMITS } from "../../../shared/lib/limits";
 import type { TFn } from "../_lib/shared";
 
 /** Someone not yet in the family list, typed straight into a form and created
@@ -101,6 +102,7 @@ export function PersonSelect({
             // biome-ignore lint/a11y/noAutofocus: the user just asked to add someone
             autoFocus
             value={newPerson.name}
+            maxLength={LIMITS.NAME}
             onChange={(event) => onNewPerson({ ...newPerson, name: event.target.value })}
             placeholder={t("keeper.family-name")}
             aria-label={t("keeper.family-name")}
@@ -108,6 +110,7 @@ export function PersonSelect({
           />
           <input
             value={newPerson.relationship}
+            maxLength={LIMITS.SHORT}
             onChange={(event) => onNewPerson({ ...newPerson, relationship: event.target.value })}
             placeholder={t("keeper.relationship-placeholder")}
             aria-label={t("keeper.relationship-placeholder")}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
+import { LIMITS } from "../../../shared/lib/limits";
 import type { RashiSign } from "../../../types/api/RashiSign";
 import { matchSigns, SIGNS } from "../_lib/signs";
 import { SignGrid } from "./sign-grid";
@@ -23,6 +24,7 @@ export function SignFinder({ onChoose }: { onChoose: (id: RashiSign) => void }) 
         <Icon name="search" className="size-3.5 shrink-0 text-text-muted" />
         <input
           value={query}
+          maxLength={LIMITS.SEARCH}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             const [only] = matched;

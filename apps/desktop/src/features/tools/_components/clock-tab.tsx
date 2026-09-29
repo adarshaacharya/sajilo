@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useSettings } from "../../../shared/context/settings-context";
+import { LIMITS } from "../../../shared/lib/limits";
 import {
   cityFor,
   flagFor,
@@ -77,6 +78,7 @@ export function ClockTab() {
         <input
           type="text"
           value={query}
+          maxLength={LIMITS.SEARCH}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={t("tools.clock-search")}
           className="control-field w-full rounded-[8px] px-2.5 py-1.5 text-[12px] text-text outline-none focus-visible:border-[color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]"
