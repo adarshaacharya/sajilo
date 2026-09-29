@@ -205,12 +205,20 @@ export interface FocusSettings {
   jokes: boolean;
   /** The user's own reminder; off while it has no words. */
   custom: CustomBreak;
+  /** The user's own words for these cards, in place of Sajilo's; empty is Sajilo's. */
+  messages: BreakMessages;
   /** One card at the stop-work time on a work day, if still at the computer. */
   endOfDay: boolean;
   /** Meals and bedtime, each at the user's own time. */
   routine: Routine;
   /** Whether "when do you eat and sleep?" has been asked yet. */
   routineAsked: boolean;
+}
+
+export interface BreakMessages {
+  eyes: string;
+  move: string;
+  water: string;
 }
 
 export interface TimedRule {
@@ -633,7 +641,6 @@ export const api = {
   previewFocusBreak: (kind: BreakKind) => invoke<FocusSnapshot>("preview_focus_break", { kind }),
   finishFocusBreak: (outcome: BreakOutcome) =>
     invoke<FocusSnapshot>("finish_focus_break", { outcome }),
-  focusIdleSeconds: () => invoke<number | null>("focus_idle_seconds"),
 
   keeperSnapshot: () => invoke<KeeperSnapshot>("keeper_snapshot"),
   resolveKeeperDate: (input: KeeperDateInput) =>

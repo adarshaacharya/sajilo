@@ -1639,3 +1639,35 @@ fn a_microphone_open_for_hours_stops_being_a_call() {
     tick(&mut state, &settings, at(now + Duration::seconds(STEP), 5));
     assert_eq!(state.call_since, None);
 }
+
+/// A message of one's own replaces Sajilo's line, in the notification and in
+/// place of the card's joke, and is kept tidy.
+#[test]
+fn a_message_of_ones_own_replaces_the_line_and_the_jokes() {
+    let mut settings = eyes_only();
+    settings.messages.move_break = format!("  Go and see the dog. {}  ", "!".repeat(200));
+    let settings = settings.normalised();
+    assert!(
+        settings
+            .messages
+            .move_break
+            .starts_with("Go and see the dog.")
+    );
+    assert_eq!(settings.messages.move_break.chars().count(), 120);
+
+    let today: sajilo_core::focus::FocusDay = serde_json::from_value(serde_json::json!({
+        "date": "2026-09-28", "screenSeconds": 0,
+        "eyes": {"reminded": 0, "taken": 0}, "move": {"reminded": 0, "taken": 0}
+    }))
+    .unwrap();
+    let (_, body) = sajilo_core::focus::message(BreakKind::Move, &today, &settings, Language::En);
+    assert_eq!(body, settings.messages.move_break);
+
+    // An example card always jokes, unless the user wrote their own words.
+    let mut state = FocusState::default();
+    preview_break(&mut state, &settings, BreakKind::Move, monday_at(11));
+    let card = state.active_break.take().expect("a card");
+    assert!(card.joke.is_none() && card.cheer.is_none());
+    preview_break(&mut state, &settings, BreakKind::Eyes, monday_at(11));
+    assert!(state.active_break.expect("a card").joke.is_some());
+}

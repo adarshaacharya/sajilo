@@ -202,13 +202,6 @@ pub fn holding(app: &AppHandle<Wry>) -> bool {
     with_tracker(app, |tracker| tracker.state.held.is_some())
 }
 
-/// Seconds since the last keyboard or mouse input, for the break card: its
-/// countdown runs while hands are off, so a look away finishes by itself.
-#[tauri::command]
-pub fn focus_idle_seconds() -> Option<u32> {
-    crate::system::idle::seconds()
-}
-
 /// What one measurement asks the platform to do.
 struct Announce {
     chime: bool,

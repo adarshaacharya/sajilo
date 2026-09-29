@@ -207,6 +207,8 @@ pub struct FocusSettings {
     pub jokes: bool,
     /// The user's own reminder.
     pub custom: CustomBreak,
+    /// The user's own words for the look-away, stand-up and water cards.
+    pub messages: BreakMessages,
     /// One card at [`Self::stop_work_at`] on a work day, if still at the
     /// computer.
     pub end_of_day: bool,
@@ -275,6 +277,33 @@ impl Routine {
 /// A meal or bedtime card still goes out this long after its time, for
 /// someone who sat down a little late; after that the moment has passed.
 const ROUTINE_WINDOW: i64 = 60;
+
+/// The user's own words for a break card, in place of Sajilo's line and its
+/// jokes. Empty means Sajilo's own.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct BreakMessages {
+    pub eyes: String,
+    #[serde(rename = "move")]
+    pub move_break: String,
+    pub water: String,
+}
+
+impl BreakMessages {
+    /// The user's words for `kind`, if they wrote any.
+    pub fn get(&self, kind: BreakKind) -> Option<&str> {
+        let text = match kind {
+            BreakKind::Eyes => &self.eyes,
+            BreakKind::Move => &self.move_break,
+            BreakKind::Water => &self.water,
+            _ => return None,
+        };
+        (!text.is_empty()).then_some(text.as_str())
+    }
+}
+
+/// Longest message of one's own kept: two lines on the card.
+const MESSAGE_MAX: usize = 120;
 
 /// A reminder the user writes: "Stretch your wrists", every two hours.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -403,6 +432,7 @@ impl Default for FocusSettings {
             chime: true,
             jokes: true,
             custom: CustomBreak::default(),
+            messages: BreakMessages::default(),
             end_of_day: true,
             routine: Routine::default(),
             routine_asked: false,
@@ -494,6 +524,13 @@ impl FocusSettings {
             .chars()
             .take(CUSTOM_LABEL_MAX)
             .collect();
+        for text in [
+            &mut self.messages.eyes,
+            &mut self.messages.move_break,
+            &mut self.messages.water,
+        ] {
+            *text = text.trim().chars().take(MESSAGE_MAX).collect();
+        }
         let rounded = (self.water_goal_ml + 25) / 50 * 50;
         self.water_goal_ml = rounded.clamp(WATER_GOAL_MIN_ML, WATER_GOAL_MAX_ML);
         for rule in [
@@ -810,7 +847,10 @@ impl ActiveBreak {
     ) -> Self {
         // An example always shows a joke, so someone deciding whether to keep
         // them on sees one.
-        let funny = settings.jokes && (preview || joke_turn(state, kind));
+        // The user's own words stand in for jokes too.
+        let funny = settings.jokes
+            && settings.messages.get(kind).is_none()
+            && (preview || joke_turn(state, kind));
         // An example shows the next lines without dealing them, so trying
         // the card out moves nothing on.
         let mut scratch;
@@ -1818,6 +1858,7 @@ pub fn message(
             (title, body.to_owned())
         }
     };
+    let body = settings.messages.get(kind).map_or(body, str::to_owned);
     (title.to_owned(), body)
 }
 

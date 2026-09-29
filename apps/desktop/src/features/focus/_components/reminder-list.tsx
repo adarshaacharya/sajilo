@@ -314,6 +314,7 @@ function IntervalEditor({
   return (
     <>
       {kind === "custom" && <CustomName settings={settings} onSettings={onSettings} />}
+      {kind !== "custom" && <OwnMessage kind={kind} settings={settings} onSettings={onSettings} />}
       <EditLine label={t(kind === "water" ? "focus.edit.water-after" : "focus.edit.every")}>
         {every}
       </EditLine>
@@ -397,5 +398,47 @@ function CustomName({
       }}
       className={`${CONTROL} w-full`}
     />
+  );
+}
+
+/** The card's words in the user's own, in place of Sajilo's line and its
+ * jokes. Empty is Sajilo's own. Saved on leaving the field, like the name. */
+function OwnMessage({
+  kind,
+  settings,
+  onSettings,
+}: {
+  kind: "eyes" | "move" | "water";
+  settings: FocusSettings;
+  onSettings: (settings: FocusSettings) => void;
+}) {
+  const { t } = useSettings();
+  const saved = settings.messages?.[kind] ?? "";
+  const [draft, setDraft] = useState(saved);
+  useEffect(() => setDraft(saved), [saved]);
+
+  return (
+    <label className="block space-y-1">
+      <span className="text-[11px] text-text-secondary">{t("focus.edit.message")}</span>
+      <input
+        value={draft}
+        maxLength={120}
+        placeholder={t("focus.edit.message-placeholder")}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          const text = draft.trim();
+          if (text !== saved) {
+            onSettings({
+              ...settings,
+              messages: { ...settings.messages, [kind]: text },
+            });
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+        className={`${CONTROL} w-full`}
+      />
+    </label>
   );
 }

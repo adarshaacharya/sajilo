@@ -58,22 +58,15 @@ const SEND_OFFS: Partial<Record<BreakKind, TranslationKey>> = {
   bedtime: "break.bedtime.send-off",
 };
 
-/** Said in place of the body while hands are on the keyboard or mouse, since
- * that is what holds the ring back. */
-const HINTS: Partial<Record<BreakKind, TranslationKey>> = {
-  eyes: "break.eyes.hint",
-  move: "break.move.hint",
-};
+/** The cards whose words can be the user's own. */
+type MessageKind = "eyes" | "move" | "water";
+const MESSAGE_KINDS = new Set<BreakKind>(["eyes", "move", "water"]);
 
 const RING = 2 * Math.PI * 17;
 /** How long the "done" line stays before the card closes. */
 const CHEER_MS = 1600;
 /** A card still waiting after this long shakes once more. */
 const NUDGE_MS = 30_000;
-/** How long the hands-off hint stays after the last input, so it does not
- * flicker while the mouse moves in bursts. */
-const TOUCH_HINT_MS = 2000;
-
 const HOLD_NOTES = {
   call: "break.after.call",
   fullscreen: "break.after.fullscreen",
@@ -81,52 +74,24 @@ const HOLD_NOTES = {
 } as const;
 
 /**
- * Seconds left on the card's countdown, redrawn a few times a second. The
- * countdown runs while hands are off the keyboard and mouse, so looking away
- * finishes the break by itself and a keystroke starts it over. Where input
- * idle can't be read, it runs on the clock instead.
- *
- * `touched` is true while input is holding the ring back: a ring that jumps
- * back to full with no word of why looks broken.
+ * Seconds left on the card's countdown, redrawn a few times a second. It runs
+ * on the clock from the moment the card opens, whatever the mouse and keys
+ * are doing: a ring that stalls while someone types looks broken.
  */
 function useCountdown(startedAt: string | undefined, seconds: number) {
   const [now, setNow] = useState(() => Date.now());
-  const [idle, setIdle] = useState<number | null>(null);
-  const [touchedAt, setTouchedAt] = useState<number | null>(null);
   useEffect(() => {
     if (!startedAt || seconds === 0) return;
-    let live = true;
-    const timer = window.setInterval(() => {
-      setNow(Date.now());
-      api
-        .focusIdleSeconds()
-        .then((value) => {
-          if (!live) return;
-          const next = typeof value === "number" ? value : null;
-          setIdle(next);
-          if (next === 0) setTouchedAt(Date.now());
-        })
-        .catch(() => {
-          if (live) setIdle(null);
-        });
-    }, 250);
-    return () => {
-      live = false;
-      window.clearInterval(timer);
-    };
+    const timer = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(timer);
   }, [startedAt, seconds]);
-  if (!startedAt) return { remaining: seconds, touched: false };
+  if (!startedAt) return seconds;
   const elapsed = Math.max(0, (now - Date.parse(startedAt)) / 1000);
-  // Idle from before the card opened is not part of this break.
-  const handsOff = idle === null ? elapsed : Math.min(idle, elapsed);
-  const remaining = Math.max(0, seconds - handsOff);
-  const touched =
-    seconds > 0 && remaining > 0 && touchedAt !== null && now - touchedAt < TOUCH_HINT_MS;
-  return { remaining, touched };
+  return Math.max(0, seconds - elapsed);
 }
 
 /** The main button: the one that counts the break. A look away has none:
- * leaving the mouse alone is how it is taken. */
+ * its ring running out is how it is taken. */
 function mainAction(card: ActiveBreak): "done" | "drank" | null {
   if (card.kind === "eyes") return null;
   return card.kind === "water" ? "drank" : "done";
@@ -199,7 +164,7 @@ export function BreakCard() {
   }, []);
 
   const card = snapshot?.activeBreak ?? null;
-  const { remaining, touched } = useCountdown(card?.startedAt, card?.seconds ?? 0);
+  const remaining = useCountdown(card?.startedAt, card?.seconds ?? 0);
 
   // The card shakes as it arrives, and once more if it is still waiting, the
   // way a mistyped password shakes: noticed out of the corner of an eye
@@ -264,12 +229,15 @@ export function BreakCard() {
     waterLeft > 0
       ? t("break.water.body").replace("{left}", litres(waterLeft, numerals))
       : t("break.water.goal-met");
-  const plain = card.kind === "water" ? waterLine : t(BODIES[card.kind]);
+  // The user's own words win over Sajilo's (the engine deals no joke then).
+  const own = MESSAGE_KINDS.has(card.kind)
+    ? snapshot.settings.messages?.[card.kind as MessageKind]
+    : undefined;
+  const plain = own || (card.kind === "water" ? waterLine : t(BODIES[card.kind]));
   const sendOff = SEND_OFFS[card.kind];
   const body = taken
     ? (cheer?.[language] ?? (sendOff ? t(sendOff) : plain))
     : (card.joke?.[language] ?? plain);
-  const hint = HINTS[card.kind];
   const title =
     card.kind === "custom" ? kindLabel(card.kind, snapshot.settings, t) : t(TITLES[card.kind]);
   // Water's row carries two drink buttons, so its "later" says less.
@@ -306,25 +274,9 @@ export function BreakCard() {
             {title}
             {card.preview && <span className="break-card__example">{t("break.example")}</span>}
           </p>
-          {/* The hint and the body share one cell, so trading one for the
-              other never moves the buttons under a reaching mouse. */}
-          <div className="break-card__swap" data-tauri-drag-region>
-            <p
-              className={`break-card__body${touched && hint ? " is-hidden" : ""}`}
-              data-tauri-drag-region
-            >
-              {body}
-            </p>
-            {hint && (
-              <p
-                className={`break-card__body break-card__hint${touched ? "" : " is-hidden"}`}
-                aria-hidden={!touched}
-                data-tauri-drag-region
-              >
-                {t(hint)}
-              </p>
-            )}
-          </div>
+          <p className="break-card__body" data-tauri-drag-region>
+            {body}
+          </p>
           {/* A joke replaces the instruction, but never the number that matters. */}
           {card.kind === "water" && <WaterBar ml={waterMl} goalMl={goalMl} />}
         </div>

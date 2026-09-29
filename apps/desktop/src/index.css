@@ -1395,24 +1395,6 @@ button.rashi-pin:hover {
   font-size: 11.5px;
   color: var(--color-text-muted);
 }
-/* The body and the hands-off hint stack in one cell and cross-fade: the cell
-   keeps the taller one's height, so the buttons never shift under a mouse
-   that is on its way to them. */
-.break-card__swap {
-  display: grid;
-  margin-top: 3px;
-}
-.break-card__swap > .break-card__body {
-  grid-area: 1 / 1;
-  margin-top: 0;
-  transition: opacity 160ms ease;
-}
-.break-card__swap > .is-hidden {
-  opacity: 0;
-}
-.break-card__hint {
-  color: var(--break-tint);
-}
 /* Today's water: a thin bar that fills to the new total when a glass is
    logged from the card. */
 .break-card__water {
@@ -1443,8 +1425,7 @@ button.rashi-pin:hover {
   color: var(--color-text-muted);
 }
 @media (prefers-reduced-motion: reduce) {
-  .break-card__water-fill,
-  .break-card__swap > .break-card__body {
+  .break-card__water-fill {
     transition: none;
   }
 }
