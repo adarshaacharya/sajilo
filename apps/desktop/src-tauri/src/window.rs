@@ -531,7 +531,8 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
     // A click on the System Tray icon says where it was, which beats asking
     // for the pointer: under GNOME on Wayland, X11 cannot see the pointer over
     // the top bar.
-    let cursor = recent_tray_click()
+    let clicked = recent_tray_click();
+    let cursor = clicked
         .map(|(x, y)| tauri::PhysicalPosition::new(f64::from(x), f64::from(y)))
         .or_else(|| window.cursor_position().ok());
     // The pointer picks the monitor, so a second screen with its own panel is
@@ -557,12 +558,19 @@ fn center_under_cursor(window: &WebviewWindow) -> bool {
     #[allow(clippy::cast_possible_truncation)]
     let pointer = cursor.map(|cursor| (cursor.x.round() as i32, cursor.y.round() as i32));
     let (inset_top, inset_bottom) = (top - screen_top, screen_bottom - bottom);
-    let panel_at_bottom = match inset_bottom.cmp(&inset_top) {
-        std::cmp::Ordering::Greater => true,
-        std::cmp::Ordering::Less => false,
-        // No panel reserves space (one that hides itself): the pointer's
-        // half of the screen is the best guess left.
-        std::cmp::Ordering::Equal => pointer.is_some_and(|(_, y)| y > top + (bottom - top) / 2),
+    let in_lower_half = |y: i32| y > top + (bottom - top) / 2;
+    let panel_at_bottom = match clicked {
+        // A click on the icon or GNOME button is on the panel itself, so its
+        // half of the screen is the panel's edge. The insets cannot say:
+        // Ubuntu's dock along the bottom reserves more than the top bar.
+        Some((_, y)) => in_lower_half(y),
+        None => match inset_bottom.cmp(&inset_top) {
+            std::cmp::Ordering::Greater => true,
+            std::cmp::Ordering::Less => false,
+            // No panel reserves space (one that hides itself): the pointer's
+            // half of the screen is the best guess left.
+            std::cmp::Ordering::Equal => pointer.is_some_and(|(_, y)| in_lower_half(y)),
+        },
     };
     let y = if panel_at_bottom {
         (bottom - height).max(top)
