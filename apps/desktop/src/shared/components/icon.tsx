@@ -22,6 +22,7 @@ import { SFCheckmarkShield } from "sf-symbols-lib/monochrome/SFCheckmarkShield";
 import { SFChevronDown } from "sf-symbols-lib/monochrome/SFChevronDown";
 import { SFChevronLeft } from "sf-symbols-lib/monochrome/SFChevronLeft";
 import { SFChevronRight } from "sf-symbols-lib/monochrome/SFChevronRight";
+import { SFChevronUp } from "sf-symbols-lib/monochrome/SFChevronUp";
 import { SFCircleHexagongridFill } from "sf-symbols-lib/monochrome/SFCircleHexagongridFill";
 import { SFClock } from "sf-symbols-lib/monochrome/SFClock";
 import { SFCloudSun } from "sf-symbols-lib/monochrome/SFCloudSun";
@@ -145,6 +146,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   refresh: SFArrowClockwise,
   swap: SFArrowLeftArrowRight,
   chevronDown: SFChevronDown,
+  chevronUp: SFChevronUp,
   chevronRight: SFChevronRight,
   chevronLeft: SFChevronLeft,
   copy: SFSquareOnSquare,
@@ -247,6 +249,7 @@ export type IconName =
   | "refresh"
   | "swap"
   | "chevronDown"
+  | "chevronUp"
   | "chevronRight"
   | "chevronLeft"
   | "copy"

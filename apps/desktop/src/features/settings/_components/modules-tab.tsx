@@ -3,6 +3,7 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
 import { CurrencyPicker } from "./currency-picker";
 import { ModuleRow } from "./module-row";
+import { TabBarEditor } from "./tab-bar-editor";
 
 export function ModulesTab() {
   const { t, language, modules, setModules } = useSettings();
@@ -27,6 +28,7 @@ export function ModulesTab() {
 
   return (
     <div className="space-y-1.5">
+      <TabBarEditor />
       <ModuleRow
         title={t("feature.weather")}
         note={t("settings.module-weather-note")}

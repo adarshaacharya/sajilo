@@ -31,7 +31,8 @@ export function Header({ title }: { title: string }) {
   const goBack = useGoBack();
   const slot = useHeaderSlotContent();
   const inner = useHeaderInnerContent();
-  const isTabRoot = TABS.some((tab) => tab.to === pathname);
+  // More is a tab of its own: no back arrow there either.
+  const isTabRoot = pathname === "/more" || TABS.some((tab) => tab.to === pathname);
   const back = inner ? inner.onBack : isTabRoot ? null : goBack;
   const kept = useKept();
   const bar = useRef<HTMLElement>(null);

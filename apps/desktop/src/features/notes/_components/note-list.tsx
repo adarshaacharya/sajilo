@@ -22,6 +22,7 @@ export function NoteList({
   onOpen,
   onNew,
   onSearch,
+  onTrash,
   onChanged,
   onToast,
 }: {
@@ -32,6 +33,7 @@ export function NoteList({
   onOpen: (id: string) => void;
   onNew: () => void;
   onSearch: () => void;
+  onTrash: () => void;
   onChanged: () => void;
   onToast: (toast: Toast) => void;
 }) {
@@ -54,10 +56,25 @@ export function NoteList({
   return (
     <div className="space-y-2">
       <JotBox onOpen={onOpen} onChanged={onChanged} onToast={onToast} />
-      <button type="button" onClick={onSearch} className="notes-search-open">
-        <Icon name="search" className="size-3.5" />
-        {t("notes.search-placeholder")}
-      </button>
+      <div className="flex gap-1.5">
+        <button type="button" onClick={onSearch} className="notes-search-open">
+          <Icon name="search" className="size-3.5" />
+          {t("notes.search-placeholder")}
+        </button>
+        {/* Always here, so a deleted note is never hard to find again. */}
+        <button
+          type="button"
+          onClick={onTrash}
+          className="notes-trash-open"
+          aria-label={t("notes.trash-title")}
+          title={t("notes.trash-title")}
+        >
+          <Icon name="trash" className="size-3.5" />
+          {(list?.trashCount ?? 0) > 0 && (
+            <span className="notes-chip__count">{list?.trashCount}</span>
+          )}
+        </button>
+      </div>
       <FolderChips
         folders={list?.folders ?? []}
         total={list?.notes.length ?? 0}

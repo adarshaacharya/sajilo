@@ -11,6 +11,7 @@ import { BreakCard } from "./features/focus/break-card";
 import { Focus } from "./features/focus/focus";
 import { Keeper } from "./features/keeper/keeper";
 import { PhotoViewer } from "./features/keeper/photo-viewer";
+import { More } from "./features/more/more";
 import { GovernmentUpdateDetail } from "./features/news/government-update-detail";
 import { News } from "./features/news/news";
 import { Notes } from "./features/notes/notes";
@@ -56,6 +57,7 @@ const ROUTES = [
   { path: "/focus", titleKey: "screen.focus", element: <Focus /> },
   { path: "/notes", titleKey: "screen.notes", element: <Notes /> },
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
+  { path: "/more", titleKey: "screen.more", element: <More /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];
 

@@ -18,6 +18,7 @@ import type { NoteDocument } from "../../types/api/NoteDocument";
 import type { NoteSaved } from "../../types/api/NoteSaved";
 import type { NoteSearchHit } from "../../types/api/NoteSearchHit";
 import type { NotesList } from "../../types/api/NotesList";
+import type { NoteTrashed } from "../../types/api/NoteTrashed";
 import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
@@ -680,6 +681,10 @@ export const api = {
   notesPin: (id: string, pinned: boolean) => invoke<void>("notes_pin", { id, pinned }),
   notesTrash: (id: string) => invoke<void>("notes_trash", { id }),
   notesRestore: (id: string) => invoke<void>("notes_restore", { id }),
+  /** The Trash, most recently deleted first, with days left before each goes. */
+  notesTrashList: () => invoke<NoteTrashed[]>("notes_trash_list"),
+  /** Deletes one note in the Trash for good; with no id, empties the Trash. */
+  notesDeleteForever: (id: string | null) => invoke<void>("notes_delete_forever", { id }),
   /** Today's note's id, made if it isn't there yet. */
   notesToday: () => invoke<string>("notes_today"),
   /** Adds a line to today's note under the time; resolves to its id. */

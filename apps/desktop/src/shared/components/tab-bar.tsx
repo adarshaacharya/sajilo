@@ -1,9 +1,10 @@
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { useSettings } from "../context/settings-context";
 import * as player from "../lib/audio";
 import { spring } from "../lib/motion";
+import { tabLayout } from "../lib/tab-layout";
 import { Equalizer } from "./equalizer";
 import { Icon, type IconName } from "./icon";
 
@@ -52,48 +53,76 @@ export function TabBar() {
     [],
   );
 
-  const visible = TABS.filter((tab) => !tab.module || modules[tab.module]);
+  const { bar, more } = tabLayout(TABS, modules);
+  // More is lit while one of the tabs it holds is open.
+  const inMore = pathname === "/more" || more.some((tab) => pathname.startsWith(tab.to));
+  // Radio playing from under More still shows its equalizer, on More.
+  const radioUnderMore = radioInTab && more.some((tab) => tab.to === "/radio");
+
+  const item = (active: boolean, icon: ReactNode, label: string) => (
+    <>
+      {active && (
+        <motion.span layoutId="tab-pill" className="tab-indicator" transition={spring.tab} />
+      )}
+      <span
+        className={`relative z-[1] flex flex-col items-center gap-0.5 transition-colors duration-200 ${
+          active
+            ? "text-[color:var(--color-accent-mark)]"
+            : "text-text-muted hover:text-text-secondary"
+        }`}
+      >
+        {icon}
+        <span className="w-full truncate px-0.5 text-center text-[10px] leading-none font-medium">
+          {label}
+        </span>
+      </span>
+    </>
+  );
 
   return (
     <nav className="tab-bar flex shrink-0 gap-0.5 px-1 py-1">
-      {visible.map((tab) => (
+      {bar.map((tab) => (
         <NavLink
           key={tab.to}
           to={tab.to}
           end={tab.to === "/"}
           className="tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1"
         >
-          {({ isActive }) => (
-            <>
-              {isActive && (
-                <motion.span
-                  layoutId="tab-pill"
-                  className="tab-indicator"
-                  transition={spring.tab}
-                />
-              )}
-              <span
-                className={`relative z-[1] flex flex-col items-center gap-0.5 transition-colors duration-200 ${
-                  isActive
-                    ? "text-[color:var(--color-accent-mark)]"
-                    : "text-text-muted hover:text-text-secondary"
-                }`}
-              >
-                {tab.to === "/radio" && radioInTab ? (
-                  <span className="flex size-4 items-center justify-center">
-                    <Equalizer isPlaying={radioPlaying} />
-                  </span>
-                ) : (
-                  <Icon name={tab.icon} />
-                )}
-                <span className="w-full truncate px-0.5 text-center text-[10px] leading-none font-medium">
-                  {t(tab.labelKey)}
+          {({ isActive }) =>
+            item(
+              isActive,
+              tab.to === "/radio" && radioInTab ? (
+                <span className="flex size-4 items-center justify-center">
+                  <Equalizer isPlaying={radioPlaying} />
                 </span>
-              </span>
-            </>
-          )}
+              ) : (
+                <Icon name={tab.icon} />
+              ),
+              t(tab.labelKey),
+            )
+          }
         </NavLink>
       ))}
+      {more.length > 0 && (
+        <NavLink
+          to="/more"
+          className="tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1"
+        >
+          {() =>
+            item(
+              inMore,
+              radioUnderMore ? (
+                <span className="flex size-4 items-center justify-center">
+                  <Equalizer isPlaying={radioPlaying} />
+                </span>
+              ) : (
+                <Icon name="ellipsis" />
+              ),
+              t("tab.more"),
+            )
+          }
+        </NavLink>
+      )}
     </nav>
   );
 }

@@ -3385,3 +3385,123 @@ input[type="search"]::-webkit-search-decoration {
   background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
   color: var(--color-accent-mark);
 }
+
+/* The Trash. */
+.notes-trash-open {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  /* The holiday red, softly: easy to spot, not alarming. */
+  background: color-mix(in srgb, var(--color-holiday) 12%, transparent);
+  color: var(--color-holiday);
+  transition: background 150ms ease;
+}
+.notes-trash-open:hover {
+  background: color-mix(in srgb, var(--color-holiday) 20%, transparent);
+}
+.notes-trash-actions {
+  display: flex;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+.notes-trash-restore,
+.notes-trash-delete,
+.notes-trash-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  transition: background 150ms ease, color 150ms ease;
+}
+.notes-trash-restore {
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+  color: var(--color-accent-mark);
+}
+.notes-trash-delete,
+.notes-trash-empty {
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text-secondary);
+}
+.notes-trash-delete.is-confirming,
+.notes-trash-empty.is-confirming {
+  background: color-mix(in srgb, var(--color-holiday) 16%, transparent);
+  color: var(--color-holiday);
+}
+
+/* More: the tabs that don't fit on the bar. */
+.more-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  color: var(--color-text);
+  transition: background 120ms ease;
+}
+.more-row:hover {
+  background: var(--color-surface-hover);
+}
+.more-row__icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-accent-fill) 14%, transparent);
+  color: var(--color-accent-mark);
+}
+.more-edit {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+}
+.more-edit:hover {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text);
+}
+
+/* Settings › Modules › Tab bar. */
+.tab-editor__label {
+  padding-top: 2px;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.tab-editor__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 2px 0 8px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
+}
+.tab-editor__row.is-fixed {
+  color: var(--color-text-muted);
+}
+.tab-editor__row.is-more {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+.tab-editor__row .icon-btn:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}

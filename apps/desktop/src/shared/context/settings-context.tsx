@@ -45,6 +45,9 @@ export interface ModulePrefs {
   keeperEnabled: boolean;
   focusEnabled: boolean;
   notesEnabled: boolean;
+  /** The tabs on the tab bar after Today, in order (routes, `/news`). The
+   * rest are under More; see `shared/lib/tab-layout`. */
+  tabBar: string[];
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -62,6 +65,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   keeperEnabled: true,
   focusEnabled: true,
   notesEnabled: true,
+  tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/notes"],
 };
 
 /** Keeps the home place and the pin list agreeing: the home place is the first
@@ -147,6 +151,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<boolean>("keeperEnabled"),
       api.getSetting<boolean>("focusEnabled"),
       api.getSetting<boolean>("notesEnabled"),
+      api.getSetting<string[]>("tabBar"),
       api.getSetting<string>("accent"),
     ])
       .then(
@@ -169,6 +174,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           keeperEnabled,
           focusEnabled,
           notesEnabled,
+          tabBar,
           storedAccent,
         ]) => {
           if (cancelled) return;
@@ -210,6 +216,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
               ...(keeperEnabled !== null && { keeperEnabled }),
               ...(focusEnabled !== null && { focusEnabled }),
               ...(notesEnabled !== null && { notesEnabled }),
+              ...(Array.isArray(tabBar) && { tabBar }),
             }),
           );
         },
@@ -247,6 +254,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("keeperEnabled", next.keeperEnabled);
         persist("focusEnabled", next.focusEnabled);
         persist("notesEnabled", next.notesEnabled);
+        persist("tabBar", next.tabBar);
         return next;
       });
     },

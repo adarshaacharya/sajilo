@@ -7,6 +7,7 @@ import type { NoteFolder } from "../../types/api/NoteFolder";
 import { NoteEditor } from "./_components/note-editor";
 import { NoteList } from "./_components/note-list";
 import { NoteSearch } from "./_components/note-search";
+import { NoteTrash } from "./_components/note-trash";
 import { type Toast, ToastBar } from "./_components/toast";
 
 /** The note open when Notes was left, so switching tabs and back returns to
@@ -28,6 +29,7 @@ export function Notes() {
   const [open, setOpenState] = useState<string | null>(openInSession ?? null);
   const [folder, setFolderState] = useState(folderInSession);
   const [searching, setSearching] = useState(false);
+  const [inTrash, setInTrash] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
   const setOpen = useCallback((id: string | null) => {
@@ -64,7 +66,9 @@ export function Notes() {
   useHeaderInner(
     open
       ? { title: folder === "all" ? t("notes.all") : folderName(openFolder), onBack: back }
-      : null,
+      : inTrash
+        ? { title: t("notes.trash-title"), onBack: () => setInTrash(false) }
+        : null,
   );
 
   /** A new note in the folder being looked at (or the first of the user's own). */
@@ -113,6 +117,15 @@ export function Notes() {
     );
   }
 
+  if (inTrash) {
+    return (
+      <>
+        <NoteTrash onChanged={refresh} onToast={setToast} />
+        <ToastBar toast={toast} onDone={() => setToast(null)} />
+      </>
+    );
+  }
+
   return (
     <>
       <NoteList
@@ -123,6 +136,7 @@ export function Notes() {
         onOpen={setOpen}
         onNew={() => void newNote()}
         onSearch={() => setSearching(true)}
+        onTrash={() => setInTrash(true)}
         onChanged={refresh}
         onToast={setToast}
       />
