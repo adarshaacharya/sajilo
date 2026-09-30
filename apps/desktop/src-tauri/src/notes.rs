@@ -629,9 +629,9 @@ pub fn trash(connection: &Connection, now: DateTime<Utc>) -> Result<Vec<NoteTras
     Ok(rows
         .into_iter()
         .map(|(id, title, preview, deleted_at)| {
-            let gone = DateTime::parse_from_rfc3339(&deleted_at)
-                .map(|at| at.with_timezone(&Utc) + Duration::days(TRASH_DAYS))
-                .unwrap_or(now);
+            let gone = DateTime::parse_from_rfc3339(&deleted_at).map_or(now, |at| {
+                at.with_timezone(&Utc) + Duration::days(TRASH_DAYS)
+            });
             // Rounded up: a note with a few hours left still has "1 day".
             let hours = gone.signed_duration_since(now).num_hours().max(0);
             let days_left = u32::try_from((hours + 23) / 24).unwrap_or(0);
@@ -857,10 +857,18 @@ pub fn list(connection: &Connection, clock: &Clock) -> Result<NotesList> {
         )
         .optional()
         .map_err(sql)?;
+    let trash_count: u32 = connection
+        .query_row(
+            "SELECT COUNT(*) FROM notes WHERE deleted_at IS NOT NULL",
+            [],
+            |row| row.get(0),
+        )
+        .map_err(sql)?;
     Ok(NotesList {
         folders,
         notes,
         last_open,
+        trash_count,
     })
 }
 
