@@ -772,11 +772,13 @@ static BLUR_WATCH: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::
 /// starts a watch, and the popover must have had focus since it opened and
 /// been up a moment.
 ///
-/// - **On X11** the watch asks X which mouse buttons are down. The popover
+/// - **On X11** (a real X11 session, not XWayland; see
+///   [`x_sees_every_click`]) the watch asks X which mouse buttons are down. The popover
 ///   hides when one is pressed with the pointer outside it: the click that took
 ///   focus, or on a focus-follows-mouse desktop, a later click anywhere. It
 ///   watches until the popover has focus again or is put away.
-/// - **On Wayland** no app can see a click outside its own windows. The watch
+/// - **On Wayland**, XWayland included, no app can see a click outside its
+///   own windows. The watch
 ///   waits for the focus to stay gone, then hides unless the pointer is over
 ///   the popover or the focus-out came with the pointer leaving it
 ///   ([`HOVER_FOCUS`]).
@@ -800,7 +802,7 @@ fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
     }
 
     let window = window.clone();
-    if on_x11() {
+    if x_sees_every_click() {
         std::thread::spawn(move || watch_for_click_away(&window, watch));
         return;
     }
@@ -939,6 +941,8 @@ pub fn tray_click_on_linux(app: &AppHandle) {
 /// pointer is. A Wayland session cannot be asked, and there an unknown pointer
 /// counts as away, so a click elsewhere still closes a popover that was never
 /// hovered; on X11 a failed read counts as inside, so it never dismisses.
+/// XWayland counts as Wayland here: X cannot see a pointer over Wayland
+/// windows.
 #[cfg(target_os = "linux")]
 fn pointer_inside(window: &WebviewWindow) -> bool {
     match POINTER_OVER.load(Ordering::SeqCst) {
@@ -946,7 +950,7 @@ fn pointer_inside(window: &WebviewWindow) -> bool {
         POINTER_OUT => return false,
         _ => {}
     }
-    if !on_x11() {
+    if !x_sees_every_click() {
         return false;
     }
     let (Ok(cursor), Ok(origin), Ok(size)) = (
@@ -962,6 +966,16 @@ fn pointer_inside(window: &WebviewWindow) -> bool {
         && cursor.x < left + f64::from(size.width)
         && cursor.y >= top
         && cursor.y < top + f64::from(size.height)
+}
+
+/// Whether X can see every click and the pointer everywhere: an X11 session.
+/// Under XWayland (GNOME on Wayland, where `prefer_x11_backend` puts Sajilo)
+/// X sees the pointer and its buttons only over X windows, so a click on the
+/// desktop or a Wayland app never shows as a button down there, and a
+/// popover waiting for one stayed open for good.
+#[cfg(target_os = "linux")]
+fn x_sees_every_click() -> bool {
+    on_x11() && std::env::var_os("WAYLAND_DISPLAY").is_none()
 }
 
 /// Whether GTK is drawing through X11 (native, or XWayland as

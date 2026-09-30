@@ -145,14 +145,18 @@ So on Linux a focus-out only starts a watch (`click_away_on_linux`), and only
 if the popover had focus since it opened, has been up at least 400 ms, and is
 not held open for a dialog. What the watch does depends on the session:
 
-- **X11** (and XWayland): every 25 ms it asks X whether a mouse button is down
+- **X11** (an X11 session, not XWayland): every 25 ms it asks X whether a mouse button is down
   (`mouse_button_down`, through GDK, which can answer for any window). A
   button down with the pointer outside the popover hides it. That is the click
   that took focus, or, where focus follows the mouse, the next click anywhere.
   The watch ends when the popover has focus again or is put away. A click
   shorter than 25 ms can slip between two checks; a real one lasts longer, but
   `xdotool click` does not, so tests press and release with a pause between.
-- **Wayland**: no app can see a click outside its own windows. The watch waits
+- **Wayland**, XWayland included: no app can see a click outside its own
+  windows. XWayland is where Sajilo runs on GNOME's Wayland (Ubuntu), and X
+  there sees buttons only over X windows: a click on the desktop or a Wayland
+  app never shows as a button down, so the X11 watch kept the popover open
+  for good (`x_sees_every_click`). The watch waits
   250 ms for the focus to stay gone, then hides unless the pointer is over the
   popover, or the focus-out came within 120 ms of the pointer leaving it
   (`HOVER_FOCUS`), which is focus following the mouse rather than a click.
