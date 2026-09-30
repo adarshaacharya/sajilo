@@ -5,7 +5,7 @@
 //! disappears cleanly and an offline launch never invents a new one.
 //!
 //! What this device shows is decided here, not in the web UI: a notice must be
-//! live, meant for this platform, and not closed by the user. Urgent notices
+//! live, meant for this platform and version, and not closed by the user. Urgent notices
 //! cannot be closed, and each is also sent once as a system notification, for
 //! people who rarely open the popover.
 
@@ -59,6 +59,33 @@ fn this_platform() -> Option<AnnouncementPlatform> {
     }
 }
 
+/// A plain `major.minor.patch` version, comparable as a tuple.
+type Version = (u64, u64, u64);
+
+fn parse_version(text: &str) -> Option<Version> {
+    let mut parts = text.split('.').map(|part| part.parse::<u64>().ok());
+    let version = (parts.next()??, parts.next()??, parts.next()??);
+    parts.next().is_none().then_some(version)
+}
+
+/// This build's version.
+fn this_version(app: &AppHandle<Wry>) -> Version {
+    let version = &app.package_info().version;
+    (version.major, version.minor, version.patch)
+}
+
+/// Whether `version` falls within a notice's bounds. A bound that does not
+/// parse hides the notice: a mistyped target must not reach everyone.
+fn in_versions(notice: &Announcement, version: Version) -> bool {
+    let within = |bound: &Option<String>, allowed: fn(Version, Version) -> bool| {
+        bound
+            .as_deref()
+            .is_none_or(|bound| parse_version(bound).is_some_and(|bound| allowed(version, bound)))
+    };
+    within(&notice.min_version, |version, min| version >= min)
+        && within(&notice.max_version, |version, max| version <= max)
+}
+
 /// The notices this device shows, in the Worker's order.
 ///
 /// Time is checked again here even though the Worker already filters by it:
@@ -66,6 +93,7 @@ fn this_platform() -> Option<AnnouncementPlatform> {
 fn for_this_device(
     notices: Vec<Announcement>,
     platform: Option<AnnouncementPlatform>,
+    version: Version,
     dismissed: &[String],
     now: DateTime<Utc>,
 ) -> Vec<Announcement> {
@@ -77,6 +105,7 @@ fn for_this_device(
             notice.platforms.is_empty()
                 || platform.is_some_and(|platform| notice.platforms.contains(&platform))
         })
+        .filter(|notice| in_versions(notice, version))
         .filter(|notice| {
             notice.level == AnnouncementLevel::Urgent || !dismissed.contains(&notice.id)
         })
@@ -154,7 +183,13 @@ pub async fn get_announcement(
 
     let dismissed = remembered(&app, DISMISSED_ANNOUNCEMENTS_KEY);
     let state = state.map(|response| AnnouncementResponse {
-        announcements: for_this_device(response.announcements, this_platform(), &dismissed, now),
+        announcements: for_this_device(
+            response.announcements,
+            this_platform(),
+            this_version(&app),
+            &dismissed,
+            now,
+        ),
     });
     if let Some(response) = state.value() {
         announce_urgent(&app, &response.announcements);
@@ -192,8 +227,12 @@ mod tests {
             expires_at: None,
             action: None,
             platforms: Vec::new(),
+            min_version: None,
+            max_version: None,
         }
     }
+
+    const VERSION: Version = (0, 1, 33);
 
     fn now() -> DateTime<Utc> {
         Utc.with_ymd_and_hms(2026, 9, 25, 12, 0, 0).unwrap()
@@ -212,9 +251,21 @@ mod tests {
         let everyone = notice("everyone", AnnouncementLevel::Info);
         let all = vec![windows, desktops, everyone];
 
-        let on_linux = for_this_device(all.clone(), Some(AnnouncementPlatform::Linux), &[], now());
+        let on_linux = for_this_device(
+            all.clone(),
+            Some(AnnouncementPlatform::Linux),
+            VERSION,
+            &[],
+            now(),
+        );
         assert_eq!(ids(&on_linux), ["mac-and-linux", "everyone"]);
-        let on_windows = for_this_device(all, Some(AnnouncementPlatform::Windows), &[], now());
+        let on_windows = for_this_device(
+            all,
+            Some(AnnouncementPlatform::Windows),
+            VERSION,
+            &[],
+            now(),
+        );
         assert_eq!(ids(&on_windows), ["windows", "everyone"]);
     }
 
@@ -225,7 +276,7 @@ mod tests {
             notice("urgent", AnnouncementLevel::Urgent),
         ];
         let closed = vec!["info".to_owned(), "urgent".to_owned()];
-        let shown = for_this_device(all, None, &closed, now());
+        let shown = for_this_device(all, None, VERSION, &closed, now());
         assert_eq!(ids(&shown), ["urgent"]);
     }
 
@@ -236,8 +287,37 @@ mod tests {
         let mut early = notice("not-yet", AnnouncementLevel::Info);
         early.starts_at = Some(now() + chrono::Duration::minutes(1));
         let live = notice("live", AnnouncementLevel::Info);
-        let shown = for_this_device(vec![expired, early, live], None, &[], now());
+        let shown = for_this_device(vec![expired, early, live], None, VERSION, &[], now());
         assert_eq!(ids(&shown), ["live"]);
+    }
+
+    #[test]
+    fn a_notice_reaches_only_the_versions_it_names() {
+        let bounded = |id: &str, min: Option<&str>, max: Option<&str>| {
+            let mut bounded = notice(id, AnnouncementLevel::Info);
+            bounded.min_version = min.map(str::to_owned);
+            bounded.max_version = max.map(str::to_owned);
+            bounded
+        };
+        let all = vec![
+            bounded("before-fix", None, Some("0.1.32")),
+            bounded("up-to-this", None, Some("0.1.33")),
+            bounded("exactly-this", Some("0.1.33"), Some("0.1.33")),
+            bounded("from-next", Some("0.1.34"), None),
+            bounded("minor-not-string-order", Some("0.1.9"), None),
+            bounded("mistyped", None, Some("v0.1.40")),
+            bounded("everyone", None, None),
+        ];
+        let shown = for_this_device(all, None, VERSION, &[], now());
+        assert_eq!(
+            ids(&shown),
+            [
+                "up-to-this",
+                "exactly-this",
+                "minor-not-string-order",
+                "everyone"
+            ]
+        );
     }
 
     /// The Worker also sends `announcement` for versions before the list; the

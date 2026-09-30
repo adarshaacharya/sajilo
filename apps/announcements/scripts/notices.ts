@@ -70,7 +70,12 @@ function status(notice: Announcement): string {
 }
 
 function show(notice: Announcement): void {
-  const who = notice.platforms?.length ? notice.platforms.join(", ") : "everyone";
+  const platforms = notice.platforms?.length ? notice.platforms.join(", ") : "everyone";
+  const versions =
+    notice.minVersion && notice.minVersion === notice.maxVersion
+      ? `, version ${notice.minVersion} only`
+      : `${notice.minVersion ? `, from ${notice.minVersion}` : ""}${notice.maxVersion ? `, up to ${notice.maxVersion}` : ""}`;
+  const who = `${platforms}${versions}`;
   console.log(`\n[${notice.level}] ${notice.id}  (${status(notice)}, for ${who})`);
   console.log(`  EN  ${notice.title.en}\n      ${notice.body.en}`);
   console.log(`  NE  ${notice.title.ne}\n      ${notice.body.ne}`);

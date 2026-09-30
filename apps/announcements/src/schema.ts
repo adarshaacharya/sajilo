@@ -29,6 +29,13 @@ export type Announcement = {
   action?: AnnouncementAction;
   /** Omitted or empty: every platform. */
   platforms?: AnnouncementPlatform[];
+  /**
+   * The oldest and newest Sajilo versions shown this notice, both inclusive,
+   * like "0.1.32". Omitted means no bound; set both to the same version to
+   * reach only that one.
+   */
+  minVersion?: string;
+  maxVersion?: string;
 };
 
 /** The KV key holding every published notice, as one JSON array. */
@@ -40,7 +47,26 @@ export const MAX_LIVE = 5;
 const LEVELS: AnnouncementLevel[] = ["info", "important", "urgent"];
 const PLATFORMS: AnnouncementPlatform[] = ["windows", "macos", "linux"];
 const TITLE_MAX = 180;
+const VERSION = /^(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})$/;
 const BODY_MAX = 320;
+
+function version(value: unknown, field: string): string | null {
+  if (value === undefined) return null;
+  return typeof value === "string" && VERSION.test(value)
+    ? null
+    : `${field} must be a plain version, like 0.1.33`;
+}
+
+/** Compares two versions that passed {@link VERSION}. */
+function compareVersions(a: string, b: string): number {
+  const left = a.split(".").map(Number);
+  const right = b.split(".").map(Number);
+  for (let part = 0; part < 3; part++) {
+    const difference = (left[part] ?? 0) - (right[part] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -86,6 +112,15 @@ export function problem(value: unknown): string | null {
     Date.parse(value.startsAt) >= Date.parse(value.expiresAt)
   ) {
     return "startsAt must be before expiresAt";
+  }
+  const versions = version(value.minVersion, "minVersion") ?? version(value.maxVersion, "maxVersion");
+  if (versions) return versions;
+  if (
+    typeof value.minVersion === "string" &&
+    typeof value.maxVersion === "string" &&
+    compareVersions(value.minVersion, value.maxVersion) > 0
+  ) {
+    return "minVersion must not be after maxVersion";
   }
   if (value.platforms !== undefined) {
     if (

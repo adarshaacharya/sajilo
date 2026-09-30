@@ -46,6 +46,14 @@ dto! {
         /// Empty means every platform.
         #[serde(default)]
         pub platforms: Vec<AnnouncementPlatform>,
+        /// The oldest Sajilo version shown this notice, inclusive, like
+        /// "0.1.32". Kept as text so one malformed bound hides only its own
+        /// notice rather than failing the whole response.
+        #[serde(default)]
+        pub min_version: Option<String>,
+        /// The newest Sajilo version shown this notice, inclusive.
+        #[serde(default)]
+        pub max_version: Option<String>,
     }
 
     /// The notices live now, most pressing first. A wrapper, not HTTP 204, so

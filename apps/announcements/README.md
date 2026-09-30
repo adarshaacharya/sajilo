@@ -26,6 +26,7 @@ cleared out whenever the list is saved.
 | `title`, `body` | `en` and `ne`, both required; 180 and 320 characters at most. |
 | `startsAt`, `expiresAt` | Optional ISO 8601 UTC times. Hidden before the start and after the expiry. |
 | `platforms` | Optional: any of `windows`, `macos`, `linux`. Omitted means everyone. Matched on the device; the app never says which platform it runs on. |
+| `minVersion`, `maxVersion` | Optional, inclusive, like `0.1.32`. `maxVersion` reaches people who have not updated yet; set both to the same version to reach only that one. Matched on the device; the app never sends its version. Versions before 0.1.34 ignore both fields and show the notice regardless. |
 | `action` | Optional link (`https://` only) and its label; the whole card opens it. |
 
 At most five notices are live at once, urgent first. A malformed record is

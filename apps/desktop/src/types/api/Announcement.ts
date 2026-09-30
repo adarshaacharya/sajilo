@@ -8,4 +8,14 @@ export type Announcement = { id: string, level: AnnouncementLevel, title: Locali
 /**
  * Empty means every platform.
  */
-platforms: Array<AnnouncementPlatform>, };
+platforms: Array<AnnouncementPlatform>, 
+/**
+ * The oldest Sajilo version shown this notice, inclusive, like
+ * "0.1.32". Kept as text so one malformed bound hides only its own
+ * notice rather than failing the whole response.
+ */
+minVersion: string | null, 
+/**
+ * The newest Sajilo version shown this notice, inclusive.
+ */
+maxVersion: string | null, };

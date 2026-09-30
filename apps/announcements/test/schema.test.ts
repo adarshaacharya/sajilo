@@ -16,6 +16,7 @@ function notice(id: string, extra: Partial<Announcement> = {}): Announcement {
 describe("problem", () => {
   test("accepts a complete notice", () => {
     expect(problem(notice("ipo-2026-10", { platforms: ["windows"] }))).toBeNull();
+    expect(problem(notice("exact", { minVersion: "0.1.32", maxVersion: "0.1.32" }))).toBeNull();
   });
 
   test("names what is wrong, so the publish script can say it", () => {
@@ -23,6 +24,11 @@ describe("problem", () => {
     expect(problem({ ...notice("a"), level: "loud" })).toContain("level must be");
     expect(problem({ ...notice("a"), title: { en: "Only English" } })).toBe("title.ne is missing");
     expect(problem({ ...notice("a"), platforms: ["android"] })).toContain("platforms");
+    expect(problem({ ...notice("a"), maxVersion: "v0.1.33" })).toContain("maxVersion");
+    expect(problem({ ...notice("a"), minVersion: "0.1" })).toContain("minVersion");
+    expect(problem({ ...notice("a"), minVersion: "0.1.10", maxVersion: "0.1.9" })).toBe(
+      "minVersion must not be after maxVersion",
+    );
     expect(
       problem({ ...notice("a"), action: { url: "http://plain.example", label: { en: "x", ne: "x" } } }),
     ).toContain("https");
