@@ -75,6 +75,7 @@ pub const RASHIFAL_ENABLED: &str = "rashifalEnabled";
 pub const RADIO_ENABLED: &str = "radioEnabled";
 pub const KEEPER_ENABLED: &str = "keeperEnabled";
 pub const FOCUS_ENABLED: &str = "focusEnabled";
+pub const NOTES_ENABLED: &str = "notesEnabled";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

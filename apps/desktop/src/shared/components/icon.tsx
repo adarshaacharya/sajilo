@@ -8,6 +8,7 @@ import { SFBag } from "sf-symbols-lib/monochrome/SFBag";
 import { SFBanknote } from "sf-symbols-lib/monochrome/SFBanknote";
 import { SFBell } from "sf-symbols-lib/monochrome/SFBell";
 import { SFBellSlash } from "sf-symbols-lib/monochrome/SFBellSlash";
+import { SFBold } from "sf-symbols-lib/monochrome/SFBold";
 import { SFBolt } from "sf-symbols-lib/monochrome/SFBolt";
 import { SFBook } from "sf-symbols-lib/monochrome/SFBook";
 import { SFBookClosed } from "sf-symbols-lib/monochrome/SFBookClosed";
@@ -15,6 +16,7 @@ import { SFCalendar } from "sf-symbols-lib/monochrome/SFCalendar";
 import { SFCalendarBadgeCheckmark } from "sf-symbols-lib/monochrome/SFCalendarBadgeCheckmark";
 import { SFCar } from "sf-symbols-lib/monochrome/SFCar";
 import { SFChartLineUptrendXyaxis } from "sf-symbols-lib/monochrome/SFChartLineUptrendXyaxis";
+import { SFChecklist } from "sf-symbols-lib/monochrome/SFChecklist";
 import { SFCheckmark } from "sf-symbols-lib/monochrome/SFCheckmark";
 import { SFCheckmarkShield } from "sf-symbols-lib/monochrome/SFCheckmarkShield";
 import { SFChevronDown } from "sf-symbols-lib/monochrome/SFChevronDown";
@@ -34,6 +36,8 @@ import { SFEnvelope } from "sf-symbols-lib/monochrome/SFEnvelope";
 import { SFExclamationmarkCircle } from "sf-symbols-lib/monochrome/SFExclamationmarkCircle";
 import { SFEye } from "sf-symbols-lib/monochrome/SFEye";
 import { SFFigureWalk } from "sf-symbols-lib/monochrome/SFFigureWalk";
+import { SFFolder } from "sf-symbols-lib/monochrome/SFFolder";
+import { SFFolderBadgePlus } from "sf-symbols-lib/monochrome/SFFolderBadgePlus";
 import { SFForkKnife } from "sf-symbols-lib/monochrome/SFForkKnife";
 import { SFFuelpump } from "sf-symbols-lib/monochrome/SFFuelpump";
 import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
@@ -69,6 +73,7 @@ import { SFSpeakerSlash } from "sf-symbols-lib/monochrome/SFSpeakerSlash";
 import { SFSpeakerWave2 } from "sf-symbols-lib/monochrome/SFSpeakerWave2";
 import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrowDown";
 import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
+import { SFSquareAndPencil } from "sf-symbols-lib/monochrome/SFSquareAndPencil";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
 import { SFSquareOnSquare } from "sf-symbols-lib/monochrome/SFSquareOnSquare";
 import { SFStar } from "sf-symbols-lib/monochrome/SFStar";
@@ -80,6 +85,8 @@ import { SFSunMax } from "sf-symbols-lib/monochrome/SFSunMax";
 import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
 import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
 import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
+import { SFTextformatSize } from "sf-symbols-lib/monochrome/SFTextformatSize";
+import { SFTextPadHeader } from "sf-symbols-lib/monochrome/SFTextPadHeader";
 import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
 import { SFWifi } from "sf-symbols-lib/monochrome/SFWifi";
 import { SFWrenchAndScrewdriver } from "sf-symbols-lib/monochrome/SFWrenchAndScrewdriver";
@@ -187,6 +194,13 @@ const GLYPHS: Record<IconName, SFComp> = {
   pills: SFPills,
   ellipsis: SFEllipsis,
   mail: SFEnvelope,
+  notes: SFTextPadHeader,
+  folder: SFFolder,
+  folderPlus: SFFolderBadgePlus,
+  compose: SFSquareAndPencil,
+  checklist: SFChecklist,
+  bold: SFBold,
+  heading: SFTextformatSize,
 };
 
 export type IconName =
@@ -281,7 +295,14 @@ export type IconName =
   | "graduation"
   | "pills"
   | "ellipsis"
-  | "mail";
+  | "mail"
+  | "notes"
+  | "folder"
+  | "folderPlus"
+  | "compose"
+  | "checklist"
+  | "bold"
+  | "heading";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

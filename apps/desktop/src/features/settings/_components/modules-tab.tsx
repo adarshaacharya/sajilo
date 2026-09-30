@@ -109,6 +109,14 @@ export function ModulesTab() {
       />
 
       <ModuleRow
+        title={t("screen.notes")}
+        note={t("settings.module-notes-note")}
+        icon="notes"
+        checked={modules.notesEnabled}
+        onChange={(value) => setModules((current) => ({ ...current, notesEnabled: value }))}
+      />
+
+      <ModuleRow
         title={t("keeper.title")}
         note={t("settings.module-keeper-note")}
         icon="keeper"

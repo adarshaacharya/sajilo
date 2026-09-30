@@ -38,34 +38,35 @@ const kinds = [
 
       <div class="field">
         <label for="summary">One line describing it</label>
-        <input id="summary" name="summary" type="text" placeholder="e.g. NEPSE tab shows yesterday's prices" required />
+        <input id="summary" name="summary" type="text" placeholder="e.g. NEPSE tab shows yesterday's prices" maxlength="200" required />
       </div>
 
       <div class="field">
         <label for="details">What happened, and what you expected instead</label>
-        <textarea id="details" name="details" rows="6" placeholder="The more detail, the faster it gets fixed." required></textarea>
+        <textarea id="details" name="details" rows="6" placeholder="The more detail, the faster it gets fixed." maxlength="10000" required></textarea>
+        <p class="field-hint field-count" id="details-count" aria-live="polite"></p>
       </div>
 
       <div class="field">
         <label for="screenshot">Screenshot <span class="field-optional">(optional, up to 5 MB)</span></label>
-        <input id="screenshot" name="screenshot" type="file" accept="image/*" />
+        <input id="screenshot" name="screenshot" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
         <p class="field-hint" id="screenshot-hint"></p>
       </div>
 
       <div class="field-row">
         <div class="field">
           <label for="version">App version</label>
-          <input id="version" name="version" type="text" placeholder="Settings › About" />
+          <input id="version" name="version" type="text" placeholder="Settings › About" maxlength="100" />
         </div>
         <div class="field">
           <label for="os">OS</label>
-          <input id="os" name="os" type="text" placeholder="e.g. macOS 15, Windows 11" />
+          <input id="os" name="os" type="text" placeholder="e.g. macOS 15, Windows 11" maxlength="100" />
         </div>
       </div>
 
       <div class="field">
         <label for="email">Your email</label>
-        <input id="email" name="email" type="email" placeholder="you@example.com" required />
+        <input id="email" name="email" type="email" placeholder="you@example.com" maxlength="200" required />
         <p class="field-hint">We'll follow up once it's fixed, and you'll be first to try it.</p>
       </div>
 
@@ -110,11 +111,28 @@ const kinds = [
   const screenshotHint = document.getElementById("screenshot-hint");
 
   const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+  // The same four the server accepts; SVG is left out because it can carry script.
+  const SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+  const detailsInput = document.getElementById("details");
+  const detailsCount = document.getElementById("details-count");
+
+  // Only speaks up near the limit, so a short report never sees a number.
+  function updateDetailsCount() {
+    const max = Number(detailsInput.getAttribute("maxlength"));
+    const left = max - detailsInput.value.length;
+    detailsCount.textContent = left <= 400 ? `${left} characters left` : "";
+  }
+  detailsInput?.addEventListener("input", updateDetailsCount);
 
   screenshotInput?.addEventListener("change", () => {
     const file = screenshotInput.files?.[0];
     if (!file) {
       screenshotHint.textContent = "";
+      return;
+    }
+    if (!SCREENSHOT_TYPES.includes(file.type)) {
+      screenshotHint.textContent = "Use a PNG, JPEG, WebP or GIF image.";
+      screenshotInput.value = "";
       return;
     }
     if (file.size > MAX_SCREENSHOT_BYTES) {
@@ -181,6 +199,7 @@ const kinds = [
       if (!res.ok) throw new Error(`status ${res.status}`);
       form.reset();
       screenshotHint.textContent = "";
+      detailsCount.textContent = "";
       note.textContent = "Sent. Thanks — it goes straight to the person who reads these.";
     } catch {
       note.textContent = "Couldn't send that just now. Try “Copy instead” and email it to contact@sajilo.fyi.";

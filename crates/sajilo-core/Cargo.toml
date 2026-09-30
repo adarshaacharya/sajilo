@@ -12,6 +12,9 @@ chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+# Notes: Devanagari typed on different keyboards can reach the same text by
+# different code points; NFC makes one note, tag or link match the other.
+unicode-normalization = "0.1"
 # Codegen only: derives the TypeScript binding for NepaliDate, which crosses
 # into sajilo-api's DTOs. Adds no runtime, no I/O.
 ts-rs = { version = "10", optional = true }

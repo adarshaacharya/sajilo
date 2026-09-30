@@ -57,6 +57,7 @@ pub mod load_state;
 pub mod meta;
 pub mod mutual_funds;
 pub mod news;
+pub mod notes;
 pub mod radio;
 pub mod rashifal;
 pub mod stocks;

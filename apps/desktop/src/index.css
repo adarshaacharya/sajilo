@@ -2915,3 +2915,473 @@ input[type="search"]::-webkit-search-decoration {
 .accent-swatch--phewa { background: #3cc4b4; }
 .accent-swatch--rudraksha { background: #c47a4c; }
 .accent-swatch--chandi { background: #aab0b8; }
+
+/* ------------------------------------------------------------------ Notes */
+
+.notes-jot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 5px 0 11px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  transition: border-color 150ms ease;
+}
+.notes-jot.is-active,
+.notes-jot:focus-within {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 70%, transparent);
+}
+.notes-jot__add {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+/* Typing Nepali in English letters: the flag and ने on a raised pill, so it
+   reads as a button in the light theme too, where bare text would not. */
+.notes-ne {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px 0 6px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.notes-ne:hover {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text);
+}
+.notes-ne__flag {
+  height: 14px;
+  width: auto;
+}
+.notes-ne[aria-pressed="true"] {
+  background: var(--color-accent-fill);
+  border-color: var(--color-accent-fill);
+  color: var(--color-accent-ink);
+}
+.notes-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.notes-chips::-webkit-scrollbar {
+  display: none;
+}
+.notes-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+.notes-chip:hover {
+  color: var(--color-text);
+}
+.notes-chip[aria-selected="true"],
+.notes-chip[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent-mark) 50%, transparent);
+  color: var(--color-accent-mark);
+}
+.notes-chip__count {
+  font-size: 11px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+.notes-chip.is-add {
+  width: 30px;
+  justify-content: center;
+  padding: 0;
+  border-style: dashed;
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.notes-chip.is-editing {
+  width: 120px;
+  color: var(--color-text);
+  outline: none;
+  border-color: var(--color-accent-mark);
+}
+
+.notes-group-label {
+  padding: 10px 8px 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.notes-row {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border-radius: 9px;
+  text-align: left;
+  color: var(--color-text);
+  transition: background 120ms ease;
+}
+.notes-row:hover,
+.notes-row:focus-visible {
+  background: var(--color-surface-hover);
+}
+.notes-badge {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-accent-fill) 14%, transparent);
+  color: var(--color-accent-mark);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.notes-menu {
+  position: absolute;
+  z-index: 30;
+  right: 4px;
+  top: 100%;
+  min-width: 190px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.35);
+  animation: notes-pop 140ms ease-out;
+}
+.notes-editor > .notes-menu {
+  top: 34px;
+}
+.notes-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 7px;
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--color-text);
+}
+.notes-menu__item:hover,
+.notes-menu__item:focus-visible {
+  background: var(--color-surface-hover);
+}
+.notes-menu__item.is-danger {
+  color: var(--color-holiday);
+}
+.notes-menu__label {
+  padding: 6px 9px 3px;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+.notes-menu__divider {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--color-divider);
+}
+
+.notes-toast {
+  position: fixed;
+  z-index: 40;
+  left: 12px;
+  right: 12px;
+  bottom: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.35);
+  font-size: 12px;
+  color: var(--color-text);
+  animation: notes-pop 160ms ease-out;
+}
+.notes-toast__action {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-accent-mark);
+}
+
+.notes-search {
+  position: fixed;
+  z-index: 35;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-canvas);
+  animation: notes-pop 150ms ease-out;
+}
+.notes-search__field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 70%, transparent);
+}
+.notes-hit {
+  border-radius: 3px;
+  padding: 0 1px;
+  background: color-mix(in srgb, var(--color-accent-fill) 30%, transparent);
+  color: var(--color-text);
+}
+
+.notes-editor {
+  position: relative;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+}
+.notes-editor__body {
+  flex: 1;
+  padding: 2px 4px 0;
+}
+.notes-backlinks {
+  margin: 8px 4px 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-divider);
+}
+.notes-backlink {
+  display: block;
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+.notes-backlink:hover {
+  background: var(--color-surface-hover);
+}
+.notes-format {
+  position: sticky;
+  bottom: -10px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 8px -10px -10px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-canvas);
+}
+.notes-format__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 7px;
+  color: var(--color-text-secondary);
+  transition: background 120ms ease, color 120ms ease;
+}
+.notes-format__btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.notes-save-state {
+  margin-right: 4px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  transition: color 200ms ease;
+}
+.notes-save-state.is-failed {
+  color: var(--color-holiday);
+}
+
+/* The editor's own marks: title, headings, checklist boxes, links, tags. */
+.cm-note-title {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.35;
+  padding-bottom: 4px !important;
+}
+.cm-note-h1 {
+  font-size: 18px;
+  font-weight: 650;
+}
+.cm-note-h2 {
+  font-size: 16px;
+  font-weight: 650;
+  padding-top: 6px !important;
+}
+.cm-note-h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.cm-note-done {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--color-text-muted) 70%, transparent);
+}
+.cm-note-check {
+  width: 15px;
+  height: 15px;
+  margin: 0 7px 0 1px;
+  vertical-align: -2px;
+  accent-color: var(--color-accent-fill);
+  cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.cm-note-check:active {
+  transform: scale(0.82);
+}
+.cm-note-bullet {
+  display: inline-block;
+  width: 14px;
+  color: var(--color-accent-mark);
+}
+.cm-note-link {
+  color: var(--color-accent-mark);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  cursor: pointer;
+}
+.cm-note-tag {
+  border-radius: 4px;
+  padding: 0 3px;
+  background: color-mix(in srgb, var(--color-accent-fill) 14%, transparent);
+  color: var(--color-accent-mark);
+}
+
+@keyframes notes-pop {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notes-menu,
+  .notes-toast,
+  .notes-search {
+    animation: none;
+  }
+}
+
+/* The list's "New note": pinned to the foot of the screen, bottom right. */
+.notes-new {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 2px 2px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--color-canvas) 45%);
+}
+.notes-new__btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 13px 0 11px;
+  border-radius: 999px;
+  /* A soft tint of the accent on frosted glass, rather than a solid block. */
+  background: color-mix(in srgb, var(--color-accent-fill) 14%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 22%, transparent);
+  color: var(--color-accent-mark);
+  font-size: 12.5px;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.14);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 120ms ease;
+}
+.notes-new__btn:hover {
+  background: color-mix(in srgb, var(--color-accent-fill) 22%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-accent-mark) 38%, transparent);
+}
+.notes-new__btn:active {
+  transform: scale(0.96);
+}
+
+/* The open note's own bar: saved, pin, ⋯. */
+.notes-editor__bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: -4px 0 4px;
+  padding-left: 6px;
+}
+
+/* Opens search: looks like the field it opens, a quiet row under the jot box. */
+.notes-search-open {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+.notes-search-open:hover {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text-secondary);
+}
+
+/* Pin, as a word, so it can't be mistaken for the header's keep-open pin. */
+.notes-pin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  margin-left: 8px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  transition: background 150ms ease, color 150ms ease;
+}
+.notes-pin-chip:hover {
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+  color: var(--color-text-secondary);
+}
+.notes-pin-chip[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-accent-fill) 16%, transparent);
+  color: var(--color-accent-mark);
+}

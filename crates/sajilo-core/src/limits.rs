@@ -24,6 +24,11 @@ pub const FIELD_LABEL: usize = 60;
 pub const FIELD_VALUE: usize = 500;
 /// Most fields of one's own one record keeps.
 pub const FIELDS: usize = 30;
+/// A note in Notes: its whole Markdown body. Long enough for any meeting,
+/// short enough that one note never slows the editor or search.
+pub const NOTE_BODY: usize = 100_000;
+/// A Notes folder's name.
+pub const FOLDER: usize = 60;
 /// A search box.
 pub const SEARCH: usize = 100;
 
@@ -60,6 +65,8 @@ mod tests {
             ("FIELD_VALUE", FIELD_VALUE),
             ("FIELDS", FIELDS),
             ("SEARCH", SEARCH),
+            ("NOTE_BODY", NOTE_BODY),
+            ("FOLDER", FOLDER),
         ] {
             let line = format!("  {name}: {value},");
             assert!(ts.contains(&line), "limits.ts should have `{line}`");

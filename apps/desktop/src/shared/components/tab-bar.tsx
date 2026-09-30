@@ -20,6 +20,7 @@ export const TABS: readonly {
     | "radioEnabled"
     | "keeperEnabled"
     | "focusEnabled"
+    | "notesEnabled"
     | null;
 }[] = [
   { to: "/", labelKey: "tab.today", icon: "today", module: null },
@@ -29,6 +30,7 @@ export const TABS: readonly {
   { to: "/radio", labelKey: "tab.radio", icon: "radio", module: "radioEnabled" },
   { to: "/tools", labelKey: "tab.tools", icon: "tools", module: null },
   { to: "/focus", labelKey: "tab.focus", icon: "focus", module: "focusEnabled" },
+  { to: "/notes", labelKey: "tab.notes", icon: "notes", module: "notesEnabled" },
   { to: "/keeper", labelKey: "tab.keeper", icon: "keeper", module: "keeperEnabled" },
 ];
 

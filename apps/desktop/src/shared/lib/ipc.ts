@@ -14,6 +14,10 @@ import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
+import type { NoteDocument } from "../../types/api/NoteDocument";
+import type { NoteSaved } from "../../types/api/NoteSaved";
+import type { NoteSearchHit } from "../../types/api/NoteSearchHit";
+import type { NotesList } from "../../types/api/NotesList";
 import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
@@ -661,6 +665,37 @@ export const api = {
   pauseFocus: (choice: PauseChoice) => invoke<FocusSnapshot>("pause_focus", { choice }),
   previewFocusBreak: (kind: BreakKind) => invoke<FocusSnapshot>("preview_focus_break", { kind }),
   focusJokeDecks: () => invoke<JokeDeck[]>("focus_joke_decks"),
+
+  /** Notes: folders and notes for the list, pinned first, newest first. */
+  notesList: () => invoke<NotesList>("notes_list"),
+  notesOpen: (id: string) => invoke<NoteDocument>("notes_open", { id }),
+  /** Refused when `revision` is older than the note's: it changed elsewhere. */
+  notesSave: (id: string, body: string, revision: number) =>
+    invoke<NoteSaved>("notes_save", { id, body, revision }),
+  notesRememberCursor: (id: string, cursor: number) =>
+    invoke<void>("notes_remember_cursor", { id, cursor }),
+  notesCreate: (folderId: string, body?: string) =>
+    invoke<string>("notes_create", { folderId, body: body ?? null }),
+  notesMove: (id: string, folderId: string) => invoke<void>("notes_move", { id, folderId }),
+  notesPin: (id: string, pinned: boolean) => invoke<void>("notes_pin", { id, pinned }),
+  notesTrash: (id: string) => invoke<void>("notes_trash", { id }),
+  notesRestore: (id: string) => invoke<void>("notes_restore", { id }),
+  /** Today's note's id, made if it isn't there yet. */
+  notesToday: () => invoke<string>("notes_today"),
+  /** Adds a line to today's note under the time; resolves to its id. */
+  notesJot: (text: string) => invoke<string>("notes_jot", { text }),
+  notesSearch: (query: string, folderId: string | null) =>
+    invoke<NoteSearchHit[]>("notes_search", { query, folderId }),
+  notesAsText: (id: string) => invoke<string>("notes_as_text", { id }),
+  notesRemoveTicked: (id: string, revision: number) =>
+    invoke<NoteSaved>("notes_remove_ticked", { id, revision }),
+  notesCreateFolder: (name: string) => invoke<string>("notes_create_folder", { name }),
+  notesRenameFolder: (id: string, name: string) =>
+    invoke<void>("notes_rename_folder", { id, name }),
+  notesDeleteFolder: (id: string) => invoke<void>("notes_delete_folder", { id }),
+  /** Romanized Nepali to Devanagari; unfinished words are left alone. */
+  notesTransliterate: (text: string, finished: boolean) =>
+    invoke<string>("notes_transliterate", { text, finished }),
   finishFocusBreak: (outcome: BreakOutcome) =>
     invoke<FocusSnapshot>("finish_focus_break", { outcome }),
 

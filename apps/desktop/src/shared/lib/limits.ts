@@ -15,4 +15,6 @@ export const LIMITS = {
   FIELD_VALUE: 500,
   FIELDS: 30,
   SEARCH: 100,
+  NOTE_BODY: 100000,
+  FOLDER: 60,
 } as const;

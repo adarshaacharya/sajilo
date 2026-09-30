@@ -8,6 +8,7 @@ pub mod background_refresh;
 pub mod commands;
 pub mod db;
 pub mod feed;
+pub mod notes;
 pub mod prefs;
 pub mod system;
 pub mod tray;
@@ -284,6 +285,26 @@ pub fn run() {
             commands::weather::list_places,
             commands::forex::get_forex,
             commands::news::get_news,
+            commands::notes::notes_list,
+            commands::notes::notes_open,
+            commands::notes::notes_save,
+            commands::notes::notes_remember_cursor,
+            commands::notes::notes_create,
+            commands::notes::notes_move,
+            commands::notes::notes_pin,
+            commands::notes::notes_trash,
+            commands::notes::notes_restore,
+            commands::notes::notes_trash_list,
+            commands::notes::notes_delete_forever,
+            commands::notes::notes_today,
+            commands::notes::notes_jot,
+            commands::notes::notes_search,
+            commands::notes::notes_as_text,
+            commands::notes::notes_remove_ticked,
+            commands::notes::notes_create_folder,
+            commands::notes::notes_rename_folder,
+            commands::notes::notes_delete_folder,
+            commands::notes::notes_transliterate,
             commands::news::news_sources,
             commands::announcement::get_announcement,
             commands::announcement::dismiss_announcement,

@@ -327,6 +327,7 @@ fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
         ("radio", on_off(prefs::RADIO_ENABLED, true)),
         ("keeper", on_off(prefs::KEEPER_ENABLED, true)),
         ("focus", on_off(prefs::FOCUS_ENABLED, true)),
+        ("notes", on_off(prefs::NOTES_ENABLED, true)),
         ("clocks", on_off("clocksEnabled", false)),
     ])
 }

@@ -11,10 +11,12 @@ import { EmailMessage } from "cloudflare:email";
 import { createMimeMessage, Mailbox } from "mimetext";
 
 const KINDS = new Set(["Something is broken", "Data looks wrong", "The app crashed", "A feature idea", "Something else"]);
-const MAX_LEN = 4000;
+const MAX_LEN = 10000;
 const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
 
 const MAX_BODY_BYTES = 7 * 1024 * 1024; // ~5 MB screenshot, base64-inflated, plus headroom
+// Raster formats only: SVG is an image type that can carry script.
+const SCREENSHOT_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
 export async function handleReport(request, env) {
   if (request.method !== "POST") {
@@ -52,7 +54,8 @@ export async function handleReport(request, env) {
   }
 
   const kind = KINDS.has(body.kind) ? body.kind : "Something else";
-  const summary = clean(body.summary, 200);
+  // It becomes the email's subject line, so it stays on one line.
+  const summary = clean(body.summary, 200).replace(/[\r\n]+/g, " ");
   const details = clean(body.details, MAX_LEN);
   const version = clean(body.version, 100) || "not given";
   const os = clean(body.os, 100) || "not given";
@@ -123,7 +126,7 @@ function validScreenshot(shot) {
   if (!shot || typeof shot !== "object") return null;
   const { filename, contentType, data } = shot;
   if (typeof filename !== "string" || typeof contentType !== "string" || typeof data !== "string") return false;
-  if (!contentType.startsWith("image/")) return false;
+  if (!SCREENSHOT_TYPES.has(contentType)) return false;
   // Base64 runs ~4/3 the size of the original bytes.
   if (data.length * 0.75 > MAX_SCREENSHOT_BYTES) return false;
   return { filename: filename.slice(0, 120), contentType, data };

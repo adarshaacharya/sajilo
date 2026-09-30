@@ -10,6 +10,7 @@ pub mod error;
 pub mod focus;
 pub mod limits;
 pub mod nepal_time;
+pub mod notes;
 pub mod notify;
 pub mod numerals;
 pub mod places;

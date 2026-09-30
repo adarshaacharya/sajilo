@@ -12,7 +12,7 @@ use serde_json::Value;
 use tauri::{AppHandle, Manager, Wry};
 
 const DATABASE_FILE: &str = "sajilo.db";
-pub const SCHEMA_VERSION: i64 = 9;
+pub const SCHEMA_VERSION: i64 = 10;
 
 pub type Result<T> = std::result::Result<T, String>;
 
@@ -42,11 +42,17 @@ pub fn written_by_newer(app: &AppHandle<Wry>) -> Option<i64> {
 
 pub fn open(app: &AppHandle<Wry>) -> Result<Connection> {
     let connection = Connection::open(database_path(app)?).map_err(|error| error.to_string())?;
+    prepare(&connection)?;
+    Ok(connection)
+}
+
+/// Foreign keys on and the schema current: what every connection needs, a
+/// test's in-memory one included.
+pub(crate) fn prepare(connection: &Connection) -> Result<()> {
     connection
         .pragma_update(None, "foreign_keys", "ON")
         .map_err(|error| error.to_string())?;
-    migrate(&connection)?;
-    Ok(connection)
+    migrate(connection)
 }
 
 /// Tables that have not changed shape since they were introduced.
@@ -177,10 +183,124 @@ const STOCK_PORTFOLIO_TABLES: &str = "
                 ON stock_transactions (symbol, trade_date, created_at);
 ";
 
+/// Notes (schema 10). Built to last: every note and folder has a permanent
+/// id, so renaming or moving never breaks a link or a pin; what the list and
+/// search need (title, preview, counts, tags, links) is kept beside the body
+/// and rewritten on each save from the body, which stays the one source of
+/// truth and is plain Markdown, so an export to `.md` files needs nothing
+/// new. Soft deletes (`deleted_at`) are the Trash. Times are RFC 3339 UTC.
+///
+/// - `note_folders.parent_id` allows nested folders later; the UI is flat for
+///   now. Names are unique among siblings by `name_key` (NFC, lower case), so
+///   `Office` and `office`, or one Devanagari name typed two ways, can't both
+///   exist. `role` marks the folders the app itself relies on (`daily`), one
+///   of each at most.
+/// - `notes.revision` goes up on every save; a save that names an older
+///   revision is refused rather than overwriting newer text.
+/// - `notes.daily_bs` (`2083-06-14`) makes a day's note findable and unique.
+/// - Tags and links are rows, so "every note tagged #office" and "what links
+///   here" are indexed lookups, not scans of every body.
+/// - `note_search` is full-text search. Its tokenizer keeps Devanagari
+///   vowel signs and viramas inside words (`unicode61` alone splits `आजको`
+///   into fragments), and it holds its own copy of the text, kept in step
+///   in the same transaction as each save.
+/// - `note_revisions` is version history; `note_attachments` is for pictures.
+const NOTES_TABLES: &str = "
+            CREATE TABLE IF NOT EXISTS note_folders (
+                id TEXT PRIMARY KEY NOT NULL,
+                parent_id TEXT REFERENCES note_folders(id) ON DELETE RESTRICT,
+                name TEXT NOT NULL CHECK (length(trim(name)) > 0),
+                name_key TEXT NOT NULL,
+                role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'daily')),
+                position INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                deleted_at TEXT
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS note_folders_name_idx
+                ON note_folders (COALESCE(parent_id, ''), name_key) WHERE deleted_at IS NULL;
+            CREATE UNIQUE INDEX IF NOT EXISTS note_folders_role_idx
+                ON note_folders (role) WHERE role <> 'user' AND deleted_at IS NULL;
+
+            CREATE TABLE IF NOT EXISTS notes (
+                id TEXT PRIMARY KEY NOT NULL,
+                folder_id TEXT NOT NULL REFERENCES note_folders(id) ON DELETE RESTRICT,
+                body TEXT NOT NULL,
+                title TEXT NOT NULL,
+                title_key TEXT NOT NULL,
+                preview TEXT NOT NULL,
+                word_count INTEGER NOT NULL DEFAULT 0,
+                open_tasks INTEGER NOT NULL DEFAULT 0,
+                done_tasks INTEGER NOT NULL DEFAULT 0,
+                daily_bs TEXT UNIQUE,
+                pinned_at TEXT,
+                cursor INTEGER,
+                opened_at TEXT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                deleted_at TEXT,
+                revision INTEGER NOT NULL DEFAULT 1
+            );
+            CREATE INDEX IF NOT EXISTS notes_folder_idx
+                ON notes (folder_id, deleted_at, updated_at);
+            CREATE INDEX IF NOT EXISTS notes_title_idx ON notes (title_key);
+            CREATE INDEX IF NOT EXISTS notes_deleted_idx ON notes (deleted_at);
+
+            CREATE TABLE IF NOT EXISTS note_tags (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                name_key TEXT NOT NULL UNIQUE,
+                created_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS note_tag_links (
+                note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+                tag_id INTEGER NOT NULL REFERENCES note_tags(id) ON DELETE CASCADE,
+                PRIMARY KEY (note_id, tag_id)
+            ) WITHOUT ROWID;
+            CREATE INDEX IF NOT EXISTS note_tag_links_tag_idx ON note_tag_links (tag_id);
+
+            CREATE TABLE IF NOT EXISTS note_links (
+                from_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+                target TEXT NOT NULL,
+                target_key TEXT NOT NULL,
+                PRIMARY KEY (from_id, target_key)
+            ) WITHOUT ROWID;
+            CREATE INDEX IF NOT EXISTS note_links_target_idx ON note_links (target_key);
+
+            CREATE TABLE IF NOT EXISTS note_revisions (
+                id INTEGER PRIMARY KEY,
+                note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+                body TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS note_revisions_note_idx
+                ON note_revisions (note_id, created_at);
+
+            CREATE TABLE IF NOT EXISTS note_attachments (
+                id TEXT PRIMARY KEY NOT NULL,
+                note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                mime TEXT NOT NULL,
+                bytes INTEGER NOT NULL,
+                data BLOB NOT NULL,
+                created_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS note_attachments_note_idx ON note_attachments (note_id);
+
+            CREATE VIRTUAL TABLE IF NOT EXISTS note_search USING fts5(
+                note_id UNINDEXED,
+                title,
+                body,
+                tags,
+                tokenize = \"unicode61 categories 'L* N* Co M*' remove_diacritics 0\",
+                prefix = '2 3'
+            );
+";
+
 fn migrate(connection: &Connection) -> Result<()> {
     connection
         .execute_batch(&format!(
-            "{BASE_TABLES}{KEEPER_TABLES}{STOCK_PORTFOLIO_TABLES}
+            "{BASE_TABLES}{KEEPER_TABLES}{STOCK_PORTFOLIO_TABLES}{NOTES_TABLES}
             INSERT INTO schema_meta (key, value)
                 VALUES ('schema_version', 1)
                 ON CONFLICT(key) DO NOTHING;"
@@ -249,6 +369,12 @@ fn upgrade(connection: &Connection, from: i64) -> Result<()> {
     if from < 8 {
         connection
             .execute_batch(STOCK_PORTFOLIO_TABLES)
+            .map_err(|error| error.to_string())?;
+    }
+    // 10: Notes. New tables only; nothing existing changes.
+    if from < 10 {
+        connection
+            .execute_batch(NOTES_TABLES)
             .map_err(|error| error.to_string())?;
     }
     bump_schema_version(connection, SCHEMA_VERSION)

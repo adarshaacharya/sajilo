@@ -13,6 +13,7 @@ import { Keeper } from "./features/keeper/keeper";
 import { PhotoViewer } from "./features/keeper/photo-viewer";
 import { GovernmentUpdateDetail } from "./features/news/government-update-detail";
 import { News } from "./features/news/news";
+import { Notes } from "./features/notes/notes";
 import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
 import { Rashifal } from "./features/rashifal/rashifal";
@@ -53,6 +54,7 @@ const ROUTES = [
   { path: "/radio", titleKey: "screen.radio", element: <Radio /> },
   { path: "/tools", titleKey: "screen.tools", element: <Tools /> },
   { path: "/focus", titleKey: "screen.focus", element: <Focus /> },
+  { path: "/notes", titleKey: "screen.notes", element: <Notes /> },
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];

@@ -44,6 +44,7 @@ export interface ModulePrefs {
   clocks: string[];
   keeperEnabled: boolean;
   focusEnabled: boolean;
+  notesEnabled: boolean;
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -60,6 +61,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   clocks: [],
   keeperEnabled: true,
   focusEnabled: true,
+  notesEnabled: true,
 };
 
 /** Keeps the home place and the pin list agreeing: the home place is the first
@@ -144,6 +146,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<string[]>("clocks"),
       api.getSetting<boolean>("keeperEnabled"),
       api.getSetting<boolean>("focusEnabled"),
+      api.getSetting<boolean>("notesEnabled"),
       api.getSetting<string>("accent"),
     ])
       .then(
@@ -165,6 +168,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           clocks,
           keeperEnabled,
           focusEnabled,
+          notesEnabled,
           storedAccent,
         ]) => {
           if (cancelled) return;
@@ -205,6 +209,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
               ...(clocks && { clocks }),
               ...(keeperEnabled !== null && { keeperEnabled }),
               ...(focusEnabled !== null && { focusEnabled }),
+              ...(notesEnabled !== null && { notesEnabled }),
             }),
           );
         },
@@ -241,6 +246,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("clocks", next.clocks);
         persist("keeperEnabled", next.keeperEnabled);
         persist("focusEnabled", next.focusEnabled);
+        persist("notesEnabled", next.notesEnabled);
         return next;
       });
     },

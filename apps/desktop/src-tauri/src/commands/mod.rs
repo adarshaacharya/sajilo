@@ -13,6 +13,7 @@ pub mod keeper;
 pub mod mutual_funds;
 pub mod nepse_intraday;
 pub mod news;
+pub mod notes;
 pub mod notify;
 pub mod plans;
 pub mod portfolio;
