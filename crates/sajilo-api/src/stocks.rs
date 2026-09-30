@@ -90,6 +90,39 @@ dto! {
         pub value: f64,
     }
 
+    /// A figure reported for a fiscal year (and quarter), as NEPSE sites give
+    /// them: `10.81` for `FY:082-083, Q:4`.
+    pub struct ReportedFigure {
+        pub value: f64,
+        /// The period as the source writes it, e.g. `FY 082/83 · Q4`; empty
+        /// when none is given.
+        pub period: String,
+    }
+
+    /// What a company is worth and pays, from Merolagani's company page.
+    /// Every figure may be missing: a newly listed company has no EPS yet, a
+    /// mutual fund no book value.
+    pub struct StockFundamentals {
+        pub symbol: String,
+        pub sector: Option<String>,
+        pub shares_outstanding: Option<f64>,
+        pub market_cap: Option<f64>,
+        pub eps: Option<ReportedFigure>,
+        pub pe_ratio: Option<f64>,
+        pub book_value: Option<f64>,
+        pub pbv: Option<f64>,
+        /// Cash dividend and bonus share, percent of paid-up value.
+        pub cash_dividend: Option<ReportedFigure>,
+        pub bonus_share: Option<ReportedFigure>,
+        pub right_share: Option<String>,
+        /// Price change over the last year, percent.
+        pub one_year_yield: Option<f64>,
+        pub average_volume_30_day: Option<f64>,
+        pub paid_up_value: Option<f64>,
+        pub source: String,
+        pub freshness: Freshness,
+    }
+
     /// One point on a share's chart: a moment and the price then.
     pub struct StockChartPoint {
         /// Seconds since 1970, UTC. A trade's own moment for a session's

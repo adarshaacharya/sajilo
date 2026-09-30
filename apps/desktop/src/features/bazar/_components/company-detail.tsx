@@ -1,17 +1,21 @@
 import { useState } from "react";
+import useSWR from "swr";
 import { BackButton } from "../../../shared/components/back-button";
 import { Icon } from "../../../shared/components/icon";
+import { SkeletonBlock } from "../../../shared/components/skeleton";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { translate } from "../../../shared/lib/i18n";
+import { api } from "../../../shared/lib/ipc";
+import { catchAsFailed, loadedValue } from "../../../shared/lib/load-state";
 import type { StockPortfolio } from "../../../types/api/StockPortfolio";
 import type { StockPosition } from "../../../types/api/StockPosition";
 import type { StockPrice } from "../../../types/api/StockPrice";
 import type { StockQuote } from "../../../types/api/StockQuote";
 import type { StockTransaction } from "../../../types/api/StockTransaction";
 import type { StockTransactionKind } from "../../../types/api/StockTransactionKind";
-import { money, money0 } from "../_lib/format";
+import { money, money0, money2 } from "../_lib/format";
 import { signedMoney, signedPercent } from "../_lib/portfolio";
-import { changeText, changeTone, week52Position } from "../_lib/stock-tone";
+import { changeTone, week52Position } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";
 import { RangeBar } from "./range-bar";
 import { StatementRow } from "./statement";
@@ -23,6 +27,120 @@ type TFn = (key: TranslationKey) => string;
 
 function sharesansarUrl(symbol: string) {
   return `https://www.sharesansar.com/company/${symbol.toLowerCase()}`;
+}
+
+function merolaganiUrl(symbol: string) {
+  return `https://merolagani.com/CompanyDetail.aspx?symbol=${symbol}`;
+}
+
+type Row = { label: string; value: string; note?: string };
+
+/** A titled block of the share page: Today's trading, Performance, Fundamentals. */
+function StockSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="stock-section">
+      <h3 className="stock-label">{title}</h3>
+      <div className="space-y-2">{children}</div>
+    </div>
+  );
+}
+
+/** Label on the left, figure on the right, one per line, as Merolagani lists them. */
+function StockRows({ rows }: { rows: Row[] }) {
+  return (
+    <dl className="stock-rows">
+      {rows.map((row) => (
+        <div key={row.label} className="stock-row">
+          <dt className="text-text-muted">{row.label}</dt>
+          <dd className="text-right font-medium tabular-nums">
+            {row.value}
+            {row.note && (
+              <span className="ml-1 text-[10px] font-normal text-text-muted">{row.note}</span>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** EPS, P/E, book value, dividends and the rest, from Merolagani. */
+function Fundamentals({ symbol, t }: { symbol: string; t: TFn }) {
+  const { data } = useSWR(["stock-fundamentals", symbol], () =>
+    catchAsFailed(api.getStockFundamentals(symbol)),
+  );
+  const f = loadedValue(data);
+  if (!data) {
+    return (
+      <StockSection title={t("stocks.section-fundamentals")}>
+        <SkeletonBlock className="h-[120px] w-full" />
+      </StockSection>
+    );
+  }
+  if (!f) {
+    return (
+      <StockSection title={t("stocks.section-fundamentals")}>
+        <p className="text-[10.5px] text-text-muted">{t("stocks.fundamentals-unavailable")}</p>
+      </StockSection>
+    );
+  }
+  const plain = (value: number | null | undefined) => (value != null ? money2.format(value) : "—");
+  const percent = (value: number | null | undefined) =>
+    value != null ? `${money2.format(value)}%` : "—";
+  const fundamentals: Row[] = [
+    {
+      label: t("stocks.eps"),
+      value: f.eps ? `Rs ${money2.format(f.eps.value)}` : "—",
+      note: f.eps?.period,
+    },
+    { label: t("stocks.pe"), value: plain(f.peRatio) },
+    {
+      label: t("stocks.book-value"),
+      value: f.bookValue != null ? `Rs ${money2.format(f.bookValue)}` : "—",
+    },
+    { label: t("stocks.pbv"), value: plain(f.pbv) },
+    {
+      label: t("stocks.market-cap"),
+      value: f.marketCap != null ? `Rs ${money0.format(f.marketCap)}` : "—",
+    },
+    {
+      label: t("stocks.shares-outstanding"),
+      value: f.sharesOutstanding != null ? money0.format(f.sharesOutstanding) : "—",
+    },
+    { label: t("stocks.one-year-yield"), value: percent(f.oneYearYield) },
+    {
+      label: t("stocks.avg-volume-30"),
+      value: f.averageVolume30Day != null ? money0.format(f.averageVolume30Day) : "—",
+    },
+  ];
+  const dividends: Row[] = [
+    {
+      label: t("stocks.cash-dividend"),
+      value: f.cashDividend ? `${money2.format(f.cashDividend.value)}%` : "—",
+      note: f.cashDividend?.period,
+    },
+    {
+      label: t("stocks.bonus-share"),
+      value: f.bonusShare ? `${money2.format(f.bonusShare.value)}%` : "—",
+      note: f.bonusShare?.period,
+    },
+    ...(f.rightShare ? [{ label: t("stocks.right-share"), value: f.rightShare }] : []),
+  ];
+  return (
+    <>
+      <StockSection title={t("stocks.section-fundamentals")}>
+        {f.sector && (
+          <p className="text-[10.5px] text-text-muted">
+            {t("stocks.sector")}: {f.sector}
+          </p>
+        )}
+        <StockRows rows={fundamentals} />
+      </StockSection>
+      <StockSection title={t("stocks.section-dividends")}>
+        <StockRows rows={dividends} />
+      </StockSection>
+    </>
+  );
 }
 
 /**
@@ -41,6 +159,7 @@ export function CompanyDetail({
   priceStale,
   onPortfolioChange,
   onDeleteTransaction,
+  asOf,
   t,
 }: {
   quote: StockQuote;
@@ -52,6 +171,8 @@ export function CompanyDetail({
   priceStale: boolean;
   onPortfolioChange: (portfolio: StockPortfolio) => void;
   onDeleteTransaction: (id: string) => Promise<void>;
+  /** When the price was last traded or published, for "As on". */
+  asOf?: string;
   t: TFn;
 }) {
   const [editing, setEditing] = useState<{
@@ -66,28 +187,26 @@ export function CompanyDetail({
       ? (quote.ltp - quote.low) / (quote.high - quote.low)
       : null;
 
-  const stats: { label: string; value: string }[] = [
-    { label: t("stocks.open"), value: quote.open != null ? money.format(quote.open) : "—" },
-    { label: t("stocks.high"), value: quote.high != null ? money.format(quote.high) : "—" },
-    { label: t("stocks.low"), value: quote.low != null ? money.format(quote.low) : "—" },
-    { label: t("stocks.prev-close"), value: money.format(quote.previousClose) },
-    { label: t("stocks.vwap"), value: quote.vwap != null ? money.format(quote.vwap) : "—" },
+  const rs = (value: number | null | undefined) =>
+    value != null ? `Rs ${money2.format(value)}` : "—";
+  const count = (value: number | null | undefined) => (value != null ? money0.format(value) : "—");
+  // Today's session, labelled as NEPSE sites label it.
+  const trading: Row[] = [
+    { label: t("stocks.open"), value: rs(quote.open) },
+    { label: t("stocks.high"), value: rs(quote.high) },
+    { label: t("stocks.low"), value: rs(quote.low) },
+    { label: t("stocks.prev-close"), value: rs(quote.previousClose) },
+    { label: t("stocks.vwap"), value: rs(quote.vwap) },
+    { label: t("stocks.volume"), value: count(quote.volume) },
     {
-      label: t("stocks.traded"),
-      value: quote.volume != null ? money0.format(quote.volume) : "—",
+      label: t("stocks.turnover"),
+      value: quote.turnover > 0 ? `Rs ${money0.format(quote.turnover)}` : "—",
     },
-    {
-      label: t("stocks.trades"),
-      value: quote.transactions != null ? money0.format(quote.transactions) : "—",
-    },
-    {
-      label: t("stocks.avg-120"),
-      value: quote.average120Day != null ? money.format(quote.average120Day) : "—",
-    },
-    {
-      label: t("stocks.avg-180"),
-      value: quote.average180Day != null ? money.format(quote.average180Day) : "—",
-    },
+    { label: t("stocks.trades"), value: count(quote.transactions) },
+  ];
+  const averages: Row[] = [
+    { label: t("stocks.avg-120"), value: rs(quote.average120Day) },
+    { label: t("stocks.avg-180"), value: rs(quote.average180Day) },
   ];
 
   // Recording a trade is its own screen, not a form hiding under a wall of
@@ -141,24 +260,30 @@ export function CompanyDetail({
           <FollowButton followed={followed} onToggle={onToggle} />
         </div>
 
-        <div className="mt-2 flex items-baseline gap-2">
-          <p className="text-[22px] font-semibold tabular-nums">Rs {money.format(quote.ltp)}</p>
+        {/* Labelled the way ShareSansar ("Ltp", "As on") and Merolagani
+            ("Market Price", "% Change") label it, so it reads as familiar. */}
+        <div className="mt-2 flex items-baseline justify-between gap-2">
+          <p className="stock-label">{t("stocks.market-price")}</p>
+          {asOf && (
+            <p className="text-[10px] text-text-muted tabular-nums">
+              {t("stocks.as-on")} {asOf}
+            </p>
+          )}
+        </div>
+        <div className="flex items-baseline gap-2">
+          <p className="text-[22px] font-semibold tabular-nums">Rs {money2.format(quote.ltp)}</p>
           <p className={`text-[11px] font-medium tabular-nums ${changeTone(quote.change)}`}>
-            {changeText(quote.change, quote.changePercent)}
+            {quote.change > 0 ? "▲" : quote.change < 0 ? "▼" : ""}{" "}
+            {money2.format(Math.abs(quote.change))} ({Math.abs(quote.changePercent).toFixed(2)}%)
           </p>
+          <p className="text-[10px] text-text-muted">{t("stocks.today")}</p>
         </div>
 
         <StockChart symbol={quote.symbol} />
+      </section>
 
-        <div className="mt-2 space-y-2">
-          {quote.week52Low != null && quote.week52High != null && (
-            <RangeBar
-              title={t("stocks.week52")}
-              low={quote.week52Low}
-              high={quote.week52High}
-              position={week52Position(quote)}
-            />
-          )}
+      <section className="surface-card p-2.5">
+        <StockSection title={t("stocks.section-trading")}>
           {quote.low != null && quote.high != null && quote.high > quote.low && (
             <RangeBar
               title={t("stocks.day-range")}
@@ -167,24 +292,39 @@ export function CompanyDetail({
               position={dayPos}
             />
           )}
-        </div>
+          <StockRows rows={trading} />
+        </StockSection>
 
-        <div className="section-divider mt-3 grid grid-cols-3 gap-2 pt-2">
-          {stats.map((stat) => (
-            <div key={stat.label}>
-              <p className="truncate text-[10px] text-text-muted">{stat.label}</p>
-              <p className="text-[11px] font-medium tabular-nums">{stat.value}</p>
-            </div>
-          ))}
-        </div>
+        <StockSection title={t("stocks.section-performance")}>
+          {quote.week52Low != null && quote.week52High != null && (
+            <RangeBar
+              title={t("stocks.week52")}
+              low={quote.week52Low}
+              high={quote.week52High}
+              position={week52Position(quote)}
+            />
+          )}
+          <StockRows rows={averages} />
+        </StockSection>
 
-        <button
-          type="button"
-          onClick={() => openExternalLink(sharesansarUrl(quote.symbol))}
-          className="mt-2.5 text-[11px] text-[color:var(--color-accent-mark)] hover:opacity-80"
-        >
-          {t("stocks.open-sharesansar")}
-        </button>
+        <Fundamentals symbol={quote.symbol} t={t} />
+
+        <div className="section-divider mt-3 flex gap-4 pt-2">
+          <button
+            type="button"
+            onClick={() => openExternalLink(sharesansarUrl(quote.symbol))}
+            className="text-[11px] text-[color:var(--color-accent-mark)] hover:opacity-80"
+          >
+            {t("stocks.open-sharesansar")}
+          </button>
+          <button
+            type="button"
+            onClick={() => openExternalLink(merolaganiUrl(quote.symbol))}
+            className="text-[11px] text-[color:var(--color-accent-mark)] hover:opacity-80"
+          >
+            {t("stocks.open-merolagani")}
+          </button>
+        </div>
       </section>
 
       <section className="surface-card p-2.5">

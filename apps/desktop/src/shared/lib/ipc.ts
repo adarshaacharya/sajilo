@@ -25,6 +25,7 @@ import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
 import type { StockChart } from "../../types/api/StockChart";
+import type { StockFundamentals } from "../../types/api/StockFundamentals";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import type { StockPortfolio } from "../../types/api/StockPortfolio";
 import type { StockPrice } from "../../types/api/StockPrice";
@@ -850,6 +851,9 @@ export const api = {
     invoke<Record<string, string>>("crypto_current_ids", { ids }),
   searchCrypto: (query: string) => invoke<LoadState<CryptoSearchHit[]>>("search_crypto", { query }),
   /** One share's price over `range`: `1d` (the latest session), `1w`, `1m`, `3m`, `1y`, `5y`. */
+  /** One company's EPS, P/E, book value, dividends and the rest, from Merolagani. */
+  getStockFundamentals: (symbol: string) =>
+    invoke<LoadState<StockFundamentals>>("get_stock_fundamentals", { symbol }),
   getStockChart: (symbol: string, range: string) =>
     invoke<LoadState<StockChart>>("get_stock_chart", { symbol, range }),
   getCryptoChart: (id: string, days: number) =>

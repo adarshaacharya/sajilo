@@ -9,6 +9,11 @@ import type { NepaliDate } from "../../../types/api/NepaliDate";
 
 export const money = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 export const money0 = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
+/** Share prices as NEPSE and its sites print them: always two decimals, 570.00. */
+export const money2 = new Intl.NumberFormat("en-IN", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 const METAL_NAMES: Record<Metal, { en: string; ne: string }> = {
   fineGold: { en: "Fine gold", ne: "छापावाल सुन" },

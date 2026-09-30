@@ -16,7 +16,7 @@ import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot
 import type { StockPortfolio } from "../../../types/api/StockPortfolio";
 import type { StockPosition } from "../../../types/api/StockPosition";
 import type { StockPrice } from "../../../types/api/StockPrice";
-import { money, money0 } from "../_lib/format";
+import { money, money0, sourceStamp } from "../_lib/format";
 import { findIssue, groupIssues, nepalToday } from "../_lib/ipo";
 import { heldPositions, profitPercent, signedMoney, signedPercent } from "../_lib/portfolio";
 import {
@@ -276,6 +276,7 @@ export function Stocks({
             position={positionOf(openQuote.symbol)}
             prices={prices}
             priceStale={state?.status === "stale"}
+            asOf={sourceStamp(snapshot?.freshness)}
             onPortfolioChange={(next) => acceptPortfolio(next, openQuote.symbol)}
             onDeleteTransaction={async (id) => {
               const next = await api.deleteStockTransaction(id, prices);

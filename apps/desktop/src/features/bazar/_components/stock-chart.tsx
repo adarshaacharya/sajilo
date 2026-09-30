@@ -52,10 +52,11 @@ export function StockChart({ symbol }: { symbol: string }) {
           tabs={RANGES.map((item) => ({ id: item.id, label: item.label }))}
         />
         {move != null && (
-          <span
-            className={`absolute top-0 right-0 text-[10px] font-medium leading-4 tabular-nums ${move >= 0 ? "text-positive" : "text-holiday"}`}
-          >
-            {percentText(move)}
+          <span className="absolute top-0 right-0 text-[10px] leading-4 tabular-nums">
+            <span className={`font-medium ${move >= 0 ? "text-positive" : "text-holiday"}`}>
+              {percentText(move)}
+            </span>{" "}
+            <span className="text-text-muted">{t(`stocks.chart-over-${range}`)}</span>
           </span>
         )}
       </div>

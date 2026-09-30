@@ -10,11 +10,11 @@
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::stocks::{StockChart, StockMarketSnapshot};
+use sajilo_api::stocks::{StockChart, StockFundamentals, StockMarketSnapshot};
 use sajilo_core::nepal_time;
-use sajilo_providers::sharehub_chart;
 use sajilo_providers::sharehub_live::{self, LiveMarket};
 use sajilo_providers::{HttpClient, sharesansar};
+use sajilo_providers::{merolagani, sharehub_chart};
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -37,6 +37,7 @@ pub struct StocksCache {
     feed: Feed<StockMarketSnapshot>,
     live: Feed<LiveMarket>,
     charts: Mutex<ChartFeeds>,
+    fundamentals: Mutex<HashMap<String, Arc<Feed<StockFundamentals>>>>,
     client: HttpClient,
 }
 
@@ -46,6 +47,7 @@ impl Default for StocksCache {
             feed: Feed::new(STOCKS_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
             live: Feed::new(STOCKS_LIVE_KEY, LIVE_MAX_AGE_SECS, LIVE_REFETCH_AFTER_SECS),
             charts: Mutex::new(HashMap::new()),
+            fundamentals: Mutex::new(HashMap::new()),
             client: HttpClient::new(),
         }
     }
@@ -74,6 +76,41 @@ impl StocksCache {
             })
             .clone()
     }
+}
+
+/// A company's fundamentals change with its quarterly report, so a copy is
+/// kept a day and checked every few hours.
+const FUNDAMENTALS_MAX_AGE_SECS: i64 = 24 * 60 * 60;
+const FUNDAMENTALS_REFETCH_AFTER_SECS: i64 = 6 * 60 * 60;
+
+/// One company's EPS, P/E, book value, dividends and the rest.
+#[tauri::command]
+pub async fn get_stock_fundamentals(
+    app: AppHandle<Wry>,
+    symbol: String,
+) -> LoadState<StockFundamentals> {
+    let symbol = symbol.trim().to_ascii_uppercase();
+    if !sharehub_chart::valid_symbol(&symbol) {
+        return LoadState::Failed(format!("unsupported symbol: {symbol}"));
+    }
+    let cache = app.state::<StocksCache>();
+    let feed = cache
+        .fundamentals
+        .lock()
+        .expect("stock fundamentals feeds mutex poisoned")
+        .entry(symbol.clone())
+        .or_insert_with(|| {
+            Arc::new(Feed::keyed(
+                Cow::Owned(format!("{STOCKS_KEY}.fundamentals.{symbol}")),
+                FUNDAMENTALS_MAX_AGE_SECS,
+                FUNDAMENTALS_REFETCH_AFTER_SECS,
+            ))
+        })
+        .clone();
+    let client = &cache.client;
+    let now = Utc::now();
+    feed.get(&app, now, false, || merolagani::fetch(client, &symbol, now))
+        .await
 }
 
 /// One share's price over `range` (`1d`, `1w`, `1m`, `3m`, `1y`, `5y`).
