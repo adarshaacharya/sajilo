@@ -24,6 +24,7 @@ import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
+import type { StockChart } from "../../types/api/StockChart";
 import type { StockMarketSnapshot } from "../../types/api/StockMarketSnapshot";
 import type { StockPortfolio } from "../../types/api/StockPortfolio";
 import type { StockPrice } from "../../types/api/StockPrice";
@@ -848,6 +849,9 @@ export const api = {
   cryptoCurrentIds: (ids: string[]) =>
     invoke<Record<string, string>>("crypto_current_ids", { ids }),
   searchCrypto: (query: string) => invoke<LoadState<CryptoSearchHit[]>>("search_crypto", { query }),
+  /** One share's price over `range`: `1d` (the latest session), `1w`, `1m`, `3m`, `1y`, `5y`. */
+  getStockChart: (symbol: string, range: string) =>
+    invoke<LoadState<StockChart>>("get_stock_chart", { symbol, range }),
   getCryptoChart: (id: string, days: number) =>
     invoke<LoadState<CryptoChart>>("get_crypto_chart", { id, days }),
   /** Every fund's SIP payment schedule, soonest first. Each change below

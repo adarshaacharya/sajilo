@@ -597,8 +597,8 @@
   "stocks.breadth-down": "{n} fell",
   "stocks.breadth-flat": "{n} unchanged",
   "stocks.breadth-up": "{n} rose",
-  "stocks.chart-label": "NEPSE through the latest session",
-  "stocks.chart-unavailable": "Chart unavailable right now",
+  "stocks.chart-label": "{symbol} price chart",
+  "stocks.chart-unavailable": "This chart can't be reached right now.",
   "stocks.day-range": "Day range",
   "stocks.dividend-bonus": "{n}% bonus",
   "stocks.dividend-cash": "{n}% cash",
@@ -1204,5 +1204,6 @@
   "settings.move-up": "Move up",
   "settings.move-down": "Move down",
   "settings.add-to-bar": "Add to the bar",
-  "settings.remove-from-bar": "Move to More"
+  "settings.remove-from-bar": "Move to More",
+  "stocks.chart-range": "Chart range"
 }

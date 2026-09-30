@@ -10,10 +10,14 @@
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::stocks::StockMarketSnapshot;
+use sajilo_api::stocks::{StockChart, StockMarketSnapshot};
 use sajilo_core::nepal_time;
+use sajilo_providers::sharehub_chart;
 use sajilo_providers::sharehub_live::{self, LiveMarket};
 use sajilo_providers::{HttpClient, sharesansar};
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Manager, Wry};
 
 use crate::feed::Feed;
@@ -26,9 +30,13 @@ const REFETCH_AFTER_SECS: i64 = 5 * 60;
 const LIVE_MAX_AGE_SECS: i64 = 10 * 60;
 const LIVE_REFETCH_AFTER_SECS: i64 = 60;
 
+/// A share's chart cache, by symbol and range.
+type ChartFeeds = HashMap<(String, String), Arc<Feed<StockChart>>>;
+
 pub struct StocksCache {
     feed: Feed<StockMarketSnapshot>,
     live: Feed<LiveMarket>,
+    charts: Mutex<ChartFeeds>,
     client: HttpClient,
 }
 
@@ -37,9 +45,58 @@ impl Default for StocksCache {
         Self {
             feed: Feed::new(STOCKS_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
             live: Feed::new(STOCKS_LIVE_KEY, LIVE_MAX_AGE_SECS, LIVE_REFETCH_AFTER_SECS),
+            charts: Mutex::new(HashMap::new()),
             client: HttpClient::new(),
         }
     }
+}
+
+impl StocksCache {
+    /// One cached chart per share and range, made the first time it's asked
+    /// for. The session's chart moves by the minute while NEPSE trades; the
+    /// daily ranges gain one point a day.
+    fn chart_feed(&self, symbol: &str, range: &str) -> Arc<Feed<StockChart>> {
+        let (max_age, refetch) = if range == "1d" {
+            (30 * 60, 60)
+        } else {
+            (24 * 60 * 60, 3 * 60 * 60)
+        };
+        self.charts
+            .lock()
+            .expect("stock chart feeds mutex poisoned")
+            .entry((symbol.to_owned(), range.to_owned()))
+            .or_insert_with(|| {
+                Arc::new(Feed::keyed(
+                    Cow::Owned(format!("{STOCKS_KEY}.chart.{symbol}.{range}")),
+                    max_age,
+                    refetch,
+                ))
+            })
+            .clone()
+    }
+}
+
+/// One share's price over `range` (`1d`, `1w`, `1m`, `3m`, `1y`, `5y`).
+#[tauri::command]
+pub async fn get_stock_chart(
+    app: AppHandle<Wry>,
+    symbol: String,
+    range: String,
+) -> LoadState<StockChart> {
+    let symbol = symbol.trim().to_ascii_uppercase();
+    if !sharehub_chart::valid_symbol(&symbol)
+        || !sharehub_chart::CHART_RANGES.contains(&range.as_str())
+    {
+        return LoadState::Failed(format!("unsupported chart: {symbol} {range}"));
+    }
+    let cache = app.state::<StocksCache>();
+    let feed = cache.chart_feed(&symbol, &range);
+    let client = &cache.client;
+    let now = Utc::now();
+    feed.get(&app, now, false, || {
+        sharehub_chart::fetch(client, &symbol, &range, now)
+    })
+    .await
 }
 
 /// Whether the live board could say anything the day table does not: the

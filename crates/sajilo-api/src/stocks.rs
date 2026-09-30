@@ -90,6 +90,26 @@ dto! {
         pub value: f64,
     }
 
+    /// One point on a share's chart: a moment and the price then.
+    pub struct StockChartPoint {
+        /// Seconds since 1970, UTC. A trade's own moment for a session's
+        /// chart; midnight UTC of the trading day for longer ranges.
+        pub time: u32,
+        pub price: f64,
+        pub volume: f64,
+    }
+
+    /// A share's price over a range, oldest first.
+    pub struct StockChart {
+        pub symbol: String,
+        /// `1d` (the latest session, trade by trade), `1w`, `1m`, `3m`, `1y`
+        /// or `5y` (one close per trading day).
+        pub range: String,
+        pub points: Vec<StockChartPoint>,
+        pub source: String,
+        pub freshness: Freshness,
+    }
+
     /// NEPSE through its latest session, a sample a minute, oldest first.
     pub struct IndexIntraday {
         #[serde(default)]

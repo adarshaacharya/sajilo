@@ -15,6 +15,7 @@ import { changeText, changeTone, week52Position } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";
 import { RangeBar } from "./range-bar";
 import { StatementRow } from "./statement";
+import { StockChart } from "./stock-chart";
 import { StockTransactionForm } from "./stock-transaction-form";
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -146,6 +147,8 @@ export function CompanyDetail({
             {changeText(quote.change, quote.changePercent)}
           </p>
         </div>
+
+        <StockChart symbol={quote.symbol} />
 
         <div className="mt-2 space-y-2">
           {quote.week52Low != null && quote.week52High != null && (

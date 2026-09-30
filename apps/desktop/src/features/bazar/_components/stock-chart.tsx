@@ -5,26 +5,36 @@ import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { catchAsFailed, loadedValue } from "../../../shared/lib/load-state";
-import { CHART_RANGES, type ChartDays, percentText, usd } from "../_lib/crypto";
-import { PriceChart } from "./price-chart";
+import { percentText } from "../_lib/crypto";
+import { money } from "../_lib/format";
+import { type ChartSpan, PriceChart } from "./price-chart";
+
+const RANGES = [
+  { id: "1d", label: "1D" },
+  { id: "1w", label: "1W" },
+  { id: "1m", label: "1M" },
+  { id: "3m", label: "3M" },
+  { id: "1y", label: "1Y" },
+  { id: "5y", label: "5Y" },
+] as const;
+type Range = (typeof RANGES)[number]["id"];
+
+/** NEPSE's session is in Nepal time wherever the reader is: +5:45. */
+const NEPAL_OFFSET_SECONDS = (5 * 60 + 45) * 60;
+
+const span = (range: Range): ChartSpan =>
+  range === "1d" ? "session" : range === "1y" || range === "5y" ? "year" : "days";
 
 /**
- * lightweight-charts labels its axis in UTC. Sliding every sample by this
- * machine's offset makes it read the user's own clock, wherever they are.
+ * A share's price over the chosen range, from ShareHub: the latest session
+ * trade by trade, or one close a day for longer. Each range is fetched once
+ * and cached in Rust.
  */
-function localOffsetSeconds(): number {
-  return -new Date().getTimezoneOffset() * 60;
-}
-
-/**
- * A coin's price over the chosen range, with the move across it. The range
- * tabs sit above the plot; each range is fetched once and cached in Rust.
- */
-export function CryptoChart({ id }: { id: string }) {
+export function StockChart({ symbol }: { symbol: string }) {
   const { t } = useSettings();
-  const [days, setDays] = useState<ChartDays>(7);
-  const { data, isLoading, mutate } = useSWR(["crypto-chart", id, days], () =>
-    catchAsFailed(api.getCryptoChart(id, days)),
+  const [range, setRange] = useState<Range>("1m");
+  const { data, isLoading, mutate } = useSWR(["stock-chart", symbol, range], () =>
+    catchAsFailed(api.getStockChart(symbol, range)),
   );
   const chart = loadedValue(data);
   const points = chart?.points ?? [];
@@ -36,10 +46,10 @@ export function CryptoChart({ id }: { id: string }) {
     <div className="section-divider mt-2.5 pt-1">
       <div className="relative">
         <TabStrip
-          label={t("crypto.chart-range")}
-          value={String(days)}
-          onChange={(next) => setDays(Number(next) as ChartDays)}
-          tabs={CHART_RANGES.map((range) => ({ id: String(range.days), label: range.label }))}
+          label={t("stocks.chart-range")}
+          value={range}
+          onChange={(next) => setRange(next as Range)}
+          tabs={RANGES.map((item) => ({ id: item.id, label: item.label }))}
         />
         {move != null && (
           <span
@@ -53,7 +63,7 @@ export function CryptoChart({ id }: { id: string }) {
         <SkeletonBlock className="mt-2 h-[120px] w-full" />
       ) : points.length < 2 ? (
         <div className="mt-2 flex items-center gap-2 text-[10px] text-text-muted">
-          <span className="min-w-0 flex-1">{t("crypto.chart-unavailable")}</span>
+          <span className="min-w-0 flex-1">{t("stocks.chart-unavailable")}</span>
           <button
             type="button"
             onClick={() => void mutate()}
@@ -65,10 +75,10 @@ export function CryptoChart({ id }: { id: string }) {
       ) : (
         <PriceChart
           points={points}
-          offsetSeconds={localOffsetSeconds()}
-          span={days === 1 ? "session" : days === 365 ? "year" : "days"}
-          formatPrice={usd}
-          label={t("crypto.chart-label")}
+          offsetSeconds={range === "1d" ? NEPAL_OFFSET_SECONDS : 0}
+          span={span(range)}
+          formatPrice={(price) => `Rs ${money.format(price)}`}
+          label={t("stocks.chart-label").replace("{symbol}", symbol)}
         />
       )}
     </div>

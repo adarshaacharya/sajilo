@@ -1,0 +1,173 @@
+[
+ {
+  "time": 1790750280,
+  "symbol": "GBLBS",
+  "open": 662.1,
+  "close": 662.1,
+  "high": 662.1,
+  "low": 662.1,
+  "volume": 15
+ },
+ {
+  "time": 1790751240,
+  "symbol": "GBLBS",
+  "open": 662.1,
+  "close": 662.1,
+  "high": 662.1,
+  "low": 662.1,
+  "volume": 11
+ },
+ {
+  "time": 1790751480,
+  "symbol": "GBLBS",
+  "open": 662.2,
+  "close": 662.2,
+  "high": 662.2,
+  "low": 662.2,
+  "volume": 15
+ },
+ {
+  "time": 1790751540,
+  "symbol": "GBLBS",
+  "open": 662.2,
+  "close": 662.2,
+  "high": 662.2,
+  "low": 662.2,
+  "volume": 15
+ },
+ {
+  "time": 1790751900,
+  "symbol": "GBLBS",
+  "open": 663,
+  "close": 663,
+  "high": 663,
+  "low": 663,
+  "volume": 11
+ },
+ {
+  "time": 1790752800,
+  "symbol": "GBLBS",
+  "open": 665.5,
+  "close": 665.5,
+  "high": 665.5,
+  "low": 665.5,
+  "volume": 70
+ },
+ {
+  "time": 1790753280,
+  "symbol": "GBLBS",
+  "open": 665.5,
+  "close": 665.5,
+  "high": 665.5,
+  "low": 665.5,
+  "volume": 50
+ },
+ {
+  "time": 1790753340,
+  "symbol": "GBLBS",
+  "open": 662.2,
+  "close": 665.5,
+  "high": 665.5,
+  "low": 662.2,
+  "volume": 195
+ },
+ {
+  "time": 1790754360,
+  "symbol": "GBLBS",
+  "open": 674.5,
+  "close": 674.5,
+  "high": 674.5,
+  "low": 674.5,
+  "volume": 10
+ },
+ {
+  "time": 1790754840,
+  "symbol": "GBLBS",
+  "open": 667,
+  "close": 667,
+  "high": 667,
+  "low": 667,
+  "volume": 200
+ },
+ {
+  "time": 1790755440,
+  "symbol": "GBLBS",
+  "open": 665,
+  "close": 665,
+  "high": 665,
+  "low": 665,
+  "volume": 30
+ },
+ {
+  "time": 1790755500,
+  "symbol": "GBLBS",
+  "open": 664,
+  "close": 662,
+  "high": 664,
+  "low": 662,
+  "volume": 65
+ },
+ {
+  "time": 1790755560,
+  "symbol": "GBLBS",
+  "open": 662,
+  "close": 661.1,
+  "high": 662,
+  "low": 661.1,
+  "volume": 335
+ },
+ {
+  "time": 1790755740,
+  "symbol": "GBLBS",
+  "open": 661.1,
+  "close": 661.1,
+  "high": 661.1,
+  "low": 661.1,
+  "volume": 10
+ },
+ {
+  "time": 1790755860,
+  "symbol": "GBLBS",
+  "open": 661.1,
+  "close": 661.1,
+  "high": 661.1,
+  "low": 661.1,
+  "volume": 10
+ },
+ {
+  "time": 1790756040,
+  "symbol": "GBLBS",
+  "open": 660.1,
+  "close": 660.1,
+  "high": 660.1,
+  "low": 660.1,
+  "volume": 10
+ },
+ {
+  "time": 1790759040,
+  "symbol": "GBLBS",
+  "open": 668,
+  "close": 668,
+  "high": 668,
+  "low": 668,
+  "volume": 10
+ },
+ {
+  "time": 1790759100,
+  "symbol": "GBLBS",
+  "open": 664.9,
+  "close": 664.9,
+  "high": 664.9,
+  "low": 664.9,
+  "volume": 89
+ },
+ {
+  "time": 1790759220,
+  "symbol": "GBLBS",
+  "open": 665,
+  "close": 665,
+  "high": 665,
+  "low": 665,
+  "volume": 200
+ }
+]

@@ -597,8 +597,8 @@
   "stocks.breadth-down": "{n} घटे",
   "stocks.breadth-flat": "{n} उस्तै",
   "stocks.breadth-up": "{n} बढे",
-  "stocks.chart-label": "पछिल्लो कारोबार दिनको नेप्से",
-  "stocks.chart-unavailable": "अहिले चार्ट उपलब्ध छैन",
+  "stocks.chart-label": "{symbol} को मूल्य चार्ट",
+  "stocks.chart-unavailable": "अहिले यो चार्ट ल्याउन सकिएन।",
   "stocks.day-range": "दिनभरको रेन्ज",
   "stocks.dividend-bonus": "{n}% बोनस",
   "stocks.dividend-cash": "{n}% नगद",
@@ -1204,5 +1204,6 @@
   "settings.move-up": "माथि सार्नुहोस्",
   "settings.move-down": "तल सार्नुहोस्",
   "settings.add-to-bar": "बारमा थप्नुहोस्",
-  "settings.remove-from-bar": "थपमा सार्नुहोस्"
+  "settings.remove-from-bar": "थपमा सार्नुहोस्",
+  "stocks.chart-range": "चार्टको अवधि"
 }
