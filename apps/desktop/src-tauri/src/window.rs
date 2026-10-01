@@ -66,6 +66,9 @@ const MINI_KEY: &str = "popover.mini.v1";
 /// The popover's two sizes, in logical pixels. Full matches `tauri.conf.json`.
 const FULL_SIZE: (f64, f64) = (380.0, 560.0);
 const MINI_SIZE: (f64, f64) = (320.0, 72.0);
+/// Window titles a tiling window manager's rules can match on Linux.
+const FULL_TITLE: &str = "Sajilo";
+const MINI_TITLE: &str = "Sajilo Mini";
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize)]
 struct Place {
@@ -134,9 +137,17 @@ pub fn set_mini(window: &WebviewWindow, mini: bool) {
 /// Gives the window the size of the full popover or the mini strip. The
 /// top-left corner stays put, so the strip shrinks toward where it was
 /// dragged.
+///
+/// Tiling window managers (Hyprland, Sway, i3) ignore an app's own resize
+/// and keep the window at its tile's size, so the strip would sit in a big
+/// empty window. The title changes with the view so a user's window rule can
+/// match the mini strip and float it at its size. The app-id would be the
+/// natural thing to match, but GTK fixes it at startup.
 pub fn apply_window_kind(window: &WebviewWindow) {
-    let (width, height) = if is_mini() { MINI_SIZE } else { FULL_SIZE };
+    let mini = is_mini();
+    let (width, height) = if mini { MINI_SIZE } else { FULL_SIZE };
     let _ = window.set_size(tauri::LogicalSize::new(width, height));
+    let _ = window.set_title(if mini { MINI_TITLE } else { FULL_TITLE });
 }
 
 /// Follows a kept popover as it is dragged. Kept in memory; written when it
