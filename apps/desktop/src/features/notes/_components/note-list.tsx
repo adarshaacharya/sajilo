@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { Menu, MenuItem } from "../../../shared/components/menu";
+import type { Toast } from "../../../shared/components/toast";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { LIMITS } from "../../../shared/lib/limits";
@@ -8,7 +9,6 @@ import type { NoteFolder } from "../../../types/api/NoteFolder";
 import type { NoteSummary } from "../../../types/api/NoteSummary";
 import type { NotesList } from "../../../types/api/NotesList";
 import { NepaliToggle } from "./nepali-toggle";
-import type { Toast } from "./toast";
 
 type FolderName = (folder: NoteFolder | undefined) => string;
 

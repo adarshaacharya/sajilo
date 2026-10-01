@@ -15,12 +15,12 @@ export function ToastBar({ toast, onDone }: { toast: Toast | null; onDone: () =>
 
   if (!toast) return null;
   return (
-    <div className="notes-toast" role="status">
+    <div className="app-toast" role="status">
       <span className="min-w-0 flex-1">{toast.text}</span>
       {toast.action && (
         <button
           type="button"
-          className="notes-toast__action"
+          className="app-toast__action"
           onClick={() => {
             toast.action?.run();
             onDone();

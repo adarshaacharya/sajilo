@@ -1,12 +1,12 @@
 import { useState } from "react";
 import useSWR from "swr";
 import { Icon } from "../../../shared/components/icon";
+import type { Toast } from "../../../shared/components/toast";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import type { NoteTrashed } from "../../../types/api/NoteTrashed";
 import { useSentenceNumerals } from "../../focus/_lib/format";
-import type { Toast } from "./toast";
 
 /**
  * The Trash: notes deleted in the last 30 days, each with the days it has

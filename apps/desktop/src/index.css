@@ -3125,7 +3125,7 @@ input[type="search"]::-webkit-search-decoration {
   background: var(--color-divider);
 }
 
-.notes-toast {
+.app-toast {
   position: fixed;
   z-index: 40;
   left: 12px;
@@ -3143,7 +3143,7 @@ input[type="search"]::-webkit-search-decoration {
   color: var(--color-text);
   animation: notes-pop 160ms ease-out;
 }
-.notes-toast__action {
+.app-toast__action {
   flex-shrink: 0;
   font-weight: 600;
   color: var(--color-accent-mark);
@@ -3309,7 +3309,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 @media (prefers-reduced-motion: reduce) {
   .notes-menu,
-  .notes-toast,
+  .app-toast,
   .notes-search {
     animation: none;
   }

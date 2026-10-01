@@ -5,6 +5,7 @@ import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { SearchField } from "../../shared/components/search-field";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
+import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import * as player from "../../shared/lib/audio";
 import { api } from "../../shared/lib/ipc";
@@ -12,6 +13,7 @@ import { catchAsFailed } from "../../shared/lib/load-state";
 import { usePersistedList } from "../../shared/lib/persisted";
 import { scrollIntoBox } from "../../shared/lib/scroll";
 import { track } from "../../shared/lib/usage";
+import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { LoadState } from "../../types/api/LoadState";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RadioStation } from "../../types/api/RadioStation";
@@ -233,13 +235,23 @@ export function Radio() {
     return () => target.removeEventListener("scroll", sync);
   }, []);
 
-  const loading = isValidating;
+  const {
+    run: runRefresh,
+    refreshing,
+    toast: refreshToast,
+    dismiss: dismissRefresh,
+  } = useRefreshFeedback(t("refresh.unchanged-radio"));
+  const refreshNow = useCallback(
+    () => void runRefresh([directory], async () => [await load(true)]),
+    [runRefresh, directory, load],
+  );
+  const loading = isValidating || refreshing;
 
   const refreshButton = useMemo(
     () => (
       <button
         type="button"
-        onClick={() => load(true)}
+        onClick={refreshNow}
         disabled={loading}
         aria-label={t("action.refresh")}
         className="icon-btn shrink-0"
@@ -247,7 +259,7 @@ export function Radio() {
         <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
       </button>
     ),
-    [load, loading, t],
+    [refreshNow, loading, t],
   );
 
   useHeaderSlot(refreshButton);
@@ -431,6 +443,7 @@ export function Radio() {
           </>
         )}
       </StateBanner>
+      <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>
   );
 }

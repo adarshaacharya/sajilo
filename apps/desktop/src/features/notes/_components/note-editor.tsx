@@ -3,6 +3,7 @@ import { EditorView } from "@codemirror/view";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { Menu, MenuItem } from "../../../shared/components/menu";
+import type { Toast } from "../../../shared/components/toast";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import type { NoteDocument } from "../../../types/api/NoteDocument";
@@ -16,7 +17,6 @@ import {
   setNepali,
 } from "../_lib/editor";
 import { NepaliToggle } from "./nepali-toggle";
-import type { Toast } from "./toast";
 
 /** How long after the last keystroke a note is saved, and the cursor's place
  * remembered. */

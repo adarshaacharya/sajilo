@@ -6,11 +6,13 @@ import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
 import { type LoadStatus, StateBanner } from "../../shared/components/state-banner";
 import { TabStrip } from "../../shared/components/tab-strip";
+import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { api, type Bazar as BazarFeeds } from "../../shared/lib/ipc";
 import { catchAsFailed, fetchedAtLabel, loadedValue } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
+import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
@@ -250,6 +252,68 @@ export function Bazar() {
     ],
   );
 
+  // What the open tab shows, before and after a refresh, so the answer to
+  // the button is about the prices on screen rather than every feed behind it.
+  const shown = useMemo(
+    () =>
+      tab === "metals"
+        ? [feeds?.metals]
+        : tab === "fuel"
+          ? [feeds?.fuel]
+          : tab === "vegetables"
+            ? [feeds?.vegetables]
+            : tab === "forex"
+              ? [forex]
+              : view === "funds"
+                ? [funds]
+                : view === "crypto"
+                  ? [crypto]
+                  : [stocks, intraday, ipos, dividends],
+    [tab, view, feeds, forex, funds, crypto, stocks, intraday, ipos, dividends],
+  );
+  const {
+    run: runRefresh,
+    refreshing,
+    toast: refreshToast,
+    dismiss: dismissRefresh,
+  } = useRefreshFeedback(t(tab === "forex" ? "refresh.unchanged-forex" : "refresh.unchanged"));
+  const refreshNow = useCallback(() => {
+    void runRefresh(shown, async () => {
+      // Everything the old button refreshed still refreshes; only what the
+      // tab shows is waited on and compared.
+      const feedsNext = mutateFeeds(fetchFeeds(true), { revalidate: false });
+      const stocksNext = mutateStocks(catchAsFailed<StockMarketSnapshot>(api.getStocks(true)), {
+        revalidate: false,
+      });
+      if (tab === "metals") return [(await feedsNext)?.metals];
+      if (tab === "fuel") return [(await feedsNext)?.fuel];
+      if (tab === "vegetables") return [(await feedsNext)?.vegetables];
+      if (tab === "forex") return [await mutateForex(fetchForex(true), { revalidate: false })];
+      const fundsNext = mutateFunds(fetchMutualFunds(true), { revalidate: false });
+      if (view === "funds") return [await fundsNext];
+      if (view === "crypto") return [await mutateCrypto(fetchCrypto(true), { revalidate: false })];
+      return Promise.all([
+        stocksNext,
+        mutateIntraday(fetchIntraday(true), { revalidate: false }),
+        mutateIpos(fetchIpos(true), { revalidate: false }),
+        mutateDividends(fetchDividends(true), { revalidate: false }),
+      ]);
+    });
+  }, [
+    runRefresh,
+    shown,
+    tab,
+    view,
+    mutateFeeds,
+    mutateStocks,
+    mutateForex,
+    mutateFunds,
+    mutateCrypto,
+    mutateIntraday,
+    mutateIpos,
+    mutateDividends,
+  ]);
+
   const metals = loadedValue(feeds?.metals);
   const fuel = loadedValue(feeds?.fuel);
   const vegetables = loadedValue(feeds?.vegetables);
@@ -258,15 +322,18 @@ export function Bazar() {
     () => (
       <button
         type="button"
-        onClick={() => load(true)}
-        disabled={loading}
+        onClick={refreshNow}
+        disabled={loading || refreshing}
         aria-label={t("action.refresh")}
         className="icon-btn shrink-0"
       >
-        <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+        <Icon
+          name="refresh"
+          className={`size-3.5 ${loading || refreshing ? "animate-spin" : ""}`}
+        />
       </button>
     ),
-    [load, loading, t],
+    [refreshNow, loading, refreshing, t],
   );
 
   useHeaderSlot(refreshButton);
@@ -364,6 +431,7 @@ export function Bazar() {
           {vegetables && <VegetablesTab snapshot={vegetables} />}
         </StateBanner>
       )}
+      <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>
   );
 }

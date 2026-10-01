@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useSearchParams } from "react-router";
 import useSWR from "swr";
 import { useHeaderInner } from "../../shared/components/header-slot";
+import { type Toast, ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
 import type { NoteFolder } from "../../types/api/NoteFolder";
@@ -9,7 +10,6 @@ import { NoteEditor } from "./_components/note-editor";
 import { NoteList } from "./_components/note-list";
 import { NoteSearch } from "./_components/note-search";
 import { NoteTrash } from "./_components/note-trash";
-import { type Toast, ToastBar } from "./_components/toast";
 
 /** The note open when Notes was left, so switching tabs and back returns to
  * it. A fresh start opens on the list; `?open=<id>` opens one note instead. */

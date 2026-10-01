@@ -3,6 +3,7 @@ import useSWR from "swr";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { StateBanner } from "../../shared/components/state-banner";
+import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
 import {
@@ -13,6 +14,7 @@ import {
 } from "../../shared/lib/load-state";
 import { usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
+import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RashiSign } from "../../types/api/RashiSign";
 import { SourceNote } from "../bazar/_components/source-note";
@@ -42,7 +44,17 @@ export function Rashifal() {
   const mineInfo = SIGNS.find((sign) => sign.id === mine);
   const [viewing, setViewing] = useState<RashiSign | null>(null);
 
-  const loading = isValidating;
+  const {
+    run: runRefresh,
+    refreshing,
+    toast: refreshToast,
+    dismiss: dismissRefresh,
+  } = useRefreshFeedback(t("refresh.unchanged-rashifal"));
+  const refreshNow = useCallback(
+    () => void runRefresh([state], async () => [await load(true)]),
+    [runRefresh, state, load],
+  );
+  const loading = isValidating || refreshing;
   const snapshot = loadedValue(state);
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
   const shown = viewing ?? mine;
@@ -54,7 +66,7 @@ export function Rashifal() {
     () => (
       <button
         type="button"
-        onClick={() => load(true)}
+        onClick={refreshNow}
         disabled={loading}
         aria-label={t("action.refresh")}
         className="icon-btn shrink-0"
@@ -62,7 +74,7 @@ export function Rashifal() {
         <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
       </button>
     ),
-    [load, loading, t],
+    [refreshNow, loading, t],
   );
 
   useHeaderSlot(refreshButton);
@@ -119,6 +131,7 @@ export function Rashifal() {
       </section>
 
       {published && <SourceNote label={t("bazar.published")} stamp={published} />}
+      <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>
   );
 }

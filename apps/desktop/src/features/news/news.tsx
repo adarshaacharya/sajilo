@@ -6,6 +6,7 @@ import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
 import { Select } from "../../shared/components/select";
 import { StateBanner } from "../../shared/components/state-banner";
+import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { openExternalLink } from "../../shared/lib/external-link";
 import { api } from "../../shared/lib/ipc";
@@ -17,6 +18,7 @@ import {
 } from "../../shared/lib/load-state";
 import { usePersistedList, usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
+import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import { HeadlineRow } from "./_components/headline-row";
@@ -51,8 +53,11 @@ export function News() {
   });
   const load = useCallback(
     (refresh = false) =>
-      mutate(catchAsFailed<NewsDigest>(api.getNews(refresh)), { revalidate: false }).then(() =>
-        setVisible(PAGE),
+      mutate(catchAsFailed<NewsDigest>(api.getNews(refresh)), { revalidate: false }).then(
+        (fetched) => {
+          setVisible(PAGE);
+          return fetched;
+        },
       ),
     [mutate],
   );
@@ -64,7 +69,17 @@ export function News() {
       .catch(() => setSources([]));
   }, []);
 
-  const loading = isValidating;
+  const {
+    run: runRefresh,
+    refreshing,
+    toast: refreshToast,
+    dismiss: dismissRefresh,
+  } = useRefreshFeedback();
+  const refreshNow = useCallback(
+    () => void runRefresh([state], async () => [await load(true)]),
+    [runRefresh, state, load],
+  );
+  const loading = isValidating || refreshing;
 
   // A source saved before it was renamed or dropped must not leave the list
   // permanently empty, so an unknown key reads as no filter at all. Until the
@@ -85,7 +100,7 @@ export function News() {
     () => (
       <button
         type="button"
-        onClick={() => load(true)}
+        onClick={refreshNow}
         disabled={loading}
         aria-label={t("action.refresh")}
         className="icon-btn shrink-0"
@@ -93,7 +108,7 @@ export function News() {
         <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
       </button>
     ),
-    [load, loading, t],
+    [refreshNow, loading, t],
   );
 
   useHeaderSlot(refreshButton);
@@ -275,6 +290,7 @@ export function News() {
       {freshness && items.length > 0 && (
         <p className="mt-1 text-[10px] text-text-muted">{freshness}</p>
       )}
+      <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </StateBanner>
   );
 }

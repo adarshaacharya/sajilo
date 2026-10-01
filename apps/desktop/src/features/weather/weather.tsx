@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { useHeaderInner, useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
+import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
 import {
@@ -11,6 +12,7 @@ import {
   loadedValue,
 } from "../../shared/lib/load-state";
 import { placeLabel, usePlaces } from "../../shared/lib/places";
+import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 import { AirQualityPanel } from "./_components/air-quality-panel";
 import { ForecastDays } from "./_components/forecast-days";
@@ -102,7 +104,17 @@ export function Weather() {
     [setModules],
   );
 
-  const loading = isValidating;
+  const {
+    run: runRefresh,
+    refreshing,
+    toast: refreshToast,
+    dismiss: dismissRefresh,
+  } = useRefreshFeedback();
+  const refreshNow = useCallback(
+    () => void runRefresh([state], async () => [await load(true)]),
+    [runRefresh, state, load],
+  );
+  const loading = isValidating || refreshing;
 
   // A reading for another place (a stale cache entry, or a recording that has
   // only the one) is never drawn under this place's name.
@@ -116,7 +128,7 @@ export function Weather() {
       picking ? null : (
         <button
           type="button"
-          onClick={() => load(true)}
+          onClick={refreshNow}
           disabled={loading}
           aria-label={t("action.refresh")}
           className="icon-btn shrink-0"
@@ -124,7 +136,7 @@ export function Weather() {
           <Icon name="refresh" className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
         </button>
       ),
-    [load, loading, picking, t],
+    [refreshNow, loading, picking, t],
   );
   useHeaderSlot(refreshButton);
   useHeaderInner(picking ? { title: t("weather.places"), onBack: () => setPicking(false) } : null);
@@ -259,6 +271,7 @@ export function Weather() {
       {snapshot && (
         <p className="px-0.5 text-[10px] text-text-muted">{fetchedAtLabel(snapshot.freshness)}</p>
       )}
+      <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>
   );
 }
