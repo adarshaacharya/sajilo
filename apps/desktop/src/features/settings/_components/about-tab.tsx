@@ -195,7 +195,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink("https://adarsha.dev")}
-          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
+          className="text-text-secondary underline decoration-dotted decoration-[color:var(--color-text-muted)] underline-offset-2 transition-colors hover:text-[color:var(--color-accent-mark)] hover:decoration-[color:var(--color-accent-mark)]"
         >
           Adarsha Acharya
         </button>
@@ -203,7 +203,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink(LICENSE_URL)}
-          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
+          className="text-text-secondary underline decoration-dotted decoration-[color:var(--color-text-muted)] underline-offset-2 transition-colors hover:text-[color:var(--color-accent-mark)] hover:decoration-[color:var(--color-accent-mark)]"
         >
           {t("about.rights")}
         </button>
@@ -211,7 +211,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink(PRIVACY_URL)}
-          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
+          className="text-text-secondary underline decoration-dotted decoration-[color:var(--color-text-muted)] underline-offset-2 transition-colors hover:text-[color:var(--color-accent-mark)] hover:decoration-[color:var(--color-accent-mark)]"
         >
           {t("about.privacy")}
         </button>
