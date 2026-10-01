@@ -378,6 +378,64 @@ fn record_crypto(
     );
 }
 
+/// The Notes tab as a new install sees it: the three folders it starts with
+/// and the welcome note the app itself writes, read by the same
+/// `sajilo_core::notes` parser the app reads every note with. Nothing a user
+/// wrote is shown; there is no user.
+fn record_notes(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
+    use sajilo_api::notes::{NoteDocument, NoteFolder, NoteSummary, NotesList};
+    use sajilo_core::focus::Language;
+
+    let body = sajilo_core::notes::welcome_note(Language::En);
+    let facts = sajilo_core::notes::facts(body);
+    let stamp = now.to_rfc3339();
+    let folder = |id: &str, name: &str, role: &str, count: u32| NoteFolder {
+        id: id.to_owned(),
+        name: name.to_owned(),
+        role: role.to_owned(),
+        count,
+    };
+    let list = NotesList {
+        folders: vec![
+            folder("daily", "Daily", "daily", 0),
+            folder("office", "Office", "user", 0),
+            folder("personal", "Personal", "user", 1),
+        ],
+        notes: vec![NoteSummary {
+            id: "welcome".to_owned(),
+            folder_id: "personal".to_owned(),
+            title: facts.title,
+            preview: facts.preview,
+            tags: facts.tags,
+            open_tasks: facts.open_tasks,
+            done_tasks: facts.done_tasks,
+            pinned: false,
+            created_at: stamp.clone(),
+            updated_at: stamp,
+            group: "today".to_owned(),
+            group_label: "Today".to_owned(),
+        }],
+        last_open: Some("welcome".to_owned()),
+        trash_count: 0,
+    };
+    let document = NoteDocument {
+        id: "welcome".to_owned(),
+        folder_id: "personal".to_owned(),
+        body: body.to_owned(),
+        revision: 1,
+        cursor: Some(0),
+        linked_from: Vec::new(),
+    };
+    commands.insert(
+        "notes_list".to_owned(),
+        serde_json::to_value(&list).expect("notes list"),
+    );
+    commands.insert(
+        "notes_open:welcome".to_owned(),
+        serde_json::to_value(&document).expect("note"),
+    );
+}
+
 fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Utc>) {
     let read = |relative: &str| -> String {
         std::fs::read_to_string(root.join("fixtures").join(relative))
@@ -458,6 +516,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
         )),
     );
     record_crypto(commands, &read, now);
+    record_notes(commands, now);
     commands.insert(
         "get_forex".to_owned(),
         load_state(nrb::parse(&read("nrb/rates.json"), now)),

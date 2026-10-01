@@ -14,6 +14,11 @@ import scenesUrl from "../data/scenes.json?url";
 
 type Args = Record<string, unknown> | undefined;
 
+/** An accent asked for in the page's URL, for the theme section. */
+const ACCENT = new URLSearchParams(window.location.search).get("accent");
+/** A theme asked for in the page's URL, `light` or `dark`. */
+const THEME = new URLSearchParams(window.location.search).get("theme");
+
 interface Recording {
   recordedAt: string;
   commands: Record<string, unknown>;
@@ -51,6 +56,8 @@ function key(command: string, args: Args): string {
       return `group_number:${args.value}:${args.fractionDigits}`;
     case "get_crypto_chart":
       return `get_crypto_chart:${args.id}:${args.days}`;
+    case "notes_open":
+      return `notes_open:${args.id}`;
     default:
       return command;
   }
@@ -88,6 +95,11 @@ const WRITES = new Set([
   "open_keeper_viewer",
   "delete_keeper_record",
   "set_notification_options",
+  "notes_remember_cursor",
+  "notes_pin",
+  "notes_move",
+  "notes_trash",
+  "notes_restore",
   "preview_reminder_card",
   "dismiss_reminder",
   "dismiss_announcement",
@@ -164,6 +176,18 @@ export async function invoke<T>(command: string, args?: Args): Promise<T> {
     } as T;
   }
   if (WRITES.has(command)) return undefined as T;
+
+  // The theme section shows the app in each accent: `?accent=phewa` answers
+  // the one setting that decides it, so nothing else about the scene changes.
+  if (command === "get_setting" && args?.key === "accent" && ACCENT) return ACCENT as T;
+  // Likewise `?theme=light`: the saved theme would otherwise win once loaded.
+  if (command === "get_setting" && args?.key === "theme" && THEME) return THEME as T;
+
+  // Typing in Notes in the lightbox saves into nothing; the editor still
+  // needs a revision back, or it reports the save as failed.
+  if (command === "notes_save") {
+    return { id: args?.id, revision: Number(args?.revision ?? 0) + 1, title: "" } as T;
+  }
 
   const { recordedAt, commands } = await loaded;
   const exact = commands[key(command, args)];

@@ -9,19 +9,29 @@ interface Props {
   route: string;
   /** What the frame shows, for screen readers. */
   title: string;
+  /** Light or dark; dark unless asked. */
+  theme?: "light" | "dark";
+  /** One of the app's accents (`phewa`, `dhaka`…); the user's default unless asked. */
+  accent?: string;
 }
 
-const { route, title } = Astro.props;
-const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=dark`;
+const { route, title, theme = "dark", accent } = Astro.props;
+const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=${theme}${
+  accent ? `&accent=${encodeURIComponent(accent)}` : ""
+}`;
 ---
 
-<div class="app-frame" data-app-frame>
+<div class="app-frame" data-app-frame data-theme={theme}>
   <div class="app-frame-screen">
     <iframe {title} {src} tabindex="-1" scrolling="no" loading="lazy"></iframe>
   </div>
 </div>
 
 <style>
+  .app-frame[data-theme="light"],
+  .app-frame[data-theme="light"] iframe {
+    background: #f5f5f7;
+  }
   .app-frame {
     position: relative;
     aspect-ratio: 380 / 560;

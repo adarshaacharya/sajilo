@@ -31,34 +31,6 @@ const REVISIONS_KEPT: i64 = 50;
 /// Search results, at most.
 const SEARCH_LIMIT: i64 = 30;
 
-const WELCOME_EN: &str = "Welcome to Notes
-
-The first line is the title. Just start typing.
-
-- [ ] Type [] and a space to make a checklist; Enter adds the next one
-- [ ] Tick this one off
-
-Link notes with [[ and tag them with #ideas.
-
-Tap ने to type Nepali in English letters: mero naam becomes मेरो नाम.
-
-Delete this note any time.
-";
-
-const WELCOME_NE: &str = "नोटमा स्वागत छ
-
-पहिलो लाइन नै शीर्षक हो। लेख्न थाल्नुहोस्।
-
-- [ ] चेकलिस्ट बनाउन [] अनि स्पेस थिच्नुहोस्; Enter थिचे अर्को आउँछ
-- [ ] यसमा टिक लगाउनुहोस्
-
-[[ ले नोटहरू जोड्नुहोस्, #विचार जस्ता ट्याग लगाउनुहोस्।
-
-अंग्रेजी अक्षरमा नेपाली लेख्न ने थिच्नुहोस्: mero naam लेखे मेरो नाम हुन्छ।
-
-यो नोट जुनसुकै बेला हटाउन सक्नुहुन्छ।
-";
-
 /// What "now" means for the list's headings: the time, Nepal's today, and the
 /// language the headings are written in.
 pub struct Clock {
@@ -111,10 +83,7 @@ pub fn ensure_ready(
                 personal = id;
             }
         }
-        let welcome = match language {
-            Language::En => WELCOME_EN,
-            Language::Ne => WELCOME_NE,
-        };
+        let welcome = core::welcome_note(language);
         insert_note(&tx, &personal, welcome, None, now)?;
         tx.execute(
             "INSERT INTO schema_meta (key, value) VALUES ('notes_seeded', 1)",

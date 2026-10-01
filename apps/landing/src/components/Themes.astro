@@ -1,0 +1,198 @@
+---
+// Make Sajilo yours: the real app in each accent, light or dark. The frame is
+// the app itself (the showcase answers the accent setting from the URL); the
+// swatches are the app's own accent colours, as Settings draws them.
+import AppFrame from "./AppFrame.astro";
+
+const accents = [
+  { id: "marigold", en: "Marigold", ne: "सयपत्री", color: "#d4a84a" },
+  { id: "himali", en: "Himalayan blue", ne: "हिमाली नीलो", color: "#5eaef2" },
+  { id: "chandi", en: "Chandi", ne: "चाँदी", color: "#aab0b8" },
+  { id: "phewa", en: "Phewa", ne: "फेवा", color: "#3cc4b4" },
+  { id: "ilam", en: "Ilam tea", ne: "इलामे चिया", color: "#a5c75c" },
+  { id: "makhamali", en: "Makhamali", ne: "मखमली", color: "#b98cf2" },
+  { id: "kamal", en: "Kamal", ne: "कमल", color: "#ec6fb2" },
+  { id: "dhaka", en: "Dhaka red", ne: "ढाका", color: "#b8284a" },
+  { id: "rudraksha", en: "Rudraksha", ne: "रुद्राक्ष", color: "#c47a4c" },
+];
+---
+
+<section class="themes wrap" id="themes" aria-labelledby="themes-title">
+  <div class="themes-grid">
+    <div class="themes-main">
+      <div class="section-head reveal">
+        <h2 id="themes-title">Nine colours, each one Nepali. <em>Light or dark.</em></h2>
+        <p class="themes-lede">
+          Pick an accent named for something every Nepali knows, from Tihar's marigolds to Palpali
+          Dhaka. Each is tuned to read as well in light as in dark.
+        </p>
+      </div>
+
+      <div class="themes-picker reveal" role="radiogroup" aria-label="Accent colour">
+        {accents.map((accent, index) => (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={index === 0 ? "true" : "false"}
+            data-accent={accent.id}
+            class="themes-swatch"
+            style={`--swatch:${accent.color}`}
+          >
+            <span class="themes-dot" aria-hidden="true"></span>
+            <span class="themes-name">{accent.en}</span>
+            <span class="themes-ne" lang="ne">{accent.ne}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="themes-mode reveal" role="radiogroup" aria-label="Theme">
+        <button type="button" role="radio" aria-checked="true" data-mode="dark">Dark</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="light">Light</button>
+      </div>
+    </div>
+
+    <div class="themes-stage reveal" data-themes-stage>
+      <AppFrame route="/" title="Sajilo's Today screen in the chosen colour" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .themes {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .themes-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+  }
+  .themes-lede {
+    margin-top: 14px;
+    max-width: 52ch;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--paper-2);
+  }
+  .themes-picker {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: clamp(24px, 3vw, 36px);
+  }
+  .themes-swatch {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--line-2);
+    background: transparent;
+    color: var(--paper-2);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      background 150ms ease;
+  }
+  .themes-swatch:hover {
+    border-color: color-mix(in srgb, var(--swatch) 60%, transparent);
+  }
+  .themes-swatch[aria-checked="true"] {
+    border-color: var(--swatch);
+    background: color-mix(in srgb, var(--swatch) 12%, transparent);
+  }
+  .themes-dot {
+    grid-row: span 2;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.25);
+  }
+  .themes-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--paper-1, inherit);
+  }
+  .themes-ne {
+    font-size: 12px;
+    color: var(--paper-3);
+  }
+  .themes-mode {
+    display: inline-flex;
+    gap: 4px;
+    margin-top: 14px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+  }
+  .themes-mode button {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--paper-3);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .themes-mode button[aria-checked="true"] {
+    background: var(--gilt-2);
+    color: #1a1408;
+    font-weight: 600;
+  }
+  @media (max-width: 860px) {
+    .themes-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .themes-stage {
+      max-width: 340px;
+    }
+    .themes-picker {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  // Picking a colour or a mode reloads the frame with it: the app reads the
+  // accent and theme at load, the same way it would from Settings.
+  const section = document.getElementById("themes");
+  const frame = section?.querySelector<HTMLIFrameElement>("[data-themes-stage] iframe");
+  const wrapper = section?.querySelector<HTMLElement>("[data-themes-stage] [data-app-frame]");
+  let accent = "marigold";
+  let mode: "dark" | "light" = "dark";
+
+  function show() {
+    if (!frame) return;
+    const url = new URL(frame.src, window.location.href);
+    url.searchParams.set("accent", accent);
+    url.searchParams.set("theme", mode);
+    frame.src = url.toString();
+    wrapper?.setAttribute("data-theme", mode);
+  }
+
+  function pick(group: Element | null | undefined, chosen: Element) {
+    group?.querySelectorAll("[role=radio]").forEach((item) => {
+      item.setAttribute("aria-checked", item === chosen ? "true" : "false");
+    });
+  }
+
+  section?.querySelectorAll<HTMLButtonElement>("[data-accent]").forEach((button) => {
+    button.addEventListener("click", () => {
+      accent = button.dataset.accent ?? "marigold";
+      pick(button.parentElement, button);
+      show();
+    });
+  });
+  section?.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      mode = button.dataset.mode === "light" ? "light" : "dark";
+      pick(button.parentElement, button);
+      show();
+    });
+  });
+</script>
