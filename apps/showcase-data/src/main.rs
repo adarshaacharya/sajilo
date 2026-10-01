@@ -507,17 +507,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
             now,
         )),
     );
-    // The one fund whose NAV history is recorded; others answer nothing,
-    // rather than borrowing its chart.
-    commands.insert(
-        "get_fund_nav_history:NMBSBF".to_owned(),
-        load_state(fund_nav_history::parse(
-            "NMBSBF",
-            Some(&read("sharesansar/nav-chart-1082-daily.json")),
-            Some(&read("sharesansar/nav-chart-1082-weekly.json")),
-            now,
-        )),
-    );
+    fund_history(commands, &read, now);
     commands.insert(
         "get_nepse_intraday".to_owned(),
         load_state(nepse_intraday::parse(
@@ -669,4 +659,22 @@ fn system(commands: &mut BTreeMap<String, Value>) {
     // A fresh install: the shell stores 1 2 3 on first run (see the desktop
     // `lib.rs`), so the site shows the digits a new user starts on.
     insert(commands, "get_setting:numeralStyle", &"latin");
+}
+
+/// The one fund whose NAV history is recorded; others answer nothing,
+/// rather than borrowing its chart.
+fn fund_history(
+    commands: &mut BTreeMap<String, Value>,
+    read: &impl Fn(&str) -> String,
+    now: DateTime<Utc>,
+) {
+    commands.insert(
+        "get_fund_nav_history:NMBSBF".to_owned(),
+        load_state(fund_nav_history::parse(
+            "NMBSBF",
+            Some(&read("sharesansar/nav-chart-1082-daily.json")),
+            Some(&read("sharesansar/nav-chart-1082-weekly.json")),
+            now,
+        )),
+    );
 }
