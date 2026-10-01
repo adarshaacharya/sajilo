@@ -1,28 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
-import { Segmented } from "../../../shared/components/segmented";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
-import {
-  api,
-  type NotificationOptions,
-  type PermissionState,
-  type ReminderStyle,
-} from "../../../shared/lib/ipc";
+import { api, type NotificationOptions } from "../../../shared/lib/ipc";
 import { triggerSetupPreview } from "../../calendar/_components/setup-card";
+import { SOURCES } from "../notifications";
 import { SettingsSection } from "./settings-section";
-
-function anyReminder(options: NotificationOptions): boolean {
-  return (
-    options.eveOfFestival ||
-    options.eveOfPublicHoliday ||
-    options.ipoClosingDay ||
-    options.sipPayment ||
-    options.dailyRashifal
-  );
-}
 
 export function SystemTab() {
   const { t } = useSettings();
@@ -36,19 +21,7 @@ export function SystemTab() {
     installUpdate,
     restartToUpdate,
   } = useUpdater();
-  const [options, setOptions] = useState<NotificationOptions>({
-    eveOfPublicHoliday: true,
-    eveOfFestival: true,
-    hour: 19,
-    ipoClosingDay: true,
-    sipPayment: true,
-    dailyRashifal: false,
-    style: "card",
-  });
-  // The daily rashifal needs a sign; without one its switch says where to
-  // pick it.
-  const [hasSign, setHasSign] = useState(false);
-  const [permission, setPermission] = useState<PermissionState>("unknown");
+  const [options, setOptions] = useState<NotificationOptions | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [usageInsightsEnabled, setUsageInsightsEnabled] = useState(false);
 
@@ -58,34 +31,25 @@ export function SystemTab() {
       .then(setOptions)
       .catch(() => {});
     api
-      .getSetting<string>("selectedRashi")
-      .then((sign) => setHasSign(typeof sign === "string" && sign.length > 0))
-      .catch(() => {});
-    api
-      .notificationPermission()
-      .then(setPermission)
-      .catch(() => {});
-    api
       .usageInsightsEnabled()
       .then((enabled) => setUsageInsightsEnabled(enabled === true))
       .catch(() => {});
   }, []);
 
-  const updateOptions = async (next: NotificationOptions) => {
-    // A card needs no permission; only the system notification does.
-    if (anyReminder(next) && next.style === "notification" && permission !== "granted") {
-      setPermission(await api.requestNotificationPermission().catch(() => "denied" as const));
-    }
-    setOptions(next);
-    await api.setNotificationOptions(next).catch(() => {});
-  };
-
-  const reminderNote =
-    permission === "denied" && options.style === "notification"
-      ? t("settings.reminder-denied-note")
-      : anyReminder(options)
-        ? t("settings.reminder-enabled-note")
-        : t("settings.reminder-off-note");
+  const reminderSummary = !options
+    ? ""
+    : options.pausedUntil && new Date(options.pausedUntil) > new Date()
+      ? t("notifications.summary-paused")
+      : t("notifications.summary")
+          .replace("{on}", String(SOURCES.filter((source) => options[source]).length))
+          .replace(
+            "{style}",
+            t(
+              options.style === "card"
+                ? "notifications.style-card"
+                : "notifications.style-notification",
+            ),
+          );
 
   const setUsageInsights = (enabled: boolean) => {
     setUsageInsightsEnabled(enabled);
@@ -181,62 +145,18 @@ export function SystemTab() {
         </SettingsSection>
       )}
 
-      <SettingsSection title={t("settings.reminders")} footnote={reminderNote}>
-        <div className="space-y-2 pb-1">
-          <p className="text-[12px]">{t("reminders.style")}</p>
-          <Segmented<ReminderStyle>
-            label={t("reminders.style")}
-            value={options.style}
-            onChange={(style) => updateOptions({ ...options, style })}
-            options={[
-              { id: "card", label: t("reminders.style.card") },
-              { id: "notification", label: t("reminders.style.notification") },
-            ]}
-          />
-          <p className="text-[10px] leading-snug text-text-muted">
-            {t(
-              options.style === "card"
-                ? "reminders.style-note.card"
-                : "reminders.style-note.notification",
-            )}
-          </p>
-          {options.style === "card" && (
-            <button
-              type="button"
-              onClick={() => api.previewReminderCard().catch(() => {})}
-              className="settings-btn"
-            >
-              {t("reminders.preview")}
-            </button>
-          )}
-        </div>
-        <Toggle
-          label={t("reminder.holiday-tomorrow")}
-          checked={options.eveOfPublicHoliday}
-          onChange={(value) => updateOptions({ ...options, eveOfPublicHoliday: value })}
-        />
-        <Toggle
-          label={t("reminder.festival-tomorrow")}
-          checked={options.eveOfFestival}
-          onChange={(value) => updateOptions({ ...options, eveOfFestival: value })}
-        />
-        <Toggle
-          label={t("reminder.ipo-closing-day")}
-          checked={options.ipoClosingDay}
-          onChange={(value) => updateOptions({ ...options, ipoClosingDay: value })}
-        />
-        <Toggle
-          label={t("reminder.sip-payment")}
-          checked={options.sipPayment}
-          onChange={(value) => updateOptions({ ...options, sipPayment: value })}
-        />
-        <Toggle
-          label={t("reminder.daily-rashifal")}
-          note={t(hasSign ? "reminder.daily-rashifal-note" : "reminder.daily-rashifal-no-sign")}
-          checked={options.dailyRashifal && hasSign}
-          disabled={!hasSign}
-          onChange={(value) => updateOptions({ ...options, dailyRashifal: value })}
-        />
+      <SettingsSection title={t("settings.reminders")}>
+        <button
+          type="button"
+          onClick={() => navigate("/settings/notifications")}
+          className="flex w-full items-center justify-between gap-3 text-left"
+        >
+          <span className="min-w-0">
+            <span className="block text-[12px]">{t("screen.notifications")}</span>
+            <span className="mt-0.5 block text-[10px] text-text-muted">{reminderSummary}</span>
+          </span>
+          <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+        </button>
       </SettingsSection>
 
       <SettingsSection title={t("settings.privacy")}>

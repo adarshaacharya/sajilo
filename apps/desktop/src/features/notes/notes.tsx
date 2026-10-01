@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router";
 import useSWR from "swr";
 import { useHeaderInner } from "../../shared/components/header-slot";
 import { useSettings } from "../../shared/context/settings-context";
@@ -11,8 +12,8 @@ import { NoteTrash } from "./_components/note-trash";
 import { type Toast, ToastBar } from "./_components/toast";
 
 /** The note open when Notes was left, so switching tabs and back returns to
- * it. On a fresh start the shell's `lastOpen` does the same. */
-let openInSession: string | null | undefined;
+ * it. A fresh start opens on the list; `?open=<id>` opens one note instead. */
+let openInSession: string | null = null;
 /** The folder picked in the list, for the same reason. */
 let folderInSession = "all";
 
@@ -26,7 +27,8 @@ let folderInSession = "all";
 export function Notes() {
   const { t } = useSettings();
   const { data: list, mutate } = useSWR("notes-list", () => api.notesList());
-  const [open, setOpenState] = useState<string | null>(openInSession ?? null);
+  const [params] = useSearchParams();
+  const [open, setOpenState] = useState<string | null>(params.get("open") ?? openInSession);
   const [folder, setFolderState] = useState(folderInSession);
   const [searching, setSearching] = useState(false);
   const [inTrash, setInTrash] = useState(false);
@@ -40,13 +42,6 @@ export function Notes() {
     folderInSession = id;
     setFolderState(id);
   };
-
-  // Open where you left off, the first time Notes is shown this run.
-  useEffect(() => {
-    if (openInSession !== undefined || !list) return;
-    openInSession = list.lastOpen ?? null;
-    if (list.lastOpen) setOpenState(list.lastOpen);
-  }, [list]);
 
   const folders = list?.folders ?? [];
   const current = open ? list?.notes.find((note) => note.id === open) : undefined;

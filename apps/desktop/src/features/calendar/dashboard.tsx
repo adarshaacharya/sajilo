@@ -9,6 +9,7 @@ import { useSettings } from "../../shared/context/settings-context";
 import {
   api,
   type CalendarMonth,
+  type DayPlan,
   type NepaliDate,
   type Today,
   type UpcomingEvent,
@@ -17,6 +18,7 @@ import { useNepalDay } from "../../shared/lib/nepal-day";
 import { digits } from "../../shared/lib/numerals";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
+import { DayPlanSection } from "./_components/day-plan-section";
 import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
 import { HomeAnnouncement } from "./_components/home-announcement";
@@ -120,6 +122,8 @@ export function Dashboard() {
   const [monthSpan, setMonthSpan] = useState("");
   const [upcoming, setUpcoming] = useState<UpcomingEvent[]>([]);
   const [planDays, setPlanDays] = useState<Set<string>>(new Set());
+  const [todayPlans, setTodayPlans] = useState<DayPlan[] | null>(null);
+  const [plansChanged, setPlansChanged] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   // A new day reloads today, the grid and Up next: the popover outlives
@@ -149,6 +153,17 @@ export function Dashboard() {
   // Asked per month rather than derived from every plan here: a monthly or
   // yearly plan lands on a different day each time, and that is the engine's
   // call, not the grid's.
+  const todayDate = today?.nepali;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `plansChanged` is the trigger
+  useEffect(() => {
+    if (!todayDate) return;
+    api
+      .plansForDay(todayDate.year, todayDate.month, todayDate.day)
+      .then(setTodayPlans)
+      .catch(() => setTodayPlans([]));
+  }, [todayDate?.year, todayDate?.month, todayDate?.day, plansChanged]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `plansChanged` is the trigger
   useEffect(() => {
     if (!cursorYear || !cursorMonth) return;
     api
@@ -157,7 +172,7 @@ export function Dashboard() {
         setPlanDays(new Set((days ?? []).map((day) => `${cursorYear}-${cursorMonth}-${day}`))),
       )
       .catch(() => setPlanDays(new Set()));
-  }, [cursorYear, cursorMonth]);
+  }, [cursorYear, cursorMonth, plansChanged]);
 
   // The grid marks today, so a new day asks for it again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: `day` is the trigger
@@ -273,6 +288,15 @@ export function Dashboard() {
             ))}
           </div>
         </div>
+      )}
+
+      {todayPlans && (
+        <DayPlanSection
+          home
+          date={today.nepali}
+          plans={todayPlans}
+          onChanged={() => setPlansChanged((count) => count + 1)}
+        />
       )}
 
       <UpNext events={eventSlides} />

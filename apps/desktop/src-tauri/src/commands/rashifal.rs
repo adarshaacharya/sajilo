@@ -97,7 +97,10 @@ pub mod reminder {
             .flatten()
             .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default();
-        if !options.daily_rashifal || !background_refresh::enabled(app, prefs::RASHIFAL_ENABLED) {
+        if !options.daily_rashifal
+            || options.is_paused(Utc::now())
+            || !background_refresh::enabled(app, prefs::RASHIFAL_ENABLED)
+        {
             return None;
         }
         super::my_sign(app)

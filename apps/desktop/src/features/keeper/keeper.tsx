@@ -1,7 +1,7 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import useSWR from "swr";
-import { useHeaderInner, useHeaderSlot } from "../../shared/components/header-slot";
+import { useHeaderInner } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import {
@@ -295,23 +295,9 @@ export function Keeper() {
     />
   );
 
-  // Adding is always one tap away on the home screen, whatever is below it.
+  // Adding is always one tap away on the home screen: a full-width button at
+  // the foot, saying what it adds, never a button in the app header.
   const onHome = screen === null;
-  const addButton = useMemo(
-    () =>
-      onHome ? (
-        <button
-          type="button"
-          onClick={() => setStack((current) => [...current, { name: "add" }])}
-          className="keeper-add-btn"
-        >
-          <Icon name="plus" className="size-3" />
-          {t("keeper.add")}
-        </button>
-      ) : null,
-    [onHome, t],
-  );
-  useHeaderSlot(addButton);
 
   /** A new reminder of the same kind: from the same template, or for one made
    * from scratch, under the same title. */
@@ -469,6 +455,18 @@ export function Keeper() {
     <div className="min-w-0 space-y-2.5">
       {errorBanner}
       {body}
+      {onHome && (
+        <div className="keeper-add">
+          <button
+            type="button"
+            onClick={() => setStack((current) => [...current, { name: "add" }])}
+            className="keeper-add__btn"
+          >
+            <Icon name="plus" className="size-3.5" />
+            {t("keeper.add")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

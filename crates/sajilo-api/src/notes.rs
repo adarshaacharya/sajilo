@@ -34,8 +34,6 @@ dto! {
     pub struct NotesList {
         pub folders: Vec<NoteFolder>,
         pub notes: Vec<NoteSummary>,
-        /// The note open when Notes was last left, to open it again.
-        pub last_open: Option<String>,
         /// How many notes are in the Trash.
         pub trash_count: u32,
     }

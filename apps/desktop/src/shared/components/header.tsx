@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useSettings } from "../context/settings-context";
 import { useDragWhenKept, useKept } from "../lib/popover-kept";
+import { tabLayout } from "../lib/tab-layout";
 import { BackButton, useGoBack } from "./back-button";
 import { useHeaderInnerContent, useHeaderSlotContent } from "./header-slot";
 import { Icon } from "./icon";
@@ -25,15 +26,18 @@ import { UpdateHeaderButton } from "./update-header-button";
  * from — or to Today when the app was opened straight onto it.
  */
 export function Header({ title }: { title: string }) {
-  const { t } = useSettings();
+  const { t, modules } = useSettings();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const goBack = useGoBack();
   const slot = useHeaderSlotContent();
   const inner = useHeaderInnerContent();
-  // More is a tab of its own: no back arrow there either.
-  const isTabRoot = pathname === "/more" || TABS.some((tab) => tab.to === pathname);
-  const back = inner ? inner.onBack : isTabRoot ? null : goBack;
+  // Only what's on the tab bar is a root; More is one too. A tab that lives
+  // under More was opened from there, so its back arrow returns to More.
+  const { bar: onBar, more } = tabLayout(TABS, modules);
+  const isTabRoot = pathname === "/more" || onBar.some((tab) => tab.to === pathname);
+  const inMore = more.some((tab) => tab.to === pathname);
+  const back = inner ? inner.onBack : isTabRoot ? null : inMore ? () => navigate("/more") : goBack;
   const kept = useKept();
   const bar = useRef<HTMLElement>(null);
   useDragWhenKept(bar);

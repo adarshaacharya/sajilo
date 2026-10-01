@@ -11241,10 +11241,13 @@
     },
     "get_notification_options": {
       "dailyRashifal": false,
+      "dayPlans": true,
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
       "hour": 19,
       "ipoClosingDay": true,
+      "keeper": true,
+      "pausedUntil": null,
       "sipPayment": true,
       "style": "card"
     },
@@ -40847,7 +40850,6 @@
           "role": "user"
         }
       ],
-      "lastOpen": "welcome",
       "notes": [
         {
           "createdAt": "2026-08-26T14:20:00+00:00",

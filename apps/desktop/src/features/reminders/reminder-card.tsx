@@ -108,11 +108,13 @@ export function ReminderCard() {
   // The reading is the point of this card, so its button says so.
   const openLabel = reminder.kind === "rashifal" ? "reminder.read" : "reminder.open";
 
-  const dismiss = (open: boolean) => {
+  /** Closes the card, opening the popover at `route` if given. */
+  const close = (route: string | null) => {
     if (busy) return;
     setBusy(true);
-    api.dismissReminder(open ? ROUTES[reminder.kind] : null).catch(() => setBusy(false));
+    api.dismissReminder(route).catch(() => setBusy(false));
   };
+  const dismiss = (open: boolean) => close(open ? ROUTES[reminder.kind] : null);
 
   return (
     <div
@@ -143,8 +145,22 @@ export function ReminderCard() {
       </div>
 
       <div className="break-card__actions" data-tauri-drag-region>
-        <span className="mr-auto text-[11px] text-text-muted" data-tauri-drag-region>
-          {view.waiting > 0 && t("reminder.more").replace("{n}", digits(view.waiting, numerals))}
+        <span className="mr-auto flex min-w-0 items-center gap-1.5 text-[11px] text-text-muted">
+          {view.waiting > 0 && (
+            <span data-tauri-drag-region>
+              {t("reminder.more").replace("{n}", digits(view.waiting, numerals))} ·
+            </span>
+          )}
+          {/* A way out, on every card: anyone who'd rather not see these finds
+              the switch without hunting through Settings. */}
+          <button
+            type="button"
+            onClick={() => close("/settings/notifications")}
+            disabled={busy}
+            className="reminder-card__settings"
+          >
+            {t("reminder.turn-off")}
+          </button>
         </span>
         <button
           type="button"

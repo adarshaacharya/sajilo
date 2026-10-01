@@ -5,6 +5,8 @@
 //! attachments or arbitrary recurrence. It answers one question well: what do I
 //! need to remember on this date?
 
+use std::collections::BTreeSet;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -59,6 +61,12 @@ pub struct DayPlan {
     #[serde(default)]
     pub recurrence: Recurrence,
     pub created_at: DateTime<Utc>,
+    /// The days it was ticked off. One day for a one-time plan; for a
+    /// repeating one each occurrence is ticked on its own, so this month's
+    /// rent done doesn't mark next month's. Absent in plans written before
+    /// ticking existed, so they load as not done.
+    #[serde(default)]
+    pub done: BTreeSet<NepaliDate>,
 }
 
 impl DayPlan {
@@ -81,6 +89,20 @@ impl DayPlan {
         }
         let length = days_in_month(year, month)? as u32;
         Some(NepaliDate::new(year, month, self.date.day.min(length)))
+    }
+
+    /// Whether the occurrence on `date` was ticked off.
+    pub fn is_done_on(&self, date: NepaliDate) -> bool {
+        self.done.contains(&date)
+    }
+
+    /// Ticks the occurrence on `date` off, or back on.
+    pub fn set_done_on(&mut self, date: NepaliDate, done: bool) {
+        if done {
+            self.done.insert(date);
+        } else {
+            self.done.remove(&date);
+        }
     }
 
     pub fn occurs_on(&self, candidate: NepaliDate) -> bool {

@@ -11,9 +11,11 @@ export function Switch({
   checked,
   onChange,
   disabled,
+  ariaLabel,
   className = "",
 }: {
   checked: boolean;
+  ariaLabel?: string;
   onChange: (value: boolean) => void;
   disabled?: boolean;
   className?: string;
@@ -23,6 +25,7 @@ export function Switch({
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={ariaLabel}
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={`shrink-0 disabled:opacity-50 ${className}`}

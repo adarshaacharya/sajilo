@@ -17,6 +17,7 @@ fn plan(id: &str, date: NepaliDate, time: Option<(u32, u32)>, created: i64) -> D
         note: String::new(),
         recurrence: Recurrence::None,
         created_at: Utc.timestamp_opt(created, 0).unwrap(),
+        done: std::collections::BTreeSet::new(),
     }
 }
 

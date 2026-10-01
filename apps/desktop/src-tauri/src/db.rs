@@ -316,7 +316,22 @@ fn migrate(connection: &Connection) -> Result<()> {
     if version < SCHEMA_VERSION {
         upgrade(connection, version)?;
     }
-    ensure_repeat_day(connection)
+    ensure_repeat_day(connection)?;
+    ensure_plan_done(connection)
+}
+
+/// The days each day plan was ticked off, as a JSON list of BS dates. Added
+/// the same safe way as `repeat_day`: a missing column with a default, so
+/// every existing plan reads as not done.
+fn ensure_plan_done(connection: &Connection) -> Result<()> {
+    if !has_column(connection, "day_plans", "done_dates")? {
+        connection
+            .execute_batch(
+                "ALTER TABLE day_plans ADD COLUMN done_dates TEXT NOT NULL DEFAULT '[]';",
+            )
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(())
 }
 
 /// The day a repeating Keeper date was set for, so a bill on the 30th that

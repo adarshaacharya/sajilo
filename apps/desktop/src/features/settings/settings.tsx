@@ -8,7 +8,7 @@ import { ModulesTab } from "./_components/modules-tab";
 import { SystemTab } from "./_components/system-tab";
 
 type Tab = "display" | "modules" | "system" | "about";
-const TABS: readonly Tab[] = ["display", "modules", "system", "about"];
+const TABS: readonly Tab[] = ["display", "system", "modules", "about"];
 
 /** `?tab=system` opens straight onto a tab, like Bazar's `?tab=`. */
 function isTab(value: string | null): value is Tab {
@@ -30,8 +30,8 @@ export function Settings() {
         scrollable={false}
         options={[
           { id: "display" as const, label: t("settings.tab-display"), icon: "display" as const },
-          { id: "modules" as const, label: t("settings.tab-modules"), icon: "modules" as const },
           { id: "system" as const, label: t("settings.tab-system"), icon: "system" as const },
+          { id: "modules" as const, label: t("settings.tab-modules"), icon: "modules" as const },
           { id: "about" as const, label: t("settings.tab-about"), icon: "info" as const },
         ]}
       />

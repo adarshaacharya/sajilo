@@ -415,7 +415,6 @@ fn record_notes(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
             group: "today".to_owned(),
             group_label: "Today".to_owned(),
         }],
-        last_open: Some("welcome".to_owned()),
         trash_count: 0,
     };
     let document = NoteDocument {

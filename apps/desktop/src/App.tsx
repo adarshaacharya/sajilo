@@ -19,6 +19,7 @@ import { Radio } from "./features/radio/radio";
 import { RadioMiniPlayer } from "./features/radio/radio-mini-player";
 import { Rashifal } from "./features/rashifal/rashifal";
 import { ReminderCard } from "./features/reminders/reminder-card";
+import { Notifications } from "./features/settings/notifications";
 import { Settings } from "./features/settings/settings";
 import { Tools } from "./features/tools/tools";
 import { Weather } from "./features/weather/weather";
@@ -59,6 +60,11 @@ const ROUTES = [
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/more", titleKey: "screen.more", element: <More /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
+  {
+    path: "/settings/notifications",
+    titleKey: "screen.notifications",
+    element: <Notifications />,
+  },
 ] as const satisfies readonly { path: string; titleKey: TranslationKey; element: ReactNode }[];
 
 function TrayNavigation() {

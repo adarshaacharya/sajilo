@@ -171,6 +171,23 @@ export interface DayPlan {
   note: string;
   recurrence: PlanRecurrence;
   createdAt: string;
+  /** The days it was ticked off; a repeating plan is ticked per day. */
+  done: NepaliDate[];
+}
+
+/** A part of a one-line plan picked out by `quick_plan`. */
+export type QuickKind = "day" | "time" | "reminder" | "repeat";
+
+/** A plan typed as one line, read by the shell: title, and what it found. */
+export interface QuickPlan {
+  title: string;
+  /** The day the words named ("tomorrow", "Friday"), when not today. */
+  date: NepaliDate | null;
+  time: PlanTime | null;
+  reminder: number | null;
+  recurrence: PlanRecurrence;
+  parts: { kind: QuickKind; text: string }[];
+  assumedTime: boolean;
 }
 
 export type BreakKind =
@@ -611,7 +628,15 @@ export interface NotificationOptions {
   dailyRashifal: boolean;
   /** How every reminder arrives, Routine's included. */
   style: ReminderStyle;
+  /** Day plans' reminders, all at once; each plan's is its own choice. */
+  dayPlans: boolean;
+  /** Keeper's due-date reminders, as a group. */
+  keeper: boolean;
+  /** Nothing arrives before this (ISO time); what comes due meanwhile is let go. */
+  pausedUntil: string | null;
 }
+
+export type PauseFor = "oneHour" | "oneDay" | "untilTomorrow";
 
 export type ReminderKind = "plan" | "festival" | "holiday" | "ipo" | "sip" | "keeper" | "rashifal";
 
@@ -658,6 +683,18 @@ export const api = {
   planDays: (year: number, month: number) => invoke<number[]>("plan_days", { year, month }),
   savePlan: (plan: DayPlan) => invoke<DayPlan[]>("save_plan", { plan }),
   deletePlan: (id: string) => invoke<DayPlan[]>("delete_plan", { id }),
+  /** Ticks a plan off, or back on, for one day. */
+  setPlanDone: (id: string, date: NepaliDate, done: boolean) =>
+    invoke<DayPlan[]>("set_plan_done", {
+      id,
+      year: date.year,
+      month: date.month,
+      day: date.day,
+      done,
+    }),
+  /** Reads "Call dai 3pm remind 15m" into a title and its parts; `ignore` keeps dismissed kinds as words. */
+  quickPlan: (line: string, ignore: QuickKind[]) =>
+    invoke<QuickPlan>("quick_plan", { line, ignore }),
 
   focusSnapshot: () => invoke<FocusSnapshot>("focus_snapshot"),
   setFocusSettings: (settings: FocusSettings) =>
@@ -775,6 +812,8 @@ export const api = {
   getNotificationOptions: () => invoke<NotificationOptions>("get_notification_options"),
   /** The user saw today's reading for their sign: no morning reminder today. */
   rashifalRead: () => invoke<void>("rashifal_read"),
+  pauseReminders: (pause: PauseFor | null) =>
+    invoke<NotificationOptions>("pause_reminders", { pause }),
   setNotificationOptions: (options: NotificationOptions) =>
     invoke<PlannedNotification[]>("set_notification_options", { options }),
   pendingNotifications: () => invoke<PlannedNotification[]>("pending_notifications"),

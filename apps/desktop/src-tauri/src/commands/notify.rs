@@ -70,10 +70,14 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     let plans = crate::commands::plans::all_for_backup(app).unwrap_or_default();
     let now = Utc::now();
 
-    let mut all = plan_day_plans(&plans, now);
+    let mut all = if options.day_plans {
+        plan_day_plans(&plans, now)
+    } else {
+        Vec::new()
+    };
     // Hiding Keeper in Settings silences it too; a module you turned off
     // shouldn't keep talking.
-    if crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
+    if options.keeper && crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
         all.extend(crate::commands::keeper::pending_notifications(app, now));
     }
     all.extend(ipo_closing(app, options, now));
@@ -189,6 +193,20 @@ pub fn set_notification_options(
     Ok(upcoming(&app))
 }
 
+/// Pauses every reminder for a while (`Some`), or ends a pause (`None`).
+#[tauri::command]
+pub fn pause_reminders(
+    app: AppHandle<Wry>,
+    pause: Option<sajilo_core::notify::PauseFor>,
+) -> Result<NotificationOptions> {
+    let mut options: NotificationOptions = read(&app, OPTIONS_KEY);
+    options.paused_until = pause.map(|pause| sajilo_core::notify::pause_end(pause, Utc::now()));
+    let value = serde_json::to_value(options).map_err(|error| error.to_string())?;
+    db::set_json(&app, OPTIONS_KEY, &value)?;
+    reschedule();
+    Ok(options)
+}
+
 /// How long a brand-new install keeps reminders to itself: long enough to
 /// finish the setup card without a card or notification landing on top of it.
 const FIRST_RUN_HOLD: std::time::Duration = std::time::Duration::from_secs(5 * 60);
@@ -225,11 +243,19 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
     let now = Utc::now();
     let mut fired: LastFired = read(app, LAST_FIRED_KEY);
     let mut delivered = 0;
-    let as_cards = style(app) == ReminderStyle::Card;
+    let options: NotificationOptions = read(app, OPTIONS_KEY);
+    let paused = options.is_paused(now);
+    let as_cards = options.style == ReminderStyle::Card;
     let mut cards = Vec::new();
 
     for notification in pending(app) {
         if !should_fire_late(&notification, now, &fired) {
+            continue;
+        }
+        if paused {
+            // Let go, not saved for later: see `NotificationOptions::paused_until`.
+            fired.record(&notification.id, now);
+            delivered += 1;
             continue;
         }
         if as_cards {

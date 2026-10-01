@@ -7,10 +7,6 @@ import type { NoteSummary } from "./NoteSummary";
  */
 export type NotesList = { folders: Array<NoteFolder>, notes: Array<NoteSummary>, 
 /**
- * The note open when Notes was last left, to open it again.
- */
-lastOpen: string | null, 
-/**
  * How many notes are in the Trash.
  */
 trashCount: number, };

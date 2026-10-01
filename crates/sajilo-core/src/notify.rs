@@ -51,6 +51,18 @@ pub struct NotificationOptions {
     /// default: a corner notification is gone before it is read.
     #[serde(default)]
     pub style: ReminderStyle,
+    /// Day plans' own reminders. Each plan's reminder is its own choice; this
+    /// silences them all.
+    #[serde(default = "enabled_by_default")]
+    pub day_plans: bool,
+    /// Keeper's renewal and due-date reminders, as a group.
+    #[serde(default = "enabled_by_default")]
+    pub keeper: bool,
+    /// Nothing is delivered before this moment. A reminder that comes due
+    /// meanwhile is let go rather than saved up: a pile of cards waiting at
+    /// the end of a quiet hour is what pausing was meant to avoid.
+    #[serde(default)]
+    pub paused_until: Option<DateTime<Utc>>,
 }
 
 fn default_hour() -> u32 {
@@ -73,13 +85,25 @@ impl Default for NotificationOptions {
             sip_payment: enabled_by_default(),
             daily_rashifal: false,
             style: ReminderStyle::default(),
+            day_plans: enabled_by_default(),
+            keeper: enabled_by_default(),
+            paused_until: None,
         }
     }
 }
 
 impl NotificationOptions {
     pub fn is_any_enabled(&self) -> bool {
-        self.festivals_enabled() || self.ipo_closing_day || self.sip_payment
+        self.festivals_enabled()
+            || self.ipo_closing_day
+            || self.sip_payment
+            || self.day_plans
+            || self.keeper
+    }
+
+    /// Paused, at `now`.
+    pub fn is_paused(&self, now: DateTime<Utc>) -> bool {
+        self.paused_until.is_some_and(|until| now < until)
     }
 
     fn festivals_enabled(self) -> bool {
@@ -418,6 +442,11 @@ fn notification_for(
 ) -> Option<PlannedNotification> {
     let time = plan.time?;
     let reminder = plan.reminder?;
+    // Ticked off already: nothing left to remind about. A repeating plan
+    // moves on to its next occurrence.
+    if plan.is_done_on(date) {
+        return None;
+    }
     let day = gregorian_date_from(date).ok()?;
     let event_at = at_nepal_time(day, time.hour, time.minute)?;
     let fire_at = event_at - Duration::minutes(i64::from(reminder.0));
@@ -525,4 +554,31 @@ pub fn next_wake(
         .map(|notification| notification.fire_at)
         .filter(|fire_at| *fire_at > now)
         .min()
+}
+
+/// How long a pause lasts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum PauseFor {
+    OneHour,
+    OneDay,
+    /// Until 7 the next morning, Nepal time.
+    UntilTomorrow,
+}
+
+/// When a pause chosen at `now` ends.
+pub fn pause_end(pause: PauseFor, now: DateTime<Utc>) -> DateTime<Utc> {
+    match pause {
+        PauseFor::OneHour => now + Duration::hours(1),
+        PauseFor::OneDay => now + Duration::hours(24),
+        PauseFor::UntilTomorrow => {
+            let today = now.with_timezone(&nepal_time::offset()).date_naive();
+            (today + Duration::days(1))
+                .and_hms_opt(7, 0, 0)
+                .and_then(|morning| nepal_time::offset().from_local_datetime(&morning).single())
+                .map_or(now + Duration::hours(12), |morning| {
+                    morning.with_timezone(&Utc)
+                })
+        }
+    }
 }

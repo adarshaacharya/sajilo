@@ -817,15 +817,6 @@ pub fn list(connection: &Connection, clock: &Clock) -> Result<NotesList> {
         .collect::<rusqlite::Result<Vec<_>>>()
         .map_err(sql)?;
 
-    let last_open: Option<String> = connection
-        .query_row(
-            "SELECT id FROM notes WHERE deleted_at IS NULL AND opened_at IS NOT NULL
-             ORDER BY opened_at DESC LIMIT 1",
-            [],
-            |row| row.get(0),
-        )
-        .optional()
-        .map_err(sql)?;
     let trash_count: u32 = connection
         .query_row(
             "SELECT COUNT(*) FROM notes WHERE deleted_at IS NOT NULL",
@@ -836,7 +827,6 @@ pub fn list(connection: &Connection, clock: &Clock) -> Result<NotesList> {
     Ok(NotesList {
         folders,
         notes,
-        last_open,
         trash_count,
     })
 }
@@ -1041,10 +1031,6 @@ mod tests {
         let budget = summary.iter().find(|note| note.id == id).unwrap();
         assert_eq!(budget.tags, ["meeting", "काम"]);
         assert_eq!(budget.open_tasks, 1);
-        assert_eq!(
-            list(&connection, &clock()).unwrap().last_open.as_deref(),
-            Some(other.as_str())
-        );
     }
 
     #[test]

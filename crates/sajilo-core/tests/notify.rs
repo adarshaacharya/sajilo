@@ -183,6 +183,7 @@ fn timed_plan(id: &str, day: u32, hour: u32, reminder: u32) -> DayPlan {
         note: String::new(),
         recurrence: Recurrence::None,
         created_at: Utc::now(),
+        done: std::collections::BTreeSet::new(),
     }
 }
 
@@ -193,6 +194,24 @@ fn an_untimed_plan_is_never_scheduled() {
     plan.time = None;
     plan.reminder = None;
     assert!(plan_day_plans(&[plan], nepal(2026, 8, 1, 9)).is_empty());
+}
+
+/// A plan ticked off before its reminder needs no reminder; a monthly one
+/// moves on to next month's.
+#[test]
+fn a_ticked_off_plan_is_not_reminded() {
+    let mut plan = timed_plan("a", 20, 9, 15);
+    assert_eq!(
+        plan_day_plans(&[plan.clone()], nepal(2026, 8, 1, 9)).len(),
+        1
+    );
+    plan.set_done_on(plan.date, true);
+    assert!(plan_day_plans(&[plan.clone()], nepal(2026, 8, 1, 9)).is_empty());
+
+    plan.recurrence = Recurrence::MonthlyBikramSambat;
+    let next = plan_day_plans(&[plan], nepal(2026, 8, 1, 9));
+    assert_eq!(next.len(), 1, "next month's still comes");
+    assert!(next[0].id.ends_with(".2083.5"), "{}", next[0].id);
 }
 
 /// The reminder fires its lead time *before* the plan, not at it.
@@ -508,4 +527,25 @@ fn every_reminder_carries_its_kind() {
 
     let plan = plan_day_plans(&[timed_plan("a", 20, 9, 15)], now);
     assert_eq!(plan[0].kind, ReminderKind::Plan);
+}
+
+#[test]
+fn a_pause_until_tomorrow_ends_at_seven_nepal_time() {
+    use sajilo_core::notify::{PauseFor, pause_end};
+    // 2026-10-01 22:00 in Nepal (16:15 UTC).
+    let now = Utc.with_ymd_and_hms(2026, 10, 1, 16, 15, 0).unwrap();
+    let end = pause_end(PauseFor::UntilTomorrow, now);
+    assert_eq!(end, Utc.with_ymd_and_hms(2026, 10, 2, 1, 15, 0).unwrap());
+    let options = NotificationOptions {
+        paused_until: Some(end),
+        ..NotificationOptions::default()
+    };
+    assert!(options.is_paused(now));
+    assert!(!options.is_paused(end));
+}
+
+#[test]
+fn options_saved_before_the_new_switches_keep_them_on() {
+    let options: NotificationOptions = serde_json::from_str(r#"{"eveOfFestival":false}"#).unwrap();
+    assert!(options.day_plans && options.keeper && options.paused_until.is_none());
 }
