@@ -121,7 +121,7 @@ export function FundDetail({
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <p className="text-[28px] font-semibold leading-none tabular-nums">
+          <p className="text-[18px] font-semibold leading-none tabular-nums">
             Rs {navFormat.format(headlineNav(fund))}
           </p>
           <FundBadge fund={fund} />

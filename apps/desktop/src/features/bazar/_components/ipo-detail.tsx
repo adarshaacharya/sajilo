@@ -64,7 +64,7 @@ export function IpoDetail({ entry, onBack }: { entry: PhasedIssue; onBack: () =>
       <div className="mt-3 flex items-baseline gap-1.5">
         {ratio != null ? (
           <>
-            <p className="text-[22px] font-semibold leading-none tabular-nums">
+            <p className="text-[18px] font-semibold leading-none tabular-nums">
               {ratioText(ratio)}×
             </p>
             <p className="text-[11px] text-text-secondary">{t("stocks.ipo-subscribed-label")}</p>

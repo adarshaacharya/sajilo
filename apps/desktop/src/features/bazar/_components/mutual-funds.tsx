@@ -253,7 +253,7 @@ function YourFunds({
         <>
           {held.length > 0 && (
             <div className="mt-1 flex items-baseline justify-between gap-2">
-              <p className="text-[22px] font-semibold tabular-nums">Rs {money.format(total)}</p>
+              <p className="text-[18px] font-semibold tabular-nums">Rs {money.format(total)}</p>
               {Math.abs(moved) >= 0.005 && (
                 <p
                   className={`text-[11px] font-medium tabular-nums ${moved > 0 ? "text-positive" : "text-holiday"}`}

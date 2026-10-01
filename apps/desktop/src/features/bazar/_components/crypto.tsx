@@ -313,7 +313,7 @@ function YourCoins({
           {held.length > 0 && (
             <div className="mt-1 flex items-end justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-[22px] font-semibold leading-tight tabular-nums">{usd(total)}</p>
+                <p className="text-[18px] font-semibold leading-tight tabular-nums">{usd(total)}</p>
                 {nprRate != null && (
                   <p className="text-[10px] text-text-muted tabular-nums">
                     ≈ Rs {money0.format(total * nprRate)}

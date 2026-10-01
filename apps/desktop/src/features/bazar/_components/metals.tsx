@@ -66,7 +66,7 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
                 percentOnly
               />
             </div>
-            <p className="mt-1 text-[32px] font-semibold leading-none tabular-nums">
+            <p className="mt-1 text-[18px] font-semibold leading-none tabular-nums">
               Rs {money.format(headline.price)}
             </p>
             <div className="mt-2 flex items-end justify-between gap-2">

@@ -169,7 +169,7 @@ export function CryptoDetail({
         </div>
 
         <div className="mt-2.5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-          <p className="text-[28px] font-semibold leading-none tabular-nums">{usd(coin.price)}</p>
+          <p className="text-[18px] font-semibold leading-none tabular-nums">{usd(coin.price)}</p>
           <DayChange coin={coin} />
         </div>
         {nprRate != null && (

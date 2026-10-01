@@ -271,7 +271,7 @@ export function CompanyDetail({
           )}
         </div>
         <div className="flex items-baseline gap-2">
-          <p className="text-[22px] font-semibold tabular-nums">Rs {money2.format(quote.ltp)}</p>
+          <p className="text-[18px] font-semibold tabular-nums">Rs {money2.format(quote.ltp)}</p>
           <p className={`text-[11px] font-medium tabular-nums ${changeTone(quote.change)}`}>
             {quote.change > 0 ? "▲" : quote.change < 0 ? "▼" : ""}{" "}
             {money2.format(Math.abs(quote.change))} ({Math.abs(quote.changePercent).toFixed(2)}%)

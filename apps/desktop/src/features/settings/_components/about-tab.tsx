@@ -195,7 +195,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink("https://adarsha.dev")}
-          className="hover:text-text-secondary hover:underline"
+          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
         >
           Adarsha Acharya
         </button>
@@ -203,7 +203,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink(LICENSE_URL)}
-          className="hover:text-text-secondary hover:underline"
+          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
         >
           {t("about.rights")}
         </button>
@@ -211,7 +211,7 @@ export function AboutTab() {
         <button
           type="button"
           onClick={() => openExternalLink(PRIVACY_URL)}
-          className="hover:text-text-secondary hover:underline"
+          className="text-[color:var(--color-accent-mark)] underline-offset-2 hover:underline"
         >
           {t("about.privacy")}
         </button>

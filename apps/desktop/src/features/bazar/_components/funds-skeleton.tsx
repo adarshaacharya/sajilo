@@ -33,7 +33,7 @@ export function FundsSkeleton({ held }: { held: number }) {
           </div>
         ) : (
           <>
-            <SkeletonLine className="mt-1 text-[22px]" bar="w-2/5" />
+            <SkeletonLine className="mt-1 text-[18px]" bar="w-2/5" />
             <div className="mt-0.5">
               {Array.from({ length: held }, (_, row) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder rows

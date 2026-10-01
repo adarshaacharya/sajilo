@@ -43,7 +43,7 @@ export function IndexHeadline({
             percentOnly
           />
         </div>
-        <p className="mt-1 text-[28px] font-semibold leading-none tabular-nums">
+        <p className="mt-1 text-[18px] font-semibold leading-none tabular-nums">
           {money.format(index.value)}
         </p>
         <p className="mt-1.5 text-[11px] text-text-muted tabular-nums">
