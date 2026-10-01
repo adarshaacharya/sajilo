@@ -48,7 +48,7 @@ The strip stays open when you click elsewhere and can be **dragged anywhere**. I
 
 ## Keep it open
 
-Press the **pin** at the top right and Sajilo stays open while you work, drags by its top bar, and reopens where you left it. **Esc** or the tray icon still puts it away. See [First steps](/docs/first-steps.html#keeping-it-open).
+Press the **pin** at the top right and Sajilo stays open while you work, drags by its top bar, and reopens where you left it. The tray icon still puts it away; **Esc** doesn't while it's pinned. See [First steps](/docs/first-steps.html#keeping-it-open).
 
 ## The menu bar date
 

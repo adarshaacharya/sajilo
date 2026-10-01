@@ -120,12 +120,12 @@ plain toggle is right there.
 | Way | macOS | Windows | Linux |
 |---|---|---|---|
 | Click anywhere outside | Yes | Yes | Yes (see below) |
-| Escape | Yes | Yes | Yes |
+| Escape (not while pinned) | Yes | Yes | Yes |
 | Click the tray icon | Yes | Yes | Yes (a single click opens the menu on GNOME; double-click opens Sajilo) |
 | Open a link | Yes, so the browser comes to the front | Yes | Yes |
 
-A pinned popover ignores clicks outside and links, but Escape and the tray
-still put it away. While the popover shows a dialog of its own (a file picker,
+A pinned popover ignores clicks outside, links and Escape; the tray still
+puts it away. While the popover shows a dialog of its own (a file picker,
 a "delete this?" prompt), it is held open so the dialog's focus does not count
 as a click away (`set_pinned`, from the page's `pinPopover`).
 
@@ -195,7 +195,9 @@ The pin sits in the header, beside Settings, on every screen: in `Header`
 - Opening a link does not close it (`external-link.ts` checks `isKept()`).
 - It drags by its header, like a title bar.
 - It reopens where it was left, across restarts too.
-- Escape and the tray still put it away, so there is always a way out.
+- Escape does not close it: an Escape meant for a field or a menu inside it
+  used to close the window. The tray icon (or GNOME button) still puts it
+  away, and unpinning lets Escape close it again.
 - The pin shows the accent colour on a faint wash of it
   (`.icon-btn[aria-pressed="true"]` in `index.css`). The colour lives in CSS
   because the unlayered `.icon-btn` rule overrides a Tailwind colour class.
@@ -331,7 +333,7 @@ What to check, in order, before shipping a change to this window:
 | 6 | Click the icon while open | Closes; the menu offers Open |
 | 7 | Pin, then click the desktop | Stays open |
 | 8 | Drag Today's header | Moves |
-| 9 | Escape, then open from the tray | Reopens where it was dragged |
+| 9 | Escape, then the icon twice | Escape leaves it open; the icon closes it and reopens it where it was dragged |
 | 10 | Restart the app | Still pinned, same place |
 | 11 | Drag another screen's header (News) | Moves |
 | 12 | Unpin, then click the desktop | Closes |
@@ -340,7 +342,7 @@ What to check, in order, before shipping a change to this window:
 | 15 | Run 1 to 6 again with `GDK_BACKEND=wayland,x11` | Same results |
 | 16 | Unpinned, press Mini view | Shrinks to the strip in place, and the pin is on |
 | 17 | Drag the strip; click the desktop | Moves; stays open |
-| 18 | Escape, then the tray | Back as the strip, where it was dragged |
+| 18 | Escape, then the tray twice | Escape leaves it; back as the strip, where it was dragged |
 | 19 | Restart | Still the strip, same place |
 | 20 | Open a reminder card's Open while mini | The full view opens on that screen |
 | 21 | Strip's expand button, then unpin | Full view, still pinned; then the tray popover |

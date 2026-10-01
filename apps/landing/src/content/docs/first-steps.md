@@ -17,7 +17,7 @@ Sajilo is a small window that opens from your **menu bar** (Mac), **system tray*
 | **macOS** | Click the Nepali date in the menu bar | Click the date again, or click anywhere else |
 | **Linux** | Click the Nepal flag in your panel (on Ubuntu, click the date, then **Open Sajilo**) | Click the flag again, or click anywhere else |
 
-On every system, **Esc** closes it too. Closing only hides the window: Sajilo keeps running, so the radio keeps playing and reminders still arrive.
+On every system, **Esc** closes it too, unless it's pinned. Closing only hides the window: Sajilo keeps running, so the radio keeps playing and reminders still arrive.
 
 **Right-click** the tray icon for a short menu: on Windows and macOS the date, **Settings…** and **Quit Sajilo**; on Linux **Open Sajilo** and **Quit Sajilo**.
 
@@ -34,7 +34,7 @@ While it's pinned:
 - It stays open when you click somewhere else, and opening a news link doesn't hide it.
 - **Drag it by its top bar** to put it anywhere on your screen. On the Today screen, that's the area with the date.
 - It opens in the same place next time, even after a restart.
-- **Esc** or the tray icon still puts it away.
+- The tray icon still puts it away. **Esc** doesn't while it's pinned, so pressing it inside a box or menu never closes Sajilo.
 
 Press the pin again to go back to normal: it closes when you click away, and opens by the tray icon again.
 

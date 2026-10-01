@@ -33,7 +33,7 @@ import { SettingsProvider, useSettings } from "./shared/context/settings-context
 import { UpdaterProvider } from "./shared/context/updater-context";
 import type { translate } from "./shared/lib/i18n";
 import { api } from "./shared/lib/ipc";
-import { isMini, setMini, useMini } from "./shared/lib/popover-kept";
+import { isKept, isMini, setMini, useMini } from "./shared/lib/popover-kept";
 import { persistentCacheProvider } from "./shared/lib/swr-cache";
 import { track } from "./shared/lib/usage";
 
@@ -126,11 +126,15 @@ function TrackScreens() {
  *
  * Clicking away closes it too. On Linux the shell reads a focus-out as a click
  * away only when it looks like one (see `window::hide_on_blur`), so Escape is
- * the dismissal that never depends on the compositor. */
+ * the dismissal that never depends on the compositor.
+ *
+ * Not while it is pinned: a pinned popover stays until it is unpinned or put
+ * away from the tray, and an Escape meant for a field or a menu inside it
+ * used to close the whole window. */
 function DismissOnEscape() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented) return;
+      if (event.key !== "Escape" || event.defaultPrevented || isKept()) return;
       api.hidePopover().catch(() => {});
     };
 
