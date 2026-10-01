@@ -20,7 +20,7 @@ export function SignFinder({ onChoose }: { onChoose: (id: RashiSign) => void }) 
     <section className="surface-card space-y-2.5 p-3">
       <h2 className="text-[13px] font-semibold">{t("rashifal.pick-sign")}</h2>
 
-      <label className="rashi-search">
+      <label className="rashi-search field-shell">
         <Icon name="search" className="size-3.5 shrink-0 text-text-muted" />
         <input
           value={query}

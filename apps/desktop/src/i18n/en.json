@@ -1258,5 +1258,13 @@
   "customize.hidden": "Hidden",
   "customize.today-screen": "On the Today screen",
   "customize.bar-limit": "Today + up to {n}",
-  "reminder.turn-off": "Turn these off"
+  "reminder.options": "Options",
+  "reminder.settings": "Notification settings…",
+  "reminder.off.plan": "Turn off day plan reminders",
+  "reminder.off.festival": "Turn off festival reminders",
+  "reminder.off.holiday": "Turn off holiday reminders",
+  "reminder.off.ipo": "Turn off IPO reminders",
+  "reminder.off.sip": "Turn off SIP reminders",
+  "reminder.off.keeper": "Turn off Keeper reminders",
+  "reminder.off.rashifal": "Turn off daily rashifal"
 }

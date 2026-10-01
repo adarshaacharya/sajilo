@@ -658,25 +658,67 @@ html {
 }
 
 /*
- * One focus ring for every control in the app.
+ * Focus, in two voices.
  *
- * Before this, `focus-visible` existed on exactly one selector — the text
- * field — so keyboard users had no visible position anywhere else in a window
- * that has no chrome of its own to orient against.
+ * Controls you press (buttons, links, switches, checkboxes) get a thin ring,
+ * and browsers show it only to keyboard users. Fields you type into show
+ * focus on every click — a browser counts that as keyboard focus — so a ring
+ * there was a loud gold box each time someone clicked a field. They get a
+ * soft tint instead: the border warms toward the accent with a faint glow.
+ *
+ * In `@layer base`, so a component's own focus style (Tailwind's
+ * `outline-none`, `focus-visible:ring-*`, a field shell below) always wins;
+ * unlayered, this rule beat every utility in the app.
  */
-:where(
-  button,
-  a,
-  [role="button"],
-  [tabindex]:not([tabindex="-1"]),
-  summary,
-  input,
-  select,
-  textarea
-):focus-visible {
-  outline: 2px solid var(--color-accent-mark);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+/* The ring keyboard users follow: thin, and a touch softer than the accent. */
+:root {
+  --focus-ring: 1.5px solid color-mix(in srgb, var(--color-accent-mark) 75%, transparent);
+}
+
+@layer base {
+  :where(
+    button,
+    a,
+    [role="button"],
+    [tabindex]:not([tabindex="-1"]),
+    summary,
+    input[type="checkbox"],
+    input[type="radio"],
+    input[type="range"]
+  ):focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: 1px;
+    border-radius: var(--radius-sm);
+  }
+
+  :where(
+    input:not([type="checkbox"], [type="radio"], [type="range"]),
+    select,
+    textarea
+  ):focus-visible {
+    outline: none;
+    border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+  }
+}
+
+/*
+ * A box with a field inside (a search bar, the jot line, the day-plan line):
+ * the box shows focus, and the field never draws a second ring of its own.
+ */
+.field-shell {
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+.field-shell:focus-within {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent-mark) 12%, transparent);
+}
+.field-shell :is(input, textarea):focus-visible {
+  outline: none;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* Opaque card. No backdrop-filter: the surface underneath is a known colour,
@@ -747,6 +789,14 @@ html {
   background: var(--color-control-bg);
   border: 1px solid var(--color-control-border);
   box-shadow: var(--color-control-inset);
+}
+/* Focus on a field is a soft warmth, not a ring: it shows on every click. */
+.control-field:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
+  box-shadow:
+    var(--color-control-inset),
+    0 0 0 2px color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
 }
 
 /* NSTextField has no visible up/down stepper by default — the browser's
@@ -1190,15 +1240,6 @@ button.rashi-pin:hover {
   transition: border-color 0.12s ease;
 }
 
-/* The box carries the focus ring, so the field inside doesn't draw another. */
-.rashi-search:focus-within {
-  border-color: var(--color-accent-mark);
-  box-shadow: 0 0 0 1px var(--color-accent-mark);
-}
-
-.rashi-search input:focus-visible {
-  outline: none;
-}
 
 .rashi-glyph {
   display: grid;
@@ -1503,7 +1544,7 @@ button.rashi-pin:hover {
   background: color-mix(in srgb, var(--color-text) 14%, transparent);
 }
 .break-card__button:focus-visible {
-  outline: 2px solid var(--color-accent-mark);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 
@@ -1575,13 +1616,13 @@ button.rashi-pin:hover {
 }
 
 .update-window__automatic:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent-mark);
-  outline-offset: 3px;
+  outline: var(--focus-ring);
+  outline-offset: 2px;
   border-radius: var(--radius-xs);
 }
 
 .update-window__close:focus-visible {
-  outline: 2px solid var(--color-accent-mark);
+  outline: var(--focus-ring);
   outline-offset: 1px;
 }
 
@@ -1794,7 +1835,7 @@ button.rashi-pin:hover {
   cursor: pointer;
 }
 .days-off-option:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent-mark);
+  outline: var(--focus-ring);
   outline-offset: 2px;
 }
 .days-off-option__dot {
@@ -2885,8 +2926,8 @@ input[type="search"]::-webkit-search-decoration {
   outline-offset: 2px;
 }
 .accent-swatch:has(input:focus-visible) {
-  outline: 2px solid var(--color-accent-mark);
-  outline-offset: 3px;
+  outline: var(--focus-ring);
+  outline-offset: 2px;
 }
 .accent-swatch--marigold { background: #d4a84a; }
 .accent-swatch--dhaka { background: #b8284a; }
@@ -2911,9 +2952,8 @@ input[type="search"]::-webkit-search-decoration {
   border: 1px solid var(--color-border);
   transition: border-color 150ms ease;
 }
-.notes-jot.is-active,
-.notes-jot:focus-within {
-  border-color: color-mix(in srgb, var(--color-accent-mark) 70%, transparent);
+.notes-jot.is-active {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
 }
 .notes-jot__add {
   height: 26px;
@@ -3127,7 +3167,7 @@ input[type="search"]::-webkit-search-decoration {
   padding: 0 10px;
   border-radius: 10px;
   background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
 }
 .notes-hit {
   border-radius: 3px;
@@ -3540,9 +3580,8 @@ input[type="search"]::-webkit-search-decoration {
   border: 1px solid var(--color-border);
   transition: border-color 150ms ease;
 }
-.day-plan-add.is-typing,
-.day-plan-add:focus-within {
-  border-color: color-mix(in srgb, var(--color-accent-mark) 65%, transparent);
+.day-plan-add.is-typing {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
 }
 .day-plan-tool {
   display: inline-flex;
@@ -3649,16 +3688,13 @@ input[type="search"]::-webkit-search-decoration {
   z-index: 10;
   animation: notes-pop 150ms ease-out;
 }
-/* The box shows focus; the line inside it doesn't draw a second ring. */
-.day-plan-add input:focus-visible {
-  outline: none;
-}
 
 /* On the home screen the card is the field: no second box inside it. */
 .day-plan-add.is-bare,
 .day-plan-add.is-bare:focus-within {
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
   padding-left: 8px;
 }
 
@@ -3706,14 +3742,38 @@ input[type="search"]::-webkit-search-decoration {
   transform: scale(0.98);
 }
 
-/* The reminder card's quiet way to Settings › Notifications. */
-.reminder-card__settings {
-  font-size: 10.5px;
+
+/* The reminder card's ⋯: quiet in the corner, as macOS and Slack keep theirs. */
+.reminder-card__more {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
   color: var(--color-text-muted);
-  text-decoration: underline dotted;
-  text-underline-offset: 2px;
-  transition: color 120ms ease;
+  transition: background 120ms ease, color 120ms ease;
 }
-.reminder-card__settings:hover {
+.reminder-card__more:hover,
+.reminder-card__more[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
   color: var(--color-text);
+}
+/* Its two choices, in place of the buttons. */
+.reminder-card__options {
+  display: grid;
+  gap: 4px;
+}
+.reminder-card__options button {
+  padding: 7px 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  transition: background 120ms ease;
+}
+.reminder-card__options button:hover {
+  background: color-mix(in srgb, var(--color-text) 11%, transparent);
 }

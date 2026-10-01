@@ -79,7 +79,7 @@ export function NoteSearch({
   return (
     <div className="notes-search" role="dialog" aria-label={t("notes.search")}>
       <div className="flex items-center gap-2 px-2.5 pt-2.5">
-        <div className="notes-search__field">
+        <div className="notes-search__field field-shell">
           <Icon name="search" className="size-3.5 shrink-0 text-text-muted" />
           <input
             // biome-ignore lint/a11y/noAutofocus: search opens to be typed into

@@ -1258,5 +1258,13 @@
   "customize.hidden": "लुकाइएका",
   "customize.today-screen": "आजको पानामा",
   "customize.bar-limit": "आज + {n} सम्म",
-  "reminder.turn-off": "यी बन्द गर्ने"
+  "reminder.options": "विकल्प",
+  "reminder.settings": "सूचना सेटिङ…",
+  "reminder.off.plan": "दिनको योजनाको सूचना बन्द",
+  "reminder.off.festival": "चाडपर्वको सूचना बन्द",
+  "reminder.off.holiday": "बिदाको सूचना बन्द",
+  "reminder.off.ipo": "आईपीओ सूचना बन्द",
+  "reminder.off.sip": "एसआईपी सूचना बन्द",
+  "reminder.off.keeper": "किपर सूचना बन्द",
+  "reminder.off.rashifal": "दैनिक राशिफल बन्द"
 }

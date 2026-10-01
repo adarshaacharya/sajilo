@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
-import { api, type ReminderCardView, type ReminderKind } from "../../shared/lib/ipc";
+import {
+  api,
+  type NotificationOptions,
+  type ReminderCardView,
+  type ReminderKind,
+} from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { useSentenceNumerals } from "../focus/_lib/format";
@@ -44,6 +49,27 @@ const TRANSLATED_TITLES = {
   holiday: "reminder.holiday-tomorrow",
 } as const;
 
+/** The Settings › Notifications switch behind each kind of card. */
+const SWITCHES: Record<ReminderKind, keyof NotificationOptions> = {
+  plan: "dayPlans",
+  festival: "eveOfFestival",
+  holiday: "eveOfPublicHoliday",
+  ipo: "ipoClosingDay",
+  sip: "sipPayment",
+  keeper: "keeper",
+  rashifal: "dailyRashifal",
+};
+
+const TURN_OFF_LABELS = {
+  plan: "reminder.off.plan",
+  festival: "reminder.off.festival",
+  holiday: "reminder.off.holiday",
+  ipo: "reminder.off.ipo",
+  sip: "reminder.off.sip",
+  keeper: "reminder.off.keeper",
+  rashifal: "reminder.off.rashifal",
+} as const satisfies Record<ReminderKind, string>;
+
 /** Shell event: the reminder in front changed (dismissed, or an example). */
 const CHANGED_EVENT = "sajilo://reminder-changed";
 /** A card still waiting after this long shakes once more. */
@@ -59,6 +85,9 @@ export function ReminderCard() {
   const numerals = useSentenceNumerals();
   const [view, setView] = useState<ReminderCardView | null>(null);
   const [busy, setBusy] = useState(false);
+  // The ⋯ choices replace the buttons in place: the card is its own small
+  // window, sized to fit, so a dropdown would be cut off.
+  const [options, setOptions] = useState(false);
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   useFitWindow(element);
 
@@ -68,6 +97,7 @@ export function ReminderCard() {
       .then((next) => {
         setView(next);
         setBusy(false);
+        setOptions(false);
       })
       .catch(() => {});
   }, []);
@@ -115,6 +145,19 @@ export function ReminderCard() {
     api.dismissReminder(route).catch(() => setBusy(false));
   };
   const dismiss = (open: boolean) => close(open ? ROUTES[reminder.kind] : null);
+  /** Switches this kind off, as Settings › Notifications would, and moves on. */
+  const turnOff = async () => {
+    if (busy) return;
+    if (!view.preview) {
+      const current = await api.getNotificationOptions().catch(() => null);
+      if (current) {
+        await api
+          .setNotificationOptions({ ...current, [SWITCHES[reminder.kind]]: false })
+          .catch(() => {});
+      }
+    }
+    close(null);
+  };
 
   return (
     <div
@@ -129,10 +172,13 @@ export function ReminderCard() {
           <Icon name={ICONS[reminder.kind]} className="size-5" />
         </span>
         <div className="min-w-0 flex-1" data-tauri-drag-region>
-          <p className="break-card__eyebrow" data-tauri-drag-region>
-            {t(KIND_LABELS[reminder.kind])}
-            {view.preview && <span className="break-card__example">{t("break.example")}</span>}
-          </p>
+          {/* A festival or holiday title already says what it is. */}
+          {(!titleKey || view.preview) && (
+            <p className="break-card__eyebrow" data-tauri-drag-region>
+              {!titleKey && t(KIND_LABELS[reminder.kind])}
+              {view.preview && <span className="break-card__example">{t("break.example")}</span>}
+            </p>
+          )}
           <p className="break-card__title" data-tauri-drag-region>
             {titleKey ? t(titleKey) : reminder.title}
           </p>
@@ -142,43 +188,54 @@ export function ReminderCard() {
             </p>
           )}
         </div>
+        <button
+          type="button"
+          onClick={() => setOptions((open) => !open)}
+          aria-expanded={options}
+          aria-label={t("reminder.options")}
+          title={t("reminder.options")}
+          className="reminder-card__more"
+        >
+          <Icon name="ellipsis" className="size-3.5" />
+        </button>
       </div>
 
-      <div className="break-card__actions" data-tauri-drag-region>
-        <span className="mr-auto flex min-w-0 items-center gap-1.5 text-[11px] text-text-muted">
-          {view.waiting > 0 && (
-            <span data-tauri-drag-region>
-              {t("reminder.more").replace("{n}", digits(view.waiting, numerals))} ·
-            </span>
-          )}
-          {/* A way out, on every card: anyone who'd rather not see these finds
-              the switch without hunting through Settings. */}
+      {options ? (
+        <div className="reminder-card__options">
+          <button type="button" onClick={() => void turnOff()} disabled={busy}>
+            {t(TURN_OFF_LABELS[reminder.kind])}
+          </button>
+          <button type="button" onClick={() => close("/settings/notifications")} disabled={busy}>
+            {t("reminder.settings")}
+          </button>
+        </div>
+      ) : (
+        <div className="break-card__actions" data-tauri-drag-region>
+          <span className="mr-auto flex min-w-0 items-center gap-1.5 text-[11px] text-text-muted">
+            {view.waiting > 0 && (
+              <span data-tauri-drag-region>
+                {t("reminder.more").replace("{n}", digits(view.waiting, numerals))} ·
+              </span>
+            )}
+          </span>
           <button
             type="button"
-            onClick={() => close("/settings/notifications")}
+            onClick={() => dismiss(true)}
             disabled={busy}
-            className="reminder-card__settings"
+            className="break-card__button break-card__button--quiet"
           >
-            {t("reminder.turn-off")}
+            {t(openLabel)}
           </button>
-        </span>
-        <button
-          type="button"
-          onClick={() => dismiss(true)}
-          disabled={busy}
-          className="break-card__button break-card__button--quiet"
-        >
-          {t(openLabel)}
-        </button>
-        <button
-          type="button"
-          onClick={() => dismiss(false)}
-          disabled={busy}
-          className="break-card__button break-card__button--main"
-        >
-          {t("reminder.dismiss")}
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => dismiss(false)}
+            disabled={busy}
+            className="break-card__button break-card__button--main"
+          >
+            {t("reminder.dismiss")}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

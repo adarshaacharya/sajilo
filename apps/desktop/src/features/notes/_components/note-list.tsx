@@ -252,7 +252,7 @@ function JotBox({
   };
 
   return (
-    <div className={`notes-jot${text ? " is-active" : ""}`}>
+    <div className={`notes-jot field-shell${text ? " is-active" : ""}`}>
       <Icon name="bolt" className="size-3 shrink-0 text-accent-mark" />
       <input
         type="text"

@@ -414,7 +414,9 @@ function QuickAdd({
 
   return (
     <div>
-      <div className={`day-plan-add${typing ? " is-typing" : ""}${bare ? " is-bare" : ""}`}>
+      <div
+        className={`day-plan-add field-shell${typing ? " is-typing" : ""}${bare ? " is-bare" : ""}`}
+      >
         <Icon name="plus" className="size-3 shrink-0 text-accent-mark" />
         <input
           ref={input}
