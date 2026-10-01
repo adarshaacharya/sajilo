@@ -87,7 +87,7 @@ Waybar, swaybar, i3bar and polybar show Sajilo's flag in their tray, if your bar
 
 ### Keep it floating, under your bar
 
-On Wayland (sway, Hyprland, niri), the compositor decides where every window opens, and apps can't choose. So Sajilo can't put itself under its icon there, and a pinned Sajilo opens where the compositor says, not where you left it. A window rule fixes both. Sajilo's title is always `Sajilo`.
+On Wayland (sway, Hyprland, niri), the compositor decides where every window opens, and apps can't choose. So Sajilo can't put itself under its icon there, and a pinned Sajilo opens where the compositor says, not where you left it. A window rule fixes both. Sajilo's title is `Sajilo`, and `Sajilo Mini` while the [mini view](/docs/make-it-yours.html) is on.
 
 **sway** (`~/.config/sway/config`) or **i3**:
 
@@ -121,6 +121,37 @@ window-rule {
 ```
 
 Floating windows need niri 25.01 or newer.
+
+### Mini view on a tiling setup
+
+Most tiling window managers ignore an app's own resizing, so pressing **Mini view** can leave the small strip inside a full-size window. From version 0.1.34 the window is titled `Sajilo Mini` while the mini view is on, so you can give it a rule of its own. The rules above match `Sajilo` exactly, so they don't catch it.
+
+**Hyprland**:
+
+```bash
+windowrulev2 = float, title:^(Sajilo Mini)$
+windowrulev2 = size 320 72, title:^(Sajilo Mini)$
+windowrulev2 = pin, title:^(Sajilo Mini)$
+```
+
+**sway** or **i3**:
+
+```bash
+for_window [title="^Sajilo Mini$"] floating enable, sticky enable, resize set 320 72
+```
+
+**niri**:
+
+```kdl
+window-rule {
+    match title="^Sajilo Mini$"
+    open-floating true
+    default-column-width { fixed 320; }
+    default-window-height { fixed 72; }
+}
+```
+
+Some window managers only apply a size rule when a window first opens. If the strip stays large after you switch to mini view, quit Sajilo and open it again: it reopens in mini view and the rule applies.
 
 ### Reminders on a tiling setup
 
