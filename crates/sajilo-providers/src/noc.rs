@@ -1,135 +1,147 @@
 //! Nepal Oil Corporation, the state importer that sets every retail fuel price
-//! in the country. Ported from `NOCFuelProvider.swift`.
+//! in the country.
 //!
-//! NOC publishes no API, only a server-rendered price history table. That table
-//! is the primary source rather than a mirror of one, and it is read the way a
-//! reader would: find the heading row, then take the two most recent revisions.
-//! Column *positions* are never assumed — headings are matched by name, so NOC
-//! inserting a column cannot silently shift diesel into the kerosene slot.
+//! NOC's site became a client-rendered app in late 2026, so its old price table
+//! is no longer in the page. The app reads the same public, keyless JSON the
+//! site itself uses: every price revision, per fuel and depot. Kathmandu's
+//! revisions are the ones shown, as the old table showed.
+//!
+//! Decoded defensively: every field the response carries is optional here, a
+//! fuel is matched by its slug rather than a position, and a row that cannot
+//! be read is skipped rather than failing the whole snapshot.
 
-use std::collections::HashMap;
-
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, Utc};
 use sajilo_api::bazar::{Fuel, FuelPrice, FuelPriceSnapshot};
 use sajilo_api::load_state::Freshness;
+use serde::Deserialize;
 
 use crate::error::{ProviderError, Result};
-use crate::html;
 use crate::http::HttpClient;
 
 pub const SOURCE_NAME: &str = "NOC fuel";
 
-pub const ENDPOINT: &str = "https://noc.org.np/retailprice";
+/// Kathmandu's revisions only: the full list is close to a megabyte.
+pub const ENDPOINT: &str = "https://beta.noc.org.np/api/fuel-prices?search=Kathmandu&per_page=500";
+
+/// The depot whose prices are shown.
+const LOCATION: &str = "kathmandu";
 
 pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<FuelPriceSnapshot> {
     let body = client.get_text(SOURCE_NAME, ENDPOINT).await?;
     parse(&body, now)
 }
 
-pub fn parse(page: &str, now: DateTime<Utc>) -> Result<FuelPriceSnapshot> {
-    // Selected by heading rather than position, so another table appearing
-    // above this one on the page does not break the read.
-    let rows = html::table_with_headings(page, &["petrol", "diesel"])
-        .filter(|rows| rows.len() >= 2)
-        .ok_or_else(|| ProviderError::parse(SOURCE_NAME, "no price table on the page"))?;
+#[derive(Deserialize)]
+struct Response {
+    #[serde(default)]
+    data: Vec<Row>,
+}
 
-    let columns = column_indices(&rows[0]);
-    if columns.is_empty() {
-        return Err(ProviderError::parse(
-            SOURCE_NAME,
-            "the table carries no recognisable fuel column",
-        ));
+#[derive(Deserialize)]
+struct Row {
+    price: Option<serde_json::Value>,
+    price_date: Option<String>,
+    fuel_type: Option<Named>,
+    location: Option<Named>,
+}
+
+#[derive(Deserialize)]
+struct Named {
+    slug: Option<String>,
+    name: Option<String>,
+}
+
+/// One revision of one fuel's price.
+struct Revision {
+    fuel: Fuel,
+    price: f64,
+    at: NaiveDateTime,
+}
+
+pub fn parse(body: &str, now: DateTime<Utc>) -> Result<FuelPriceSnapshot> {
+    let response: Response = serde_json::from_str(body).map_err(|error| {
+        ProviderError::parse(SOURCE_NAME, format!("not the price list: {error}"))
+    })?;
+
+    let revisions: Vec<Revision> = response.data.iter().filter_map(revision).collect();
+
+    let mut prices = Vec::new();
+    let mut effective_from: Option<NaiveDate> = None;
+    for fuel in Fuel::ALL {
+        let mut own: Vec<&Revision> = revisions.iter().filter(|rev| rev.fuel == fuel).collect();
+        own.sort_by_key(|rev| std::cmp::Reverse(rev.at));
+        let Some(current) = own.first() else {
+            continue;
+        };
+        // The revision it replaced is the newest one from an earlier day: NOC
+        // sometimes enters the same day's price twice, minutes apart.
+        let previous = own
+            .iter()
+            .find(|rev| rev.at.date() < current.at.date())
+            .map_or(current.price, |rev| rev.price);
+        prices.push(FuelPrice {
+            fuel,
+            price: current.price,
+            previous_price: previous,
+        });
+        let day = current.at.date();
+        effective_from = Some(effective_from.map_or(day, |known| known.max(day)));
     }
-
-    // Newest revision first, which is how NOC orders the table. The row under
-    // it is the revision it replaced, giving the change figure.
-    let current = &rows[1];
-    let previous = rows.get(2).unwrap_or(current);
-
-    let prices: Vec<FuelPrice> = Fuel::ALL
-        .into_iter()
-        .filter_map(|fuel| {
-            let column = *columns.get(&fuel)?;
-            let price = amount(current, column)?;
-            Some(FuelPrice {
-                fuel,
-                price,
-                // A first-ever revision has nothing before it; treating the
-                // price as its own predecessor reports "no change" rather than
-                // a fabricated swing from zero.
-                previous_price: amount(previous, column).unwrap_or(price),
-            })
-        })
-        .collect();
 
     if prices.is_empty() {
         return Err(ProviderError::parse(
             SOURCE_NAME,
-            "no fuel price could be read from the newest revision",
+            "no Kathmandu fuel price in the response",
         ));
     }
 
-    let effective_from = current
-        .first()
-        .and_then(|cell| effective_date(cell))
-        .unwrap_or_else(|| now.date_naive());
-
     Ok(FuelPriceSnapshot {
         prices,
-        effective_from,
+        effective_from: effective_from.unwrap_or_else(|| now.date_naive()),
         freshness: Freshness::new(now),
     })
 }
 
-fn column_indices(heading: &[String]) -> HashMap<Fuel, usize> {
-    let mut indices = HashMap::new();
-    for (index, cell) in heading.iter().enumerate() {
-        let name = cell.to_lowercase();
-        for fuel in Fuel::ALL {
-            if name.contains(fuel.column_heading()) {
-                // First column wins: NOC has never repeated a heading, and
-                // taking a later one would silently prefer a stray match.
-                indices.entry(fuel).or_insert(index);
-            }
-        }
+fn revision(row: &Row) -> Option<Revision> {
+    let location = row.location.as_ref()?;
+    let place = location.name.as_deref().or(location.slug.as_deref())?;
+    if !place.trim().eq_ignore_ascii_case(LOCATION) {
+        return None;
     }
-    indices
+    let fuel = fuel(row.fuel_type.as_ref()?.slug.as_deref()?)?;
+    let price = match row.price.as_ref()? {
+        serde_json::Value::String(text) => text.trim().replace(',', "").parse().ok()?,
+        serde_json::Value::Number(number) => number.as_f64()?,
+        _ => return None,
+    };
+    // NaN fails this too.
+    if !price.is_finite() || price <= 0.0 {
+        return None;
+    }
+    let at = price_date(row.price_date.as_deref()?)?;
+    Some(Revision { fuel, price, at })
 }
 
-fn amount(row: &[String], index: usize) -> Option<f64> {
-    let value = html::parse_number(row.get(index)?)?;
-    (value > 0.0).then_some(value)
+/// NOC's slug for each fuel. Aviation fuels are left out.
+fn fuel(slug: &str) -> Option<Fuel> {
+    Some(match slug.trim() {
+        "petrol" => Fuel::Petrol,
+        "diesel" => Fuel::Diesel,
+        "kerosene" => Fuel::Kerosene,
+        "lp-gas" | "lpg" => Fuel::Lpg,
+        _ => return None,
+    })
 }
 
-/// The effective-date cell pairs a Bikram Sambat date with the AD one in
-/// brackets, and NOC has typed it several ways over the years —
-/// `2083.04.17(2026.08.02)`, `2083.03.16 (2026.06.30)`. The AD date inside the
-/// brackets is the part that parses unambiguously, so this takes that and
-/// tolerates whichever separators surround it.
-pub fn effective_date(cell: &str) -> Option<NaiveDate> {
-    let open = cell.find('(')?;
-    let close = cell.find(')')?;
-    if close <= open {
-        return None;
-    }
-
-    let parts: Vec<&str> = cell[open + 1..close]
-        .split(['.', '-', '/'])
-        .map(str::trim)
-        .filter(|part| !part.is_empty())
-        .collect();
-    if parts.len() != 3 {
-        return None;
-    }
-
-    let year: i32 = parts[0].parse().ok()?;
-    let month: u32 = parts[1].parse().ok()?;
-    let day: u32 = parts[2].parse().ok()?;
-    // The bracketed date is the Gregorian one by NOC's own convention — a BS
-    // year cannot be told apart from an AD one numerically (BS 2083 and AD 2083
-    // are the same integer), so this only rejects years no calendar would use.
-    if year <= 1900 {
-        return None;
-    }
-    NaiveDate::from_ymd_opt(year, month, day)
+/// `2026-10-01 09:39:00`, or the date alone.
+pub fn price_date(text: &str) -> Option<NaiveDateTime> {
+    let text = text.trim();
+    NaiveDateTime::parse_from_str(text, "%Y-%m-%d %H:%M:%S")
+        .ok()
+        .or_else(|| {
+            NaiveDate::parse_from_str(text.get(..10)?, "%Y-%m-%d")
+                .ok()?
+                .and_hms_opt(0, 0, 0)
+        })
+        .filter(|at| at.year() > 1900)
 }

@@ -1012,7 +1012,7 @@
       "fuel": {
         "status": "fresh",
         "value": {
-          "effectiveFrom": "2026-08-02",
+          "effectiveFrom": "2026-10-01",
           "freshness": {
             "fetchedAt": "2026-08-26T14:20:00Z",
             "sourceTimestamp": null
@@ -1020,17 +1020,17 @@
           "prices": [
             {
               "fuel": "petrol",
-              "previousPrice": 197.0,
+              "previousPrice": 200.0,
               "price": 200.0
             },
             {
               "fuel": "diesel",
-              "previousPrice": 195.0,
+              "previousPrice": 200.0,
               "price": 200.0
             },
             {
               "fuel": "kerosene",
-              "previousPrice": 195.0,
+              "previousPrice": 200.0,
               "price": 200.0
             },
             {
@@ -26969,9 +26969,6 @@
     "group_number:1973:0": "1,973",
     "group_number:1973:1": "1,973.0",
     "group_number:1973:2": "1,973.00",
-    "group_number:197:0": "197",
-    "group_number:197:1": "197.0",
-    "group_number:197:2": "197.00",
     "group_number:198.36:0": "198",
     "group_number:198.36:1": "198.4",
     "group_number:198.36:2": "198.36",

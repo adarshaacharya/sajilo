@@ -207,16 +207,6 @@ impl Fuel {
             Self::Lpg => "per cylinder",
         }
     }
-
-    /// The column heading NOC uses, lowercased.
-    pub fn column_heading(self) -> &'static str {
-        match self {
-            Self::Petrol => "petrol",
-            Self::Diesel => "diesel",
-            Self::Kerosene => "kerosene",
-            Self::Lpg => "lpg",
-        }
-    }
 }
 
 impl FuelPrice {

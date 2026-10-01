@@ -469,7 +469,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
         "get_bazar".to_owned(),
         json!({
             "metals": load_state(fenegosida::parse(&read("fenegosida/today.json"), now)),
-            "fuel": load_state(noc::parse(&read("noc/prices.html"), now)),
+            "fuel": load_state(noc::parse(&read("noc/fuel-prices.json"), now)),
             "vegetables": load_state(kalimati::parse(&read("kalimati/prices.html"), now)),
         }),
     );
