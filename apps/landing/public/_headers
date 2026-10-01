@@ -1,0 +1,4 @@
+# The Linux install script has no extension; serve it as text so a browser
+# shows it rather than downloading it.
+/install/linux
+  Content-Type: text/plain; charset=utf-8

@@ -14,6 +14,18 @@ Sajilo runs on **64-bit (x86_64) Linux**, on **Ubuntu 22.04 or newer** and distr
 | **.rpm** | Fedora, openSUSE |
 | **AppImage** | Arch, Manjaro, EndeavourOS, and anything else |
 
+## Quick install
+
+One command picks the right package for your distribution and installs it:
+
+```bash
+curl -fsSL https://sajilo.fyi/install/linux | sh
+```
+
+It installs the **.deb** with `apt` on Debian, Ubuntu, Mint and their family, the **.rpm** with `dnf` or `zypper` on Fedora and openSUSE, and **sajilo-bin** from the AUR on Arch when `yay` or `paru` is installed. Anywhere else it puts the **AppImage** in `~/.local/bin` and adds Sajilo to your applications menu. The .deb and .rpm ask for your password, since they install for the whole system.
+
+Rather see what it does first? [Read the script](/install/linux), or install by hand below.
+
 ## With the .deb
 
 [Download the .deb](/dl/linux-deb) (**Sajilo-linux-amd64.deb**), then install it from the folder you saved it in:
