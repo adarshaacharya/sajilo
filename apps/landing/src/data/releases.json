@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.34",
+    "name": "Sajilo v0.1.34",
+    "publishedAt": "2026-10-01T17:19:58Z",
+    "body": "\r\n\r\n## Notes\r\n\r\nA new **Notes** tab for anything you want to keep: a shopping list, a number, a draft.\r\n\r\n- Format with headings, lists and bold, and search across all your notes.\r\n- The **ने** button switches to Nepali typing.\r\n- Deleted notes go to a **Trash** first, with the number of days each has left. Put a note back, or delete it for good.\r\n- Your first note is a welcome note, written in your language.\r\n\r\n## Choose your tab bar\r\n\r\nThe tab bar now shows **Today plus up to five tabs**, and everything else sits under **More**. Pick and reorder them in **Settings › Modules › Tab bar**.\r\n\r\n## Day plans as a to-do list\r\n\r\n- **One line adds a plan.** Type \"Meeting tomorrow 3pm\" or \"भोलि\" and Sajilo picks out the day, time, reminder and repeat.\r\n- **Tick plans off** day by day. A ticked plan isn't reminded.\r\n- Edit a plan in place, and delete it with undo. Today's plans and the add line are also on the home screen.\r\n\r\n## Notifications in one place\r\n\r\n**Settings › Notifications** has one switch per kind of reminder, each with when it arrives.\r\n\r\n- **Pause all reminders** for an hour, 24 hours, or until morning.\r\n- Every reminder card has a **⋯** menu to turn that kind off.\r\n\r\n## Shares and mutual funds\r\n\r\n- **Every share has a price chart:** 1D (the latest session, trade by trade), 1W, 1M, 3M, 1Y and 5Y.\r\n- **A share's page reads like ShareSansar or Merolagani:**\r\n  - Market price (LTP)\r\n  - Today's trading\r\n  - The 52-week range\r\n  - New **Fundamentals**: EPS, P/E, book value, PBV, market cap and more\r\n  - Cash, bonus and right-share **dividends**\r\n- **Mutual funds now have a NAV chart** going back years: 1M, 3M, 1Y and All. Closed-end funds get the market-price chart.\r\n- A fund's page now shows **returns** (1M, 3M, 6M, 1Y, since start) and its **recent NAVs** as a table.\r\n- Labels now use the terms the portals use: Daily, Weekly and Monthly NAV, LTP, premium and discount.\r\n\r\n## Refresh now tells you what it found\r\n\r\nAfter a refresh you'll see \"Updated\", \"Already up to date\", or that a source couldn't be reached and saved data is showing. Tapping refresh again within 30 seconds says \"Just checked\".\r\n\r\n## Break reminders\r\n\r\n- **Customise > Messages** lists every line a break card can say, in English and Nepali. Reword lines, switch them off, or add your own.\r\n- Look away, Stand up and Water can each show **one message of your own** instead.\r\n- The countdown rings now always run from the moment the card opens.\r\n\r\n## Fixes\r\n\r\n- **Fuel prices** load again. NOC changed its website.\r\n- **Crypto prices** load again from Nepal, now from CoinPaprika and Binance, with 250 coins. Coins you'd starred carry over.\r\n- **Today** moves to the new day by itself without a restart.\r\n- **Escape** no longer closes a pinned Sajilo.\r\n- **Text fields** have length limits, so very long text can't be pasted in by accident.\r\n\r\n## Linux\r\n\r\n- **GNOME:** Sajilo's own top-bar button opens it in **one click**. It needs one log-out after updating, and Sajilo tells you when.\r\n- **Ubuntu with the dock at the bottom:** Sajilo opens under the top bar again, not at the bottom of the screen.\r\n- **Ubuntu 26.04:** a click outside closes Sajilo again.\r\n- **Tiling window managers (Hyprland, sway, i3, niri):** in mini view the window is titled **\"Sajilo Mini\"**, so you can give the strip its own window rule. The rules are in the [Linux install guide](https://sajilo.fyi/docs/install-linux.html)\r\n\r\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.34",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-macos-arm64.dmg",
+        "size": 10931552
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-macos-x64.dmg",
+        "size": 11591181
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-windows-x64.exe",
+        "size": 8130170
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-linux-amd64.deb",
+        "size": 14858808
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-linux-x86_64.AppImage",
+        "size": 160172536
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.34/Sajilo-linux-x86_64.rpm",
+        "size": 14859246
+      }
+    ]
+  },
+  {
     "version": "v0.1.33",
     "name": "Sajilo v0.1.33",
     "publishedAt": "2026-09-29T05:48:33Z",
