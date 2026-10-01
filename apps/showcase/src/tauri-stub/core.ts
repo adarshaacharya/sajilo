@@ -48,6 +48,8 @@ function key(command: string, args: Args): string {
       return `plans_for_day:${args.year}:${args.month}:${args.day}`;
     case "panchanga_for":
       return `panchanga_for:${args.isoDate}`;
+    case "get_fund_nav_history":
+      return `get_fund_nav_history:${args.symbol}`;
     case "get_setting":
       return `get_setting:${args.key}`;
     case "shift_month":

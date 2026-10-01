@@ -12,6 +12,7 @@ import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
+import type { NavHistory } from "../../types/api/NavHistory";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { NoteDocument } from "../../types/api/NoteDocument";
@@ -878,6 +879,8 @@ export const api = {
   /** Every mutual fund's latest NAV, from ShareHub or ShareSansar; `refresh` forces a live pull. */
   getMutualFunds: (refresh = false) =>
     invoke<LoadState<MutualFundSnapshot>>("get_mutual_funds", { refresh }),
+  getFundNavHistory: (symbol: string, refresh = false) =>
+    invoke<LoadState<NavHistory>>("get_fund_nav_history", { symbol, refresh }),
   /** The top coins by market value, in US dollars, from CoinPaprika or Binance; `refresh` forces a live pull. */
   getCrypto: (refresh = false) => invoke<LoadState<CryptoSnapshot>>("get_crypto", { refresh }),
   /** One coin's price over the last 1, 7, 30 or 365 days. */

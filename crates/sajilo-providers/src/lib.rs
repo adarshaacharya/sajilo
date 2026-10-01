@@ -11,6 +11,7 @@ pub mod crypto;
 pub mod dividends;
 pub mod error;
 pub mod fenegosida;
+pub mod fund_nav_history;
 pub mod government_updates;
 pub mod hamropatro;
 pub mod hamropatro_metals;

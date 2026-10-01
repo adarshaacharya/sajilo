@@ -16,8 +16,10 @@ import {
 } from "../_lib/funds";
 import { issueDate } from "../_lib/ipo";
 import { FollowButton } from "./follow-button";
+import { FundNavChart, FundNavTables } from "./fund-nav-chart";
 import { FundBadge, NavDate } from "./fund-row";
 import { SipSetup } from "./sip-setup";
+import { StockChart } from "./stock-chart";
 
 /** Shares are counted whole, grouped the Nepali way: 78,73,248. */
 const shareCount = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
@@ -134,6 +136,11 @@ export function FundDetail({
             ` · ${t("funds.since").replace("{date}", date(fund.previous.date))}`}
         </p>
 
+        {/* An open-end fund's history is its NAV; a closed-end one trades on
+            NEPSE, so its chart is the market price, like any share's. */}
+        {fund.kind === "openEnd" && <FundNavChart symbol={fund.symbol} />}
+        {closed && <StockChart symbol={fund.symbol} />}
+
         {tiles.length > 0 && (
           <div className="section-divider mt-2.5 grid grid-cols-3 gap-2 pt-2">
             {tiles.map((tile) => (
@@ -147,6 +154,8 @@ export function FundDetail({
             ))}
           </div>
         )}
+
+        {fund.kind === "openEnd" && <FundNavTables symbol={fund.symbol} />}
 
         {facts.length > 0 && (
           <div className="section-divider mt-2.5 grid grid-cols-2 gap-2 pt-2">

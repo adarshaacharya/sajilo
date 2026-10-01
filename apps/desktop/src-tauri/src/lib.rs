@@ -268,6 +268,7 @@ pub fn run() {
             commands::ipos::get_ipos,
             commands::dividends::get_dividends,
             commands::mutual_funds::get_mutual_funds,
+            commands::mutual_funds::get_fund_nav_history,
             commands::crypto::get_crypto,
             commands::crypto::get_crypto_chart,
             commands::crypto::get_crypto_coins,

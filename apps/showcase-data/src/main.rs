@@ -30,8 +30,8 @@ use sajilo_core::calendar::month::month;
 use sajilo_core::calendar::weekly_holiday::weekly_holiday;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
-    cdsc, crypto, dividends, fenegosida, hamropatro, kalimati, kantipur, market_status,
-    mutual_funds, nepse_intraday, noc, nrb, open_meteo, ratopati, rss, sharesansar,
+    cdsc, crypto, dividends, fenegosida, fund_nav_history, hamropatro, kalimati, kantipur,
+    market_status, mutual_funds, nepse_intraday, noc, nrb, open_meteo, ratopati, rss, sharesansar,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -504,6 +504,17 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
         "get_mutual_funds".to_owned(),
         load_state(mutual_funds::parse_sharehub(
             &read("sharehub/mutual-fund-nav.json"),
+            now,
+        )),
+    );
+    // The one fund whose NAV history is recorded; others answer nothing,
+    // rather than borrowing its chart.
+    commands.insert(
+        "get_fund_nav_history:NMBSBF".to_owned(),
+        load_state(fund_nav_history::parse(
+            "NMBSBF",
+            Some(&read("sharesansar/nav-chart-1082-daily.json")),
+            Some(&read("sharesansar/nav-chart-1082-weekly.json")),
             now,
         )),
     );

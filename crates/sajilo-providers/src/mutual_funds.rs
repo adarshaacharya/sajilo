@@ -57,7 +57,10 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<MutualFund
 }
 
 /// Every page of one ShareSansar tab, following the row count it reports.
-async fn sharesansar_tab(client: &HttpClient, kind: FundKind) -> Result<Vec<(FundKind, String)>> {
+pub(crate) async fn sharesansar_tab(
+    client: &HttpClient,
+    kind: FundKind,
+) -> Result<Vec<(FundKind, String)>> {
     let tab = match kind {
         FundKind::OpenEnd => 2,
         FundKind::ClosedEnd => -1,

@@ -75,6 +75,23 @@ dto! {
         pub held_shares: Option<f64>,
     }
 
+    /// One NAV on a fund's chart.
+    pub struct NavHistoryPoint {
+        /// Seconds since 1970: midnight UTC of the day the NAV is as of, the
+        /// way a share's daily chart marks its days.
+        pub time: u32,
+        pub nav: f64,
+    }
+
+    /// An open-end fund's NAV over the years it has published, oldest first:
+    /// daily where the manager publishes daily, weekly before that.
+    pub struct NavHistory {
+        pub symbol: String,
+        pub points: Vec<NavHistoryPoint>,
+        pub source: String,
+        pub freshness: Freshness,
+    }
+
     pub struct MutualFundSnapshot {
         /// Open-end first, then closed-end, then matured; by name within each.
         #[serde(default)]
