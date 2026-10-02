@@ -54,6 +54,15 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
           </details>
         </div>
       </div>
+      <!-- Linux visitors can skip choosing a package: the install script picks
+           the right one. -->
+      <div class="linux-cmd" id="linux-cmd" hidden>
+        <span>Or install from a terminal:</span>
+        <div class="linux-cmd-box">
+          <code>curl -fsSL https://sajilo.fyi/install/linux | sh</code>
+          <button type="button" class="linux-cmd-copy" aria-label="Copy the install command">Copy</button>
+        </div>
+      </div>
       <!-- Unsigned builds: macOS blocks the first open. Said here, where people
            click Download, not only in the Install section at the bottom. -->
       <p class="mac-note" id="mac-note" hidden aria-live="polite">
@@ -171,7 +180,12 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
     animation: rise 1s var(--ease) 0.16s both;
   }
 
+  /* Its entrance animation gives it a layer of its own, and the notes after
+     it get theirs later, so without a z-index they paint over the open
+     platform menu. */
   .cta {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
     gap: 22px;
@@ -187,6 +201,48 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
   }
   .platforms {
     position: relative;
+  }
+  .linux-cmd {
+    display: grid;
+    gap: 6px;
+    max-width: 52ch;
+    margin-top: 16px;
+    font-size: 13.5px;
+    color: var(--paper-3);
+    animation: rise 1s var(--ease) 0.3s both;
+  }
+  .linux-cmd[hidden] {
+    display: none;
+  }
+  .linux-cmd-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 12px;
+    border-radius: 10px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+  .linux-cmd-box code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--paper);
+  }
+  .linux-cmd-copy {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+    color: var(--gilt);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .linux-cmd-copy:hover {
+    border-color: var(--gilt);
   }
   .install-guides {
     max-width: 46ch;
@@ -414,6 +470,22 @@ const menubarDate = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today
   document.querySelectorAll<HTMLAnchorElement>(".platforms a").forEach((a) => {
     a.hidden = a.dataset.platform === detected.platform;
   });
+
+  // Linux visitors get the one-line install under the button.
+  const linuxCmd = document.getElementById("linux-cmd");
+  if (linuxCmd && detected.platform.startsWith("linux")) {
+    linuxCmd.hidden = false;
+    const copy = linuxCmd.querySelector<HTMLButtonElement>(".linux-cmd-copy");
+    copy?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(linuxCmd.querySelector("code")?.textContent ?? "");
+        copy.textContent = "Copied";
+      } catch {
+        copy.textContent = "Select it";
+      }
+      window.setTimeout(() => (copy.textContent = "Copy"), 1600);
+    });
+  }
 
   // Mac visitors get the Gatekeeper note under the button, and the next steps
   // once they have actually started a macOS download.

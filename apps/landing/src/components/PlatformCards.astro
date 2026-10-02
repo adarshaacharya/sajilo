@@ -28,7 +28,8 @@ const platforms = [
   {
     id: "linux",
     name: "Linux",
-    step: "The .deb for Ubuntu and Mint, the .rpm for Fedora and openSUSE, or the AppImage anywhere else, Arch included.",
+    step: "One command picks the right package and installs it. Or download the .deb, .rpm or AppImage yourself.",
+    command: "curl -fsSL https://sajilo.fyi/install/linux | sh",
     find: "In your top bar. No top bar, or nothing there? Open Sajilo from your apps menu.",
     link: { href: "/docs/install-linux.html", label: "Commands and tray setup" },
     dl: [
@@ -56,6 +57,14 @@ const Heading = level;
       </div>
       <p class="platform-step">{p.step}</p>
       <p class="platform-find"><span>Where it lives</span>{p.find}</p>
+      {p.command && (
+        <div class="platform-cmd">
+          <code>{p.command}</code>
+          <button type="button" class="platform-copy" data-copy={p.command} aria-label="Copy the install command">
+            Copy
+          </button>
+        </div>
+      )}
       <div class="platform-dl">
         {p.dl.map((d) => (
           <a class="btn btn--ghost btn--sm" href={`/dl/${d.id}`} data-platform={d.id}>
@@ -71,6 +80,18 @@ const Heading = level;
 
 <script>
   import { detectPlatform } from "../scripts/platform";
+
+  document.querySelectorAll<HTMLButtonElement>(".platform-copy").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Select it";
+      }
+      window.setTimeout(() => (button.textContent = "Copy"), 1600);
+    });
+  });
 
   // A guess marks, it never hides: the visitor's card gets "For you" and its
   // likeliest file is filled in, and every other button stays as it was.
@@ -132,6 +153,36 @@ const Heading = level;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--gilt);
+  }
+  .platform-cmd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 12px;
+    border-radius: 10px;
+    background: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .platform-cmd code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12.5px;
+    color: var(--paper);
+  }
+  .platform-copy {
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+    color: var(--gilt);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .platform-copy:hover {
+    border-color: var(--gilt);
   }
   .platform-dl {
     display: flex;
