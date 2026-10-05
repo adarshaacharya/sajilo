@@ -6,6 +6,9 @@ compiled into the app as the offline default, and published, signed, to
 merge it: CI validates, signs and deploys it, and every running copy picks it
 up within about three hours. Nothing else changes a remote value.
 
+**How to publish, undo, rotate keys and troubleshoot:
+[docs/remote-config.md](../../docs/remote-config.md).**
+
 | Pack | What | Rust type |
 |---|---|---|
 | `jokes.json` | Break, meal and bedtime jokes, and the cheers after a break | `sajilo_core::config::jokes::JokesPack` |

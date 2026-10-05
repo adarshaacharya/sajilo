@@ -10,6 +10,8 @@ on:
       - "crates/sajilo-config/**"
       - "crates/sajilo-core/src/config/**"
       - "crates/sajilo-api/src/announcement.rs"
+      - "crates/sajilo-api/src/news.rs"
+      - "crates/sajilo-api/src/radio.rs"
       - "apps/config-publish/**"
       - "apps/config/**"
       - ".github/workflows/publish-config.yml"

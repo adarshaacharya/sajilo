@@ -114,6 +114,8 @@ Non-negotiables:
   `publish-config.yml` validates, signs, and deploys them. Nothing at
   `config.sajilo.fyi` is edited by hand. Every pack type has a `validate()`
   that bounds what even a correctly signed pack can do; widen it deliberately.
+  The runbook (publishing, rollback, keys, adding a pack) is
+  `docs/remote-config.md`.
 - The landing page shows the app, not pictures of it. Nothing in
   `apps/showcase` or `apps/landing` may hand-write sample data: every value
   rendered comes from the recording (`apps/landing/src/data/showcase.ts` is the
