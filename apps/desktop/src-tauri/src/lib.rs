@@ -291,6 +291,7 @@ pub fn run() {
             commands::weather::get_weather,
             commands::weather::list_places,
             commands::forex::get_forex,
+            commands::forex::get_forex_history,
             commands::news::get_news,
             commands::notes::notes_list,
             commands::notes::notes_open,

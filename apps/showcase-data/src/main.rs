@@ -517,10 +517,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     );
     record_crypto(commands, &read, now);
     record_notes(commands, now);
-    commands.insert(
-        "get_forex".to_owned(),
-        load_state(nrb::parse(&read("nrb/rates.json"), now)),
-    );
+    record_forex(commands, &read, now);
     commands.insert(
         "get_rashifal".to_owned(),
         load_state(hamropatro::parse(&read("hamropatro/rashifal.html"), now)),
@@ -665,7 +662,7 @@ fn system(commands: &mut BTreeMap<String, Value>) {
 /// rather than borrowing its chart.
 fn fund_history(
     commands: &mut BTreeMap<String, Value>,
-    read: &impl Fn(&str) -> String,
+    read: &dyn Fn(&str) -> String,
     now: DateTime<Utc>,
 ) {
     commands.insert(
@@ -677,4 +674,37 @@ fn fund_history(
             now,
         )),
     );
+}
+
+/// Today's NRB table and the chart's history, both from recorded NRB pages.
+fn record_forex(
+    commands: &mut BTreeMap<String, Value>,
+    read: &dyn Fn(&str) -> String,
+    now: DateTime<Utc>,
+) {
+    commands.insert(
+        "get_forex".to_owned(),
+        load_state(nrb::parse(&read("nrb/rates.json"), now)),
+    );
+    // The forex chart: the same parser over two recorded pages of NRB
+    // history, kept to the default favourites — the rows a visitor sees —
+    // so the recording the site downloads stays small.
+    let history = nrb::parse_history(
+        &[
+            read("nrb/history-page-1.json"),
+            read("nrb/history-page-2.json"),
+        ],
+        now,
+    )
+    .map(|mut history| {
+        let shown = sajilo_api::forex::DEFAULT_FAVOURITES;
+        history
+            .series
+            .retain(|code, _| shown.contains(&code.as_str()));
+        history
+            .units
+            .retain(|code, _| shown.contains(&code.as_str()));
+        history
+    });
+    commands.insert("get_forex_history".to_owned(), load_state(history));
 }

@@ -29,6 +29,9 @@ export function ForexRates({
   const [amount, setAmount] = useState(1);
   const [code, setCode] = useState("USD");
   const [reversed, setReversed] = useState(false);
+  /** The one currency whose chart is open, if any. */
+  const [charted, setCharted] = useState<string | null>(null);
+  const toggleChart = (next: string) => setCharted((current) => (current === next ? null : next));
 
   useEffect(() => {
     if (modules.forexFavourites[0]) setCode(modules.forexFavourites[0]);
@@ -108,7 +111,12 @@ export function ForexRates({
             {t("forex.favourites")}
           </p>
           {favourites.map((rate) => (
-            <ForexRateRow key={rate.currencyCode} rate={rate} />
+            <ForexRateRow
+              key={rate.currencyCode}
+              rate={rate}
+              open={charted === rate.currencyCode}
+              onToggle={() => toggleChart(rate.currencyCode)}
+            />
           ))}
         </section>
       )}
@@ -119,7 +127,12 @@ export function ForexRates({
             {t("forex.all-currencies")}
           </p>
           {others.map((rate) => (
-            <ForexRateRow key={rate.currencyCode} rate={rate} />
+            <ForexRateRow
+              key={rate.currencyCode}
+              rate={rate}
+              open={charted === rate.currencyCode}
+              onToggle={() => toggleChart(rate.currencyCode)}
+            />
           ))}
         </section>
       )}

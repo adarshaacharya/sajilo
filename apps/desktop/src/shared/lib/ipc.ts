@@ -6,6 +6,7 @@ import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
 import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DirectoryResponse } from "../../types/api/DirectoryResponse";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
+import type { ForexHistory } from "../../types/api/ForexHistory";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
@@ -929,6 +930,9 @@ export const api = {
   listPlaces: () => invoke<Place[]>("list_places"),
 
   getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
+  /** A year of NRB daily rates for every currency, for the chart. */
+  getForexHistory: (refresh = false) =>
+    invoke<LoadState<ForexHistory>>("get_forex_history", { refresh }),
 
   getNews: (refresh = false) => invoke<LoadState<NewsDigest>>("get_news", { refresh }),
   getAnnouncement: (refresh = false) =>
