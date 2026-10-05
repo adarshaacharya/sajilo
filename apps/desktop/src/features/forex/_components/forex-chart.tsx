@@ -51,7 +51,7 @@ export function ForexChart({ code }: { code: string }) {
   const span: ChartSpan = range === "1y" ? "year" : "days";
 
   return (
-    <div className="pb-2.5">
+    <div>
       <div className="relative">
         <TabStrip
           label={t("stocks.chart-range")}
