@@ -7,6 +7,7 @@ import { useUpdater } from "../../../shared/context/updater-context";
 import { api, type NotificationOptions } from "../../../shared/lib/ipc";
 import { triggerSetupPreview } from "../../calendar/_components/setup-card";
 import { SOURCES } from "../notifications";
+import { ContentSection } from "./content-section";
 import { SettingsSection } from "./settings-section";
 
 export function SystemTab() {
@@ -144,6 +145,8 @@ export function SystemTab() {
           )}
         </SettingsSection>
       )}
+
+      <ContentSection />
 
       <SettingsSection title={t("settings.reminders")}>
         <button

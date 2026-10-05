@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Static assets only: no `main`, no script, no KV. Requests for static
+  // assets are free and unlimited on Cloudflare's free plan and don't count
+  // toward the 100k/day Worker request limit, so however many copies of
+  // Sajilo check for config, this costs nothing and can't be run up.
+  "name": "sajilo-config",
+  "compatibility_date": "2026-09-12",
+  "assets": {
+    // Written by `sajilo-config-publish build` in CI; never committed.
+    "directory": "./dist",
+    "not_found_handling": "none"
+  },
+  // A custom domain on the sajilo.fyi zone, which is already on Cloudflare:
+  // free, and the certificate is managed.
+  "routes": [{ "pattern": "config.sajilo.fyi", "custom_domain": true }],
+  "workers_dev": false
+}

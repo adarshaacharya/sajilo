@@ -35,6 +35,7 @@ Linux.
 | `crates/sajilo-core/` | Pure Rust: calendar engine, numerals, tools. No I/O, no Tauri — compiles into the server, the desktop binary, and a plain `cargo test`. |
 | `crates/sajilo-providers/` | Fetchers and parsers for every public source (news, weather, forex, bazar, rashifal, radio). |
 | `crates/sajilo-api/` | Shared DTO contract; `ts-rs` generates the TypeScript bindings the frontend imports. |
+| `crates/sajilo-config/` | Pure Rust trust for remote config: signed manifest, hashes, rollback rule, the pack registry, the public keys. |
 | `apps/server/` | Background service: fetches and caches every source on a schedule, serves `/v1/*`. |
 | `apps/desktop/src-tauri/` | The tray shell: window, tray icon/title, notifications, backup, autostart, updater, commands. |
 | `apps/desktop/src/` | The web UI — React 19 + TypeScript + Tailwind, feature-based (`features/<name>/`, `shared/` for cross-cutting). |
@@ -42,6 +43,9 @@ Linux.
 | `apps/showcase/` | The landing page's carousel. Mounts `apps/desktop/src` in a browser with the Tauri IPC layer stubbed, so the site embeds the real app rather than screenshots of it. |
 | `apps/showcase-data/` | Records what that stub answers, by running the real engine and parsers over `fixtures/`. Regenerate with `cargo run -p sajilo-showcase-data`. |
 | `data/calendar-events/` | Bundled BS calendar events (2066–2083), embedded into `sajilo-core` at build time. |
+| `data/config/` | Remote config packs (jokes, kill switches, sources, calendar corrections, directory, announcements): bundled defaults and the live override. See its README. |
+| `apps/config/` | Static-assets-only Cloudflare Worker serving the signed packs at `config.sajilo.fyi` (free plan, no script). |
+| `apps/config-publish/` | Validates, builds and signs `data/config/` (`check`, `build`, `keygen`). |
 | `data/places/` | Every district headquarters plus major towns (English/Nepali names, coordinates, elevation) that weather can be shown for, embedded into `sajilo-core`. |
 | `fixtures/` | Recorded upstream HTML/JSON so provider parser tests never touch the network. |
 
@@ -51,6 +55,10 @@ Linux.
 cargo test --workspace       # Rust: core, providers, api, server, desktop
 cargo clippy --workspace --exclude sajilo-desktop --all-targets -- -D warnings
 cargo fmt --all --check
+```
+
+```bash
+cargo run -p sajilo-config-publish -- check   # validate data/config/ as the app would
 ```
 
 ```bash
@@ -96,6 +104,16 @@ Non-negotiables:
   since ts-rs names those files after the Rust type.
 - New Rust tests are ordinary `#[test]`s reading only from `fixtures/`, never a
   live network call.
+- Remote config is data, never code. What the app *says* and *where it
+  fetches from* (jokes and reminder copy, feed URLs and provider endpoints,
+  TTLs, kill switches, calendar corrections, directory entries) lives in
+  `data/config/*.json`: bundled into the binary as the offline default, and
+  published as the live override. How the app *computes* (calendar engine,
+  parser logic, UI strings, the telemetry allowlist, keys, CSP) stays in code.
+  Remote values only ever change through a PR merged to `main`;
+  `publish-config.yml` validates, signs, and deploys them. Nothing at
+  `config.sajilo.fyi` is edited by hand. Every pack type has a `validate()`
+  that bounds what even a correctly signed pack can do; widen it deliberately.
 - The landing page shows the app, not pictures of it. Nothing in
   `apps/showcase` or `apps/landing` may hand-write sample data: every value
   rendered comes from the recording (`apps/landing/src/data/showcase.ts` is the

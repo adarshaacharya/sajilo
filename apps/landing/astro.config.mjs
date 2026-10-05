@@ -14,5 +14,5 @@ export default defineConfig({
   markdown: { rehypePlugins: [rehypeHeadingIds, headingAnchors] },
   // The recording the page reads its numbers from lives in the showcase
   // package; Vite refuses to serve files outside the project root unless told.
-  vite: { server: { fs: { allow: [".."] } } },
+  vite: { server: { fs: { allow: ["..", "../../data/config"] } } },
 });

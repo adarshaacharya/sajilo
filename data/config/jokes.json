@@ -1,0 +1,566 @@
+{
+  "decks": {
+    "bedtime": [
+      {
+        "en": "Laptop off. The internet will still be there tomorrow.",
+        "ne": "ल्यापटप बन्द। इन्टरनेट भोलि पनि हुन्छ।"
+      },
+      {
+        "en": "Nothing good has ever been decided on a laptop after 11.",
+        "ne": "राति ११ पछि ल्यापटपमा कहिल्यै राम्रो निर्णय भएको छैन।"
+      },
+      {
+        "en": "Go to sleep. The load-shedding generation managed; so can you.",
+        "ne": "सुत्नुहोस्। लोडसेडिङ पुस्ताले सक्यो, तपाईंले पनि सक्नुहुन्छ।"
+      },
+      {
+        "en": "Sleep now, or be the one nodding off in the 10 o'clock meeting.",
+        "ne": "अहिले सुत्नुहोस्, नत्र भोलि १० बजेको मिटिङमा झुक्ने तपाईं नै हुनुहुन्छ।"
+      },
+      {
+        "en": "Sleep. The next reel is the same as the last hundred.",
+        "ne": "सुत्नुहोस्। अर्को रिल पनि अघिल्ला सयवटाजस्तै हो।"
+      },
+      {
+        "en": "Bedtime. Your bed misses you more than your manager does.",
+        "ne": "सुत्ने बेला। म्यानेजरले भन्दा ओछ्यानले तपाईंलाई बढी सम्झन्छ।"
+      },
+      {
+        "en": "Go to sleep. Tomorrow's traffic will need all your patience.",
+        "ne": "सुत्नुहोस्। भोलिको जामले तपाईंको सबै धैर्य माग्छ।"
+      },
+      {
+        "en": "Lights off. The dogs outside will bark all night anyway; get a head start.",
+        "ne": "बत्ती निभाउनुहोस्। बाहिरका कुकुर रातभर भुक्छन् नै, चाँडै सुरु गर्नुहोस्।"
+      },
+      {
+        "en": "Close the laptop before you start another \"quick fix\".",
+        "ne": "अर्को 'सानो फिक्स' सुरु गर्नुअघि ल्यापटप बन्द गर्नुहोस्।"
+      },
+      {
+        "en": "Staying up doesn't make tomorrow come any later. Sleep.",
+        "ne": "जागा बस्दैमा भोलि ढिलो आउँदैन। सुत्नुहोस्।"
+      }
+    ],
+    "breakfast": [
+      {
+        "en": "Food first, laptop later. House rule.",
+        "ne": "पहिले खाना, अनि ल्यापटप। घरको नियम।"
+      },
+      {
+        "en": "Chiya and a biscuit is not breakfast, no matter how you arrange it.",
+        "ne": "चिया र बिस्कुट जसरी मिलाए पनि बिहानको खाना होइन।"
+      },
+      {
+        "en": "Your emails were not hungry all night. You were.",
+        "ne": "रातभरि इमेल भोकाएको थिएन, तपाईं भोकाउनुभयो।"
+      },
+      {
+        "en": "Eat something. The standup will survive without you for ten minutes.",
+        "ne": "केही खानुहोस्। स्ट्यान्डअप मिटिङ १० मिनेट तपाईंबिना बाँच्छ।"
+      },
+      {
+        "en": "Eat. The pigeons at the temple had breakfast hours ago.",
+        "ne": "खानुहोस्। मन्दिरका परेवाले त घण्टौं अघि नै खाइसके।"
+      },
+      {
+        "en": "Have breakfast. Yesterday's cold chiya doesn't count.",
+        "ne": "बिहानको खाना खानुहोस्। हिजोको सेलाएको चिया गनिँदैन।"
+      },
+      {
+        "en": "Food, now. Sel roti, chiura, anything. The laptop can wait.",
+        "ne": "खाना, अहिले। सेलरोटी, चिउरा, जे भए पनि। ल्यापटप पर्खिन्छ।"
+      },
+      {
+        "en": "Eat breakfast. Your brain runs on glucose, not optimism.",
+        "ne": "खाना खानुहोस्। दिमाग आशाले होइन, ग्लुकोजले चल्छ।"
+      }
+    ],
+    "dinner": [
+      {
+        "en": "Dinner time. The screen can watch itself for a while.",
+        "ne": "खाना खाने बेला। स्क्रिनले केही बेर आफैंलाई हेरोस्।"
+      },
+      {
+        "en": "Close the laptop. Dinner is more interesting than your inbox.",
+        "ne": "ल्यापटप बन्द गर्नुहोस्। इनबक्सभन्दा बेलुकाको खाना रमाइलो छ।"
+      },
+      {
+        "en": "Eat now, before dinner becomes a midnight Wai Wai.",
+        "ne": "अहिले खानुहोस्, नत्र बेलुकाको खाना मध्यरातको वाइवाई बन्छ।"
+      },
+      {
+        "en": "Dinner. Put the phone face down too; we know about the phone.",
+        "ne": "खाना। फोन पनि घोप्टो पारिदिनुहोस्, फोनको कुरा हामीलाई थाहा छ।"
+      },
+      {
+        "en": "Eat with people, not with tabs.",
+        "ne": "ट्याबसँग होइन, मान्छेसँग खानुहोस्।"
+      },
+      {
+        "en": "The group chat is not dinner conversation. Go to the table.",
+        "ne": "ग्रुप च्याट खानाको गफ होइन। टेबलमा जानुहोस्।"
+      },
+      {
+        "en": "Laptop down, plate up.",
+        "ne": "ल्यापटप तल, थाल माथि।"
+      },
+      {
+        "en": "Go eat. The tarkari has been reheated twice already.",
+        "ne": "खान जानुहोस्। तरकारी दुईपटक तताइसकियो।"
+      }
+    ],
+    "endOfDay": [
+      {
+        "en": "The email can wait. It waited all day for you.",
+        "ne": "इमेल पर्खिन्छ। दिनभरि त तपाईंलाई पर्खियो।"
+      },
+      {
+        "en": "Go home. The office chair will still be here tomorrow, unfortunately.",
+        "ne": "घर जानुहोस्। अफिसको कुर्सी भोलि पनि यहीँ हुनेछ, दुर्भाग्यवश।"
+      },
+      {
+        "en": "Log off before your boss remembers one more thing.",
+        "ne": "हाकिमलाई अर्को काम सम्झना आउनुअघि लग अफ गर्नुहोस्।"
+      },
+      {
+        "en": "Nobody ever got promoted for being online till 9.",
+        "ne": "राति ९ बजेसम्म अनलाइन बसेर कसैको प्रमोसन भएको छैन।"
+      },
+      {
+        "en": "Time to go. Beat the evening jam, or at least join it early.",
+        "ne": "जाने बेला भयो। बेलुकीको जाम छल्नुहोस्, नभए कम्तीमा चाँडै भेटिनुहोस्।"
+      },
+      {
+        "en": "Your shift is over. The work isn't, and that's tomorrow's problem.",
+        "ne": "तपाईंको पाली सकियो। काम सकिएको छैन, तर त्यो भोलिको समस्या हो।"
+      },
+      {
+        "en": "Log off. Nobody will read that email tonight, including you.",
+        "ne": "लग अफ गर्नुहोस्। आज राति त्यो इमेल कसैले पढ्दैन, तपाईंले पनि।"
+      },
+      {
+        "en": "Time's up. Even Singha Durbar went home hours ago.",
+        "ne": "समय सकियो। सिंहदरबार त घण्टौं अघि नै घर गइसक्यो।"
+      },
+      {
+        "en": "Stop working. You're not paid for overtime, emotionally or financially.",
+        "ne": "काम रोक्नुहोस्। ओभरटाइमको पैसा पाउनुहुन्न, न खल्तीमा न मनमा।"
+      },
+      {
+        "en": "If it's urgent, they'll call. They always call.",
+        "ne": "जरुरी भए फोन आउँछ। सधैं आउँछ।"
+      },
+      {
+        "en": "Close the laptop. Tomorrow-you can handle it; that's what they're for.",
+        "ne": "ल्यापटप बन्द गर्नुहोस्। भोलिको तपाईंले सम्हाल्नुहुन्छ, त्यसैका लागि त हुनुहुन्छ।"
+      }
+    ],
+    "eyes": [
+      {
+        "en": "Blink. Your eyes are drier than a Kathmandu tap in Chaitra.",
+        "ne": "आँखा झिम्काउनुहोस्। चैतको काठमाडौंको धाराभन्दा सुख्खा भइसक्यो।"
+      },
+      {
+        "en": "Stare into the distance like someone waiting for a visa result.",
+        "ne": "भिसाको रिजल्ट पर्खिरहेको मान्छेजस्तै टाढा टोलाउनुहोस्।"
+      },
+      {
+        "en": "Look away now, or pay Rs 3,000 for a chasma you'll leave in a micro.",
+        "ne": "अहिले टाढा हेर्नुहोस्, नत्र ३ हजारको चस्मा किन्नुपर्छ, जुन माइक्रोमै छुट्छ।"
+      },
+      {
+        "en": "Rest your eyes, or start budgeting for glasses at 25.",
+        "ne": "आँखालाई आराम दिनुहोस्, नत्र २५ मै चस्माको बजेट छुट्याउनुपर्छ।"
+      },
+      {
+        "en": "Look at something far away. In Kathmandu, the next building counts.",
+        "ne": "टाढाको कुनै चीज हेर्नुहोस्। काठमाडौंमा छेउको घर पनि चल्छ।"
+      },
+      {
+        "en": "Look out the window. Can you see the Himalayas? No? Welcome to Kathmandu.",
+        "ne": "झ्यालबाहिर हेर्नुहोस्। हिमाल देखियो? देखिएन? काठमाडौंमा स्वागत छ।"
+      },
+      {
+        "en": "Stare at the wall like it owes you money.",
+        "ne": "भित्ताले तपाईंको पैसा तिर्न बाँकी भएजस्तो गरी एकटक हेर्नुहोस्।"
+      },
+      {
+        "en": "Look away. You've read that same line three times anyway.",
+        "ne": "टाढा हेर्नुहोस्। त्यही लाइन तीनपटक पढिसक्नुभयो।"
+      },
+      {
+        "en": "Rest your eyes. Staring harder won't make the code compile.",
+        "ne": "आँखा आराम गर्नुहोस्। जति घुरे पनि कोड कम्पाइल हुँदैन।"
+      },
+      {
+        "en": "Look away. The spreadsheet will still be wrong in twenty seconds.",
+        "ne": "टाढा हेर्नुहोस्। बीस सेकेन्डपछि पनि स्प्रेडसिट गलत नै हुनेछ।"
+      },
+      {
+        "en": "Find an electric pole and trace one wire. See you in twenty seconds.",
+        "ne": "बिजुलीको पोल हेरेर एउटा तार पछ्याउनुहोस्। बीस सेकेन्डमा भेटौंला।"
+      },
+      {
+        "en": "Blink slowly, like a loan officer reading your salary slip.",
+        "ne": "तलबको स्लिप पढ्ने बैंकको कर्मचारीजस्तै बिस्तारै आँखा झिम्काउनुहोस्।"
+      },
+      {
+        "en": "Close your eyes. Pretend it's load-shedding and there's nothing else to do.",
+        "ne": "आँखा चिम्लनुहोस्। लोडसेडिङ भएजस्तो ठान्नुहोस्, अरू गर्ने केही छैन।"
+      },
+      {
+        "en": "Look far away. Not Sydney far. Just across the room.",
+        "ne": "टाढा हेर्नुहोस्। सिड्नी जत्ति टाढा होइन, कोठाको पल्लो छेउसम्म।"
+      },
+      {
+        "en": "Squint at something far away. People will think you're having a big idea.",
+        "ne": "टाढा केही हेरेर आँखा सानो पार्नुहोस्। मान्छेले ठूलो आइडिया आयो भन्ठान्छन्।"
+      },
+      {
+        "en": "Eyes off the screen. The reply you're waiting for isn't coming.",
+        "ne": "स्क्रिनबाट नजर हटाउनुहोस्। पर्खिरहेको रिप्लाई आउँदैन।"
+      },
+      {
+        "en": "Rest your eyes. NEPSE will still be red when you look back.",
+        "ne": "आँखा आराम गर्नुहोस्। फर्केर हेर्दा पनि नेप्से रातै हुनेछ।"
+      },
+      {
+        "en": "The Tilganga queue is two months long. Look away now instead.",
+        "ne": "तिलगंगामा दुई महिनाको लाइन छ। बरु अहिले नै टाढा हेर्नुहोस्।"
+      },
+      {
+        "en": "Look away. The screen is not going to blink first.",
+        "ne": "टाढा हेर्नुहोस्। स्क्रिनले पहिले आँखा झिम्काउने छैन।"
+      },
+      {
+        "en": "Blink twice if your manager is watching. Then look away for twenty seconds.",
+        "ne": "म्यानेजरले हेरिरहेको छ भने दुईपटक आँखा झिम्काउनुहोस्। अनि बीस सेकेन्ड टाढा हेर्नुहोस्।"
+      },
+      {
+        "en": "Look at something green. A plant, a tree, an army truck. Anything.",
+        "ne": "केही हरियो हेर्नुहोस्। बिरुवा, रूख, सेनाको ट्रक। जे भए पनि।"
+      },
+      {
+        "en": "Rest your eyes. The email will still be passive-aggressive in twenty seconds.",
+        "ne": "आँखा आराम गर्नुहोस्। बीस सेकेन्डपछि पनि त्यो इमेल घुमाउरो पारामा रिसाएकै हुनेछ।"
+      },
+      {
+        "en": "Count the unfinished houses out the window. Actually don't, it'd take all day.",
+        "ne": "झ्यालबाहिरका अधुरा घर गन्नुहोस्। होइन, नगन्नुहोस्, दिनभर लाग्छ।"
+      },
+      {
+        "en": "Look away. Your screen has seen enough of your face today.",
+        "ne": "टाढा हेर्नुहोस्। स्क्रिनले आज तपाईंको अनुहार धेरै देखिसक्यो।"
+      },
+      {
+        "en": "Nobody ever got promoted for not blinking. Look away.",
+        "ne": "आँखा नझिम्काएर कसैको प्रमोसन भएको छैन। टाढा हेर्नुहोस्।"
+      }
+    ],
+    "lunch": [
+      {
+        "en": "Dal bhat power, 24 hour. But only if you actually eat it.",
+        "ne": "दाल भात पावर, २४ आवर। तर खाए मात्र।"
+      },
+      {
+        "en": "Have you eaten? \"Later\" is not a time.",
+        "ne": "खाना खानुभयो? 'पछि' भन्ने कुनै समय होइन।"
+      },
+      {
+        "en": "The canteen is closing the pot. Go.",
+        "ne": "क्यान्टिनले भाँडो बन्द गर्दैछ। जानुहोस्।"
+      },
+      {
+        "en": "Eating at your desk is a meeting with your keyboard. Eat elsewhere.",
+        "ne": "डेस्कमै खानु भनेको किबोर्डसँग मिटिङ हो। अन्तै गएर खानुहोस्।"
+      },
+      {
+        "en": "Go eat. Nobody in history has regretted the second serving of bhat.",
+        "ne": "खान जानुहोस्। भात थपेर इतिहासमा कसैले पछुताएको छैन।"
+      },
+      {
+        "en": "Lunch break. Legally, emotionally and spiritually required.",
+        "ne": "दिउँसोको खानाको ब्रेक। यो चाहिँ छुटाउनै मिल्दैन।"
+      },
+      {
+        "en": "Eat something that isn't Wai Wai. Or do; we're not the food police.",
+        "ne": "वाइवाईबाहेक केही खानुहोस्। वा वाइवाई नै, हामी खानाका प्रहरी होइनौं।"
+      },
+      {
+        "en": "The khaja ghar is open and the momos won't eat themselves.",
+        "ne": "खाजाघर खुला छ, मःम आफैं खाइँदैन।"
+      }
+    ],
+    "move": [
+      {
+        "en": "Your back is starting to sound like a Pulsar on a cold morning.",
+        "ne": "तपाईंको ढाड जाडो बिहानको पल्सरजस्तै आवाज निकाल्न थाल्यो।"
+      },
+      {
+        "en": "You've been sitting longer than a Sajha bus at Ratnapark.",
+        "ne": "रत्नपार्कमा यात्रु पर्खिरहेको साझा बसभन्दा धेरै बेर बस्नुभयो।"
+      },
+      {
+        "en": "Get up. At this rate you'll need a physio before a promotion.",
+        "ne": "उठ्नुहोस्। यसरी त प्रमोसनभन्दा पहिले फिजियो चाहिन्छ।"
+      },
+      {
+        "en": "People once walked from Gorkha to Kathmandu. You can make it to the kitchen.",
+        "ne": "मान्छेहरू गोरखाबाट काठमाडौं हिँडेरै आउँथे। तपाईं भान्सासम्म त पुग्न सक्नुहुन्छ।"
+      },
+      {
+        "en": "Stretch, or your neck stays stuck in the reading-WhatsApp position.",
+        "ne": "तन्किनुहोस्, नत्र घाँटी ह्वाट्सएप पढ्ने पोजमै अड्किन्छ।"
+      },
+      {
+        "en": "Your legs have gone to sleep. Wake them before they apply for DV.",
+        "ne": "खुट्टा निदाइसके। डिभी भर्नुअघि ब्युँझाउनुहोस्।"
+      },
+      {
+        "en": "You stand up for the national anthem. Do it once for your spine.",
+        "ne": "राष्ट्रिय गानमा त उठ्नुहुन्छ। एकपटक ढाडका लागि पनि उठ्नुहोस्।"
+      },
+      {
+        "en": "Get up and refill your chiya. See, breaks can be selfish.",
+        "ne": "उठेर अर्को कप चिया थप्नुहोस्। हेर्नुस्, ब्रेक आफ्नै फाइदाका लागि पनि हुन सक्छ।"
+      },
+      {
+        "en": "Walk to the window and back. More than your gym membership got this month.",
+        "ne": "झ्यालसम्म गएर फर्किनुहोस्। यो महिना जिमको मेम्बरसिपले पाएभन्दा बढी हो।"
+      },
+      {
+        "en": "Your chair is starting to take your shape. Stand up before it's permanent.",
+        "ne": "कुर्सीले तपाईंकै आकार लिन थाल्यो। स्थायी हुनुअघि उठ्नुहोस्।"
+      },
+      {
+        "en": "Stretch like you just got off a night bus from Kakarbhitta.",
+        "ne": "काँकडभिट्टाको रात्रिबसबाट भर्खर झरेजस्तो गरी तन्किनुहोस्।"
+      },
+      {
+        "en": "Your hips are locked tighter than a government office at 4:59.",
+        "ne": "तपाईंको कम्मर ४:५९ को सरकारी अफिसभन्दा कडा बन्द छ।"
+      },
+      {
+        "en": "Open the fridge, stare, close it. Congratulations, that was cardio.",
+        "ne": "फ्रिज खोल्नुहोस्, हेर्नुहोस्, बन्द गर्नुहोस्। बधाई छ, त्यो कार्डियो थियो।"
+      },
+      {
+        "en": "Go check the water tank on the roof. Someone has to, and today it's you.",
+        "ne": "छतमा गएर पानीको ट्याङ्की हेर्नुहोस्। कसैले त हेर्नुपर्छ, आज तपाईंको पालो।"
+      },
+      {
+        "en": "Ten squats. Or two. We're not your PT sir.",
+        "ne": "दसवटा स्क्वाट। या दुईवटा। हामी तपाईंका पीटी सर होइनौं।"
+      },
+      {
+        "en": "Go to the balcony and judge the neighbours' clothesline. It's cultural.",
+        "ne": "बार्दलीमा गएर छिमेकीको लुगा सुकाउने डोरी नियाल्नुहोस्। यो त संस्कृति हो।"
+      },
+      {
+        "en": "Porters carry 60 kg to Namche with better posture than you. Stand up.",
+        "ne": "भरियाहरू ६० केजी बोकेर पनि तपाईंभन्दा सिधा भएर नाम्चे पुग्छन्। उठ्नुहोस्।"
+      },
+      {
+        "en": "Get up before your spine files a complaint on Hello Sarkar.",
+        "ne": "ढाडले हेलो सरकारमा उजुरी हाल्नुअघि उठ्नुहोस्।"
+      },
+      {
+        "en": "Stand up and look busy somewhere else for two minutes.",
+        "ne": "उठेर दुई मिनेट अन्तै कतै व्यस्त देखिनुहोस्।"
+      },
+      {
+        "en": "Stand up. Your knees already sound like a Maruti 800 on a hill road.",
+        "ne": "उठ्नुहोस्। घुँडा उकालो चढ्दै गरेको मारुति ८०० जस्तै कराउन थाले।"
+      },
+      {
+        "en": "Get up. Sitting all day is how \"gastric\" starts.",
+        "ne": "उठ्नुहोस्। दिनभर बस्दा नै ग्यास्ट्रिक सुरु हुन्छ।"
+      },
+      {
+        "en": "Walk around like you're looking for your chappal. You know the walk.",
+        "ne": "चप्पल खोजेजस्तो गरी यताउता हिँड्नुहोस्। त्यो हिँडाइ त थाहा छ नि।"
+      },
+      {
+        "en": "Stand up and stretch. Loud groaning is allowed.",
+        "ne": "उठेर तन्किनुहोस्। ठूलो स्वरले कन्न पाइन्छ।"
+      }
+    ],
+    "water": [
+      {
+        "en": "Drink water. Chiya is not a food group.",
+        "ne": "पानी पिउनुहोस्। चिया खानेकुराको समूह होइन।"
+      },
+      {
+        "en": "One glass now. You're 60% water, not 60% chiya.",
+        "ne": "अहिले एक गिलास। शरीर ६० प्रतिशत पानी हो, चिया होइन।"
+      },
+      {
+        "en": "Drink water. Momo achar is not a liquid.",
+        "ne": "पानी पिउनुहोस्। मःमको अचार तरल पदार्थ होइन।"
+      },
+      {
+        "en": "You're drier than a Tarai field in Jestha. Drink something.",
+        "ne": "जेठको तराईको खेतभन्दा सुख्खा हुनुभयो। केही पिउनुहोस्।"
+      },
+      {
+        "en": "Melamchi finally reached Kathmandu. The least you can do is drink some.",
+        "ne": "मेलम्ची बल्ल काठमाडौं आइपुग्यो। कम्तीमा अलिकति पिइदिनुहोस्।"
+      },
+      {
+        "en": "Hydrate. Your kidneys don't have a union yet, but they're organising.",
+        "ne": "पानी पिउनुहोस्। मिर्गौलाको युनियन छैन, तर बनाउने सोचमा छन्।"
+      },
+      {
+        "en": "The jar-water delivery comes more often than you drink. Fix that.",
+        "ne": "तपाईं पानी पिउनेभन्दा धेरैपटक त जारपानी आउँछ। सच्याउनुहोस्।"
+      },
+      {
+        "en": "Hydrate. The bottle on your desk is not a decoration.",
+        "ne": "पानी पिउनुहोस्। डेस्कको बोतल सजावटको सामान होइन।"
+      },
+      {
+        "en": "Official notice from the Department of Body Water Supply: drink up.",
+        "ne": "तपाईंको शरीरबाट सूचना: पानी पठाइदिनुहोस्।"
+      },
+      {
+        "en": "Refill the bottle. It's been empty since Monday; we noticed.",
+        "ne": "बोतल भर्नुहोस्। सोमबारदेखि खाली छ, हामीले देखेका छौं।"
+      },
+      {
+        "en": "You paid for that jar of water. Get your money's worth.",
+        "ne": "त्यो जारपानीको पैसा तिर्नुभएको हो। पैसा असुल गर्नुहोस्।"
+      },
+      {
+        "en": "Take a sip. Of water. Not chiya. We'll know.",
+        "ne": "एक घुट्को। पानीको। चियाको होइन। हामीलाई थाहा हुन्छ।"
+      },
+      {
+        "en": "Pokhara has a whole lake. You can manage one glass.",
+        "ne": "पोखरासँग पूरै ताल छ। तपाईं एक गिलास त पिउन सक्नुहुन्छ।"
+      },
+      {
+        "en": "Drink up. Dehydration causes headaches, and headaches cause bad emails.",
+        "ne": "पानी पिउनुहोस्। तिर्खाले टाउको दुख्छ, टाउको दुखेपछि नराम्रो इमेल लेखिन्छ।"
+      },
+      {
+        "en": "The tulsi gets watered more often than you do.",
+        "ne": "तुलसीको मोठलाई पनि तपाईंलाई भन्दा धेरै पानी हालिन्छ।"
+      },
+      {
+        "en": "Water: no queue, no price hike, no load-shedding. Drink it.",
+        "ne": "पानी: न लाइन, न मूल्यवृद्धि, न लोडसेडिङ। पिइहाल्नुहोस्।"
+      },
+      {
+        "en": "Drink water. It should not come out the colour of chiya.",
+        "ne": "पानी पिउनुहोस्। बाहिर निस्कँदा चियाको रङ हुनु हुँदैन।"
+      },
+      {
+        "en": "The Bagmati in winter has more water in it than you. Drink up.",
+        "ne": "जाडोको बागमतीमा पनि तपाईंमा भन्दा धेरै पानी छ। पिउनुहोस्।"
+      },
+      {
+        "en": "A glass now saves a Rs 50 headache pill later.",
+        "ne": "अहिलेको एक गिलासले पछिको ५० रुपैयाँको टाउको दुखाइको चक्की बचाउँछ।"
+      },
+      {
+        "en": "You are not a cactus. Drink water.",
+        "ne": "तपाईं सिउँडी होइन। पानी पिउनुहोस्।"
+      }
+    ]
+  },
+  "done": {
+    "any": [
+      {
+        "en": "Nice. Your future self says thank you.",
+        "ne": "राम्रो। भविष्यको तपाईंले धन्यवाद भन्नुभयो।"
+      },
+      {
+        "en": "Well done. Somebody, somewhere, is mildly proud.",
+        "ne": "स्याबास। कोही न कोही, कतै न कतै, अलिअलि गर्व गरिरहेको छ।"
+      },
+      {
+        "en": "Look at you, following instructions. Rare.",
+        "ne": "वाह, भनेको मान्नुभयो। यस्तो कहिलेकाहीँ मात्र हुन्छ।"
+      },
+      {
+        "en": "Proud of you. Don't let it go to your head.",
+        "ne": "गर्व लाग्यो। तर धेरै फुर्ती नलगाउनुहोस्।"
+      },
+      {
+        "en": "Break complete. Your doctor just lost a customer.",
+        "ne": "ब्रेक सकियो। तपाईंको डाक्टरले एउटा ग्राहक गुमाए।"
+      },
+      {
+        "en": "Add that to your CV under self-care.",
+        "ne": "यसलाई CV मा सेल्फ-केयर भनेर थप्नुहोस्।"
+      },
+      {
+        "en": "Healthiest thing you've done since Tihar.",
+        "ne": "तिहारयता तपाईंले गरेको सबैभन्दा स्वस्थ काम।"
+      }
+    ],
+    "eyes": [
+      {
+        "en": "There you go. Your eyes say dhanyabad.",
+        "ne": "ल भयो। आँखाले धन्यवाद भनेका छन्।"
+      },
+      {
+        "en": "Eyes rested. The screen can have you back now.",
+        "ne": "आँखाले आराम पाए। अब स्क्रिनले तपाईंलाई फिर्ता पाउन सक्छ।"
+      },
+      {
+        "en": "Twenty seconds well spent. The chasma shop will have to wait.",
+        "ne": "बीस सेकेन्ड सदुपयोग भयो। चस्मा पसल अब पर्खिनुपर्छ।"
+      },
+      {
+        "en": "Blinking: back in service.",
+        "ne": "आँखा झिम्काउने सेवा: फेरि सुचारु।"
+      }
+    ],
+    "move": [
+      {
+        "en": "Shabash. Your physio's EMI just got harder to pay.",
+        "ne": "स्याबास। तपाईंको फिजियोलाई EMI तिर्न गाह्रो भयो।"
+      },
+      {
+        "en": "Done. Your chair missed you, though.",
+        "ne": "भयो। तर कुर्सीले चाहिँ तपाईंलाई सम्झियो।"
+      },
+      {
+        "en": "Your spine sends its regards.",
+        "ne": "तपाईंको ढाडले नमस्कार पठाएको छ।"
+      },
+      {
+        "en": "See? Easy. Now don't sit for six hours straight.",
+        "ne": "देख्नुभयो? सजिलो। अब लगातार छ घण्टा नबस्नुहोस्।"
+      },
+      {
+        "en": "Well done. You've earned a chiya. Kidding. Water.",
+        "ne": "स्याबास। एक कप चिया कमाउनुभयो। ठट्टा। पानी।"
+      },
+      {
+        "en": "Back already? The meeting didn't miss you either.",
+        "ne": "फर्किनुभयो? मिटिङले पनि तपाईंलाई सम्झेन।"
+      }
+    ],
+    "water": [
+      {
+        "en": "Glug glug. Your kidneys have called off the strike.",
+        "ne": "गट गट। मिर्गौलाले हडताल फिर्ता लियो।"
+      },
+      {
+        "en": "That glass counts. The chiya ones never did.",
+        "ne": "यो गिलास गनियो। चियाका गिलास त कहिल्यै गनिएनन्।"
+      },
+      {
+        "en": "Cheers. Water, not chiya. We checked.",
+        "ne": "चियर्स। चिया होइन, पानी। हामीले जाँच्यौं।"
+      },
+      {
+        "en": "Hydrated. The tulsi finally has competition.",
+        "ne": "पानी पुग्यो। अब तुलसीको मोठसँग प्रतिस्पर्धा छ।"
+      }
+    ]
+  }
+}

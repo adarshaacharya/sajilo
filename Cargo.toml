@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "apps/server", "apps/desktop/src-tauri", "apps/showcase-data"]
+members = ["crates/*", "apps/server", "apps/desktop/src-tauri", "apps/showcase-data", "apps/config-publish"]
 # A patched copy of a dependency, not ours to lint; see vendor/ksni/PATCHED.md.
 exclude = ["vendor/ksni"]
 
@@ -8,7 +8,7 @@ exclude = ["vendor/ksni"]
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/mukezhz/sajilo"
+repository = "https://github.com/adarshaacharya/sajilo"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
@@ -79,6 +79,7 @@ future_not_send = "allow"
 sajilo-core = { path = "crates/sajilo-core" }
 sajilo-api = { path = "crates/sajilo-api" }
 sajilo-providers = { path = "crates/sajilo-providers" }
+sajilo-config = { path = "crates/sajilo-config" }
 
 chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
 serde = { version = "1", features = ["derive"] }

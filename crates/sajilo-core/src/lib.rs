@@ -6,6 +6,7 @@
 
 pub mod backup;
 pub mod calendar;
+pub mod config;
 pub mod error;
 pub mod focus;
 pub mod limits;

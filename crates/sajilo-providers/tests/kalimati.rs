@@ -109,14 +109,29 @@ fn rejects_a_date_stamp_it_cannot_trust() {
 /// table must be matched longest-first or every capsicum is filed as a chilli.
 #[test]
 fn resolves_nested_produce_names_longest_first() {
-    assert_eq!(kalimati::english_name("भेडे खुर्सानी"), Some("Capsicum"));
-    assert_eq!(kalimati::english_name("खुर्सानी सुकेको"), Some("Chilli"));
+    assert_eq!(
+        kalimati::english_name("भेडे खुर्सानी"),
+        Some("Capsicum".to_owned())
+    );
+    assert_eq!(
+        kalimati::english_name("खुर्सानी सुकेको"),
+        Some("Chilli".to_owned())
+    );
     // The board's own typo'd spelling of capsicum must not fall through to chilli.
-    assert_eq!(kalimati::english_name("भेडे खु्र्सानी"), Some("Capsicum"));
-    assert_eq!(kalimati::english_name("रातो बन्दा"), Some("Red cabbage"));
-    assert_eq!(kalimati::english_name("बन्दा"), Some("Cabbage"));
-    assert_eq!(kalimati::english_name("गान्टे मूला"), Some("Kohlrabi"));
-    assert_eq!(kalimati::english_name("मूला"), Some("Radish"));
+    assert_eq!(
+        kalimati::english_name("भेडे खु्र्सानी"),
+        Some("Capsicum".to_owned())
+    );
+    assert_eq!(
+        kalimati::english_name("रातो बन्दा"),
+        Some("Red cabbage".to_owned())
+    );
+    assert_eq!(kalimati::english_name("बन्दा"), Some("Cabbage".to_owned()));
+    assert_eq!(
+        kalimati::english_name("गान्टे मूला"),
+        Some("Kohlrabi".to_owned())
+    );
+    assert_eq!(kalimati::english_name("मूला"), Some("Radish".to_owned()));
 }
 
 /// Anything uncertain is left out rather than guessed at: a wrong label on a

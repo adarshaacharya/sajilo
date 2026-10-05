@@ -4,6 +4,7 @@ import type { CryptoChart } from "../../types/api/CryptoChart";
 import type { CryptoCoin } from "../../types/api/CryptoCoin";
 import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
 import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
+import type { DirectoryResponse } from "../../types/api/DirectoryResponse";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
@@ -23,6 +24,7 @@ import type { NoteTrashed } from "../../types/api/NoteTrashed";
 import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
+import type { RemoteConfigStatus } from "../../types/api/RemoteConfigStatus";
 import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
 import type { StockChart } from "../../types/api/StockChart";
@@ -932,6 +934,12 @@ export const api = {
   getAnnouncement: (refresh = false) =>
     invoke<LoadState<AnnouncementResponse>>("get_announcement", { refresh }),
   dismissAnnouncement: (id: string) => invoke<void>("dismiss_announcement", { id }),
+  /** The signed remote config: what's installed, and when it was checked. */
+  remoteConfigStatus: () => invoke<RemoteConfigStatus>("remote_config_status"),
+  /** Checks for new config now, whatever the schedule says. */
+  checkRemoteConfig: () => invoke<RemoteConfigStatus>("check_remote_config"),
+  /** Phone numbers, sites and keeper templates, from the directory pack. */
+  configDirectory: () => invoke<DirectoryResponse>("config_directory"),
   /** An update is installed; the shell restarts into it at a quiet moment. */
   updateInstalled: () => invoke<void>("update_installed"),
   /** So an automatic restart never cuts off the radio. */

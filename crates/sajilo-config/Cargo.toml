@@ -1,0 +1,25 @@
+[package]
+name = "sajilo-config"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+# Trust for remote config: the signed manifest, hashes, ordering, and which
+# packs this build can read. Pure like sajilo-core — no I/O, no async, no
+# HTTP — so the publisher in CI and the desktop app run the same checks.
+[dependencies]
+sajilo-core.workspace = true
+sajilo-api.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+base64 = "0.22"
+# Zero-dependency minisign verification; the same crate Tauri's updater uses.
+minisign-verify = "0.2"
+sha2 = "0.10"
+
+[dev-dependencies]
+minisign = "0.7"

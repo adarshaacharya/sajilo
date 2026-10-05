@@ -1191,13 +1191,10 @@ const DECKS: [BreakKind; 8] = [
     BreakKind::Bedtime,
 ];
 
-fn every_deck() -> Vec<(String, Vec<jokes::Line>)> {
-    let own = DECKS.iter().map(|kind| {
-        (
-            jokes::deck_name(*kind).to_owned(),
-            jokes::lines(*kind).to_vec(),
-        )
-    });
+fn every_deck() -> Vec<(String, Vec<jokes::Joke>)> {
+    let own = DECKS
+        .iter()
+        .map(|kind| (jokes::deck_name(*kind).to_owned(), jokes::lines(*kind)));
     let done = [
         BreakKind::Eyes,
         BreakKind::Move,
@@ -1209,8 +1206,8 @@ fn every_deck() -> Vec<(String, Vec<jokes::Line>)> {
     own.chain(done).collect()
 }
 
-fn in_deck(deck: &[jokes::Line], joke: &jokes::Joke) -> bool {
-    deck.iter().any(|(en, ne)| *en == joke.en && *ne == joke.ne)
+fn in_deck(deck: &[jokes::Joke], joke: &jokes::Joke) -> bool {
+    deck.contains(joke)
 }
 
 #[test]
@@ -1220,11 +1217,11 @@ fn every_deck_is_big_enough_short_enough_and_has_no_twins() {
             lines.len() >= jokes::MIN_DECK,
             "{name} is too small to rotate"
         );
-        let english: HashSet<_> = lines.iter().map(|(en, _)| en).collect();
-        let nepali: HashSet<_> = lines.iter().map(|(_, ne)| ne).collect();
+        let english: HashSet<_> = lines.iter().map(|joke| &joke.en).collect();
+        let nepali: HashSet<_> = lines.iter().map(|joke| &joke.ne).collect();
         assert_eq!(english.len(), lines.len(), "{name} repeats an English line");
         assert_eq!(nepali.len(), lines.len(), "{name} repeats a Nepali line");
-        for (en, ne) in &lines {
+        for jokes::Joke { en, ne } in &lines {
             assert!(
                 !en.trim().is_empty() && !ne.trim().is_empty(),
                 "{name}: {en}"
@@ -1266,7 +1263,7 @@ fn no_joke_mentions_family() {
         "माइजु",
     ];
     for (name, lines) in every_deck() {
-        for (en, ne) in &lines {
+        for jokes::Joke { en, ne } in &lines {
             let lower = en.to_lowercase();
             for word in ENGLISH {
                 let hit = lower
@@ -1324,7 +1321,7 @@ fn every_third_card_brings_a_new_joke_and_a_cheer_when_jokes_are_on() {
             .expect("a card when it comes due");
         if turn.is_multiple_of(JOKE_EVERY) {
             let joke = card.joke.expect("jokes are on by default");
-            assert!(in_deck(jokes::EYES, &joke));
+            assert!(in_deck(&jokes::lines(BreakKind::Eyes), &joke));
             let cheer = card.cheer.expect("a joke card closes with a cheer");
             assert!(in_deck(&jokes::done_lines(BreakKind::Eyes), &cheer));
             seen.push(joke.en);
@@ -1371,7 +1368,12 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
 
     let (title, body) = say(&mut state, &settings, BreakKind::Move, Language::En);
     assert_eq!(title, "Time to move");
-    assert!(jokes::MOVE.iter().any(|(en, _)| *en == body), "{body}");
+    assert!(
+        jokes::lines(BreakKind::Move)
+            .iter()
+            .any(|line| line.en == body),
+        "{body}"
+    );
     let (_, again) = say(&mut state, &settings, BreakKind::Move, Language::En);
     assert!(
         again.starts_with("60 minutes at the screen."),
@@ -1380,7 +1382,11 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
 
     let (_, water) = say(&mut state, &settings, BreakKind::Water, Language::En);
     let (joke, total) = water.split_once('\n').expect("the joke, then the total");
-    assert!(jokes::WATER.iter().any(|(en, _)| *en == joke));
+    assert!(
+        jokes::lines(BreakKind::Water)
+            .iter()
+            .any(|line| line.en == joke)
+    );
     assert_eq!(total, "0 of 2.5 litres today.");
 
     // Water's own turn would be plain now; start its pace over to hear the
@@ -1389,7 +1395,12 @@ fn a_notification_says_the_joke_and_keeps_the_water_total() {
     let (title, water) = say(&mut state, &settings, BreakKind::Water, Language::Ne);
     assert_eq!(title, "पानी पिउनुहोस्");
     let (joke, total) = water.split_once('\n').expect("the joke, then the total");
-    assert!(jokes::WATER.iter().any(|(_, ne)| *ne == joke), "{joke}");
+    assert!(
+        jokes::lines(BreakKind::Water)
+            .iter()
+            .any(|line| line.ne == joke),
+        "{joke}"
+    );
     assert_eq!(total, "आज २.५ मध्ये ० लिटर।");
 
     let (_, custom) = say(&mut state, &settings, BreakKind::Custom, Language::En);
@@ -1679,9 +1690,9 @@ fn a_deck_takes_the_users_edits_and_keeps_five_lines() {
     let built = jokes::lines(BreakKind::Bedtime);
     let mut edits = jokes::JokeEdits::new();
     let deck_edits = edits.entry("bedtime".to_owned()).or_default();
-    deck_edits.off.insert(built[0].0.to_owned());
+    deck_edits.off.insert(built[0].en.clone());
     deck_edits.edited.insert(
-        built[1].0.to_owned(),
+        built[1].en.clone(),
         jokes::Joke {
             en: "  Sleep, the reels will wait.  ".to_owned(),
             ne: String::new(),
@@ -1714,7 +1725,7 @@ fn a_deck_takes_the_users_edits_and_keeps_five_lines() {
 
     let deck = jokes::deck(BreakKind::Bedtime, &edits);
     assert_eq!(deck.len(), built.len(), "one off, one added");
-    assert!(deck.iter().all(|joke| joke.en != built[0].0));
+    assert!(deck.iter().all(|joke| joke.en != built[0].en));
     let reworded = deck
         .iter()
         .find(|joke| joke.en == "Sleep, the reels will wait.")
@@ -1729,10 +1740,6 @@ fn a_deck_takes_the_users_edits_and_keeps_five_lines() {
     // Switching off all but three brings Sajilo's lines back.
     let deck_edits = edits.get_mut("bedtime").unwrap();
     deck_edits.added.clear();
-    deck_edits.off = built
-        .iter()
-        .skip(3)
-        .map(|(en, _)| (*en).to_owned())
-        .collect();
+    deck_edits.off = built.iter().skip(3).map(|joke| joke.en.clone()).collect();
     assert_eq!(jokes::deck(BreakKind::Bedtime, &edits).len(), built.len());
 }

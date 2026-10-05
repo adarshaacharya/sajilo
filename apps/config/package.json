@@ -1,0 +1,14 @@
+{
+  "name": "sajilo-config",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "cargo run -q -p sajilo-config-publish -- build --out dist --rev $(git log -1 --format=%ct)",
+    "dev": "wrangler dev --local --port 8788",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.131.1"
+  }
+}

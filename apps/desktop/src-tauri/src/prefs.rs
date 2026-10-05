@@ -51,7 +51,6 @@ pub const FOREX_KEY: &str = "forex.v1";
 /// joined the publisher catalog. Otherwise their picker options can filter an
 /// older cached digest to zero headlines until its normal refresh window.
 pub const NEWS_KEY: &str = "news.v3";
-pub const ANNOUNCEMENT_KEY: &str = "announcement.v2";
 /// Notices the user closed, by id. Kept short: ids of long-gone notices are
 /// trimmed away as new ones are closed.
 pub const DISMISSED_ANNOUNCEMENTS_KEY: &str = "dismissedAnnouncements";

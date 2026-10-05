@@ -2,15 +2,10 @@ import { useMemo, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { Segmented } from "../../../shared/components/segmented";
 import { useSettings } from "../../../shared/context/settings-context";
+import { useDirectory } from "../../../shared/lib/directory";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import { LIMITS } from "../../../shared/lib/limits";
-import {
-  type Category,
-  CONTACTS,
-  type DirectorySection,
-  WEBSITES,
-  type WebsiteType,
-} from "../_lib/directory";
+import type { Category, DirectorySection, WebsiteType } from "../_lib/directory";
 
 export function EmergencyTab({
   initialSection = "phones",
@@ -24,6 +19,7 @@ export function EmergencyTab({
   const [category, setCategory] = useState<Category | "all">("all");
   const [websiteType, setWebsiteType] = useState<WebsiteType | "all">("all");
   const isNepali = language === "ne";
+  const { contacts, websites } = useDirectory();
 
   const sectionOptions = [
     { id: "phones" as const, label: isNepali ? "फोन नम्बर" : "Phone numbers" },
@@ -40,7 +36,7 @@ export function EmergencyTab({
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return CONTACTS.filter(
+    return contacts.filter(
       (contact) =>
         (category === "all" || contact.category === category) &&
         (!needle ||
@@ -49,11 +45,11 @@ export function EmergencyTab({
             .toLocaleLowerCase()
             .includes(needle)),
     );
-  }, [category, query]);
+  }, [category, contacts, query]);
 
   const filteredWebsites = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
-    return WEBSITES.filter(
+    return websites.filter(
       (website) =>
         (websiteType === "all" || website.type === websiteType) &&
         (!needle ||
@@ -62,7 +58,7 @@ export function EmergencyTab({
             .toLocaleLowerCase()
             .includes(needle)),
     );
-  }, [query, websiteType]);
+  }, [query, websiteType, websites]);
 
   const websiteTypeOptions = [
     { id: "all" as const, label: isNepali ? "सबै" : "All" },

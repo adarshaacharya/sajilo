@@ -70,7 +70,7 @@ impl Config {
                 PathBuf::from,
             ),
             contact_url: env::var("CONTACT_URL")
-                .unwrap_or_else(|_| "https://github.com/mukezhz/sajilo".to_owned()),
+                .unwrap_or_else(|_| "https://github.com/adarshaacharya/sajilo".to_owned()),
             min_client_version: env::var("MIN_CLIENT_VERSION")
                 .unwrap_or_else(|_| "0.1.0".to_owned()),
             notice: env::var("NOTICE").ok().filter(|s| !s.trim().is_empty()),
@@ -113,7 +113,7 @@ impl Default for Config {
         Self {
             port: 8080,
             cache_path: PathBuf::from("/var/lib/sajilo/snapshot.json"),
-            contact_url: "https://github.com/mukezhz/sajilo".to_owned(),
+            contact_url: "https://github.com/adarshaacharya/sajilo".to_owned(),
             min_client_version: "0.1.0".to_owned(),
             notice: None,
             intervals: Intervals::default(),

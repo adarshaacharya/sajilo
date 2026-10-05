@@ -1,0 +1,58 @@
+name: Publish config
+
+# Validates, signs and deploys data/config/ to https://config.sajilo.fyi/.
+# The only way a remote value changes: a PR merged to main.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/config/**"
+      - "crates/sajilo-config/**"
+      - "crates/sajilo-core/src/config/**"
+      - "crates/sajilo-api/src/announcement.rs"
+      - "apps/config-publish/**"
+      - "apps/config/**"
+      - ".github/workflows/publish-config.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two publishes at once: the later commit must land last.
+concurrency:
+  group: publish-config
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Sign and deploy
+    runs-on: ubuntu-latest
+    # Holds the signing key and the Cloudflare token. Its deployment rule
+    # allows only `main`, so neither a fork's PR nor another branch can use it.
+    environment: config-publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+      - name: Test the trust checks
+        run: cargo test -p sajilo-config -p sajilo-core --test config_packs
+      - name: Build and sign
+        env:
+          SAJILO_CONFIG_SIGNING_KEY: ${{ secrets.CONFIG_SIGNING_KEY }}
+          SAJILO_CONFIG_SIGNING_KEY_PASSWORD: ${{ secrets.CONFIG_SIGNING_KEY_PASSWORD }}
+        # rev = the commit time: it only goes up, nobody bumps it by hand, and
+        # re-running an older commit yields a lower rev that clients refuse.
+        run: |
+          cargo run -q -p sajilo-config-publish -- build \
+            --out apps/config/dist --rev "$(git log -1 --format=%ct)"
+      - name: Deploy
+        working-directory: apps/config
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          bun install --frozen-lockfile
+          bunx wrangler deploy

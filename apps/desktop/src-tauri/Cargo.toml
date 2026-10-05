@@ -19,6 +19,7 @@ tauri-build = { version = "2", features = [] }
 sajilo-api.workspace = true
 sajilo-core.workspace = true
 sajilo-providers.workspace = true
+sajilo-config.workspace = true
 chrono.workspace = true
 futures-util = "0.3"
 # The random usage id, and nothing else. `v4` only: no node id, no MAC address,
@@ -49,6 +50,10 @@ resvg = { version = "0.44", default-features = false }
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "bmp", "tiff"] }
 base64 = "0.22"
 url = "2"
+
+[dev-dependencies]
+# Signs test manifests with the fixture key; never in a release build.
+minisign = "0.7"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-autostart = "2"

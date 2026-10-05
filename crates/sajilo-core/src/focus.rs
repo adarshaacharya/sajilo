@@ -872,11 +872,7 @@ impl ActiveBreak {
             (
                 deal_joke(told, kind, settings),
                 kind.slot().and_then(|_| {
-                    let done: Vec<jokes::Joke> = jokes::done_lines(kind)
-                        .into_iter()
-                        .map(jokes::Joke::from)
-                        .collect();
-                    jokes::deal(told, &jokes::done_deck(kind), &done)
+                    jokes::deal(told, &jokes::done_deck(kind), &jokes::done_lines(kind))
                 }),
             )
         } else {

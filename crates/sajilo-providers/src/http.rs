@@ -21,6 +21,18 @@ pub const USER_AGENT: &str = concat!(
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 
+/// The answer to a conditional GET.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Conditional {
+    /// `304`: what the caller already holds is current.
+    NotModified,
+    /// The body, and the `ETag` to send next time.
+    Body {
+        bytes: Vec<u8>,
+        etag: Option<String>,
+    },
+}
+
 #[derive(Clone)]
 pub struct HttpClient {
     inner: reqwest::Client,
@@ -51,7 +63,10 @@ impl HttpClient {
         url: &str,
         headers: &[(&str, &str)],
     ) -> Result<String> {
-        let mut request = self.inner.get(url);
+        // A source that moved is pointed at its new home by the sources pack,
+        // without a release. Bounded to https public hosts by its validation.
+        let url = sajilo_core::config::sources::rewrite(url);
+        let mut request = self.inner.get(url.as_ref());
         for (name, value) in headers {
             request = request.header(*name, *value);
         }
@@ -78,6 +93,59 @@ impl HttpClient {
                 source_name,
                 message: error.to_string(),
             })
+    }
+
+    /// A GET that sends `If-None-Match` and reads at most `max_bytes`. For
+    /// Sajilo's own static files — the config manifest and packs — so not
+    /// subject to the sources pack's rewrites: a bad rewrite must never be
+    /// able to cut a client off from the fix.
+    pub async fn get_conditional(
+        &self,
+        source_name: &'static str,
+        url: &str,
+        etag: Option<&str>,
+        max_bytes: usize,
+    ) -> Result<Conditional> {
+        let transport = |error: reqwest::Error| ProviderError::Transport {
+            source_name,
+            message: error.to_string(),
+        };
+        let mut request = self.inner.get(url);
+        if let Some(etag) = etag {
+            request = request.header(reqwest::header::IF_NONE_MATCH, etag);
+        }
+        let mut response = request.send().await.map_err(transport)?;
+        let status = response.status();
+        if status == reqwest::StatusCode::NOT_MODIFIED {
+            return Ok(Conditional::NotModified);
+        }
+        if !status.is_success() {
+            return Err(ProviderError::Status {
+                source_name,
+                status: status.as_u16(),
+            });
+        }
+        let too_large =
+            || ProviderError::parse(source_name, format!("larger than {max_bytes} bytes"));
+        if response
+            .content_length()
+            .is_some_and(|length| length > max_bytes as u64)
+        {
+            return Err(too_large());
+        }
+        let etag = response
+            .headers()
+            .get(reqwest::header::ETAG)
+            .and_then(|value| value.to_str().ok())
+            .map(str::to_owned);
+        let mut bytes = Vec::new();
+        while let Some(chunk) = response.chunk().await.map_err(transport)? {
+            if bytes.len() + chunk.len() > max_bytes {
+                return Err(too_large());
+            }
+            bytes.extend_from_slice(&chunk);
+        }
+        Ok(Conditional::Body { bytes, etag })
     }
 
     /// Sends a small JSON payload to a first-party endpoint. Just like reads,

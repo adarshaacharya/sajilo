@@ -7,6 +7,8 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use crate::config::Pack;
+use crate::config::calendar::CalendarPack;
 use crate::numerals::to_ascii_digits;
 
 /// Festival and tithi coverage in the bundled data. Years outside this range are
@@ -77,9 +79,39 @@ fn raw_month(year: i32, month: u32) -> Option<&'static str> {
     EVENT_FILES.get(index).copied().flatten()
 }
 
-/// Events for a BS month, keyed by day of month. Missing or unparseable data
-/// yields an empty map rather than an error — the calendar still renders.
+/// Events for a BS month, keyed by day of month, with the active calendar
+/// pack's corrections laid over the bundled data. Missing or unparseable
+/// data yields an empty map rather than an error — the calendar still
+/// renders.
 pub fn events(year: i32, month: u32) -> BTreeMap<u32, CalendarEvent> {
+    let mut result = bundled_events(year, month);
+    for patch in CalendarPack::active().patches(year, month) {
+        let event = result.entry(patch.day).or_insert_with(|| CalendarEvent {
+            name: None,
+            tithi: None,
+            is_public_holiday: false,
+            marriage: false,
+            bratabandha: false,
+        });
+        let cleared = |text: &String| {
+            let text = text.trim();
+            (!text.is_empty()).then(|| text.to_owned())
+        };
+        if let Some(name) = &patch.name {
+            event.name = cleared(name);
+        }
+        if let Some(tithi) = &patch.tithi {
+            event.tithi = cleared(tithi);
+        }
+        if let Some(holiday) = patch.holiday {
+            event.is_public_holiday = holiday;
+        }
+    }
+    result
+}
+
+/// The bundled events alone.
+fn bundled_events(year: i32, month: u32) -> BTreeMap<u32, CalendarEvent> {
     let Some(raw) = raw_month(year, month) else {
         return BTreeMap::new();
     };

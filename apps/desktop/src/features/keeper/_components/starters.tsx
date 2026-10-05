@@ -1,9 +1,10 @@
 import { Icon, type IconName } from "../../../shared/components/icon";
+import { useDirectory } from "../../../shared/lib/directory";
 import type { KeeperDocumentType } from "../../../shared/lib/ipc";
 import { docTypeLabel, documentSpec, RECURRENCE_LABELS } from "../_lib/documents";
 import { DOCUMENT_ICONS, REMINDER_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
-import { REMINDER_TEMPLATES, type ReminderTemplate } from "../_lib/templates";
+import type { ReminderTemplate } from "../_lib/templates";
 
 /** What most households keep first: the car's papers and the monthly bill. */
 const STARTER_DOCUMENTS: KeeperDocumentType[] = ["bluebook", "drivingLicence"];
@@ -25,7 +26,7 @@ export function Starters({
   onSeeAll: () => void;
   t: TFn;
 }) {
-  const reminder = REMINDER_TEMPLATES.find((entry) => entry.id === STARTER_REMINDER);
+  const reminder = useDirectory().reminderTemplates.find((entry) => entry.id === STARTER_REMINDER);
   const rows: { key: string; icon: IconName; title: string; hint: string; onPick: () => void }[] = [
     ...STARTER_DOCUMENTS.map((type) => {
       const spec = documentSpec({ documentType: type, details: {} });

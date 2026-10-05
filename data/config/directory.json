@@ -1,0 +1,626 @@
+{
+  "contacts": [
+    {
+      "name": "Nepal Police",
+      "nameNe": "नेपाल प्रहरी",
+      "number": "100",
+      "description": "Police emergency",
+      "descriptionNe": "प्रहरी इमर्जेन्सी",
+      "category": "emergency",
+      "tone": "urgent"
+    },
+    {
+      "name": "Fire Brigade",
+      "nameNe": "दमकल",
+      "number": "101",
+      "description": "Fire support",
+      "descriptionNe": "आगलागी सहायता",
+      "category": "emergency",
+      "tone": "urgent"
+    },
+    {
+      "name": "Ambulance",
+      "nameNe": "एम्बुलेन्स",
+      "number": "102",
+      "description": "Ambulance support",
+      "descriptionNe": "एम्बुलेन्स सहायता",
+      "category": "emergency",
+      "tone": "urgent"
+    },
+    {
+      "name": "Traffic Police",
+      "nameNe": "ट्राफिक प्रहरी",
+      "number": "103",
+      "description": "Traffic emergency and accidents",
+      "descriptionNe": "ट्राफिक इमर्जेन्सी र दुर्घटना",
+      "category": "emergency",
+      "tone": "urgent"
+    },
+    {
+      "name": "Missing Children",
+      "nameNe": "हराएका बालबालिका",
+      "number": "104",
+      "description": "Missing child response",
+      "descriptionNe": "हराएका बालबालिकाका लागि",
+      "category": "emergency",
+      "tone": "support"
+    },
+    {
+      "name": "Child Helpline",
+      "nameNe": "बाल हेल्पलाइन",
+      "number": "1098",
+      "description": "Child protection support",
+      "descriptionNe": "बाल संरक्षण सहायता",
+      "category": "emergency",
+      "tone": "support"
+    },
+    {
+      "name": "Women Helpline",
+      "nameNe": "महिला हेल्पलाइन",
+      "number": "1145",
+      "description": "Support for women",
+      "descriptionNe": "महिलाका लागि सहायता",
+      "category": "emergency",
+      "tone": "support"
+    },
+    {
+      "name": "Tourist Police",
+      "nameNe": "पर्यटक प्रहरी",
+      "number": "1144",
+      "description": "Tourist assistance",
+      "descriptionNe": "पर्यटक सहायता",
+      "category": "emergency",
+      "tone": "support"
+    },
+    {
+      "name": "Mental Health",
+      "nameNe": "मानसिक स्वास्थ्य",
+      "number": "1166",
+      "description": "Patan Mental Hospital",
+      "descriptionNe": "पाटन मानसिक अस्पताल",
+      "category": "health",
+      "tone": "support"
+    },
+    {
+      "name": "Nepal Electricity Authority",
+      "nameNe": "नेपाल विद्युत् प्राधिकरण",
+      "number": "1150",
+      "description": "Electricity complaints",
+      "descriptionNe": "बत्ती गएको वा बिजुलीको गुनासो",
+      "category": "utility",
+      "tone": "support"
+    },
+    {
+      "name": "Nepal Telecom mobile",
+      "nameNe": "नेपाल टेलिकम मोबाइल",
+      "number": "1498",
+      "description": "Mobile service complaints",
+      "descriptionNe": "मोबाइल सेवा गुनासो",
+      "category": "utility",
+      "tone": "support"
+    },
+    {
+      "name": "Nepal Telecom FTTH",
+      "nameNe": "नेपाल टेलिकम एफटीटीएच",
+      "number": "198",
+      "description": "Landline, FTTH and ADSL support",
+      "descriptionNe": "ल्याण्डलाइन, एफटीटीएच र एडीएसएल सहायता",
+      "category": "utility",
+      "tone": "support"
+    },
+    {
+      "name": "Hello Sarkar",
+      "nameNe": "हेलो सरकार",
+      "number": "1111",
+      "description": "Government complaints and information",
+      "descriptionNe": "सरकारी गुनासो र जानकारी",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "Ministry of Home Affairs",
+      "nameNe": "गृह मन्त्रालय",
+      "number": "1112",
+      "description": "Home affairs information",
+      "descriptionNe": "गृह मन्त्रालयको जानकारी",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "Health Ministry",
+      "nameNe": "स्वास्थ्य मन्त्रालय",
+      "number": "1115",
+      "description": "Health information and support",
+      "descriptionNe": "स्वास्थ्य जानकारी र सहायता",
+      "category": "health",
+      "tone": "support"
+    },
+    {
+      "name": "Disaster Helpline",
+      "nameNe": "विपद् हेल्पलाइन",
+      "number": "1234",
+      "description": "Disaster emergency information",
+      "descriptionNe": "बाढी, पहिरो, भूकम्पको बेला जानकारी",
+      "category": "government",
+      "tone": "urgent"
+    },
+    {
+      "name": "MoFAGA Information",
+      "nameNe": "संघीय मामिला तथा सामान्य प्रशासन",
+      "number": "1618014200309",
+      "description": "Local government information",
+      "descriptionNe": "गाउँपालिका, नगरपालिकाको जानकारी",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "Ministry of Home Affairs office",
+      "nameNe": "गृह मन्त्रालय कार्यालय",
+      "number": "01-4211208",
+      "description": "Singhadurbar office landline",
+      "descriptionNe": "सिंहदरबार कार्यालयको ल्यान्डलाइन",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "MoFAGA office",
+      "nameNe": "संघीय मामिला मन्त्रालय कार्यालय",
+      "number": "01-4200318",
+      "description": "Local government office landline",
+      "descriptionNe": "स्थानीय तहसम्बन्धी कार्यालयको ल्यान्डलाइन",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "Nepal Telecom central office",
+      "nameNe": "नेपाल टेलिकम केन्द्रीय कार्यालय",
+      "number": "01-4210106",
+      "description": "Bhadrakali Plaza office landline",
+      "descriptionNe": "भद्रकाली प्लाजा कार्यालयको ल्यान्डलाइन",
+      "category": "utility",
+      "tone": "support"
+    },
+    {
+      "name": "District Administration Office, Bhaktapur",
+      "nameNe": "जिल्ला प्रशासन कार्यालय, भक्तपुर",
+      "number": "01-6614437",
+      "description": "Chief District Officer office",
+      "descriptionNe": "प्रमुख जिल्ला अधिकारीको कार्यालय",
+      "category": "government",
+      "tone": "support"
+    },
+    {
+      "name": "Dakshinkali Municipality",
+      "nameNe": "दक्षिणकाली नगरपालिका",
+      "number": "01-4710028",
+      "description": "Municipal office landline",
+      "descriptionNe": "नगरपालिकाको कार्यालय ल्यान्डलाइन",
+      "category": "government",
+      "tone": "support"
+    }
+  ],
+  "websites": [
+    {
+      "name": "IRD bill prize",
+      "nameNe": "IRD बिल पुरस्कार",
+      "description": "Register eligible bills and check prize winners",
+      "descriptionNe": "बिल दर्ता गर्नुहोस् र कसले जित्यो हेर्नुहोस्",
+      "type": "portal",
+      "url": "https://prize.ird.gov.np/"
+    },
+    {
+      "name": "Nepal Government Portal",
+      "nameNe": "नेपाल सरकार पोर्टल",
+      "description": "Official government services and information",
+      "descriptionNe": "सरकारी सेवा र जानकारी एकै ठाउँमा",
+      "type": "portal",
+      "url": "https://www.nepal.gov.np/"
+    },
+    {
+      "name": "National ID portal",
+      "nameNe": "राष्ट्रिय परिचयपत्र पोर्टल",
+      "description": "Check card status and download eNID",
+      "descriptionNe": "कार्डको अवस्था हेर्नुहोस् र eNID डाउनलोड गर्नुहोस्",
+      "type": "checker",
+      "url": "https://citizenportal.donidcr.gov.np/ne"
+    },
+    {
+      "name": "Passport application",
+      "nameNe": "पासपोर्ट आवेदन",
+      "description": "Apply for an e-passport and appointment",
+      "descriptionNe": "ई-पासपोर्ट फारम र अपोइन्टमेन्ट",
+      "type": "portal",
+      "url": "https://online.nepalpassport.gov.np/"
+    },
+    {
+      "name": "Passport status",
+      "nameNe": "पासपोर्ट स्टाटस",
+      "description": "Check your e-passport status",
+      "descriptionNe": "ई-पासपोर्ट कहाँ पुग्यो हेर्नुहोस्",
+      "type": "checker",
+      "url": "https://nepalpassport.gov.np/en?post_type=dispatchedstatus"
+    },
+    {
+      "name": "Driving licence application",
+      "nameNe": "ड्राइभिङ लाइसेन्स आवेदन",
+      "description": "Online licence form, quotas and appointments",
+      "descriptionNe": "अनलाइन फाराम, कोटा र अपोइन्टमेन्ट",
+      "type": "portal",
+      "url": "https://applydl.dotm.gov.np/"
+    },
+    {
+      "name": "Licence print checker",
+      "nameNe": "लाइसेन्स प्रिन्ट जाँच",
+      "description": "Check whether your smart-card licence is printed",
+      "descriptionNe": "स्मार्ट-कार्ड लाइसेन्स छापिएको छ कि छैन हेर्नुहोस्",
+      "type": "checker",
+      "url": "https://applydl.dotm.gov.np/licensecheck"
+    },
+    {
+      "name": "Taxpayer portal",
+      "nameNe": "करदाता पोर्टल",
+      "description": "PAN, VAT, returns and tax services",
+      "descriptionNe": "प्यान, भ्याट, रिटर्न र कर",
+      "type": "portal",
+      "url": "https://taxpayerportal.ird.gov.np/taxpayer/app.html"
+    },
+    {
+      "name": "Health Insurance e-Portal",
+      "nameNe": "स्वास्थ्य बीमा ई-पोर्टल",
+      "description": "Register, renew and view health insurance",
+      "descriptionNe": "स्वास्थ्य बीमा दर्ता, नवीकरण र जाँच",
+      "type": "portal",
+      "url": "https://eportal.hib.gov.np/register"
+    },
+    {
+      "name": "Free Health Portal",
+      "nameNe": "फ्री उपचार पोर्टल",
+      "description": "Find hospitals and available free-treatment beds",
+      "descriptionNe": "अस्पताल र खाली फ्री उपचार बेड खोज्नुहोस्",
+      "type": "checker",
+      "url": "https://freehealth.mohp.gov.np/"
+    },
+    {
+      "name": "Police clearance",
+      "nameNe": "प्रहरी रिपोर्ट",
+      "description": "Online police clearance registration",
+      "descriptionNe": "चारित्रिक प्रमाणपत्रको अनलाइन फारम",
+      "type": "portal",
+      "url": "https://opcr.nepalpolice.gov.np/"
+    },
+    {
+      "name": "Election Commission",
+      "nameNe": "निर्वाचन आयोग",
+      "description": "Voter registration, voter roll and results",
+      "descriptionNe": "मतदाता दर्ता, नामावली र नतिजा",
+      "type": "checker",
+      "url": "https://election.gov.np/"
+    },
+    {
+      "name": "Mero Kitta",
+      "nameNe": "मेरो कित्ता",
+      "description": "Land maps, records and service requests",
+      "descriptionNe": "जग्गाको नक्सा, रेकर्ड र निवेदन",
+      "type": "portal",
+      "url": "https://merokitta.dos.gov.np/"
+    },
+    {
+      "name": "Company registration",
+      "nameNe": "कम्पनी दर्ता",
+      "description": "Office of Company Registrar e-services",
+      "descriptionNe": "कम्पनी रजिष्ट्रारका अनलाइन सेवा",
+      "type": "portal",
+      "url": "https://camis.ocr.gov.np/"
+    },
+    {
+      "name": "Company search",
+      "nameNe": "कम्पनी खोजी",
+      "description": "Search registered companies by name, PAN or number",
+      "descriptionNe": "नाम, प्यान वा दर्ता नम्बरबाट कम्पनी खोज्नुहोस्",
+      "type": "checker",
+      "url": "https://company.ocr.gov.np/"
+    },
+    {
+      "name": "Nepal visa application",
+      "nameNe": "नेपाल भिसा आवेदन",
+      "description": "Online visa application for Nepali missions",
+      "descriptionNe": "नेपाली दूतावासका लागि अनलाइन भिसा फारम",
+      "type": "portal",
+      "url": "https://nepaliport.immigration.gov.np/onlinevisa-mission/application"
+    },
+    {
+      "name": "Foreign employment search",
+      "nameNe": "विदेश रोजगारी",
+      "description": "Labour approval and foreign job search",
+      "descriptionNe": "लेबर परमिट र म्यानपावर कम्पनी खोज्नुहोस्",
+      "type": "checker",
+      "url": "https://foreignjob.dofe.gov.np/"
+    },
+    {
+      "name": "Nepal Electricity Authority",
+      "nameNe": "नेपाल विद्युत् प्राधिकरण",
+      "description": "Electricity payment and customer services",
+      "descriptionNe": "बिजुलीको बिल र ग्राहक सेवा",
+      "type": "portal",
+      "url": "https://www.nea.org.np/en/payment"
+    },
+    {
+      "name": "KUKL customer portal",
+      "nameNe": "केयूकेएल ग्राहक पोर्टल",
+      "description": "Water bill, customer services and complaints",
+      "descriptionNe": "खानेपानी बिल, ग्राहक सेवा र गुनासो",
+      "type": "portal",
+      "url": "https://www.kukl.org.np/e-services/customer-web-portal"
+    },
+    {
+      "name": "Social Security Fund",
+      "nameNe": "सामाजिक सुरक्षा कोष",
+      "description": "Contributor account and social security services",
+      "descriptionNe": "तपाईंको SSF खाता र सेवा",
+      "type": "portal",
+      "url": "https://sosys.ssf.gov.np/Modules/REGISTRATION/ContributorLogin.aspx"
+    },
+    {
+      "name": "Bolpatra e-GP",
+      "nameNe": "टेन्डर (ई-जीपी)",
+      "description": "Government procurement and published bids",
+      "descriptionNe": "सरकारी खरिद र टेन्डर",
+      "type": "portal",
+      "url": "https://www.bolpatra.gov.np/"
+    },
+    {
+      "name": "Nagarik App",
+      "nameNe": "नागरिक एप",
+      "description": "Government services in one app",
+      "descriptionNe": "एकै एपमा सरकारी सेवा",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=com.yajtech.nagarikapp"
+    },
+    {
+      "name": "KTM Public Transport",
+      "nameNe": "केटिएम सार्वजनिक यातायात",
+      "description": "Official Kathmandu Valley bus finder",
+      "descriptionNe": "काठमाडौं उपत्यकामा बस खोज्ने एप",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=com.fccpta.ktmpublictransport"
+    },
+    {
+      "name": "Mero Kitta app",
+      "nameNe": "मेरो कित्ता एप",
+      "description": "Official land-service app from Survey Department",
+      "descriptionNe": "नापी विभागको जग्गा सेवा एप",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=np.gov.dos.merokitta"
+    },
+    {
+      "name": "Nepal ePassport app",
+      "nameNe": "नेपाल ई-पासपोर्ट एप",
+      "description": "Official e-passport app",
+      "descriptionNe": "सरकारी ई-पासपोर्ट एप",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=com.dop.passport"
+    },
+    {
+      "name": "Shramsansar",
+      "nameNe": "श्रम संसार",
+      "description": "Official jobs, training and labour-market app",
+      "descriptionNe": "जागिर र तालिम खोज्ने सरकारी एप",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=np.gov.shramsansar"
+    },
+    {
+      "name": "Nepal Weather Official",
+      "nameNe": "नेपाल मौसम (सरकारी)",
+      "description": "Official forecasts and weather alerts",
+      "descriptionNe": "सरकारी मौसम पूर्वानुमान र चेतावनी",
+      "type": "app",
+      "url": "https://play.google.com/store/apps/details?id=np.gov.dhm.nepalweather"
+    }
+  ],
+  "reminderTemplates": [
+    {
+      "id": "electricity",
+      "title": "Electricity bill",
+      "category": "home",
+      "tips": [
+        "Have your SC number and customer ID ready",
+        "Pay on eSewa, Khalti, connectIPS, or at the NEA counter",
+        "2% off if paid within 7 days of the meter reading",
+        "Penalty from day 16: 5%, then 10% after day 30, 25% after day 40"
+      ],
+      "url": "https://nea.org.np/",
+      "recurrence": "monthlyBs",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "water",
+      "title": "Water bill",
+      "category": "home",
+      "tips": [
+        "Have your KUKL customer number ready",
+        "Pay on eSewa, Khalti, the KUKL app, or at the counter",
+        "KUKL gives a rebate for paying early",
+        "Old arrears must be cleared before online payment is accepted"
+      ],
+      "url": "https://www.kukl.org.np/",
+      "recurrence": "monthlyBs",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "internet",
+      "title": "Internet bill",
+      "category": "home",
+      "tips": [
+        "Have your customer ID or username ready",
+        "Pay in the provider's app, eSewa, Khalti, or at the counter"
+      ],
+      "url": "",
+      "recurrence": "monthly",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "telephone",
+      "title": "Telephone bill",
+      "category": "home",
+      "tips": [
+        "NTC landlines run on an advance deposit; top it up before it runs out",
+        "Check the balance: dial 1606, or SMS CB*<number> to 1415",
+        "Pay on eSewa, Khalti, or with an NTC recharge card"
+      ],
+      "url": "https://www.ntc.net.np/",
+      "recurrence": "monthly",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "rent",
+      "title": "Rent payment",
+      "category": "home",
+      "tips": [
+        "Keep a receipt for every payment",
+        "The landlord owes 10% house rent tax; the agreement should say who pays it"
+      ],
+      "url": "",
+      "recurrence": "monthlyBs",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "loan",
+      "title": "Loan EMI",
+      "category": "money",
+      "tips": [
+        "Have your loan account number ready",
+        "Late instalments draw penal interest after a short grace period",
+        "Overdue past 90 days, the loan is classed non-performing"
+      ],
+      "url": "",
+      "recurrence": "monthly",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "school",
+      "title": "School fee",
+      "category": "home",
+      "tips": [
+        "Have the student ID ready",
+        "Keep the payment receipt"
+      ],
+      "url": "",
+      "remindDays": [
+        7,
+        0
+      ]
+    },
+    {
+      "id": "medicine",
+      "title": "Medicine refill",
+      "category": "health",
+      "tips": [
+        "Take the prescription",
+        "Note the medicine name and dose"
+      ],
+      "url": "",
+      "remindDays": [
+        3,
+        0
+      ]
+    },
+    {
+      "id": "subscription",
+      "title": "Subscription",
+      "category": "money",
+      "tips": [
+        "Rename this to the service: Netflix, YouTube Premium, iCloud, gym…",
+        "Add one reminder per subscription",
+        "Cards are charged automatically; cancel before the date to stop it"
+      ],
+      "url": "",
+      "recurrence": "monthly",
+      "remindDays": [
+        3,
+        0
+      ]
+    }
+  ],
+  "renewalGuides": {
+    "passport": {
+      "url": "https://nepalpassport.gov.np/en",
+      "fee": "From Rs 5,000 (34 pages); verify current revenue",
+      "location": "Department of Passports, Tripureshwor, or your DAO",
+      "checklist": [
+        "Online pre-enrolment and appointment",
+        "Citizenship certificate",
+        "National ID number (NIN)",
+        "Current passport",
+        "Revenue payment receipt",
+        "Marriage or migration certificate (if details changed)"
+      ],
+      "note": "Adults get 10 years, under-18s 5. Renewal opens once less than a year is left, and many visas need six months of validity."
+    },
+    "drivingLicence": {
+      "url": "https://edlvrs.dotm.gov.np/",
+      "fee": "Provincial fee shown on EDLVRS",
+      "location": "Apply on EDLVRS, then the Transport Management Office for biometrics",
+      "checklist": [
+        "Original driving licence",
+        "Citizenship certificate or National ID",
+        "Medical certificate (within 3 months)",
+        "EDLVRS application and payment receipt"
+      ],
+      "note": "Valid 10 years (5 from age 60). Renewing late adds a fine, and a licence expired more than 5 years is cancelled."
+    },
+    "bluebook": {
+      "url": "https://dotm.gov.np/",
+      "fee": "Provincial tax by CC/kW + renewal fee",
+      "location": "Transport Management Office, Nagarik App, or provincial portal",
+      "checklist": [
+        "Original bluebook",
+        "Valid third-party or comprehensive insurance",
+        "Owner’s citizenship or NID copy",
+        "Previous tax receipt"
+      ],
+      "note": "Due by Ashad end each fiscal year. Late fine on the tax: 5% within 30 days, 10% for the next 45, 20% after that, then 32% per year."
+    },
+    "insurance": {
+      "url": "",
+      "fee": "Premium amount",
+      "location": "Insurance company branch or app",
+      "checklist": [
+        "Policy number",
+        "Previous policy or renewal notice",
+        "Bluebook copy (vehicle policy)",
+        "Premium payment receipt"
+      ],
+      "note": "A lapsed vehicle policy blocks bluebook renewal. Life policies usually allow a grace period of about 30 days (15 for monthly premiums)."
+    },
+    "warranty": {
+      "url": "",
+      "fee": "",
+      "location": "Brand service centre or seller",
+      "checklist": [
+        "Purchase bill / invoice",
+        "Stamped warranty card",
+        "Serial or IMEI number",
+        "Box and accessories"
+      ],
+      "note": "Check for faults before it ends — repairs after that are paid."
+    }
+  }
+}
