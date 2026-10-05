@@ -252,6 +252,7 @@ fn item(
         title: link.to_owned(),
         link: link.to_owned(),
         source,
+        source_key: None,
         source_name: source.display_name().to_owned(),
         published: published.map(|secs| Utc.timestamp_opt(secs, 0).unwrap()),
         precision,

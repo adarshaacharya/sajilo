@@ -9,6 +9,7 @@
 //! `sajilo-config`; this module only knows shapes and bounds.
 
 pub mod calendar;
+pub mod calendar_years;
 pub mod check;
 pub mod directory;
 pub mod flags;

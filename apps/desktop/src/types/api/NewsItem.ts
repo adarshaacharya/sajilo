@@ -10,4 +10,9 @@ import type { NewsSource } from "./NewsSource";
  * they came from. Official government notices additionally retain their
  * public body and attachments so Sajilo can provide a usable detail view.
  */
-export type NewsItem = { id: string | null, title: string, link: string, source: NewsSource, sourceName: string, published: string | null, precision: DatePrecision, content: string | null, department: string | null, tags: Array<string>, attachments: Array<NewsAttachment>, };
+export type NewsItem = { id: string | null, title: string, link: string, source: NewsSource, 
+/**
+ * The pack id of a [`NewsSource::Custom`] source; `None` for the
+ * built-in ones, which `source` already names.
+ */
+sourceKey: string | null, sourceName: string, published: string | null, precision: DatePrecision, content: string | null, department: string | null, tags: Array<string>, attachments: Array<NewsAttachment>, };

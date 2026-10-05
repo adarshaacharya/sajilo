@@ -341,6 +341,18 @@ Everything in the steps above shipped together, with these differences:
   still compiled in; each is a new pack following the jokes pattern.
   (The Kalimati map has since moved; the crypto map is a one-off migration
   and stays in code.)
+- **Three more packs:**
+  - `calendar-years`: whole new BS years of festival data, beyond the bundled
+    2083, at most two at a time. The next release moves a year into
+    `data/calendar-events/` and out of the pack. The calendar's supported
+    range reads `last_event_year()`, which includes pack years.
+  - `news-sources`: extra RSS newsrooms. Headlines from them carry
+    `NewsSource::Custom` and a `source_key` with the pack id, which the
+    picker filters by.
+  - `radio`: add, hide, or re-stream stations on top of Ratopati's list.
+    `https` only, which is all the webview's CSP plays.
+
+  The pack size cap went up to 512 KB to fit two calendar years.
 - **The System tab** has an "App content" row: last check, how many packs
   came from remote, and "Check now".
 

@@ -14,7 +14,8 @@ use std::collections::HashSet;
 
 use chrono::{DateTime, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource};
+use sajilo_api::news::{DatePrecision, NewsDigest, NewsItem, NewsSource, NewsSourcesPack};
+use sajilo_core::config::Pack;
 
 use crate::error::Result;
 use crate::http::HttpClient;
@@ -57,6 +58,30 @@ pub async fn fetch(client: &HttpClient, now: DateTime<Utc>, limit: usize) -> Res
         let items = interleave(&desks, parser::DEFAULT_LIMIT);
         if items.is_empty() {
             failed.push(source.display_name().to_owned());
+        } else {
+            feeds.push(items);
+        }
+    }
+
+    // Newsrooms added by the news-sources pack: plain RSS, read exactly like
+    // the built-in feeds and labelled with their own id and name.
+    for source in &NewsSourcesPack::active().sources {
+        let mut desks = Vec::new();
+        for url in &source.feeds {
+            if let Ok(body) = client.get_text(SOURCE_NAME, url).await {
+                let mut items = parser::parse(&body, NewsSource::Custom, parser::DEFAULT_LIMIT);
+                for item in &mut items {
+                    item.source_key = Some(source.id.clone());
+                    item.source_name.clone_from(&source.name);
+                }
+                if !items.is_empty() {
+                    desks.push(items);
+                }
+            }
+        }
+        let items = interleave(&desks, parser::DEFAULT_LIMIT);
+        if items.is_empty() {
+            failed.push(source.name.clone());
         } else {
             feeds.push(items);
         }

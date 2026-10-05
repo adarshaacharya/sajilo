@@ -147,3 +147,37 @@ fn kalimati_names_match_longest_first_and_update() {
     assert_eq!(pack.names.len(), 2);
     assert!(KalimatiPack::parse(r#"{"names":[{"ne":"","en":"x"}]}"#).is_err());
 }
+
+/// A new year arrives as data: 2083's files stand in for "2084" here.
+#[test]
+fn a_new_year_of_festivals_installs_from_the_pack() {
+    use sajilo_core::calendar::events::{LAST_EVENT_YEAR, last_event_year};
+    use sajilo_core::config::calendar_years::CalendarYearsPack;
+
+    let next = LAST_EVENT_YEAR + 1;
+    assert!(events(next, 1).is_empty());
+    assert_eq!(last_event_year(), LAST_EVENT_YEAR);
+
+    let months: Vec<serde_json::Value> = (1..=12)
+        .map(|month| {
+            let path = format!(
+                "{}/../../data/calendar-events/{LAST_EVENT_YEAR}/{month}.json",
+                env!("CARGO_MANIFEST_DIR")
+            );
+            serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap()
+        })
+        .collect();
+    let pack = serde_json::json!({ "years": { next.to_string(): months } });
+    CalendarYearsPack::install(&pack.to_string()).unwrap();
+    assert_eq!(last_event_year(), next);
+    assert_eq!(events(next, 1), events(LAST_EVENT_YEAR, 1));
+
+    // A bundled year, or eleven months, is refused.
+    let bundled = serde_json::json!({ "years": { LAST_EVENT_YEAR.to_string(): months } });
+    assert!(CalendarYearsPack::parse(&bundled.to_string()).is_err());
+    let short = serde_json::json!({ "years": { next.to_string(): &months[..11] } });
+    assert!(CalendarYearsPack::parse(&short.to_string()).is_err());
+
+    CalendarYearsPack::reset();
+    assert!(events(next, 1).is_empty());
+}

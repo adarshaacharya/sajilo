@@ -1,7 +1,10 @@
 //! Every pack this build reads, by name.
 
 use sajilo_api::announcement::AnnouncementsPack;
+use sajilo_api::news::NewsSourcesPack;
+use sajilo_api::radio::RadioPack;
 use sajilo_core::config::calendar::CalendarPack;
+use sajilo_core::config::calendar_years::CalendarYearsPack;
 use sajilo_core::config::directory::DirectoryPack;
 use sajilo_core::config::flags::FlagsPack;
 use sajilo_core::config::jokes::JokesPack;
@@ -35,13 +38,16 @@ const fn info<T: Pack + serde::Serialize>() -> PackInfo {
     }
 }
 
-static PACKS: [PackInfo; 7] = [
+static PACKS: [PackInfo; 10] = [
     info::<AnnouncementsPack>(),
     info::<CalendarPack>(),
+    info::<CalendarYearsPack>(),
     info::<DirectoryPack>(),
     info::<FlagsPack>(),
     info::<JokesPack>(),
     info::<KalimatiPack>(),
+    info::<NewsSourcesPack>(),
+    info::<RadioPack>(),
     info::<SourcesPack>(),
 ];
 

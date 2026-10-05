@@ -88,6 +88,7 @@ fn build(update: WireUpdate) -> Option<NewsItem> {
         title: title.to_owned(),
         link: format!("{PORTAL_URL}#update-{id}"),
         source: NewsSource::NepalGovernment,
+        source_key: None,
         source_name: NewsSource::NepalGovernment.display_name().to_owned(),
         published: Some(update.created_at),
         precision: DatePrecision::Exact,

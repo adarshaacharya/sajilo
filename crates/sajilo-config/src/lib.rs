@@ -25,8 +25,9 @@ pub use registry::{PackInfo, pack, packs};
 pub const FORMAT: u32 = 1;
 /// Refused before parsing: a manifest is a few hundred bytes.
 pub const MANIFEST_MAX_BYTES: usize = 16 * 1024;
-/// Refused before hashing: the largest pack today is ~60 KB.
-pub const PACK_MAX_BYTES: usize = 256 * 1024;
+/// Refused before hashing. Most packs are a few KB; a new year of festival
+/// data is ~100 KB, and the calendar-years pack may carry two.
+pub const PACK_MAX_BYTES: usize = 512 * 1024;
 /// Where the manifest sits under the config host.
 pub const MANIFEST_PATH: &str = "v1/manifest.json";
 

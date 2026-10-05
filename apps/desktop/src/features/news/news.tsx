@@ -121,7 +121,7 @@ export function News() {
   const filtered =
     selected === ALL
       ? (digest?.items ?? []).filter((item) => item.source !== GOVERNMENT)
-      : (digest?.items ?? []).filter((item) => item.source === selected);
+      : (digest?.items ?? []).filter((item) => (item.sourceKey ?? item.source) === selected);
   const items = filtered.slice(0, visible);
   const banner = loadBanner(state, fetchedAtLabel(digest?.freshness));
   const freshness = digest ? fetchedAtLabel(digest.freshness) : null;
@@ -242,7 +242,7 @@ export function News() {
         <Stagger className="surface-card overflow-hidden">
           {items.map((item) => (
             <FadeUp
-              key={`${item.source}-${item.link}`}
+              key={`${item.sourceKey ?? item.source}-${item.link}`}
               className="border-b border-divider last:border-b-0"
             >
               <HeadlineRow
