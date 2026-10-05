@@ -687,24 +687,13 @@ fn record_forex(
         load_state(nrb::parse(&read("nrb/rates.json"), now)),
     );
     // The forex chart: the same parser over two recorded pages of NRB
-    // history, kept to the default favourites — the rows a visitor sees —
-    // so the recording the site downloads stays small.
+    // history. Every currency, since a visitor can open any row's chart.
     let history = nrb::parse_history(
         &[
             read("nrb/history-page-1.json"),
             read("nrb/history-page-2.json"),
         ],
         now,
-    )
-    .map(|mut history| {
-        let shown = sajilo_api::forex::DEFAULT_FAVOURITES;
-        history
-            .series
-            .retain(|code, _| shown.contains(&code.as_str()));
-        history
-            .units
-            .retain(|code, _| shown.contains(&code.as_str()));
-        history
-    });
+    );
     commands.insert("get_forex_history".to_owned(), load_state(history));
 }
