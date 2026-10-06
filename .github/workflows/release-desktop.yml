@@ -161,9 +161,11 @@ jobs:
           # only root can enter the image, so sandboxes that mount it as root
           # (firejail, the AppImage catalog's test) refuse to run AppRun.
           chmod -R u+rwX,go+rX,go-w "$WORK/squashfs-root"
+          # A tagged release, not "continuous": continuous is rebuilt upstream
+          # without notice, which broke the pinned checksum (v0.1.35's first run).
           curl -fsSL -o "$WORK/appimagetool" \
-            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-          echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  $WORK/appimagetool" | sha256sum -c -
+            https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+          echo "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0  $WORK/appimagetool" | sha256sum -c -
           chmod +x "$WORK/appimagetool"
           "$WORK/appimagetool" --appimage-extract-and-run "$WORK/squashfs-root" "$APPIMAGE.repaired"
           mv "$APPIMAGE.repaired" "$APPIMAGE"
