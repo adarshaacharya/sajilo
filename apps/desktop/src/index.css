@@ -2274,6 +2274,40 @@ button.rashi-pin:hover {
   min-height: 112px;
 }
 
+/* The row of three live tools: small, equal, the answer at the bottom. */
+.tool-live {
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 84px;
+  padding: 9px;
+}
+
+/* What a live tile is, above its answer: small and quiet, tinted. */
+.tool-live__label {
+  overflow: hidden;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--tint) 70%, var(--color-text-secondary));
+}
+
+/* A calculator: icon beside its name, half the height of a stacked card. */
+.tool-calc {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+/* The stopwatch's play button, pinned in its tile's corner. */
+.tool-live__action {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+}
+
 .tool-directory {
   gap: 10px;
 }

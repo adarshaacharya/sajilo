@@ -26,11 +26,12 @@ type Calculator = { id: ToolId; label: string; hint: string; icon: IconName; tin
 const tinted = (tint: string) => ({ "--tint": tint }) as CSSProperties;
 
 /**
- * Tools' front page. The two everyday tools show their answer before they
- * are opened: today in both calendars, and the time in the city you follow.
- * The Directory shows 100/101/102 on the card; the full list and official
- * sites open from there. Calculators sit below, each in its own colour so
- * they read as four different things rather than one repeated tile.
+ * Tools' front page. The Directory leads: it is the tool people open most,
+ * and 100/101/102 should never be a scroll away. Then the three live tools
+ * as one row of small tiles, each showing its answer before it is opened —
+ * today in both calendars, the time where you follow, the stopwatch's run.
+ * Calculators sit below, each in its own colour so they read as four
+ * different things rather than one repeated tile.
  */
 export function ToolsHome({
   onOpen,
@@ -73,14 +74,13 @@ export function ToolsHome({
 
   return (
     <div className="space-y-3 pt-0.5">
-      <div className="grid grid-cols-2 gap-2">
+      <DirectoryCard onOpen={(section) => onOpen("emergency", section)} />
+
+      <div className="grid grid-cols-3 gap-2">
         <DateCard onOpen={() => onOpen("date")} />
         <ClockCard onOpen={() => onOpen("clock")} />
+        <StopwatchCard onOpen={() => onOpen("stopwatch")} />
       </div>
-
-      <StopwatchCard onOpen={() => onOpen("stopwatch")} />
-
-      <DirectoryCard onOpen={(section) => onOpen("emergency", section)} />
 
       <section aria-labelledby="tools-calculators" className="space-y-1.5">
         <h2 id="tools-calculators" className="px-0.5 text-[11px] font-semibold text-text-secondary">
@@ -92,7 +92,7 @@ export function ToolsHome({
               key={tool.id}
               type="button"
               onClick={() => onOpen(tool.id)}
-              className="tool-card"
+              className="tool-card tool-calc"
               style={tinted(tool.tint)}
             >
               <span className="tool-card__icon">
@@ -122,25 +122,19 @@ function StopwatchCard({ onOpen }: { onOpen: () => void }) {
   const running = stopwatch.isRunning(watch);
   const started = running || ms > 0;
   return (
-    <div
-      className="tool-card tool-feature flex-row items-center gap-2.5"
-      style={tinted("var(--color-accent-mark)")}
-    >
+    <div className="tool-card tool-live relative" style={tinted("var(--color-violet)")}>
       <button
         type="button"
         onClick={onOpen}
-        className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+        className="flex min-w-0 flex-1 flex-col justify-between gap-1.5 text-left"
       >
-        <span className="tool-card__icon">
-          <Icon name="clock" className="size-4" />
-        </span>
-        <span className="min-w-0">
-          <span className="block truncate text-[12px] font-semibold">{t("tools.stopwatch")}</span>
-          <span
-            className={`block truncate text-[10px] ${started ? "tabular-nums text-text" : "text-text-muted"}`}
-          >
-            {started ? clockText(ms, numerals) : t("tools.stopwatch-hint")}
-          </span>
+        <span className="tool-live__label pr-6">{t("tools.stopwatch")}</span>
+        <span
+          className={`block truncate text-[15px] font-bold leading-none tabular-nums ${
+            started ? "" : "text-text-muted"
+          }`}
+        >
+          {clockText(ms, numerals)}
         </span>
       </button>
       <button
@@ -153,9 +147,9 @@ function StopwatchCard({ onOpen }: { onOpen: () => void }) {
               ? "stopwatch.tap-resume"
               : "stopwatch.tap-start",
         )}
-        className="icon-btn shrink-0"
+        className="icon-btn tool-live__action"
       >
-        <Icon name={running ? "pause" : "play"} className="size-3.5" />
+        <Icon name={running ? "pause" : "play"} className="size-3" />
       </button>
     </div>
   );
@@ -178,15 +172,10 @@ function DateCard({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="tool-card tool-feature min-h-0 gap-1.5"
+      className="tool-card tool-live"
       style={tinted("var(--color-accent-mark)")}
     >
-      <span className="flex min-w-0 items-center gap-2">
-        <span className="tool-card__icon">
-          <Icon name="upcoming" className="size-3.5" />
-        </span>
-        <span className="truncate text-[11px] font-semibold">{t("tools.date")}</span>
-      </span>
+      <span className="tool-live__label">{t("tools.date-short")}</span>
       <span className="min-w-0">
         {today ? (
           <>
@@ -214,16 +203,11 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       onClick={onOpen}
-      className="tool-card tool-feature min-h-0 gap-1.5"
+      className="tool-card tool-live"
       style={tinted("var(--color-weather-tint)")}
     >
       <span className="flex items-center justify-between gap-1">
-        <span className="flex min-w-0 items-center gap-2">
-          <span className="tool-card__icon">
-            <Icon name="clock" className="size-3.5" />
-          </span>
-          <span className="truncate text-[11px] font-semibold">{t("tools.clock")}</span>
-        </span>
+        <span className="tool-live__label">{t("tools.clock-short")}</span>
         {zone && reading && reading.dayOffset !== 0 && (
           <span className="shrink-0 text-[10px] text-text-muted">
             {formatDayOffset(reading.dayOffset)}
@@ -233,7 +217,7 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
       <span className="min-w-0">
         {zone ? (
           <>
-            <span className="block text-[18px] font-bold leading-none tabular-nums">
+            <span className="block text-[15px] font-bold leading-none tabular-nums">
               {reading?.time ?? "--:--"}
             </span>
             <span className="mt-1 block truncate text-[10px] text-text-muted">
@@ -242,7 +226,7 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
           </>
         ) : (
           <>
-            <span className="block text-[18px] font-bold leading-none tabular-nums text-text-muted">
+            <span className="block text-[15px] font-bold leading-none tabular-nums text-text-muted">
               --:--
             </span>
             <span className="mt-1 block truncate text-[10px] text-text-muted">
