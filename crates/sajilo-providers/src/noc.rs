@@ -11,7 +11,7 @@
 //! be read is skipped rather than failing the whole snapshot.
 
 use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, Utc};
-use sajilo_api::bazar::{Fuel, FuelPrice, FuelPriceSnapshot};
+use sajilo_api::bazar::{Fuel, FuelPoint, FuelPrice, FuelPriceSnapshot};
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
 
@@ -79,10 +79,29 @@ pub fn parse(body: &str, now: DateTime<Utc>) -> Result<FuelPriceSnapshot> {
             .iter()
             .find(|rev| rev.at.date() < current.at.date())
             .map_or(current.price, |rev| rev.price);
+        // One point per day, the day's last entry, oldest first: the step
+        // chart's revisions.
+        let mut history: Vec<FuelPoint> = Vec::new();
+        for rev in own.iter().rev() {
+            let time = rev
+                .at
+                .date()
+                .and_hms_opt(0, 0, 0)
+                .map_or(0, |at| at.and_utc().timestamp());
+            match history.last_mut() {
+                Some(last) if last.time == time => last.price = rev.price,
+                _ => history.push(FuelPoint {
+                    time,
+                    price: rev.price,
+                }),
+            }
+        }
         prices.push(FuelPrice {
             fuel,
             price: current.price,
             previous_price: previous,
+            changed_on: Some(current.at.date()),
+            history,
         });
         let day = current.at.date();
         effective_from = Some(effective_from.map_or(day, |known| known.max(day)));

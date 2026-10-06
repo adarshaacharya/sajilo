@@ -186,6 +186,21 @@ dto! {
         pub fuel: Fuel,
         pub price: f64,
         pub previous_price: f64,
+        /// The day the current price took effect.
+        #[serde(default)]
+        pub changed_on: Option<NaiveDate>,
+        /// Every Kathmandu revision NOC's API holds, oldest first — one per
+        /// day. Sparse: the API only has what was entered after it launched.
+        #[serde(default)]
+        pub history: Vec<FuelPoint>,
+    }
+
+    /// A price that took effect on a day and stood until the next.
+    pub struct FuelPoint {
+        /// UTC midnight of the day it took effect, in seconds.
+        #[cfg_attr(feature = "typescript", ts(type = "number"))]
+        pub time: i64,
+        pub price: f64,
     }
 
     pub struct FuelPriceSnapshot {

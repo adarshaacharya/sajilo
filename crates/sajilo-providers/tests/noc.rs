@@ -87,3 +87,24 @@ fn rejects_a_response_it_cannot_read() {
     assert!(noc::parse("<html>maintenance</html>", now).is_err());
     assert!(noc::parse(r#"{"success":true,"data":[]}"#, now).is_err());
 }
+
+#[test]
+fn each_fuel_carries_its_revisions_oldest_first_one_per_day() {
+    let body = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../fixtures/noc/fuel-prices.json"
+    ))
+    .unwrap();
+    let snapshot = sajilo_providers::noc::parse(&body, chrono::Utc::now()).unwrap();
+    for price in &snapshot.prices {
+        let history = &price.history;
+        assert!(!history.is_empty(), "{:?}", price.fuel);
+        assert!(history.windows(2).all(|pair| pair[0].time < pair[1].time));
+        assert_eq!(
+            history.last().unwrap().price,
+            price.price,
+            "ends at today's price"
+        );
+        assert!(price.changed_on.is_some());
+    }
+}

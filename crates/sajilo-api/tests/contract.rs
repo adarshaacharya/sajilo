@@ -214,6 +214,8 @@ fn treats_a_sub_paisa_move_as_unchanged() {
         fuel: Fuel::Petrol,
         price: 171.0,
         previous_price: 171.0,
+        changed_on: None,
+        history: Vec::new(),
     };
     assert!(flat.is_unchanged());
 
@@ -221,6 +223,8 @@ fn treats_a_sub_paisa_move_as_unchanged() {
         fuel: Fuel::Diesel,
         price: 158.0,
         previous_price: 156.0,
+        changed_on: None,
+        history: Vec::new(),
     };
     assert!(!up.is_unchanged());
     assert!(up.is_up());

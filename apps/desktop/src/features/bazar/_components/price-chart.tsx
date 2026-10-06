@@ -7,6 +7,7 @@ import {
   type IChartApi,
   type ISeriesApi,
   LineStyle,
+  LineType,
   type UTCTimestamp,
 } from "lightweight-charts";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -33,12 +34,16 @@ export function PriceChart({
   span,
   formatPrice,
   label,
+  steps = false,
 }: {
   points: readonly { time: number; price: number }[];
   offsetSeconds: number;
   span: ChartSpan;
   formatPrice: (price: number) => string;
   label: string;
+  /** Draw as steps: for a price that is set on a day and holds until the
+   * next revision, like fuel, rather than one that moves continuously. */
+  steps?: boolean;
 }) {
   const { language } = useSettings();
   const palette = usePalette();
@@ -114,6 +119,7 @@ export function PriceChart({
       lastValueVisible: false,
       crosshairMarkerRadius: 3,
       crosshairMarkerBorderWidth: 0,
+      lineType: steps ? LineType.WithSteps : LineType.Simple,
     });
     created.subscribeCrosshairMove((param) => {
       const sample = param.seriesData.get(area) as AreaData<UTCTimestamp> | undefined;
@@ -130,7 +136,7 @@ export function PriceChart({
       chart.current = null;
       series.current = null;
     };
-  }, []);
+  }, [steps]);
 
   useEffect(() => {
     series.current?.setData(data);
