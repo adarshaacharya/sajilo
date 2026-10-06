@@ -5,6 +5,7 @@ import { useHeaderInner } from "../../shared/components/header-slot";
 import { type Toast, ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
 import { api } from "../../shared/lib/ipc";
+import { track } from "../../shared/lib/usage";
 import type { NoteFolder } from "../../types/api/NoteFolder";
 import { NoteEditor } from "./_components/note-editor";
 import { NoteList } from "./_components/note-list";
@@ -75,6 +76,7 @@ export function Notes() {
         folders[0];
       if (!target) return;
       const id = await api.notesCreate(target.id, body);
+      track("action.note-create");
       await mutate();
       setSearching(false);
       setOpen(id);

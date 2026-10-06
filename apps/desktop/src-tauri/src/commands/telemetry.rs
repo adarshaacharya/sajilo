@@ -53,6 +53,9 @@ pub const EVENTS: &[&str] = &[
     "screen.events",
     "screen.converter",
     "screen.day",
+    "screen.notes",
+    "screen.more",
+    "screen.settings-notifications",
     // Tabs inside a screen.
     "tab.bazar.stocks",
     "tab.bazar.forex",
@@ -69,6 +72,7 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.weight",
     "tab.tools.vat",
     "tab.tools.interest",
+    "tab.tools.stopwatch",
     "tab.rashifal.daily",
     "tab.rashifal.weekly",
     "tab.rashifal.monthly",
@@ -81,6 +85,8 @@ pub const EVENTS: &[&str] = &[
     "action.news-open",
     "action.keeper-save",
     "action.plan-save",
+    // A note made, never what it says.
+    "action.note-create",
     "action.setup-done",
     "action.focus-on",
     "action.focus-off",
