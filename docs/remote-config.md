@@ -41,12 +41,18 @@ static-assets-only Cloudflare Worker: free and unmetered.
    and the first problem, e.g. `data/config/jokes.json: jokes: decks.eyes has
    fewer than 3 lines`.
 3. Open a PR. CI runs the same check ("Remote config is valid").
-4. Merge. **Publish config** runs on `main` and deploys in a few minutes.
+4. Merge. **Publish config** starts on `main` and **waits for your approval**:
+   the `config-publish` environment has you as a required reviewer, so an
+   accidental push never goes live on its own. Open the run on GitHub (Actions
+   › Publish config, or the email/notification GitHub sends) and press
+   **Review deployments › Approve and deploy**. It deploys in a few minutes.
+   Reject it, or just leave it, and nothing is published.
 
 ### How long until users see it
 
 | Step | Time |
 |---|---|
+| You approve the deployment on GitHub | when you choose |
 | Workflow builds, signs, deploys | ~3–5 min |
 | Cloudflare may serve the old manifest | up to 5 min |
 | Each app's next check | up to ~1¼ h (1 h ± 20%), 15 s after launch, or at once with **Check now** |
