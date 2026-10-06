@@ -303,42 +303,40 @@ function YourCoins({
       : undefined;
   };
 
+  // Nothing starred yet: no card. Starring a coin is how it appears.
+  if (coins.length === 0) return null;
+
   return (
     <section className="surface-card p-2.5" aria-label={t("crypto.yours")}>
       <p className="text-[11px] font-semibold text-text-secondary">{t("crypto.yours")}</p>
-      {coins.length === 0 ? (
-        <p className="mt-1 text-[11px] text-text-secondary">{t("crypto.empty-yours")}</p>
-      ) : (
-        <>
-          {held.length > 0 && (
-            <div className="mt-1 flex items-end justify-between gap-2">
-              <div className="min-w-0">
-                <p className="text-[18px] font-semibold leading-tight tabular-nums">{usd(total)}</p>
-                {nprRate != null && (
-                  <p className="text-[10px] text-text-muted tabular-nums">
-                    ≈ Rs {money0.format(total * nprRate)}
-                  </p>
-                )}
-              </div>
-              <div className="shrink-0 text-right text-[11px] font-medium tabular-nums">
-                {Math.abs(moved) >= 0.005 && (
-                  <p className={moved > 0 ? "text-positive" : "text-holiday"}>
-                    {moved > 0 ? "+" : "−"}
-                    {usd(Math.abs(moved))} {t("crypto.today")}
-                  </p>
-                )}
-                {costed.length > 0 && Math.abs(gain) >= 0.005 && (
-                  <p className={gain > 0 ? "text-positive" : "text-holiday"}>
-                    {gain > 0 ? "+" : "−"}
-                    {usd(Math.abs(gain))} {t("crypto.overall")}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
-          <div className="mt-0.5">{coins.map((coin) => row(coin, detail(coin)))}</div>
-        </>
+
+      {held.length > 0 && (
+        <div className="mt-1 flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[18px] font-semibold leading-tight tabular-nums">{usd(total)}</p>
+            {nprRate != null && (
+              <p className="text-[10px] text-text-muted tabular-nums">
+                ≈ Rs {money0.format(total * nprRate)}
+              </p>
+            )}
+          </div>
+          <div className="shrink-0 text-right text-[11px] font-medium tabular-nums">
+            {Math.abs(moved) >= 0.005 && (
+              <p className={moved > 0 ? "text-positive" : "text-holiday"}>
+                {moved > 0 ? "+" : "−"}
+                {usd(Math.abs(moved))} {t("crypto.today")}
+              </p>
+            )}
+            {costed.length > 0 && Math.abs(gain) >= 0.005 && (
+              <p className={gain > 0 ? "text-positive" : "text-holiday"}>
+                {gain > 0 ? "+" : "−"}
+                {usd(Math.abs(gain))} {t("crypto.overall")}
+              </p>
+            )}
+          </div>
+        </div>
       )}
+      <div className="mt-0.5">{coins.map((coin) => row(coin, detail(coin)))}</div>
     </section>
   );
 }
