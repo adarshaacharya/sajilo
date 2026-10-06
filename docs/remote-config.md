@@ -119,36 +119,63 @@ showing as one. `"sunday": null` means Sunday was never a holiday.
 
 ### Send a notice
 
+The quick way, from `apps/announcements`:
+
+```bash
+bun run announce            # asks for each field, validates, commits, pushes
+bun run announce --dry-run  # writes the file only
+bun run announce --prune    # drops expired announcements
+```
+
+Then approve the Publish config run on GitHub. By hand, it is an entry in
 `announcements.json`:
 
 ```json
 {
-  "notices": [
-    {
-      "id": "holiday-2083-07-05",
-      "level": "urgent",
-      "title": { "en": "Public holiday tomorrow", "ne": "भोलि सार्वजनिक बिदा" },
-      "body":  { "en": "The government has declared Kartik 5 a public holiday.",
-                 "ne": "सरकारले कात्तिक ५ गते सार्वजनिक बिदा घोषणा गरेको छ।" },
-      "expiresAt": "2026-10-23T00:00:00Z"
-    }
-  ]
+  "id": "holiday-2083-07-05",
+  "category": "notice",
+  "level": "important",
+  "title": { "en": "Public holiday tomorrow", "ne": "भोलि सार्वजनिक बिदा" },
+  "body":  { "en": "The government has declared Kartik 5 a public holiday.",
+             "ne": "सरकारले कात्तिक ५ गते सार्वजनिक बिदा घोषणा गरेको छ।" },
+  "expiresAt": "2026-10-23T00:00:00Z"
 }
 ```
 
-- `level`: `info`, `important`, or `urgent`. Urgent can't be dismissed and is
-  also sent once as a system notification.
-- Optional fields: `startsAt`, `expiresAt`, `platforms` (`["windows", "macos",
-  "linux"]`), `minVersion` / `maxVersion` (`"0.1.36"`), and `action` (`{ "url":
-  "https://…", "label": { "en", "ne" } }`).
+**Category** — what it is, and the From Sajilo switch it follows:
+
+| `category` | For | Pops up by default | Users' switch |
+|---|---|---|---|
+| `notice` | Holiday declared, bandh, alert | yes | on |
+| `greeting` | Dashain, New Year, on the day | yes | on |
+| `update` | A new version, "please update" | no | on |
+| `status` | A source late or down (set `screen`) | no | none |
+| `tip` | How to use something | no | off (opt-in) |
+| `ask` | Survey, feedback | no | off (opt-in) |
+| `general` (default) | Anything else | no | none |
+
+**Delivery** — `"delivery": "quiet"` (banner only) or `"popup"` (banner, and
+once a pop-up). Left out, it follows the table; `"level": "urgent"` always
+pops up and can't be dismissed. A pop-up arrives the way the user takes
+reminders: a **card**, or a **system notification** if they chose that. At
+most **one pop-up a day** from Sajilo, never while reminders are paused, and
+each announcement pops up once.
+
+**Screen** — `"screen": "bazar"` (or `news`, `rashifal`, `radio`,
+`weather`) shows the banner on that screen instead of Today. Use it for
+`status` notes ("NEPSE prices are delayed today").
+
+**Targeting** — `minVersion` / `maxVersion` (inclusive, `"0.1.35"`),
+`platforms` (`["windows", "macos", "linux"]`), `startsAt` / `expiresAt`, and
+an optional `action` (`{ "url": "https://…", "label": { "en", "ne" } }`).
+
+**Older versions** — only 0.1.35 and later read this file. To reach 0.1.34
+and older, post through the old Worker: `bun run notices publish notice.json`
+(`announce` offers this when an announcement targets them).
+
 - Each `id` is shown once per user and remembered when dismissed, so give a
   new notice a new id.
-- At most 5 show at once (urgent first). Delete expired notices from time to
-  time; at most 20 fit in the file.
-- To ask old versions to update, use `"maxVersion": "0.1.35"` and an action
-  linking to `https://sajilo.fyi`.
-- This is not a real push: it arrives at each app's next check. Use it for
-  things that are still true hours later.
+- At most 5 banners show at once (urgent first); at most 20 fit in the file.
 
 ### A source broke: pause it
 

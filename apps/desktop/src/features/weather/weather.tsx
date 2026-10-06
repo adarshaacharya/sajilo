@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { useHeaderInner, useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { ToastBar } from "../../shared/components/toast";
@@ -173,6 +174,7 @@ export function Weather() {
 
   return (
     <div className="space-y-2.5">
+      <AnnouncementBanner screen="weather" />
       <PinnedPlaces
         pins={modules.weatherPins}
         viewing={viewing}

@@ -61,6 +61,11 @@ fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &st
         .unwrap_or_default()
 }
 
+/// The user's notification options, as Settings saved them.
+pub fn options(app: &AppHandle<Wry>) -> NotificationOptions {
+    read(app, OPTIONS_KEY)
+}
+
 /// Everything the scheduler may deliver, soonest first — festivals, day plans,
 /// Keeper and IPO reminders merged. Includes reminders that came due within
 /// the late window, delivered or not: `deliver_due` checks `LastFired`, and

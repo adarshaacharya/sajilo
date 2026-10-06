@@ -26,6 +26,11 @@ type Source = keyof Pick<
   | "dayPlans"
   | "keeper"
   | "dailyRashifal"
+  | "sajiloNotices"
+  | "sajiloGreetings"
+  | "sajiloUpdates"
+  | "sajiloTips"
+  | "sajiloAsks"
 >;
 
 const GROUPS: {
@@ -76,6 +81,36 @@ const GROUPS: {
         source: "dailyRashifal",
         labelKey: "reminder.daily-rashifal",
         whenKey: "notifications.when.rashifal",
+      },
+    ],
+  },
+  {
+    titleKey: "notifications.group.sajilo",
+    rows: [
+      {
+        source: "sajiloNotices",
+        labelKey: "notifications.sajilo.notices",
+        whenKey: "notifications.when.sajilo-notices",
+      },
+      {
+        source: "sajiloGreetings",
+        labelKey: "notifications.sajilo.greetings",
+        whenKey: "notifications.when.sajilo-greetings",
+      },
+      {
+        source: "sajiloUpdates",
+        labelKey: "notifications.sajilo.updates",
+        whenKey: "notifications.when.sajilo-updates",
+      },
+      {
+        source: "sajiloTips",
+        labelKey: "notifications.sajilo.tips",
+        whenKey: "notifications.when.sajilo-tips",
+      },
+      {
+        source: "sajiloAsks",
+        labelKey: "notifications.sajilo.asks",
+        whenKey: "notifications.when.sajilo-asks",
       },
     ],
   },

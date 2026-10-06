@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import useSWR from "swr";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { FadeUp, Stagger } from "../../shared/components/motion";
@@ -196,6 +197,7 @@ export function News() {
       onRetry={() => load(true)}
       skeleton={<NewsSkeleton showNotices={selected === ALL} />}
     >
+      <AnnouncementBanner screen="news" className="mb-2" />
       <div className="mb-2">
         <Select
           ariaLabel={t("news.source")}

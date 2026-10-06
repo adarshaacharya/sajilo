@@ -638,13 +638,27 @@ export interface NotificationOptions {
   dayPlans: boolean;
   /** Keeper's due-date reminders, as a group. */
   keeper: boolean;
+  /** Announcements from Sajilo, by kind. Tips and asks are opt-in. */
+  sajiloNotices: boolean;
+  sajiloGreetings: boolean;
+  sajiloUpdates: boolean;
+  sajiloTips: boolean;
+  sajiloAsks: boolean;
   /** Nothing arrives before this (ISO time); what comes due meanwhile is let go. */
   pausedUntil: string | null;
 }
 
 export type PauseFor = "oneHour" | "oneDay" | "untilTomorrow";
 
-export type ReminderKind = "plan" | "festival" | "holiday" | "ipo" | "sip" | "keeper" | "rashifal";
+export type ReminderKind =
+  | "plan"
+  | "festival"
+  | "holiday"
+  | "ipo"
+  | "sip"
+  | "keeper"
+  | "rashifal"
+  | "announcement";
 
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {

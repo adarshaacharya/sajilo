@@ -63,6 +63,18 @@ pub struct NotificationOptions {
     /// the end of a quiet hour is what pausing was meant to avoid.
     #[serde(default)]
     pub paused_until: Option<DateTime<Utc>>,
+    /// Announcements from Sajilo, by kind. Civic notices, festival greetings
+    /// and updates are on; tips and asks are opt-in.
+    #[serde(default = "enabled_by_default")]
+    pub sajilo_notices: bool,
+    #[serde(default = "enabled_by_default")]
+    pub sajilo_greetings: bool,
+    #[serde(default = "enabled_by_default")]
+    pub sajilo_updates: bool,
+    #[serde(default)]
+    pub sajilo_tips: bool,
+    #[serde(default)]
+    pub sajilo_asks: bool,
 }
 
 fn default_hour() -> u32 {
@@ -88,6 +100,11 @@ impl Default for NotificationOptions {
             day_plans: enabled_by_default(),
             keeper: enabled_by_default(),
             paused_until: None,
+            sajilo_notices: enabled_by_default(),
+            sajilo_greetings: enabled_by_default(),
+            sajilo_updates: enabled_by_default(),
+            sajilo_tips: false,
+            sajilo_asks: false,
         }
     }
 }
@@ -134,6 +151,8 @@ pub enum ReminderKind {
     Sip,
     Keeper,
     Rashifal,
+    /// An announcement from Sajilo, popped up because its delivery asks to.
+    Announcement,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.

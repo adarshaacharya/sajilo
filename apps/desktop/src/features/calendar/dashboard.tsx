@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { Card } from "../../shared/components/card";
 import { MonthGrid } from "../../shared/components/month-grid";
 import { SkeletonBlock } from "../../shared/components/skeleton";
@@ -21,7 +22,6 @@ import { DateHeader } from "./_components/date-header";
 import { DayPlanSection } from "./_components/day-plan-section";
 import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
-import { HomeAnnouncement } from "./_components/home-announcement";
 import { SetupCard, useSetupCard } from "./_components/setup-card";
 import { UpNext } from "./_components/up-next";
 
@@ -238,7 +238,7 @@ export function Dashboard() {
       <DateHeader today={today} />
       {setup.visible && <SetupCard onDone={setup.dismiss} />}
 
-      <HomeAnnouncement />
+      <AnnouncementBanner />
 
       {modules.clocksEnabled && modules.clocks.length > 0 && (
         <ClockRow timeZones={modules.clocks} />

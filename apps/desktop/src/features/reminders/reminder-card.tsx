@@ -19,6 +19,7 @@ const ICONS: Record<ReminderKind, IconName> = {
   sip: "banknote",
   keeper: "keeper",
   rashifal: "rashifal",
+  announcement: "bell",
 };
 
 /** Where "Open" takes the popover for each kind of reminder. */
@@ -30,6 +31,7 @@ const ROUTES: Record<ReminderKind, string> = {
   sip: "/bazar",
   keeper: "/keeper",
   rashifal: "/rashifal",
+  announcement: "/",
 };
 
 const KIND_LABELS = {
@@ -40,6 +42,7 @@ const KIND_LABELS = {
   sip: "reminder.kind.sip",
   keeper: "reminder.kind.keeper",
   rashifal: "reminder.kind.rashifal",
+  announcement: "reminder.kind.announcement",
 } as const satisfies Record<ReminderKind, string>;
 
 /** Festival and holiday titles are ours, so they follow the language; the
@@ -49,8 +52,11 @@ const TRANSLATED_TITLES = {
   holiday: "reminder.holiday-tomorrow",
 } as const;
 
+type CardSwitch = { option: keyof NotificationOptions; label: TurnOffLabel };
+type TurnOffLabel = (typeof TURN_OFF_LABELS)[keyof typeof TURN_OFF_LABELS];
+
 /** The Settings › Notifications switch behind each kind of card. */
-const SWITCHES: Record<ReminderKind, keyof NotificationOptions> = {
+const SWITCHES: Record<Exclude<ReminderKind, "announcement">, keyof NotificationOptions> = {
   plan: "dayPlans",
   festival: "eveOfFestival",
   holiday: "eveOfPublicHoliday",
@@ -68,7 +74,33 @@ const TURN_OFF_LABELS = {
   sip: "reminder.off.sip",
   keeper: "reminder.off.keeper",
   rashifal: "reminder.off.rashifal",
-} as const satisfies Record<ReminderKind, string>;
+  notice: "reminder.off.notice",
+  greeting: "reminder.off.greeting",
+  update: "reminder.off.update",
+  tip: "reminder.off.tip",
+  ask: "reminder.off.ask",
+} as const;
+
+/** An announcement's switch follows its category, which its id carries:
+ * `announcement:<category>:<id>`. Status and general notices have none. */
+const ANNOUNCEMENT_SWITCHES: Record<string, keyof NotificationOptions> = {
+  notice: "sajiloNotices",
+  greeting: "sajiloGreetings",
+  update: "sajiloUpdates",
+  tip: "sajiloTips",
+  ask: "sajiloAsks",
+};
+
+function switchFor(reminder: ReminderCardView["reminder"]): CardSwitch | null {
+  if (reminder.kind === "announcement") {
+    const category = reminder.id.split(":")[1] ?? "";
+    const option = ANNOUNCEMENT_SWITCHES[category];
+    return option
+      ? { option, label: TURN_OFF_LABELS[category as keyof typeof TURN_OFF_LABELS] }
+      : null;
+  }
+  return { option: SWITCHES[reminder.kind], label: TURN_OFF_LABELS[reminder.kind] };
+}
 
 /** Shell event: the reminder in front changed (dismissed, or an example). */
 const CHANGED_EVENT = "sajilo://reminder-changed";
@@ -145,15 +177,15 @@ export function ReminderCard() {
     api.dismissReminder(route).catch(() => setBusy(false));
   };
   const dismiss = (open: boolean) => close(open ? ROUTES[reminder.kind] : null);
+  const cardSwitch = switchFor(reminder);
   /** Switches this kind off, as Settings › Notifications would, and moves on. */
   const turnOff = async () => {
-    if (busy) return;
+    if (busy || !cardSwitch) return;
+    const { option } = cardSwitch;
     if (!view.preview) {
       const current = await api.getNotificationOptions().catch(() => null);
       if (current) {
-        await api
-          .setNotificationOptions({ ...current, [SWITCHES[reminder.kind]]: false })
-          .catch(() => {});
+        await api.setNotificationOptions({ ...current, [option]: false }).catch(() => {});
       }
     }
     close(null);
@@ -202,9 +234,11 @@ export function ReminderCard() {
 
       {options ? (
         <div className="reminder-card__options">
-          <button type="button" onClick={() => void turnOff()} disabled={busy}>
-            {t(TURN_OFF_LABELS[reminder.kind])}
-          </button>
+          {cardSwitch && (
+            <button type="button" onClick={() => void turnOff()} disabled={busy}>
+              {t(cardSwitch.label)}
+            </button>
+          )}
           <button type="button" onClick={() => close("/settings/notifications")} disabled={busy}>
             {t("reminder.settings")}
           </button>

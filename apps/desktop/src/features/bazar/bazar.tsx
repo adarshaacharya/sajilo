@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 import useSWR from "swr";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
@@ -340,6 +341,7 @@ export function Bazar() {
 
   return (
     <div className="min-w-0 space-y-2.5">
+      <AnnouncementBanner screen="bazar" />
       <Segmented
         label={t("screen.bazar")}
         value={tab}

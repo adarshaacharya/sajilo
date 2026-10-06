@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { StateBanner } from "../../shared/components/state-banner";
@@ -119,6 +120,7 @@ export function Rashifal() {
 
   return (
     <div className="space-y-2.5">
+      <AnnouncementBanner screen="rashifal" />
       <StateBanner state={banner} onRetry={() => load(true)} skeleton={<ReadingCardSkeleton />}>
         {shown && (
           <ReadingCard

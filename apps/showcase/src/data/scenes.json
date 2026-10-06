@@ -32987,6 +32987,11 @@
       "ipoClosingDay": true,
       "keeper": true,
       "pausedUntil": null,
+      "sajiloAsks": false,
+      "sajiloGreetings": true,
+      "sajiloNotices": true,
+      "sajiloTips": false,
+      "sajiloUpdates": true,
       "sipPayment": true,
       "style": "card"
     },

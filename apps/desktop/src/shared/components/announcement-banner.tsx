@@ -1,13 +1,14 @@
 import { useState } from "react";
 import useSWR from "swr";
-import { Icon } from "../../../shared/components/icon";
-import { useSettings } from "../../../shared/context/settings-context";
-import { openExternalLink } from "../../../shared/lib/external-link";
-import { api } from "../../../shared/lib/ipc";
-import { catchAsFailed, loadedValue } from "../../../shared/lib/load-state";
-import { digits } from "../../../shared/lib/numerals";
-import type { AnnouncementLevel } from "../../../types/api/AnnouncementLevel";
-import type { LocalizedText } from "../../../types/api/LocalizedText";
+import type { AnnouncementCategory } from "../../types/api/AnnouncementCategory";
+import type { AnnouncementLevel } from "../../types/api/AnnouncementLevel";
+import type { LocalizedText } from "../../types/api/LocalizedText";
+import { useSettings } from "../context/settings-context";
+import { openExternalLink } from "../lib/external-link";
+import { api } from "../lib/ipc";
+import { catchAsFailed, loadedValue } from "../lib/load-state";
+import { digits } from "../lib/numerals";
+import { Icon } from "./icon";
 
 function textForLocale(text: LocalizedText, language: "en" | "ne"): string {
   return text[language] || text.en;
@@ -36,10 +37,29 @@ const TONES: Record<AnnouncementLevel, { edge: string; surface: string; title: s
   },
 };
 
-/** Server-scheduled notices, already filtered for this device by the engine.
- * One shows at a time, most pressing first, so Today grows by one strip however
- * many are live; no empty, loading, or failure chrome. */
-export function HomeAnnouncement() {
+const CATEGORY_LABELS = {
+  notice: "announcement.category.notice",
+  greeting: "announcement.category.greeting",
+  update: "announcement.category.update",
+  status: "announcement.category.status",
+  tip: "announcement.category.tip",
+  ask: "announcement.category.ask",
+  general: "announcement.category.general",
+} as const satisfies Record<AnnouncementCategory, string>;
+
+/** Announcements from Sajilo, already filtered for this device by the
+ * engine, for one screen: Today by default, or the screen a notice names (a
+ * Status note about NEPSE belongs on Bazar). One shows at a time, most
+ * pressing first, so a screen grows by one strip however many are live; no
+ * empty, loading, or failure chrome. */
+export function AnnouncementBanner({
+  screen = "today",
+  className = "",
+}: {
+  screen?: string;
+  /** Spacing for a screen that doesn't stack its children with a gap. */
+  className?: string;
+}) {
   const { t, language, numerals } = useSettings();
   const { data: state, mutate } = useSWR(
     "announcement",
@@ -47,7 +67,9 @@ export function HomeAnnouncement() {
     { revalidateOnFocus: false },
   );
   const [index, setIndex] = useState(0);
-  const announcements = loadedValue(state)?.announcements ?? [];
+  const announcements = (loadedValue(state)?.announcements ?? []).filter(
+    (notice) => (notice.screen ?? "today") === screen,
+  );
   if (announcements.length === 0) return null;
 
   const shown = Math.min(index, announcements.length - 1);
@@ -66,11 +88,14 @@ export function HomeAnnouncement() {
 
   return (
     <section
-      className={`relative flex overflow-hidden rounded-[10px] border border-divider ${tone.surface}`}
+      className={`relative flex overflow-hidden rounded-[10px] border border-divider ${tone.surface} ${className}`}
       aria-label={t("announcement.label")}
     >
       <span aria-hidden className={`w-[3px] shrink-0 ${tone.edge}`} />
       <div className="min-w-0 flex-1 py-2 pr-1 pl-2.5">
+        <p className="text-[9px] font-semibold uppercase leading-3 tracking-[0.06em] text-text-muted">
+          {t(CATEGORY_LABELS[notice.category])}
+        </p>
         <p className={`text-[12px] font-semibold leading-4 ${tone.title}`}>
           {textForLocale(notice.title, language)}
         </p>

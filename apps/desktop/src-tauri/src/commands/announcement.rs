@@ -12,15 +12,21 @@
 
 use chrono::{DateTime, Utc};
 use sajilo_api::announcement::{
-    Announcement, AnnouncementLevel, AnnouncementPlatform, AnnouncementResponse, AnnouncementsPack,
+    Announcement, AnnouncementCategory, AnnouncementDelivery, AnnouncementLevel,
+    AnnouncementPlatform, AnnouncementResponse, AnnouncementsPack,
 };
 use sajilo_api::load_state::LoadState;
 use sajilo_core::config::Pack;
+use sajilo_core::focus::ReminderStyle;
+use sajilo_core::notify::{NotificationOptions, PlannedNotification, ReminderKind};
 use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::NotificationExt;
 
 use crate::db;
 use crate::prefs::{DISMISSED_ANNOUNCEMENTS_KEY, NOTIFIED_ANNOUNCEMENTS_KEY};
+
+/// The Nepal day an announcement last popped up, so it is one a day at most.
+const LAST_POPUP_DAY_KEY: &str = "announcementPopupDay";
 
 /// How many closed or announced ids are remembered. Far more than are ever
 /// live at once, so a closed notice never comes back.
@@ -125,34 +131,95 @@ fn remember(app: &AppHandle<Wry>, key: &str, id: &str) {
     }
 }
 
-/// Sends each urgent notice once as a system notification, in the app's
-/// language.
-fn announce_urgent(app: &AppHandle<Wry>, notices: &[Announcement]) {
-    let mut notified = remembered(app, NOTIFIED_ANNOUNCEMENTS_KEY);
+/// The one announcement to pop up now, if any: the most pressing that asks
+/// for a pop-up and has not had one. At most one a day from Sajilo, however
+/// many are live, and none while reminders are paused.
+fn popup_due<'a>(
+    shown: &'a [Announcement],
+    notified: &[String],
+    last_popup_day: Option<&str>,
+    today: &str,
+    paused: bool,
+) -> Option<&'a Announcement> {
+    if paused || last_popup_day == Some(today) {
+        return None;
+    }
+    shown.iter().find(|notice| {
+        notice.effective_delivery() == AnnouncementDelivery::Popup && !notified.contains(&notice.id)
+    })
+}
+
+/// Pops up today's announcement, once, the way the user takes reminders: a
+/// card, or a system notification.
+fn pop_up(app: &AppHandle<Wry>, shown: &[Announcement], options: &NotificationOptions) {
+    let notified = remembered(app, NOTIFIED_ANNOUNCEMENTS_KEY);
+    let today = sajilo_core::nepal_time::today().to_string();
+    let last_day = db::get_json(app, LAST_POPUP_DAY_KEY)
+        .ok()
+        .flatten()
+        .and_then(|value| value.as_str().map(str::to_owned));
+    let Some(notice) = popup_due(
+        shown,
+        &notified,
+        last_day.as_deref(),
+        &today,
+        options.is_paused(Utc::now()),
+    ) else {
+        return;
+    };
     let nepali = crate::prefs::language(app) == sajilo_core::focus::Language::Ne;
-    for notice in notices {
-        if notice.level != AnnouncementLevel::Urgent || notified.contains(&notice.id) {
-            continue;
+    let pick = |text: &sajilo_api::announcement::LocalizedText| {
+        if nepali {
+            text.ne.clone()
+        } else {
+            text.en.clone()
         }
-        let pick = |text: &sajilo_api::announcement::LocalizedText| {
-            if nepali {
-                text.ne.clone()
-            } else {
-                text.en.clone()
-            }
-        };
-        let shown = app
+    };
+    let delivered = match options.style {
+        ReminderStyle::Card => {
+            crate::commands::reminder_card::enqueue(
+                app,
+                vec![PlannedNotification {
+                    // The card reads the category from the id, for its
+                    // "Turn off …" choice.
+                    id: format!(
+                        "announcement:{}:{}",
+                        category_key(notice.category),
+                        notice.id
+                    ),
+                    kind: ReminderKind::Announcement,
+                    title: pick(&notice.title),
+                    body: pick(&notice.body),
+                    fire_at: Utc::now(),
+                }],
+            );
+            true
+        }
+        ReminderStyle::Notification => app
             .notification()
             .builder()
             .title(pick(&notice.title))
             .body(pick(&notice.body))
-            .show();
-        if let Err(error) = shown {
-            eprintln!("sajilo: could not deliver an urgent notice: {error}");
-            continue;
-        }
+            .show()
+            .inspect_err(|error| eprintln!("sajilo: could not deliver an announcement: {error}"))
+            .is_ok(),
+    };
+    if delivered {
         remember(app, NOTIFIED_ANNOUNCEMENTS_KEY, &notice.id);
-        notified.push(notice.id.clone());
+        let _ = db::set_json(app, LAST_POPUP_DAY_KEY, &serde_json::Value::from(today));
+    }
+}
+
+/// The category as the card and the settings name it.
+const fn category_key(category: AnnouncementCategory) -> &'static str {
+    match category {
+        AnnouncementCategory::Notice => "notice",
+        AnnouncementCategory::Greeting => "greeting",
+        AnnouncementCategory::Update => "update",
+        AnnouncementCategory::Status => "status",
+        AnnouncementCategory::Tip => "tip",
+        AnnouncementCategory::Ask => "ask",
+        AnnouncementCategory::General => "general",
     }
 }
 
@@ -169,16 +236,24 @@ pub async fn get_announcement(
     }
     let now = Utc::now();
     let dismissed = remembered(&app, DISMISSED_ANNOUNCEMENTS_KEY);
+    let options = crate::commands::notify::options(&app);
+    // A category the user switched off is gone everywhere, banner and pop-up.
+    let notices = AnnouncementsPack::active()
+        .notices
+        .iter()
+        .filter(|notice| notice.allowed_by(&options))
+        .cloned()
+        .collect();
     let response = AnnouncementResponse {
         announcements: for_this_device(
-            AnnouncementsPack::active().notices.clone(),
+            notices,
             this_platform(),
             this_version(&app),
             &dismissed,
             now,
         ),
     };
-    announce_urgent(&app, &response.announcements);
+    pop_up(&app, &response.announcements, &options);
     LoadState::Fresh(response)
 }
 
@@ -214,6 +289,9 @@ mod tests {
             platforms: Vec::new(),
             min_version: None,
             max_version: None,
+            category: AnnouncementCategory::General,
+            delivery: None,
+            screen: None,
         }
     }
 
@@ -324,5 +402,56 @@ mod tests {
             response.announcements[0].platforms,
             [AnnouncementPlatform::Windows]
         );
+    }
+
+    #[test]
+    fn one_pop_up_a_day_the_most_pressing_first_never_twice() {
+        let mut quiet = notice("tip", AnnouncementLevel::Info);
+        quiet.category = AnnouncementCategory::Tip;
+        let mut holiday = notice("holiday", AnnouncementLevel::Important);
+        holiday.category = AnnouncementCategory::Notice;
+        let mut greeting = notice("dashain", AnnouncementLevel::Info);
+        greeting.category = AnnouncementCategory::Greeting;
+        let shown = [quiet, holiday, greeting];
+
+        let first = popup_due(&shown, &[], None, "2026-10-07", false).unwrap();
+        assert_eq!(
+            first.id, "holiday",
+            "a tip never pops up; the notice comes first"
+        );
+        assert!(popup_due(&shown, &[], Some("2026-10-07"), "2026-10-07", false).is_none());
+        let next = popup_due(
+            &shown,
+            &["holiday".to_owned()],
+            Some("2026-10-06"),
+            "2026-10-07",
+            false,
+        );
+        assert_eq!(next.unwrap().id, "dashain");
+        assert!(
+            popup_due(&shown, &[], None, "2026-10-07", true).is_none(),
+            "paused"
+        );
+    }
+
+    #[test]
+    fn delivery_follows_the_category_unless_published_or_urgent() {
+        let mut tip = notice("tip", AnnouncementLevel::Info);
+        tip.category = AnnouncementCategory::Tip;
+        assert_eq!(tip.effective_delivery(), AnnouncementDelivery::Quiet);
+        tip.delivery = Some(AnnouncementDelivery::Popup);
+        assert_eq!(tip.effective_delivery(), AnnouncementDelivery::Popup);
+        let mut update = notice("update", AnnouncementLevel::Urgent);
+        update.category = AnnouncementCategory::Update;
+        update.delivery = Some(AnnouncementDelivery::Quiet);
+        assert_eq!(
+            update.effective_delivery(),
+            AnnouncementDelivery::Popup,
+            "urgent always pops up"
+        );
+
+        let options = NotificationOptions::default();
+        assert!(!tip.allowed_by(&options), "tips are opt-in");
+        assert!(update.allowed_by(&options));
     }
 }

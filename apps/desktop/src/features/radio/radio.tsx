@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
+import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { Equalizer } from "../../shared/components/equalizer";
 import { useHeaderSlot } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
@@ -349,6 +350,7 @@ export function Radio() {
 
   return (
     <div ref={rootRef} className="space-y-2.5">
+      <AnnouncementBanner screen="radio" />
       {current && (
         <div ref={nowBarRef} className="radio-now-bar" data-stuck={stuck || undefined}>
           <section className="surface-card space-y-2.5 p-3">

@@ -12,6 +12,36 @@ dto_enum! {
         Urgent,
     }
 
+    /// What an announcement is about. Each kind has its own switch in
+    /// Settings › Notifications › From Sajilo.
+    #[derive(Default)]
+    pub enum AnnouncementCategory {
+        /// A civic notice: a holiday declared, a bandh, an alert.
+        Notice,
+        /// A festival or new-year greeting, on the day.
+        Greeting,
+        /// A new version, or a nudge to update.
+        Update,
+        /// A source running late or down, shown on that screen.
+        Status,
+        /// How to use something in Sajilo.
+        Tip,
+        /// A survey or a request for feedback.
+        Ask,
+        /// Anything else; follows no switch.
+        #[default]
+        General,
+    }
+
+    /// How an announcement arrives.
+    pub enum AnnouncementDelivery {
+        /// A banner on its screen, nothing more.
+        Quiet,
+        /// The banner, and once a pop-up: a card or a system notification,
+        /// whichever the user picked for reminders.
+        Popup,
+    }
+
     /// Which desktop a notice is for. Matched on the device: the app never
     /// says which platform it runs on.
     pub enum AnnouncementPlatform {
@@ -54,6 +84,15 @@ dto! {
         /// The newest Sajilo version shown this notice, inclusive.
         #[serde(default)]
         pub max_version: Option<String>,
+        #[serde(default)]
+        pub category: AnnouncementCategory,
+        /// Left out, it follows the category (and `level`: urgent pops up).
+        #[serde(default)]
+        pub delivery: Option<AnnouncementDelivery>,
+        /// The screen a banner belongs on (`bazar`, `news`, …); left out, Today.
+        /// A Status notice says what is late where it is late.
+        #[serde(default)]
+        pub screen: Option<String>,
     }
 
     /// The notices live now, most pressing first. A wrapper, not HTTP 204, so
@@ -96,7 +135,46 @@ fn check_text(field: &str, text: &LocalizedText, max: usize) -> Result<(), Strin
     check::text(&format!("{field}.ne"), &text.ne, max)
 }
 
+/// The screens a banner can be placed on.
+pub const BANNER_SCREENS: [&str; 6] = ["today", "bazar", "news", "rashifal", "radio", "weather"];
+
 impl Announcement {
+    /// How this one arrives: as published, else the category's default.
+    /// An urgent notice always pops up.
+    pub fn effective_delivery(&self) -> AnnouncementDelivery {
+        if self.level == AnnouncementLevel::Urgent {
+            return AnnouncementDelivery::Popup;
+        }
+        self.delivery.unwrap_or(match self.category {
+            AnnouncementCategory::Notice | AnnouncementCategory::Greeting => {
+                AnnouncementDelivery::Popup
+            }
+            AnnouncementCategory::Update
+            | AnnouncementCategory::Status
+            | AnnouncementCategory::Tip
+            | AnnouncementCategory::Ask
+            | AnnouncementCategory::General => AnnouncementDelivery::Quiet,
+        })
+    }
+
+    /// Whether the user's From Sajilo switches let this category through.
+    /// Status and general notices follow no switch.
+    pub fn allowed_by(&self, options: &sajilo_core::notify::NotificationOptions) -> bool {
+        match self.category {
+            AnnouncementCategory::Notice => options.sajilo_notices,
+            AnnouncementCategory::Greeting => options.sajilo_greetings,
+            AnnouncementCategory::Update => options.sajilo_updates,
+            AnnouncementCategory::Tip => options.sajilo_tips,
+            AnnouncementCategory::Ask => options.sajilo_asks,
+            AnnouncementCategory::Status | AnnouncementCategory::General => true,
+        }
+    }
+
+    /// The screen its banner shows on.
+    pub fn banner_screen(&self) -> &str {
+        self.screen.as_deref().unwrap_or("today")
+    }
+
     /// What the Worker's `problem()` checks, in Rust.
     pub fn problem(&self) -> Option<String> {
         let check = || -> Result<(), String> {
@@ -130,6 +208,11 @@ impl Announcement {
                 && parse_version(min) > parse_version(max)
             {
                 return Err("minVersion must not be after maxVersion".to_owned());
+            }
+            if let Some(screen) = &self.screen
+                && !BANNER_SCREENS.contains(&screen.as_str())
+            {
+                return Err(format!("screen must be one of {BANNER_SCREENS:?}"));
             }
             if let Some(action) = &self.action {
                 sajilo_core::config::check::https_url("action.url", &action.url)?;
