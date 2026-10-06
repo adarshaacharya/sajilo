@@ -106,8 +106,6 @@
   "dashboard.update-install": "इन्स्टल",
   "dashboard.update-installed": "अपडेट इन्स्टल भयो",
   "dashboard.update-restart": "अपडेट गर्नुहोस्",
-  "tools.clock-short": "घडी",
-  "tools.date-short": "मिति",
   "tray.update-restart": "रिस्टार्ट गरेर v{version} मा अपडेट गर्नुहोस्",
   "dashboard.updated-hour": "१ घण्टाअघि अपडेट",
   "dashboard.updated-hours": "{n} घण्टाअघि अपडेट",

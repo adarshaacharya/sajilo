@@ -106,8 +106,6 @@
   "dashboard.update-install": "Install",
   "dashboard.update-installed": "Update installed",
   "dashboard.update-restart": "Restart to update",
-  "tools.clock-short": "Clock",
-  "tools.date-short": "Date",
   "tray.update-restart": "Restart to update to v{version}",
   "dashboard.updated-hour": "Updated 1 hour ago",
   "dashboard.updated-hours": "Updated {n} hours ago",

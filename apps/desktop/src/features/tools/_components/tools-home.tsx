@@ -175,7 +175,7 @@ function DateCard({ onOpen }: { onOpen: () => void }) {
       className="tool-card tool-live"
       style={tinted("var(--color-accent-mark)")}
     >
-      <span className="tool-live__label">{t("tools.date-short")}</span>
+      <span className="tool-live__label">{t("tools.date")}</span>
       <span className="min-w-0">
         {today ? (
           <>
@@ -207,7 +207,7 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
       style={tinted("var(--color-weather-tint)")}
     >
       <span className="flex items-center justify-between gap-1">
-        <span className="tool-live__label">{t("tools.clock-short")}</span>
+        <span className="tool-live__label">{t("tools.clock")}</span>
         {zone && reading && reading.dayOffset !== 0 && (
           <span className="shrink-0 text-[10px] text-text-muted">
             {formatDayOffset(reading.dayOffset)}
