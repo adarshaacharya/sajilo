@@ -10,7 +10,7 @@ Each file in `data/config/` is a **pack**. It is compiled into the app as the
 offline default, and published, signed, to `https://config.sajilo.fyi/` as
 the live override. You change a value by merging a PR to `main`; the
 **Publish config** workflow validates, signs and deploys it. Running apps
-check about every 3 hours, verify the signature and every pack's hash, and
+check about every hour, verify the signature and every pack's hash, and
 apply what changed. Anything wrong (bad signature, bad hash, out-of-bounds
 content, offline) keeps what the app already has. Hosting is a
 static-assets-only Cloudflare Worker: free and unmetered.
@@ -49,7 +49,7 @@ static-assets-only Cloudflare Worker: free and unmetered.
 |---|---|
 | Workflow builds, signs, deploys | ~3–5 min |
 | Cloudflare may serve the old manifest | up to 5 min |
-| Each app's next check | up to ~3.5 h (3 h ± 20%), 15 s after launch, or at once with **Check now** |
+| Each app's next check | up to ~1¼ h (1 h ± 20%), 15 s after launch, or at once with **Check now** |
 
 To see it yourself straight away: Settings → System → **App content** →
 **Check now**. The row then says "Checked just now" and how many packs came

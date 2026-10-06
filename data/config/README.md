@@ -4,7 +4,7 @@ Everything Sajilo can be told after it ships. Each file is one **pack**:
 compiled into the app as the offline default, and published, signed, to
 `https://config.sajilo.fyi/` as the live override. Edit a file, open a PR,
 merge it: CI validates, signs and deploys it, and every running copy picks it
-up within about three hours. Nothing else changes a remote value.
+up within about an hour. Nothing else changes a remote value.
 
 **How to publish, undo, rotate keys and troubleshoot:
 [docs/remote-config.md](../../docs/remote-config.md).**

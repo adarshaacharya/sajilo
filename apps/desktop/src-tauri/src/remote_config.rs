@@ -31,10 +31,12 @@ const CONFIG_HOST: &str = "https://config.sajilo.fyi/";
 const STORE_KEY: &str = "remoteConfig.v1";
 const SOURCE_NAME: &str = "Sajilo config";
 /// How often the manifest is checked, give or take a fifth so a release
-/// doesn't line every client up on the same minute.
-const CHECK_EVERY_SECS: i64 = 3 * 60 * 60;
+/// doesn't line every client up on the same minute. Hourly: an unchanged
+/// manifest is a ~200-byte 304 from a free static host, and a holiday the
+/// government announces today should reach people within the hour.
+const CHECK_EVERY_SECS: i64 = 60 * 60;
 /// After a failed check, try again sooner.
-const RETRY_AFTER_FAILURE_SECS: i64 = 30 * 60;
+const RETRY_AFTER_FAILURE_SECS: i64 = 15 * 60;
 pub const CHANGED_EVENT: &str = "sajilo://config-changed";
 
 /// What survives a restart.

@@ -188,7 +188,7 @@ which users get `429`s. Phase 7 moves announcements onto this static pipeline.
   first use. The last-good remote copy is read from SQLite in the same lazy
   step. No network on the startup path.
 - **When it fetches:** in the existing `background_refresh` cycle (15 s after
-  launch, then hourly), at most every 3 hours, with ±20 % jitter so a release
+  launch, then hourly), at most every hour, with ±20 % jitter so a release
   doesn't make every client hit the CDN in the same minute. A normal check is
   one conditional GET that returns `304`.
 - **What it downloads:** only packs whose hash changed. A typical edit is one
