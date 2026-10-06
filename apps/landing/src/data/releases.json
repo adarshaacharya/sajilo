@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.35",
+    "name": "Sajilo v0.1.35",
+    "publishedAt": "2026-10-06T16:47:29Z",
+    "body": "## Charts for forex, gold, silver and fuel\n\n- **Forex:** the converter card now charts the selected currency's NRB buy rate over **1M, 3M or 1Y**, with the change and the low and high. Tap any currency to chart it.\n- **Gold & silver:** the gold card charts hallmark **gold or silver per tola** over 1M, 3M or 1Y.\n- **Fuel:** tap a fuel to see when its price last changed and what it replaced, and every Kathmandu revision as a step chart.\n\n## Rashifal for the week, month and year\n\n- **Today, Week, Month and Year** tabs on your rashi, each titled the way the source names it.\n- **Lucky colour and number** on today's reading.\n- Long readings fold behind **Read more**.\n- If Hamro Patro is down, readings come from **Ratopati** instead, and the card says which.\n\n## Fixes without waiting for an update\n\nSajilo can now take small corrections without a new version: a holiday the government announces, a moved news feed, a new radio station, a wrong phone number, next year's festivals. They arrive signed, within about an hour, and **Settings › System › App content** shows when it last checked.\n\n## News from Sajilo, your way\n\nNotices (like a holiday the government declares), festival greetings and update news can now reach you as a banner, and the important ones once as a card or notification, whichever you chose for reminders. At most one a day. **Settings › Notifications › From Sajilo** turns each kind on or off.\n\n## Turn off one kind of break\n\nBreak cards (look away, water, move, meals, bedtime) now have the same **⋯** as reminder cards: turn off just that kind, or open break settings. The ⋯ is also easier to spot.\n\n## Tools, tidied\n\nThe **Directory** comes first, with 100, 101 and 102 always in view. Date Converter, Second Clock and Stopwatch sit in one row, each showing its answer, and the calculators take half the space.\n\n## Smaller things\n\n- **Your funds** and **Your coins** no longer show an empty card until you star something.\n- Forex no longer goes blank on a day NRB publishes empty rates.\n- The Linux AppImage now runs in sandboxes such as firejail.\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.35",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-macos-arm64.dmg",
+        "size": 11386730
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-macos-x64.dmg",
+        "size": 12076112
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-windows-x64.exe",
+        "size": 8409365
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-linux-amd64.deb",
+        "size": 15350110
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-linux-x86_64.AppImage",
+        "size": 160598520
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.35/Sajilo-linux-x86_64.rpm",
+        "size": 15349873
+      }
+    ]
+  },
+  {
     "version": "v0.1.34",
     "name": "Sajilo v0.1.34",
     "publishedAt": "2026-10-01T17:19:58Z",
