@@ -7,6 +7,7 @@ import {
   api,
   type BreakKind,
   type BreakOutcome,
+  type FocusSettings,
   type FocusSnapshot,
   type Joke,
 } from "../../shared/lib/ipc";
@@ -38,6 +39,41 @@ const BODIES = {
 } as const;
 
 type TranslationKey = Parameters<typeof translate>[0];
+
+const TURN_OFF_LABELS = {
+  eyes: "break.off.eyes",
+  move: "break.off.move",
+  water: "break.off.water",
+  custom: "break.off.custom",
+  endOfDay: "break.off.endOfDay",
+  breakfast: "break.off.breakfast",
+  lunch: "break.off.lunch",
+  dinner: "break.off.dinner",
+  bedtime: "break.off.bedtime",
+} as const satisfies Record<BreakKind, TranslationKey>;
+
+/** The settings with just this kind of break switched off, the way the
+ * Routine screen's own switch for it would. */
+function withKindOff(settings: FocusSettings, kind: BreakKind): FocusSettings {
+  switch (kind) {
+    case "eyes":
+    case "move":
+    case "water":
+      return { ...settings, [kind]: { ...settings[kind], enabled: false } };
+    case "custom":
+      return { ...settings, custom: { ...settings.custom, enabled: false } };
+    case "endOfDay":
+      return { ...settings, endOfDay: false };
+    case "breakfast":
+    case "lunch":
+    case "dinner":
+    case "bedtime":
+      return {
+        ...settings,
+        routine: { ...settings.routine, [kind]: { ...settings.routine[kind], enabled: false } },
+      };
+  }
+}
 
 /** What the main button says where "Done" would not fit the moment. */
 const DONE_LABELS: Partial<Record<BreakKind, TranslationKey>> = {
@@ -183,6 +219,9 @@ export function BreakCard() {
   // The cheer was dealt by the engine when the card opened, so it stays put
   // for as long as the card is up.
   const [taken, setTaken] = useState(false);
+  // The ⋯ choices replace the buttons in place, as on a reminder card: the
+  // card is its own small window, so a dropdown would be cut off.
+  const [options, setOptions] = useState(false);
   const [cheer, setCheer] = useState<Joke | null>(null);
   const [drankMl, setDrankMl] = useState(0);
   const cardCheer = card?.cheer ?? null;
@@ -281,11 +320,49 @@ export function BreakCard() {
           {card.kind === "water" && <WaterBar ml={waterMl} goalMl={goalMl} />}
         </div>
         {card.seconds > 0 && <Countdown remaining={remaining} seconds={card.seconds} />}
+        {!taken && (
+          <button
+            type="button"
+            onClick={() => setOptions((open) => !open)}
+            aria-expanded={options}
+            aria-label={t("reminder.options")}
+            title={t("reminder.options")}
+            className="reminder-card__more"
+          >
+            <Icon name="ellipsis" className="size-3.5" />
+          </button>
+        )}
       </div>
+
+      {options && !taken && (
+        <div className="reminder-card__options">
+          <button
+            type="button"
+            onClick={() => {
+              // An example card changes nothing; a real one turns its kind off.
+              const off = card.preview
+                ? Promise.resolve()
+                : api.setFocusSettings(withKindOff(snapshot.settings, card.kind)).then(() => {});
+              void off.catch(() => {}).finally(() => finish("skip"));
+            }}
+          >
+            {t(TURN_OFF_LABELS[card.kind])}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void api.openScreen("/focus").catch(() => {});
+              finish("skip");
+            }}
+          >
+            {t("break.settings")}
+          </button>
+        </div>
+      )}
 
       {/* Laid out like a Mac dialog: the way out on the left, and the main
           action — the one that counts the break — on the far right. */}
-      <div className="break-card__actions" hidden={taken} data-tauri-drag-region>
+      <div className="break-card__actions" hidden={taken || options} data-tauri-drag-region>
         <button type="button" onClick={() => finish("skip")} className="btn-ghost mr-auto">
           {t("break.skip")}
         </button>

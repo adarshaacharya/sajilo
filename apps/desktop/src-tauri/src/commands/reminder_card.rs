@@ -145,3 +145,16 @@ pub fn preview_reminder_card(app: AppHandle<Wry>) {
         None => show(&app),
     }
 }
+
+/// Shows the popover at `route`, for a card's "… settings" choice. Only an
+/// in-app path is accepted.
+#[tauri::command]
+pub fn open_screen(app: AppHandle<Wry>, route: String) {
+    if !route.starts_with('/') || route.contains("://") {
+        return;
+    }
+    if let Some(window) = crate::window::main_window(&app) {
+        crate::window::show(&window);
+        let _ = window.emit("sajilo://navigate", route);
+    }
+}

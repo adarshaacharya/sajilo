@@ -946,6 +946,8 @@ export const api = {
   getAnnouncement: (refresh = false) =>
     invoke<LoadState<AnnouncementResponse>>("get_announcement", { refresh }),
   dismissAnnouncement: (id: string) => invoke<void>("dismiss_announcement", { id }),
+  /** Shows the popover at an in-app route, from a card. */
+  openScreen: (route: string) => invoke<void>("open_screen", { route }),
   /** The signed remote config: what's installed, and when it was checked. */
   remoteConfigStatus: () => invoke<RemoteConfigStatus>("remote_config_status"),
   /** Checks for new config now, whatever the schedule says. */

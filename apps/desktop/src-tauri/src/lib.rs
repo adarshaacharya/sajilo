@@ -388,6 +388,7 @@ pub fn run() {
             commands::notify::pending_notifications,
             commands::reminder_card::current_reminder,
             commands::reminder_card::dismiss_reminder,
+            commands::reminder_card::open_screen,
             commands::reminder_card::preview_reminder_card,
             commands::notify::get_notification_options,
             commands::notify::set_notification_options,

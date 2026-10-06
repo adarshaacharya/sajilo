@@ -3752,12 +3752,15 @@ input[type="search"]::-webkit-search-decoration {
   align-items: center;
   justify-content: center;
   border-radius: 7px;
-  color: var(--color-text-muted);
+  /* A faint resting chip and secondary-strength dots, so it reads as a
+     button rather than decoration; hover and open only deepen it. */
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  color: var(--color-text-secondary);
   transition: background 120ms ease, color 120ms ease;
 }
 .reminder-card__more:hover,
 .reminder-card__more[aria-expanded="true"] {
-  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  background: color-mix(in srgb, var(--color-text) 12%, transparent);
   color: var(--color-text);
 }
 /* Its two choices, in place of the buttons. */
