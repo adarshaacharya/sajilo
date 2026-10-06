@@ -157,6 +157,10 @@ jobs:
           fi
 
           rm -f "$WORK/squashfs-root/usr/lib/"libwayland-*
+          # --appimage-extract writes every directory as 0700. Repacked as-is,
+          # only root can enter the image, so sandboxes that mount it as root
+          # (firejail, the AppImage catalog's test) refuse to run AppRun.
+          chmod -R u+rwX,go+rX,go-w "$WORK/squashfs-root"
           curl -fsSL -o "$WORK/appimagetool" \
             https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           echo "a6d71e2b6cd66f8e8d16c37ad164658985e0cf5fcaa950c90a482890cb9d13e0  $WORK/appimagetool" | sha256sum -c -
