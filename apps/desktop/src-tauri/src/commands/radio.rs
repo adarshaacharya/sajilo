@@ -4,7 +4,8 @@
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::radio::RadioDirectory;
+use sajilo_api::radio::{RadioDirectory, RadioPack};
+use sajilo_core::config::Pack;
 use sajilo_providers::{HttpClient, ratopati};
 use tauri::{AppHandle, Manager, Wry};
 
@@ -42,6 +43,9 @@ pub async fn get_stations(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadSta
             ratopati::fetch_directory(client, now)
         })
         .await
+        // Applied on the way out, not stored, so a pack change shows at once
+        // and the cached directory stays Ratopati's own.
+        .map(|directory| RadioPack::active().apply(directory))
 }
 
 /// The playable URL for one station, read from its own page.
@@ -50,6 +54,9 @@ pub async fn get_stations(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadSta
 /// directory lists around 270 of them, and a listener plays one.
 #[tauri::command]
 pub async fn station_stream(app: AppHandle<Wry>, slug: String) -> Result<String, String> {
+    if let Some(url) = RadioPack::active().stream_for(&slug) {
+        return Ok(url);
+    }
     let client = app.state::<RadioCache>().client.clone();
     ratopati::fetch_stream_url(&client, &slug)
         .await

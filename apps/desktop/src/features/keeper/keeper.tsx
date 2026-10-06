@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { useHeaderInner } from "../../shared/components/header-slot";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
+import { currentDirectory } from "../../shared/lib/directory";
 import {
   api,
   type KeeperDocumentType,
@@ -36,12 +37,7 @@ import {
 } from "./_lib/documents";
 import { groupDocuments, groupItems, groupName, itemGroupName } from "./_lib/groups";
 import { type I18nKey, id, todayKeeperDate } from "./_lib/shared";
-import {
-  applyTemplate,
-  blankItem,
-  REMINDER_TEMPLATES,
-  type ReminderTemplate,
-} from "./_lib/templates";
+import { applyTemplate, blankItem, type ReminderTemplate } from "./_lib/templates";
 
 /** Keeper's own navigation: a small stack, so back always means "the screen I
  * came from" — the add picker, a document reached through a link, the list. */
@@ -306,7 +302,9 @@ export function Keeper() {
       ...blankItem(await todayKeeperDate().catch(() => null)),
       personId: defaultPerson,
     };
-    const template = REMINDER_TEMPLATES.find((entry) => entry.id === source.template);
+    const template = currentDirectory().reminderTemplates.find(
+      (entry) => entry.id === source.template,
+    );
     push({
       name: "editItem",
       draft: template

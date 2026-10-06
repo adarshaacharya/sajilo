@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../../shared/components/icon";
+import { useDirectory } from "../../../shared/lib/directory";
 import type { KeeperDocumentType } from "../../../shared/lib/ipc";
 import { DOCUMENT_TYPES, docTypeLabel, documentSpec, RECURRENCE_LABELS } from "../_lib/documents";
 import { DOCUMENT_ICONS, REMINDER_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
-import { REMINDER_TEMPLATES, type ReminderTemplate } from "../_lib/templates";
+import type { ReminderTemplate } from "../_lib/templates";
 
 /** The one way in. People think "Aama's passport" or "the electricity bill",
  * not "is this a record or a reminder?" — so they pick the thing, and the
@@ -25,6 +26,7 @@ export function AddPicker({
   onSip: () => void;
   t: TFn;
 }) {
+  const { reminderTemplates } = useDirectory();
   /** A few words on how each kind of paper behaves, so the choice says what
    * Keeper will do with it. */
   const documentHint = (type: KeeperDocumentType) => {
@@ -55,7 +57,7 @@ export function AddPicker({
       )}
       {only !== "documents" && (
         <Group title={t("keeper.add.reminders")} note={t("keeper.add.reminders-note")}>
-          {REMINDER_TEMPLATES.map((template) => (
+          {reminderTemplates.map((template) => (
             <Tile
               key={template.id}
               icon={REMINDER_ICONS[template.id] ?? "keeper"}

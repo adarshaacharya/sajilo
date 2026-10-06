@@ -176,6 +176,7 @@ mod tests {
             title: title.to_owned(),
             link: format!("https://annapurnapost.com/story/{title}"),
             source: NewsSource::AnnapurnaPost,
+            source_key: None,
             source_name: "Annapurna Post".to_owned(),
             published,
             precision: sajilo_api::news::DatePrecision::Exact,

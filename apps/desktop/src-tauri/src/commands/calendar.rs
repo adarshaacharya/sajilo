@@ -149,11 +149,12 @@ pub fn panchanga_for(iso_date: String) -> Result<Panchanga> {
 
 #[tauri::command]
 pub fn supported_range() -> SupportedRange {
-    use sajilo_core::calendar::events::{FIRST_EVENT_YEAR, LAST_EVENT_YEAR};
+    use sajilo_core::calendar::events::{FIRST_EVENT_YEAR, last_event_year};
     SupportedRange {
         first_year: bs::FIRST_YEAR,
         last_year: bs::LAST_YEAR,
         first_event_year: FIRST_EVENT_YEAR,
-        last_event_year: LAST_EVENT_YEAR,
+        // Later years arrive in the calendar-years pack, no release needed.
+        last_event_year: last_event_year(),
     }
 }

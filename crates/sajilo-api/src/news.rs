@@ -47,6 +47,9 @@ dto_enum! {
         RatopatiEnglish,
         Kantipur,
         Gorkhapatra,
+        /// A newsroom from the `news-sources` config pack; the headline's
+        /// `source_key` says which.
+        Custom,
     }
 
     /// How precisely `published` is known.
@@ -84,6 +87,10 @@ dto! {
         pub title: String,
         pub link: String,
         pub source: NewsSource,
+        /// The pack id of a [`NewsSource::Custom`] source; `None` for the
+        /// built-in ones, which `source` already names.
+        #[serde(default)]
+        pub source_key: Option<String>,
         pub source_name: String,
         // Absent in some feeds — Annapurna Post publishes no `pubDate` at all
         // — so nothing may depend on it being there.
@@ -106,7 +113,9 @@ dto! {
     /// Sent rather than duplicated in TypeScript so the publisher names and the
     /// language split have exactly one definition — this file.
     pub struct NewsSourceInfo {
-        pub id: NewsSource,
+        /// A built-in source's `NewsSource` name, or a pack source's id —
+        /// what a headline's `source_key ?? source` is compared with.
+        pub id: String,
         pub name: String,
         pub english: bool,
         pub official: bool,
@@ -123,17 +132,97 @@ dto! {
 }
 
 impl NewsSourceInfo {
-    /// Every source, in `NewsSource::ALL` order.
+    /// Every source: the built-in ones in `NewsSource::ALL` order, then the
+    /// active `news-sources` pack's.
     pub fn catalog() -> Vec<Self> {
+        use sajilo_core::config::Pack;
         NewsSource::ALL
             .into_iter()
             .map(|source| Self {
-                id: source,
+                id: source.key().to_owned(),
                 name: source.display_name().to_owned(),
                 english: source.is_english(),
                 official: source.is_official(),
             })
+            .chain(NewsSourcesPack::active().sources.iter().map(|source| Self {
+                id: source.id.clone(),
+                name: source.name.clone(),
+                english: source.english,
+                official: false,
+            }))
             .collect()
+    }
+}
+
+dto! {
+    /// A newsroom added by config: any site with an RSS or Atom feed.
+    pub struct PackNewsSource {
+        /// Stable once published: a reader's chosen filter is saved by it.
+        pub id: String,
+        pub name: String,
+        pub feeds: Vec<String>,
+        #[serde(default)]
+        pub english: bool,
+    }
+
+    /// Newsrooms added without a release: `data/config/news-sources.json`.
+    pub struct NewsSourcesPack {
+        #[serde(default)]
+        pub sources: Vec<PackNewsSource>,
+    }
+}
+
+/// Every source is fetched on each refresh; this keeps a refresh quick.
+const MAX_PACK_SOURCES: usize = 20;
+const MAX_FEEDS: usize = 4;
+
+impl sajilo_core::config::Pack for NewsSourcesPack {
+    const NAME: &'static str = "news-sources";
+    const SCHEMA: u32 = 1;
+
+    fn bundled_json() -> &'static str {
+        include_str!("../../../data/config/news-sources.json")
+    }
+
+    fn validate(&self) -> Result<(), String> {
+        use sajilo_core::config::check;
+        if self.sources.len() > MAX_PACK_SOURCES {
+            return Err(format!("more than {MAX_PACK_SOURCES} sources"));
+        }
+        let mut ids = std::collections::BTreeSet::new();
+        for source in &self.sources {
+            let id = &source.id;
+            let slug = !id.is_empty()
+                && id.len() <= 40
+                && id
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+            if !slug {
+                return Err(format!("{id}: id must be a lowercase slug"));
+            }
+            if NewsSource::ALL.iter().any(|built_in| built_in.key() == id)
+                || id == "all"
+                || id == "custom"
+            {
+                return Err(format!("{id}: id is taken"));
+            }
+            if !ids.insert(id.as_str()) {
+                return Err(format!("{id} appears twice"));
+            }
+            check::text(&format!("{id}.name"), &source.name, 60)?;
+            if source.feeds.is_empty() || source.feeds.len() > MAX_FEEDS {
+                return Err(format!("{id}: 1 to {MAX_FEEDS} feeds"));
+            }
+            for feed in &source.feeds {
+                check::https_url(&format!("{id}.feeds"), feed)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn slot() -> &'static sajilo_core::config::Slot<Self> {
+        static SLOT: sajilo_core::config::Slot<NewsSourcesPack> = sajilo_core::config::Slot::new();
+        &SLOT
     }
 }
 
@@ -155,6 +244,27 @@ impl NewsSource {
         Self::Gorkhapatra,
     ];
 
+    /// The name it serialises as: `"onlineKhabar"`.
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::NepalGovernment => "nepalGovernment",
+            Self::OnlineKhabar => "onlineKhabar",
+            Self::OnlineKhabarEnglish => "onlineKhabarEnglish",
+            Self::AnnapurnaPost => "annapurnaPost",
+            Self::Ratopati => "ratopati",
+            Self::Bizkhabar => "bizkhabar",
+            Self::ArthaSansar => "arthaSansar",
+            Self::TechPana => "techPana",
+            Self::HamroKhelkud => "hamroKhelkud",
+            Self::KathmanduPost => "kathmanduPost",
+            Self::Khabarhub => "khabarhub",
+            Self::RatopatiEnglish => "ratopatiEnglish",
+            Self::Kantipur => "kantipur",
+            Self::Gorkhapatra => "gorkhapatra",
+            Self::Custom => "custom",
+        }
+    }
+
     pub fn display_name(self) -> &'static str {
         match self {
             Self::NepalGovernment => "Nepal Government",
@@ -171,6 +281,7 @@ impl NewsSource {
             Self::RatopatiEnglish => "Ratopati English",
             Self::Kantipur => "Kantipur",
             Self::Gorkhapatra => "Gorkhapatra",
+            Self::Custom => "News",
         }
     }
 
@@ -202,6 +313,8 @@ impl NewsSource {
             // Only `/rss` serves, and it names itself in an `atom:link
             // rel="self"`, so it is the feed the paper means to publish.
             Self::Gorkhapatra => &["https://gorkhapatraonline.com/rss"],
+            // Its feeds are in the pack, per source.
+            Self::Custom => &[],
         }
     }
 

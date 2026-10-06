@@ -14,7 +14,9 @@
 use std::collections::BTreeMap;
 
 use chrono::{DateTime, Duration, Utc};
-use sajilo_api::bazar::{Metal, MetalRate, MetalRateSnapshot, MetalSource, MetalUnit};
+use sajilo_api::bazar::{
+    Metal, MetalHistory, MetalPoint, MetalRate, MetalRateSnapshot, MetalSource, MetalUnit,
+};
 use sajilo_api::load_state::Freshness;
 use serde::Deserialize;
 
@@ -77,6 +79,52 @@ impl Day {
         }?;
         (value > 0.0).then_some(value)
     }
+}
+
+/// How far back the chart reaches: one request, about 300 trading days.
+pub const CHART_DAYS: i64 = 366;
+
+pub fn history_url(now: DateTime<Utc>) -> String {
+    let from = (now - Duration::days(CHART_DAYS)).format("%Y-%m-%d");
+    format!("{HOST}?from-date={from}")
+}
+
+/// A year of gold and silver for the chart. NepaliPatro rather than the
+/// Federation: the Federation's year endpoint has numbers for about one day
+/// in five, and NepaliPatro republishes its figures for every trading day.
+pub async fn fetch_history(client: &HttpClient, now: DateTime<Utc>) -> Result<MetalHistory> {
+    let body = client.get_text(SOURCE_NAME, &history_url(now)).await?;
+    parse_history(&body, now)
+}
+
+pub fn parse_history(body: &str, now: DateTime<Utc>) -> Result<MetalHistory> {
+    let payload: Payload = serde_json::from_str(body)
+        .map_err(|error| ProviderError::parse(SOURCE_NAME, error.to_string()))?;
+    let series = |metal: Metal| -> Vec<MetalPoint> {
+        payload
+            .data
+            .iter()
+            .filter_map(|(date, day)| {
+                let date = chrono::NaiveDate::parse_from_str(date, "%Y-%m-%d").ok()?;
+                Some(MetalPoint {
+                    time: date.and_hms_opt(0, 0, 0)?.and_utc().timestamp(),
+                    price: day.rate(metal, MetalUnit::Tola)?,
+                })
+            })
+            .collect()
+    };
+    let (gold, silver) = (series(Metal::FineGold), series(Metal::Silver));
+    if gold.is_empty() && silver.is_empty() {
+        return Err(ProviderError::parse(
+            SOURCE_NAME,
+            "no rates in the history window",
+        ));
+    }
+    Ok(MetalHistory {
+        gold,
+        silver,
+        freshness: Freshness::new(now),
+    })
 }
 
 pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<MetalRateSnapshot> {

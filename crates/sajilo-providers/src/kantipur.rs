@@ -67,6 +67,7 @@ fn build(entry: Entry) -> Option<NewsItem> {
         title: title.to_owned(),
         link: link.to_owned(),
         source: NewsSource::Kantipur,
+        source_key: None,
         source_name: NewsSource::Kantipur.display_name().to_owned(),
         published: parse_nepal_time(&entry.pub_date),
         precision: DatePrecision::Exact,

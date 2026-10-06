@@ -1,7 +1,7 @@
+import { currentDirectory } from "../../../shared/lib/directory";
 import type { KeeperDocumentType, KeeperItem, KeeperRecord } from "../../../shared/lib/ipc";
 import { DOCUMENT_TYPES, docTypeLabel, recordName } from "./documents";
 import type { TFn } from "./shared";
-import { REMINDER_TEMPLATES } from "./templates";
 
 /** Every document of one kind: all the citizenships, all the passports. A
  * custom document is its own kind, keyed by the name the user gave it. */
@@ -89,6 +89,8 @@ export function groupItems(items: readonly KeeperItem[]): ItemGroup[] {
 }
 
 export function itemGroupName(group: ItemGroup) {
-  const template = REMINDER_TEMPLATES.find((entry) => entry.id === group.template);
+  const template = currentDirectory().reminderTemplates.find(
+    (entry) => entry.id === group.template,
+  );
   return template?.title ?? group.items[0]?.title ?? "";
 }

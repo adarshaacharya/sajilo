@@ -97,3 +97,32 @@ fn a_parse_failure_is_not_retryable() {
     assert!(!error.is_retryable());
     assert_eq!(error.source_name(), nrb::SOURCE_NAME);
 }
+
+#[test]
+fn history_merges_pages_into_one_series_per_currency() {
+    let read = |page: u32| {
+        std::fs::read_to_string(format!(
+            "{}/../../fixtures/nrb/history-page-{page}.json",
+            env!("CARGO_MANIFEST_DIR")
+        ))
+        .unwrap()
+    };
+    let history =
+        sajilo_providers::nrb::parse_history(&[read(1), read(2)], chrono::Utc::now()).unwrap();
+
+    let usd = &history.series["USD"];
+    // 128 days across the two pages; 6 Aug 2026 carries `null` for every
+    // rate and is skipped.
+    assert_eq!(usd.len(), 127);
+    assert!(
+        usd.windows(2).all(|pair| pair[0].time < pair[1].time),
+        "oldest first"
+    );
+    assert!(
+        usd.iter()
+            .all(|point| point.sell >= point.buy && point.buy > 100.0)
+    );
+    assert_eq!(history.units["INR"], 100);
+    assert_eq!(history.units["USD"], 1);
+    assert!(history.series.len() >= 20);
+}

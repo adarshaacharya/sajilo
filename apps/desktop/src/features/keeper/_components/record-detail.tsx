@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
+import { useDirectory } from "../../../shared/lib/directory";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import type { KeeperDate, KeeperPerson, KeeperRecord } from "../../../shared/lib/ipc";
 import {
@@ -13,7 +14,6 @@ import {
   recordSummary,
 } from "../_lib/documents";
 import { daysUntil, dueLabel, dueTone, formatBs, formatDate, type TFn } from "../_lib/shared";
-import { RENEWAL_GUIDES } from "../_lib/templates";
 import { DateField } from "./date-picker";
 import { PhotoStrip } from "./photo-strip";
 
@@ -44,7 +44,7 @@ export function RecordDetail({
   t: TFn;
 }) {
   const spec = documentSpec(record);
-  const guide = RENEWAL_GUIDES[record.documentType];
+  const guide = useDirectory().renewalGuides[record.documentType];
   // Links are stored on one side; show both, so a policy knows its bluebook.
   const linked = records.filter(
     (other) =>

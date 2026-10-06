@@ -71,7 +71,7 @@ fn price(row: &[String]) -> Option<VegetablePrice> {
         minimum: amount(&row[2])?,
         maximum: amount(&row[3])?,
         average: amount(&row[4])?,
-        english_name: english_name(name).map(str::to_owned),
+        english_name: english_name(name),
     })
 }
 
@@ -122,77 +122,9 @@ pub fn published_date(page: &str) -> Option<NepaliDate> {
 /// Matched longest-first, because the names nest: "भेडे खुर्सानी" is capsicum
 /// while "खुर्सानी" is chilli, and checking the short one first would file
 /// every capsicum as a chilli.
-pub fn english_name(name: &str) -> Option<&'static str> {
-    PRODUCE_NAMES
-        .iter()
-        .find(|(nepali, _)| name.contains(nepali))
-        .map(|(_, english)| *english)
+///
+/// The list is the `kalimati` config pack (`data/config/kalimati.json`), so
+/// a new item on the board gets its English name without a release.
+pub fn english_name(name: &str) -> Option<String> {
+    sajilo_core::config::kalimati::english_name(name)
 }
-
-/// Sorted longest-first at authoring time; the test below enforces that.
-const PRODUCE_NAMES: &[(&str, &str)] = &[
-    ("ड्रागन फ्रुट", "Dragon fruit"),
-    ("भेडे खुर्सानी", "Capsicum"),
-    // The board's own table carries both spellings of chilli on the same day —
-    // one has a stray halant after "खु". Kept verbatim so the typo does not
-    // quietly drop those rows out of the English list.
-    ("भेडे खु्र्सानी", "Capsicum"),
-    ("तोरीको साग", "Rapeseed greens"),
-    ("पालूगो साग", "Spinach"),
-    ("सौफको साग", "Fennel greens"),
-    ("गान्टे मूला", "Kohlrabi"),
-    ("भटमासकोशा", "Soybean pod"),
-    ("तितो करेला", "Bitter gourd"),
-    ("भुई कटहर", "Pineapple"),
-    ("रुख कटहर", "Jackfruit"),
-    ("रातो बन्दा", "Red cabbage"),
-    ("चिचिण्डो", "Snake gourd"),
-    ("आभोकाडो", "Avocado"),
-    ("ब्रोकाउली", "Broccoli"),
-    ("खुर्सानी", "Chilli"),
-    ("घिरौला", "Sponge gourd"),
-    ("रायो साग", "Mustard greens"),
-    ("चुकुन्दर", "Beetroot"),
-    ("नासपाती", "Pear"),
-    ("गोलभेडा", "Tomato"),
-    ("कुरीलो", "Asparagus"),
-    ("नरिवल", "Coconut"),
-    ("पिंडालू", "Taro"),
-    ("सजिवन", "Drumstick"),
-    ("तरबुजा", "Watermelon"),
-    ("गुन्दुक", "Gundruk"),
-    ("पार्सले", "Parsley"),
-    ("कागती", "Lemon"),
-    ("पुदीना", "Mint"),
-    ("काउली", "Cauliflower"),
-    ("भिण्डी", "Okra"),
-    ("काक्रो", "Cucumber"),
-    ("जुनार", "Sweet orange"),
-    ("अदुवा", "Ginger"),
-    ("परवर", "Pointed gourd"),
-    ("चुकन्दर", "Beetroot"),
-    ("सेलरी", "Celery"),
-    ("न्यूरो", "Fiddlehead fern"),
-    ("स्कूस", "Chayote"),
-    ("बन्दा", "Cabbage"),
-    ("भन्टा", "Brinjal"),
-    ("गाजर", "Carrot"),
-    ("प्याज", "Onion"),
-    ("लौका", "Bottle gourd"),
-    ("फर्सी", "Pumpkin"),
-    ("अनार", "Pomegranate"),
-    ("स्याउ", "Apple"),
-    ("इमली", "Tamarind"),
-    ("बोडी", "Yardlong bean"),
-    ("अमला", "Amla"),
-    ("मूला", "Radish"),
-    ("सिमी", "Beans"),
-    ("च्याउ", "Mushroom"),
-    ("लप्सी", "Lapsi"),
-    ("तोफु", "Tofu"),
-    ("तामा", "Bamboo shoot"),
-    ("केरा", "Banana"),
-    ("मेवा", "Papaya"),
-    ("आँप", "Mango"),
-    ("आलु", "Potato"),
-];

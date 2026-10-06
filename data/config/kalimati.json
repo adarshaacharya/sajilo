@@ -1,0 +1,248 @@
+{
+  "names": [
+    {
+      "ne": "ड्रागन फ्रुट",
+      "en": "Dragon fruit"
+    },
+    {
+      "ne": "भेडे खुर्सानी",
+      "en": "Capsicum"
+    },
+    {
+      "ne": "भेडे खु्र्सानी",
+      "en": "Capsicum"
+    },
+    {
+      "ne": "तोरीको साग",
+      "en": "Rapeseed greens"
+    },
+    {
+      "ne": "पालूगो साग",
+      "en": "Spinach"
+    },
+    {
+      "ne": "सौफको साग",
+      "en": "Fennel greens"
+    },
+    {
+      "ne": "गान्टे मूला",
+      "en": "Kohlrabi"
+    },
+    {
+      "ne": "भटमासकोशा",
+      "en": "Soybean pod"
+    },
+    {
+      "ne": "तितो करेला",
+      "en": "Bitter gourd"
+    },
+    {
+      "ne": "भुई कटहर",
+      "en": "Pineapple"
+    },
+    {
+      "ne": "रुख कटहर",
+      "en": "Jackfruit"
+    },
+    {
+      "ne": "रातो बन्दा",
+      "en": "Red cabbage"
+    },
+    {
+      "ne": "चिचिण्डो",
+      "en": "Snake gourd"
+    },
+    {
+      "ne": "आभोकाडो",
+      "en": "Avocado"
+    },
+    {
+      "ne": "ब्रोकाउली",
+      "en": "Broccoli"
+    },
+    {
+      "ne": "खुर्सानी",
+      "en": "Chilli"
+    },
+    {
+      "ne": "घिरौला",
+      "en": "Sponge gourd"
+    },
+    {
+      "ne": "रायो साग",
+      "en": "Mustard greens"
+    },
+    {
+      "ne": "चुकुन्दर",
+      "en": "Beetroot"
+    },
+    {
+      "ne": "नासपाती",
+      "en": "Pear"
+    },
+    {
+      "ne": "गोलभेडा",
+      "en": "Tomato"
+    },
+    {
+      "ne": "कुरीलो",
+      "en": "Asparagus"
+    },
+    {
+      "ne": "नरिवल",
+      "en": "Coconut"
+    },
+    {
+      "ne": "पिंडालू",
+      "en": "Taro"
+    },
+    {
+      "ne": "सजिवन",
+      "en": "Drumstick"
+    },
+    {
+      "ne": "तरबुजा",
+      "en": "Watermelon"
+    },
+    {
+      "ne": "गुन्दुक",
+      "en": "Gundruk"
+    },
+    {
+      "ne": "पार्सले",
+      "en": "Parsley"
+    },
+    {
+      "ne": "कागती",
+      "en": "Lemon"
+    },
+    {
+      "ne": "पुदीना",
+      "en": "Mint"
+    },
+    {
+      "ne": "काउली",
+      "en": "Cauliflower"
+    },
+    {
+      "ne": "भिण्डी",
+      "en": "Okra"
+    },
+    {
+      "ne": "काक्रो",
+      "en": "Cucumber"
+    },
+    {
+      "ne": "जुनार",
+      "en": "Sweet orange"
+    },
+    {
+      "ne": "अदुवा",
+      "en": "Ginger"
+    },
+    {
+      "ne": "परवर",
+      "en": "Pointed gourd"
+    },
+    {
+      "ne": "चुकन्दर",
+      "en": "Beetroot"
+    },
+    {
+      "ne": "सेलरी",
+      "en": "Celery"
+    },
+    {
+      "ne": "न्यूरो",
+      "en": "Fiddlehead fern"
+    },
+    {
+      "ne": "स्कूस",
+      "en": "Chayote"
+    },
+    {
+      "ne": "बन्दा",
+      "en": "Cabbage"
+    },
+    {
+      "ne": "भन्टा",
+      "en": "Brinjal"
+    },
+    {
+      "ne": "गाजर",
+      "en": "Carrot"
+    },
+    {
+      "ne": "प्याज",
+      "en": "Onion"
+    },
+    {
+      "ne": "लौका",
+      "en": "Bottle gourd"
+    },
+    {
+      "ne": "फर्सी",
+      "en": "Pumpkin"
+    },
+    {
+      "ne": "अनार",
+      "en": "Pomegranate"
+    },
+    {
+      "ne": "स्याउ",
+      "en": "Apple"
+    },
+    {
+      "ne": "इमली",
+      "en": "Tamarind"
+    },
+    {
+      "ne": "बोडी",
+      "en": "Yardlong bean"
+    },
+    {
+      "ne": "अमला",
+      "en": "Amla"
+    },
+    {
+      "ne": "मूला",
+      "en": "Radish"
+    },
+    {
+      "ne": "सिमी",
+      "en": "Beans"
+    },
+    {
+      "ne": "च्याउ",
+      "en": "Mushroom"
+    },
+    {
+      "ne": "लप्सी",
+      "en": "Lapsi"
+    },
+    {
+      "ne": "तोफु",
+      "en": "Tofu"
+    },
+    {
+      "ne": "तामा",
+      "en": "Bamboo shoot"
+    },
+    {
+      "ne": "केरा",
+      "en": "Banana"
+    },
+    {
+      "ne": "मेवा",
+      "en": "Papaya"
+    },
+    {
+      "ne": "आँप",
+      "en": "Mango"
+    },
+    {
+      "ne": "आलु",
+      "en": "Potato"
+    }
+  ]
+}

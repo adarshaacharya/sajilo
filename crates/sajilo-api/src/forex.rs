@@ -138,3 +138,25 @@ pub fn currency_name(code: &str) -> &str {
         other => other,
     }
 }
+
+dto! {
+    /// One day's NRB rate for one currency, per its quoted `unit`.
+    pub struct ForexPoint {
+        /// UTC midnight of the date the rate applies to, in seconds.
+        #[cfg_attr(feature = "typescript", ts(type = "number"))]
+        pub time: i64,
+        pub buy: f64,
+        pub sell: f64,
+    }
+
+    /// A year of daily rates for every currency NRB publishes, oldest
+    /// first: what the forex chart draws from. One request a quarter of the
+    /// year, fetched once a day.
+    pub struct ForexHistory {
+        /// By ISO code.
+        pub series: BTreeMap<String, Vec<ForexPoint>>,
+        /// How many units each currency's points are quoted per (INR: 100).
+        pub units: BTreeMap<String, u32>,
+        pub freshness: Freshness,
+    }
+}

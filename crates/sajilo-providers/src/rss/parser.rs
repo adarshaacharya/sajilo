@@ -169,6 +169,7 @@ fn build(title: &str, link: &str, pub_date: &str, source: NewsSource) -> Option<
         title: title.to_owned(),
         link: link.to_owned(),
         source,
+        source_key: None,
         source_name: source.display_name().to_owned(),
         published: feed_date.or(link_date),
         precision: if link_date.is_none() {

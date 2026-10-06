@@ -25,6 +25,11 @@ pub(crate) fn enabled(app: &AppHandle<Wry>, key: &str) -> bool {
 }
 
 async fn refresh(app: &AppHandle<Wry>) {
+    // Config first: a kill switch or a moved source published since the last
+    // cycle should apply to the fetches below. Usually a 304, or skipped
+    // until its own schedule comes round.
+    crate::remote_config::refresh(app, false).await;
+
     let news_enabled = enabled(app, prefs::NEWS_ENABLED);
     let weather_enabled = enabled(app, prefs::WEATHER_ENABLED);
     let forex_enabled = enabled(app, prefs::FOREX_ENABLED);
@@ -39,7 +44,6 @@ async fn refresh(app: &AppHandle<Wry>) {
     let stocks_app = app.clone();
     let rashifal_app = app.clone();
     let radio_app = app.clone();
-    let announcement_app = app.clone();
     let telemetry_app = app.clone();
 
     tokio::join!(
@@ -73,9 +77,6 @@ async fn refresh(app: &AppHandle<Wry>) {
             if radio_enabled {
                 commands::radio::get_stations(radio_app, Some(false)).await;
             }
-        },
-        async move {
-            commands::announcement::get_announcement(announcement_app, Some(false)).await;
         },
         async move {
             let _ = commands::telemetry::send_usage_ping(telemetry_app).await;

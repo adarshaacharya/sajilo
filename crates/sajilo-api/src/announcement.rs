@@ -68,3 +68,108 @@ dto! {
         pub announcements: Vec<Announcement>,
     }
 }
+
+dto! {
+    /// Notices published through the signed config channel rather than the
+    /// announcements Worker: free to serve, and changed only by a PR.
+    pub struct AnnouncementsPack {
+        #[serde(default)]
+        pub notices: Vec<Announcement>,
+    }
+}
+
+const MAX_NOTICES: usize = 20;
+const TITLE_MAX: usize = 180;
+const BODY_MAX: usize = 320;
+
+/// `0.1.32` as numbers, or `None` for anything else.
+pub fn parse_version(text: &str) -> Option<(u64, u64, u64)> {
+    let mut parts = text.trim().trim_start_matches('v').split('.');
+    let mut next = || parts.next()?.parse::<u64>().ok();
+    let version = (next()?, next()?, next()?);
+    parts.next().is_none().then_some(version)
+}
+
+fn check_text(field: &str, text: &LocalizedText, max: usize) -> Result<(), String> {
+    use sajilo_core::config::check;
+    check::text(&format!("{field}.en"), &text.en, max)?;
+    check::text(&format!("{field}.ne"), &text.ne, max)
+}
+
+impl Announcement {
+    /// What the Worker's `problem()` checks, in Rust.
+    pub fn problem(&self) -> Option<String> {
+        let check = || -> Result<(), String> {
+            if self.id.is_empty()
+                || self.id.len() > 64
+                || !self
+                    .id
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+            {
+                return Err("id must be a short slug".to_owned());
+            }
+            check_text("title", &self.title, TITLE_MAX)?;
+            check_text("body", &self.body, BODY_MAX)?;
+            if let (Some(starts), Some(expires)) = (self.starts_at, self.expires_at)
+                && starts >= expires
+            {
+                return Err("startsAt must be before expiresAt".to_owned());
+            }
+            for (field, version) in [
+                ("minVersion", &self.min_version),
+                ("maxVersion", &self.max_version),
+            ] {
+                if let Some(version) = version
+                    && parse_version(version).is_none()
+                {
+                    return Err(format!("{field} is not a version"));
+                }
+            }
+            if let (Some(min), Some(max)) = (&self.min_version, &self.max_version)
+                && parse_version(min) > parse_version(max)
+            {
+                return Err("minVersion must not be after maxVersion".to_owned());
+            }
+            if let Some(action) = &self.action {
+                sajilo_core::config::check::https_url("action.url", &action.url)?;
+                check_text("action.label", &action.label, TITLE_MAX)?;
+            }
+            Ok(())
+        };
+        check()
+            .err()
+            .map(|message| format!("{}: {message}", self.id))
+    }
+}
+
+impl sajilo_core::config::Pack for AnnouncementsPack {
+    const NAME: &'static str = "announcements";
+    const SCHEMA: u32 = 1;
+
+    fn bundled_json() -> &'static str {
+        include_str!("../../../data/config/announcements.json")
+    }
+
+    fn validate(&self) -> Result<(), String> {
+        if self.notices.len() > MAX_NOTICES {
+            return Err(format!("more than {MAX_NOTICES} notices"));
+        }
+        let mut ids = std::collections::BTreeSet::new();
+        for notice in &self.notices {
+            if let Some(problem) = notice.problem() {
+                return Err(problem);
+            }
+            if !ids.insert(notice.id.as_str()) {
+                return Err(format!("{} appears twice", notice.id));
+            }
+        }
+        Ok(())
+    }
+
+    fn slot() -> &'static sajilo_core::config::Slot<Self> {
+        static SLOT: sajilo_core::config::Slot<AnnouncementsPack> =
+            sajilo_core::config::Slot::new();
+        &SLOT
+    }
+}

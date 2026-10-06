@@ -3,20 +3,16 @@
 //! Saturday has always been one. Sunday joined it for government offices and
 //! schools from 2082 Chaitra 23 (6 April 2026), a fuel-saving measure; Nepal
 //! tried the same in 1999 and in 2022 and dropped it both times. So Sunday is
-//! a dated rule: when it ends, `SUNDAY_UNTIL` gets that date and every month
-//! before it keeps showing the Sundays that really were holidays.
+//! a dated rule: when it ends, `data/config/calendar.json` gets that date in
+//! `sunday.until` and every month before it keeps showing the Sundays that
+//! really were holidays. The pack is published remotely, so the change
+//! reaches people the day it is announced, not the day of the next release.
 
 use chrono::{NaiveDate, Weekday};
 use serde::{Deserialize, Serialize};
 
-/// First Sunday-holiday week: the cabinet decision took effect on this day.
-pub const SUNDAY_FROM: NaiveDate = match NaiveDate::from_ymd_opt(2026, 4, 6) {
-    Some(date) => date,
-    None => panic!("a real date"),
-};
-
-/// The last day Sunday was a holiday, once the rule is withdrawn.
-pub const SUNDAY_UNTIL: Option<NaiveDate> = None;
+use crate::config::Pack;
+use crate::config::calendar::CalendarPack;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,7 +29,11 @@ pub fn weekly_holiday(date: NaiveDate) -> Option<WeeklyHoliday> {
     use chrono::Datelike;
     match date.weekday() {
         Weekday::Sat => Some(WeeklyHoliday::Saturday),
-        Weekday::Sun if date >= SUNDAY_FROM && SUNDAY_UNTIL.is_none_or(|until| date <= until) => {
+        Weekday::Sun
+            if CalendarPack::active().sunday.is_some_and(|rule| {
+                date >= rule.from && rule.until.is_none_or(|until| date <= until)
+            }) =>
+        {
             Some(WeeklyHoliday::Sunday)
         }
         _ => None,

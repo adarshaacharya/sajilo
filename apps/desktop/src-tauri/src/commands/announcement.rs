@@ -1,8 +1,9 @@
 //! The editorial notices that can appear on Sajilo's Today screen.
 //!
-//! The public Worker is the only network hop. The client caches both the live
-//! notices and the deliberate "nothing to show" response, so an expired notice
-//! disappears cleanly and an offline launch never invents a new one.
+//! Notices arrive in the signed `announcements` config pack, published by a
+//! PR and served as a static file, so they cost nothing to serve however many
+//! people run Sajilo. The announcements Worker still answers versions from
+//! before the pack; this build never calls it.
 //!
 //! What this device shows is decided here, not in the web UI: a notice must be
 //! live, meant for this platform and version, and not closed by the user. Urgent notices
@@ -11,40 +12,21 @@
 
 use chrono::{DateTime, Utc};
 use sajilo_api::announcement::{
-    Announcement, AnnouncementLevel, AnnouncementPlatform, AnnouncementResponse,
+    Announcement, AnnouncementLevel, AnnouncementPlatform, AnnouncementResponse, AnnouncementsPack,
 };
 use sajilo_api::load_state::LoadState;
-use sajilo_providers::{HttpClient, ProviderError};
-use tauri::{AppHandle, Manager, Wry};
+use sajilo_core::config::Pack;
+use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::NotificationExt;
 
 use crate::db;
-use crate::feed::Feed;
-use crate::prefs::{ANNOUNCEMENT_KEY, DISMISSED_ANNOUNCEMENTS_KEY, NOTIFIED_ANNOUNCEMENTS_KEY};
+use crate::prefs::{DISMISSED_ANNOUNCEMENTS_KEY, NOTIFIED_ANNOUNCEMENTS_KEY};
 
-pub const ANNOUNCEMENT_ENDPOINT: &str =
-    "https://sajilo-announcements.adarshx.workers.dev/v1/announcement";
-
-const MAX_AGE_SECS: i64 = 2 * 60 * 60;
-const REFETCH_AFTER_SECS: i64 = 30 * 60;
-const SOURCE_NAME: &str = "Sajilo announcements";
 /// How many closed or announced ids are remembered. Far more than are ever
 /// live at once, so a closed notice never comes back.
 const REMEMBERED_IDS: usize = 50;
-
-pub struct AnnouncementCache {
-    feed: Feed<AnnouncementResponse>,
-    client: HttpClient,
-}
-
-impl Default for AnnouncementCache {
-    fn default() -> Self {
-        Self {
-            feed: Feed::new(ANNOUNCEMENT_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
-            client: HttpClient::new(),
-        }
-    }
-}
+/// At most this many notices show at once, as the Worker capped them.
+const MAX_LIVE: usize = 5;
 
 /// The platform this build runs on.
 fn this_platform() -> Option<AnnouncementPlatform> {
@@ -86,10 +68,8 @@ fn in_versions(notice: &Announcement, version: Version) -> bool {
         && within(&notice.max_version, |version, max| version <= max)
 }
 
-/// The notices this device shows, in the Worker's order.
-///
-/// Time is checked again here even though the Worker already filters by it:
-/// a cached list can outlive a notice's expiry while the computer is offline.
+/// The notices this device shows: live now, for this platform and version,
+/// not closed, most pressing first, at most [`MAX_LIVE`].
 fn for_this_device(
     notices: Vec<Announcement>,
     platform: Option<AnnouncementPlatform>,
@@ -97,7 +77,7 @@ fn for_this_device(
     dismissed: &[String],
     now: DateTime<Utc>,
 ) -> Vec<Announcement> {
-    notices
+    let mut shown = notices
         .into_iter()
         .filter(|notice| notice.starts_at.is_none_or(|start| start <= now))
         .filter(|notice| notice.expires_at.is_none_or(|end| end > now))
@@ -109,7 +89,20 @@ fn for_this_device(
         .filter(|notice| {
             notice.level == AnnouncementLevel::Urgent || !dismissed.contains(&notice.id)
         })
-        .collect()
+        .collect::<Vec<_>>();
+    // Stable, so the pack's order holds within a level.
+    shown.sort_by_key(|notice| rank(notice.level));
+    shown.truncate(MAX_LIVE);
+    shown
+}
+
+/// Urgent first, then important, then info; the pack's order within each.
+const fn rank(level: AnnouncementLevel) -> u8 {
+    match level {
+        AnnouncementLevel::Urgent => 0,
+        AnnouncementLevel::Important => 1,
+        AnnouncementLevel::Info => 2,
+    }
 }
 
 fn remembered(app: &AppHandle<Wry>, key: &str) -> Vec<String> {
@@ -163,38 +156,30 @@ fn announce_urgent(app: &AppHandle<Wry>, notices: &[Announcement]) {
     }
 }
 
+/// The notices to show now. `refresh` asks for a config check first; the
+/// notices themselves are always the installed pack's, so this answers
+/// offline too.
 #[tauri::command]
 pub async fn get_announcement(
     app: AppHandle<Wry>,
     refresh: Option<bool>,
 ) -> LoadState<AnnouncementResponse> {
-    let cache = app.state::<AnnouncementCache>();
-    let client = &cache.client;
+    if refresh.unwrap_or(false) {
+        crate::remote_config::refresh(&app, true).await;
+    }
     let now = Utc::now();
-
-    let state = cache
-        .feed
-        .get(&app, now, refresh.unwrap_or(false), || async move {
-            let raw = client.get_text(SOURCE_NAME, ANNOUNCEMENT_ENDPOINT).await?;
-            serde_json::from_str(&raw)
-                .map_err(|error| ProviderError::parse(SOURCE_NAME, error.to_string()))
-        })
-        .await;
-
     let dismissed = remembered(&app, DISMISSED_ANNOUNCEMENTS_KEY);
-    let state = state.map(|response| AnnouncementResponse {
+    let response = AnnouncementResponse {
         announcements: for_this_device(
-            response.announcements,
+            AnnouncementsPack::active().notices.clone(),
             this_platform(),
             this_version(&app),
             &dismissed,
             now,
         ),
-    });
-    if let Some(response) = state.value() {
-        announce_urgent(&app, &response.announcements);
-    }
-    state
+    };
+    announce_urgent(&app, &response.announcements);
+    LoadState::Fresh(response)
 }
 
 /// Closes a notice for good. An urgent notice stays regardless: the filter

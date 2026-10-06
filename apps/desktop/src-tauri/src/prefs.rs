@@ -29,6 +29,8 @@ pub const TRAY_ICON: &str = "trayIcon";
 // key per feed so a single unreadable entry cannot take the others down.
 pub const BAZAR_METALS_KEY: &str = "bazar.metals.v1";
 pub const BAZAR_FUEL_KEY: &str = "bazar.fuel.v1";
+/// A year of gold and silver for the chart.
+pub const BAZAR_METAL_HISTORY_KEY: &str = "bazar.metalHistory.v1";
 pub const BAZAR_VEGETABLES_KEY: &str = "bazar.vegetables.v1";
 pub const STOCKS_KEY: &str = "stocks.v1";
 /// ShareHub's live board, overlaid on the ShareSansar snapshot in session.
@@ -47,11 +49,13 @@ pub fn weather_cache_key(place_id: &str) -> String {
     format!("weather.{place_id}.v1")
 }
 pub const FOREX_KEY: &str = "forex.v1";
+/// A year of NRB rates for the chart. Under `forex` so a `flags` pause of the
+/// module pauses this too.
+pub const FOREX_HISTORY_KEY: &str = "forex.history.v1";
 /// v3 invalidates digests written before the technology and sports sources
 /// joined the publisher catalog. Otherwise their picker options can filter an
 /// older cached digest to zero headlines until its normal refresh window.
 pub const NEWS_KEY: &str = "news.v3";
-pub const ANNOUNCEMENT_KEY: &str = "announcement.v2";
 /// Notices the user closed, by id. Kept short: ids of long-gone notices are
 /// trimmed away as new ones are closed.
 pub const DISMISSED_ANNOUNCEMENTS_KEY: &str = "dismissedAnnouncements";

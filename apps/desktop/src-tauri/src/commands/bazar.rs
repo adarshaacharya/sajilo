@@ -7,14 +7,18 @@
 //! client later leaves the command signature and the UI untouched.
 
 use chrono::{DateTime, Utc};
-use sajilo_api::bazar::{FuelPriceSnapshot, MetalRateSnapshot, VegetableMarketSnapshot};
+use sajilo_api::bazar::{
+    FuelPriceSnapshot, MetalHistory, MetalRateSnapshot, VegetableMarketSnapshot,
+};
 use sajilo_api::load_state::LoadState;
 use sajilo_providers::{HttpClient, fenegosida, hamropatro_metals, kalimati, nepalipatro, noc};
 use serde::Serialize;
 use tauri::{AppHandle, Manager, Wry};
 
 use crate::feed::Feed;
-use crate::prefs::{BAZAR_FUEL_KEY, BAZAR_METALS_KEY, BAZAR_VEGETABLES_KEY};
+use crate::prefs::{
+    BAZAR_FUEL_KEY, BAZAR_METAL_HISTORY_KEY, BAZAR_METALS_KEY, BAZAR_VEGETABLES_KEY,
+};
 
 /// Metals and produce move daily at most, so an hour-old number is still the
 /// current number. NOC revises fuel on its own schedule, weeks apart.
@@ -22,6 +26,9 @@ const METALS_MAX_AGE_SECS: i64 = 60 * 60;
 const VEGETABLES_MAX_AGE_SECS: i64 = 6 * 60 * 60;
 const FUEL_MAX_AGE_SECS: i64 = 12 * 60 * 60;
 const REFETCH_AFTER_SECS: i64 = 15 * 60;
+/// Rates are set once a trading day; a year of them is fresh for a day.
+const METAL_HISTORY_MAX_AGE_SECS: i64 = 24 * 60 * 60;
+const METAL_HISTORY_REFETCH_AFTER_SECS: i64 = 6 * 60 * 60;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,6 +40,7 @@ pub struct Bazar {
 
 pub struct BazarCache {
     metals: Feed<MetalRateSnapshot>,
+    metal_history: Feed<MetalHistory>,
     fuel: Feed<FuelPriceSnapshot>,
     vegetables: Feed<VegetableMarketSnapshot>,
     client: HttpClient,
@@ -42,6 +50,11 @@ impl Default for BazarCache {
     fn default() -> Self {
         Self {
             metals: Feed::new(BAZAR_METALS_KEY, METALS_MAX_AGE_SECS, REFETCH_AFTER_SECS),
+            metal_history: Feed::new(
+                BAZAR_METAL_HISTORY_KEY,
+                METAL_HISTORY_MAX_AGE_SECS,
+                METAL_HISTORY_REFETCH_AFTER_SECS,
+            ),
             fuel: Feed::new(BAZAR_FUEL_KEY, FUEL_MAX_AGE_SECS, REFETCH_AFTER_SECS),
             vegetables: Feed::new(
                 BAZAR_VEGETABLES_KEY,
@@ -51,6 +64,24 @@ impl Default for BazarCache {
             client: HttpClient::new(),
         }
     }
+}
+
+/// A year of gold and silver for the chart. Fetched only when the chart is
+/// shown, never by the background refresh.
+#[tauri::command]
+pub async fn get_metal_history(
+    app: AppHandle<Wry>,
+    refresh: Option<bool>,
+) -> LoadState<MetalHistory> {
+    let cache = app.state::<BazarCache>();
+    let client = &cache.client;
+    let now = Utc::now();
+    cache
+        .metal_history
+        .get(&app, now, refresh.unwrap_or(false), || {
+            nepalipatro::fetch_history(client, now)
+        })
+        .await
 }
 
 #[tauri::command]

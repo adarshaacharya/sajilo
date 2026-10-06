@@ -109,7 +109,7 @@ pub fn focus_joke_decks() -> Vec<JokeDeck> {
         .iter()
         .map(|&kind| JokeDeck {
             kind,
-            lines: jokes::lines(kind).iter().map(|&line| line.into()).collect(),
+            lines: jokes::lines(kind),
         })
         .collect()
 }

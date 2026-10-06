@@ -229,6 +229,9 @@ function YourFunds({
     return move ? sum + (holdings[fund.symbol] ?? 0) * move.change : sum;
   }, 0);
 
+  // Nothing starred and no SIP due: no card. Starring a fund is how it appears.
+  if (funds.length === 0 && dueNow.length === 0 && !next) return null;
+
   return (
     <section className="surface-card p-2.5" aria-label={t("funds.yours")}>
       <div className="flex min-h-[20px] items-center justify-between gap-2">
@@ -245,27 +248,21 @@ function YourFunds({
           </button>
         )}
       </div>
-      {funds.length === 0 ? (
-        dueNow.length === 0 && (
-          <p className="mt-1 text-[11px] text-text-secondary">{t("funds.empty-yours")}</p>
-        )
-      ) : (
-        <>
-          {held.length > 0 && (
-            <div className="mt-1 flex items-baseline justify-between gap-2">
-              <p className="text-[18px] font-semibold tabular-nums">Rs {money.format(total)}</p>
-              {Math.abs(moved) >= 0.005 && (
-                <p
-                  className={`text-[11px] font-medium tabular-nums ${moved > 0 ? "text-positive" : "text-holiday"}`}
-                >
-                  {moved > 0 ? "+" : "−"}Rs {money.format(Math.abs(moved))} {t("funds.this-week")}
-                </p>
-              )}
-            </div>
+
+      {held.length > 0 && (
+        <div className="mt-1 flex items-baseline justify-between gap-2">
+          <p className="text-[18px] font-semibold tabular-nums">Rs {money.format(total)}</p>
+          {Math.abs(moved) >= 0.005 && (
+            <p
+              className={`text-[11px] font-medium tabular-nums ${moved > 0 ? "text-positive" : "text-holiday"}`}
+            >
+              {moved > 0 ? "+" : "−"}Rs {money.format(Math.abs(moved))} {t("funds.this-week")}
+            </p>
           )}
-          <div className="mt-0.5">{funds.map((fund) => row(fund, sips.of(fund.symbol)))}</div>
-        </>
+        </div>
       )}
+      <div className="mt-0.5">{funds.map((fund) => row(fund, sips.of(fund.symbol)))}</div>
+
       {dueNow.length > 0 && (
         <div className="mt-1.5 border-t border-divider">
           {dueNow.map((sip) => (

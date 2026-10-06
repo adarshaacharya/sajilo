@@ -10,6 +10,7 @@ pub mod db;
 pub mod feed;
 pub mod notes;
 pub mod prefs;
+pub mod remote_config;
 pub mod system;
 pub mod tray;
 pub mod window;
@@ -148,6 +149,9 @@ pub fn run() {
             // Create and migrate the single local database before any tray or
             // notification code reads user-owned state.
             db::open(app.handle()).map_err(std::io::Error::other)?;
+            // The last verified remote config, before any screen reads a
+            // joke, a holiday or a source.
+            remote_config::restore(app.handle());
             // Before anything can show the popover: a kept one opens where it
             // was left.
             window::load_kept(app.handle());
@@ -164,7 +168,7 @@ pub fn run() {
             app.manage(commands::weather::WeatherCache::default());
             app.manage(commands::forex::ForexCache::default());
             app.manage(commands::news::NewsCache::default());
-            app.manage(commands::announcement::AnnouncementCache::default());
+            app.manage(remote_config::RemoteConfig::default());
             app.manage(commands::focus::FocusRuntime::default());
             app.manage(commands::reminder_card::ReminderQueue::default());
             system::dock::set_hidden(app.handle(), true);
@@ -258,6 +262,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
+            commands::bazar::get_metal_history,
             commands::stocks::get_stock_chart,
             commands::stocks::get_stock_fundamentals,
             commands::stocks::get_stocks,
@@ -287,6 +292,7 @@ pub fn run() {
             commands::weather::get_weather,
             commands::weather::list_places,
             commands::forex::get_forex,
+            commands::forex::get_forex_history,
             commands::news::get_news,
             commands::notes::notes_list,
             commands::notes::notes_open,
@@ -311,6 +317,9 @@ pub fn run() {
             commands::news::news_sources,
             commands::announcement::get_announcement,
             commands::announcement::dismiss_announcement,
+            remote_config::remote_config_status,
+            remote_config::check_remote_config,
+            remote_config::config_directory,
             commands::telemetry::usage_insights_enabled,
             commands::telemetry::set_usage_insights_enabled,
             commands::calendar::today,

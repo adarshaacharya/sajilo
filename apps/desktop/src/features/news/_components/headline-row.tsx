@@ -52,7 +52,7 @@ export function HeadlineRow({
           <>
             <span
               className="size-[7px] shrink-0 rounded-full"
-              style={{ background: sourceColor(item.source) }}
+              style={{ background: sourceColor(item.sourceKey ?? item.source) }}
               aria-hidden="true"
             />
             <span className="font-semibold text-text-secondary">{item.sourceName}</span>

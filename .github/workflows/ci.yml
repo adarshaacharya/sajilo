@@ -42,17 +42,25 @@ jobs:
             git diff --stat -- apps/desktop/src/types >&2
             exit 1
           fi
-      - name: sajilo-core stays I/O-free
+      - name: sajilo-core and sajilo-config stay I/O-free
         shell: bash
         run: |
-          # The crate must compile into the server, the desktop binary and a
-          # plain cargo test, so it may not pull in a runtime or an HTTP client.
-          for crate in tokio reqwest tauri hyper; do
-            if cargo tree -p sajilo-core --prefix none | grep -qw "$crate"; then
-              echo "sajilo-core must not depend on $crate" >&2
-              exit 1
-            fi
+          # Both compile into the server, the desktop binary, the config
+          # publisher and a plain cargo test, so neither may pull in a runtime
+          # or an HTTP client.
+          for pkg in sajilo-core sajilo-config; do
+            for crate in tokio reqwest tauri hyper; do
+              if cargo tree -p "$pkg" -e normal --prefix none | grep -qw "$crate"; then
+                echo "$pkg must not depend on $crate" >&2
+                exit 1
+              fi
+            done
           done
+      - name: Remote config is valid
+        if: matrix.os == 'ubuntu-latest'
+        # The same validation the app runs before installing a pack, so a PR
+        # that would be refused on every device fails here instead.
+        run: cargo run -q -p sajilo-config-publish -- check
 
   showcase:
     name: Showcase

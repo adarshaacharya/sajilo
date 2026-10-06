@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useSWRConfig } from "swr";
 import { useSettings } from "../context/settings-context";
+import { refreshDirectory } from "../lib/directory";
 import { api } from "../lib/ipc";
 import { catchAsFailed } from "../lib/load-state";
 
@@ -84,6 +85,27 @@ export function BackgroundFeedRefresh() {
 
     return () => unlisten?.();
   }, [syncCaches]);
+
+  // New config installed: notices and the directory read from it, so show
+  // them now rather than at the next screen visit.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    import("@tauri-apps/api/event")
+      .then(({ listen }) =>
+        listen("sajilo://config-changed", () => {
+          void refreshDirectory();
+          void mutate("announcement", catchAsFailed(api.getAnnouncement(false)), {
+            revalidate: false,
+          });
+        }),
+      )
+      .then((stop) => {
+        unlisten = stop;
+      })
+      .catch(() => {});
+
+    return () => unlisten?.();
+  }, [mutate]);
 
   return null;
 }

@@ -60,6 +60,7 @@ pub mod news;
 pub mod notes;
 pub mod radio;
 pub mod rashifal;
+pub mod remote_config;
 pub mod stocks;
 pub mod weather;
 

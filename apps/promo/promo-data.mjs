@@ -171,16 +171,16 @@ export const facts = {
 // ---------------------------------------------------------------- cards
 
 /**
- * A joke exactly as the engine deals it: the English line looked up in
- * `sajilo-core`'s decks, with the Nepali that sits beside it. A line the
- * engine doesn't have is an error, not a stand-in.
+ * A joke exactly as the engine deals it: the English line looked up in the
+ * bundled jokes pack (`data/config/jokes.json`), with the Nepali beside it.
+ * A line the pack doesn't have is an error, not a stand-in.
  */
-const JOKES = readFileSync(join(here, "../../crates/sajilo-core/src/focus/jokes.rs"), "utf8");
+const JOKES = JSON.parse(readFileSync(join(here, "../../data/config/jokes.json"), "utf8"));
+const ALL_LINES = [...Object.values(JOKES.decks), ...Object.values(JOKES.done)].flat();
 function joke(en) {
-  const escaped = en.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = JOKES.match(new RegExp(`"${escaped}",\\s*"([^"]+)"`));
-  if (!match) throw new Error(`not one of the engine's lines: ${en}`);
-  return { en, ne: match[1] };
+  const line = ALL_LINES.find((candidate) => candidate.en === en);
+  if (!line) throw new Error(`not one of the engine's lines: ${en}`);
+  return { en, ne: line.ne };
 }
 
 /**

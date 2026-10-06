@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CONTROL } from "../../shared/components/control";
 import { Icon } from "../../shared/components/icon";
 import { Select } from "../../shared/components/select";
@@ -8,6 +8,7 @@ import { openExternalLink } from "../../shared/lib/external-link";
 import { fetchedAtLabel, loadBanner, loadedValue } from "../../shared/lib/load-state";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
+import { ForexChart } from "./_components/forex-chart";
 import { ForexRateRow } from "./_components/forex-rate-row";
 import { ConverterSkeleton, RateCardSkeleton } from "./_components/forex-skeleton";
 import { conversionText, rateFootnote, sourceTimestamp } from "./_lib/format";
@@ -29,6 +30,13 @@ export function ForexRates({
   const [amount, setAmount] = useState(1);
   const [code, setCode] = useState("USD");
   const [reversed, setReversed] = useState(false);
+  const converter = useRef<HTMLElement>(null);
+  /** A row picks the converter's currency; the chart under it follows, and
+   * the card scrolls back into view so the change is seen. */
+  const choose = (next: string) => {
+    setCode(next);
+    converter.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
 
   useEffect(() => {
     if (modules.forexFavourites[0]) setCode(modules.forexFavourites[0]);
@@ -47,7 +55,7 @@ export function ForexRates({
 
   return (
     <div className="space-y-2.5">
-      <section className="surface-card p-2.5">
+      <section ref={converter} className="surface-card scroll-mt-2 p-2.5">
         <StateBanner state={banner} onRetry={onRetry} skeleton={<ConverterSkeleton />}>
           {snapshot && selected ? (
             <div className="space-y-2.5">
@@ -88,6 +96,9 @@ export function ForexRates({
                 </p>
               )}
               <p className="text-[11px] text-text-muted">{rateFootnote(selected, reversed)}</p>
+              <div className="section-divider pt-2">
+                <ForexChart code={selected.currencyCode} />
+              </div>
             </div>
           ) : null}
         </StateBanner>
@@ -108,7 +119,12 @@ export function ForexRates({
             {t("forex.favourites")}
           </p>
           {favourites.map((rate) => (
-            <ForexRateRow key={rate.currencyCode} rate={rate} />
+            <ForexRateRow
+              key={rate.currencyCode}
+              rate={rate}
+              selected={rate.currencyCode === selected?.currencyCode}
+              onSelect={() => choose(rate.currencyCode)}
+            />
           ))}
         </section>
       )}
@@ -119,7 +135,12 @@ export function ForexRates({
             {t("forex.all-currencies")}
           </p>
           {others.map((rate) => (
-            <ForexRateRow key={rate.currencyCode} rate={rate} />
+            <ForexRateRow
+              key={rate.currencyCode}
+              rate={rate}
+              selected={rate.currencyCode === selected?.currencyCode}
+              onSelect={() => choose(rate.currencyCode)}
+            />
           ))}
         </section>
       )}

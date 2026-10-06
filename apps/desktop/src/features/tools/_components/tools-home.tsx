@@ -2,12 +2,13 @@ import type { CSSProperties } from "react";
 import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
+import { useDirectory } from "../../../shared/lib/directory";
 import { api } from "../../../shared/lib/ipc";
 import { useNepalDay } from "../../../shared/lib/nepal-day";
 import { digits } from "../../../shared/lib/numerals";
 import * as stopwatch from "../../../shared/lib/stopwatch";
 import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
-import { CONTACTS, type DirectorySection } from "../_lib/directory";
+import type { DirectorySection } from "../_lib/directory";
 import { clockText } from "./stopwatch-tab";
 
 export type ToolId =
@@ -261,7 +262,8 @@ function ClockCard({ onOpen }: { onOpen: () => void }) {
 function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void }) {
   const { t, language } = useSettings();
   const ne = language === "ne";
-  const emergency = CONTACTS.filter((contact) => contact.category === "emergency").slice(0, 3);
+  const { contacts } = useDirectory();
+  const emergency = contacts.filter((contact) => contact.category === "emergency").slice(0, 3);
 
   return (
     <section

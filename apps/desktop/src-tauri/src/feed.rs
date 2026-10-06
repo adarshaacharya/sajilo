@@ -5,6 +5,9 @@
 //! shows fresh data, labelled stale data, or an explicit failure — and a failed
 //! refresh never discards what is already on screen.
 //!
+//! The remote config reaches every feed here, by its cache key: a `flags`
+//! pause stops fetching, and the last good value stays, labelled.
+//!
 //! ponytail: this is the client-side half of what `apps/server` does. When the
 //! server is deployed and `client.rs` lands, the `fetch` closures change and
 //! everything here stays.
@@ -17,6 +20,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use crate::db;
 use chrono::{DateTime, Utc};
 use sajilo_api::load_state::LoadState;
+use sajilo_core::config::Pack;
+use sajilo_core::config::flags::FlagsPack;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use tauri::{AppHandle, Wry};
@@ -78,6 +83,7 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
         Fut: Future<Output = sajilo_providers::Result<T>>,
     {
         self.hydrate(app);
+        let (max_age_secs, refetch_after_secs) = (self.max_age_secs, self.refetch_after_secs);
 
         let cached = {
             let guard = self.slot.lock().expect("feed cache mutex poisoned");
@@ -86,11 +92,28 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
                 .map(|entry| (entry.value.clone(), entry.fetched_at))
         };
 
+        // Paused remotely because the source broke: no fetch, not even a
+        // forced one. What we hold is still worth showing, labelled.
+        if let Some(reason) = FlagsPack::active().pause_for(&self.key) {
+            return match cached {
+                Some((value, fetched_at)) => {
+                    LoadState::from_cache(value, fetched_at, max_age_secs, now)
+                }
+                None => LoadState::Failed(
+                    if crate::prefs::language(app) == sajilo_core::focus::Language::Ne {
+                        reason.ne.clone()
+                    } else {
+                        reason.en.clone()
+                    },
+                ),
+            };
+        }
+
         if !force
             && let Some((value, fetched_at)) = &cached
-            && (now - *fetched_at).num_seconds() < self.refetch_after_secs
+            && (now - *fetched_at).num_seconds() < refetch_after_secs
         {
-            return LoadState::from_cache(value.clone(), *fetched_at, self.max_age_secs, now);
+            return LoadState::from_cache(value.clone(), *fetched_at, max_age_secs, now);
         }
 
         match retrying(fetch).await {
@@ -101,7 +124,7 @@ impl<T: Clone + Serialize + DeserializeOwned> Feed<T> {
             // A dead upstream must not discard a good value we already hold.
             Err(error) => match cached {
                 Some((value, fetched_at)) => {
-                    LoadState::from_cache(value, fetched_at, self.max_age_secs, now)
+                    LoadState::from_cache(value, fetched_at, max_age_secs, now)
                 }
                 None => LoadState::Failed(error.to_string()),
             },
