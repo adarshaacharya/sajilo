@@ -10,4 +10,13 @@ export type Rashifal = { sign: RashiSign,
  * summarised, or reflowed — it is someone's writing, and Sajilo shows
  * it as published.
  */
-prediction: string, };
+prediction: string, 
+/**
+ * The day's lucky colour, when the reading names one ("आजको शुभ
+ * रंग सेतो…"). Lifted out of the text, which keeps saying it too.
+ */
+luckyColour: string | null, 
+/**
+ * The day's lucky number, as written (Devanagari digits).
+ */
+luckyNumber: string | null, };

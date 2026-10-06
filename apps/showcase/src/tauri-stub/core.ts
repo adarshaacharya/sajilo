@@ -60,6 +60,8 @@ function key(command: string, args: Args): string {
       return `get_crypto_chart:${args.id}:${args.days}`;
     case "notes_open":
       return `notes_open:${args.id}`;
+    case "get_rashifal_period":
+      return `get_rashifal_period:${args.period}`;
     default:
       return command;
   }

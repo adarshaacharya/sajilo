@@ -286,6 +286,7 @@ pub fn run() {
             commands::sips::remind_sip_tomorrow,
             commands::nepse_intraday::get_nepse_intraday,
             commands::rashifal::get_rashifal,
+            commands::rashifal::get_rashifal_period,
             commands::rashifal::reminder::rashifal_read,
             commands::radio::get_stations,
             commands::radio::station_stream,

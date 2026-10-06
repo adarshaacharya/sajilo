@@ -25,6 +25,7 @@ import type { NotesList } from "../../types/api/NotesList";
 import type { NoteTrashed } from "../../types/api/NoteTrashed";
 import type { Place } from "../../types/api/Place";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
+import type { RashifalPeriod } from "../../types/api/RashifalPeriod";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RemoteConfigStatus } from "../../types/api/RemoteConfigStatus";
 import type { SipStatus } from "../../types/api/SipStatus";
@@ -923,6 +924,9 @@ export const api = {
 
   getRashifal: (refresh = false) =>
     invoke<LoadState<RashifalSnapshot>>("get_rashifal", { refresh }),
+  /** Readings for a span: daily is the same feed as `getRashifal`. */
+  getRashifalPeriod: (period: RashifalPeriod, refresh = false) =>
+    invoke<LoadState<RashifalSnapshot>>("get_rashifal_period", { period, refresh }),
 
   /** Weather for a place id; the home place when `location` is left out. */
   getWeather: (refresh = false, location?: string) =>

@@ -519,10 +519,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     record_crypto(commands, &read, now);
     record_notes(commands, now);
     record_forex(commands, &read, now);
-    commands.insert(
-        "get_rashifal".to_owned(),
-        load_state(hamropatro::parse(&read("hamropatro/rashifal.html"), now)),
-    );
+    record_rashifal(commands, &read, now);
     commands.insert(
         "get_stations".to_owned(),
         load_state(ratopati::parse_directory(&read("ratopati/radio.html"), now)),
@@ -706,4 +703,38 @@ fn record_forex(
             now,
         )),
     );
+}
+
+/// Every rashifal span from its recorded Hamro Patro page. Daily answers both
+/// `get_rashifal` and the period command, as it does in the app.
+fn record_rashifal(
+    commands: &mut BTreeMap<String, Value>,
+    read: &dyn Fn(&str) -> String,
+    now: DateTime<Utc>,
+) {
+    use sajilo_api::rashifal::RashifalPeriod;
+    for (period, file, key) in [
+        (RashifalPeriod::Daily, "hamropatro/rashifal.html", "daily"),
+        (
+            RashifalPeriod::Weekly,
+            "hamropatro/rashifal-weekly.html",
+            "weekly",
+        ),
+        (
+            RashifalPeriod::Monthly,
+            "hamropatro/rashifal-monthly.html",
+            "monthly",
+        ),
+        (
+            RashifalPeriod::Yearly,
+            "hamropatro/rashifal-yearly.html",
+            "yearly",
+        ),
+    ] {
+        let state = load_state(hamropatro::parse_period(&read(file), period, now));
+        if period == RashifalPeriod::Daily {
+            commands.insert("get_rashifal".to_owned(), state.clone());
+        }
+        commands.insert(format!("get_rashifal_period:{key}"), state);
+    }
 }

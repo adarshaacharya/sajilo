@@ -1,4 +1,5 @@
-//! Daily rashifal from Hamro Patro. Ported from
+//! Rashifal from Hamro Patro: daily, weekly, monthly and yearly, one page
+//! each, every sign on every page. Ported from
 //! `HamroPatroRashifalProvider.swift`.
 //!
 //! The `/en/` path serves the same Nepali prose with only the surrounding
@@ -8,7 +9,7 @@
 
 use chrono::{DateTime, Utc};
 use sajilo_api::load_state::Freshness;
-use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalSnapshot};
+use sajilo_api::rashifal::{RashiSign, Rashifal, RashifalPeriod, RashifalSnapshot, RashifalSource};
 use scraper::{Html, Selector};
 
 use crate::error::{ProviderError, Result};
@@ -28,22 +29,44 @@ const MINIMUM_PREDICTION_CHARS: usize = 60;
 /// two runs later; more than this and the markup has moved.
 const LOOKAHEAD_RUNS: usize = 6;
 
+/// The page for a period. The weekly, monthly and yearly pages are laid out
+/// exactly like the daily one, so one parser reads all four.
+pub fn url(period: RashifalPeriod) -> String {
+    match period {
+        RashifalPeriod::Daily => ENDPOINT.to_owned(),
+        RashifalPeriod::Weekly => format!("{ENDPOINT}/weekly"),
+        RashifalPeriod::Monthly => format!("{ENDPOINT}/monthly"),
+        RashifalPeriod::Yearly => format!("{ENDPOINT}/yearly"),
+    }
+}
+
 pub async fn fetch(client: &HttpClient, now: DateTime<Utc>) -> Result<RashifalSnapshot> {
-    let body = client.get_text(SOURCE_NAME, ENDPOINT).await?;
-    parse(&body, now)
+    fetch_period(client, RashifalPeriod::Daily, now).await
+}
+
+pub async fn fetch_period(
+    client: &HttpClient,
+    period: RashifalPeriod,
+    now: DateTime<Utc>,
+) -> Result<RashifalSnapshot> {
+    let body = client.get_text(SOURCE_NAME, &url(period)).await?;
+    parse_period(&body, period, now)
 }
 
 pub fn parse(page: &str, now: DateTime<Utc>) -> Result<RashifalSnapshot> {
+    parse_period(page, RashifalPeriod::Daily, now)
+}
+
+pub fn parse_period(
+    page: &str,
+    period: RashifalPeriod,
+    now: DateTime<Utc>,
+) -> Result<RashifalSnapshot> {
     let runs = text_runs(page);
 
     let readings: Vec<Rashifal> = RashiSign::ALL
         .into_iter()
-        .filter_map(|sign| {
-            Some(Rashifal {
-                sign,
-                prediction: prediction(sign, &runs)?,
-            })
-        })
+        .filter_map(|sign| Some(Rashifal::new(sign, prediction(sign, &runs)?)))
         .collect();
 
     // All twelve or nothing. A partial page means the markup moved, and showing
@@ -62,8 +85,25 @@ pub fn parse(page: &str, now: DateTime<Utc>) -> Result<RashifalSnapshot> {
 
     Ok(RashifalSnapshot {
         readings,
+        period,
+        title: title(page),
+        source: RashifalSource::HamroPatro,
         freshness: Freshness::new(now),
     })
+}
+
+/// The page title's Nepali half: "साप्ताहिक राशिफल असोज २०८३, साता ३" from
+/// "साप्ताहिक राशिफल असोज २०८३, साता ३ — Weekly Rashifal … | Hamro Patro".
+fn title(page: &str) -> Option<String> {
+    let document = Html::parse_document(page);
+    let selector = Selector::parse("title").expect("static selector");
+    let full = document
+        .select(&selector)
+        .next()?
+        .text()
+        .collect::<String>();
+    let nepali = full.split(['—', '|']).next()?.trim();
+    (contains_devanagari(nepali) && nepali.chars().count() <= 80).then(|| nepali.to_owned())
 }
 
 /// Each sign is a heading of its own followed by its paragraph. The first
