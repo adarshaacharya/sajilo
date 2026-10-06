@@ -86,3 +86,64 @@ fn refuses_a_partial_page() {
     assert!(error.to_string().contains("1 of 12"), "{error}");
     assert!(!error.is_retryable(), "a markup change never retries away");
 }
+
+fn period_page(name: &str) -> String {
+    std::fs::read_to_string(format!(
+        "{}/../../fixtures/hamropatro/{name}.html",
+        env!("CARGO_MANIFEST_DIR")
+    ))
+    .unwrap()
+}
+
+/// The weekly, monthly and yearly pages share the daily page's layout: all
+/// twelve signs, each longer than the last, titled with the span.
+#[test]
+fn every_period_reads_all_twelve_signs_with_its_title() {
+    use sajilo_api::rashifal::{RashifalPeriod, RashifalSource};
+    let now = chrono::Utc::now();
+    let cases = [
+        (
+            RashifalPeriod::Weekly,
+            "rashifal-weekly",
+            "साप्ताहिक राशिफल असोज २०८३, साता ३",
+        ),
+        (
+            RashifalPeriod::Monthly,
+            "rashifal-monthly",
+            "मासिक राशिफल असोज २०८३",
+        ),
+        (
+            RashifalPeriod::Yearly,
+            "rashifal-yearly",
+            "वार्षिक राशिफल २०८३",
+        ),
+    ];
+    for (period, file, title) in cases {
+        let snapshot = hamropatro::parse_period(&period_page(file), period, now).unwrap();
+        assert_eq!(snapshot.readings.len(), 12, "{file}");
+        assert_eq!(snapshot.period, period);
+        assert_eq!(snapshot.title.as_deref(), Some(title));
+        assert_eq!(snapshot.source, RashifalSource::HamroPatro);
+    }
+    let yearly =
+        hamropatro::parse_period(&period_page("rashifal-yearly"), RashifalPeriod::Yearly, now)
+            .unwrap();
+    assert!(
+        yearly
+            .readings
+            .iter()
+            .all(|reading| reading.prediction.chars().count() > 1000)
+    );
+}
+
+#[test]
+fn the_daily_reading_carries_its_lucky_colour_and_number() {
+    let snapshot = hamropatro::parse(&period_page("rashifal"), chrono::Utc::now()).unwrap();
+    assert!(
+        snapshot
+            .readings
+            .iter()
+            .all(|reading| reading.lucky_colour.is_some() && reading.lucky_number.is_some())
+    );
+    assert_eq!(snapshot.title.as_deref(), Some("आजको राशिफल भदौ १, २०८३"));
+}

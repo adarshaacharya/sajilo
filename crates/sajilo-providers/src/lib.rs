@@ -28,6 +28,7 @@ pub mod noc;
 pub mod nrb;
 pub mod open_meteo;
 pub mod ratopati;
+pub mod ratopati_rashifal;
 pub mod rss;
 pub mod sharehub_chart;
 pub mod sharehub_live;

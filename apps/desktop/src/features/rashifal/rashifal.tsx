@@ -15,9 +15,11 @@ import {
 import { usePersistedString } from "../../shared/lib/persisted";
 import { track } from "../../shared/lib/usage";
 import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
+import type { RashifalPeriod } from "../../types/api/RashifalPeriod";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
+import type { RashifalSource } from "../../types/api/RashifalSource";
 import type { RashiSign } from "../../types/api/RashiSign";
-import { SourceNote } from "../bazar/_components/source-note";
+import { SourceLink, SourceNote } from "../bazar/_components/source-note";
 import { DailyOffer } from "./_components/daily-offer";
 import { ReadingCard, ReadingCardSkeleton } from "./_components/reading-card";
 import { SignFinder } from "./_components/sign-finder";
@@ -27,17 +29,32 @@ import { SIGNS, validSign } from "./_lib/signs";
 
 const STORAGE_KEY = "selectedRashi";
 
+/** Who to credit, by source. Proper names, so not translated. */
+const SOURCES: Record<RashifalSource, { name: string; href: string }> = {
+  hamroPatro: { name: "Hamro Patro", href: "https://www.hamropatro.com/rashifal" },
+  ratopati: { name: "Ratopati", href: "https://www.ratopati.com/rashifal" },
+};
+
 export function Rashifal() {
   const { t, language } = useSettings();
-  const {
-    data: state,
-    isValidating,
-    mutate,
-  } = useSWR("rashifal", () => catchAsFailed(api.getRashifal(false)));
+  const [period, setPeriod] = useState<RashifalPeriod>("daily");
+  const daily = period === "daily";
+  // Daily keeps its own key: the background refresh and the morning
+  // reminder warm it. The longer spans load when their tab is opened.
+  const dailyFeed = useSWR("rashifal", () => catchAsFailed(api.getRashifal(false)));
+  const spanFeed = useSWR(daily ? null : ["rashifal-period", period], () =>
+    catchAsFailed(api.getRashifalPeriod(period)),
+  );
+  const { data: state, isValidating, mutate } = daily ? dailyFeed : spanFeed;
   const load = useCallback(
     (refresh = false) =>
-      mutate(catchAsFailed<RashifalSnapshot>(api.getRashifal(refresh)), { revalidate: false }),
-    [mutate],
+      mutate(
+        catchAsFailed<RashifalSnapshot>(
+          daily ? api.getRashifal(refresh) : api.getRashifalPeriod(period, refresh),
+        ),
+        { revalidate: false },
+      ),
+    [mutate, daily, period],
   );
   const [storedSign, setStoredSign] = usePersistedString(STORAGE_KEY);
   const mine = validSign(storedSign);
@@ -111,6 +128,12 @@ export function Rashifal() {
             isMine={isMine}
             onSetMine={() => choose(shown)}
             allReadings={snapshot?.readings}
+            period={period}
+            onPeriod={(next) => {
+              track(`tab.rashifal.${next}`);
+              setPeriod(next);
+            }}
+            title={daily ? null : snapshot?.title}
           />
         )}
       </StateBanner>
@@ -130,7 +153,15 @@ export function Rashifal() {
         />
       </section>
 
-      {published && <SourceNote label={t("bazar.published")} stamp={published} />}
+      {published && (
+        <SourceNote label={t("bazar.published")} stamp={published}>
+          {snapshot && (
+            <SourceLink href={SOURCES[snapshot.source].href}>
+              {t("rashifal.source").replace("{source}", SOURCES[snapshot.source].name)}
+            </SourceLink>
+          )}
+        </SourceNote>
+      )}
       <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>
   );

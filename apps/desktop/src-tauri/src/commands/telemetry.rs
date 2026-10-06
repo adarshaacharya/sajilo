@@ -69,6 +69,10 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.weight",
     "tab.tools.vat",
     "tab.tools.interest",
+    "tab.rashifal.daily",
+    "tab.rashifal.weekly",
+    "tab.rashifal.monthly",
+    "tab.rashifal.yearly",
     // Things done.
     "action.popover-open",
     "action.date-convert",

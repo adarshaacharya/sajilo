@@ -1,11 +1,20 @@
+import { useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { SkeletonBlock, SkeletonLine } from "../../../shared/components/skeleton";
+import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Freshness } from "../../../types/api/Freshness";
 import type { Rashifal } from "../../../types/api/Rashifal";
+import type { RashifalPeriod } from "../../../types/api/RashifalPeriod";
 import type { RashiSign } from "../../../types/api/RashiSign";
 import { isReadingFromToday } from "../_lib/format";
 import { signMeta } from "../_lib/signs";
+
+export const PERIODS: readonly RashifalPeriod[] = ["daily", "weekly", "monthly", "yearly"];
+
+/** Past this many characters a reading is folded behind "Read more": a
+ * year's reading runs to ~2,000, which is several screens in the popover. */
+const FOLD_AT = 600;
 
 export function ReadingCard({
   sign,
@@ -14,6 +23,9 @@ export function ReadingCard({
   isMine,
   onSetMine,
   allReadings = [],
+  period,
+  onPeriod,
+  title,
 }: {
   sign: RashiSign;
   reading: Rashifal | undefined;
@@ -24,10 +36,23 @@ export function ReadingCard({
   freshness: Freshness | undefined;
   isMine: boolean;
   onSetMine: () => void;
+  period: RashifalPeriod;
+  onPeriod: (period: RashifalPeriod) => void;
+  /** The span as the source names it, e.g. "मासिक राशिफल असोज २०८३". */
+  title?: string | null;
 }) {
   const { t } = useSettings();
   const meta = signMeta(sign);
-  const fromToday = isReadingFromToday(freshness);
+  const daily = period === "daily";
+  // Only a daily reading can be "for an earlier day"; a week's reading
+  // fetched yesterday is still this week's.
+  const fromToday = !daily || isReadingFromToday(freshness);
+  const long = (reading?.prediction.length ?? 0) > FOLD_AT;
+  const [expanded, setExpanded] = useState(false);
+  // A new sign or span starts folded again.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on sign/period change
+  useEffect(() => setExpanded(false), [sign, period]);
+  const folded = long && !expanded;
 
   return (
     <section className="surface-card space-y-2.5 p-3">
@@ -40,13 +65,30 @@ export function ReadingCard({
             {meta.ne} <span className="text-text-muted">·</span> {meta.en}
           </p>
           <p className="mt-0.5 text-[11px] text-text-muted">
-            {meta.western} · {isMine ? t("rashifal.yours") : t("rashifal.looking-up")}
+            {meta.western} ·{" "}
+            {isMine
+              ? daily
+                ? t("rashifal.yours")
+                : t("rashifal.is-mine")
+              : daily
+                ? t("rashifal.looking-up")
+                : t(`rashifal.period-${period}`)}
           </p>
         </div>
       </div>
 
+      <TabStrip
+        label={t("rashifal.period")}
+        value={period}
+        onChange={onPeriod}
+        tabs={PERIODS.map((id) => ({ id, label: t(`rashifal.period-${id}`) }))}
+      />
+      {title && <p className="-mt-1 text-[10px] text-text-muted">{title}</p>}
+
       <div className="grid">
-        {allReadings.map((other) => (
+        {/* Daily readings are short: every sign's is laid in unseen so the
+            card keeps one height across signs. Longer spans fold instead. */}
+        {(daily ? allReadings : []).map((other) => (
           <p
             key={other.sign}
             aria-hidden="true"
@@ -56,7 +98,11 @@ export function ReadingCard({
           </p>
         ))}
         {reading ? (
-          <p className="col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line">
+          <p
+            className={`col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line ${
+              folded ? "line-clamp-[9]" : ""
+            }`}
+          >
             {reading.prediction}
           </p>
         ) : (
@@ -65,6 +111,33 @@ export function ReadingCard({
           </p>
         )}
       </div>
+
+      {long && (
+        <button
+          type="button"
+          onClick={() => setExpanded((value) => !value)}
+          className="-mt-1 text-[11px] font-medium text-[color:var(--color-accent-mark)] hover:underline"
+        >
+          {expanded ? t("rashifal.read-less") : t("rashifal.read-more")}
+        </button>
+      )}
+
+      {daily && (reading?.luckyColour || reading?.luckyNumber) && (
+        <div className="flex flex-wrap gap-1.5">
+          {reading.luckyColour && (
+            <span className="rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] px-1.5 text-[10px] leading-5 text-text-secondary">
+              {t("rashifal.lucky-colour")}{" "}
+              <span className="font-semibold text-text">{reading.luckyColour}</span>
+            </span>
+          )}
+          {reading.luckyNumber && (
+            <span className="rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] px-1.5 text-[10px] leading-5 text-text-secondary">
+              {t("rashifal.lucky-number")}{" "}
+              <span className="font-semibold text-text tabular-nums">{reading.luckyNumber}</span>
+            </span>
+          )}
+        </div>
+      )}
 
       {!fromToday && (
         <p className="flex items-center gap-1.5 text-[10px] text-text-muted">

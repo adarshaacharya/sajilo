@@ -42,6 +42,9 @@ pub const MUTUAL_FUNDS_KEY: &str = "mutualFunds.v1";
 pub const CRYPTO_KEY: &str = "crypto.v2";
 pub const NEPSE_INTRADAY_KEY: &str = "nepseIntraday.v1";
 pub const RASHIFAL_KEY: &str = "rashifal.v1";
+pub const RASHIFAL_WEEKLY_KEY: &str = "rashifal.weekly.v1";
+pub const RASHIFAL_MONTHLY_KEY: &str = "rashifal.monthly.v1";
+pub const RASHIFAL_YEARLY_KEY: &str = "rashifal.yearly.v1";
 pub const RADIO_KEY: &str = "radio.v1";
 /// One cache entry per place: `weather.kathmandu.v1`. The three cities that
 /// came before the place list used the same spelling.

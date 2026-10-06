@@ -1,21 +1,36 @@
-//! The twelve daily rashifal readings.
+//! The twelve rashifal readings, daily and for the week, month and year.
+//!
+//! Hamro Patro first, Ratopati when it fails: Hamro Patro lists every sign
+//! on one page per period, Ratopati needs a page per sign.
 
 use chrono::Utc;
 use sajilo_api::load_state::LoadState;
-use sajilo_api::rashifal::{RashiSign, RashifalSnapshot};
-use sajilo_providers::{HttpClient, hamropatro};
+use sajilo_api::rashifal::{RashiSign, RashifalPeriod, RashifalSnapshot};
+use sajilo_providers::{HttpClient, hamropatro, ratopati_rashifal};
 use tauri::{AppHandle, Manager, Wry};
 
 use crate::feed::Feed;
-use crate::prefs::{RASHIFAL_KEY, SELECTED_RASHI};
+use crate::prefs::{
+    RASHIFAL_KEY, RASHIFAL_MONTHLY_KEY, RASHIFAL_WEEKLY_KEY, RASHIFAL_YEARLY_KEY, SELECTED_RASHI,
+};
 
 /// One reading per day, published each morning. Half a day keeps it labelled
 /// fresh through the day it belongs to.
 const MAX_AGE_SECS: i64 = 12 * 60 * 60;
 const REFETCH_AFTER_SECS: i64 = 60 * 60;
 
+/// The longer spans change less often; each is fresh for a good part of the
+/// span it covers and re-asked for well inside it.
+const HOUR: i64 = 60 * 60;
+const WEEKLY: (i64, i64) = (24 * HOUR, 6 * HOUR);
+const MONTHLY: (i64, i64) = (3 * 24 * HOUR, 12 * HOUR);
+const YEARLY: (i64, i64) = (30 * 24 * HOUR, 24 * HOUR);
+
 pub struct RashifalCache {
     feed: Feed<RashifalSnapshot>,
+    weekly: Feed<RashifalSnapshot>,
+    monthly: Feed<RashifalSnapshot>,
+    yearly: Feed<RashifalSnapshot>,
     client: HttpClient,
 }
 
@@ -23,8 +38,35 @@ impl Default for RashifalCache {
     fn default() -> Self {
         Self {
             feed: Feed::new(RASHIFAL_KEY, MAX_AGE_SECS, REFETCH_AFTER_SECS),
+            weekly: Feed::new(RASHIFAL_WEEKLY_KEY, WEEKLY.0, WEEKLY.1),
+            monthly: Feed::new(RASHIFAL_MONTHLY_KEY, MONTHLY.0, MONTHLY.1),
+            yearly: Feed::new(RASHIFAL_YEARLY_KEY, YEARLY.0, YEARLY.1),
             client: HttpClient::new(),
         }
+    }
+}
+
+impl RashifalCache {
+    fn feed(&self, period: RashifalPeriod) -> &Feed<RashifalSnapshot> {
+        match period {
+            RashifalPeriod::Daily => &self.feed,
+            RashifalPeriod::Weekly => &self.weekly,
+            RashifalPeriod::Monthly => &self.monthly,
+            RashifalPeriod::Yearly => &self.yearly,
+        }
+    }
+}
+
+/// Hamro Patro, then Ratopati. Ratopati's error is the one reported when
+/// both fail, since it is the last thing tried.
+async fn fetch_period(
+    client: &HttpClient,
+    period: RashifalPeriod,
+    now: chrono::DateTime<Utc>,
+) -> sajilo_providers::Result<RashifalSnapshot> {
+    match hamropatro::fetch_period(client, period, now).await {
+        Ok(snapshot) => Ok(snapshot),
+        Err(_) => ratopati_rashifal::fetch(client, period, now).await,
     }
 }
 
@@ -40,7 +82,27 @@ pub async fn get_rashifal(
     cache
         .feed
         .get(&app, now, refresh.unwrap_or(false), || {
-            hamropatro::fetch(client, now)
+            fetch_period(client, RashifalPeriod::Daily, now)
+        })
+        .await
+}
+
+/// The readings for any period. Daily is the same feed `get_rashifal` and the
+/// morning reminder read; the longer spans are fetched only when asked for.
+#[tauri::command]
+pub async fn get_rashifal_period(
+    app: AppHandle<Wry>,
+    period: RashifalPeriod,
+    refresh: Option<bool>,
+) -> LoadState<RashifalSnapshot> {
+    let cache = app.state::<RashifalCache>();
+    let client = &cache.client;
+    let now = Utc::now();
+
+    cache
+        .feed(period)
+        .get(&app, now, refresh.unwrap_or(false), || {
+            fetch_period(client, period, now)
         })
         .await
 }
