@@ -29,6 +29,8 @@ pub const TRAY_ICON: &str = "trayIcon";
 // key per feed so a single unreadable entry cannot take the others down.
 pub const BAZAR_METALS_KEY: &str = "bazar.metals.v1";
 pub const BAZAR_FUEL_KEY: &str = "bazar.fuel.v1";
+/// A year of gold and silver for the chart.
+pub const BAZAR_METAL_HISTORY_KEY: &str = "bazar.metalHistory.v1";
 pub const BAZAR_VEGETABLES_KEY: &str = "bazar.vegetables.v1";
 pub const STOCKS_KEY: &str = "stocks.v1";
 /// ShareHub's live board, overlaid on the ShareSansar snapshot in session.

@@ -31,7 +31,8 @@ use sajilo_core::calendar::weekly_holiday::weekly_holiday;
 use sajilo_core::calendar::{panchanga, upcoming};
 use sajilo_providers::{
     cdsc, crypto, dividends, fenegosida, fund_nav_history, hamropatro, kalimati, kantipur,
-    market_status, mutual_funds, nepse_intraday, noc, nrb, open_meteo, ratopati, rss, sharesansar,
+    market_status, mutual_funds, nepalipatro, nepse_intraday, noc, nrb, open_meteo, ratopati, rss,
+    sharesansar,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -676,7 +677,8 @@ fn fund_history(
     );
 }
 
-/// Today's NRB table and the chart's history, both from recorded NRB pages.
+/// The Bazar charts' history: NRB forex pages and NepaliPatro's metal year,
+/// plus today's NRB table.
 fn record_forex(
     commands: &mut BTreeMap<String, Value>,
     read: &dyn Fn(&str) -> String,
@@ -696,4 +698,12 @@ fn record_forex(
         now,
     );
     commands.insert("get_forex_history".to_owned(), load_state(history));
+    // Gold and silver's year chart, from the recorded NepaliPatro year.
+    commands.insert(
+        "get_metal_history".to_owned(),
+        load_state(nepalipatro::parse_history(
+            &read("nepalipatro/bullions-year.json"),
+            now,
+        )),
+    );
 }

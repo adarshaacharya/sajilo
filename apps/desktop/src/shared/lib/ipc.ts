@@ -12,6 +12,7 @@ import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { LoadState } from "../../types/api/LoadState";
+import type { MetalHistory } from "../../types/api/MetalHistory";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { NavHistory } from "../../types/api/NavHistory";
@@ -931,6 +932,9 @@ export const api = {
 
   getForex: (refresh = false) => invoke<LoadState<ForexSnapshot>>("get_forex", { refresh }),
   /** A year of NRB daily rates for every currency, for the chart. */
+  /** A year of hallmark gold and silver per tola, for the chart. */
+  getMetalHistory: (refresh = false) =>
+    invoke<LoadState<MetalHistory>>("get_metal_history", { refresh }),
   getForexHistory: (refresh = false) =>
     invoke<LoadState<ForexHistory>>("get_forex_history", { refresh }),
 

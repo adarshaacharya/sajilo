@@ -262,6 +262,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::bazar::get_bazar,
+            commands::bazar::get_metal_history,
             commands::stocks::get_stock_chart,
             commands::stocks::get_stock_fundamentals,
             commands::stocks::get_stocks,

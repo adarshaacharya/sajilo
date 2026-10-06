@@ -65,6 +65,23 @@ dto! {
         pub gold_history: Vec<f64>,
         pub freshness: Freshness,
     }
+
+    /// One trading day's price per tola.
+    pub struct MetalPoint {
+        /// UTC midnight of the trading day, in seconds.
+        #[cfg_attr(feature = "typescript", ts(type = "number"))]
+        pub time: i64,
+        pub price: f64,
+    }
+
+    /// A year of hallmark gold and silver per tola, oldest first, for the
+    /// chart. Trading days only: the market closes on Saturdays and
+    /// holidays, and those dates are absent rather than zero.
+    pub struct MetalHistory {
+        pub gold: Vec<MetalPoint>,
+        pub silver: Vec<MetalPoint>,
+        pub freshness: Freshness,
+    }
 }
 
 impl Metal {

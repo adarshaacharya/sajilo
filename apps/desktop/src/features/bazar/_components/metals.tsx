@@ -1,11 +1,9 @@
-import { Sparkline } from "../../../shared/components/sparkline";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Metal } from "../../../types/api/Metal";
 import type { MetalRateSnapshot } from "../../../types/api/MetalRateSnapshot";
 import type { MetalSource } from "../../../types/api/MetalSource";
 import type { MetalUnit } from "../../../types/api/MetalUnit";
 import {
-  changePercent,
   headlineMetal,
   metalName,
   metalUnitLabel,
@@ -16,6 +14,7 @@ import {
 } from "../_lib/format";
 import { ChangeBadge } from "./change-badge";
 import { MetalCalculator } from "./metal-calculator";
+import { MetalChart } from "./metal-chart";
 import { MetalRow } from "./metal-row";
 import { SourceLink, SourceNote } from "./source-note";
 
@@ -79,22 +78,10 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
                 )}
                 Rs {money.format(pricePerGram(headline))}/g
               </p>
-              {snapshot.goldHistory.length >= 3 && (
-                <div className="w-[88px] shrink-0">
-                  <Sparkline
-                    values={snapshot.goldHistory}
-                    className={
-                      changePercent(
-                        priceChange(headline.price, headline.previousPrice),
-                        headline.previousPrice,
-                      ) >= 0
-                        ? "text-positive"
-                        : "text-holiday"
-                    }
-                  />
-                </div>
-              )}
             </div>
+          </div>
+          <div className="section-divider mt-2.5 pt-2">
+            <MetalChart />
           </div>
         </section>
       )}
@@ -116,6 +103,12 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
 
       <SourceNote label={t("bazar.published")} stamp={published}>
         {credit && <SourceLink href={credit.href}>{credit.name}</SourceLink>}
+        {/* The year chart always comes from Nepali Patro, whoever answered today. */}
+        {snapshot.source !== "nepaliPatro" && (
+          <SourceLink href={CREDITS.nepaliPatro.href}>
+            {t("metals.chart-source").replace("{source}", CREDITS.nepaliPatro.name)}
+          </SourceLink>
+        )}
       </SourceNote>
     </div>
   );

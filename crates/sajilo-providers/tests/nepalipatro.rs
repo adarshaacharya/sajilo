@@ -77,3 +77,27 @@ fn always_requests_a_bounded_window() {
 fn credits_its_own_source() {
     assert_eq!(parsed().source, sajilo_api::bazar::MetalSource::NepaliPatro);
 }
+
+#[test]
+fn a_year_of_gold_and_silver_per_tola_oldest_first() {
+    let body = std::fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../fixtures/nepalipatro/bullions-year.json"
+    ))
+    .unwrap();
+    let history = sajilo_providers::nepalipatro::parse_history(&body, chrono::Utc::now()).unwrap();
+
+    // 306 trading days between 6 Oct 2025 and 6 Oct 2026; Saturdays and
+    // holidays are absent, not zero.
+    assert_eq!(history.gold.len(), 306);
+    assert_eq!(history.silver.len(), 306);
+    assert!(
+        history
+            .gold
+            .windows(2)
+            .all(|pair| pair[0].time < pair[1].time)
+    );
+    assert_eq!(history.gold.last().unwrap().price, 291_500.0);
+    assert_eq!(history.silver.last().unwrap().price, 4_415.0);
+    assert!(history.gold.iter().all(|point| point.price > 100_000.0));
+}
