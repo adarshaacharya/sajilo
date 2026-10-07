@@ -3861,3 +3861,14 @@ input[type="search"]::-webkit-search-decoration {
   /* A ring, so white reads on light and black on dark. */
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text) 25%, transparent);
 }
+
+/* "Read more" over the end of a folded reading's last line, on a fade of the
+   card so the cut-off words behind it don't show through. */
+.reading-more {
+  padding-left: 2.5em;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-surface-raised) 2em
+  );
+}

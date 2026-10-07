@@ -129,7 +129,6 @@ export function Rashifal() {
             freshness={snapshot?.freshness}
             isMine={isMine}
             onSetMine={() => choose(shown)}
-            allReadings={snapshot?.readings}
             period={period}
             onPeriod={(next) => {
               track(`tab.rashifal.${next}`);

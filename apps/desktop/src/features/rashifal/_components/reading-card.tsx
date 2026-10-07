@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { SkeletonBlock, SkeletonLine } from "../../../shared/components/skeleton";
 import { TabStrip } from "../../../shared/components/tab-strip";
@@ -13,27 +13,18 @@ import { signMeta } from "../_lib/signs";
 
 export const PERIODS: readonly RashifalPeriod[] = ["daily", "weekly", "monthly", "yearly"];
 
-/** Past this many characters a reading is folded behind "Read more": a
- * year's reading runs to ~2,000, which is several screens in the popover. */
-const FOLD_AT = 600;
-
 export function ReadingCard({
   sign,
   reading,
   freshness,
   isMine,
   onSetMine,
-  allReadings = [],
   period,
   onPeriod,
   title,
 }: {
   sign: RashiSign;
   reading: Rashifal | undefined;
-  /** Every sign's reading today. Laid in the same spot, unseen, so the card
-   * is always as tall as the longest and nothing below it jumps when
-   * switching signs. */
-  allReadings?: readonly Rashifal[];
   freshness: Freshness | undefined;
   isMine: boolean;
   onSetMine: () => void;
@@ -48,12 +39,25 @@ export function ReadingCard({
   // Only a daily reading can be "for an earlier day"; a week's reading
   // fetched yesterday is still this week's.
   const fromToday = !daily || isReadingFromToday(freshness);
-  const long = (reading?.prediction.length ?? 0) > FOLD_AT;
   const [expanded, setExpanded] = useState(false);
   // A new sign or span starts folded again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset on sign/period change
   useEffect(() => setExpanded(false), [sign, period]);
-  const folded = long && !expanded;
+  // Whether the folded text runs past its six lines: measured, not guessed
+  // from a character count, so "Read more" shows exactly when text is hidden.
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const [overflowing, setOverflowing] = useState(false);
+  const prediction = reading?.prediction;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: re-measure when the text changes
+  useLayoutEffect(() => {
+    const element = textRef.current;
+    if (!element || expanded) return;
+    const measure = () => setOverflowing(element.scrollHeight > element.clientHeight + 1);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [prediction, expanded]);
 
   return (
     <section className="surface-card space-y-2.5 p-3">
@@ -84,72 +88,84 @@ export function ReadingCard({
         onChange={onPeriod}
         tabs={PERIODS.map((id) => ({ id, label: t(`rashifal.period-${id}`) }))}
       />
-      {title && <p className="-mt-1 text-[10px] text-text-muted">{title}</p>}
-
-      <div className="grid">
-        {/* Daily readings are short: every sign's is laid in unseen so the
-            card keeps one height across signs. Longer spans fold instead. */}
-        {(daily ? allReadings : []).map((other) => (
-          <p
-            key={other.sign}
-            aria-hidden="true"
-            className="invisible col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line"
-          >
-            {other.prediction}
-          </p>
-        ))}
+      {/* Six lines, always: a short reading keeps the space, a long one folds
+          with "Read more" over its last line. With the fixed row below, the
+          card is one height across signs and spans, so nothing jumps. */}
+      <div className="relative">
         {reading ? (
           <p
-            className={`col-start-1 row-start-1 text-[13px] leading-[1.65] whitespace-pre-line ${
-              folded ? "line-clamp-[9]" : ""
+            ref={textRef}
+            className={`min-h-[9.9em] text-[13px] leading-[1.65] whitespace-pre-line ${
+              expanded ? "" : "line-clamp-6"
             }`}
           >
             {reading.prediction}
           </p>
         ) : (
-          <p className="col-start-1 row-start-1 text-[12px] text-text-secondary">
+          <p className="min-h-[9.9em] text-[12px] text-text-secondary">
             {t("rashifal.unavailable")}
           </p>
         )}
+        {overflowing && !expanded && (
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="reading-more absolute right-0 bottom-0 text-[13px] leading-[1.65] font-medium text-[color:var(--color-accent-mark)] hover:underline"
+          >
+            {t("rashifal.read-more")}
+          </button>
+        )}
       </div>
-
-      {long && (
+      {expanded && (
         <button
           type="button"
-          onClick={() => setExpanded((value) => !value)}
+          onClick={() => setExpanded(false)}
           className="-mt-1 text-[11px] font-medium text-[color:var(--color-accent-mark)] hover:underline"
         >
-          {expanded ? t("rashifal.read-less") : t("rashifal.read-more")}
+          {t("rashifal.read-less")}
         </button>
       )}
 
-      {daily && (reading?.luckyColour || reading?.luckyNumber) && (
-        <div className="grid grid-cols-2 gap-1.5">
-          {reading.luckyColour && (
-            <div className="lucky-tile">
-              <span className="lucky-tile__label">{t("rashifal.lucky-colour")}</span>
-              <span className="lucky-tile__value">
-                {swatchFor(reading.luckyColour) && (
-                  <span
-                    aria-hidden="true"
-                    className="lucky-tile__swatch"
-                    style={{ background: swatchFor(reading.luckyColour) ?? undefined }}
-                  />
+      {/* One fixed row: today's lucky colour and number, or the span's
+          title for a week, month or year. */}
+      <div className="h-[48px]">
+        {daily
+          ? (reading?.luckyColour || reading?.luckyNumber) && (
+              <div className="grid h-full grid-cols-2 gap-1.5">
+                {reading.luckyColour && (
+                  <div className="lucky-tile">
+                    <span className="lucky-tile__label">{t("rashifal.lucky-colour")}</span>
+                    <span className="lucky-tile__value">
+                      {swatchFor(reading.luckyColour) && (
+                        <span
+                          aria-hidden="true"
+                          className="lucky-tile__swatch"
+                          style={{ background: swatchFor(reading.luckyColour) ?? undefined }}
+                        />
+                      )}
+                      <span className="truncate">{reading.luckyColour}</span>
+                    </span>
+                  </div>
                 )}
-                <span className="truncate">{reading.luckyColour}</span>
-              </span>
-            </div>
-          )}
-          {reading.luckyNumber && (
-            <div className="lucky-tile">
-              <span className="lucky-tile__label">{t("rashifal.lucky-number")}</span>
-              <span className="lucky-tile__value lucky-tile__value--number">
-                {reading.luckyNumber}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
+                {reading.luckyNumber && (
+                  <div className="lucky-tile">
+                    <span className="lucky-tile__label">{t("rashifal.lucky-number")}</span>
+                    <span className="lucky-tile__value lucky-tile__value--number">
+                      {reading.luckyNumber}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )
+          : title && (
+              <div className="lucky-tile h-full justify-center">
+                <span className="lucky-tile__label">{t(`rashifal.period-${period}`)}</span>
+                <span className="truncate text-[12px] font-medium text-text-secondary">
+                  {title}
+                </span>
+              </div>
+            )}
+      </div>
 
       {!fromToday && (
         <p className="flex items-center gap-1.5 text-[10px] text-text-muted">
