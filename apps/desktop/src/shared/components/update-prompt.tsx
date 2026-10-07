@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import appIconUrl from "../../../src-tauri/icons/128x128@2x.png";
 import { useSettings } from "../context/settings-context";
-import { useUpdater } from "../context/updater-context";
+import { DOWNLOAD_URL, useUpdater } from "../context/updater-context";
 import { openExternalLink } from "../lib/external-link";
 import { api } from "../lib/ipc";
 import { Icon } from "./icon";
@@ -28,6 +28,7 @@ export function UpdateWindow() {
   const { t } = useSettings();
   const {
     enabled,
+    installKind,
     automaticUpdates,
     state,
     version,
@@ -82,6 +83,12 @@ export function UpdateWindow() {
 
   const install = async () => {
     setInstallFailed(false);
+    // Nothing to install here: the download page, and out of the way.
+    if (installKind === "manual") {
+      openExternalLink(DOWNLOAD_URL);
+      later();
+      return;
+    }
     if (state === "installed") {
       await restartToUpdate();
       return;
@@ -134,8 +141,17 @@ export function UpdateWindow() {
         className="mt-3 text-[12px] leading-relaxed text-text-secondary"
         data-tauri-drag-region
       >
-        {state === "installed" ? t("updater.ready-body") : t("updater.prompt-body")}
+        {state === "installed"
+          ? t("updater.ready-body")
+          : installKind === "manual"
+            ? t("updater.manual-body")
+            : t("updater.prompt-body")}
       </p>
+      {installKind === "prompt" && state !== "installed" && (
+        <p className="mt-1 text-[11px] leading-snug text-text-muted" data-tauri-drag-region>
+          {t("updater.needs-password")}
+        </p>
+      )}
 
       <button
         type="button"
@@ -148,18 +164,28 @@ export function UpdateWindow() {
 
       {(installFailed || state === "failed") && (
         <p role="alert" className="mt-2 text-[10px] leading-snug text-negative">
-          {t("updater.install-failed")}
+          {t("updater.install-failed")}{" "}
+          <button
+            type="button"
+            onClick={() => openExternalLink(DOWNLOAD_URL)}
+            className="font-medium text-accent underline-offset-2 hover:underline"
+          >
+            {t("updater.download-instead")}
+          </button>
         </p>
       )}
 
-      <label className="update-window__automatic">
-        <input
-          type="checkbox"
-          checked={automaticUpdates}
-          onChange={(event) => setAutomaticUpdates(event.currentTarget.checked)}
-        />
-        <span>{t("updater.automatic-updates")}</span>
-      </label>
+      {/* Only a quiet install can be automatic. */}
+      {installKind === "auto" && (
+        <label className="update-window__automatic">
+          <input
+            type="checkbox"
+            checked={automaticUpdates}
+            onChange={(event) => setAutomaticUpdates(event.currentTarget.checked)}
+          />
+          <span>{t("updater.automatic-updates")}</span>
+        </label>
+      )}
 
       <div className="update-window__actions">
         <button
@@ -178,11 +204,13 @@ export function UpdateWindow() {
         >
           {state === "installed"
             ? t("settings.update-restart")
-            : state === "downloading"
-              ? t("updater.installing")
-              : state === "failed" || installFailed
-                ? t("updater.try-again")
-                : t("updater.install-restart")}
+            : installKind === "manual"
+              ? t("updater.download")
+              : state === "downloading"
+                ? t("updater.installing")
+                : state === "failed" || installFailed
+                  ? t("updater.try-again")
+                  : t("updater.install-restart")}
         </button>
       </div>
     </section>

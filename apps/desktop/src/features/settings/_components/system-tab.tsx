@@ -15,6 +15,7 @@ export function SystemTab() {
   const navigate = useNavigate();
   const {
     enabled: updaterEnabled,
+    installKind,
     state: updateState,
     version: updateVersion,
     error: updateError,
@@ -130,7 +131,7 @@ export function SystemTab() {
               className="settings-btn settings-btn--accent"
             >
               <Icon name="refresh" className="size-3 shrink-0" />
-              {t("settings.install-update")}
+              {installKind === "manual" ? t("updater.download") : t("settings.install-update")}
             </button>
           ) : (
             <button

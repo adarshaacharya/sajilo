@@ -13,6 +13,7 @@ pub mod prefs;
 pub mod remote_config;
 pub mod system;
 pub mod tray;
+mod update_kind;
 pub mod window;
 
 use tauri::{Manager, WindowEvent};
@@ -410,6 +411,7 @@ pub fn run() {
             commands::tray::set_tray_update,
             commands::tray::pin_popover,
             updater_enabled,
+            update_kind::update_install_kind,
             system::update_restart::update_installed,
             system::update_restart::set_audio_playing,
         ])

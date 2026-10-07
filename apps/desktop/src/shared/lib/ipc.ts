@@ -40,6 +40,11 @@ import type { StockTransactionKind } from "../../types/api/StockTransactionKind"
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 
+/** `auto`: installs quietly. `prompt`: a Linux package that asks for the
+ * admin password, so it installs only when clicked. `manual`: the app can't
+ * install it here (e.g. the AUR package); the user updates by hand. */
+export type UpdateInstallKind = "auto" | "prompt" | "manual";
+
 /** Mirrors `commands::bazar::Bazar`. */
 export interface Bazar {
   metals: LoadState<MetalRateSnapshot>;
@@ -848,6 +853,8 @@ export const api = {
   isDockIconVisible: () => invoke<boolean>("is_dock_icon_visible"),
   /** False in every dev build and any release built without a signing key. */
   updaterEnabled: () => invoke<boolean>("updater_enabled"),
+  /** How this copy updates: quietly, after a password prompt, or by hand. */
+  updateInstallKind: () => invoke<UpdateInstallKind>("update_install_kind"),
 
   /** All three bazar feeds. Cached in Rust; `refresh` forces a refetch. */
   getBazar: (refresh = false) => invoke<Bazar>("get_bazar", { refresh }),

@@ -8,7 +8,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { api } from "../lib/ipc";
+import { openExternalLink } from "../lib/external-link";
+import { api, type UpdateInstallKind } from "../lib/ipc";
 
 export type UpdateState =
   | "idle"
@@ -19,8 +20,13 @@ export type UpdateState =
   | "installed"
   | "failed";
 
+/** Where a person updates by hand when the app can't install it itself. */
+export const DOWNLOAD_URL = "https://sajilo.fyi/download.html";
+
 interface Updater {
   enabled: boolean;
+  /** How this copy updates; see `UpdateInstallKind`. */
+  installKind: UpdateInstallKind;
   automaticUpdates: boolean;
   state: UpdateState;
   /** The version on offer, once a check has found one. */
@@ -108,6 +114,8 @@ export function UpdaterProvider({
   const owner = mode === "owner";
   const [enabled, setEnabled] = useState(false);
   const [automaticUpdates, setAutomaticUpdatesState] = useState(true);
+  const [installKind, setInstallKind] = useState<UpdateInstallKind>("auto");
+  const installKindRef = useRef<UpdateInstallKind>("auto");
   const [state, setState] = useState<UpdateState>("idle");
   const [version, setVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +140,9 @@ export function UpdaterProvider({
       setVersion(next?.version ?? null);
       if (!next) {
         setState("up-to-date");
-      } else if (automaticUpdatesRef.current) {
+      } else if (automaticUpdatesRef.current && installKindRef.current === "auto") {
+        // Only a quiet install happens on its own. A Linux package would
+        // pop a password prompt out of nowhere, so it waits for a click.
         setState("downloading");
         await next.downloadAndInstall();
         setState("installed");
@@ -149,6 +159,10 @@ export function UpdaterProvider({
   const runInstall = useCallback(async () => {
     const pending = update.current;
     if (!pending) return false;
+    if (installKindRef.current === "manual") {
+      openExternalLink(DOWNLOAD_URL);
+      return false;
+    }
     setState("downloading");
     setError(null);
     try {
@@ -243,9 +257,15 @@ export function UpdaterProvider({
       setState("available");
       return;
     }
-    Promise.all([api.updaterEnabled(), api.getSetting<boolean>("automaticUpdates")])
-      .then(([isEnabled, storedAutomaticUpdates]) => {
+    Promise.all([
+      api.updaterEnabled(),
+      api.getSetting<boolean>("automaticUpdates"),
+      api.updateInstallKind().catch((): UpdateInstallKind => "auto"),
+    ])
+      .then(([isEnabled, storedAutomaticUpdates, kind]) => {
         if (cancelled) return;
+        installKindRef.current = kind;
+        setInstallKind(kind);
         const nextAutomaticUpdates = storedAutomaticUpdates ?? true;
         automaticUpdatesRef.current = nextAutomaticUpdates;
         setAutomaticUpdatesState(nextAutomaticUpdates);
@@ -272,6 +292,7 @@ export function UpdaterProvider({
     <UpdaterContext.Provider
       value={{
         enabled,
+        installKind,
         automaticUpdates,
         state,
         version,
