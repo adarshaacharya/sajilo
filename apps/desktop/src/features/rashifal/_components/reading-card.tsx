@@ -22,6 +22,7 @@ export function ReadingCard({
   period,
   onPeriod,
   title,
+  loading = false,
 }: {
   sign: RashiSign;
   reading: Rashifal | undefined;
@@ -32,6 +33,9 @@ export function ReadingCard({
   onPeriod: (period: RashifalPeriod) => void;
   /** The span as the source names it, e.g. "मासिक राशिफल असोज २०८३". */
   title?: string | null;
+  /** A span's readings on their way: the card stays, its four lines
+   * shimmer, so opening a tab for the first time doesn't jump either. */
+  loading?: boolean;
 }) {
   const { t } = useSettings();
   const meta = signMeta(sign);
@@ -43,7 +47,7 @@ export function ReadingCard({
   // A new sign or span starts folded again.
   // biome-ignore lint/correctness/useExhaustiveDependencies: reset on sign/period change
   useEffect(() => setExpanded(false), [sign, period]);
-  // Whether the folded text runs past its six lines: measured, not guessed
+  // Whether the folded text runs past its four lines: measured, not guessed
   // from a character count, so "Read more" shows exactly when text is hidden.
   const textRef = useRef<HTMLParagraphElement>(null);
   const [overflowing, setOverflowing] = useState(false);
@@ -88,21 +92,28 @@ export function ReadingCard({
         onChange={onPeriod}
         tabs={PERIODS.map((id) => ({ id, label: t(`rashifal.period-${id}`) }))}
       />
-      {/* Six lines, always: a short reading keeps the space, a long one folds
+      {/* Four lines, always: a short reading keeps the space, a long one folds
           with "Read more" over its last line. With the fixed row below, the
           card is one height across signs and spans, so nothing jumps. */}
       <div className="relative">
-        {reading ? (
+        {loading ? (
+          <div className="min-h-[6.6em] text-[13px] leading-[1.65]">
+            {["w-full", "w-11/12", "w-full", "w-3/5"].map((bar, line) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed placeholder lines
+              <SkeletonLine key={line} className="text-[13px] leading-[1.65]" bar={bar} />
+            ))}
+          </div>
+        ) : reading ? (
           <p
             ref={textRef}
-            className={`min-h-[9.9em] text-[13px] leading-[1.65] whitespace-pre-line ${
-              expanded ? "" : "line-clamp-6"
+            className={`min-h-[6.6em] text-[13px] leading-[1.65] whitespace-pre-line ${
+              expanded ? "" : "line-clamp-4"
             }`}
           >
             {reading.prediction}
           </p>
         ) : (
-          <p className="min-h-[9.9em] text-[12px] text-text-secondary">
+          <p className="min-h-[6.6em] text-[12px] text-text-secondary">
             {t("rashifal.unavailable")}
           </p>
         )}
@@ -129,42 +140,44 @@ export function ReadingCard({
       {/* One fixed row: today's lucky colour and number, or the span's
           title for a week, month or year. */}
       <div className="h-[48px]">
-        {daily
-          ? (reading?.luckyColour || reading?.luckyNumber) && (
-              <div className="grid h-full grid-cols-2 gap-1.5">
-                {reading.luckyColour && (
-                  <div className="lucky-tile">
-                    <span className="lucky-tile__label">{t("rashifal.lucky-colour")}</span>
-                    <span className="lucky-tile__value">
-                      {swatchFor(reading.luckyColour) && (
-                        <span
-                          aria-hidden="true"
-                          className="lucky-tile__swatch"
-                          style={{ background: swatchFor(reading.luckyColour) ?? undefined }}
-                        />
-                      )}
-                      <span className="truncate">{reading.luckyColour}</span>
-                    </span>
-                  </div>
-                )}
-                {reading.luckyNumber && (
-                  <div className="lucky-tile">
-                    <span className="lucky-tile__label">{t("rashifal.lucky-number")}</span>
-                    <span className="lucky-tile__value lucky-tile__value--number">
-                      {reading.luckyNumber}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )
-          : title && (
-              <div className="lucky-tile h-full justify-center">
-                <span className="lucky-tile__label">{t(`rashifal.period-${period}`)}</span>
-                <span className="truncate text-[12px] font-medium text-text-secondary">
-                  {title}
-                </span>
-              </div>
-            )}
+        {loading
+          ? null
+          : daily
+            ? (reading?.luckyColour || reading?.luckyNumber) && (
+                <div className="grid h-full grid-cols-2 gap-1.5">
+                  {reading.luckyColour && (
+                    <div className="lucky-tile">
+                      <span className="lucky-tile__label">{t("rashifal.lucky-colour")}</span>
+                      <span className="lucky-tile__value">
+                        {swatchFor(reading.luckyColour) && (
+                          <span
+                            aria-hidden="true"
+                            className="lucky-tile__swatch"
+                            style={{ background: swatchFor(reading.luckyColour) ?? undefined }}
+                          />
+                        )}
+                        <span className="truncate">{reading.luckyColour}</span>
+                      </span>
+                    </div>
+                  )}
+                  {reading.luckyNumber && (
+                    <div className="lucky-tile">
+                      <span className="lucky-tile__label">{t("rashifal.lucky-number")}</span>
+                      <span className="lucky-tile__value lucky-tile__value--number">
+                        {reading.luckyNumber}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )
+            : title && (
+                <div className="lucky-tile h-full justify-center">
+                  <span className="lucky-tile__label">{t(`rashifal.period-${period}`)}</span>
+                  <span className="truncate text-[12px] font-medium text-text-secondary">
+                    {title}
+                  </span>
+                </div>
+              )}
       </div>
 
       {!fromToday && (

@@ -76,6 +76,7 @@ export function Rashifal() {
   const snapshot = loadedValue(state);
   const banner = loadBanner(state, fetchedAtLabel(snapshot?.freshness));
   const shown = viewing ?? mine;
+  const spanLoading = !daily && state === undefined;
   const reading = shown ? snapshot?.readings.find((entry) => entry.sign === shown) : undefined;
   const isMine = shown !== null && shown === mine;
   const published = publishedStamp(snapshot?.freshness);
@@ -121,9 +122,16 @@ export function Rashifal() {
   return (
     <div className="space-y-2.5">
       <AnnouncementBanner screen="rashifal" />
-      <StateBanner state={banner} onRetry={() => load(true)} skeleton={<ReadingCardSkeleton />}>
+      <StateBanner
+        // A span loading for the first time keeps the card (tabs and all)
+        // and shimmers its text, rather than swapping in a smaller skeleton.
+        state={spanLoading ? { status: "fresh" } : banner}
+        onRetry={() => load(true)}
+        skeleton={<ReadingCardSkeleton />}
+      >
         {shown && (
           <ReadingCard
+            loading={spanLoading}
             sign={shown}
             reading={reading}
             freshness={snapshot?.freshness}
