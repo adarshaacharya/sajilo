@@ -8,6 +8,7 @@ import type { Rashifal } from "../../../types/api/Rashifal";
 import type { RashifalPeriod } from "../../../types/api/RashifalPeriod";
 import type { RashiSign } from "../../../types/api/RashiSign";
 import { isReadingFromToday } from "../_lib/format";
+import { swatchFor } from "../_lib/lucky";
 import { signMeta } from "../_lib/signs";
 
 export const PERIODS: readonly RashifalPeriod[] = ["daily", "weekly", "monthly", "yearly"];
@@ -123,18 +124,29 @@ export function ReadingCard({
       )}
 
       {daily && (reading?.luckyColour || reading?.luckyNumber) && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="grid grid-cols-2 gap-1.5">
           {reading.luckyColour && (
-            <span className="rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] px-1.5 text-[10px] leading-5 text-text-secondary">
-              {t("rashifal.lucky-colour")}{" "}
-              <span className="font-semibold text-text">{reading.luckyColour}</span>
-            </span>
+            <div className="lucky-tile">
+              <span className="lucky-tile__label">{t("rashifal.lucky-colour")}</span>
+              <span className="lucky-tile__value">
+                {swatchFor(reading.luckyColour) && (
+                  <span
+                    aria-hidden="true"
+                    className="lucky-tile__swatch"
+                    style={{ background: swatchFor(reading.luckyColour) ?? undefined }}
+                  />
+                )}
+                <span className="truncate">{reading.luckyColour}</span>
+              </span>
+            </div>
           )}
           {reading.luckyNumber && (
-            <span className="rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] px-1.5 text-[10px] leading-5 text-text-secondary">
-              {t("rashifal.lucky-number")}{" "}
-              <span className="font-semibold text-text tabular-nums">{reading.luckyNumber}</span>
-            </span>
+            <div className="lucky-tile">
+              <span className="lucky-tile__label">{t("rashifal.lucky-number")}</span>
+              <span className="lucky-tile__value lucky-tile__value--number">
+                {reading.luckyNumber}
+              </span>
+            </div>
           )}
         </div>
       )}

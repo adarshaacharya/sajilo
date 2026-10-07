@@ -3814,3 +3814,50 @@ input[type="search"]::-webkit-search-decoration {
 .reminder-card__options button:hover {
   background: color-mix(in srgb, var(--color-text) 11%, transparent);
 }
+
+/* Rashifal's lucky colour and number: two small tiles under the reading, a
+   quiet label over the value. The colour carries a swatch of itself. */
+.lucky-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 7px 9px;
+  border-radius: 9px;
+  border: 1px solid var(--color-divider);
+  background: color-mix(in srgb, var(--color-accent-mark) 6%, var(--color-surface));
+}
+
+.lucky-tile__label {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lucky-tile__value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.lucky-tile__value--number {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-mark);
+}
+
+.lucky-tile__swatch {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  /* A ring, so white reads on light and black on dark. */
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text) 25%, transparent);
+}
