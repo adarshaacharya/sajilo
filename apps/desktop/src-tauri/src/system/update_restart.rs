@@ -11,13 +11,28 @@
 //! nobody would notice: the person has been away for a while, the window is
 //! closed, no card is on screen, and the radio is silent. Someone who is using
 //! the computer is never interrupted.
+//!
+//! Windows can't swap the files of a running app, so its installer closes
+//! Sajilo the moment it starts. There the update is only downloaded at first,
+//! and the install itself waits for the same quiet moment.
+//!
+//! Either way the restart leaves a note, so the new version comes back the way
+//! the old one was: in the tray, window closed — not as if opened by hand.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-use tauri::{AppHandle, Manager, Wry};
+use tauri::{AppHandle, Emitter, Manager, Wry};
 
 use super::{card_window, idle};
+use crate::db;
+
+/// When the last quiet restart happened, as Unix seconds.
+const QUIET_RESTART_KEY: &str = "quietRestartAt";
+/// A note older than this belongs to an install that never finished.
+const QUIET_RESTART_FRESH_SECONDS: u64 = 15 * 60;
+/// Tells the update window a downloaded update can be installed now.
+const INSTALL_NOW_EVENT: &str = "sajilo://updater-install-now";
 
 /// Away this long, and the restart goes unnoticed.
 const AWAY_SECONDS: u32 = 10 * 60;
@@ -69,10 +84,44 @@ fn moment(app: &AppHandle<Wry>) -> Moment {
     }
 }
 
-/// Called by the update window once an update is installed. Starts watching
-/// for a quiet moment to restart into it.
-#[tauri::command]
-pub fn update_installed(app: AppHandle<Wry>) {
+/// What happens at the quiet moment.
+#[derive(Debug, Clone, Copy)]
+enum Finish {
+    /// Installed on disk; start again into it.
+    Restart,
+    /// Downloaded only (Windows); the update window installs it, which
+    /// closes and reopens the app.
+    Install,
+}
+
+fn now_seconds() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |elapsed| elapsed.as_secs())
+}
+
+fn note_quiet_restart(app: &AppHandle<Wry>) {
+    let _ = db::set_json(app, QUIET_RESTART_KEY, &serde_json::json!(now_seconds()));
+}
+
+/// Whether this launch is the app coming back from a quiet restart, and so
+/// should stay in the tray. Reads the note once.
+pub fn returning_from_quiet_restart(app: &AppHandle<Wry>) -> bool {
+    let noted = db::get_json(app, QUIET_RESTART_KEY)
+        .ok()
+        .flatten()
+        .and_then(|value| value.as_u64());
+    if noted.is_some() {
+        let _ = db::delete_json(app, QUIET_RESTART_KEY);
+    }
+    noted.is_some_and(|at| fresh(at, now_seconds()))
+}
+
+fn fresh(noted_at: u64, now: u64) -> bool {
+    now.saturating_sub(noted_at) <= QUIET_RESTART_FRESH_SECONDS
+}
+
+fn watch(app: AppHandle<Wry>, finish: Finish) {
     PENDING.store(true, Ordering::SeqCst);
     if WATCHING.swap(true, Ordering::SeqCst) {
         return;
@@ -81,11 +130,31 @@ pub fn update_installed(app: AppHandle<Wry>) {
         loop {
             std::thread::sleep(CHECK_EVERY);
             if should_restart(moment(&app)) {
-                app.request_restart();
+                note_quiet_restart(&app);
+                match finish {
+                    Finish::Restart => app.request_restart(),
+                    Finish::Install => {
+                        let _ = app.emit(INSTALL_NOW_EVENT, ());
+                    }
+                }
                 return;
             }
         }
     });
+}
+
+/// Called by the update window once an update is installed. Starts watching
+/// for a quiet moment to restart into it.
+#[tauri::command]
+pub fn update_installed(app: AppHandle<Wry>) {
+    watch(app, Finish::Restart);
+}
+
+/// Called by the update window on Windows once an update is downloaded.
+/// Starts watching for a quiet moment to install it.
+#[tauri::command]
+pub fn update_downloaded(app: AppHandle<Wry>) {
+    watch(app, Finish::Install);
 }
 
 /// Called by the radio as it starts and stops.
@@ -144,5 +213,14 @@ mod tests {
         for moment in cases {
             assert!(!should_restart(moment), "{moment:?}");
         }
+    }
+
+    #[test]
+    fn only_a_recent_note_keeps_the_window_closed() {
+        assert!(fresh(1_000, 1_000));
+        assert!(fresh(1_000, 1_000 + QUIET_RESTART_FRESH_SECONDS));
+        assert!(!fresh(1_000, 1_001 + QUIET_RESTART_FRESH_SECONDS));
+        // A clock set back is still the same restart, not a stale one.
+        assert!(fresh(2_000, 1_000));
     }
 }

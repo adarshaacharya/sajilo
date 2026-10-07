@@ -977,6 +977,8 @@ export const api = {
   configDirectory: () => invoke<DirectoryResponse>("config_directory"),
   /** An update is installed; the shell restarts into it at a quiet moment. */
   updateInstalled: () => invoke<void>("update_installed"),
+  /** Windows: an update is downloaded; the shell asks for the install at a quiet moment. */
+  updateDownloaded: () => invoke<void>("update_downloaded"),
   /** So an automatic restart never cuts off the radio. */
   setAudioPlaying: (playing: boolean) => invoke<void>("set_audio_playing", { playing }),
   /** The source picker's options — static, named in Rust. */

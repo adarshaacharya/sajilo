@@ -10,6 +10,7 @@ import {
 } from "react";
 import { openExternalLink } from "../lib/external-link";
 import { api, type UpdateInstallKind } from "../lib/ipc";
+import { isWindows } from "../lib/platform";
 
 export type UpdateState =
   | "idle"
@@ -54,6 +55,8 @@ type UpdaterRequest =
 
 const STATE_EVENT = "sajilo://updater-state";
 const REQUEST_EVENT = "sajilo://updater-request";
+/** From the shell: nobody's around, so a downloaded update can install now. */
+const INSTALL_NOW_EVENT = "sajilo://updater-install-now";
 /** A check is one fetch of the release's `latest.json` (about a kilobyte) from
  * GitHub's release CDN — not the rate-limited REST API — so half-hourly costs
  * nothing noticeable and gets a fix to people within the half hour. */
@@ -120,6 +123,8 @@ export function UpdaterProvider({
   const [version, setVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const update = useRef<Update | null>(null);
+  /** Windows: downloaded, waiting for a quiet moment to install. */
+  const downloaded = useRef(false);
   const stateRef = useRef<UpdateState>("idle");
   const automaticUpdatesRef = useRef(true);
   const installWaiter = useRef<((installed: boolean) => void) | null>(null);
@@ -137,6 +142,7 @@ export function UpdaterProvider({
       const { check } = await import("@tauri-apps/plugin-updater");
       const next = await check();
       update.current = next;
+      downloaded.current = false;
       setVersion(next?.version ?? null);
       if (!next) {
         setState("up-to-date");
@@ -144,9 +150,18 @@ export function UpdaterProvider({
         // Only a quiet install happens on its own. A Linux package would
         // pop a password prompt out of nowhere, so it waits for a click.
         setState("downloading");
-        await next.downloadAndInstall();
-        setState("installed");
-        void api.updateInstalled().catch(() => {});
+        if (isWindows) {
+          // Windows' installer closes the app as it starts, so only download
+          // now; the shell asks for the install once nobody's around.
+          await next.download();
+          downloaded.current = true;
+          setState("available");
+          void api.updateDownloaded().catch(() => {});
+        } else {
+          await next.downloadAndInstall();
+          setState("installed");
+          void api.updateInstalled().catch(() => {});
+        }
       } else {
         setState("available");
       }
@@ -166,7 +181,8 @@ export function UpdaterProvider({
     setState("downloading");
     setError(null);
     try {
-      await pending.downloadAndInstall();
+      if (downloaded.current) await pending.install();
+      else await pending.downloadAndInstall();
       setState("installed");
       void api.updateInstalled().catch(() => {});
       return true;
@@ -197,6 +213,10 @@ export function UpdaterProvider({
         setAutomaticUpdatesState(request.enabled);
         break;
     }
+  });
+
+  useTauriEvent<null>(INSTALL_NOW_EVENT, owner, () => {
+    if (downloaded.current) void runInstall();
   });
 
   // ---- mirror: shows the owner's state and forwards what the user asks for

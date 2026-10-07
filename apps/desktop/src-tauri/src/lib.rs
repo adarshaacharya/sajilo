@@ -222,7 +222,11 @@ pub fn run() {
                     );
                 }
                 system::autostart::refresh_login_item(app.handle());
-                if (first_run || !system::autostart::launched_at_login())
+                // After a quiet restart into an update, it goes back to the
+                // tray, the way it was.
+                let quiet_restart =
+                    system::update_restart::returning_from_quiet_restart(app.handle());
+                if (first_run || !(system::autostart::launched_at_login() || quiet_restart))
                     && let Some(main) = window::main_window(app.handle())
                 {
                     window::show(&main);
@@ -413,6 +417,7 @@ pub fn run() {
             updater_enabled,
             update_kind::update_install_kind,
             system::update_restart::update_installed,
+            system::update_restart::update_downloaded,
             system::update_restart::set_audio_playing,
         ])
         .build(context())
