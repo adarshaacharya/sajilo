@@ -67,7 +67,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   focusEnabled: true,
   notesEnabled: true,
   toolsEnabled: true,
-  tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/notes"],
+  tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/tools"],
 };
 
 /** Keeps the home place and the pin list agreeing: the home place is the first
@@ -96,6 +96,20 @@ interface Settings {
 }
 
 const SettingsContext = createContext<Settings | null>(null);
+
+/** The tab bar before Tools and Notes swapped places (0.1.36). */
+const OLD_DEFAULT_TAB_BAR = ["/bazar", "/news", "/focus", "/rashifal", "/notes"];
+
+/**
+ * A saved bar identical to the old default was never really chosen, so it
+ * moves with the default; any bar someone arranged themselves is kept.
+ */
+function withoutOldDefault(tabBar: string[]): string[] {
+  const untouched =
+    tabBar.length === OLD_DEFAULT_TAB_BAR.length &&
+    tabBar.every((to, index) => to === OLD_DEFAULT_TAB_BAR[index]);
+  return untouched ? DEFAULT_MODULES.tabBar : tabBar;
+}
 
 function applyTheme(theme: ThemeMode) {
   if (theme === "system") delete document.documentElement.dataset.theme;
@@ -221,7 +235,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
               ...(focusEnabled !== null && { focusEnabled }),
               ...(notesEnabled !== null && { notesEnabled }),
               ...(toolsEnabled !== null && { toolsEnabled }),
-              ...(Array.isArray(tabBar) && { tabBar }),
+              ...(Array.isArray(tabBar) && { tabBar: withoutOldDefault(tabBar) }),
             }),
           );
         },
