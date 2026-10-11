@@ -4,7 +4,7 @@ use chrono::{TimeZone, Utc};
 use sajilo_core::NepaliDate;
 use sajilo_core::calendar::bikram_sambat::days_in_month;
 use sajilo_core::planner::{
-    DayPlan, PlanTime, Recurrence, Reminder, ordered, plan_days_in_month, plans_on,
+    DayPlan, PlanTime, Recurrence, Reminder, ordered, plan_days_in_month, plans_on, upcoming_plans,
 };
 
 fn plan(id: &str, date: NepaliDate, time: Option<(u32, u32)>, created: i64) -> DayPlan {
@@ -219,4 +219,39 @@ fn older_stored_plans_decode_as_one_time() {
     let plan: DayPlan = serde_json::from_str(raw).expect("legacy plans still load");
     assert_eq!(plan.recurrence, Recurrence::None);
     assert_eq!(plan.title, "Old plan");
+}
+
+/// "My plans" lists what's left: soonest first, repeats on each day they
+/// fall, ticked-off occurrences gone, forgotten one-time plans as overdue.
+#[test]
+fn upcoming_plans_list_what_is_left_soonest_first() {
+    let today = NepaliDate::new(2083, 6, 25);
+    let later = plan("later", NepaliDate::new(2083, 7, 2), None, 0);
+    let soon = plan("soon", NepaliDate::new(2083, 6, 26), Some((9, 0)), 0);
+    let forgotten = plan("forgotten", NepaliDate::new(2083, 6, 20), None, 0);
+    let mut finished = plan("finished", NepaliDate::new(2083, 6, 27), None, 0);
+    finished.set_done_on(finished.date, true);
+    let mut rent = plan("rent", NepaliDate::new(2083, 5, 1), None, 0);
+    rent.recurrence = Recurrence::MonthlyBikramSambat;
+
+    let list = upcoming_plans(&[later, soon, forgotten, finished, rent], today, 60);
+    let shown: Vec<(&str, i64)> = list
+        .iter()
+        .map(|item| (item.plan.id.as_str(), item.days_away))
+        .collect();
+
+    assert_eq!(shown[0], ("forgotten", -5));
+    assert_eq!(shown[1], ("soon", 1));
+    assert!(shown.iter().all(|(id, _)| *id != "finished"));
+    // Rent on the 1st of Kartik and of Mangsir, never its past months.
+    let rent_days: Vec<NepaliDate> = list
+        .iter()
+        .filter(|item| item.plan.id == "rent")
+        .map(|item| item.date)
+        .collect();
+    assert_eq!(
+        rent_days,
+        [NepaliDate::new(2083, 7, 1), NepaliDate::new(2083, 8, 1)]
+    );
+    assert!(shown.windows(2).all(|pair| pair[0].1 <= pair[1].1));
 }

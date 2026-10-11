@@ -7,10 +7,10 @@
 
 use std::collections::BTreeSet;
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::calendar::bikram_sambat::days_in_month;
+use crate::calendar::bikram_sambat::{days_in_month, gregorian_date_from, nepali_date_from};
 use crate::calendar::nepali_date::NepaliDate;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -154,4 +154,56 @@ pub fn plan_days_in_month(plans: &[DayPlan], year: i32, month: u32) -> Vec<u32> 
     days.sort_unstable();
     days.dedup();
     days
+}
+
+/// How far ahead "My plans" looks: two months covers rent and the next
+/// monthly report without turning into a yearly agenda.
+pub const UPCOMING_PLAN_DAYS: i64 = 60;
+/// How far back an unfinished one-time plan stays listed as overdue.
+pub const OVERDUE_PLAN_DAYS: i64 = 30;
+
+/// One occurrence of a plan in "My plans".
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct UpcomingPlan {
+    pub plan: DayPlan,
+    /// The day this occurrence falls on; for a repeat, not the plan's own date.
+    pub date: NepaliDate,
+    pub gregorian: NaiveDate,
+    /// Whole days from today: negative is overdue, 0 today, 1 tomorrow.
+    pub days_away: i64,
+}
+
+/// Every unfinished plan from `today` to `horizon_days` ahead, repeats
+/// resolved to each day they fall on, soonest first. One-time plans left
+/// unticked in the last [`OVERDUE_PLAN_DAYS`] come first, as overdue; a
+/// repeat's past occurrences don't, since the next one is already listed.
+pub fn upcoming_plans(
+    plans: &[DayPlan],
+    today: NepaliDate,
+    horizon_days: i64,
+) -> Vec<UpcomingPlan> {
+    let Ok(start) = gregorian_date_from(today) else {
+        return Vec::new();
+    };
+    let mut upcoming = Vec::new();
+    for days_away in -OVERDUE_PLAN_DAYS..=horizon_days {
+        let gregorian = start + Duration::days(days_away);
+        let Ok(date) = nepali_date_from(gregorian) else {
+            continue;
+        };
+        let mut on_day: Vec<DayPlan> = plans
+            .iter()
+            .filter(|plan| plan.occurs_on(date) && !plan.is_done_on(date))
+            .filter(|plan| days_away >= 0 || plan.recurrence == Recurrence::None)
+            .cloned()
+            .collect();
+        ordered(&mut on_day);
+        upcoming.extend(on_day.into_iter().map(|plan| UpcomingPlan {
+            plan,
+            date,
+            gregorian,
+            days_away,
+        }));
+    }
+    upcoming
 }

@@ -3,7 +3,10 @@
 use chrono::{DateTime, Utc};
 use rusqlite::params;
 use sajilo_core::NepaliDate;
-use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder, plan_days_in_month, plans_on};
+use sajilo_core::planner::{
+    DayPlan, PlanTime, Recurrence, Reminder, UPCOMING_PLAN_DAYS, UpcomingPlan, plan_days_in_month,
+    plans_on, upcoming_plans,
+};
 use sajilo_core::quick_plan::{QuickKind, QuickPlan};
 use tauri::{AppHandle, Wry};
 
@@ -118,6 +121,15 @@ pub fn plans_for_day(app: AppHandle<Wry>, year: i32, month: u32, day: u32) -> Re
 #[tauri::command]
 pub fn plan_days(app: AppHandle<Wry>, year: i32, month: u32) -> Result<Vec<u32>> {
     Ok(plan_days_in_month(&load(&app)?, year, month))
+}
+
+/// "My plans": what's left from today on, overdue one-time plans first.
+#[tauri::command]
+pub fn upcoming_plans_list(app: AppHandle<Wry>) -> Result<Vec<UpcomingPlan>> {
+    let today =
+        sajilo_core::calendar::bikram_sambat::nepali_date_from(sajilo_core::nepal_time::today())
+            .map_err(|error| error.to_string())?;
+    Ok(upcoming_plans(&load(&app)?, today, UPCOMING_PLAN_DAYS))
 }
 
 #[tauri::command]

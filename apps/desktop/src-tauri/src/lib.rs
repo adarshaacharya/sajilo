@@ -340,6 +340,7 @@ pub fn run() {
             commands::plans::list_plans,
             commands::plans::plans_for_day,
             commands::plans::plan_days,
+            commands::plans::upcoming_plans_list,
             commands::plans::save_plan,
             commands::plans::set_plan_done,
             commands::plans::quick_plan,

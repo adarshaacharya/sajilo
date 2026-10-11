@@ -186,6 +186,16 @@ export interface DayPlan {
   done: NepaliDate[];
 }
 
+/** One occurrence in "My plans"; mirrors `UpcomingPlan` in `sajilo-core`. */
+export interface UpcomingPlan {
+  plan: DayPlan;
+  /** The day this occurrence falls on; for a repeat, not the plan's own date. */
+  date: NepaliDate;
+  gregorian: string;
+  /** Negative is overdue, 0 today, 1 tomorrow. */
+  days_away: number;
+}
+
 /** A part of a one-line plan picked out by `quick_plan`. */
 export type QuickKind = "day" | "time" | "reminder" | "repeat";
 
@@ -702,6 +712,8 @@ export const api = {
   panchangaFor: (isoDate: string) => invoke<Panchanga>("panchanga_for", { isoDate }),
 
   listPlans: () => invoke<DayPlan[]>("list_plans"),
+  /** "My plans": what's left from today on, overdue one-time plans first. */
+  upcomingPlans: () => invoke<UpcomingPlan[]>("upcoming_plans_list"),
   plansForDay: (year: number, month: number, day: number) =>
     invoke<DayPlan[]>("plans_for_day", { year, month, day }),
   /** Days of a BS month with a plan on them, repeating plans included. */
