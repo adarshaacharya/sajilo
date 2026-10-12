@@ -54,7 +54,7 @@ main() {
     *" fedora "* | *" rhel "* | *" suse "* | *" opensuse "*)
       if has dnf || has zypper; then install_rpm; return; fi ;;
     *" arch "*)
-      if has yay || has paru; then install_aur; return; fi ;;
+      if { has yay || has paru; } && aur_has_sajilo; then install_aur; return; fi ;;
   esac
   install_appimage
 }
@@ -93,6 +93,14 @@ install_rpm() {
     $SUDO zypper --non-interactive install --allow-unsigned-rpm "$TMP/Sajilo-linux-x86_64.rpm"
   fi
   done_message
+}
+
+# Whether sajilo-bin is actually on the AUR. If it isn't (never published, or
+# taken down), asking yay/paru for it only ends in "could not find all required
+# packages", so Arch falls through to the AppImage instead.
+aur_has_sajilo() {
+  curl -fsSL --max-time 10 "https://aur.archlinux.org/rpc/v5/info?arg%5B%5D=sajilo-bin" 2>/dev/null |
+    grep -q '"resultcount":[1-9]'
 }
 
 install_aur() {

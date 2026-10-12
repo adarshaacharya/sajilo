@@ -22,7 +22,7 @@ One command picks the right package for your distribution and installs it:
 curl -fsSL https://sajilo.fyi/install/linux | sh
 ```
 
-It installs the **.deb** with `apt` on Debian, Ubuntu, Mint and their family, the **.rpm** with `dnf` or `zypper` on Fedora and openSUSE, and **sajilo-bin** from the AUR on Arch when `yay` or `paru` is installed. Anywhere else it puts the **AppImage** in `~/.local/bin` and adds Sajilo to your applications menu. The .deb and .rpm ask for your password, since they install for the whole system.
+It installs the **.deb** with `apt` on Debian, Ubuntu, Mint and their family, the **.rpm** with `dnf` or `zypper` on Fedora and openSUSE, and **sajilo-bin** from the AUR on Arch when `yay` or `paru` is installed and the package is on the AUR. Anywhere else it puts the **AppImage** in `~/.local/bin` and adds Sajilo to your applications menu. The .deb and .rpm ask for your password, since they install for the whole system.
 
 Rather see what it does first? [Read the script](/install/linux), or install by hand below.
 

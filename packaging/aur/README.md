@@ -27,7 +27,7 @@ Actions tab and enter the version (for example `0.1.29`).
    first push creates `sajilo-bin` on the AUR; every later one updates it.
 
 Without the secret the workflow still builds and checks the package, then
-leaves a notice that nothing was pushed.
+fails, so a missing key never passes for a published package.
 
 ## Trying it before publishing
 

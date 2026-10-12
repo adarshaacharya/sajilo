@@ -9,7 +9,7 @@ name: Publish to the AUR
 # One-time setup (see packaging/aur/README.md): an AUR account with an SSH key,
 # and that key's private half in this repository's secrets as
 # AUR_SSH_PRIVATE_KEY. The first run creates the package; later runs update it.
-# Without the secret it still builds and checks the package, then says so.
+# Without the secret it still builds and checks the package, then fails.
 on:
   release:
     types: [published]
@@ -94,9 +94,14 @@ jobs:
           rm -f "$WORK"/*.deb
           cat .SRCINFO
 
-      - name: Say why nothing was pushed
+      # Fails rather than passing with a notice: a green run here used to read
+      # as "published" while sajilo-bin had never reached the AUR, and the Linux
+      # install script sent Arch users to a package that did not exist.
+      - name: Fail when nothing can be pushed
         if: steps.version.outputs.skip == 'false' && steps.version.outputs.push != 'true'
-        run: echo "::notice::Built and checked sajilo-bin, but AUR_SSH_PRIVATE_KEY is not set, so nothing was pushed. See packaging/aur/README.md."
+        run: |
+          echo "::error::Built and checked sajilo-bin, but AUR_SSH_PRIVATE_KEY is not set, so nothing was pushed. See packaging/aur/README.md."
+          exit 1
 
       - name: Push to the AUR
         if: steps.version.outputs.skip == 'false' && steps.version.outputs.push == 'true'
