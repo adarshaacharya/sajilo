@@ -65,6 +65,17 @@ chmod +x Sajilo-linux-x86_64.AppImage
 
 If it complains about **FUSE**, install `libfuse2` (on Ubuntu 24.04 the package is called `libfuse2t64`; on Arch, `sudo pacman -S fuse2`).
 
+## On Arch, Manjaro and EndeavourOS
+
+Use the AppImage. The [quick install](#quick-install) command sets it up for you: it puts it in `~/.local/bin` and adds Sajilo to your applications menu. It needs FUSE:
+
+```bash
+sudo pacman -S fuse2
+curl -fsSL https://sajilo.fyi/install/linux | sh
+```
+
+An AUR package, **sajilo-bin**, is on its way but not published yet, so `yay -S sajilo-bin` or `paru -S sajilo-bin` answers *could not find all required packages* for now. Once it's on the AUR, the quick install uses it automatically when `yay` or `paru` is installed.
+
 ## Finding Sajilo in your top bar
 
 Sajilo puts a **Nepal flag** in your panel, in the area where other apps put their icons. On Ubuntu the Nepali date shows beside it. (You can switch the flag for Sajilo's own icon in **Settings → Display → Menu bar**.)

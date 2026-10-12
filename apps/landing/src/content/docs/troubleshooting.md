@@ -25,6 +25,19 @@ On **Ubuntu 22.04, Linux Mint 21, Pop!_OS 22.04** and similar, **Sajilo 0.1.28 a
 
 To check, run `sajilo-desktop` in a terminal: if you see `GLIBC_2.39 not found`, this is the problem.
 
+## Arch: “could not find all required packages: sajilo-bin”
+
+The **sajilo-bin** AUR package isn't published yet. Until 13 October 2026 the Linux install command still tried it on Arch whenever `yay` or `paru` was installed, and stopped with this error.
+
+**Fix:** run the install command again. It now checks the AUR first and installs the AppImage instead:
+
+```bash
+sudo pacman -S fuse2
+curl -fsSL https://sajilo.fyi/install/linux | sh
+```
+
+See [Install on Arch](/docs/install-linux.html#on-arch-manjaro-and-endeavouros).
+
 ## The browser says the file “isn't commonly downloaded”
 
 ![Edge's Downloads panel warning that Sajilo-windows-x64.exe isn't commonly downloaded](/assets/docs/windows-edge-not-commonly-downloaded.jpg)
