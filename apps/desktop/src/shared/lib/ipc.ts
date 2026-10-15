@@ -655,7 +655,7 @@ export interface NotificationOptions {
    * asked for. */
   dailyRashifal: boolean;
   /** When the daily rashifal comes, or the first moment back at the computer
-   * after it. `null` is 7:00. */
+   * after it. `null` is 10:00. */
   rashifalTime: PlanTime | null;
   /** How every reminder arrives, Routine's included. */
   style: ReminderStyle;

@@ -357,7 +357,7 @@ fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
     ])
 }
 
-/// The daily rashifal as one word: off, left at 7:00 (`default`), or which
+/// The daily rashifal as one word: off, left at 10:00 (`default`), or which
 /// part of the day it is set for. A part of the day, never the minute.
 fn rashifal_daily(app: &AppHandle<Wry>) -> &'static str {
     let options: sajilo_core::notify::NotificationOptions = read(app, prefs::NOTIFICATION_OPTIONS)

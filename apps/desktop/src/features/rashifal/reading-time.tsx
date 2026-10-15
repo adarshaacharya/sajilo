@@ -4,14 +4,14 @@ import type { PlanTime } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 
 /** When the reading comes unless another time is picked; the shell's default. */
-const DEFAULT_TIME: PlanTime = { hour: 7, minute: 0 };
+const DEFAULT_TIME: PlanTime = { hour: 10, minute: 0 };
 /** The shell accepts 5:00 to 22:00. */
 const EARLIEST_HOUR = 5;
 const LATEST_HOUR = 22;
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
-/** `at 07:00`, in the reader's digits. A missing time is the default. */
+/** `at 10:00`, in the reader's digits. A missing time is the default. */
 export function useReadingTimeText() {
   const { t, numerals } = useSettings();
   return (time: PlanTime | null) => {
@@ -24,7 +24,7 @@ export function useReadingTimeText() {
 }
 
 /**
- * The time the daily reading comes, "Every day at 07:00", kept within 5:00
+ * The time the daily reading comes, "Every day at 10:00", kept within 5:00
  * to 22:00 by the picker itself. One control for
  * the offer card, the Rashifal screen's own line, and Settings, so all three
  * say it the same way.
@@ -53,7 +53,7 @@ export function ReadingTime({
           value={`${pad(hour)}:${pad(minute)}`}
           ariaLabel={t("rashifal.time.label")}
           onChange={(next) => {
-            const [nextHour = 7, nextMinute = 0] = next.split(":").map(Number);
+            const [nextHour = 10, nextMinute = 0] = next.split(":").map(Number);
             onChange(clamp({ hour: nextHour, minute: nextMinute }));
           }}
         />

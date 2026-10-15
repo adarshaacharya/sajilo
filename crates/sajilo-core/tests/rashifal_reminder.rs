@@ -4,7 +4,8 @@ use chrono::{DateTime, Duration, NaiveTime, TimeZone, Utc};
 use sajilo_core::focus::Language;
 use sajilo_core::planner::PlanTime;
 use sajilo_core::rashifal::{
-    DEFAULT_TIME, MorningState, Step, Tick, mark_read, reading_time, reminder_id, step, title,
+    DEFAULT_TIME, MorningState, SETTLE_MINUTES, Step, Tick, mark_read, reading_time, reminder_id,
+    step, title,
 };
 
 const STEP: i64 = 15;
@@ -62,7 +63,7 @@ fn it_comes_at_its_time_and_only_once() {
 }
 
 #[test]
-fn away_at_its_time_it_comes_when_back() {
+fn away_at_its_time_it_comes_once_settled_back() {
     let mut state = MorningState::default();
     // Away from 6:00 until 10:30.
     let away = |now: DateTime<Utc>| {
@@ -74,13 +75,30 @@ fn away_at_its_time_it_comes_when_back() {
         tick(now, idle)
     };
     let shown = run(&mut state, at(6, 0), 300, away).expect("comes once back");
-    assert!(shown >= at(10, 30) && shown <= at(10, 31), "{shown}");
+    let settle = Duration::minutes(SETTLE_MINUTES);
+    assert!(
+        shown >= at(10, 30) + settle && shown <= at(10, 31) + settle,
+        "{shown}"
+    );
+}
+
+#[test]
+fn the_laptop_opened_after_its_time_waits_too() {
+    let mut state = MorningState::default();
+    // A tick at 6:00, then the laptop shut until 9:00: the gap is time away.
+    assert_eq!(step(&mut state, busy(at(6, 0))), Step::Wait);
+    let shown = run(&mut state, at(9, 0), 60, busy).expect("comes after settling");
+    assert!(
+        shown >= at(9, 0) + Duration::minutes(SETTLE_MINUTES),
+        "{shown}"
+    );
 }
 
 #[test]
 fn too_late_and_the_day_is_skipped() {
     let mut state = MorningState::default();
     // Seven plus six hours: from 13:00 it is no longer that day's reading.
+    // (The tests set the reading for 7:00.)
     assert_eq!(run(&mut state, at(13, 0), 120, busy), None);
 }
 
@@ -167,9 +185,10 @@ fn state_saved_by_the_older_morning_reminder_still_loads() {
 }
 
 #[test]
-fn the_saved_time_or_seven() {
+fn the_saved_time_or_ten() {
+    let ten = NaiveTime::from_hms_opt(10, 0, 0).unwrap();
     assert_eq!(reading_time(None), DEFAULT_TIME);
-    assert_eq!(DEFAULT_TIME, seven());
+    assert_eq!(DEFAULT_TIME, ten);
     assert_eq!(
         reading_time(Some(PlanTime {
             hour: 6,
@@ -177,15 +196,10 @@ fn the_saved_time_or_seven() {
         })),
         NaiveTime::from_hms_opt(6, 30, 0).unwrap()
     );
-    // Outside 5:00–22:00, or not a time at all: seven.
-    assert_eq!(reading_time(Some(PlanTime { hour: 3, minute: 0 })), seven());
-    assert_eq!(
-        reading_time(Some(PlanTime {
-            hour: 25,
-            minute: 0
-        })),
-        seven()
-    );
+    // Outside 5:00–22:00, or not a time at all: the default.
+    for hour in [3, 25] {
+        assert_eq!(reading_time(Some(PlanTime { hour, minute: 0 })), ten);
+    }
 }
 
 #[test]

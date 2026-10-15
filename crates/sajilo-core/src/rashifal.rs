@@ -1,11 +1,13 @@
 //! The daily rashifal reminder: today's reading for the user's own sign, at
 //! the time they picked.
 //!
-//! A desktop app cannot always be seen at a fixed hour: at 7:00 the laptop may
-//! be shut. So the reading comes at its time if someone is at the computer,
-//! and otherwise at the first moment they are back, up to [`LATE_HOURS`]
-//! later; past that the day's reading reads stale, and the day is skipped. It
-//! waits for a pause in typing so it never lands on a keystroke.
+//! A desktop app cannot always be seen at a fixed hour: at 10:00 the laptop
+//! may be shut. So the reading comes at its time if someone is at the
+//! computer then. Otherwise it comes once they have been back for
+//! [`SETTLE_MINUTES`] (opening the laptop is for logging in and catching up,
+//! not for a card), up to [`LATE_HOURS`] after its time; past that the day's
+//! reading reads stale, and the day is skipped. It waits for a pause in
+//! typing so it never lands on a keystroke.
 //!
 //! Deliberately pure, like [`crate::focus`]: the shell measures idle time and
 //! calls [`step`] every few seconds; a test can walk a whole day through it in
@@ -14,7 +16,7 @@
 use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::focus::{ACTIVE_WINDOW_SECONDS, Language, TYPING_PAUSE_SECONDS};
+use crate::focus::{ACTIVE_WINDOW_SECONDS, Language, MAX_TICK_GAP_SECONDS, TYPING_PAUSE_SECONDS};
 use crate::planner::PlanTime;
 
 /// Once due, how long it waits for a pause in typing before showing anyway.
@@ -23,9 +25,11 @@ const DUE_GRACE_SECONDS: i64 = 60;
 pub const EARLIEST: NaiveTime = NaiveTime::from_hms_opt(5, 0, 0).expect("valid time");
 pub const LATEST: NaiveTime = NaiveTime::from_hms_opt(22, 0, 0).expect("valid time");
 /// When it comes unless the reader picks a time.
-pub const DEFAULT_TIME: NaiveTime = NaiveTime::from_hms_opt(7, 0, 0).expect("valid time");
+pub const DEFAULT_TIME: NaiveTime = NaiveTime::from_hms_opt(10, 0, 0).expect("valid time");
+/// Back at the computer after its time, the reading waits this long first.
+pub const SETTLE_MINUTES: i64 = 10;
 /// A time missed with the computer asleep still comes, this much later at
-/// most: 7:00 can arrive at 10:30, but not in the evening.
+/// most: 10:00 can arrive at 13:30, but not in the evening.
 pub const LATE_HOURS: i64 = 6;
 
 /// The reading's time from the saved option: [`DEFAULT_TIME`] when none is
@@ -46,6 +50,10 @@ pub struct MorningState {
     pub done: Option<NaiveDate>,
     /// When it came due while the user was typing.
     pub due_since: Option<DateTime<Utc>>,
+    /// Since when the user has been at the computer without a break: away,
+    /// or the computer asleep, starts it again.
+    pub present_since: Option<DateTime<Utc>>,
+    pub last_tick: Option<DateTime<Utc>>,
 }
 
 /// One measurement from the shell.
@@ -91,8 +99,24 @@ pub fn step(state: &mut MorningState, tick: Tick) -> Step {
     let present = tick
         .idle_seconds
         .is_none_or(|idle| idle <= ACTIVE_WINDOW_SECONDS);
+    // A gap between ticks is the computer asleep or the app closed: time away.
+    let slept = state
+        .last_tick
+        .is_some_and(|last| (tick.now - last).num_seconds() > i64::from(MAX_TICK_GAP_SECONDS));
+    state.last_tick = Some(tick.now);
+    if !present || slept {
+        state.present_since = None;
+    }
+    if present {
+        state.present_since.get_or_insert(tick.now);
+    }
+    // At the computer when its time came: now. Arrived after: once settled.
+    let its_time = tick.now - (tick.local - tick.local.date().and_time(tick.at));
+    let settled = state.present_since.is_some_and(|since| {
+        since <= its_time || tick.now - since >= Duration::minutes(SETTLE_MINUTES)
+    });
 
-    if state.done == Some(date) || !in_window || !present || tick.held {
+    if state.done == Some(date) || !in_window || !present || !settled || tick.held {
         state.due_since = None;
         return Step::Wait;
     }

@@ -48,7 +48,7 @@ pub struct NotificationOptions {
     #[serde(default)]
     pub daily_rashifal: bool,
     /// When the daily rashifal comes: that time, or the first moment back at
-    /// the computer after it. `None` is 7:00. See `rashifal::reading_time`.
+    /// the computer after it. `None` is 10:00. See `rashifal::reading_time`.
     #[serde(default)]
     pub rashifal_time: Option<PlanTime>,
     /// How every reminder arrives — these and Breaks alike. A card is the
