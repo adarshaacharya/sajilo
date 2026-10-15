@@ -31,6 +31,7 @@ import { SFCpu } from "sf-symbols-lib/monochrome/SFCpu";
 import { SFCupAndSaucer } from "sf-symbols-lib/monochrome/SFCupAndSaucer";
 import { SFDesktopcomputer } from "sf-symbols-lib/monochrome/SFDesktopcomputer";
 import { SFDocument } from "sf-symbols-lib/monochrome/SFDocument";
+import { SFDocumentBadgeClock } from "sf-symbols-lib/monochrome/SFDocumentBadgeClock";
 import { SFDotRadiowavesLeftAndRight } from "sf-symbols-lib/monochrome/SFDotRadiowavesLeftAndRight";
 import { SFDrop } from "sf-symbols-lib/monochrome/SFDrop";
 import { SFEllipsis } from "sf-symbols-lib/monochrome/SFEllipsis";
@@ -207,6 +208,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   heading: SFTextformatSize,
   keyboard: SFKeyboard,
   briefcase: SFBriefcase,
+  bills: SFDocumentBadgeClock,
 };
 
 export type IconName =
@@ -311,7 +313,8 @@ export type IconName =
   | "bold"
   | "heading"
   | "keyboard"
-  | "briefcase";
+  | "briefcase"
+  | "bills";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

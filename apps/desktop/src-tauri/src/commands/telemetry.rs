@@ -56,6 +56,7 @@ pub const EVENTS: &[&str] = &[
     "screen.notes",
     "screen.more",
     "screen.jobs",
+    "screen.bills",
     "screen.settings-notifications",
     // Tabs inside a screen.
     "tab.bazar.stocks",
@@ -77,6 +78,7 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.interest",
     "tab.tools.stopwatch",
     "tab.tools.nepali",
+    "tab.bills.electricity",
     "tab.jobs.all",
     "tab.jobs.psc",
     "tab.jobs.tsc",
@@ -352,6 +354,7 @@ fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
         ("notes", on_off(prefs::NOTES_ENABLED, true)),
         ("tools", on_off(prefs::TOOLS_ENABLED, true)),
         ("jobs", on_off(prefs::JOBS_ENABLED, true)),
+        ("bills", on_off(prefs::BILLS_ENABLED, true)),
         ("clocks", on_off("clocksEnabled", false)),
         ("rashifalDaily", rashifal_daily(app).to_owned()),
     ])

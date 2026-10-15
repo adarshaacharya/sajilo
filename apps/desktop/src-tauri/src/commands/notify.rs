@@ -84,7 +84,9 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     // shouldn't keep talking.
     if options.keeper && crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
         all.extend(crate::commands::keeper::pending_notifications(app, now));
-        // The electricity bill lives in Keeper, and goes quiet with it.
+    }
+    // Bills & status switched off in Settings goes quiet too.
+    if crate::background_refresh::enabled(app, prefs::BILLS_ENABLED) {
         all.extend(crate::commands::electricity::pending_notifications(
             app, now,
         ));

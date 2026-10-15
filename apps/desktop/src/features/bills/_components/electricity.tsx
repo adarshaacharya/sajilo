@@ -4,11 +4,14 @@ import { CONTROL, CONTROL_LABEL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
 import { Select } from "../../../shared/components/select";
 import { StateBanner } from "../../../shared/components/state-banner";
+import type { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { catchAsFailed, loadBanner, loadedValue } from "../../../shared/lib/load-state";
 import type { ElectricityBill } from "../../../types/api/ElectricityBill";
 import type { ElectricityStatement } from "../../../types/api/ElectricityStatement";
-import type { TFn } from "../_lib/shared";
+
+type TFn = ReturnType<typeof useSettings>["t"];
+
 import { dueLine, dueToneOf, rupees, useElectricity } from "../electricity-due";
 
 /** Longer than any SC number or consumer id printed on a bill. */

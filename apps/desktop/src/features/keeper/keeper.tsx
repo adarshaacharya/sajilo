@@ -17,7 +17,6 @@ import {
 import { withPopoverPinned } from "../../shared/lib/popover-dialog";
 import { track } from "../../shared/lib/usage";
 import { AddPicker } from "./_components/add-picker";
-import { ElectricityPage } from "./_components/electricity";
 import { GroupPage } from "./_components/group-page";
 import { Home, type PersonFilter, type View } from "./_components/home";
 import { ItemEditor } from "./_components/item-editor";
@@ -49,8 +48,6 @@ type Screen =
   /** Every reminder of one kind. */
   | { name: "itemGroup"; key: string }
   | { name: "sips" }
-  /** The electricity bill, from NEA. */
-  | { name: "electricity" }
   | { name: "record"; id: string }
   | { name: "editRecord"; draft: KeeperRecordInput; newPerson: NewPerson | null }
   | { name: "editItem"; draft: KeeperItem; newPerson: NewPerson | null };
@@ -62,11 +59,7 @@ export function Keeper() {
   const linked = new URLSearchParams(linkedSearch);
   const [data, setData] = useState<KeeperSnapshot>({ people: [], items: [], records: [] });
   const [stack, setStack] = useState<Screen[]>(() =>
-    linked.get("section") === "sips"
-      ? [{ name: "sips" }]
-      : linked.get("section") === "electricity"
-        ? [{ name: "electricity" }]
-        : [],
+    linked.get("section") === "sips" ? [{ name: "sips" }] : [],
   );
   const [view, setView] = useState<View>(() =>
     linked.get("view") === "reminders" ? "reminders" : "documents",
@@ -234,19 +227,17 @@ export function Keeper() {
                     : t("keeper.title")
                   : screen.name === "sips"
                     ? t("keeper.sip.title")
-                    : screen.name === "electricity"
-                      ? t("electricity.title")
-                      : screen.name === "record"
-                        ? current
-                          ? recordName(t, current)
-                          : t("keeper.title")
-                        : screen.name === "editRecord"
-                          ? screen.draft.createdAt
-                            ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
-                            : docTypeLabel(t, screen.draft.documentType)
-                          : screen.draft.createdAt
-                            ? t("keeper.edit-title")
-                            : t("keeper.new-title"),
+                    : screen.name === "record"
+                      ? current
+                        ? recordName(t, current)
+                        : t("keeper.title")
+                      : screen.name === "editRecord"
+                        ? screen.draft.createdAt
+                          ? `${t("keeper.edit")} · ${docTypeLabel(t, screen.draft.documentType)}`
+                          : docTypeLabel(t, screen.draft.documentType)
+                        : screen.draft.createdAt
+                          ? t("keeper.edit-title")
+                          : t("keeper.new-title"),
           onBack: back,
         },
   );
@@ -351,8 +342,6 @@ export function Keeper() {
         </button>
       </div>
     );
-  } else if (screen?.name === "electricity") {
-    body = <ElectricityPage t={t} />;
   } else if (screen?.name === "sips") {
     body = (
       <SipReminders
@@ -454,7 +443,6 @@ export function Keeper() {
         onOpenRecord={(recordId) => push({ name: "record", id: recordId })}
         onOpenItem={(item) => push({ name: "editItem", draft: item, newPerson: null })}
         onOpenSips={() => push({ name: "sips" })}
-        onOpenElectricity={() => push({ name: "electricity" })}
         onToggleItem={toggleItem}
         t={t}
       />

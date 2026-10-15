@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from "react";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router";
 import { SWRConfig } from "swr";
 import { Bazar } from "./features/bazar/bazar";
+import { Bills } from "./features/bills/bills";
 import { Converter } from "./features/calendar/converter";
 import { Dashboard } from "./features/calendar/dashboard";
 import { DayDetail } from "./features/calendar/day-detail";
@@ -60,6 +61,7 @@ const ROUTES = [
   { path: "/notes", titleKey: "screen.notes", element: <Notes /> },
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/jobs", titleKey: "screen.jobs", element: <Jobs /> },
+  { path: "/bills", titleKey: "screen.bills", element: <Bills /> },
   { path: "/more", titleKey: "screen.more", element: <More /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
   {

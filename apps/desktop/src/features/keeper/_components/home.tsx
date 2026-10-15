@@ -16,7 +16,6 @@ import { groupDocuments, groupItems, groupName, itemGroupName } from "../_lib/gr
 import { DOCUMENT_ICONS } from "../_lib/icons";
 import { daysUntil, dueLabel, dueTone, type TFn } from "../_lib/shared";
 import { type Upcoming, upcomingOf } from "../_lib/upcoming";
-import { ElectricityRow } from "./electricity";
 import { DueTile, ItemGroupRow, TickButton } from "./rows";
 import { SipGroupRow } from "./sip-reminders";
 
@@ -52,7 +51,6 @@ export function Home({
   onOpenRecord,
   onOpenItem,
   onOpenSips,
-  onOpenElectricity,
   onToggleItem,
   t,
 }: {
@@ -70,7 +68,6 @@ export function Home({
   onOpenRecord: (id: string) => void;
   onOpenItem: (item: KeeperItem) => void;
   onOpenSips: () => void;
-  onOpenElectricity: () => void;
   onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
@@ -176,10 +173,7 @@ export function Home({
           />
         )
       ) : items.length === 0 && visibleSips.length === 0 ? (
-        <>
-          <ElectricityRow onOpen={onOpenElectricity} t={t} />
-          {picker("reminders")}
-        </>
+        picker("reminders")
       ) : (
         <>
           <div className="control-field flex min-w-0 items-center gap-1.5 rounded-md px-2">
@@ -193,7 +187,6 @@ export function Home({
               className="min-w-0 flex-1 bg-transparent py-1.5 text-[11px] outline-none placeholder:text-text-muted"
             />
           </div>
-          <ElectricityRow onOpen={onOpenElectricity} t={t} />
           <ReminderList
             items={items.filter((item) =>
               `${item.title} ${item.note}`.toLowerCase().includes(search.toLowerCase()),

@@ -2,24 +2,24 @@ import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
-import { dueLine, dueToneOf, rupees, useElectricity } from "../../keeper/electricity-due";
+import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electricity-due";
 
 /**
  * The electricity bill on the home screen, only while there is one to pay:
  * the amount, and what paying it now costs. Paid, or never set up, and it is
- * not there at all. Tap it for the bill in Keeper.
+ * not there at all. Tap it for the bill in Bills & status.
  */
 export function BillGlance() {
   const { t, modules } = useSettings();
   const navigate = useNavigate();
   const { data } = useElectricity();
   const due = loadedValue(data)?.due;
-  if (!modules.keeperEnabled || !due) return null;
+  if (!modules.billsEnabled || !due) return null;
 
   return (
     <button
       type="button"
-      onClick={() => navigate("/keeper?section=electricity")}
+      onClick={() => navigate("/bills?open=electricity")}
       className="surface-card flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
     >
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
