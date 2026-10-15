@@ -1,0 +1,96 @@
+{
+  "fullName": "Ram Bahadur Thapa",
+  "username": "ramthapa",
+  "accountType": "PERSONAL",
+  "accountDisabled": false,
+  "subscribedPackageId": 18881266,
+  "subscribedPackageName": "6G 400Mbps/12mths with 1TV",
+  "subscribedPackageType": "Unlimited",
+  "subscriptionType": "RETAIL",
+  "branch": "KALIMATI",
+  "daysRemaining": "117",
+  "amount": 0,
+  "currentPlan": {
+    "packageId": 18881266,
+    "packageName": "6G 400Mbps/12mths with 1TV",
+    "packageRate": 18080,
+    "packageLabel": "6G 400Mbps/12mths with 1TV [Rs.18080.00]"
+  },
+  "packageOptions": [
+    {
+      "packageId": 18881657,
+      "packageName": "6G Pro 400Mbps/12mnths with 1TV",
+      "packageRate": 20760,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Pro 400Mbps/12mnths with 1TV [Rs. 20760]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "365",
+      "recommendOrder": 1
+    },
+    {
+      "packageId": 18881653,
+      "packageName": "6G Premium 200Mbps/12mnths with 1TV",
+      "packageRate": 19230,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Premium 200Mbps/12mnths with 1TV [Rs. 19230]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "365",
+      "recommendOrder": 2
+    },
+    {
+      "packageId": 18881661,
+      "packageName": "6G Ultra 500Mbps/12mnths with 1TV",
+      "packageRate": 21800,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Ultra 500Mbps/12mnths with 1TV [Rs. 21800]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "365",
+      "recommendOrder": 3
+    },
+    {
+      "packageId": 18881654,
+      "packageName": "6G Pro 400Mbps/1mnth with 1TV",
+      "packageRate": 2050,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Pro 400Mbps/1mnth with 1TV [Rs. 2050]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "30",
+      "recommendOrder": 4
+    },
+    {
+      "packageId": 18881655,
+      "packageName": "6G Pro 400Mbps/3mnths with 1TV",
+      "packageRate": 5950,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Pro 400Mbps/3mnths with 1TV [Rs. 5950]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "90",
+      "recommendOrder": 5
+    },
+    {
+      "packageId": 18881656,
+      "packageName": "6G Pro 400Mbps/6mnths with 1TV",
+      "packageRate": 11460,
+      "wifi6ActivationCharge": 1130,
+      "wifi6Plan": true,
+      "packageLabel": "6G Pro 400Mbps/6mnths with 1TV [Rs. 11460]",
+      "tvEligiblePackage": 0,
+      "packageEligibility": false,
+      "packageDuration": "180",
+      "recommendOrder": 6
+    }
+  ],
+  "message": "You have 117 day(s) remaining. You can pay in advance. Note: You need to top-up NetTV separately. For this, please go to https://epayment.worldlink.com.np/new/nettv-payment",
+  "eligibilityForLottery": false,
+  "payRef": "0000000000000000"
+}

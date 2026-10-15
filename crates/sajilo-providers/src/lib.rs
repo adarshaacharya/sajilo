@@ -35,6 +35,7 @@ pub mod rss;
 pub mod sharehub_chart;
 pub mod sharehub_live;
 pub mod sharesansar;
+pub mod worldlink;
 
 pub use error::{ProviderError, Result};
 pub use http::HttpClient;

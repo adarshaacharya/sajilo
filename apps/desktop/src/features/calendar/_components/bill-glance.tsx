@@ -3,6 +3,7 @@ import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electricity-due";
+import { internetTone, SOON_DAYS, useInternet } from "../../bills/internet-due";
 
 /**
  * The electricity bill on the home screen, only while there is one to pay:
@@ -10,6 +11,52 @@ import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electric
  * not there at all. Tap it for the bill in Bills & status.
  */
 export function BillGlance() {
+  return (
+    <>
+      <ElectricityGlance />
+      <InternetGlance />
+    </>
+  );
+}
+
+/** WorldLink on the home screen, only when renewal is a week away or past. */
+function InternetGlance() {
+  const { t, modules } = useSettings();
+  const navigate = useNavigate();
+  const { data } = useInternet();
+  const status = loadedValue(data);
+  const days = status?.daysLeft ?? null;
+  if (!modules.billsEnabled || !status || days === null) return null;
+  if (!status.disabled && days > SOON_DAYS) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate("/bills?open=internet")}
+      className="surface-card flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+    >
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+        <Icon name="wifi" className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[12px] font-semibold">{t("internet.glance")}</span>
+        <span className={`mt-0.5 block truncate text-[10.5px] font-medium ${internetTone(status)}`}>
+          {status.disabled || days < 0
+            ? t("internet.expired")
+            : days === 0
+              ? t("internet.last-day")
+              : t("internet.days-left").replace("{n}", String(days))}
+          {status.renewalRate != null && (
+            <span className="text-text-muted"> · {rupees(status.renewalRate)}</span>
+          )}
+        </span>
+      </span>
+      <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+    </button>
+  );
+}
+
+function ElectricityGlance() {
   const { t, modules } = useSettings();
   const navigate = useNavigate();
   const { data } = useElectricity();

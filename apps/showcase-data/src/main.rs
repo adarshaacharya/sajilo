@@ -771,6 +771,11 @@ fn record_electricity(commands: &mut BTreeMap<String, Value>, read: &dyn Fn(&str
     );
     commands.insert("get_nea_account".to_owned(), Value::Null);
     commands.insert(
+        "get_internet".to_owned(),
+        json!({ "status": "unavailable" }),
+    );
+    commands.insert("get_worldlink_account".to_owned(), Value::Null);
+    commands.insert(
         "nea_offices".to_owned(),
         load_state(sajilo_providers::nea::parse_offices(&read("nea/form.html"))),
     );

@@ -92,6 +92,9 @@ pub const JOBS_SEEN: &str = "jobsSeen";
 /// Never leaves this computer except to NEA's own bill check.
 pub const NEA_ACCOUNT: &str = "neaAccount";
 pub const NEA_OFFICES_KEY: &str = "neaOffices.v1";
+/// The WorldLink username whose subscription is checked. Sent only to
+/// WorldLink's own renewal lookup.
+pub const WORLDLINK_ACCOUNT: &str = "worldlinkAccount";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

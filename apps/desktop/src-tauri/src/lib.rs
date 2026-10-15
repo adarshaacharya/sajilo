@@ -162,6 +162,7 @@ pub fn run() {
             app.manage(commands::ipos::IposCache::default());
             app.manage(commands::jobs::JobsCache::default());
             app.manage(commands::electricity::ElectricityCache::default());
+            app.manage(commands::internet::InternetCache::default());
             app.manage(commands::dividends::DividendsCache::default());
             app.manage(commands::mutual_funds::MutualFundsCache::default());
             app.manage(commands::crypto::CryptoCache::default());
@@ -284,6 +285,10 @@ pub fn run() {
             commands::electricity::set_nea_account,
             commands::electricity::clear_nea_account,
             commands::electricity::get_electricity,
+            commands::internet::get_worldlink_account,
+            commands::internet::set_worldlink_account,
+            commands::internet::clear_worldlink_account,
+            commands::internet::get_internet,
             commands::jobs::get_jobs,
             commands::jobs::job_detail,
             commands::jobs::mark_jobs_seen,

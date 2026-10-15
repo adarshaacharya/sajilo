@@ -11,6 +11,7 @@ import type { ForexHistory } from "../../types/api/ForexHistory";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
+import type { InternetStatus } from "../../types/api/InternetStatus";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { JobDetailPart } from "../../types/api/JobDetailPart";
 import type { JobSource } from "../../types/api/JobSource";
@@ -46,6 +47,7 @@ import type { StockTradeEstimate } from "../../types/api/StockTradeEstimate";
 import type { StockTransactionKind } from "../../types/api/StockTransactionKind";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
+import type { WorldLinkAccount } from "../../types/api/WorldLinkAccount";
 
 /** `auto`: installs quietly. `prompt`: a Linux package that asks for the
  * admin password, so it installs only when clicked. `manual`: the app can't
@@ -938,6 +940,14 @@ export const api = {
   /** The saved account's bills; `unavailable` when none is saved. */
   getElectricity: (refresh = false) =>
     invoke<LoadState<ElectricityStatement>>("get_electricity", { refresh }),
+
+  getWorldlinkAccount: () => invoke<WorldLinkAccount | null>("get_worldlink_account"),
+  /** Checks the username with WorldLink before saving; rejects with a readable reason. */
+  setWorldlinkAccount: (account: WorldLinkAccount) =>
+    invoke<InternetStatus>("set_worldlink_account", { account }),
+  clearWorldlinkAccount: () => invoke<void>("clear_worldlink_account"),
+  /** The saved WorldLink subscription; `unavailable` when none is saved. */
+  getInternet: (refresh = false) => invoke<LoadState<InternetStatus>>("get_internet", { refresh }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>
