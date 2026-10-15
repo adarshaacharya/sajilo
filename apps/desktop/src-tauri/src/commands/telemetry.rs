@@ -353,7 +353,28 @@ fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
         ("tools", on_off(prefs::TOOLS_ENABLED, true)),
         ("jobs", on_off(prefs::JOBS_ENABLED, true)),
         ("clocks", on_off("clocksEnabled", false)),
+        ("rashifalDaily", rashifal_daily(app).to_owned()),
     ])
+}
+
+/// The daily rashifal as one word: off, left at 7:00 (`default`), or which
+/// part of the day it is set for. A part of the day, never the minute.
+fn rashifal_daily(app: &AppHandle<Wry>) -> &'static str {
+    let options: sajilo_core::notify::NotificationOptions = read(app, prefs::NOTIFICATION_OPTIONS)
+        .and_then(|value| serde_json::from_value(value).ok())
+        .unwrap_or_default();
+    if !options.daily_rashifal {
+        return "off";
+    }
+    options
+        .rashifal_time
+        .map_or("default", |time| match time.hour {
+            0..7 => "early",
+            7..9 => "morning",
+            9..12 => "late-morning",
+            12..17 => "afternoon",
+            _ => "evening",
+        })
 }
 
 /// Sends at most one event per UTC day, unless switched off. Failed

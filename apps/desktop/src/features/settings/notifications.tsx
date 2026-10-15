@@ -12,6 +12,7 @@ import {
   type PermissionState,
   type ReminderStyle,
 } from "../../shared/lib/ipc";
+import { ReadingTime } from "../rashifal/reading-time";
 import { SettingsSection } from "./_components/settings-section";
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -213,7 +214,7 @@ export function Notifications() {
             <SettingsSection title={t(group.titleKey)}>
               {group.rows.map((row) => {
                 const needsSign = row.source === "dailyRashifal" && !hasSign;
-                return (
+                const line = (
                   <div
                     key={row.source}
                     className={`flex items-center justify-between gap-3${needsSign ? " opacity-50" : ""}`}
@@ -232,6 +233,19 @@ export function Notifications() {
                     />
                   </div>
                 );
+                // The daily reading's time sits under its switch while it is on.
+                if (row.source === "dailyRashifal" && options.dailyRashifal && !needsSign) {
+                  return (
+                    <div key={row.source} className="space-y-2">
+                      {line}
+                      <ReadingTime
+                        value={options.rashifalTime ?? null}
+                        onChange={(next) => void update({ ...options, rashifalTime: next })}
+                      />
+                    </div>
+                  );
+                }
+                return line;
               })}
               {group.titleKey === "notifications.group.yours" && (
                 <button

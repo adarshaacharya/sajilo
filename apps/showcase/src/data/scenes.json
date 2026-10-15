@@ -37132,6 +37132,7 @@
       "ipoClosingDay": true,
       "keeper": true,
       "pausedUntil": null,
+      "rashifalTime": null,
       "sajiloAsks": false,
       "sajiloGreetings": true,
       "sajiloNotices": true,

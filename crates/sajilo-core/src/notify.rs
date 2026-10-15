@@ -42,11 +42,15 @@ pub struct NotificationOptions {
     /// only the switch that silences them all at once.
     #[serde(default = "enabled_by_default")]
     pub sip_payment: bool,
-    /// Today's rashifal for the user's own sign, when they first sit down in
-    /// the morning. Off until asked for: it only means anything once a sign
+    /// Today's rashifal for the user's own sign, at its time. Off until
+    /// asked for: it only means anything once a sign
     /// is chosen, and the Rashifal tab offers it then.
     #[serde(default)]
     pub daily_rashifal: bool,
+    /// When the daily rashifal comes: that time, or the first moment back at
+    /// the computer after it. `None` is 7:00. See `rashifal::reading_time`.
+    #[serde(default)]
+    pub rashifal_time: Option<PlanTime>,
     /// How every reminder arrives — these and Breaks alike. A card is the
     /// default: a corner notification is gone before it is read.
     #[serde(default)]
@@ -96,6 +100,7 @@ impl Default for NotificationOptions {
             ipo_closing_day: enabled_by_default(),
             sip_payment: enabled_by_default(),
             daily_rashifal: false,
+            rashifal_time: None,
             style: ReminderStyle::default(),
             day_plans: enabled_by_default(),
             keeper: enabled_by_default(),

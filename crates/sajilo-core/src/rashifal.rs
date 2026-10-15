@@ -1,46 +1,49 @@
-//! The daily rashifal reminder: today's reading for the user's own sign,
-//! shown when they first sit down at the computer in the morning.
+//! The daily rashifal reminder: today's reading for the user's own sign, at
+//! the time they picked.
 //!
-//! A desktop app cannot reach anyone at a fixed hour: at 7:00 the laptop is
-//! shut, and a 7:00 reminder then lands at 10:30 in the middle of a meeting.
-//! So the moment is the user's own arrival instead. After [`EARLIEST`], the
-//! first [`SETTLE_MINUTES`] of real use are left alone (logging in, catching up
-//! on messages), then the card waits for a pause in typing and shows. Past
-//! [`LATEST`] a morning reading reads stale, so that day is skipped.
+//! A desktop app cannot always be seen at a fixed hour: at 7:00 the laptop may
+//! be shut. So the reading comes at its time if someone is at the computer,
+//! and otherwise at the first moment they are back, up to [`LATE_HOURS`]
+//! later; past that the day's reading reads stale, and the day is skipped. It
+//! waits for a pause in typing so it never lands on a keystroke.
 //!
 //! Deliberately pure, like [`crate::focus`]: the shell measures idle time and
-//! calls [`step`] every few seconds; a test can walk a whole morning through
-//! it in milliseconds.
+//! calls [`step`] every few seconds; a test can walk a whole day through it in
+//! milliseconds.
 
 use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::focus::{ACTIVE_WINDOW_SECONDS, Language, MAX_TICK_GAP_SECONDS, TYPING_PAUSE_SECONDS};
+use crate::focus::{ACTIVE_WINDOW_SECONDS, Language, TYPING_PAUSE_SECONDS};
+use crate::planner::PlanTime;
 
-/// Minutes of use, after [`EARLIEST`], before the reading is offered. Only
-/// time at the keyboard or mouse counts, so sitting down and then going to
-/// make chiya does not run the clock down.
-pub const SETTLE_MINUTES: u32 = 5;
-/// Use before this does not count: someone up at 3:00 is not having their
-/// morning.
-pub const EARLIEST: NaiveTime = NaiveTime::from_hms_opt(5, 0, 0).expect("valid time");
-/// Nothing after this: a morning reading at 15:00 is yesterday's news.
-pub const LATEST: NaiveTime = NaiveTime::from_hms_opt(12, 0, 0).expect("valid time");
 /// Once due, how long it waits for a pause in typing before showing anyway.
 const DUE_GRACE_SECONDS: i64 = 60;
+/// The earliest and latest times the reading can be set for.
+pub const EARLIEST: NaiveTime = NaiveTime::from_hms_opt(5, 0, 0).expect("valid time");
+pub const LATEST: NaiveTime = NaiveTime::from_hms_opt(22, 0, 0).expect("valid time");
+/// When it comes unless the reader picks a time.
+pub const DEFAULT_TIME: NaiveTime = NaiveTime::from_hms_opt(7, 0, 0).expect("valid time");
+/// A time missed with the computer asleep still comes, this much later at
+/// most: 7:00 can arrive at 10:30, but not in the evening.
+pub const LATE_HOURS: i64 = 6;
 
-/// What the reminder remembers between ticks, persisted so a restart neither
-/// forgets the minutes already used nor shows the reading twice.
+/// The reading's time from the saved option: [`DEFAULT_TIME`] when none is
+/// set, or when a hand-edited value falls outside [`EARLIEST`]..=[`LATEST`].
+pub fn reading_time(saved: Option<PlanTime>) -> NaiveTime {
+    saved
+        .and_then(|time| NaiveTime::from_hms_opt(time.hour, time.minute, 0))
+        .filter(|time| (EARLIEST..=LATEST).contains(time))
+        .unwrap_or(DEFAULT_TIME)
+}
+
+/// What the reminder remembers between ticks, persisted so a restart never
+/// shows the reading twice.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct MorningState {
-    /// The day `used_seconds` belongs to.
-    pub day: Option<NaiveDate>,
-    /// Seconds at the computer today since [`EARLIEST`].
-    pub used_seconds: u32,
     /// The last day the reading was shown, or read in the app. Once a day.
     pub done: Option<NaiveDate>,
-    pub last_tick: Option<DateTime<Utc>>,
     /// When it came due while the user was typing.
     pub due_since: Option<DateTime<Utc>>,
 }
@@ -49,16 +52,18 @@ pub struct MorningState {
 #[derive(Debug, Clone, Copy)]
 pub struct Tick {
     pub now: DateTime<Utc>,
-    /// The computer's own clock: the morning is the user's morning.
+    /// The computer's own clock: the reader's day is the reader's own.
     pub local: NaiveDateTime,
     /// Seconds since the last keyboard or mouse input; `None` where the
-    /// platform cannot tell, in which case all time counts as use.
+    /// platform cannot tell, in which case the user counts as present.
     pub idle_seconds: Option<u32>,
     /// A call, a fullscreen app or Do Not Disturb that the user lets hold
     /// reminders back.
     pub held: bool,
     /// Today's reading is in the cache.
     pub reading_ready: bool,
+    /// When the reading is set for. See [`reading_time`].
+    pub at: NaiveTime,
 }
 
 /// What the shell should do after a tick.
@@ -75,37 +80,19 @@ pub enum Step {
 pub fn step(state: &mut MorningState, tick: Tick) -> Step {
     let date = tick.local.date();
     let time = tick.local.time();
-    if state.day != Some(date) {
-        state.day = Some(date);
-        state.used_seconds = 0;
-        state.due_since = None;
-    }
+    // Never past midnight: a late evening time has the rest of its day, not
+    // the small hours of the next.
+    let late = tick
+        .at
+        .overflowing_add_signed(Duration::hours(LATE_HOURS))
+        .0
+        .max(tick.at);
+    let in_window = time >= tick.at && (late == tick.at || time < late);
+    let present = tick
+        .idle_seconds
+        .is_none_or(|idle| idle <= ACTIVE_WINDOW_SECONDS);
 
-    let elapsed = state.last_tick.map_or(0, |last| {
-        u32::try_from((tick.now - last).num_seconds().max(0)).unwrap_or(u32::MAX)
-    });
-    state.last_tick = Some(tick.now);
-    // Asleep, shut, or not running: the gap was time away.
-    let active = if elapsed > MAX_TICK_GAP_SECONDS {
-        0
-    } else {
-        match tick.idle_seconds {
-            Some(idle) if idle > ACTIVE_WINDOW_SECONDS => {
-                elapsed.saturating_sub(idle - ACTIVE_WINDOW_SECONDS)
-            }
-            _ => elapsed,
-        }
-    };
-    if time >= EARLIEST {
-        state.used_seconds = state.used_seconds.saturating_add(active);
-    }
-
-    if state.done == Some(date)
-        || time < EARLIEST
-        || time >= LATEST
-        || state.used_seconds < SETTLE_MINUTES * 60
-        || tick.held
-    {
+    if state.done == Some(date) || !in_window || !present || tick.held {
         state.due_since = None;
         return Step::Wait;
     }

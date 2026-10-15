@@ -152,8 +152,9 @@ pub mod reminder {
         }
     }
 
-    /// Switched on, with a sign chosen and the Rashifal module showing.
-    fn wanted(app: &AppHandle<Wry>) -> Option<RashiSign> {
+    /// Switched on, with a sign chosen and the Rashifal module showing: the
+    /// sign, and when its reading comes.
+    fn wanted(app: &AppHandle<Wry>) -> Option<(RashiSign, chrono::NaiveTime)> {
         let options: NotificationOptions = db::get_json(app, prefs::NOTIFICATION_OPTIONS)
             .ok()
             .flatten()
@@ -165,7 +166,7 @@ pub mod reminder {
         {
             return None;
         }
-        super::my_sign(app)
+        super::my_sign(app).map(|sign| (sign, rashifal::reading_time(options.rashifal_time)))
     }
 
     /// Today's reading for `sign`, if the cache has one fetched today. A
@@ -192,7 +193,7 @@ pub mod reminder {
 
     /// One measurement. Returns true when the reading should be fetched.
     fn measure(app: &AppHandle<Wry>) -> bool {
-        let Some(sign) = wanted(app) else {
+        let Some((sign, at)) = wanted(app) else {
             return false;
         };
         let reading = todays_reading(app, sign);
@@ -209,6 +210,7 @@ pub mod reminder {
                 idle_seconds: crate::system::idle::seconds(),
                 held,
                 reading_ready: reading.is_some(),
+                at,
             },
         );
         save(app, &state);

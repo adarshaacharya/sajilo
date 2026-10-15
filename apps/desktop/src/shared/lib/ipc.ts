@@ -651,9 +651,12 @@ export interface NotificationOptions {
   ipoClosingDay: boolean;
   /** Master switch for SIP payment reminders; each fund's is opt-in. */
   sipPayment: boolean;
-  /** Today's rashifal for the user's sign, when they first sit down in the
-   * morning. Off until asked for. */
+  /** Today's rashifal for the user's sign, at `rashifalTime`. Off until
+   * asked for. */
   dailyRashifal: boolean;
+  /** When the daily rashifal comes, or the first moment back at the computer
+   * after it. `null` is 7:00. */
+  rashifalTime: PlanTime | null;
   /** How every reminder arrives, Routine's included. */
   style: ReminderStyle;
   /** Day plans' reminders, all at once; each plan's is its own choice. */
