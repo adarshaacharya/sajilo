@@ -23,6 +23,7 @@ pub mod kantipur;
 pub mod market_status;
 pub mod merolagani;
 pub mod mutual_funds;
+pub mod nea;
 pub mod nepalipatro;
 pub mod nepse_intraday;
 pub mod noc;

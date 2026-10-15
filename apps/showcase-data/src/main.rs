@@ -521,6 +521,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     record_forex(commands, &read, now);
     record_rashifal(commands, &read, now);
     record_jobs(commands, &read, now);
+    record_electricity(commands, &read);
     commands.insert(
         "get_stations".to_owned(),
         load_state(ratopati::parse_directory(&read("ratopati/radio.html"), now)),
@@ -759,6 +760,20 @@ fn record_jobs(
         let name = wire.as_str().expect("a source is a string");
         commands.insert(format!("get_jobs:{name}"), load_state(served));
     }
+}
+
+/// A visitor has no NEA account, so the bill shows as not set up; picking an
+/// office in its setup lists NEA's real offices, from the recorded form.
+fn record_electricity(commands: &mut BTreeMap<String, Value>, read: &dyn Fn(&str) -> String) {
+    commands.insert(
+        "get_electricity".to_owned(),
+        json!({ "status": "unavailable" }),
+    );
+    commands.insert("get_nea_account".to_owned(), Value::Null);
+    commands.insert(
+        "nea_offices".to_owned(),
+        load_state(sajilo_providers::nea::parse_offices(&read("nea/form.html"))),
+    );
 }
 
 fn record_rashifal(

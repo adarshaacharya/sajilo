@@ -84,6 +84,10 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     // shouldn't keep talking.
     if options.keeper && crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
         all.extend(crate::commands::keeper::pending_notifications(app, now));
+        // The electricity bill lives in Keeper, and goes quiet with it.
+        all.extend(crate::commands::electricity::pending_notifications(
+            app, now,
+        ));
     }
     all.extend(ipo_closing(app, options, now));
     // Bazar hidden in Settings silences SIP reminders too, as it does IPO ones.

@@ -17,6 +17,7 @@ import {
 } from "../../shared/lib/ipc";
 import { useNepalDay } from "../../shared/lib/nepal-day";
 import { digits } from "../../shared/lib/numerals";
+import { BillGlance } from "./_components/bill-glance";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { DayPlanSection } from "./_components/day-plan-section";
@@ -299,6 +300,7 @@ export function Dashboard() {
         />
       )}
 
+      <BillGlance />
       <UpNext events={eventSlides} />
       <FocusGlance />
       <GlanceCards />

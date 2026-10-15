@@ -406,7 +406,7 @@ fn eve_of(date: chrono::NaiveDate, hour: u32) -> Option<DateTime<Utc>> {
     at_nepal_time(eve, hour, 0)
 }
 
-fn at_nepal_time(date: chrono::NaiveDate, hour: u32, minute: u32) -> Option<DateTime<Utc>> {
+pub fn at_nepal_time(date: chrono::NaiveDate, hour: u32, minute: u32) -> Option<DateTime<Utc>> {
     let naive = date.and_hms_opt(hour.min(23), minute.min(59), 0)?;
     nepal_time::offset()
         .from_local_datetime(&naive)

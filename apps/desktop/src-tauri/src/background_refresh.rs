@@ -46,6 +46,8 @@ async fn refresh(app: &AppHandle<Wry>) {
     let rashifal_app = app.clone();
     let radio_app = app.clone();
     let jobs_app = app.clone();
+    let electricity_app = app.clone();
+    let keeper_enabled = enabled(app, prefs::KEEPER_ENABLED);
     let telemetry_app = app.clone();
 
     tokio::join!(
@@ -78,6 +80,13 @@ async fn refresh(app: &AppHandle<Wry>) {
         async move {
             if radio_enabled {
                 commands::radio::get_stations(radio_app, Some(false)).await;
+            }
+        },
+        async move {
+            if keeper_enabled {
+                commands::electricity::get_electricity(electricity_app.clone(), Some(false)).await;
+                // A new bill found means new reminders.
+                crate::commands::notify::reschedule();
             }
         },
         async move {

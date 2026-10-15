@@ -355,7 +355,7 @@ impl JobVacancy {
         self.published_days_ago = self
             .published_on
             .and_then(|published| days_between(published, today));
-        let label = |date: NepaliDate| date_label(date, today, nepali);
+        let label = |date: NepaliDate| crate::labels::bs_label(date, today, nepali);
         self.deadline_label = self.deadline.map(label);
         self.double_fee_deadline_label = self.double_fee_deadline.map(label);
         self.published_label = self.published_on.map(label);
@@ -368,27 +368,6 @@ fn days_between(from: NepaliDate, to: NepaliDate) -> Option<i32> {
     let from = gregorian_date_from(from).ok()?;
     let to = gregorian_date_from(to).ok()?;
     i32::try_from((to - from).num_days()).ok()
-}
-
-/// `कात्तिक ३` or `Kartik 3`, with the year only when it isn't this one.
-fn date_label(date: NepaliDate, today: NepaliDate, nepali: bool) -> String {
-    use sajilo_core::numerals::devanagari;
-    let this_year = today.year == date.year;
-    match (nepali, this_year) {
-        (true, true) => format!(
-            "{} {}",
-            date.nepali_month_name(),
-            devanagari(date.day, None)
-        ),
-        (true, false) => format!(
-            "{} {}, {}",
-            date.nepali_month_name(),
-            devanagari(date.day, None),
-            devanagari(date.year, None)
-        ),
-        (false, true) => format!("{} {}", date.english_month_name(), date.day),
-        (false, false) => format!("{} {}, {}", date.english_month_name(), date.day, date.year),
-    }
 }
 
 #[cfg(test)]

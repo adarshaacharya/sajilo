@@ -87,6 +87,10 @@ pub const TOOLS_ENABLED: &str = "toolsEnabled";
 pub const JOBS_ENABLED: &str = "jobsEnabled";
 /// Vacancy ids already shown on the Jobs screen, so only later ones are new.
 pub const JOBS_SEEN: &str = "jobsSeen";
+/// The NEA account whose bill is checked: office, SC number, consumer id.
+/// Never leaves this computer except to NEA's own bill check.
+pub const NEA_ACCOUNT: &str = "neaAccount";
+pub const NEA_OFFICES_KEY: &str = "neaOffices.v1";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

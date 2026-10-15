@@ -6,6 +6,7 @@ import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
 import type { CryptoSnapshot } from "../../types/api/CryptoSnapshot";
 import type { DirectoryResponse } from "../../types/api/DirectoryResponse";
 import type { DividendSnapshot } from "../../types/api/DividendSnapshot";
+import type { ElectricityStatement } from "../../types/api/ElectricityStatement";
 import type { ForexHistory } from "../../types/api/ForexHistory";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
@@ -20,6 +21,8 @@ import type { MetalHistory } from "../../types/api/MetalHistory";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
 import type { MutualFundSnapshot } from "../../types/api/MutualFundSnapshot";
 import type { NavHistory } from "../../types/api/NavHistory";
+import type { NeaAccount } from "../../types/api/NeaAccount";
+import type { NeaOffice } from "../../types/api/NeaOffice";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { NoteDocument } from "../../types/api/NoteDocument";
@@ -924,6 +927,17 @@ export const api = {
     invoke<StockPortfolio>("delete_stock_transaction", { id, prices }),
   /** CDSC's current-issue list; cached for half an hour, `refresh` forces a live pull. */
   getIpos: (refresh = false) => invoke<LoadState<IpoSnapshot>>("get_ipos", { refresh }),
+
+  /** NEA's offices, for the electricity bill's setup. */
+  neaOffices: () => invoke<LoadState<NeaOffice[]>>("nea_offices"),
+  getNeaAccount: () => invoke<NeaAccount | null>("get_nea_account"),
+  /** Checks the numbers with NEA before saving; rejects with a readable reason. */
+  setNeaAccount: (account: NeaAccount) =>
+    invoke<ElectricityStatement>("set_nea_account", { account }),
+  clearNeaAccount: () => invoke<void>("clear_nea_account"),
+  /** The saved account's bills; `unavailable` when none is saved. */
+  getElectricity: (refresh = false) =>
+    invoke<LoadState<ElectricityStatement>>("get_electricity", { refresh }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

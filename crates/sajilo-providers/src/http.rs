@@ -95,6 +95,36 @@ impl HttpClient {
             })
     }
 
+    /// Posts a form and reads the answer as text: for the few public lookups
+    /// that are a plain HTML form, such as the electricity bill check.
+    pub async fn post_form_text(
+        &self,
+        source_name: &'static str,
+        url: &str,
+        fields: &[(&str, &str)],
+    ) -> Result<String> {
+        let url = sajilo_core::config::sources::rewrite(url);
+        let transport = |error: reqwest::Error| ProviderError::Transport {
+            source_name,
+            message: error.to_string(),
+        };
+        let response = self
+            .inner
+            .post(url.as_ref())
+            .form(fields)
+            .send()
+            .await
+            .map_err(transport)?;
+        let status = response.status();
+        if !status.is_success() {
+            return Err(ProviderError::Status {
+                source_name,
+                status: status.as_u16(),
+            });
+        }
+        response.text().await.map_err(transport)
+    }
+
     /// A GET that sends `If-None-Match` and reads at most `max_bytes`. For
     /// Sajilo's own static files — the config manifest and packs — so not
     /// subject to the sources pack's rewrites: a bad rewrite must never be
