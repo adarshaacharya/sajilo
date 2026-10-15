@@ -19,10 +19,6 @@ import type { LoadState } from "../../types/api/LoadState";
 type Filter = "all" | JobSource | JobGroup;
 type Loaded = { info: JobSourceInfo; state: LoadState<JobVacancy[]> }[];
 
-/** The Army's recruitment portal answers scripts with a CAPTCHA, so it is
- * linked rather than listed. */
-const ARMY_PORTAL = "https://vacancy.nepalarmy.mil.np";
-
 /**
  * A notice with no deadline in its data counts as open this long after it
  * was published: commissions give about a month to apply.
@@ -52,7 +48,7 @@ async function loadAll(refresh: boolean): Promise<Loaded> {
  */
 export function Jobs() {
   const { t, language } = useSettings();
-  const { data, isValidating, mutate } = useSWR("jobs", () => loadAll(false));
+  const { data, error, isValidating, mutate } = useSWR("jobs", () => loadAll(false));
   const [filter, setFilter] = useState<Filter>("all");
   const [openOnly, setOpenOnly] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -98,9 +94,13 @@ export function Jobs() {
 
   const refresh = () => mutate(loadAll(true), { revalidate: false });
 
+  // A failure on the way to the shell (no source list at all) is a failed
+  // state like any other, never an endless skeleton.
   const banner =
     data === undefined
-      ? ({ status: "loading" } as const)
+      ? error
+        ? ({ status: "failed", message: String(error) } as const)
+        : ({ status: "loading" } as const)
       : all.length === 0 && broken.length === data.length
         ? ({ status: "failed", message: "every source failed" } as const)
         : stale
@@ -166,15 +166,6 @@ export function Jobs() {
             ))}
           </ul>
         )}
-
-        <button
-          type="button"
-          onClick={() => api.openExternalUrl(ARMY_PORTAL).catch(() => {})}
-          className="mt-2 flex w-full items-center gap-1.5 px-0.5 text-left text-[10px] text-text-muted transition-colors hover:text-text-secondary"
-        >
-          <Icon name="link" className="size-3 shrink-0" />
-          {t("jobs.army")}
-        </button>
 
         {broken.length > 0 && (
           <p className="mt-2 flex items-start gap-1.5 px-0.5 text-[10px] text-text-muted">
@@ -351,12 +342,22 @@ function DeadlineBadge({ vacancy }: { vacancy: JobVacancy }) {
   const { t, numerals } = useSettings();
   const left = vacancy.daysLeft;
 
+  // No deadline in the source's data: say when it was published, and say
+  // plainly that the deadline is only in the notice, so the row never looks
+  // like it knows more than it does.
   if (left == null) {
-    return vacancy.publishedLabel ? (
-      <span className="shrink-0 pt-px text-right text-[10px] leading-tight text-text-muted">
-        {vacancy.publishedLabel}
+    return (
+      <span className="flex shrink-0 flex-col items-end gap-0.5 pt-px">
+        {vacancy.publishedLabel && (
+          <span className="text-[10px] leading-tight text-text-muted">
+            {vacancy.publishedLabel}
+          </span>
+        )}
+        <span className="whitespace-nowrap rounded-md bg-surface-hover px-1.5 py-0.5 text-[9px] leading-[12px] text-text-muted">
+          {t("jobs.deadline-tag")}
+        </span>
       </span>
-    ) : null;
+    );
   }
 
   const text =

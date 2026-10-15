@@ -9,8 +9,8 @@
 //! - The Armed Police Force lists every notice since 2075 on one page of
 //!   cards, recruitment among exam centres, results and tenders.
 //!
-//! The Nepal Army's recruitment portal answers scripts with a CAPTCHA, so it
-//! is not a source: the screen links to it instead.
+//! The Nepal Army is not a source: its recruitment portal answers scripts
+//! with a CAPTCHA.
 
 use chrono::NaiveDate;
 use sajilo_api::jobs::{JobSource, JobVacancy};

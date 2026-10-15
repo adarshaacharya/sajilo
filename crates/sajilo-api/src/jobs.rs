@@ -337,3 +337,103 @@ impl JobSourceInfo {
         }
     }
 }
+
+impl JobVacancy {
+    /// The day applications close: at double fee when there is one, since
+    /// that is the true last chance.
+    pub fn last_day(&self) -> Option<NepaliDate> {
+        self.double_fee_deadline.or(self.deadline)
+    }
+
+    /// Fills in what is worked out when a vacancy is served rather than
+    /// cached: days left, days since publication, and the dates as the
+    /// screen shows them in the reader's language. Shared by the app and the
+    /// showcase recording, so both say the same thing.
+    #[must_use]
+    pub fn served(mut self, today: NepaliDate, nepali: bool) -> Self {
+        self.days_left = self.last_day().and_then(|last| days_between(today, last));
+        self.published_days_ago = self
+            .published_on
+            .and_then(|published| days_between(published, today));
+        let label = |date: NepaliDate| date_label(date, today, nepali);
+        self.deadline_label = self.deadline.map(label);
+        self.double_fee_deadline_label = self.double_fee_deadline.map(label);
+        self.published_label = self.published_on.map(label);
+        self
+    }
+}
+
+fn days_between(from: NepaliDate, to: NepaliDate) -> Option<i32> {
+    use sajilo_core::calendar::bikram_sambat::gregorian_date_from;
+    let from = gregorian_date_from(from).ok()?;
+    let to = gregorian_date_from(to).ok()?;
+    i32::try_from((to - from).num_days()).ok()
+}
+
+/// `कात्तिक ३` or `Kartik 3`, with the year only when it isn't this one.
+fn date_label(date: NepaliDate, today: NepaliDate, nepali: bool) -> String {
+    use sajilo_core::numerals::devanagari;
+    let this_year = today.year == date.year;
+    match (nepali, this_year) {
+        (true, true) => format!(
+            "{} {}",
+            date.nepali_month_name(),
+            devanagari(date.day, None)
+        ),
+        (true, false) => format!(
+            "{} {}, {}",
+            date.nepali_month_name(),
+            devanagari(date.day, None),
+            devanagari(date.year, None)
+        ),
+        (false, true) => format!("{} {}", date.english_month_name(), date.day),
+        (false, false) => format!("{} {}, {}", date.english_month_name(), date.day, date.year),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn vacancy() -> JobVacancy {
+        JobVacancy {
+            id: "psc:1".into(),
+            source: JobSource::Psc,
+            title: "खरिदार".into(),
+            office: None,
+            level: None,
+            openings: None,
+            advertisement_code: None,
+            deadline: Some(NepaliDate::new(2083, 7, 2)),
+            double_fee_deadline: None,
+            published_on: Some(NepaliDate::new(2082, 12, 30)),
+            applicants: None,
+            url: String::new(),
+            days_left: None,
+            is_new: false,
+            reminded: false,
+            deadline_label: None,
+            double_fee_deadline_label: None,
+            published_label: None,
+            published_days_ago: None,
+        }
+    }
+
+    #[test]
+    fn days_left_across_a_month_end() {
+        // Asoj 2083 has 31 days.
+        let served = vacancy().served(NepaliDate::new(2083, 6, 29), false);
+        assert_eq!(served.days_left, Some(4));
+        let served = vacancy().served(NepaliDate::new(2083, 7, 6), false);
+        assert_eq!(served.days_left, Some(-4));
+    }
+
+    #[test]
+    fn labels_in_each_language() {
+        let served = vacancy().served(NepaliDate::new(2083, 6, 29), true);
+        assert_eq!(served.deadline_label.as_deref(), Some("कार्तिक २"));
+        assert_eq!(served.published_label.as_deref(), Some("चैत ३०, २०८२"));
+        let served = vacancy().served(NepaliDate::new(2083, 6, 29), false);
+        assert_eq!(served.deadline_label.as_deref(), Some("Kartik 2"));
+    }
+}

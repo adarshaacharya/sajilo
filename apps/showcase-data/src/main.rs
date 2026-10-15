@@ -520,6 +520,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     record_notes(commands, now);
     record_forex(commands, &read, now);
     record_rashifal(commands, &read, now);
+    record_jobs(commands, &read, now);
     commands.insert(
         "get_stations".to_owned(),
         load_state(ratopati::parse_directory(&read("ratopati/radio.html"), now)),
@@ -707,6 +708,59 @@ fn record_forex(
 
 /// Every rashifal span from its recorded Hamro Patro page. Daily answers both
 /// `get_rashifal` and the period command, as it does in the app.
+/// Every Jobs source from its recorded page, through the same parsers the app
+/// ships, served as of the recording day. Lok Sewa's recording is the
+/// central office over two pages, and Pokhara's from the year before.
+fn record_jobs(
+    commands: &mut BTreeMap<String, Value>,
+    read: &dyn Fn(&str) -> String,
+    now: DateTime<Utc>,
+) {
+    use sajilo_api::jobs::{JobSource, JobSourceInfo};
+    use sajilo_providers::jobs::{giwms, psc, public, sites};
+
+    let today = sajilo_core::calendar::bikram_sambat::nepali_date_from(now.date_naive())
+        .expect("the recording day is in the BS table");
+    insert(commands, "job_sources", &JobSourceInfo::catalog());
+    for source in JobSource::ALL {
+        let parsed = match source {
+            JobSource::Psc => [
+                "psc/advertisement-1-0.json",
+                "psc/advertisement-1-1.json",
+                "psc/advertisement-4-0-2082.json",
+            ]
+            .into_iter()
+            .map(|file| psc::parse_advertisements(&read(file)).map(|page| page.vacancies))
+            .collect::<Result<Vec<_>, _>>()
+            .map(|pages| psc::finish(pages.concat())),
+            JobSource::Tsc => giwms::parse(&read("giwms/tsc.html"), source),
+            JobSource::PpscKoshi => giwms::parse(&read("giwms/ppsc-koshi.html"), source),
+            JobSource::PpscMadhesh => giwms::parse(&read("giwms/ppsc-madhesh.html"), source),
+            JobSource::PpscBagmati => giwms::parse(&read("giwms/ppsc-bagmati.html"), source),
+            JobSource::PpscKarnali => giwms::parse(&read("giwms/ppsc-karnali.html"), source),
+            JobSource::PpscGandaki => sites::parse(&read("ppsc/gandaki.html"), source),
+            JobSource::PpscLumbini => sites::parse(&read("ppsc/lumbini.html"), source),
+            JobSource::PpscSudurpashchim => sites::parse(&read("ppsc/sudurpashchim.html"), source),
+            JobSource::NepalPolice => sites::parse(&read("security/police.html"), source),
+            JobSource::Apf => sites::parse(&read("security/apf.html"), source),
+            JobSource::Nrb => public::parse(&read("public/nrb.html"), source),
+            JobSource::NepalBank => public::parse(&read("public/nepal-bank.html"), source),
+            JobSource::Rbb => public::parse(&read("public/rbb.html"), source),
+            JobSource::Tusc => public::parse(&read("public/tusc.html"), source),
+        };
+        let served = parsed.map(|vacancies| {
+            vacancies
+                .into_iter()
+                .map(|vacancy| vacancy.served(today, false))
+                .collect::<Vec<_>>()
+        });
+        // Keyed as the app names the source on the wire: `ppscMadhesh`.
+        let wire = serde_json::to_value(source).expect("a source serialises");
+        let name = wire.as_str().expect("a source is a string");
+        commands.insert(format!("get_jobs:{name}"), load_state(served));
+    }
+}
+
 fn record_rashifal(
     commands: &mut BTreeMap<String, Value>,
     read: &dyn Fn(&str) -> String,

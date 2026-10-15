@@ -62,6 +62,8 @@ function key(command: string, args: Args): string {
       return `notes_open:${args.id}`;
     case "get_rashifal_period":
       return `get_rashifal_period:${args.period}`;
+    case "get_jobs":
+      return `get_jobs:${args.source}`;
     default:
       return command;
   }

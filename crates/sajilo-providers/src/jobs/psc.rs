@@ -199,7 +199,7 @@ pub fn parse_advertisements(body: &str) -> Result<AdvertisementPage> {
 
 /// Latest deadline first, and one row per advertisement: the same code can
 /// come back from two fiscal years' lists.
-fn finish(mut vacancies: Vec<JobVacancy>) -> Vec<JobVacancy> {
+pub fn finish(mut vacancies: Vec<JobVacancy>) -> Vec<JobVacancy> {
     vacancies.sort_by(|a, b| {
         let last = |v: &JobVacancy| v.double_fee_deadline.or(v.deadline);
         last(b).cmp(&last(a)).then_with(|| a.id.cmp(&b.id))

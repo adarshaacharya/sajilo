@@ -12,7 +12,7 @@ use chrono::Utc;
 use sajilo_api::jobs::{JobDetailPart, JobSource, JobSourceInfo, JobVacancy};
 use sajilo_api::load_state::LoadState;
 use sajilo_core::NepaliDate;
-use sajilo_core::calendar::bikram_sambat::{gregorian_date_from, nepali_date_from};
+use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::focus::Language;
 use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder};
 use sajilo_providers::HttpClient;
@@ -123,7 +123,9 @@ pub fn mark_jobs_seen(app: AppHandle<Wry>, ids: Vec<String>) -> Result<()> {
 #[tauri::command]
 pub fn remind_job_deadline(app: AppHandle<Wry>, id: String) -> Result<()> {
     let vacancy = cached_vacancy(&app, &id).ok_or("That vacancy is no longer listed.")?;
-    let date = last_day(&vacancy).ok_or("This vacancy has no deadline to remind about.")?;
+    let date = vacancy
+        .last_day()
+        .ok_or("This vacancy has no deadline to remind about.")?;
     let title = match prefs::language(&app) {
         Language::Ne => format!("आवेदनको अन्तिम दिन: {}", vacancy.title),
         Language::En => format!("Last day to apply: {}", vacancy.title),
@@ -157,12 +159,6 @@ pub async fn refresh_all(app: &AppHandle<Wry>) {
         .into_iter()
         .map(|source| get_jobs(app.clone(), source, Some(false)));
     futures_util::future::join_all(futures).await;
-}
-
-/// The day applications close: at double fee when there is one, since that
-/// is the true last chance.
-fn last_day(vacancy: &JobVacancy) -> Option<NepaliDate> {
-    vacancy.double_fee_deadline.or(vacancy.deadline)
 }
 
 fn cached_vacancy(app: &AppHandle<Wry>, id: &str) -> Option<JobVacancy> {
@@ -206,69 +202,16 @@ impl Context {
         }
     }
 
-    fn annotate(&self, mut vacancy: JobVacancy) -> JobVacancy {
-        vacancy.days_left = match (self.today, last_day(&vacancy)) {
-            (Some(today), Some(last)) => days_between(today, last),
-            _ => None,
+    fn annotate(&self, vacancy: JobVacancy) -> JobVacancy {
+        let mut vacancy = match self.today {
+            Some(today) => vacancy.served(today, self.nepali),
+            None => vacancy,
         };
         vacancy.is_new = self
             .seen
             .as_ref()
             .is_some_and(|seen| !seen.contains(&vacancy.id));
         vacancy.reminded = self.reminded.contains(&vacancy.id);
-        vacancy.deadline_label = vacancy.deadline.map(|d| self.label(d));
-        vacancy.double_fee_deadline_label = vacancy.double_fee_deadline.map(|d| self.label(d));
-        vacancy.published_label = vacancy.published_on.map(|d| self.label(d));
-        vacancy.published_days_ago = match (self.today, vacancy.published_on) {
-            (Some(today), Some(published)) => days_between(published, today),
-            _ => None,
-        };
         vacancy
-    }
-
-    /// `कात्तिक ३` or `Kartik 3`, with the year only when it isn't this one.
-    fn label(&self, date: NepaliDate) -> String {
-        let this_year = self.today.is_some_and(|today| today.year == date.year);
-        if self.nepali {
-            let day = sajilo_core::numerals::devanagari(date.day, None);
-            let mut text = format!("{} {day}", date.nepali_month_name());
-            if !this_year {
-                text = format!(
-                    "{text}, {}",
-                    sajilo_core::numerals::devanagari(date.year, None)
-                );
-            }
-            text
-        } else {
-            let mut text = format!("{} {}", date.english_month_name(), date.day);
-            if !this_year {
-                text = format!("{text}, {}", date.year);
-            }
-            text
-        }
-    }
-}
-
-fn days_between(from: NepaliDate, to: NepaliDate) -> Option<i32> {
-    let from = gregorian_date_from(from).ok()?;
-    let to = gregorian_date_from(to).ok()?;
-    i32::try_from((to - from).num_days()).ok()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn days_left_across_a_month_end() {
-        // Asoj 2083 has 31 days.
-        assert_eq!(
-            days_between(NepaliDate::new(2083, 6, 29), NepaliDate::new(2083, 7, 2)),
-            Some(4)
-        );
-        assert_eq!(
-            days_between(NepaliDate::new(2083, 7, 2), NepaliDate::new(2083, 6, 29)),
-            Some(-4)
-        );
     }
 }
