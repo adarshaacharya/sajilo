@@ -66,6 +66,8 @@ pub const EVENTS: &[&str] = &[
     "tab.stocks.nepse",
     "tab.stocks.funds",
     "tab.stocks.crypto",
+    "tab.stocks.market",
+    "tab.stocks.mine",
     "tab.tools.emergency",
     "tab.tools.clock",
     "tab.tools.date",

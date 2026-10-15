@@ -1,12 +1,15 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
+import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
+import { Segmented } from "../../../shared/components/segmented";
 import { type LoadStatus, StateBanner } from "../../../shared/components/state-banner";
 import { TabStrip } from "../../../shared/components/tab-strip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
-import { usePersistedList } from "../../../shared/lib/persisted";
+import { usePersistedList, usePersistedString } from "../../../shared/lib/persisted";
+import { track } from "../../../shared/lib/usage";
 import type { DividendSnapshot } from "../../../types/api/DividendSnapshot";
 import type { IndexIntraday } from "../../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../../types/api/IpoSnapshot";
@@ -40,6 +43,10 @@ import { StatementRow } from "./statement";
 import { StocksSkeleton } from "./stocks-skeleton";
 
 const WATCHLIST_KEY = "stockWatchlist";
+/** Which half of NEPSE was last looked at: the market, or your own shares. */
+const SECTION_KEY = "stocksNepseSection";
+
+type Section = "market" | "mine";
 const WATCHLIST_LIMIT = 12;
 
 /**
@@ -102,6 +109,14 @@ export function Stocks({
   });
   const [watchlist, setWatchlist] = usePersistedList(WATCHLIST_KEY);
   const [board, setBoard] = useState<MoverBoard>("gainers");
+  const [savedSection, saveSection] = usePersistedString(SECTION_KEY);
+  const section: Section = savedSection === "mine" ? "mine" : "market";
+  const pickSection = (next: Section) => {
+    saveSection(next);
+    setPanel(null);
+    setQuery("");
+    track(`tab.stocks.${next}`);
+  };
   const prices = useMemo<StockPrice[]>(
     () => snapshot?.quotes.map((quote) => ({ symbol: quote.symbol, price: quote.ltp })) ?? [],
     [snapshot],
@@ -253,6 +268,16 @@ export function Stocks({
   return (
     <StateBanner state={banner(state)} onRetry={onRetry}>
       <div className="space-y-2.5">
+        <Segmented
+          label={t("stocks.section")}
+          size="sm"
+          value={section}
+          onChange={pickSection}
+          options={[
+            { id: "market", label: t("stocks.market") },
+            { id: "mine", label: t("stocks.mine") },
+          ]}
+        />
         <SearchField
           value={query}
           onChange={(value) => {
@@ -306,8 +331,42 @@ export function Stocks({
               <p className="pt-1 text-[10px] text-text-muted">+{results.length - 25}</p>
             )}
           </section>
+        ) : section === "mine" ? (
+          <>
+            {held.length > 0 && portfolio ? (
+              <HoldingsCard
+                portfolio={portfolio}
+                held={held}
+                onOpen={openSymbol}
+                followed={followed}
+                onToggle={toggleFollow}
+              />
+            ) : (
+              <section className="surface-card p-3">
+                <p className="text-[12px] font-semibold">{t("stocks.mine-empty")}</p>
+                <p className="mt-0.5 text-[11px] text-text-secondary">
+                  {t("stocks.mine-empty-hint")}
+                </p>
+              </section>
+            )}
+
+            <section className="surface-card p-2.5">
+              <p className="mb-1 text-[11px] font-semibold text-text-secondary">
+                {t("stocks.watchlist")}
+              </p>
+              {watchOnly.length === 0 ? (
+                <p className="text-[11px] text-text-secondary">{t("stocks.empty-watchlist")}</p>
+              ) : (
+                watchRows
+              )}
+            </section>
+          </>
         ) : (
           <>
+            {held.length > 0 && portfolio && (
+              <PortfolioLine portfolio={portfolio} onOpen={() => pickSection("mine")} />
+            )}
+
             {snapshot.nepse && (
               <IndexHeadline
                 index={snapshot.nepse}
@@ -320,31 +379,6 @@ export function Stocks({
             )}
 
             {ipoCard}
-
-            {/* One starred list, wherever it lives: companies you own carry the
-                holdings statement above them, the rest follow underneath. */}
-            {held.length > 0 && portfolio ? (
-              <HoldingsCard
-                portfolio={portfolio}
-                held={held}
-                onOpen={openSymbol}
-                followed={followed}
-                onToggle={toggleFollow}
-              >
-                {watchRows}
-              </HoldingsCard>
-            ) : (
-              <section className="surface-card p-2.5">
-                <p className="mb-1 text-[11px] font-semibold text-text-secondary">
-                  {t("stocks.watchlist")}
-                </p>
-                {watchOnly.length === 0 ? (
-                  <p className="text-[11px] text-text-secondary">{t("stocks.empty-watchlist")}</p>
-                ) : (
-                  watchRows
-                )}
-              </section>
-            )}
 
             <DividendCard
               state={dividendState}
@@ -415,9 +449,9 @@ export function Stocks({
 }
 
 /**
- * Everything owned, as one figure with its profit beside it. The total leads;
- * the cost basis is the small print under it, because the question the card
- * answers first is "what is it worth now".
+ * Everything owned, as one figure with its profit beside it. What it is worth
+ * now leads, large; the cost basis is the small print under it. Then each
+ * company held.
  */
 function HoldingsCard({
   portfolio,
@@ -425,48 +459,38 @@ function HoldingsCard({
   onOpen,
   followed,
   onToggle,
-  children,
 }: {
   portfolio: StockPortfolio;
   held: StockPosition[];
   onOpen: (symbol: string) => void;
   followed: (symbol: string) => boolean;
   onToggle: (symbol: string) => void;
-  /** Starred companies that are not held, listed under the ones that are. */
-  children?: ReactNode;
 }) {
   const { t } = useSettings();
   const profit = portfolio.unrealisedProfitLoss;
   const percent = profitPercent(profit, portfolio.invested);
   return (
     <section className="surface-card p-2.5">
-      <p className="text-[11px] font-semibold text-text-secondary">{t("stocks.holdings")}</p>
+      <p className="text-[11px] font-semibold text-text-secondary">
+        {t("stocks.portfolio-market-value")}
+      </p>
+      <p className="mt-0.5 text-[22px] font-bold leading-tight tabular-nums">
+        {portfolio.marketValue == null ? "—" : `Rs ${money.format(portfolio.marketValue)}`}
+      </p>
+      {profit != null && (
+        <p className={`text-[12px] font-semibold tabular-nums ${changeTone(profit)}`}>
+          {signedMoney(profit)}
+          {percent == null ? "" : ` (${signedPercent(percent)})`}
+          <span className="ml-1 font-normal text-text-muted">
+            {profit < 0 ? t("stocks.portfolio-loss") : t("stocks.portfolio-profit")}
+          </span>
+        </p>
+      )}
 
-      <div className="mt-1">
+      <div className="mt-2">
         <StatementRow
           label={t("stocks.portfolio-invested")}
           value={`Rs ${money.format(portfolio.invested)}`}
-        />
-        <StatementRow
-          label={t("stocks.portfolio-market-value")}
-          value={portfolio.marketValue == null ? "—" : `Rs ${money.format(portfolio.marketValue)}`}
-        />
-        <StatementRow
-          strong
-          divided
-          label={
-            profit == null
-              ? t("stocks.portfolio-unrealised")
-              : profit < 0
-                ? t("stocks.portfolio-loss")
-                : t("stocks.portfolio-profit")
-          }
-          tone={profit}
-          value={
-            profit == null
-              ? "—"
-              : `${signedMoney(profit)}${percent == null ? "" : ` (${signedPercent(percent)})`}`
-          }
         />
         {portfolio.realisedProfitLoss !== 0 && (
           <StatementRow
@@ -478,7 +502,7 @@ function HoldingsCard({
       </div>
 
       <div className="section-divider mt-2.5 pt-1.5">
-        <p className="mb-0.5 text-[10px] font-medium text-text-muted">{t("stocks.watchlist")}</p>
+        <p className="mb-0.5 text-[10px] font-medium text-text-muted">{t("stocks.holdings")}</p>
         {held.map((position) => (
           <HoldingRow
             key={position.symbol}
@@ -488,9 +512,33 @@ function HoldingsCard({
             onToggle={() => onToggle(position.symbol)}
           />
         ))}
-        {children}
       </div>
     </section>
+  );
+}
+
+/** Your shares in one line atop the market: a glance, and the way in. */
+function PortfolioLine({ portfolio, onOpen }: { portfolio: StockPortfolio; onOpen: () => void }) {
+  const { t } = useSettings();
+  const profit = portfolio.unrealisedProfitLoss;
+  const percent = profitPercent(profit, portfolio.invested);
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="surface-card flex w-full items-center gap-2 px-2.5 py-2 text-left transition-colors hover:bg-surface-hover"
+    >
+      <span className="text-[11px] font-semibold text-text-secondary">{t("stocks.mine")}</span>
+      <span className="ml-auto text-[12px] font-semibold tabular-nums">
+        {portfolio.marketValue == null ? "—" : `Rs ${money.format(portfolio.marketValue)}`}
+      </span>
+      {percent != null && (
+        <span className={`text-[11px] font-medium tabular-nums ${changeTone(profit ?? 0)}`}>
+          {signedPercent(percent)}
+        </span>
+      )}
+      <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+    </button>
   );
 }
 
