@@ -1,0 +1,2429 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  
+  <!-- meta tags should be placed here -->
+  
+
+  <!-- Accessible Nepali Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css?family=Nunito|Nunito+Sans&display=swap" rel="stylesheet" />
+   <link rel="stylesheet" type="css" href="slick/slick.css" />
+    <link rel="stylesheet" type="css" href="slick/slick-theme.css" />
+    <link rel="stylesheet" type="css" href="./icon.css" />
+  
+  <title>Vacancy - www.nepalpolice.gov.np</title>
+  
+
+  <link rel="icon" href="/static/images/logo.png" type="image/x-icon">
+  
+
+  <link href="/static/styles/style.css" rel="stylesheet">
+  <style>
+    #anydone-logo-id,#anydone-close-id{
+      display: none;
+    }
+    .crime-title{
+      color: white;
+    }
+
+    /* ================================
+       ACCESSIBILITY IMPROVEMENTS
+    ================================ */
+
+      /* Nepali Font */
+      body.f1 {
+          font-family: 'Noto Sans Devanagari', sans-serif;
+      }
+
+      /* Show focus only for keyboard users */
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible,
+      [tabindex]:focus-visible {
+
+          outline: 3px solid #FFD54F !important;
+          border-radius: 2px;
+          transition: all 0.2s ease;
+      }
+
+      /* Remove default focus style for mouse click */
+      a:focus,
+      button:focus,
+      input:focus,
+      select:focus,
+      textarea:focus,
+      [tabindex]:focus {
+          outline: none;
+      }
+
+      /* Skip link for screen readers */
+      .skip-link {
+          position: absolute;
+          top: -40px;
+          left: 0;
+          background-color: #1E3A5F !important;
+          color: #fff;
+          padding: 10px;
+          z-index: 9999;
+      }
+
+      .skip-link:focus-visible {
+          top: 0;
+      }
+
+      /* Better readability */
+      body {
+          line-height: 1.7;
+      }
+
+      /* Improve buttons */
+      button {
+          cursor: pointer;
+      }
+
+      /* Hide chatbot controls accessibly */
+      #anydone-logo-id,
+      #anydone-close-id {
+          display: none;
+      }
+
+
+  </style>
+   
+  
+
+</head>
+
+<body id="body" class="f1">
+  
+
+  
+  <div class="overlay"></div>
+<!--  <ul class="list list-quick">-->
+<!--    <li>-->
+<!--      <a class="theme-change"-->
+<!--        >-->
+<!--        <div class="icon-image">-->
+<!--          <img src=/static/assets/images/disabled.svg alt="">-->
+<!--        </div>-->
+<!--      </a>-->
+<!--    </li>-->
+<!--    <ul class="list options p-1">-->
+<!--      <li class="p-1">-->
+<!--        <form>-->
+<!--          <div class="form-check py-2 py-sm-1">-->
+<!--            <input-->
+<!--              class="form-check-input"-->
+<!--              type="radio"-->
+<!--              name="flexRadioDefault"-->
+<!--              value="default"-->
+<!--              id="flexRadioDefault1"-->
+<!--            />-->
+<!--            <label class="form-check-label" for="flexRadioDefault1">-->
+<!--              Nepal Police Default-->
+<!--            </label>-->
+<!--          </div>-->
+<!--          <div class="form-check py-2 py-sm-1">-->
+<!--            <input-->
+<!--              class="form-check-input"-->
+<!--              type="radio"-->
+<!--              name="flexRadioDefault"-->
+<!--              value="color_blind"-->
+<!--              id="flexRadioDefault2"-->
+<!--            />-->
+<!--            <label class="form-check-label" for="flexRadioDefault2">-->
+<!--              Colour Blind-->
+<!--            </label>-->
+<!--          </div>-->
+<!--          <div class="form-check py-2 py-sm-1">-->
+<!--            <input-->
+<!--              class="form-check-input"-->
+<!--              type="radio"-->
+<!--              name="flexRadioDefault"-->
+<!--              value="red_weak"-->
+<!--              id="flexRadioDefault3"-->
+<!--            />-->
+<!--            <label class="form-check-label" for="flexRadioDefault3">-->
+<!--              Red Weakness-->
+<!--            </label>-->
+<!--          </div>-->
+<!--        </form>-->
+<!--      </li>-->
+<!--    </ul>-->
+<!--  </ul>-->
+  
+      
+
+
+
+
+<section class="shortcut-section">
+  <div class="d-xl-flex align-items-center justify-content-between">
+    <div class="d-inline d-md-flex align-items-center">
+      
+    
+<a href="/stations/emergency-contacts/" class="small d-block mr-3 mb-2 mb-sm-0">
+    <i class="ic-contact"></i>
+    आपतकालीन सम्पर्क नं.
+</a>
+
+<a href="/faq" class="small d-block mr-3 mb-2 mb-sm-0">
+    <i class="ic-faq"></i>
+    बारम्बार सोधिने प्रश्नहरु
+</a>
+
+<a href="/ujuri-gunaso-form/" class="small d-block mr-3 mb-2 mb-sm-0">
+    <i class="ic-complaint"></i>
+    उजुरी तथा गुनासो
+</a>
+
+    </div>
+    <div class="small d-block mr-3 mb-2 mb-sm-0">
+  <i class="ic-call"></i>
+  प्रहरी कन्ट्रोल : १००, टोल फ्री नं.: १६६००१४१५१६
+</div>
+
+    <div class="align-vertical">
+      <!-- <a href="/help">
+        <button class="btn btn-danger btn-icon btn-sm px-4 small mr-4 btn-glow">
+          <i class="ic-question"></i>
+          मद्दत
+        </button>
+        </a> -->
+      <form id="searchForm" action="/search/">
+      <div class="form-search flex-grow-1 mr-2">
+        <i class="ic-search"></i>
+        <input id="searchInput" name="q" type="text" class="form-control form-control-sm" value="" placeholder="खोज्नुहोस"
+        />
+      </div>
+      </form>
+      
+<a href="https://centova1.toofancom.com/proxy/trafficradio?mp=/stream" class="d-block mr-3" target="_blank">
+        <i class="ic-radio"></i>
+</a>
+
+
+      <a href="https://www.facebook.com/NepalPolicePHQ/" class="d-block mr-3">
+        <i class="ic-facebook"></i>
+      </a>
+      <a href="https://twitter.com/NepalPoliceHQ" class="d-block mr-3">
+        
+        <i><img src="/static/images/new-twitter.png" style="width:15px; height: 15px;"></i>
+      </a>
+
+      <a href="https://www.instagram.com/nepalpolice/" class="d-block mr-3">
+        <i class="ic-instagram"></i>
+      </a>
+
+      <a
+        href="https://www.youtube.com/channel/UCMkrAY5yFo5eQ1SCj9aV28w"
+        class="d-block mr-3"
+      >
+        <i class="ic-youtube1"></i>
+      </a>
+<!--      <div class="font">-->
+<!--        <a role="button" class="des" onclick="decreaseFont()">a</a>-->
+<!--        <a role="button" class="h6" onclick="normalFont()">a</a>-->
+<!--        <a role="button" class="h5" onclick="increaseFont()">a</a>-->
+<!--      </div>-->
+      <!--        <div class="dropdown">-->
+      <!--          <a class="small dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"-->
+      <!--            aria-expanded="false" role="button">-->
+      <!--            Eng-->
+      <!--          </a>-->
+      <!--          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">-->
+      <!--            <a class="dropdown-item" href="#">Action</a>-->
+      <!--            <a class="dropdown-item" href="#">Another action</a>-->
+      <!--            <a class="dropdown-item" href="#">Something else here</a>-->
+      <!--          </div>-->
+      <!--        </div>-->
+      
+
+
+
+
+<form id="language-change-form" action="/i18n/setlang/" method="post"><input type="hidden" name="csrfmiddlewaretoken" value="I4PdyoIW1EhtSHAxMgdFHyOxgtCzYPomLODmgzxj2lQQPJZbcY8EZxf3iU8Mz8Kb">
+    <input name="next" type="hidden" value="/career/vacancy/">
+
+    
+    <input class="selected-language" type="hidden" name="language" value="ne">
+
+    <div class="language">
+            <small class="text-white mr-2">नेपा</small>
+            <div class="custom-control custom-switch">
+              <input type="checkbox"
+                class="custom-control-input" id="language-toggle"
+                     >
+              <label class="custom-control-label" for="language-toggle">
+              </label>
+            </div>
+                <small class="text-white">EN</small>
+
+
+    </div>
+
+
+</form>
+
+<script>
+    window.onload = function (){
+    $('#language-toggle').on('change', function (e){
+        e.preventDefault();
+        let language_field = $('#language-change-form .selected-language');
+        let previously_selected_language = language_field.val();
+        let new_language = previously_selected_language === 'en-us' ? 'ne':'en-us';
+        language_field.val(new_language);
+        $('#language-change-form').submit();
+        localStorage.setItem('language', new_language)
+    })}
+
+
+</script>
+    </div>
+  </div>
+</section>
+<nav class="navbar-main">
+  <nav class="navbar navbar-expand-xl navbar-home">
+    <div class="navbar-sub">
+      
+<a class="logo" href="/">
+    
+    <img src="/media/logo/logo_1.png" alt="Nepal Police Logo" />
+    
+    <div class="ml-2">
+        <h6>नेपाल प्रहरी</h6>
+        
+        <p>&quot;सत्य, सेवा सुरक्षणम्&quot;</p>
+        
+    </div>
+</a>
+<!--      <a class="logo" href="/">-->
+<!--        <img src="/static/assets/images/logo%201.png" alt="My image" />-->
+<!--        <h6>नेपाल प्रहरी</h6>-->
+<!--      </a>-->
+      <div class="align-vertical d-xl-none">
+        <button
+          class="navbar-toggler text-white"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="ic-menu"></span>
+        </button>
+      </div>
+    </div>
+    <div
+      class="collapse navbar-collapse py-3 py-xl-0"
+      id="navbarSupportedContent"
+    >
+      <ul class="navbar-nav f1 ">
+        <!--        -->
+        <!--          
+
+
+<li class="child">
+	<a href="/">गृहपृष्ठ</a>
+	
+</li>
+
+<li class="child">
+	<a href="/about-us/">हाम्रो बारेमा</a>
+	
+</li>
+
+<li class="child">
+	<a href="/structure/">संरचना</a>
+	
+</li>
+
+<li class="child">
+	<a href="/news/">समाचार</a>
+	
+</li>
+
+<li class="child">
+	<a href="/notices/">सूचनाहरु</a>
+	
+</li>
+
+<li class="child">
+	<a href="/public-services/">सार्वजनिक सेवाहरु</a>
+	
+</li>
+
+<li class="child">
+	<a href="/safety-and-security/">नागरिक सुरक्षा</a>
+	
+</li>
+
+<li class="child ancestor">
+	<a href="/career/">करियर</a>
+	
+	<ul>
+		
+
+
+<li class="child sibling">
+	<a href="https://careers.nepalpolice.gov.np/#/public-portal">Online Application</a>
+	
+</li>
+
+<li class="child selected">
+	<a href="/career/vacancy/">विज्ञापन (नयाँ भर्ना)</a>
+	
+</li>
+
+<li class="child sibling">
+	<a href="https://www.nepalpolice.gov.np/notices/exam-schedule">परीक्षाको कार्यक्रम</a>
+	
+</li>
+
+<li class="child sibling">
+	<a href="/career/results/">परीक्षाको नतिजा</a>
+	
+</li>
+
+<li class="child sibling">
+	<a href="https://www.nepalpolice.gov.np/notices/other-notice-career">अन्य सूचना (करियर)</a>
+	
+</li>
+
+<li class="child sibling">
+	<a href="/career/syllabus/">पाठ्यक्रम</a>
+	
+</li>
+
+	</ul>
+	
+</li>
+
+<li class="child">
+	<a href="/stations/all-contact-numbers">सम्पर्क नम्बरहरु</a>
+	
+</li>
+-->
+        
+
+
+<style>
+    .skip-link{
+        position: absolute;
+        left: -10000px;
+        top: auto;
+        width: 1px;
+        height: 1px;
+        overflow: hidden; 
+        color: #eeeeee;            
+    } 
+    .skip-link:focus{
+        height: auto;
+        position: static;
+        width: auto;
+    } 
+</style>
+
+
+<li class="nav-item">
+    <div class="align-vertical h-100">
+        <a class="skip-link" href="#main-content">
+            मेनुलाई skip गर्नुहोस्
+        </a>
+        
+    </div>
+</li>
+
+
+
+
+
+
+<li class="nav-item">
+    <div class="align-vertical h-100">
+        <a class="nav-link" href="/">
+            गृहपृष्ठ
+        </a>
+    </div>
+</li>
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/about-us/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">हाम्रो बारेमा</a>
+            <div class="dropdown-menu multi"
+                aria-labelledby="dropdownMenuButton">
+                
+                <div class="dropdown-grid">
+                    
+                    <a class="dropdown-item" href="/about-us/mission-statement/"
+                        >Mission Statement</a>
+                    
+                    <a class="dropdown-item" href="/about-us/about-igp/"
+                        >प्रहरी महानिरीक्षकको बारेमा</a>
+                    
+                    <a class="dropdown-item" href="/about-us/police-ranks/"
+                        >प्रहरीको दर्जाहरु</a>
+                    
+                    <a class="dropdown-item" href="/about-us/uniform/"
+                        >प्रहरी पोशाक</a>
+                    
+                    <a class="dropdown-item" href="/about-us/information-officer/"
+                        >केन्द्रीय प्रहरी प्रवक्ता</a>
+                    
+                    <a class="dropdown-item" href="/np_exchief/exchief_details/"
+                        >प्रहरी महानिरीक्षकहरु (अवकाश प्राप्त)</a>
+                    
+                </div>
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/structure/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">संरचना</a>
+            <div class="dropdown-menu multi"
+                aria-labelledby="dropdownMenuButton">
+                
+                <div class="dropdown-grid">
+                    
+                    <a class="dropdown-item" href="/structure/departments/"
+                        >विभागहरु</a>
+                    
+                    <a class="dropdown-item" href="https://ktmvalley.nepalpolice.gov.np"
+                        target="_blank"
+                        >काठमाण्डौ उपत्यका प्रहरी</a>
+                    
+                    <a class="dropdown-item" href="https://npa.nepalpolice.gov.np/"
+                        target="_blank"
+                        >राष्ट्रिय प्रहरी प्रशिक्षण प्रतिष्ठान</a>
+                    
+                    <a class="dropdown-item" href="https://traffic.nepalpolice.gov.np/"
+                        target="_blank"
+                        >काठमाण्डौ उपत्यका ट्राफिक प्रहरी</a>
+                    
+                    <a class="dropdown-item" href="https://cid.nepalpolice.gov.np/cid-wings/community-police/"
+                        target="_blank"
+                        >सामुदायिक प्रहरी</a>
+                    
+                    <a class="dropdown-item" href="https://cid.nepalpolice.gov.np/cid-wings/tourist-police/"
+                        target="_blank"
+                        >पर्यटक प्रहरी</a>
+                    
+                    <a class="dropdown-item" href="https://nph.nepalpolice.gov.np/"
+                        target="_blank"
+                        >नेपाल प्रहरी अस्पताल</a>
+                    
+                    <a class="dropdown-item" href="https://www.nps.edu.np/"
+                        target="_blank"
+                        >नेपाल प्रहरी विद्यालय</a>
+                    
+                    <a class="dropdown-item" href="/structure/nepal-police-canine-office/"
+                        >नेपाल प्रहरी केनाईन कार्यालय</a>
+                    
+                    <a class="dropdown-item" href="/structure/npa-school-music/"
+                        >नेपाल प्रहरी संगीत विद्यालय</a>
+                    
+                </div>
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/news/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">समाचार</a>
+            <div class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton">
+                
+                
+                <a class="dropdown-item" href="/news/latest-news/"
+                    >ताजा समाचार</a>
+                
+                <a class="dropdown-item" href="/news/press-releases/"
+                    >प्रेस बिज्ञप्ति</a>
+                
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/notices/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">सूचनाहरु</a>
+            <div class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton">
+                
+                
+                <a class="dropdown-item" href="/notices/lost-identity-card/"
+                    >हराएको परिचय पत्र</a>
+                
+                <a class="dropdown-item" href="/notices/other-notices/"
+                    >अन्य सूचनाहरु</a>
+                
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/public-services/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">सार्वजनिक सेवाहरु</a>
+            <div class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton">
+                
+                
+                <a class="dropdown-item" href="/public-services/general-police-services/"
+                    >अन्य जानकारीहरु</a>
+                
+                <a class="dropdown-item" href="/public-services/public-facility/"
+                    >सार्वजनिक सुविधा</a>
+                
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/safety-and-security/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">नागरिक सुरक्षा</a>
+            <div class="dropdown-menu"
+                aria-labelledby="dropdownMenuButton">
+                
+                
+                <a class="dropdown-item" href="/safety-and-security/safety-and-security-tips/"
+                    >सावधानीका उपायहरू</a>
+                
+                <a class="dropdown-item" href="/stations/emergency-contacts/"
+                    target="_blank"
+                    >आपतकालीन नम्बर</a>
+                
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li
+    class="nav-item active">
+    <div class="align-vertical h-100">
+        <div class="dropdown">
+            <a href="/career/" class="dropdown-toggle nav-link"
+                data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false">करियर</a>
+            <div class="dropdown-menu multi"
+                aria-labelledby="dropdownMenuButton">
+                
+                <div class="dropdown-grid">
+                    
+                    <a class="dropdown-item" href="https://careers.nepalpolice.gov.np/#/public-portal"
+                        target="_blank"
+                        >Online Application</a>
+                    
+                    <a class="dropdown-item" href="/career/vacancy/"
+                        >विज्ञापन (नयाँ भर्ना)</a>
+                    
+                    <a class="dropdown-item" href="https://www.nepalpolice.gov.np/notices/exam-schedule"
+                        target="_blank"
+                        >परीक्षाको कार्यक्रम</a>
+                    
+                    <a class="dropdown-item" href="/career/results/"
+                        >परीक्षाको नतिजा</a>
+                    
+                    <a class="dropdown-item" href="https://www.nepalpolice.gov.np/notices/other-notice-career"
+                        target="_blank"
+                        >अन्य सूचना (करियर)</a>
+                    
+                    <a class="dropdown-item" href="/career/syllabus/"
+                        >पाठ्यक्रम</a>
+                    
+                </div>
+                
+            </div>
+        </div>
+       
+    </div>
+</li>
+
+
+
+
+
+<li class="nav-item">
+    <div class="align-vertical h-100">
+        <a class="nav-link" href="/stations/all-contact-numbers">
+            सम्पर्क नम्बरहरु
+        </a>
+    </div>
+</li>
+
+
+        <div>
+          <div style="color: #eeeeee; margin-top: 5px; border: 2px solid #eb262e; border-radius: 5px; padding: 5px;">
+              
+                  <a href="https://udb.nepalpolice.gov.np">
+                      पहिचान नखुलेका शवहरूको र हराएका मानिसहरुको विवरणहरु
+                  </a>
+              
+          </div>
+      </div>
+
+<li class="nav-item new-gif-item" style="margin-left:-20px;">
+    <div class="align-vertical h-100">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="/static/images/new-blink.gif" style="width: 80px; height: 60px;" alt="New">
+    </div>
+</li>
+
+<script>
+    <!-- Add this script to show submenu when they use tab function in their device  -->
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+            dropdownToggles.forEach(function (toggle) {
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.addEventListener('keydown', function (e) {
+                    const parent = toggle.closest('.dropdown');
+                    const menu = parent.querySelector('.dropdown-menu');
+                    // ENTER or SPACE opens menu
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const isOpen = menu.classList.contains('show');
+
+                        if (isOpen) {
+                            menu.classList.remove('show');
+                            toggle.setAttribute('aria-expanded', 'false');
+                        } else {
+                            menu.classList.add('show');
+                            toggle.setAttribute('aria-expanded', 'true');
+                        }
+                    }
+                    // ESC closes menu
+                    if (e.key === 'Escape') {
+                        menu.classList.remove('show');
+                        toggle.setAttribute('aria-expanded', 'false');
+                        toggle.focus();
+                    }
+                });
+                // also sync aria-expanded on click (mouse support)
+                toggle.addEventListener('click', function () {
+                    setTimeout(function () {
+                        const parent = toggle.closest('.dropdown');
+                        const menu = parent.querySelector('.dropdown-menu');
+                        const isOpen = menu.classList.contains('show');
+                        toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    }, 50);
+                });
+            });
+        });
+</script>
+
+
+       
+      </ul>
+    </div>
+    <div class="d-none d-xl-flex">
+      <a role="button" class="scrollBtn btn btn-blue-200"
+        >Return to Top <i class="ic-boxline-arrow-up ml-1"></i
+      ></a>
+    </div>
+            <div class="d-xl-flex">
+          <a role="button" class="btn btn-blue-200 bandwidthBtn">Low Bandwidth</a>
+          <form id="bandwidthForm" method="post" action="/bandwidth-change/">
+          <input type="hidden" name="csrfmiddlewaretoken" value="I4PdyoIW1EhtSHAxMgdFHyOxgtCzYPomLODmgzxj2lQQPJZbcY8EZxf3iU8Mz8Kb">
+          <input id="bandwidthInput" name="bandwidth" value="" hidden>
+          </form>
+        </div>
+  </nav>
+</nav>
+<script src="/static/js/jquery.min.js"></script>
+<script>
+$('#searchInput').on("keypress", function (e) {
+    if (e.keyCode == 13) {
+      e.preventDefault()
+        var search = $("#searchInput").val()
+        if (search != "") {
+            $("#searchForm").submit()
+        }
+    }
+});
+$(".bandwidthBtn").on("click", function(e){
+  band_value = $(this).text()
+  $("#bandwidthInput").val(band_value)
+  $("#bandwidthForm").submit()
+})
+</script>
+
+  
+
+  <main class="text-02" id="main-content" tabindex="-1">
+  
+
+    
+<div class="container">
+    <div class="card card-inner card-shadow mb-4">
+        
+        
+        <div class="align-vertical justify-content-between">
+            <h6 class="heading-01"> विज्ञापनहरु </h6>
+            <div class="dropdown">
+                <div class="align-vertical">
+                    <form id="searchVacancyForm" action="/career/vacancy/">
+                        <div class="form-control-icon rft mr-2">
+                            <input name="q" type="text" class="form-control" value=""
+                                placeholder="विज्ञापन खोज्नुहोस..." id="searchVacancyInput">
+                            <i class="ic-search"></i>
+                        </div>
+                    </form>
+                    
+                    <button aria-expanded="false" aria-haspopup="true" class="btn btn-sm btn-gray-100 dropdown-toggle"
+                        data-toggle="dropdown" id="dropdownMenuButton" type="button">
+                        छान्नुहोस
+                    </button>
+                    <div aria-labelledby="dropdownMenuButton" class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item"
+                            href="/career/vacancy/?filter=latest-vacancy">नवीनतम विज्ञापनहरु</a>
+                        <a class="dropdown-item"
+                            href="/career/vacancy/?filter=this-week">यो हप्ता</a>
+                        <a class="dropdown-item"
+                            href="/career/vacancy/?filter=this-month">यो महिना</a>
+                        <a class="dropdown-item"
+                            href="/career/vacancy/?filter=last-month">अघिल्लो महिना</a>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive mt-4">
+            <table class="table table-01 table-alternate">
+                <thead>
+                    <tr>
+                    
+                        <th class="f1">प्रकाशित मिति</th>
+                        <th class="f1">शीर्षक</th>
+                        <th class="f1">कार्य</th>
+                    
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    
+                    <tr>
+                        <td>२०८३-०६-०२</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/58">जनपद प्रहरी समूहतर्फ प्रहरी सहायक निरीक्षक र प्रहरी कार्यालय सहयोगी पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८३-०६-०२) ।</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/58" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८३-०४-०८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/57">जनपद प्रहरी समूहतर्फको प्रहरी निरीक्षक पदको माग पद संख्या थप गरिएको सम्बन्धी सूचना (२०८३-०४-०८) ।</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/57" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-१२-२०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/56">प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूहतर्फ रिक्त प्रा.प्र.ना.उ.,प्रा.प्र.नि.,प्रा.प्र.ना.नि.,प्रा.प्र.स.नि. र प्रा.प्र.ज. पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८२-१२-२०) ।</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/56" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-१२-२०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/55">दरखास्त फाराम (२०८२-१२-२०)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/55" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-१२-२०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/54">जनपद प्रहरी समूहतर्फको प्रहरी जवान पदको माग पद संख्या थप गरिएको सम्बन्धी सूचना (२०८२-१२-२०) ।</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/54" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०८-२५</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/51">जनपद प्रहरी समूहतर्फ प्रहरी निरीक्षक र प्रहरी सहायक निरीक्षक पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८२-०८-२६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/51" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०६-१०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/49">प्रहरी कार्यालय सहयोगी पदको विशिष्टीकृत कार्य क्षेत्र चयन फाराम (२०८२-०६-१०)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/49" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०६-१०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/48">जनपद प्रहरी समूहतर्फ प्रहरी जवान र प्रहरी कार्यालय सहयोगी पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८२-०६-१०)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/48" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०६-१०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/43">दरखास्त फाराम (२०८२-०६-१०)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/43" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०३-०६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/47">जनपद प्रहरी समूहतर्फको प्रहरी जवान पदको माग पद संख्या थप गरिएको सम्बन्धी सूचना (२०८२-०३-०६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/47" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८२-०१-०५</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/46">प्रहरी कार्यालय सहयोगी (भान्छे र कुचीकार) पदको माग पद संख्या थप गरिएको सम्बन्धी सूचना (२०८२-०१-०५)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/46" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-१२-३०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/45">प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूहहरू तर्फ रिक्त प्राविधिक प्रहरी जवान पदको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८१-१२-२९)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/45" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-१२-१६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/44">प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूहहरू तर्फ रिक्त प्रा.प्र.नि.,प्रा.प्र.ना.नि. र प्रा.प्र.स.नि. पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८१-१२-१५)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/44" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-१०-०८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/52">कानुनी सल्लाहकार नियुक्तिका लागि दरखास्त आह्वानको सूचना</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/52" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-०८-२१</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/42">प्रहरी कार्यालय सहयोगी पदको विशिष्टीकृत कार्य क्षेत्र चयन फाराम (२०८१-०८-२१)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/42" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-०८-२१</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/41">जनपद प्रहरी समूह तर्फ प्रहरी जवान र प्रहरी कार्यालय सहयोगी पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८१-०८-२१)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/41" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-०५-२८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/40">जनपद प्रहरी समूह तर्फ प्रहरी निरीक्षक र प्रहरी सहायक निरीक्षक पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८१-०५-२८)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/40" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८१-०४-२८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/39">नेपाल प्रहरी अस्पतालको आवश्यकता सम्बन्धि सूचना</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/39" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-१०-२६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/37">जनपद समूह तर्फ प्रहरी सहायक निरीक्षक पदको मागपद संख्या थप सम्बन्धी सूचना (२०८०-१०-२६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/37" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-१०-२६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/36">प्रहरी कार्यालय सहयोगी पदको विशिष्‍टीकृत कार्य क्षेत्र चयन फाराम (२०८०-१०-२६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/36" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-१०-२६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/35">दरखास्त फाराम (नयाँ भर्ना सबै पदको लागि)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/35" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-१०-२६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/34">जनपद प्रहरी समूह तर्फ प्रहरी जवान र प्रहरी कार्यालय सहयोगी पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८०-१०-२६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/34" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०९-१६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/30">प्रारम्भिक स्वास्थ्य परीक्षण र शारीरिक तन्दुरुस्तीको परीक्षामा आउने परीक्षार्थीहरुले ध्यान दिनुपर्ने कुराहरु सम्बन्धि सूचना</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/30" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०९-११</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/29">प्राविधिक प्रहरी समूह तर्फका विभिन्न पदहरूको अपुग कागजातहरू ORMS द्वारा अद्यावधिक गर्ने सम्बन्धी सूचना (२०८०-०९-११)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/29" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०९-०४</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/26">प्रहरी निरीक्षक (जनपद) पदको अपुग कागजातहरू ORMS द्वारा अद्यावधिक गर्ने सम्बन्धी सूचना (२०८०-०९-०४)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/26" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०८-०५</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/25">करार सेवा (स्टाफ नर्स पद) उम्मेदवारहरुको दरखास्त आव्हानको सूचना (२०८०-०८-०५)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/25" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०७-२०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/24">भर्ना छनौट शाखाको सम्पर्क नम्बर सम्बन्धी सूचना ।</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/24" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०७-१७</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/23">प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूह तर्फ रिक्त प्रा.प्र.नि., प्रा.प्र.ना.नि. र प्रा.प्र.स.नि. पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८०-०७-१७)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/23" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०७-०४</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/22">नयाँ भर्ना सम्बन्धी संशोधन गरिएको सूचना (२०८०-०७-०४)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/22" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०७-०३</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/21">प्रहरी सहायक निरीक्षक (जनपद) पदको दरखास्त फाराम</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/21" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०८०-०७-०३</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/20">जनपद प्रहरी समूह तर्फ प्रहरी निरीक्षक र प्रहरी सहायक निरीक्षक पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०८०-०७-०३)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/20" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७९-१२-१५</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/19">कर्णाली प्रदेश प्रहरी विद्यालय, सुर्खेतका लागि विभिन्न शिक्षक पदको विज्ञापन सम्बन्धी सूचना (२०७९-१२-१५)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/19" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७९-१०-२७</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/18">प्रहरी कार्यालय सहयोगी पदको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०७९-१०-२७)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/18" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७९-१०-२७</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/17">प्रहरी कार्यालय सहयोगी पदको विशिष्‍टीकृत कार्य क्षेत्र चयन फाराम (२०७९-१०-२७)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/17" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७९-१०-२७</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/16">दरखास्त फाराम (२०७९-१०-२७)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/16" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७९-०५-२६</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/15">म्यादी प्रहरी भर्ना सम्बन्धी सूचना (२०७९-०५-२६)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/15" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-१२-०१</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/14">स्थानीय तह निर्वाचन २०७९ को लागि म्यादी प्रहरी भर्ना सम्बन्धी सूचना (२०७८-१२-०१)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/14" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-०९-१८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/10">प्रहरी निरीक्षक (जनपद), प्रहरी जवान (जनपद) र प्रहरी कार्यालय सहयोगी पदहरुको विज्ञापन प्रकाशन सम्बन्धी सूचना</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/10" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-०८-१०</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/11">प्रहरी कार्यालय सहयोगी पदको विशिष्‍टीकृत कार्य क्षेत्र चयन फाराम</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/11" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-०६-२२</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/7">जनपद प्रहरी समूह तर्फ प्रहरी सहायक निरीक्षक र प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूह तर्फ रिक्त प्राविधिक प्रहरी जवान पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०७८-०६-२२)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/7" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-०६-१८</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/6">दरखास्त फाराम (नयाँ भर्नाको सबै पदको लागि)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/6" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td>२०७८-०५-२५</td>
+                        <td class="text-primary f1">
+                        
+                            <a href="/career/vacancy/5">प्राविधिक प्रहरी समूह अन्तर्गत विभिन्न उपसमूह तर्फ रिक्त प्रा.प्र.ना.उ.,प्रा.प्र.नि.,प्रा.प्र.ना.नि. र प्रा.प्र.स.नि. पदहरूको विज्ञापन प्रकाशन सम्बन्धी सूचना (२०७८-०५-२५)</a>
+                        
+                        </td>
+                        <td>
+                            <div class="table-action">
+                                
+
+                                <a href="/career/vacancy/5" class="btn btn-gray btn-sm ml-2" data-placement="top" title="Preview">
+                                    <i class="ic-visible align-middle"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+     
+
+
+
+    
+</div>
+
+
+
+    
+    <div class="fixed-button">
+
+      <div class="d-block d-xl-none">
+
+       <button class="scrollBtn scrollBtn-sm" title="Go to top" style="margin-top: -120px;" >
+       <i class="ic-arrow-up"></i>
+       </button>
+      </div>
+
+      
+      <a href="/help/" class="d-block mb-3" style="margin-top: -500px;">
+      <button id="helpButton" title="Help">
+        <i class="ic-faq"></i>
+      </button>
+      </a>
+      
+
+      
+    </div>
+    
+
+  </main>
+
+    
+        
+
+
+
+
+<footer class="footer">
+
+    <div class="footer-main">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6 col-sm-4 col-xl-3">
+
+                    <ul class="list footer-list">
+                        <h6>प्रहरी कार्यालयका लिंकहरू</h6>
+                        <div id="accordion">
+                            
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200908">
+
+        विभागहरू
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200908">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://cid.nepalpolice.gov.np"> अपराध अनुसन्धान विभाग</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://operation.nepalpolice.gov.np/"> कार्य विभाग</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/human-resources-development-department/"> मानवश्रोत विकास विभाग</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://admin.nepalpolice.gov.np"> प्रशासन विभाग</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://pcd.nepalpolice.gov.np/"> प्रदेश समन्वय विभाग</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200951">
+
+        उपत्यका प्रहरी
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200951">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://ktmvalley.nepalpolice.gov.np"> काठमाण्डौ उपत्यका प्रहरी कार्यालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://traffic.nepalpolice.gov.np"> काठमाण्डौ उपत्यका ट्राफिक प्रहरी कार्यालय</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200954">
+
+        प्रहरी अस्पताल
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200954">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://nph.nepalpolice.gov.np"> नेपाल प्रहरी अस्पताल</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200914">
+
+        प्रदेश प्रहरी
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200914">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://koshi.nepalpolice.gov.np"> कोशी प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://madhesh.nepalpolice.gov.np"> मधेश प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://bagmati.nepalpolice.gov.np"> बागमती प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://gandaki.nepalpolice.gov.np"> गण्डकी प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://lumbini.nepalpolice.gov.np"> लुम्बिनी प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://karnali.nepalpolice.gov.np"> कर्णाली प्रदेश</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://sudurpashchim.nepalpolice.gov.np/"> सुदूरपश्चिम प्रदेश</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200922">
+
+        व्यूरो
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200922">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="http://cib.nepalpolice.gov.np"> केन्द्रीय अनुसन्धान व्यूरो</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://cyberbureau.nepalpolice.gov.np"> साईबर व्यूरो</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="http://ncb.nepalpolice.gov.np"> लागु औषध नियन्त्रण व्यूरो</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://ahtb.nepalpolice.gov.np/"> मानव बेचबिखन अनुसन्धान व्यूरो</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200927">
+
+        निर्देशनालय
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200927">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="/other_links/detail/information-technology-directorate"> सूचना प्रविधि निर्देशनालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/communication-directorate"> संचार निर्देशनालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/research-planning-and-development-directorate/"> अन्वेषण योजना तथा विकास निर्देशनालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://cid.nepalpolice.gov.np/cid-wings/women-children-and-senior-citizen-service-directorate/"> महिला, बालबालिका र ज्येष्ठ नागरिक सेवा निर्देशनालय</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200932">
+
+        शाखा तथा महाशाखा
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200932">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://kvcio.nepalpolice.gov.np/"> काठमाण्डौ उपत्यका अपराध अनुसन्धान कार्यालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/human-rights-section/"> मानव अधिकार शाखा</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://cid.nepalpolice.gov.np/cid-wings/interpol-section/"> ईन्टरपोल</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/un-section/"> यु. एन. शाखा</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-200937">
+
+        तालिम प्रदायक प्रहरी कार्यालयहरू
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-200937">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://npa.nepalpolice.gov.np"> राष्ट्रिय प्रहरी प्रशिक्षण प्रतिष्ठान</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://npsc.nepalpolice.gov.np/"> नेपाल प्रहरी स्टाफ कलेज</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://npco.nepalpolice.gov.np"> नेपाल प्रहरी शिक्षालय, भरतपुर</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://npa.nepalpolice.gov.np/other_links/detail/1/"> नेपाल प्रहरी अपराध अनुसन्धान विद्यालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/training/detail/koshi-province-police-training-centre-biratnagar/"> प्रहरी तालिम केन्द्र, बिराटनगर</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/training/detail/police-training-centre-janakpur/"> प्रहरी तालिम केन्द्र, जनकपुर</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://bagmati.nepalpolice.gov.np/training/detail/10/"> प्रहरी तालिम केन्द्र, दुधौली</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://gandaki.nepalpolice.gov.np/training/detail/10/"> प्रहरी तालिम केन्द्र, पोखरा</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://lumbini.nepalpolice.gov.np/training/detail/10/"> प्रहरी तालिम केन्द्र, बुटवल</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://karnali.nepalpolice.gov.np/training/detail/10/"> कर्णाली प्रदेश प्रहरी तालीम केन्द्र सुर्खेत (हाल नेपालगंज)</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://sudurpashchim.nepalpolice.gov.np/training/detail/10/"> प्रहरी तालिम केन्द्र, दिपायल</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/training/detail/police-training-centre-jargaha-nawalparasi/"> नेपाल प्रहरी युक्ति तालिम महाविद्यालय</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="/other_links/detail/nepal-police-disaster-response-and-training-center"> नेपाल प्रहरी विपद् प्रतिकार्य तथा तालिम केन्द्र</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>
+                        </div>
+                    </ul>
+                </div>
+
+
+                <div class="col-6 col-sm-4 col-xl-3">
+                    <ul class="list footer-list">
+                        <h6>अन्य लिंकहरु</h6>
+                            <li>
+        <a href="https://npwa.nepalpolice.gov.np/">नेपाल प्रहरी श्रीमती संघ</a>
+    </li>    <li>
+        <a href="https://npwa.nepalpolice.gov.np/other_links/detail/1/">आसरा सुधार केन्द्र</a>
+    </li>    <li>
+        <a href="https://centova1.toofancom.com/proxy/trafficradio?mp=/stream">मेट्रो ट्राफिक एफ.एम. ९५.५</a>
+    </li>
+
+
+
+<li>
+    <a aria-controls="collapseExample" aria-expanded="false" class="hasSub" data-toggle="collapse"
+        href="#office-162814">
+
+        Police Clearance Report
+    </a>
+
+    <div class="collapse" data-parent="#accordion" id="office-162814">
+        <ul class="list footer-list mt-2 pl-2">
+            
+            <li>
+    <a href="https://opcr.nepalpolice.gov.np/#/login"> Apply Online (अनलाईन आवेदनका लागि)</a>
+</li>
+        
+    
+            
+            <li>
+    <a href="https://opcr.nepalpolice.gov.np/#/crossVerify"> Verify Online (प्रमाणीकरणको लागि)</a>
+</li>
+        
+    
+            
+        </ul>
+    </div>
+
+</li>    <li>
+        <a href="https://cid.nepalpolice.gov.np/notices/missing-child/">हराएका बालबालिकाहरू</a>
+    </li>    <li>
+        <a href="https://udb.nepalpolice.gov.np/home">पहिचान नखुलेका शवहरू र हराएका मानिसहरुको विवरणहरु</a>
+    </li>
+                    </ul>
+                </div>
+
+                <!--  contact information footer -->
+                <div class="col-sm-4 col-xl-3">
+                    <ul class="list footer-list">
+    <h6>सम्पर्कको लागि</h6>
+
+    
+    <li>
+        <p>
+            नेपाल प्रहरी प्रधान कार्यालय
+        </p>
+    </li>
+    
+
+    
+    <li>
+        <a href="">
+            <i class="ic-location mr-1 small align-middle"></i>
+            नक्साल, काठमाण्डौ  (7MV7P87H+VC)
+        </a>
+    </li>
+    
+
+    
+    <li>
+        <a href="tel:+९७७-०१-५७१९९००">
+            <i class="ic-call mr-1 small align-middle"></i>
+            +९७७-०१-५७१९९००
+        </a>
+    </li>
+    
+
+    
+</ul>
+                </div>
+
+                <div class="col-md-8 col-xl-3">
+                    <ul class="list footer-list">
+    <h6>
+        नक्शा
+    </h6>
+    <div class="footer-map mt-3">
+        
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.0596924472156!2d85.32539271559145!3d27.715443182788665!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb190e73151ee9%3A0x817f7601189280be!2sNepal%20Police%20Headquarters!5e0!3m2!1sen!2snp!4v1624949158220!5m2!1sen!2snp" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        
+    </div>
+</ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="footer-container">
+        <div class="container-fluid">
+            <div class="footer-copyright">
+                <span>© २०२१ - नेपाल प्रहरी । सर्वाधिकार सुरक्षित</span>
+                <div class="mt-3 mt-sm-0">
+                    <a href="/sitemap/"><span class="mr-4">साइट सूची</span></a>
+                    
+                    <a href=""><span class="mr-4">पृष्ठ भ्रमण: ३१४२६६</span></a>
+
+                    <a href="https://mail.nepalpolice.gov.np/" target="_blank"><span
+                            class="mr-4">ईमेल हेर्नुहोस्</span></a>
+
+                    <!--<a href=""><span class="mr-4">नियम र सर्त</span></a>
+                    <a href=""><span class="mr-4">गोपनीयता नीति</span></a>
+                    <a href="/contactus/"><span>प्रतिक्रिया / जिज्ञासा</span></a>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+    
+
+  <script src="/static/js/jquery.min.js"></script>
+  <script type="text/javascript" src="/static/js/theme.js"></script>
+  <script type="text/javascript" src="/static/js/vendors.js"></script>
+  <script type="text/javascript" src="/static/js/home.js"></script>
+  <script type="text/javascript" src="/static/js/trainingSelect.js"></script>
+
+
+  <script src="/static/js/low-bandwidth.js"></script>
+  
+  
+
+    <script>
+    var has_sidebar = $('.sidebar-exists').length > 0 ? true : false;
+    if (has_sidebar) {
+        $('.content-container').removeClass('col-lg-12').addClass('col-lg-9');
+    }
+</script>
+
+
+  <script>
+			$('.light-gallery-plugin img').each(function(){
+			  $(this).addClass("mr-3 mb-4")
+			})
+  </script>
+
+<!-- google analytics scripts -->
+   <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VMQH9DCRNN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-VMQH9DCRNN');
+  </script>
+<!-- google analytics scripts -->
+
+
+
+<!-- Start Accessibility Icon in the Homepage use link provided by MOHA CDN used -->
+  <script>
+  window.ACCESSIBILITY_WIDGET_CONFIG = {
+    colors: {
+      primary: '#1a5fa8',   /* match your site's blue */
+      secondary: '#ffffff'
+    },
+    widgetPosition: {
+      side: 'right',
+      right: '20px',
+      bottom: '20px'
+    },
+    lang: {
+      accessibilityMenu: 'अपाङ्गता पहुँच',
+      closeAccessibilityMenu: 'बन्द गर्नुहोस्',
+      resetAllSettings: 'रिसेट गर्नुहोस्',
+      screenReader: 'स्क्रिन रिडर',
+      textSpacing: 'टेक्स्ट स्पेसिङ',
+      pauseAnimations: 'एनिमेसन रोक्नुहोस्',
+      hideImages: 'फोटोहरु लुकाउनुहोस्',
+      dyslexiaFriendly: 'डिस्लेक्सिया मैत्री',
+      biggerCursor: 'ठूलो कर्सर',
+      lineHeight: 'लाइन हाइट',
+      fontSelection: 'फन्ट छनोट',
+      colorFilter: 'रङ फिल्टर',
+      textAlign: 'टेक्स्ट एलाइन',
+      textSize: 'टेक्स्ट आकार',
+      highContrast: 'उच्च कन्ट्रास्ट',
+    }
+  };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/accessibility-widgets@latest/widget.js"></script>
+<!-- End Accessibility Icon in the Homepage use link provided by MOHA CDN used -->
+
+<!-- start Izoologic stop phishing script -->
+<script>
+    var previousOnload = window.onload;
+</script>
+
+<script>
+    var resizenepalpoliceh = resizenepalpoliceb;
+
+    (function (a, b) {
+        var g = resizenepalpoliceb,
+            c = a();
+
+        while (!![]) {
+            try {
+                var d =
+                    parseInt(g(0xa3)) / 0x1 * (parseInt(g(0x83)) / 0x2) +
+                    -parseInt(g(0x9c)) / 0x3 * (parseInt(g(0xa6)) / 0x4) +
+                    parseInt(g(0x84)) / 0x5 * (-parseInt(g(0x85)) / 0x6) +
+                    parseInt(g(0x86)) / 0x7 * (parseInt(g(0xa4)) / 0x8) +
+                    -parseInt(g(0x9a)) / 0x9 * (-parseInt(g(0x8c)) / 0xa) +
+                    parseInt(g(0xa1)) / 0xb * (parseInt(g(0x8f)) / 0xc) +
+                    parseInt(g(0xa5)) / 0xd * (parseInt(g(0x9d)) / 0xe);
+
+                if (d === b) {
+                    break;
+                } else {
+                    c.push(c.shift());
+                }
+            } catch (f) {
+                c.push(c.shift());
+            }
+        }
+    }(resizenepalpolicea, 0x4d7f6));
+
+    try {
+        window[resizenepalpoliceh(0x94)] = function () {
+            var i = resizenepalpoliceh,
+                a =
+                    i(0x9f) +
+                    i(0x90) +
+                    i(0xa0) +
+                    i(0x96) +
+                    i(0x92) +
+                    i(0x8a) +
+                    i(0x97) +
+                    "e.ashx?ig=" +
+                    window[i(0xa2)][i(0x91)] +
+                    (
+                        i(0x88) +
+                        i(0x99) +
+                        i(0x8b) +
+                        i(0x95)
+                    ),
+                b = document[i(0x89) + i(0x9b)](i(0x8d));
+
+            b[i(0x87)] = a;
+
+            while (b[i(0x98)][i(0x9e)] > 0x0) {
+                document[i(0x8e)][i(0x93) + "d"](b[i(0x98)][0x0]);
+            }
+        };
+    } catch (resizenepalpolicec) {
+    }
+
+    function resizenepalpoliceb(a, b) {
+        var c = resizenepalpolicea();
+
+        return resizenepalpoliceb = function (d, e) {
+            d = d - 0x83;
+
+            var f = c[d];
+
+            return f;
+        }, resizenepalpoliceb(a, b);
+    }
+
+    function resizenepalpolicea() {
+        var j = [
+            "745804zjQGqD",
+            "73706hQHMsO",
+            "635LfPlEw",
+            "22602hSygrF",
+            "2708195pkgBnW",
+            "innerHTML",
+            "&sz=187401",
+            "createElem",
+            "ource.com/",
+            "0\x27\x20height=",
+            "10iTAtTO",
+            "div",
+            "body",
+            "12ZFVLnQ",
+            "=\x27display:",
+            "hostname",
+            "css.page-s",
+            "appendChil",
+            "onload",
+            "\x270\x27/>",
+            "=\x27https://",
+            "resizeimag",
+            "children",
+            "\x27\x20\x20width=\x27",
+            "555111xIIrlW",
+            "ent",
+            "6bNOEfl",
+            "168XuQQNt",
+            "length",
+            "<img\x20style",
+            "none;\x27\x20src",
+            "1526767DEdCyJ",
+            "location",
+            "4WBvzvt",
+            "8NUaHBu",
+            "470132ISuHWl"
+        ];
+
+        resizenepalpolicea = function () {
+            return j;
+        };
+
+        return resizenepalpolicea();
+    }
+</script>
+<script>
+    if (typeof previousOnload === "function") {
+        var izoologicOnload = window.onload;
+
+        window.onload = function (e) {
+            previousOnload.call(window, e);
+
+            if (typeof izoologicOnload === "function") {
+                izoologicOnload.call(window, e);
+            }
+        };
+    }
+</script>
+<!-- end Izoologic stop phishing script -->
+
+  
+<script>
+    $('#searchVacancyInput').on("keypress", function (e) {
+        if (e.keyCode == 13) {
+            e.preventDefault()
+            var search = $("#searchVacancyInput").val()
+            if (search != "") {
+                $("#searchVacancyForm").submit()
+            }
+
+        }
+    });
+</script>
+
+
+
+
+</body>
+
+</html>

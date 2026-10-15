@@ -36,7 +36,7 @@ fn done_json(plan: &DayPlan) -> String {
     serde_json::to_string(&plan.done).unwrap_or_else(|_| "[]".to_owned())
 }
 
-fn load(app: &AppHandle<Wry>) -> Result<Vec<DayPlan>> {
+pub(crate) fn load(app: &AppHandle<Wry>) -> Result<Vec<DayPlan>> {
     let connection = db::open(app)?;
     let mut statement = connection
         .prepare(
@@ -71,7 +71,7 @@ fn load(app: &AppHandle<Wry>) -> Result<Vec<DayPlan>> {
         .map_err(|error| error.to_string())
 }
 
-fn save(app: &AppHandle<Wry>, plan: &DayPlan) -> Result<()> {
+pub(crate) fn save(app: &AppHandle<Wry>, plan: &DayPlan) -> Result<()> {
     let mut connection = db::open(app)?;
     let transaction = connection
         .transaction()

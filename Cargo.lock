@@ -4105,6 +4105,7 @@ name = "sajilo-providers"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "futures-util",
  "quick-xml 0.38.4",
  "regex",
  "reqwest 0.12.28",

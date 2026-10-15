@@ -160,6 +160,7 @@ pub fn run() {
             app.manage(commands::bazar::BazarCache::default());
             app.manage(commands::stocks::StocksCache::default());
             app.manage(commands::ipos::IposCache::default());
+            app.manage(commands::jobs::JobsCache::default());
             app.manage(commands::dividends::DividendsCache::default());
             app.manage(commands::mutual_funds::MutualFundsCache::default());
             app.manage(commands::crypto::CryptoCache::default());
@@ -276,6 +277,12 @@ pub fn run() {
             commands::portfolio::save_stock_transaction,
             commands::portfolio::delete_stock_transaction,
             commands::ipos::get_ipos,
+            commands::jobs::job_sources,
+            commands::jobs::get_jobs,
+            commands::jobs::job_detail,
+            commands::jobs::mark_jobs_seen,
+            commands::jobs::remind_job_deadline,
+            commands::jobs::forget_job_deadline,
             commands::dividends::get_dividends,
             commands::mutual_funds::get_mutual_funds,
             commands::mutual_funds::get_fund_nav_history,

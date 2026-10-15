@@ -9,6 +9,7 @@ pub mod external;
 pub mod focus;
 pub mod forex;
 pub mod ipos;
+pub mod jobs;
 pub mod keeper;
 pub mod mutual_funds;
 pub mod nepse_intraday;

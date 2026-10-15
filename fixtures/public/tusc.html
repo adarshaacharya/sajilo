@@ -1,0 +1,760 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://tusc.tu.edu.np/assets/temp2/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="https://tusc.tu.edu.np/assets/temp2/font/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://tusc.tu.edu.np/assets/temp2/css/temp2.css">
+    <link rel="shortcut icon" href="https://portal.tu.edu.np/medias/Tribhuvan_University_logo.svg_2023_09_12_10_42_11.png" type="image/x-icon">
+    <title>TU Service Commission</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="https://tusc.tu.edu.np/assets/temp1/images/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://tusc.tu.edu.np/assets/temp1/images/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://tusc.tu.edu.np/assets/temp1/images/favicon/favicon-16x16.png">
+    <link rel="manifest" href="https://tusc.tu.edu.np/assets/temp1/images/favicon/site.webmanifest">
+    <link rel="mask-icon" href="https://tusc.tu.edu.np/assets/temp1/images/favicon/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+
+</head>
+<body>
+    <header class="header shadow">
+    <div class="header-top">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-xl-10 col-lg-10 col-md-10 col-sm-12">
+                <div class="header-top-left d-flex align-items-center">
+                    <div class="mr-2"> <a href="https://tu.edu.np/"> <img src="https://tusc.tu.edu.np/assets/logo.png" height="30px"
+                        alt=""></a></div>
+                        <div class="header-top-left">
+                            <ul class="header-top-links">
+                                                                                                            <li class=""><a
+                                                href="https://tu.edu.np/news">NEWS</a></li>
+                                                                                                                                                <li class="active"><a
+                                                href="https://tu.edu.np/notices">NOTICE</a></li>
+                                                                                                                                                <li class=""><a
+                                                href="https://tu.edu.np/events">EVENTS</a></li>
+                                                                                                                                                <li class="ht-drodown "><a href="">RESOURCES <i
+                                                    class="bi bi-caret-down-fill ms-2"></i></a>
+                                            <div class="header-top-dropdown">
+                                                <ul>
+                                                                                                            <li class=""><a
+                                                                href="https://tu.edu.np/downloads">DOWNLOADS</a>
+                                                        </li>
+                                                                                                            <li class=""><a
+                                                                href="https://tu.edu.np/gallery">GALLERY</a>
+                                                        </li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </li>
+                                                                                                                                                <li class=""><a
+                                                href="https://tu.edu.np/pages/scholorship-20">Scholarships</a></li>
+                                                                                                                                                <li class="ht-drodown "><a href="">Rules <i
+                                                    class="bi bi-caret-down-fill ms-2"></i></a>
+                                            <div class="header-top-dropdown">
+                                                <ul>
+                                                                                                            <li class=""><a
+                                                                href="https://tu.edu.np/downloads">Act</a>
+                                                        </li>
+                                                                                                            <li class=""><a
+                                                                href="https://tu.edu.np/pages/rules-211">Rules</a>
+                                                        </li>
+                                                                                                            <li class=""><a
+                                                                href="https://tu.edu.np/pages/laws-212">Laws</a>
+                                                        </li>
+                                                    
+                                                </ul>
+                                            </div>
+                                        </li>
+                                                                                                    <li class="mx-2"><a href="https://tu.edu.np/./calendar" title="Calendar"><i
+                                            class="bi bi-calendar3"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 my-1">
+                    <div class="header-top-right">
+                        <div class="header-top-search">
+                            <form class="d-flex m-0 align-items-center" method="GET" action="https://tu.edu.np/search"
+                            target="_blank">
+                            <input class="form-control" type="search" name="search" placeholder="Search"
+                            aria-label="Search" value="">
+                                <div>
+                                    <button class="btn text-warning" type="submit"><i class="bi bi-search"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="header-middle text-center">
+        <div class="container">
+                <div class="row align-items-center m-display-none d-flex">
+                    <div class="col-10 d-flex">
+                        <!-- <img src="https://portal.tu.edu.np/medias/Tribhuvan_University_logo.svg_2023_09_12_10_42_11.png" alt="" height="100"> -->
+                        <img src="https://tusc.tu.edu.np/assets/logo.png" height="100"
+                        alt="">
+                        <div class="text-start mt-4">
+                            <h4>TU Service Commission</h4>
+                            <small><b></b></small>
+                            <p>Kirtipur, Kathmandu</p>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="header-middle-right">
+                            <ul class="header-middle-contact text-end d-flex">
+                                    <li class="me-2 social-media-icons"><a href="" target="_blank"><i class="bi bi-facebook " style="color: #338CF1;font-size: 1.5rem;"></i></a>
+                                    </li>
+                                    <li class="me-2 social-media-icons"><a href=""><i class="bi bi-twitter" style="color: #399BEF ;font-size: 1.5rem;"></i></a></li>
+                                    <li class="me-2 social-media-icons"><a href=""><i class="bi bi-linkedin" style="color: #2366C2;font-size: 1.5rem;"></i></a></li>
+                                    <li class="dropdown show">
+                                        <div class="me-2 mt-1" id="shareButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-share-fill" style="color: #1b6ae0 ;font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div class="dropdown-menu" aria-labelledby="shareButton">
+                                            <a class="dropdown-item text-primary"
+                                                href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ftusc.tu.edu.np%2Fnotices%3Fnotice_type%3D38"
+                                                target="_blank">
+                                                <i class="bi bi-facebook me-2 text-primary"></i>Share on facebook
+                                            </a>
+                                            <a class="dropdown-item text-primary"
+                                                href="https://twitter.com/intent/tweet?text=Check+this+out!&url=https%3A%2F%2Ftusc.tu.edu.np%2Fnotices%3Fnotice_type%3D38"
+                                                target="_blank">
+                                                <i class="bi bi-twitter me-2 text-info"></i>Share on twitter
+                                            </a>
+                                            <a class="dropdown-item text-primary"
+                                                href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Ftusc.tu.edu.np%2Fnotices%3Fnotice_type%3D38"
+                                                target="_blank">
+                                                <i class="bi bi-linkedin me-2 text-primary"></i>Share on linkedin
+                                            </a>
+                                        </div>
+                                    </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <div class="d-flex align-items-center">
+                    <img src="https://portal.tu.edu.np/medias/Tribhuvan_University_logo.svg_2023_09_12_10_42_11.png" alt="" height="100">
+                    <div class="text-start ms-2">
+                        <div class="title">TU Service Commission</div>
+                        <div class="address">Kirtipur, Kathmandu</div>
+                    </div>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"><i class="bi bi-list"></i></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/" id="navbarDropdown" role="button" aria-expanded="false">
+                            <i class="bi bi-house-fill"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="https://tusc.tu.edu.np/institute/calendar" id="navbarDropdown" role="button"
+                           aria-expanded="false">
+                            <img src="/assets/calendar.png" alt="" width="25">
+
+
+                        </a>
+                    </li>
+                                                                                                        <li class="nav-item dropdown  ">
+                                                                            <div class="nav-link dropdown-toggle d-flex justify-content-between"
+                                             id="navbarDropdown" role="button" aria-expanded="false">
+                                            <a href="/pages/about-us-349" class="text-white">
+                                                
+                                                About Us
+                                            </a>
+                                            <div class="second-level-menu-toogle d-lg-none">
+                                                <i class="bi bi-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/pages/about-us-349">Introduction
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/tuscofficials">TU Service Commission Officials
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/pages/miscellaneous-358">Organizational Structure
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/pages/miscellaneous-358">Divisions
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/staffs">Staffs
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                            </ul>
+                                </li>
+
+                                                                                                                            
+                                <li class="nav-item">
+                                    
+                                        <a class="nav-link active" aria-current="page" href="https://vacancy.tu.edu.np/"
+                                           target="_blank"> Online Application (कर्मचारी)
+                                        </a>
+                                                                    </li>
+                                                                                                                            
+                                <li class="nav-item">
+                                    
+                                        <a class="nav-link active" aria-current="page" href="https://teachervacancy.tu.edu.np/"
+                                           target="_blank"> Online Application Teacher
+                                        </a>
+                                                                    </li>
+                                                                                                                            
+                                <li class="nav-item">
+                                    
+                                        <a class="nav-link active" aria-current="page" href="###"
+                                           target="_blank"> Eligibility
+                                        </a>
+                                                                    </li>
+                                                                                                                            
+                                <li class="nav-item">
+                                                                            <a class="nav-link active " aria-current="page"
+                                           href="/downloads"> Act, Rules and Regulations
+                                        </a>
+                                                                    </li>
+                                                                                                                            
+                                <li class="nav-item">
+                                                                            <a class="nav-link active " aria-current="page"
+                                           href="/notices"> Notices
+                                        </a>
+                                                                    </li>
+                                                                                                                            
+                                <li class="nav-item">
+                                    
+                                        <a class="nav-link active" aria-current="page" href="https://tusc.rigojobs.com/teacheropen/login/"
+                                           target="_blank"> कृति फाराम – उप प्राध्यापक खुला प्रतियोगिता
+                                        </a>
+                                                                    </li>
+                                                                                                                                                            <li class="nav-item dropdown  ">
+                                                                            <div class="nav-link dropdown-toggle d-flex justify-content-between"
+                                             id="navbarDropdown" role="button" aria-expanded="false">
+                                            <a href="/pages/miscellaneous-358" class="text-white">
+                                                
+                                                Syllabus
+                                            </a>
+                                            <div class="second-level-menu-toogle d-lg-none">
+                                                <i class="bi bi-arrow-right"></i>
+                                            </div>
+                                        </div>
+                                                                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/downloads">Lecturer Open
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/downloads">Staff Internal
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                                    <li class="">
+                                                                                                    <a class="dropdown-item text-wrap"
+                                                       href="/downloads">Staff Open
+                                                                                                            </a>
+                                                                                                                                            </li>
+
+                                                                            </ul>
+                                </li>
+
+                                                                                                                            
+                                <li class="nav-item">
+                                                                            <a class="nav-link active " aria-current="page"
+                                           href="/faqs"> FAQs
+                                        </a>
+                                                                    </li>
+                                                                                                            </ul>
+            </div>
+        </div>
+    </nav>
+            <div class="scroll-news">
+            <div class="container">
+                <div class="news-acroll-warpper position-relative">
+                    <div class="scroll-news-badge"><i class="bi bi-newspaper me-2"></i>Highlights</div>
+                    <marquee behavior="" direction="" onmouseover="this.stop();" onmouseout="this.start();">
+                        <ul>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">1</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15919">पुनर्योगको नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">2</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15918">पुनर्योगको नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">3</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15917">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">4</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15916">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">5</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15915">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">6</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15914">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">7</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15812">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">8</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15680">कृति तथा Predatory Journal/Publisher को सूची प्रकाशन सम्बन्धी सूचना (विज्ञापन नं. ६६७/०८१-०८२ सहप्राध्यापक गणित)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">9</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15650">कृति तथा Predatory Journal/Publisher को सूची प्रकाशन सम्बन्धी सूचना (विज्ञापन नं. ७०७/०८१-०८२ सहप्राध्यापक संस्कृति)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">10</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15640">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">11</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15509">प्रयोगात्मक परीक्षा सञ्चालन हुने सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">12</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15504">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">13</div>
+                                    <a href="https://tusc.tu.edu.np/notices/15240">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">14</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14885">अन्तर्वार्ता सञ्चालन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">15</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14884">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">16</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14688">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">17</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14642">प्रयोगात्मक परीक्षा सञ्चालन हुने सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">18</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14608">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">19</div>
+                                    <a href="https://tusc.tu.edu.np/notices/14219">नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">20</div>
+                                    <a href="https://tusc.tu.edu.np/notices/8062">छुट नामावली सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">21</div>
+                                    <a href="https://tusc.tu.edu.np/notices/8013">नामावली प्रकाशन सम्बन्धी सूचना (वि.नंं. ४१८।०८१–८२  , ४१९।०८१–८२  , ४२०।०८१–८२  ,४२१।०८१–८२  ,४२२।०८१–८२  ,४२३।०८१–८२ )</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">22</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7982">नामावली प्रकाशन सम्बन्धी सूचना (वि.नं. ४०७।०८१–८२ लेखा अधिकृत)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">23</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7981">नामावली प्रकाशन सम्बन्धी सूचना (वि.नं. ४०९।०८१–८२ लेखा सहायक)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">24</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7979">नामावली प्रकाशन सम्बन्धी सूचना (वि.नं. ४१४।०८१–८२ स्टाफ नर्स)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">25</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7978">नामावली प्रकाशन सम्बन्धी सूचना  (वि.नं. ४१०।०८१–८२ सहायक कानूनी सल्लाहकार वि.नं. ४११।०८१–८२ पुस्तकालय अधिकृत वि.नं. ४१२।०८१–८२ पुस्तकालय सहायक)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">26</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7977">नामावली प्रकाशन सम्बन्धी सूचना (वि.नं. ४१५।०८१–८२ प्राविधिक अधिकृत सूचना प्रविधि वि.नं. ४१६।०८१–८२ मुख्य प्राविधिक सहायक सूचना प्रविधि वि.नं. ४१७।०८१–८२ प्राविधिक सहायक सूचना प्रविधि)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">27</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7976">नामावली प्रकाशन सम्बन्धी सूचना ( वि.नं. ४१३।०८१–८२ नर्सिङ्ग अधिकृत)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">28</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7937">नामावली प्रकाशन सम्बन्धी सूचना  ( वि.नं. ४०६।०८१–८२ कार्यालय सहायक)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">29</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7936">नामावली प्रकाशन सम्बन्धी सूचना (वि.नं. ४०५।०८१–८२ मुख्य कार्यालय सहायक)</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">30</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7933">छुट नामावली सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">31</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7737">दरखास्त आव्हान सम्बन्धी सूचना –५    उप–प्राध्यापक पदका लागि अनुसन्धानात्मक विशिष्टताका आधारमा खुला प्रतियोगिता</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">32</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7736">दरखास्त आव्हान सम्बन्धी सूचना –४ उप–प्राध्यापक पदका लागि खुला प्रतियोगिता</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">33</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7734">दरखास्त आव्हान सम्बन्धी सूचना –२ प्राध्यापक तथा सह–प्राध्यापक पदका लागि आन्तरिक प्रतियोगिता</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">34</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7603">उपप्राध्यापक पदको नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">35</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7577">उपप्राध्यापक पदको नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">36</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7494">उपप्राध्यापक पदको नतिजा प्रकाशन सम्बन्धी सूचना</a>
+                                </li>
+                                                            <li class="me-4">
+                                    <div class="scroll-index">37</div>
+                                    <a href="https://tusc.tu.edu.np/notices/7262">नतिजा प्रकाशनसम्बन्धी सूचना</a>
+                                </li>
+                                                    </ul>
+                    </marquee>
+                </div>
+
+            </div>
+        </div>
+    </header>
+        <div class="inner-banner"
+        style="background-image: url(/assets/temp1/images/not.png);">
+        <div class="container">
+            <div class="inner-banner-wrapper">
+                <div class="inner-banner-detail">
+                    <h4 class="title">Notices</h4>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="https://tusc.tu.edu.np">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">
+                                Notices
+                            </li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="notices-pg">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12">
+                    <div class="section-title mb-5 py-3">
+                        <h3><i class="bi bi-layout-text-window-reverse"></i> Notices</h3>
+                    </div>
+                    <div class="col-md-12 mb-5">
+                        <form class="form" method="GET" action="https://tusc.tu.edu.np/notices">
+                            <div class="row">
+                                <div class="col-md-12 form-group my-2">
+                                    <input class="form-control border border-secondary" type="title" placeholder="Title"
+                                        name="title" aria-label="Title" value="">
+                                </div>
+
+                                <div class="col-md-4 form-group my-2">
+                                    <input type="hidden" name="start_date" id="start_date"
+                                        value="">
+                                    <input class="form-control border border-secondary datepicker" type="text"
+                                        name="nep_start_date" placeholder="Publish Date From" aria-label="Publish Date"
+                                        data-field="#start_date">
+                                </div>
+                                <div class="col-md-4 form-group my-2">
+                                    <input type="hidden" name="end_date" id="end_date"
+                                        value="">
+                                    <input class="form-control border border-secondary datepicker" type="text"
+                                        name="nep_end_date" placeholder="Publish Date To" aria-label="Publish Date"
+                                        data-field="#end_date">
+                                </div>
+                                <div class="col-md-4 form-group my-2">
+                                    <select class="form-select border border-secondary" name="notice_type">
+                                                                                    <option value=""
+                                                >
+                                                Select Notice Type</option>
+                                                                                    <option value="38"
+                                                selected>
+                                                Advertisement</option>
+                                                                                    <option value="39"
+                                                >
+                                                Written Exam</option>
+                                                                                    <option value="40"
+                                                >
+                                                Interview</option>
+                                                                                    <option value="41"
+                                                >
+                                                Result</option>
+                                                                                    <option value="42"
+                                                >
+                                                Written Exam Result</option>
+                                                                                    <option value="43"
+                                                >
+                                                Miscellaneous</option>
+                                                                                    <option value="945"
+                                                >
+                                                कृति तथा Predatory Journal/Publisher को सूची प्रकाशन सम्बन्धी सूचना</option>
+                                                                                    <option value="958"
+                                                >
+                                                स्वत: प्रकाशन (Proactive Disclosure)</option>
+                                                                            </select>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-outline-success" type="submit"><i class="bi bi-search me-2"></i>
+                                        Search</button>
+                                    <a href="https://tusc.tu.edu.np/notices" class="btn btn-danger rounded-0"><i
+                                            class="bi bi-arrow-clockwise me-2 "></i>Refresh</a>
+                                </div>
+                            </div>
+                        </form>
+
+                        <hr>
+                    </div>
+                    <div class="notices-warpper rec-post">
+                        <ul>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-09-08</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/9146">
+                                            <h5>उप प्राध्यापक पदको पदपूर्तिका लागि दरखास्त आव्हान सम्बन्धी सूचना –६</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-06-04</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/7737">
+                                            <h5>दरखास्त आव्हान सम्बन्धी सूचना –५    उप–प्राध्यापक पदका लागि अनुसन्धानात्मक विशिष्टताका आधारमा खुला प्रतियोगिता</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-06-04</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/7736">
+                                            <h5>दरखास्त आव्हान सम्बन्धी सूचना –४ उप–प्राध्यापक पदका लागि खुला प्रतियोगिता</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-06-04</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/7735">
+                                            <h5>दरखास्त आव्हान सम्बन्धी सूचना –३ प्राध्यापक तथा सह–प्राध्यापक पदका लागि  अनुसन्धानात्मक विशिष्टताका आधारमा खुला प्रतियोगिता</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-06-04</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/7734">
+                                            <h5>दरखास्त आव्हान सम्बन्धी सूचना –२ प्राध्यापक तथा सह–प्राध्यापक पदका लागि आन्तरिक प्रतियोगिता</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                            <div class="recent-post-wrapper shdow">
+                                    <div class="date">
+                                        <span class="nep_date">2025-06-04</span>
+                                    </div>
+                                    <div class="detail">
+                                        <a href="https://tusc.tu.edu.np/notices/7733">
+                                            <h5>दरखास्त आव्हान सम्बन्धी सूचना –१ प्राध्यापक तथा सहप्राध्यापक पदका लागि आन्तरिक प्रतियोगिता</h5>
+                                            
+                                        </a>
+                                    </div>
+                                </div>
+                                                    </ul>
+                        <nav>
+        <ul class="pagination">
+            
+                            <li class="page-item disabled" aria-disabled="true">
+                    <span class="page-link">&laquo; Previous</span>
+                </li>
+            
+            
+                            <li class="page-item">
+                    <a class="page-link" href="https://tusc.tu.edu.np/notices?notice_type=38&amp;cursor=eyJjcmVhdGVkX2F0IjoiMjAyNS0wNi0wNSAwNTo0Mjo1NSIsIl9wb2ludHNUb05leHRJdGVtcyI6dHJ1ZX0" rel="next">Next &raquo;</a>
+                </li>
+                    </ul>
+    </nav>
+
+                    </div>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12">
+                    <div class="sidebar">
+                        <h4 class="title">
+                            More News
+                        </h4>
+                        <hr>
+                                                    <div class="sidebar-wrapper d-flex align-items-center mb-3">
+                                <div class="date">
+                                    <span class="nep_date">2026-07-02</span>
+                                </div>
+                                <div class="detail ms-2">
+                                    <a href="https://tusc.tu.edu.np/news/251">
+                                        
+                                        Appointment of Chairman
+                                    </a>
+                                </div>
+
+                            </div>
+                                            </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="back-to-top shadow">
+    <i class="bi bi-arrow-up"></i>
+</div>
+
+<style>
+    .phone-img-list img { display: inline !important; vertical-align: middle; font-family: 'Mukta', sans-serif !important;
+        font-weight: 500;}
+</style>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+                <div class="info-officer">
+                    <div class="card">
+                                                    <img src="https://portal.tu.edu.np/medias/tulogo_2023_06_05_11_11_17.png" class="card-img-top"
+                                alt="...">
+                            <div class="card-body">
+                                <h5 class="card-title pt-3">Sita Khanal</h5>
+                                <span>Information Officer</span>
+                                <span>info@tusc.tu.edu.np</span>
+                                <span>9763372974
+                                    , 
+                                    014331121
+                                </span>
+                            </div>
+                                            </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+                <h4 class="f-title mb-4">Menu</h4>
+                <ul class="f-links">
+                                            <li>
+                                                            <a href="/gallery">Gallery</a>
+                                                    </li>
+                                            <li>
+                                                            <a href="/downloads">Downloads</a>
+                                                    </li>
+                                            <li>
+                                                            <a href="/pages/miscellaneous-358">Previous Questions</a>
+                                                    </li>
+                                            <li>
+                                                            <a href="/faqs">FAQs</a>
+                                                    </li>
+                                    </ul>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+                <h4 class="f-title mb-4">Useful Links</h4>
+                <ul class="f-links">
+                                            <li><a href="https://psc.gov.np/"> Public Service Commission</a></li>
+                                            <li><a href="https://www.ugcnepal.edu.np/"> University Grants Commission</a></li>
+                                            <li><a href="https://tu.edu.np/"> Tribhuvan University</a></li>
+                                            <li><a href="https://moest.gov.np/"> Ministry of Education Science and Technology</a></li>
+                                    </ul>
+            </div>
+            <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+                <h4 class="f-title mb-4">Contact</h4>
+                <ul class="f-links">
+                    <li><i class="bi bi-envelope me-2"></i>
+                                                info@tusc.tu.edu.np                                            </li>
+                    <li class="phone-img-list"><i class="bi bi-geo-alt me-2"></i>Kirtipur, Kathmandu</li>
+                    <li><i class="bi bi-phone me-2"></i>
+                                                4330846                                            </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="foter-bottom">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 d-flex justify-content-between">
+                    <p class="text-start">© 2026 All Rights Reserved</p>
+                    <p> <a href="https://websitedesignnepal.com/" target="_blank" style="color: #04293A">Website Design</a>
+                        by: <a href="https://www.youngminds.com.np/" style="color: #04293A" target="_blank">Young Minds</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!--=================footer section ended=========-->
+
+<!-- All Scripts-->
+<script src="https://tusc.tu.edu.np/assets/temp2/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="https://tusc.tu.edu.np/assets/temp2/js/temp2.js"></script>
+<script>
+    AOS.init({
+        once: true
+    });
+</script>
+</body>
+
+</html>

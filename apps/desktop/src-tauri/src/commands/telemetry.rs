@@ -55,6 +55,7 @@ pub const EVENTS: &[&str] = &[
     "screen.day",
     "screen.notes",
     "screen.more",
+    "screen.jobs",
     "screen.settings-notifications",
     // Tabs inside a screen.
     "tab.bazar.stocks",
@@ -74,6 +75,12 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.interest",
     "tab.tools.stopwatch",
     "tab.tools.nepali",
+    "tab.jobs.all",
+    "tab.jobs.psc",
+    "tab.jobs.tsc",
+    "tab.jobs.province",
+    "tab.jobs.security",
+    "tab.jobs.public",
     "tab.rashifal.daily",
     "tab.rashifal.weekly",
     "tab.rashifal.monthly",
@@ -96,6 +103,8 @@ pub const EVENTS: &[&str] = &[
     "action.break-skip",
     "action.reminder-open",
     "action.reminder-dismiss",
+    "action.job-open",
+    "action.job-remind",
 ];
 
 /// Counts since the last report that got through, by event name.
@@ -340,6 +349,7 @@ fn settings_snapshot(app: &AppHandle<Wry>) -> BTreeMap<&'static str, String> {
         ("focus", on_off(prefs::FOCUS_ENABLED, true)),
         ("notes", on_off(prefs::NOTES_ENABLED, true)),
         ("tools", on_off(prefs::TOOLS_ENABLED, true)),
+        ("jobs", on_off(prefs::JOBS_ENABLED, true)),
         ("clocks", on_off("clocksEnabled", false)),
     ])
 }

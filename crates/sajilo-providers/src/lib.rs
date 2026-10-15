@@ -17,6 +17,7 @@ pub mod hamropatro;
 pub mod hamropatro_metals;
 pub mod html;
 pub mod http;
+pub mod jobs;
 pub mod kalimati;
 pub mod kantipur;
 pub mod market_status;

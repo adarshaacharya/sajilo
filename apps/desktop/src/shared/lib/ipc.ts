@@ -11,6 +11,10 @@ import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
+import type { JobDetailPart } from "../../types/api/JobDetailPart";
+import type { JobSource } from "../../types/api/JobSource";
+import type { JobSourceInfo } from "../../types/api/JobSourceInfo";
+import type { JobVacancy } from "../../types/api/JobVacancy";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalHistory } from "../../types/api/MetalHistory";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
@@ -917,6 +921,17 @@ export const api = {
     invoke<StockPortfolio>("delete_stock_transaction", { id, prices }),
   /** CDSC's current-issue list; cached for half an hour, `refresh` forces a live pull. */
   getIpos: (refresh = false) => invoke<LoadState<IpoSnapshot>>("get_ipos", { refresh }),
+
+  jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
+  getJobs: (source: JobSource, refresh = false) =>
+    invoke<LoadState<JobVacancy[]>>("get_jobs", { source, refresh }),
+  /** Services and quotas one advertisement covers (Lok Sewa only). */
+  jobDetail: (id: string) => invoke<JobDetailPart[]>("job_detail", { id }),
+  /** Vacancies just shown, so they stop counting as new next time. */
+  markJobsSeen: (ids: string[]) => invoke<void>("mark_jobs_seen", { ids }),
+  /** A reminder the morning before a vacancy's last day to apply. */
+  remindJobDeadline: (id: string) => invoke<void>("remind_job_deadline", { id }),
+  forgetJobDeadline: (id: string) => invoke<void>("forget_job_deadline", { id }),
   /** ShareHub's upcoming book closures; cached for an hour, `refresh` forces a live pull. */
   getDividends: (refresh = false) =>
     invoke<LoadState<DividendSnapshot>>("get_dividends", { refresh }),

@@ -53,6 +53,7 @@ pub mod crypto;
 pub mod dividends;
 pub mod forex;
 pub mod ipos;
+pub mod jobs;
 pub mod load_state;
 pub mod meta;
 pub mod mutual_funds;

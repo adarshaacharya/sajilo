@@ -1,0 +1,2389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    
+    <style>
+        /* Apply color filters to wrapper ONLY, never to body */
+        #page-content-wrapper {
+            filter: none;
+            transition: filter 0.3s ease;
+        }
+
+.btn-bright-yellow {
+    background-color: #e4d65b !important;
+    color: #000000 !important;
+    font-weight: 600;
+}
+body.color-grayscale  #page-content-wrapper * {
+    background-color: #444647d8 !important;
+    color: #ffffff !important;
+    border-color: #666666 !important;
+}
+
+        body.color-grayscale #page-content-wrapper {
+            filter: grayscale(100%) contrast(120%);
+            background-color: #212529;
+            color:white;
+        }
+
+        body.color-protanopia #page-content-wrapper {
+            filter: url('#protanopia-filter');
+        }
+
+        /* Accessibility Widget - always visible, never filtered */
+        #accessibility-widget {
+            position: fixed !important;
+            right: 0;
+            top: 50vh;
+            transform: translateY(-50%);
+            z-index: 99999;
+            /* display:none; */
+        }
+
+        #accessibility-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50% 0 0 50%;
+            background: #495057;
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: -2px 2px 6px rgba(0,0,0,0.3);
+            transition: background 0.2s ease;
+        }
+
+        #accessibility-toggle-btn:hover {
+            background: #212529;
+        }
+
+        #accessibility-panel {
+            display: none;
+            position: absolute;
+            right: 44px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px 8px;
+            flex-direction: column;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        #accessibility-panel .btn {
+            filter: none !important;
+        }
+        .low-bandwidth img {
+    display: none !important;
+        }
+
+        .low-bandwidth video {
+    display: none !important;
+        }
+
+    .low-bandwidth iframe {
+    display: none !important;
+    }
+
+/* Optional: remove background images */
+.low-bandwidth * {
+    background-image: none !important;
+}
+/* Active state for bandwidth buttons in panel */
+    #btn-low-bandwidth.active {
+        background-color: #6c757d !important;
+        color: #fff !important;
+    }
+    #btn-high-bandwidth.active {
+        background-color: #0d6efd !important;
+        color: #fff !important;
+    }
+
+
+    /* ── Top-right bandwidth toggle button ── */
+#bandwidth-top-btn {
+    display: inline-flex;
+    gap: 6px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 20px;
+    border: 1.5px solid #495057;
+    background: #fff;
+    color: #495057;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+    font-family: inherit;
+}
+   #bandwidth-top-btn:hover {
+    color: #495057;
+    background: #fff;
+}
+    #bandwidth-top-btn i {
+        font-size: 13px;
+    }
+    /* When low-bandwidth is active, tint the button orange to signal images are hidden */
+    body.low-bandwidth #bandwidth-top-btn {
+        border-color: #e67e22;
+        color: #e67e22;
+    }
+    body.low-bandwidth #bandwidth-top-btn:hover {
+        background: #e67e22;
+        color: #fff;
+    }
+
+    /* ── Low-bandwidth: hide all images inside the page wrapper ── */
+        body.low-bandwidth #page-content-wrapper img {
+            display: none !important;
+        }
+    </style>
+     
+     
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Armed Police Force</title>
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <link rel="icon" href="https://api.apf.gov.np:8443/storage/uploads/site_setting/site_favicon/Favicon_1727596097.png" type="image/x-icon">
+
+    <meta name="description" content="Armed Police Force." />
+    <meta name="keywords" content="Armed Police Force" />
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="Armed Police Force" />
+    <meta property="og:description" content="Armed Police Force." />
+    <meta property="og:image" content="" />
+    <meta property="og:url" content="" />
+    <meta property="og:type" content="website" />
+    <!-- Twitter Tags -->
+    <meta name="twitter:title" content="Armed Police Force" />
+    <meta name="twitter:description" content="Armed Police Force." />
+    <meta name="twitter:image" content="" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="https://api.apf.gov.np:8443/storage/uploads/site_setting/site_favicon/Favicon_1727596097.png">
+
+    <!-- Audio Plugin -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.12/plyr.css" />
+
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Mukta -->
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+   
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://www.apf.gov.np/assets/plugins/bootstrap/css/bootstrap.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://www.apf.gov.np/css/index.css?v=2007182580">
+    <link rel="stylesheet" href="https://www.apf.gov.np/css/xommon.css?v=2008742182">
+    <link rel="stylesheet" href="https://www.apf.gov.np/css/responsive.css?v=719947055">
+    <link rel="stylesheet" href="https://www.apf.gov.np/css/bs-theme-overrides.css">
+    <link rel="stylesheet" href="https://www.apf.gov.np/css/styles.css?v=1464258067">
+
+    <!-- Swiper -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
+    <!-- aos -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- book viewer=> dearflip -->
+    <!-- https://jquery.dearflip.com/docs/getting-started/ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/dflip.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/css/themify-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@dearhive/dearflip-jquery-flipbook@1.7.3/dflip/js/dflip.min.js"></script>
+
+    <!-- Leaflet -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> -->
+
+
+    <!-- lightGallery -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery.min.css"
+        integrity="sha512-F2E+YYE1gkt0T5TVajAslgDfTEUQKtlu4ralVq78ViNxhKXQLrgQLLie8u1tVdG2vWnB3ute4hcdbiBtvJQh0g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery-bundle.min.css"
+        integrity="sha512-nUqPe0+ak577sKSMThGcKJauRI7ENhKC2FQAOOmdyCYSrUh0GnwLsZNYqwilpMmplN+3nO3zso8CWUgu33BDag=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js"
+        integrity="sha512-jEJ0OA9fwz5wUn6rVfGhAXiiCSGrjYCwtQRUwI/wRGEuWRZxrnxoeDoNc+Pnhx8qwKVHs2BRQrVR9RE6T4UHBg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- lightGallery Plugins (optional) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.umd.min.js"
+        integrity="sha512-VOQBxCIgNssJrB8+irZF7L8MvfpAshegc36C3H5QD7vmibXM4uCNaqJIaSNatD2z2ZQQJSx0k+q+m+xsSPp4Xw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/thumbnail/lg-thumbnail.min.js"
+        integrity="sha512-VBbe8aA3uiK90EUKJnZ4iEs0lKXRhzaAXL8CIHWYReUwULzxkOSxlNixn41OLdX0R1KNP23/s76YPyeRhE6P+Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/zoom/lg-zoom.min.js"
+        integrity="sha512-BLW2Jrofiqm6m7JhkQDIh2olT0EBI58+hIL/AXWvo8gOXKmsNlU6myJyEkTy6rOAAZjn0032FRk8sl9RgXPYIQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/fullscreen/lg-fullscreen.min.js"
+        integrity="sha512-11B0rPDzvnSOYzAT37QdnYgt0z9Xg+wX5tckB1QKl5Znl8RPvrB5npo38K2jCt+Ad44udCfBiKt9D4jRdkSE1A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/autoplay/lg-autoplay.min.js"
+        integrity="sha512-1YRlp9jO1ermVx9E3UzfBwoo88ODK0i9l2C2lNoZwCZAzvRdA+O0Lm00bUfkIf/A1esj4OK9yZ3yfgfa+FcYwg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/share/lg-share.min.js"
+        integrity="sha512-phbNIp+K+Fna0FQomV8kLzwnaSsvV7H5/cpTeZ1DanG/NFYPGzkcZS3Q+2z9eJOfjM3MLb0BdqzOzgxp1pgGKw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/video/lg-video.min.js"
+        integrity="sha512-Eo7d/1I/2Yywxw/unjfX06Q+owD82+3ign70yHtNTajId+C3CcHeqb+XP/a+uq/Fhrrkf8MeBcBiZqoMASFiiw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<body>
+      <!-- <button id="bandwidth-top-btn" onclick="toggleBandwidth()" title="Toggle bandwidth mode">
+        
+        <span id="bandwidth-top-label">Low Bandwidth</span>
+    </button> -->
+ 
+
+    <div id="page-content-wrapper">
+                    <!-- convert number format if current language is nepali -->
+<style>
+.blink-white-red {
+  font-size: 14px;
+  font-weight: bold;
+  animation: blinkColor 1s infinite;
+}
+.qr-text{
+    border: 2px solid #f1ebeb;
+    padding: 4px 14px;
+    border-radius: 50px;   /* makes oval shape */
+    font-size: 10px;
+    display: inline-block;
+}
+@keyframes blinkColor {
+  0%, 100% { color: white; }
+  50% { color: brown; }
+}
+</style>
+<header class="d-xl-flex flex-column d-none pb-1 position-relative new-header-w_">
+    <div class="secondary-color text-white">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between f-12">
+                <div class="d-flex justify-content-center align-items-center">
+                <div>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#sos-Modal" class="my-top-a" title="आपतकालीन सम्पर्क नं.">
+                        <i class="fa-solid fa-address-book"></i> आपतकालीन सम्पर्क नं.
+                    </a>
+                </div>
+                <div class="ms-5">
+                    <a href="https://mail.apf.gov.np/" target="_blank" class="my-top-a" title="इमेल">
+                    <i class="fas fa-globe"></i> इमेल
+                    </a>
+                </div>
+                <div class="ms-3">
+                     टोल फ्री : 
+                    <a href="tel:१११४" class="my-top-a" title="फोन: १११४">
+                    <i class="fa-solid fa-phone"></i> 
+                    १११४
+                    </a>
+                </div>
+                <div class="mx-3">
+                    <!-- एपीएफ :  -->
+                    <a href="tel:+९७७-०१५२४९५२४" class="my-top-a" title="फोन: +९७७-०१५२४९५२४">
+                        <i class="fa-solid fa-phone"></i> +९७७-०१५२४९५२४
+                    </a>
+                </div>
+                <div>
+                    <a href="mailto:info@apf.gov.np" class="my-top-a" title="इमेल गर्नुहोस्: info@apf.gov.np">
+                        <i class="fa-solid fa-envelope"></i> info@apf.gov.np
+                    </a>
+                </div>
+                </div>
+                <div class="d-flex justify-content-center align-items-center mb-1 position-relative">
+                    <i class="fa-solid fa-magnifying-glass search-icon_ f-18 custom-hover-color" title="खोज्नुहोस्"></i>
+                    <input 
+                    name="slug" 
+                    type="text" 
+                    placeholder="Search Here..." 
+                    class="primary-font ps-4 py-2 searchInput my-top-search" 
+                    onkeydown="handleInputKeyDown(event, this.value)"
+                    required
+                    >
+                </div>
+    <div class="d-flex justify-content-end align-items-center text-white">
+        <div class="language-switcher ">
+            <a href="#" class="custom-hover-color my-top-a f-12 fw-bold text-decoration-none whitespace-nowrap" id="languageSwitcherDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="नेपाली">
+                नेपाली <i class="ms-2 fa-solid fa-angle-down"></i>
+            </a>
+            <ul class="dropdown-menu py-1" aria-labelledby="languageSwitcherDropdown">
+                                <li><a class="dropdown-item custom-hover-color f-12 text-decoration-none primary-font-bold py-2" href="https://www.apf.gov.np/lang/en">English</a></li>
+                        </div>
+        <div class="ms-4 custom-font-b">
+            <span>
+                <a class="increase" title="फन्ट साइज बढाउनुहोस्">A <sup>+</sup></a> |
+                <a class="decrease" title="फन्ट साइज घटाउनुहोस्">A <sup>-</sup></a> 
+                <!-- <a class="reset">reset</a> -->
+            </span>
+        </div>
+        <div class="ms-4 custom-font-b"><button id="bandwidth-top-btn" onclick="toggleBandwidth()" title="Toggle bandwidth mode">
+    
+    <span id="bandwidth-top-label">Low Bandwidth</span>
+</button></div>
+        <!-- <div class="ms-4">
+            <button onclick="toggleLowBandwidth()" id="lowBandwidthBtn" style="background-color: var(--secondary-color); color: white; border: none; padding: 5px 10px; border-radius: 4px;">
+                Low Bandwidth
+            </button>
+        </div> -->
+        <!-- <div>
+            <i class="fa-solid fa-magnifying-glass search-icon f-18 mt-1 cursor-pointer custom-hover-color ps-3 pe-1 ps-xl-4" title="खोज्नुहोस्"></i>
+        </div> -->
+
+        <!-- Desktop Search Bar -->
+        <div id="search-bar" class="w-100 search-bar position-absolute h-75 align-items-center cursor-pointer rounded-50 p-3 justify-content-between">
+            <div class="d-flex w-100">
+                <input 
+                    name="slug" 
+                    type="text" 
+                    placeholder="Search Here..." 
+                    class="w-90 outline-0 border-0 primary-font p-2 searchInput" 
+                    onkeydown="handleInputKeyDown(event, this.value)"
+                    required
+                    >
+            </div>
+            <i class="fa-solid fa-xmark cross-icon f-26 cursor-pointer primary-color custom-hover-color"></i>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="hamburger-menu position-absolute d-none d-xl-block_">
+        <img src="https://www.apf.gov.np/img/Home-Page-Images/Menu/toggle-menu.png" alt="Toggle Menu" class="toggle-menu cursor-pointer" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
+    </div>
+    <div class="new-header-w accent-color text-white" id="stickyHeader">
+    <div class="container header-container">
+        <div class="header d-flex pt-1_ justify-content-between position-relative">
+            <div class="header-left ">
+                <a href="https://www.apf.gov.np" class="text-decoration-none me-4 d-flex align-items-center justify-content-between">
+                    <!-- <img src="https://api.apf.gov.np:8443/storage/uploads/site_setting/site_logo/Logo_1727596097.png" class="apf-logo cursor-pointer img-fluid" alt="APF"> -->
+                    <img src="https://www.apf.gov.np/img/logo/2.png" class="apf-logo_ cursor-pointer img-fluid " alt="APF">
+                    <div class="text-white f-16 secondary-font-bold ms-2 my-logo-text">
+                        सशस्त्र प्रहरी बल, नेपाल
+                        <br/>
+                        Armed Police Force, Nepal                         
+                    </div>
+                </a>
+                
+            </div>
+            <div class="header-right d-flex">
+                <div class="d-flex flex-column justify-content-center position-relative">
+                    
+                    <ul class="header-menu d-flex list-unstyled m-0 my-1">
+                                                                        <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="/" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase" role="button" title="गृह पृष्ठ" target="">गृह पृष्ठ</a>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="हाम्रो बारे">
+                                हाम्रो बारे <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/development"
+                                        target="_self"
+                                    >
+                                        विकासक्रम
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/ethos-and-mission"
+                                        target="_self"
+                                    >
+                                        आदर्श र मिशन
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/ranks"
+                                        target="_self"
+                                    >
+                                        दर्जाहरु
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/martyrs"
+                                        target="_self"
+                                    >
+                                        सहिद
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/roles-of-armed-police-force"
+                                        target="_self"
+                                    >
+                                        कार्यादेशहरु
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="युएन मिसन">
+                                युएन मिसन <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/un-background"
+                                        target="_self"
+                                    >
+                                        पृष्ठ भुमि
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/mission-deployment"
+                                        target="_self"
+                                    >
+                                        परिचालन
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/un-vacany"
+                                        target="_self"
+                                    >
+                                        मिसन जागिर
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/un-mission-form"
+                                        target="_self"
+                                    >
+                                        मिसन फारम
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="पदपूर्ति">
+                                पदपूर्ति <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/vacancy"
+                                        target="_self"
+                                    >
+                                        पदपूर्ति सूचना
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/syllabus-general"
+                                        target="_self"
+                                    >
+                                        पाठ्यक्रम (साधारण  समुह)
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/syallbus-technical-engineering"
+                                        target="_self"
+                                    >
+                                        पाठ्यक्रम (प्राविधिक-ईन्जिनियरिङ्ग  समुह)
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/syllabus-technical-health"
+                                        target="_self"
+                                    >
+                                        पाठ्यक्रम (प्राविधिक -स्वास्थ्य समुह )
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/syllabus-other"
+                                        target="_self"
+                                    >
+                                        पाठ्यक्रम (अन्य समुह)
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/vacancy-forms"
+                                        target="_self"
+                                    >
+                                        दरखास्त फारम
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/results"
+                                        target="_self"
+                                    >
+                                        नतिजा
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="/gallery" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase" role="button" title="ग्यालरी" target="">ग्यालरी</a>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="डाउनलोड">
+                                डाउनलोड <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/forms"
+                                        target="_self"
+                                    >
+                                        फारम
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/apf-calendars"
+                                        target="_self"
+                                    >
+                                        ए.पी.एफ पात्रो
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/directory"
+                                        target="_self"
+                                    >
+                                        निर्देशिका
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/act-rules-and-regulations"
+                                        target="_self"
+                                    >
+                                        ऐन तथा नियमावली
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/information-for-staff"
+                                        target="_self"
+                                    >
+                                        कर्मचारीहरूका लागि सूचना
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/dress-code-booklet"
+                                        target="_self"
+                                    >
+                                        पोशाक कोड पुस्तिका
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://www.apf.gov.np/right-to-information"
+                                        target="_self"
+                                    >
+                                        स.प्र.बल,नेपाल द्वारा जारी सूचना
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="हस्पिटलहरुसंगको सम्झौता">
+                                हस्पिटलहरुसंगको सम्झौता <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/valley"
+                                        target="_self"
+                                    >
+                                        उपत्यका
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/koshi-province"
+                                        target="_self"
+                                    >
+                                        कोशी प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/madhesh-province"
+                                        target="_self"
+                                    >
+                                        मधेश प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/bagmati-province"
+                                        target="_self"
+                                    >
+                                        बाग्मती प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/gandaki-province"
+                                        target="_self"
+                                    >
+                                        गण्डकी प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/lumbini-province"
+                                        target="_self"
+                                    >
+                                        लुम्बिनी प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/karnali-province"
+                                        target="_self"
+                                    >
+                                        कर्णाली प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://apf.gov.np/sudurpaschim-province"
+                                        target="_self"
+                                    >
+                                        सुदूरपश्चिम प्रदेश
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="कल्याणकारी">
+                                कल्याणकारी <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://napfs.edu.np/"
+                                        target="_self"
+                                    >
+                                        ए.पी.एफ विद्यालय
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://hospital.apf.gov.np/"
+                                        target="_self"
+                                    >
+                                        ए.पी.एफ अस्पताल
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="javascript:void(0)" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase whitespace-nowrap" id="aboutDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="प्रकाशन">
+                                प्रकाशन <span> <i class="ms-2 fa-solid fa-angle-down"></i> </span>
+                            </a>
+                            <ul class="dropdown-menu py-1" aria-labelledby="aboutDropdown">
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/publication/apf-publication-day"
+                                        target="_self"
+                                    >
+                                        ए.पी.एफ दिवस विशेषाङ्क
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://csc.apf.gov.np/publication/journal"
+                                        target="_self"
+                                    >
+                                        APF CSC Journals
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="https://hospital.apf.gov.np/publication/pratibimba_2081"
+                                        target="_self"
+                                    >
+                                        नेपाल ए.पी.एफ अस्पताल प्रतिविम्भ २०८१
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/publication/samarpan-apf-monthly-newspaper"
+                                        target="_self"
+                                    >
+                                        समर्पण ए.पी.एफ मासिक पत्रिका
+                                    </a>
+                                </li>
+                                
+                                
+                                                                <li>
+                                    <a 
+                                        class="dropdown-item primary-font-bold primary-color f-14 py-2" 
+                                        href="/publication/other_publication"
+                                        target="_self"
+                                    >
+                                        अन्य प्रकाशन
+                                    </a>
+                                </li>
+                                
+                                
+                                                            </ul>
+                            
+                        </li>
+                                                <li class="nav-item dropdown cursor-pointer ps-3 ps-xl-4">
+                                                        <a href="contact-us" class="custom-hover-color primary-font-bold text-white f-14 text-decoration-none text-uppercase" role="button" title="सम्पर्क" target="">सम्पर्क</a>
+                            
+                        </li>
+                                                                    </ul>
+                </div>
+                <div class="d-flex flex-column align-items-center ms-4">
+                    <!-- <a  class="blink-white-red" href="https://api.apf.gov.np:8443/storage/uploads/media_files/एपिएफ APPS सम्बन्धी भिडियो ०५.११ गते.mp4" target="_blank">
+                        Community Alert System
+                    </a>-->
+                   <img src="https://www.apf.gov.np/img/logo/gunaso.png" class="apf-logo_ cursor-pointer img-fluid" alt="APF" style="height:70px;"> 
+                      <span class="f-12 text-center "><a href="https://gunaso.apf.gov.np/" target="_blank">Online Gunaso</a></span> 
+                </div>
+                <!-- <a href="http://apf.innepal.biz/" target="_blank" class="text-decoration-none d-flex justify-content-end ms-5">
+                    <img src="https://www.apf.gov.np/img/logo/2.png" class="apf-logo_ cursor-pointer img-fluid" alt="APF">
+                </a> -->
+            </div>
+        </div>
+    </div>
+    </div>
+</header>
+
+<header class="d-xl-none new-header-w accent-color">
+    <div class="container">
+    <div class="row d-flex">
+        <div class="col-2 d-flex align-items-center justify-content-center">
+            <div class="hamburger-mobile-menu d-xl-none d-flex align-items-center">
+                <img src="https://www.apf.gov.np/img/Home-Page-Images/Menu/toggle-menu-white.png" alt="Toggle Menu" class="toggle-menu cursor-pointer" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
+            </div>
+        </div>
+        <div class="col-10 d-flex position-relative align-items-center justify-content-center ps-0">
+            <div class="row w-100 d-flex justify-content-between">
+                <div class="col-12 d-flex justify-content-start ps-0">
+                    <div class="header-left">
+                        <!-- <a href="https://www.apf.gov.np" class="text-decoration-none">
+                            <img src="https://api.apf.gov.np:8443/storage/uploads/site_setting/site_logo/Logo_1727596097.png" class="apf-logo cursor-pointer img-fluid" alt="Disaster Management Training School">
+                        </a> -->
+                        <a href="https://www.apf.gov.np" class="text-decoration-none p-0  d-flex align-items-center w-100">
+                            <!-- <img src="https://api.apf.gov.np:8443/storage/uploads/site_setting/site_logo/Logo_1727596097.png" class="apf-logo cursor-pointer img-fluid" alt="Disaster Management Training School"> -->
+                            <img src="https://www.apf.gov.np/img/logo/2.png" class="apf-logo_ cursor-pointer img-fluid " alt="APF">
+                        
+                            <div class="text-white f-14 f-sm-16 secondary-font-bold ms-2">
+                                सशस्त्र प्रहरी बल, नेपाल
+                                <br/>
+                                Armed Police Force, Nepal 
+                                    
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- <a href="http://apf.innepal.biz/" target="_blank" class="text-decoration-none d-flex justify-content-end ms-1">
+                <img src="https://www.apf.gov.np/img/logo/2.png" class="apf-logo_ cursor-pointer img-fluid" alt="APF">
+            </a> -->
+        </div>
+    </div>
+    </div>
+</header>
+
+
+
+  
+
+
+
+<div class="offcanvas offcanvas-start bg-body-tertiary py-3" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="width: 350px;">
+    <div class="offcanvas-header me-2">
+        <button type="button" class="btn-close f-18" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column px-0 py-0">
+        <ul class="sidebar-nav pt-0">
+        <li class="sidebar-item list-unstyled d-xl-none">
+                <!-- <div class="col-2 d-flex justify-content-end py-3">
+                    <div class="header-right d-flex align-items-center justify-content-between">
+                        <div>
+                            <i class="fa-solid fa-magnifying-glass search-icon-mobile f-23 cursor-pointer custom-hover-color" ></i>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Mobile Search Bar -->
+                <div class="pt-1 pb-3 d-flex justify-content-center">
+                    <div id="search-bar-mobile_" class="w-90 search-bar-mobile h-85 align-items-center cursor-pointer rounded-50 px-3 py-1 justify-content-between search-bar-color">
+                        <div class="d-flex w-100">
+                            <input 
+                                id="searchInputMobile"
+                                name="slug" 
+                                type="text" 
+                                placeholder="Search Here..." 
+                                class="w-90 outline-0 border-0 primary-font p-2 searchInput tertiary-color" 
+                                onkeydown="handleInputKeyDown(event, this.value)"
+                                required
+                                >
+                        </div>
+                        <!-- <i class="fa-solid fa-xmark cross-icon-mobile f-26 cursor-pointer primary-color custom-hover-color"></i> -->
+                        <i class="fa-solid fa-magnifying-glass f-23 cursor-pointer custom-hover-color" onclick="handleSearchClick()"></i>
+                    </div>
+                </div>
+            </li>
+                                    <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#56" aria-expanded="false" aria-controls="56">
+                    <span class="text-uppercase primary-font-bold f-14">हाम्रो बारे </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="56" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="/development"
+                            target="_self"
+                        >
+                            विकास
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/ethos-mission"
+                            target="_self"
+                        >
+                            इथोस र मिशन
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="/ranks"
+                            target="_self"
+                        >
+                            दर्जाहरु
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/martyrs"
+                            target="_self"
+                        >
+                            सहिद
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/roles-of-armed-police-force"
+                            target="_self"
+                        >
+                            भूमिका
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#57" aria-expanded="false" aria-controls="57">
+                    <span class="text-uppercase primary-font-bold f-14">युएन मिसन </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="57" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/un-background"
+                            target="_self"
+                        >
+                            पृष्ठ भुमि
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/mission-deployment"
+                            target="_self"
+                        >
+                            परिचालन
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/un-vacany"
+                            target="_self"
+                        >
+                            मिसन जागिर
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/un-mission-form"
+                            target="_self"
+                        >
+                            मिसन फारम
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#58" aria-expanded="false" aria-controls="58">
+                    <span class="text-uppercase primary-font-bold f-14">पदपूर्ति </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="58" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="/vacancy"
+                            target="_self"
+                        >
+                            पदपूर्ति
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/syllabus-general"
+                            target="_self"
+                        >
+                            साधारण पाठ्यक्रम
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/syallbus-technical-engineering"
+                            target="_self"
+                        >
+                            प्राविधिक (ईन्जिनियरिङ्ग तर्फ) पाठ्यक्रम
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/syllabus-technical-health"
+                            target="_self"
+                        >
+                            प्राविधिक (स्वास्थ्य तर्फ) पाठ्यक्रम
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/syllabus-other"
+                            target="_self"
+                        >
+                            अन्य पाठ्यक्रम
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/vacancy-forms"
+                            target="_self"
+                        >
+                            दरखास्त फारम
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/results"
+                            target="_self"
+                        >
+                            परिणामहरू
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#541" aria-expanded="false" aria-controls="541">
+                    <span class="text-uppercase primary-font-bold f-14">हस्पिटलहरुसंगको सम्झौता </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="541" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/valley"
+                            target="_self"
+                        >
+                            उपत्यका
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/koshi-province"
+                            target="_self"
+                        >
+                            कोशी प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/madhesh-province"
+                            target="_self"
+                        >
+                            मधेश प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/bagmati-province"
+                            target="_self"
+                        >
+                            बाग्मती प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/gandaki-province"
+                            target="_self"
+                        >
+                            गण्डकी प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/lumbini-province"
+                            target="_self"
+                        >
+                            लुम्बिनी प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/karnali-province"
+                            target="_self"
+                        >
+                            कर्णाली प्रदेश
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/sudurpaschim-province"
+                            target="_self"
+                        >
+                            सुदूरपश्चिम प्रदेश
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="javascript:void(0)" class="sidebar-link collapsed has-dropdown text-decoration-none py-2">
+                    <span class="text-uppercase primary-font-bold f-14">ग्यालरी </span>
+                </a>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#60" aria-expanded="false" aria-controls="60">
+                    <span class="text-uppercase primary-font-bold f-14">डाउनलोडहरू </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="60" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/forms"
+                            target="_self"
+                        >
+                            फारमहरू
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/apf-calendars"
+                            target="_self"
+                        >
+                            सशस्त्र प्रहरी बल पात्रो
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/directory"
+                            target="_self"
+                        >
+                            निर्देशिका
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/act-rules-and-regulations"
+                            target="_self"
+                        >
+                            ऐन तथा नियमावली
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/information-for-staff"
+                            target="_self"
+                        >
+                            कर्मचारीहरूको लागि जानकारी
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/dress-code-booklet"
+                            target="_self"
+                        >
+                            ड्रेस कोड पुस्तिका
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.apf.gov.np/right-to-information"
+                            target="_self"
+                        >
+                            स.प्र.बल,नेपाल द्वारा जारी सूचना
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#518" aria-expanded="false" aria-controls="518">
+                    <span class="text-uppercase primary-font-bold f-14">प्रकाशन </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="518" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/publication/apf-publication-day"
+                            target="_self"
+                        >
+                            APF Day Yearbook
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/publication/hospital-pratibimba-2080"
+                            target="_self"
+                        >
+                            Hospital Pratibimba 2080
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://csc.apf.gov.np/publication/journal"
+                            target="_self"
+                        >
+                            APF CSC Journals
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/publication/samarpan-apf-monthly-newspaper"
+                            target="_self"
+                        >
+                            Samarpan Apf Monthly Newspaper
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://hospital.apf.gov.np/publication/pratibimba_2081"
+                            target="_self"
+                        >
+                            APF Hospital Pratibimba 2081
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://apf.gov.np/publication/other_publication"
+                            target="_self"
+                        >
+                            Other  APF Publication
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#523" aria-expanded="false" aria-controls="523">
+                    <span class="text-uppercase primary-font-bold f-14">Welfare </span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="523" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://www.napfs.edu.np/"
+                            target="_blank"
+                        >
+                            APF School
+                        </a>
+                        
+                    </li>
+                                        <li class="sidebar-item">
+                        <a 
+                            class="sidebar-link text-decoration-none primary-font f-14 py-2" 
+                            href="https://hospital.apf.gov.np/"
+                            target="_blank"
+                        >
+                            APF Hospital
+                        </a>
+                        
+                    </li>
+                                    </ul>
+                            </li>
+
+                        <li class="sidebar-item list-unstyled">
+                                <a href="/contact-us" class="sidebar-link collapsed has-dropdown text-decoration-none py-2">
+                    <span class="text-uppercase primary-font-bold f-14">सम्पर्क गर्नुहोस् </span>
+                </a>
+                            </li>
+
+                                    <hr class="mx-4">
+            <li class="sidebar-item list-unstyled primary-font-medium">
+                <div class="ms-4 ps-1 f-15 primary-font-medium">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#sos-Modal" class="my-top-a" title="आपतकालीन सम्पर्क नं.">
+                        <i class="fa-solid fa-address-book"></i> आपतकालीन सम्पर्क नं.
+                    </a>
+                </div>
+                <hr class="mx-4">
+                <div class="ms-4 ps-1 my-2">
+                    <a href="https://mail.apf.gov.np/" target="_blank" class="my-top-a" title="इमेल">
+                    <i class="fas fa-globe"></i> <span class="f-15 primary-font-medium">इमेल</span>
+                    </a>
+                </div>
+                <div class="ms-4 ps-1 f-15 primary-font-medium">
+                     टोल फ्री : 
+                    <a href="tel:१११४" class="my-top-a" title="फोन: १११४">
+                    <i class="fa-solid fa-phone accent-color-text mx-1 "></i> <span class="accent-color-text ">
+                        १११४
+                    </span>
+                    </a>
+                </div>
+                <div class="ms-4 ps-1 my-2">
+                    <!-- एपीएफ :  -->
+                    <a href="tel:+९७७-०१५२४९५२४" class="my-top-a" title="फोन: +९७७-०१५२४९५२४">
+                        <i class="fa-solid fa-phone accent-color-text me-1 "></i> <span class="f-15">+९७७-०१५२४९५२४</span>
+                    </a>
+                </div>
+                <div class="ms-4 ps-1">
+                    <a href="mailto:info@apf.gov.np" class="my-top-a" title="इमेल गर्नुहोस्: info@apf.gov.np">
+                        <i class="fa-solid fa-envelope accent-color-text me-1 "></i> <span class="f-15">info@apf.gov.np</span>
+                    </a>
+                </div>
+            </li>
+            <hr class="mb-2 mx-4">
+            <li class="sidebar-item list-unstyled">
+                <a href="#" class="sidebar-link collapsed has-dropdown text-decoration-none py-2" data-bs-toggle="collapse" data-bs-target="#language" aria-expanded="false" aria-controls="language">
+                    <span class="fw-bold f-15 nepali-font">नेपाली</span>
+                    <i class="fas fa-chevron-down float-end"></i>
+                </a>
+                <ul id="language" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#offcanvasScrolling">
+                                        <li class="sidebar-item">
+                        <a class="sidebar-link text-decoration-none primary-font f-14 py-2" href="https://www.apf.gov.np/lang/en">English</a>
+                    </li>
+                    
+                </ul>
+            </li>
+            <li class="sidebar-item list-unstyled">
+                <div class="ms-4 custom-font-b">
+                    <span>
+                        <a class="increase sidebar-link d-inline-block ps-2 fw-bold" title="फन्ट साइज बढाउनुहोस्">A <sup>+</sup></a> |
+                        <a class="decrease sidebar-link d-inline-block fw-bold" title="फन्ट साइज घटाउनुहोस्">A <sup>-</sup></a> 
+                        <!-- <a class="reset">reset</a> -->
+                    </span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<div class="modal fade" id="sos-Modal" tabindex="-1" aria-labelledby="sosModalLabel"
+        aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-0_">
+            <div class="m-3_ quick-links-color px-xl-3 px-2 pt-3 pb-5 rounded-6">
+                <div class="modalButton_ d-flex justify-content-end position-relative">
+                    <button type="button" class="modal-btn-close text-white accent-color border-0 rounded-100"
+                        data-bs-dismiss="modal" aria-label="Close" title="Close">
+                        <i class="fa-solid fa-xmark modal-btn-icon"></i>
+                    </button>
+                </div>
+                <div class="modalHeader d-flex justify-content-center mb-2">
+                    <h5 class="modal-title f-26" id="sosModalLabel">आपतकालीन सम्पर्क नं.</h5>
+                </div>
+                <div class="modalBody mb-5_ px-3">
+                    <div class="row mt-xl-5 mt-3">
+                        <div class="mb-3 col-xl-4 col-lg-6 col-12">
+    <div class="h-100 contact-us-color d-flex align-items-center justify-content-center p-3 rounded-6 contact-us-border">
+        <div class="row w-100">
+            <div class="col-4"><img src="https://www.apf.gov.np/img/Home-Page-Images/Contact-Us-Icon/Icon-40-39.png" alt="हटलाइन" class="img-fluid"></div>
+            <div class="col-8">
+                <div class="col">
+                    <div class="row-6">
+                        <div class="secondary-font fw-bold f-14 contact-primary-color text-uppercase">हटलाइन</div>
+                    </div>
+                    <div class="row-6">
+                        <div>
+                            <a href="tel: १११४" title="फोन: १११४" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">१११४</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-3 col-xl-4 col-lg-6 col-12">
+    <div class="h-100 contact-us-color d-flex align-items-center justify-content-center p-3 rounded-6 contact-us-border">
+        <div class="row">
+            <div class="col-4"><img src="https://www.apf.gov.np/img/Home-Page-Images/Contact-Us-Icon/Icon-40-38.png" alt="अनुगमन तथा गुनासो व्यवस्थापन ईकाई" class="img-fluid"></div>
+            <div class="col-8">
+                <div class="col">
+                    <div class="row-6">
+                        <div class="secondary-font fw-bold f-14 contact-primary-color text-uppercase">अनुगमन तथा गुनासो व्यवस्थापन ईकाई</div>
+                    </div>
+                    <div class="row-6">
+                        <div class="row mb-1">
+                            <div class="col-lg-4">
+                                स.प्र.उ राधेश्याम धिमाल:
+                            </div>
+                            <div class="col-lg-8">
+                                <a href="tel: ९८५१२७२९१७" title="फोन: ९८५१२७२९१७" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">९८५१२७२९१७</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                हटलाइन:
+                            </div>
+                            <div class="col-lg-8">
+                                <a href="tel: ९८५१२६१२००" title="फोन: ९८५१२६१२००" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">९८५१२६१२००</a> <br>
+                                (२४ सै घण्टा) <br>
+                                <a href="tel: ०१-५२४९२१७" title="फोन: ०१-५२४९२१७" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">०१-५२४९२१७</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-3 col-xl-4 col-lg-6 col-12">
+    <div class="h-100 contact-us-color d-flex align-items-center justify-content-center p-3 rounded-6 contact-us-border">
+        <div class="row">
+            <div class="col-4"><img src="https://www.apf.gov.np/img/Home-Page-Images/Contact-Us-Icon/Icon-40-40.png" alt="गुनासो सुनुवाई शाखा (कार्यालय समय)" class="img-fluid"></div>
+            <div class="col-8">
+                <div class="col">
+                    <div class="row-6">
+                        <div class="secondary-font fw-bold f-14 contact-primary-color text-uppercase">गुनासो सुनुवाई शाखा (कार्यालय समय)</div>
+                    </div>
+                    <div class="row-6">
+                        <div>
+                            <a href="tel: ०१-५२४९२११" title="फोन: ०१-५२४९२११" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">०१-५२४९२११</a>
+                        </div>
+                        <div class="mt-3">
+                            <a href="https://gunaso.apf.gov.np" target="_blank" title="अनलाईन गुनासो/ सुझाव" class="button btn accent-border primary-font-bold f-16 text-white accent-color accent-color-button text-center rounded-6 px-3">
+                                <span>अनलाईन गुनासो/ सुझाव</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-3 col-xl-4 col-lg-6 col-12">
+    <div class="h-100 contact-us-color d-flex align-items-center justify-content-center p-3 rounded-6 contact-us-border">
+        <div class="row">
+            <div class="col-4"><img src="https://www.apf.gov.np/img/Home-Page-Images/Contact-Us-Icon/Icon-40-41.png" alt="सीमा सुरक्षासँग सम्बन्धित कुनै जानकारी दिनु वा लिनु परेमा" class="img-fluid"></div>
+            <div class="col-8">
+                <div class="col">
+                    <div class="row-6">
+                        <div class="secondary-font fw-bold f-14 contact-primary-color text-uppercase">सीमा सुरक्षासँग सम्बन्धित कुनै जानकारी दिनु वा लिनु परेमा</div>
+                    </div>
+                    <div class="row-6">
+                        <div>
+                            <a href="tel: ९८५१२६०७३०" title="फोन: ९८५१२६०७३०" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">९८५१२६०७३०</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mb-3 col-xl-4 col-lg-6 col-12">
+    <div class="h-100 contact-us-color d-flex align-items-center justify-content-center p-3 rounded-6 contact-us-border">
+        <div class="row">
+            <div class="col-4"><img src="https://www.apf.gov.np/img/Home-Page-Images/Contact-Us-Icon/Icon-40-42.png" alt="हस्पिटल हटलाईन (सशस्त्र प्रहरी कर्मचारीहरुका लागि)" class="img-fluid"></div>
+            <div class="col-8">
+                <div class="col">
+                    <div class="row-6">
+                        <div class="secondary-font fw-bold f-14 contact-primary-color text-uppercase">हस्पिटल हटलाईन (सशस्त्र प्रहरी कर्मचारीहरुका लागि)</div>
+                    </div>
+                    <div class="row-6">
+                        <div>
+                            <a href="tel: ९८५१२६०११२" title="फोन: ९८५१२६०११२" class="text-decoration-none secondary-font fw-bold f-17 contact-secondary-color about-info-links">९८५१२६०११२</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        
+        
+<link rel="stylesheet" href="https://www.apf.gov.np/css/vacancy.css">
+
+<div class="background-div position-relative d-flex flex-column justify-content-end"
+    style="background-image: url(https://www.apf.gov.np/img/Artboard.png)">
+    <div class="container">
+        <h1 class="mb-4 text-uppercase text-center text-xl-start text-white">पदपूर्ति सूचना</h1>
+    </div>
+    <div class="info-section info-section--border position-relative"></div>
+</div>
+<div class="static-content" data-aos="fade-up" data-aos-duration="600">
+    <div class="mb-5 pb-4">
+        <div class="container">
+            <div class="row justify-content-between">
+
+                <!-- <div class="col-sm-12 col-xl-8 col-xxl-9 justify-content-between order-last order-xl-0"> -->
+                <div class="col-sm-12 col-xl-9 justify-content-between order-last order-xl-0">
+
+                    <!-- <div class="grid-container"> -->
+                    <div class="row g-4 g-lg-0 cus-gap">
+                                                
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/Adv_083.05.26_1789101214.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2083-05-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">नयाँ भर्ना सम्बन्धी सूचना (२०८३/०५/२६ गते, सूचना नं. ०१(०८३/८४)</h5>
+                                        <div class="card-text-en"><p>नयाँ भर्ना सम्बन्धी सूचना (२०८३/०५/२६ गते, सूचना नं. ०१(०८३/८४)</p></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/New_Bharna_Notice_INSP_ASI_1766120077.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2082-09-04</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">नयाँ भर्ना सम्बन्धी सूचना (२०८२/०९/०४ गते, सूचना नं. ०३(०८२/८३)</h5>
+                                        <div class="card-text-en"><p>नयाँ भर्ना सम्बन्धी सूचना (२०८२/०९/०४ गते, सूचना नं. ०३(०८२/८३)</p></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/Adv_082.05.06_Cons_&amp;_Folls_1755830985.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2082-05-06</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान र सशस्त्र प्रहरी परिचर (विभिन्न ट्रेड) पदमा नयाँ भर्ना सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en"><p>&nbsp;सशस्त्र प्रहरी जवान र सशस्त्र प्रहरी परिचर (विभिन्न ट्रेड) पदमा नयाँ भर्ना सम्बन्धी सूचना</p></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/advertisement_lekha_kanoon_1740881711.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2081-11-18</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">साधारण समूह,कानून उपसमूह र साधारण समूह, लेखा उपसमूहतर्फ सशस्त्र प्रहरी निरीक्षक पदमा नयाँ भर्ना सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en"><p>साधारण समूह,कानून उपसमूह र साधारण समूह, लेखा उपसमूहतर्फ सशस्त्र प्रहरी निरीक्षक पदमा नयाँ भर्ना सम्बन्धी सूचना</p></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/677794d0a4cb5.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2081-09-19</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">नयाँ भर्ना सम्बन्धी सूचना (साधारण समूह, साधारण उपसमूह)</h5>
+                                        <div class="card-text-en">नयाँ भर्ना सम्बन्धी सूचना (साधारण समूह, साधारण उपसमूह)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6687777eb1743.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2081-03-21</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">नयाँ भर्ना सम्बन्धी सूचना (साधारण समूह, कानुन उपसमूह, साधारण समूह, लेखा उपसमूह र प्राविधिक उपसमूह (संचार तथा ईन्जिनियरिङ्ग) तर्फ सशस्त्र प्रहरी निरीक्षक पद )</h5>
+                                        <div class="card-text-en">नयाँ भर्ना सम्बन्धी सूचना (साधारण समूह, कानुन उपसमूह, साधारण समूह, लेखा उपसमूह र प्राविधिक उपसमूह (संचार तथा ईन्जिनियरिङ्ग) तर्फ सशस्त्र प्रहरी निरीक्षक पद )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6633783814c78.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2081-01-20</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी सहायक निरीक्षक (साधारण समूह, साधारण उपसमूहतर्फ) पद‌को लिखित परीक्षाको परीक्षा केन्द्र सम्बन्धी सूचना (स.प्र.बल, नेपाल प्रधान कार्यालय तथा  वाहिनी मुख्यालय सबै)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी सहायक निरीक्षक (साधारण समूह, साधारण उपसमूहतर्फ) पद‌को लिखित परीक्षाको परीक्षा केन्द्र सम्बन्धी सूचना (स.प्र.बल, नेपाल प्रधान कार्यालय तथा  वाहिनी मुख्यालय सबै)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/660e90453ea21.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-12-21</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">Immediate  Re-Vacancy Announcement (Nepal APF School Kohalpur-2, Banke)</h5>
+                                        <div class="card-text-en">Immediate  Re-Vacancy Announcement (Nepal APF School Kohalpur-2, Banke)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65e175eec38c9.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-11-18</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">प्राविधिक समूह (स्वास्थ्य तर्फ) नयाँ भर्ना सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">प्राविधिक समूह (स्वास्थ्य तर्फ) नयाँ भर्ना सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65dc77da3cffb.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-11-14</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">Vacancy Announcement (Nepal APF Schools Kritipur, Kohalpur, Saptari &amp; Jhalari)</h5>
+                                        <div class="card-text-en">Vacancy Announcement (Nepal APF Schools Kritipur, Kohalpur, Saptari & Jhalari)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65bf22d706409.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-10-21</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">Invitation for Bids (APF, Nepal Headquarters, Procurement Division, Kathmandu Nepal (IFB No: APF/NCB/G/01/2080/081 ))</h5>
+                                        <div class="card-text-en">Invitation for Bids (APF, Nepal Headquarters, Procurement Division, Kathmandu Nepal (IFB No: APF/NCB/G/01/2080/081 ))</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/659790b1eeb76.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-09-20</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">नयाँ भर्ना सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">नयाँ भर्ना सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6597bb378d527.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-09-20</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको माग पद संख्या थप सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको माग पद संख्या थप सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65604b8b3e4d0.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-08-08</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको लिखित परीक्षाको परीक्षा भवन कायम गरिएको सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको लिखित परीक्षाको परीक्षा भवन कायम गरिएको सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fb318c948.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. ७ बैद्यनाथ बाहिनी मुख्यालय, कैलाली)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. ७ बैद्यनाथ बाहिनी मुख्यालय, कैलाली)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fe256a39a.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको तेश्रो  चरणको विष्तृत स्वास्थ्य परीक्षण परीक्षामा उत्तीर्ण उम्मेदवारहरुको लिखित परीक्षा सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको तेश्रो  चरणको विष्तृत स्वास्थ्य परीक्षण परीक्षामा उत्तीर्ण उम्मेदवारहरुको लिखित परीक्षा सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fd066d69a.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fc9750587.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. १ बराह बाहिनी मुख्यालय, सुनसरी)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. १ बराह बाहिनी मुख्यालय, सुनसरी)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fc720cf78.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. २ छिन्नमस्ता बाहिनी मुख्यालय, महोत्तरी )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. २ छिन्नमस्ता बाहिनी मुख्यालय, महोत्तरी )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fc1b07486.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ बाहिनी मुख्यालय, कास्की )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ बाहिनी मुख्यालय, कास्की )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fba993446.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन  (स.प्र.बल,नेपाल नं. ५ बिन्ध्यावासिनी बाहिनी मुख्यालय, रुपन्देही )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन  (स.प्र.बल,नेपाल नं. ५ बिन्ध्यावासिनी बाहिनी मुख्यालय, रुपन्देही )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6530fb72eea9a.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-07-02</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. ६ महेश्वरी बाहिनी मुख्यालय, सुर्खेत)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको विस्तृत स्वास्थ्य परीक्षण परिक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. ६ महेश्वरी बाहिनी मुख्यालय, सुर्खेत)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293c128ddb3.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ७ बैद्यनाथ बाहिनी मुख्यालय, कैलाली )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ७ बैद्यनाथ बाहिनी मुख्यालय, कैलाली )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6529407e69fe2.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको तेश्रो चरणको विष्तृत स्वास्थ्य परीक्षण परीक्षाको मिति समय तालिका सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको तेश्रो चरणको विष्तृत स्वास्थ्य परीक्षण परीक्षाको मिति समय तालिका सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293dac788b6.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293d59e97e2.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. १ बराह बाहिनी मुख्यालय, सुनसरी )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. १ बराह बाहिनी मुख्यालय, सुनसरी )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293d34b5c34.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. २ छिन्नमस्ता बाहिनी मुख्यालय, महोत्तरी )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल,नेपाल नं. २ छिन्नमस्ता बाहिनी मुख्यालय, महोत्तरी )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293cc886b1e.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ बाहिनी मुख्यालय, कास्की )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ बाहिनी मुख्यालय, कास्की )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293ca1d34f7.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ५ बिन्ध्यावासिनी बाहिनी मुख्यालय, रुपन्देही )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ५ बिन्ध्यावासिनी बाहिनी मुख्यालय, रुपन्देही )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293c3e811d0.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ६ महेश्वरी बाहिनी मुख्यालय, सुर्खेत )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल,नेपाल नं. ६ महेश्वरी बाहिनी मुख्यालय, सुर्खेत )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65293afc8577f.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-26</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल, नेपाल नं. ३३ गण हेक्वा. त्रिपुरा, जुम्ला)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान पदको दोस्रो चरणको शारिरीक सहिष्णुता  परीक्षाको नतिजा प्रकाशन ( स.प्र.बल, नेपाल नं. ३३ गण हेक्वा. त्रिपुरा, जुम्ला)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/651146f51e74c.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-06-08</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ ) पदको शारीरिक सहिष्णुता परीक्षाको संशोधित मिति समय तालिका सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ ) पदको शारीरिक सहिष्णुता परीक्षाको संशोधित मिति समय तालिका सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6507103d53fbf.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ वाहिनी मुख्यालय, कास्की)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ४ मुक्तिनाथ वाहिनी मुख्यालय, कास्की)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65070fdb00f90.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ६ महेश्वरी वाहिनी मुख्यालय, सुर्खेत)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ६ महेश्वरी वाहिनी मुख्यालय, सुर्खेत)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6507151688b43.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. २ छिन्नमस्ता वाहिनी मुख्यालय, महोत्तरी )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. २ छिन्नमस्ता वाहिनी मुख्यालय, महोत्तरी )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/650710107ec59.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ५ विन्ध्यावासिनी वाहिनी मुख्यालय,रुपन्देही )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ५ विन्ध्यावासिनी वाहिनी मुख्यालय,रुपन्देही )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/6507c3797c8d2.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ ) पदको शारीरिक सहिष्णुता परीक्षाको मिति समय तालिका सम्बन्धी सूचना</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ ) पदको शारीरिक सहिष्णुता परीक्षाको मिति समय तालिका सम्बन्धी सूचना</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65070f49dfe06.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ३३ गण हे.क्वा. त्रिपुरा, जुम्ला)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ३३ गण हे.क्वा. त्रिपुरा, जुम्ला)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/65070f9dca946.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ७ बैद्यनाथ वाहिनी मुख्यालय, कैलाली)</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल नं. ७ बैद्यनाथ वाहिनी मुख्यालय, कैलाली)</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            <a href="https://api.apf.gov.np:8443/storage/uploads/news/pdf/650712c612d65.pdf" class="text-decoration-none" download target="_blank">
+                                <div class="career-card-div">
+                                    <div class="card-header-vac">
+                                        <span class="icon-text">
+                                            <i class="fa-solid fa-calendar-days"></i>
+                                            <!-- <span class="new-text">New</span> -->
+                                        </span>
+                                        <span class="posted">2080-05-31</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h5 class="card-title-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय )</h5>
+                                        <div class="card-text-en">सशस्त्र प्रहरी जवान (साधारण समूह, साधारण उपसमूहतर्फ) पदको प्रारम्भिक शारीरिक परीक्षण परीक्षाको नतिजा प्रकाशन (स.प्र.बल, नेपाल प्रधान कार्यालय )</div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-12 col-md-6 col-lg-4 ">
+                            
+<!-- trimmed for the fixture: the live page lists every notice since 2075 -->
+</div></div></div></body></html>

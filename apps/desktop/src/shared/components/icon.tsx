@@ -12,6 +12,7 @@ import { SFBold } from "sf-symbols-lib/monochrome/SFBold";
 import { SFBolt } from "sf-symbols-lib/monochrome/SFBolt";
 import { SFBook } from "sf-symbols-lib/monochrome/SFBook";
 import { SFBookClosed } from "sf-symbols-lib/monochrome/SFBookClosed";
+import { SFBriefcase } from "sf-symbols-lib/monochrome/SFBriefcase";
 import { SFCalendar } from "sf-symbols-lib/monochrome/SFCalendar";
 import { SFCalendarBadgeCheckmark } from "sf-symbols-lib/monochrome/SFCalendarBadgeCheckmark";
 import { SFCar } from "sf-symbols-lib/monochrome/SFCar";
@@ -205,6 +206,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   bold: SFBold,
   heading: SFTextformatSize,
   keyboard: SFKeyboard,
+  briefcase: SFBriefcase,
 };
 
 export type IconName =
@@ -308,7 +310,8 @@ export type IconName =
   | "checklist"
   | "bold"
   | "heading"
-  | "keyboard";
+  | "keyboard"
+  | "briefcase";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

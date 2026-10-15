@@ -23,6 +23,7 @@ export const TABS: readonly {
     | "focusEnabled"
     | "notesEnabled"
     | "toolsEnabled"
+    | "jobsEnabled"
     | null;
 }[] = [
   { to: "/", labelKey: "tab.today", icon: "today", module: null },
@@ -34,6 +35,7 @@ export const TABS: readonly {
   { to: "/focus", labelKey: "tab.focus", icon: "focus", module: "focusEnabled" },
   { to: "/notes", labelKey: "tab.notes", icon: "notes", module: "notesEnabled" },
   { to: "/keeper", labelKey: "tab.keeper", icon: "keeper", module: "keeperEnabled" },
+  { to: "/jobs", labelKey: "tab.jobs", icon: "briefcase", module: "jobsEnabled" },
 ];
 
 export function TabBar() {

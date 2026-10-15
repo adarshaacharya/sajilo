@@ -36,6 +36,7 @@ async fn refresh(app: &AppHandle<Wry>) {
     let bazar_enabled = enabled(app, prefs::BAZAR_ENABLED);
     let rashifal_enabled = enabled(app, prefs::RASHIFAL_ENABLED);
     let radio_enabled = enabled(app, prefs::RADIO_ENABLED);
+    let jobs_enabled = enabled(app, prefs::JOBS_ENABLED);
 
     let news_app = app.clone();
     let weather_app = app.clone();
@@ -44,6 +45,7 @@ async fn refresh(app: &AppHandle<Wry>) {
     let stocks_app = app.clone();
     let rashifal_app = app.clone();
     let radio_app = app.clone();
+    let jobs_app = app.clone();
     let telemetry_app = app.clone();
 
     tokio::join!(
@@ -76,6 +78,11 @@ async fn refresh(app: &AppHandle<Wry>) {
         async move {
             if radio_enabled {
                 commands::radio::get_stations(radio_app, Some(false)).await;
+            }
+        },
+        async move {
+            if jobs_enabled {
+                commands::jobs::refresh_all(&jobs_app).await;
             }
         },
         async move {

@@ -84,6 +84,9 @@ pub const KEEPER_ENABLED: &str = "keeperEnabled";
 pub const FOCUS_ENABLED: &str = "focusEnabled";
 pub const NOTES_ENABLED: &str = "notesEnabled";
 pub const TOOLS_ENABLED: &str = "toolsEnabled";
+pub const JOBS_ENABLED: &str = "jobsEnabled";
+/// Vacancy ids already shown on the Jobs screen, so only later ones are new.
+pub const JOBS_SEEN: &str = "jobsSeen";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";
