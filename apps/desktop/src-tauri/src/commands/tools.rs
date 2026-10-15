@@ -1,10 +1,10 @@
-//! The four calculators. Every one delegates to `sajilo-core` — the frontend
-//! never does a unit conversion itself, so there is one implementation of each
-//! constant in the product.
+//! The calculators and the Nepali typing tool. Every one delegates to
+//! `sajilo-core` — the frontend never does a unit conversion or a script
+//! conversion itself, so there is one implementation of each in the product.
 
 use sajilo_core::tools::land::{self, HillArea, LandUnit, TeraiArea};
 use sajilo_core::tools::units::{self, WeightUnit};
-use sajilo_core::tools::{interest, vat};
+use sajilo_core::tools::{TypingMode, interest, vat};
 use serde::Serialize;
 
 #[tauri::command]
@@ -67,4 +67,11 @@ pub fn compute_interest(
 #[tauri::command]
 pub fn group_number(value: f64, fraction_digits: usize) -> String {
     units::grouped_decimal(value, fraction_digits)
+}
+
+/// The Nepali typing tool: romanized to Devanagari, or Preeti to Unicode and
+/// back. Notes types Nepali word by word through `notes_transliterate`.
+#[tauri::command]
+pub fn convert_typing(text: String, mode: TypingMode) -> String {
+    sajilo_core::tools::convert_typing(&text, mode)
 }

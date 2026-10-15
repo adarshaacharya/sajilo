@@ -19,7 +19,8 @@ export type ToolId =
   | "interest"
   | "clock"
   | "stopwatch"
-  | "emergency";
+  | "emergency"
+  | "nepali";
 
 type Calculator = { id: ToolId; label: string; hint: string; icon: IconName; tint: string };
 
@@ -82,6 +83,8 @@ export function ToolsHome({
         <StopwatchCard onOpen={() => onOpen("stopwatch")} />
       </div>
 
+      <TypingCard onOpen={() => onOpen("nepali")} />
+
       <section aria-labelledby="tools-calculators" className="space-y-1.5">
         <h2 id="tools-calculators" className="px-0.5 text-[11px] font-semibold text-text-secondary">
           {t("tools.calculators")}
@@ -107,6 +110,33 @@ export function ToolsHome({
         </div>
       </section>
     </div>
+  );
+}
+
+/**
+ * Nepali typing, the width of the page: it is a writing tool, not a fifth
+ * calculator, and its example is the clearest way to say what it does.
+ */
+function TypingCard({ onOpen }: { onOpen: () => void }) {
+  const { t } = useSettings();
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="tool-card tool-calc w-full"
+      style={tinted("var(--color-holiday)")}
+    >
+      <span className="tool-card__icon">
+        <Icon name="keyboard" className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[12px] font-semibold">{t("tools.typing")}</span>
+        <span className="block truncate text-[10px] text-text-muted">
+          {t("tools.typing-hint-short")}
+        </span>
+      </span>
+      <span className="shrink-0 text-[13px] text-text-secondary">mero naam → मेरो नाम</span>
+    </button>
   );
 }
 

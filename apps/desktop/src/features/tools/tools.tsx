@@ -7,6 +7,7 @@ import { ClockTab } from "./_components/clock-tab";
 import { EmergencyTab } from "./_components/emergency-tab";
 import { InterestTab } from "./_components/interest-tab";
 import { LandTab } from "./_components/land-tab";
+import { NepaliTypingTab } from "./_components/nepali-typing-tab";
 import { StopwatchTab } from "./_components/stopwatch-tab";
 import { type ToolId, ToolsHome } from "./_components/tools-home";
 import { VatTab } from "./_components/vat-tab";
@@ -32,6 +33,7 @@ export function Tools() {
     weight: t("tools.weight"),
     vat: t("tools.vat"),
     interest: t("tools.interest"),
+    nepali: t("tools.typing"),
   };
   useHeaderInner(tab ? { title: titles[tab], onBack: () => setTab(null) } : null);
 
@@ -51,6 +53,7 @@ export function Tools() {
           {tab === "weight" && <WeightTab />}
           {tab === "vat" && <VatTab />}
           {tab === "interest" && <InterestTab />}
+          {tab === "nepali" && <NepaliTypingTab />}
           {tab === "clock" && <ClockTab />}
           {tab === "stopwatch" && <StopwatchTab />}
           {tab === "emergency" && <EmergencyTab initialSection={directorySection} />}

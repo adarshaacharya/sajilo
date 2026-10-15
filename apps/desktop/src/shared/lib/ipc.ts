@@ -600,6 +600,9 @@ export interface KeeperSnapshot {
   records: KeeperRecord[];
 }
 
+/** Mirrors `sajilo_core::tools::TypingMode`. */
+export type TypingMode = "romanized" | "preetiToUnicode" | "unicodeToPreeti";
+
 /** Mirrors `sajilo_core::tools::land::LandUnit`. */
 export type LandUnit =
   | "ropani"
@@ -834,6 +837,9 @@ export const api = {
     invoke<LandBreakdown>("land_breakdown", { value, from }),
   convertWeight: (value: number, from: WeightUnit, to: WeightUnit) =>
     invoke<number>("convert_weight", { value, from, to }),
+  /** The Nepali typing tool's whole answer for `text`. */
+  convertTyping: (text: string, mode: TypingMode) =>
+    invoke<string>("convert_typing", { text, mode }),
   computeVat: (amount: number, inclusive: boolean) =>
     invoke<VatBreakdown>("compute_vat", { amount, inclusive }),
   computeInterest: (principal: number, annualRatePercent: number, years: number) =>

@@ -1,10 +1,10 @@
 //! Notes: plain Markdown files, read and written by the desktop shell. What
 //! lives here is pure: what a note's text says about itself (title, preview,
 //! tags, links, checklist), where a jot lands in today's note, what a note is
-//! called on disk, and typing Nepali in English letters.
+//! called on disk. Typing Nepali in English letters lives in
+//! `tools::nepali`, shared with the Nepali typing tool.
 
 pub mod jot;
-pub mod nepali;
 pub mod parse;
 
 pub use jot::append_jot;

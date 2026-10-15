@@ -165,7 +165,7 @@ pub fn notes_delete_folder(app: AppHandle<Wry>, id: String) -> Result<()> {
 /// false only the words already ended are turned.
 #[tauri::command]
 pub fn notes_transliterate(text: String, finished: bool) -> String {
-    sajilo_core::notes::nepali::transliterate(&text, finished)
+    sajilo_core::tools::nepali::transliterate(&text, finished)
 }
 
 #[tauri::command]

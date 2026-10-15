@@ -73,6 +73,7 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.vat",
     "tab.tools.interest",
     "tab.tools.stopwatch",
+    "tab.tools.nepali",
     "tab.rashifal.daily",
     "tab.rashifal.weekly",
     "tab.rashifal.monthly",

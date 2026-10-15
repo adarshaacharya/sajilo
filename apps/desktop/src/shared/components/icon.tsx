@@ -45,6 +45,7 @@ import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
 import { SFGraduationcap } from "sf-symbols-lib/monochrome/SFGraduationcap";
 import { SFHouse } from "sf-symbols-lib/monochrome/SFHouse";
 import { SFInfoCircle } from "sf-symbols-lib/monochrome/SFInfoCircle";
+import { SFKeyboard } from "sf-symbols-lib/monochrome/SFKeyboard";
 import { SFLeaf } from "sf-symbols-lib/monochrome/SFLeaf";
 import { SFLink } from "sf-symbols-lib/monochrome/SFLink";
 import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
@@ -203,6 +204,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   checklist: SFChecklist,
   bold: SFBold,
   heading: SFTextformatSize,
+  keyboard: SFKeyboard,
 };
 
 export type IconName =
@@ -305,7 +307,8 @@ export type IconName =
   | "compose"
   | "checklist"
   | "bold"
-  | "heading";
+  | "heading"
+  | "keyboard";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

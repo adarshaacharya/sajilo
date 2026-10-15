@@ -382,6 +382,7 @@ pub fn run() {
             commands::tools::land_breakdown,
             commands::tools::convert_weight,
             commands::tools::compute_vat,
+            commands::tools::convert_typing,
             commands::tools::compute_interest,
             commands::tools::group_number,
             commands::backup::export_backup,
