@@ -80,6 +80,7 @@ pub const EVENTS: &[&str] = &[
     "tab.tools.nepali",
     "tab.bills.electricity",
     "tab.bills.internet",
+    "tab.bills.boid",
     "tab.jobs.all",
     "tab.jobs.psc",
     "tab.jobs.tsc",

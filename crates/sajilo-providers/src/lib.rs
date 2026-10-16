@@ -6,6 +6,7 @@
 //! Live checks live in `.github/workflows/smoke.yml` and run on a schedule.
 
 pub mod annapurna_dates;
+pub mod boid;
 pub mod cdsc;
 pub mod crypto;
 pub mod dividends;

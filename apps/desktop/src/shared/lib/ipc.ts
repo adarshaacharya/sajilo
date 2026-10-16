@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
+import type { BoidAccount } from "../../types/api/BoidAccount";
+import type { BoidReport } from "../../types/api/BoidReport";
 import type { CryptoChart } from "../../types/api/CryptoChart";
 import type { CryptoCoin } from "../../types/api/CryptoCoin";
 import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
@@ -941,6 +943,12 @@ export const api = {
   getElectricity: (refresh = false) =>
     invoke<LoadState<ElectricityStatement>>("get_electricity", { refresh }),
 
+  getBoidAccount: () => invoke<BoidAccount | null>("get_boid_account"),
+  /** Saves a 16-digit BOID; rejects with a readable reason. */
+  setBoidAccount: (account: BoidAccount) => invoke<BoidAccount>("set_boid_account", { account }),
+  clearBoidAccount: () => invoke<void>("clear_boid_account"),
+  /** Allotments and dividends at the registrars; the first check takes ~30s. */
+  getBoidReport: (refresh = false) => invoke<LoadState<BoidReport>>("get_boid_report", { refresh }),
   getWorldlinkAccount: () => invoke<WorldLinkAccount | null>("get_worldlink_account"),
   /** Checks the username with WorldLink before saving; rejects with a readable reason. */
   setWorldlinkAccount: (account: WorldLinkAccount) =>

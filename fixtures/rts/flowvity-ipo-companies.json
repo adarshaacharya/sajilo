@@ -1,0 +1,152 @@
+{
+ "status": 200,
+ "data": {
+  "message": "Allotment Scheme Fetched Successfully",
+  "companyList": [
+   {
+    "companyCode": "10 Percent NIMB debenture 2090"
+   },
+   {
+    "companyCode": "7% NICA Debenture 2091"
+   },
+   {
+    "companyCode": "BIKAS HYDRO - AFFECTED LOCAL"
+   },
+   {
+    "companyCode": "BIKAS HYDRO - FOREIGN"
+   },
+   {
+    "companyCode": "BIKAS HYDRO - SEVERLY AFFECTED LOCAL"
+   },
+   {
+    "companyCode": "BIKASH HYDRO - GENERAL PUBLIC"
+   },
+   {
+    "companyCode": "Foreign-Ridge Line Energy Ltd"
+   },
+   {
+    "companyCode": "General Public-Takshar Pikhuwa Khola Hydropower"
+   },
+   {
+    "companyCode": "Jalpa Samudayik Laghubitta"
+   },
+   {
+    "companyCode": "Khaptad Laghubitta"
+   },
+   {
+    "companyCode": "LEC 50 Percent Rights Share"
+   },
+   {
+    "companyCode": "Local-Ridge Line Energy Ltd"
+   },
+   {
+    "companyCode": "MAI KHOLA HYDRO POWER LTD - GENERAL"
+   },
+   {
+    "companyCode": "MAI KHOLA HYDRO POWER LTD - Local"
+   },
+   {
+    "companyCode": "Makar Jitumaya suri hydropower limited- Foreign Employment"
+   },
+   {
+    "companyCode": "Makar Jitumaya suri hydropower limited- Genera Public"
+   },
+   {
+    "companyCode": "Makar Jitumaya suri hydropower limited- Local"
+   },
+   {
+    "companyCode": "MANDU HYDROPOWER LIMITED - FOREIGN"
+   },
+   {
+    "companyCode": "MANDU HYDROPOWER LIMITED PUBLIC"
+   },
+   {
+    "companyCode": "MANDU HYDROPOWER LTD - LOCAL"
+   },
+   {
+    "companyCode": "Maya Khola Hydropower Company Limited"
+   },
+   {
+    "companyCode": "Maya Khola Hydropower Company Limited - Affected"
+   },
+   {
+    "companyCode": "Maya Khola Hydropower Company Limited - General"
+   },
+   {
+    "companyCode": "Maya Khola Hydropower Company Limited - Most Affected"
+   },
+   {
+    "companyCode": "NFS - RIGHT SHARE AUCTION"
+   },
+   {
+    "companyCode": "Om Megashree Pharmaceuticals Limited - Foreign Employment "
+   },
+   {
+    "companyCode": "OM MEGASHREE PHARMACEUTICALS LIMITED - GENERAL"
+   },
+   {
+    "companyCode": "Peoples Power Limited - General"
+   },
+   {
+    "companyCode": "Peoples Power Limited - Local"
+   },
+   {
+    "companyCode": "Prabhu Select Fund"
+   },
+   {
+    "companyCode": "PRABHU SMART FUND"
+   },
+   {
+    "companyCode": "Prabhu systematic investment scheme"
+   },
+   {
+    "companyCode": "RAWA ENERGY DEVELOPMENT LTD"
+   },
+   {
+    "companyCode": "Rawa Energy Development ltd - local"
+   },
+   {
+    "companyCode": "Ridge Energy - General Public"
+   },
+   {
+    "companyCode": "River Falls Power Limited"
+   },
+   {
+    "companyCode": "River Falls Power Limited - Local"
+   },
+   {
+    "companyCode": "SAGARMATHA JALABIDHYUT COMPANY LIMITED"
+   },
+   {
+    "companyCode": "Sagarmatha Jalbidhyut Company Ltd - Public"
+   },
+   {
+    "companyCode": "Sanima Life Insurance"
+   },
+   {
+    "companyCode": "Sarbottam Cement Ltd - Foreign"
+   },
+   {
+    "companyCode": "SARBOTTAM CEMENT LTD - GENERAL PUBLIC"
+   },
+   {
+    "companyCode": "SY Panel Nepal Ltd - Foreign "
+   },
+   {
+    "companyCode": "SY Panel Nepal Ltd - General Public "
+   },
+   {
+    "companyCode": "SY Panel Nepal Ltd - Local "
+   },
+   {
+    "companyCode": "TPKHL(Foreign)-Taksar Pikhuwa Khola Hydro Limited"
+   },
+   {
+    "companyCode": "TPKHL(LOCAL)-Taksar Pikhuwa Khola Hydro Limited"
+   },
+   {
+    "companyCode": "Union Life Insurance"
+   }
+  ]
+ }
+}

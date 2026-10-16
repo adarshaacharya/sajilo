@@ -1,0 +1,21 @@
+{
+ "error": false,
+ "message": "list_success",
+ "data": {
+  "allotted": true,
+  "allotment_detail": {
+   "id": 1348329,
+   "company_id": 45,
+   "boid_appno": "1301000000000001",
+   "name": "RAM BAHADUR THAPA",
+   "fathers_name": "HARI BAHADUR THAPA",
+   "applied_kitta": "10.00",
+   "alloted_kitta": "10.00",
+   "created_id": 1,
+   "updated_id": null,
+   "created_at": "2026-05-13T09:44:34.000000Z",
+   "updated_at": "2026-05-13T09:44:34.000000Z"
+  }
+ },
+ "meta": []
+}

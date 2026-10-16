@@ -163,6 +163,7 @@ pub fn run() {
             app.manage(commands::jobs::JobsCache::default());
             app.manage(commands::electricity::ElectricityCache::default());
             app.manage(commands::internet::InternetCache::default());
+            app.manage(commands::boid::BoidCache::default());
             app.manage(commands::dividends::DividendsCache::default());
             app.manage(commands::mutual_funds::MutualFundsCache::default());
             app.manage(commands::crypto::CryptoCache::default());
@@ -289,6 +290,10 @@ pub fn run() {
             commands::internet::set_worldlink_account,
             commands::internet::clear_worldlink_account,
             commands::internet::get_internet,
+            commands::boid::get_boid_account,
+            commands::boid::set_boid_account,
+            commands::boid::clear_boid_account,
+            commands::boid::get_boid_report,
             commands::jobs::get_jobs,
             commands::jobs::job_detail,
             commands::jobs::mark_jobs_seen,

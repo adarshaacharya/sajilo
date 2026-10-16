@@ -95,6 +95,9 @@ pub const NEA_OFFICES_KEY: &str = "neaOffices.v1";
 /// The WorldLink username whose subscription is checked. Sent only to
 /// WorldLink's own renewal lookup.
 pub const WORLDLINK_ACCOUNT: &str = "worldlinkAccount";
+/// The BOID whose allotments and dividends are checked. Sent only to the
+/// share registrars' own lookups.
+pub const BOID_ACCOUNT: &str = "boidAccount";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

@@ -2,6 +2,7 @@ pub mod announcement;
 pub mod attachments;
 pub mod backup;
 pub mod bazar;
+pub mod boid;
 pub mod calendar;
 pub mod crypto;
 pub mod dividends;

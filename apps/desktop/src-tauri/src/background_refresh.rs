@@ -86,6 +86,7 @@ async fn refresh(app: &AppHandle<Wry>) {
             if bills_enabled {
                 commands::electricity::get_electricity(electricity_app.clone(), Some(false)).await;
                 commands::internet::get_internet(electricity_app.clone(), Some(false)).await;
+                commands::boid::get_boid_report(electricity_app.clone(), Some(false)).await;
                 // A new bill found means new reminders.
                 crate::commands::notify::reschedule();
             }

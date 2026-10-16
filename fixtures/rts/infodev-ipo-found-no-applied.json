@@ -1,0 +1,19 @@
+{
+ "error": false,
+ "message": "list_success",
+ "data": {
+  "allotments": {
+   "id": 2365161,
+   "company_id": 56,
+   "boid_appno": "1301000000000001",
+   "name": "RAM BAHADUR THAPA",
+   "applied_kitta": null,
+   "alloted_kitta": 10,
+   "created_id": 3,
+   "updated_id": null,
+   "created_at": "2026-06-10 06:45:51",
+   "updated_at": "2026-06-10 06:45:51"
+  }
+ },
+ "meta": []
+}

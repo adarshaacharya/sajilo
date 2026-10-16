@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
+import { useBoidReport } from "../../bills/boid-due";
 import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electricity-due";
 import { internetTone, SOON_DAYS, useInternet } from "../../bills/internet-due";
 
@@ -15,7 +16,40 @@ export function BillGlance() {
     <>
       <ElectricityGlance />
       <InternetGlance />
+      <AllotmentGlance />
     </>
+  );
+}
+
+/** A newly found IPO allotment, for the fortnight it counts as new. */
+function AllotmentGlance() {
+  const { t, modules } = useSettings();
+  const navigate = useNavigate();
+  const { data } = useBoidReport();
+  const fresh = loadedValue(data)?.allotments.filter((allotment) => allotment.isNew) ?? [];
+  const first = fresh[0];
+  if (!modules.billsEnabled || !first) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate("/bills?open=boid")}
+      className="surface-card flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+    >
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+        <Icon name="interest" className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[12px] font-semibold">
+          {t("boid.glance").replace("{n}", String(first.allotted))}
+        </span>
+        <span className="mt-0.5 block truncate text-[10.5px] text-text-secondary">
+          {first.company}
+          {fresh.length > 1 && ` +${fresh.length - 1}`}
+        </span>
+      </span>
+      <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+    </button>
   );
 }
 

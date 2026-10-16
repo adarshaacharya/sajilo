@@ -2063,6 +2063,10 @@
         }
       }
     },
+    "get_boid_account": null,
+    "get_boid_report": {
+      "status": "unavailable"
+    },
     "get_crypto": {
       "status": "fresh",
       "value": {

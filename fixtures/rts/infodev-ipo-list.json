@@ -1,0 +1,245 @@
+[
+ {
+  "id": 41,
+  "name": "Beni Hydropower Project Limited-Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2026-09-21 04:49:49",
+  "updated_at": "2026-09-21 04:49:49"
+ },
+ {
+  "id": 40,
+  "name": "Beni Hydropower Project Limited-Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2026-05-08 04:26:03",
+  "updated_at": "2026-05-08 04:26:03"
+ },
+ {
+  "id": 39,
+  "name": "SOPAN Pharmaceuticals Limited",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2026-04-30 05:27:26",
+  "updated_at": "2026-04-30 05:27:26"
+ },
+ {
+  "id": 38,
+  "name": "SOPAN Pharmaceuticals Limited Foreign Employment",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2026-03-31 10:09:51",
+  "updated_at": "2026-03-31 10:09:51"
+ },
+ {
+  "id": 37,
+  "name": "Beni Hydropower Project Limited- Foreign Employment",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2026-03-29 08:35:22",
+  "updated_at": "2026-03-29 08:36:30"
+ },
+ {
+  "id": 36,
+  "name": "Vijaya Laghubitta Bittiya Sanstha Limited FPO",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2026-01-20 06:24:15",
+  "updated_at": "2026-01-20 06:24:15"
+ },
+ {
+  "id": 35,
+  "name": "SBL Debenture 2091",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2025-07-24 04:26:28",
+  "updated_at": "2025-07-24 04:26:28"
+ },
+ {
+  "id": 32,
+  "name": "Swarojgar Laghubitta Bittiya Sanstha Limited (FPO)",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2025-03-14 06:11:01",
+  "updated_at": "2025-03-14 06:11:01"
+ },
+ {
+  "id": 31,
+  "name": "NMB Hybrid Fund L II",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2025-02-27 11:29:24",
+  "updated_at": "2025-02-27 11:29:37"
+ },
+ {
+  "id": 28,
+  "name": "Himalayan ReInsurance Limited - Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2023-12-27 06:37:46",
+  "updated_at": "2023-12-27 06:37:46"
+ },
+ {
+  "id": 24,
+  "name": "Himalayan ReInsurance Limited - Foreign Employment",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2023-12-17 04:21:12",
+  "updated_at": "2023-12-17 08:14:31"
+ },
+ {
+  "id": 23,
+  "name": "9% Nepal SBI Bank Debenture 2089",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2023-08-28 03:59:13",
+  "updated_at": "2023-08-28 03:59:13"
+ },
+ {
+  "id": 22,
+  "name": "Kutheli Bukhari Small Hydropower Limited for General Public.",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2023-07-23 07:52:55",
+  "updated_at": "2023-07-23 07:52:55"
+ },
+ {
+  "id": 21,
+  "name": "Kutheli Bukhari Small Hydropower Limited - Foreign Employment.",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2023-06-27 04:23:14",
+  "updated_at": "2023-06-27 04:47:32"
+ },
+ {
+  "id": 20,
+  "name": "Kutheli Bukhari Small Hydropower Limited -Locals.",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2023-06-27 04:16:13",
+  "updated_at": "2023-06-27 04:46:43"
+ },
+ {
+  "id": 19,
+  "name": "Asian Hydropower Limited- Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2023-02-26 04:40:54",
+  "updated_at": "2023-02-26 04:40:54"
+ },
+ {
+  "id": 18,
+  "name": "Asian Hydro Power Limited- Foreign Employment",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2023-01-24 06:20:36",
+  "updated_at": "2023-01-24 06:29:03"
+ },
+ {
+  "id": 17,
+  "name": "Asian Hydro Power Limited- Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2023-01-24 06:20:24",
+  "updated_at": "2023-01-24 06:28:55"
+ },
+ {
+  "id": 16,
+  "name": "Sanjen Jalvidhyut Company Limited -Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-11-15 10:25:33",
+  "updated_at": "2023-06-27 04:48:33"
+ },
+ {
+  "id": 15,
+  "name": "Eastern Hydropower Limited -Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-11-03 04:38:07",
+  "updated_at": "2023-06-27 04:48:40"
+ },
+ {
+  "id": 13,
+  "name": "Eastern Hydropower Limited -Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-09-27 04:10:20",
+  "updated_at": "2023-06-27 04:48:50"
+ },
+ {
+  "id": 12,
+  "name": "NMB Sulav Investment Fund II",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2022-09-21 08:08:43",
+  "updated_at": "2022-09-21 08:08:43"
+ },
+ {
+  "id": 11,
+  "name": "Upper HewaHydropower Company Limited -Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-07-16 06:44:59",
+  "updated_at": "2023-06-27 04:49:01"
+ },
+ {
+  "id": 10,
+  "name": "Upper Solu Hydro Electric Company Limited -Public",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-07-14 05:15:41",
+  "updated_at": "2023-06-27 04:49:13"
+ },
+ {
+  "id": 8,
+  "name": "Upper HewaHydropower Company Limited -Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-06-24 09:05:33",
+  "updated_at": "2023-06-27 04:49:22"
+ },
+ {
+  "id": 7,
+  "name": "Upper Solu Hydro Electric Company Limited -Locals",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": 1,
+  "created_at": "2022-06-23 05:11:49",
+  "updated_at": "2023-06-27 04:49:31"
+ },
+ {
+  "id": 6,
+  "name": "Manakamana Smart Laghubitta Bittiya Sanstha Limited",
+  "flag": "1",
+  "created_id": 1,
+  "updated_id": null,
+  "created_at": "2022-05-09 04:02:37",
+  "updated_at": "2022-05-09 04:02:37"
+ }
+]

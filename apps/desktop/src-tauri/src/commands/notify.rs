@@ -91,6 +91,7 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
             app, now,
         ));
         all.extend(crate::commands::internet::pending_notifications(app, now));
+        all.extend(crate::commands::boid::pending_notifications(app, now));
     }
     all.extend(ipo_closing(app, options, now));
     // Bazar hidden in Settings silences SIP reminders too, as it does IPO ones.

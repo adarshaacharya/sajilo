@@ -147,6 +147,53 @@ impl HttpClient {
         response.text().await.map_err(transport)
     }
 
+    /// Posts JSON and reads the answer as text, whatever its status: some
+    /// lookups answer "not found" with a 4xx and a JSON message, and that is
+    /// an answer, not a failure. The caller reads the body either way.
+    pub async fn post_json_any_status(
+        &self,
+        source_name: &'static str,
+        url: &str,
+        body: &serde_json::Value,
+    ) -> Result<(u16, String)> {
+        let url = sajilo_core::config::sources::rewrite(url);
+        let transport = |error: reqwest::Error| ProviderError::Transport {
+            source_name,
+            message: error.to_string(),
+        };
+        let response = self
+            .inner
+            .post(url.as_ref())
+            .header(reqwest::header::ACCEPT, "application/json")
+            .json(body)
+            .send()
+            .await
+            .map_err(transport)?;
+        let status = response.status().as_u16();
+        Ok((status, response.text().await.map_err(transport)?))
+    }
+
+    /// A GET whose answer is read whatever its status, for the same reason.
+    pub async fn get_any_status(
+        &self,
+        source_name: &'static str,
+        url: &str,
+        headers: &[(&str, &str)],
+    ) -> Result<(u16, String)> {
+        let url = sajilo_core::config::sources::rewrite(url);
+        let transport = |error: reqwest::Error| ProviderError::Transport {
+            source_name,
+            message: error.to_string(),
+        };
+        let mut request = self.inner.get(url.as_ref());
+        for (name, value) in headers {
+            request = request.header(*name, *value);
+        }
+        let response = request.send().await.map_err(transport)?;
+        let status = response.status().as_u16();
+        Ok((status, response.text().await.map_err(transport)?))
+    }
+
     /// A GET that sends `If-None-Match` and reads at most `max_bytes`. For
     /// Sajilo's own static files — the config manifest and packs — so not
     /// subject to the sources pack's rewrites: a bad rewrite must never be
