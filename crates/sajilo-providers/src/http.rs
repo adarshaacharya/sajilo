@@ -21,6 +21,22 @@ pub const USER_AGENT: &str = concat!(
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(10);
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(5);
 
+/// Intermediate certificates some Nepali sites forget to send.
+///
+/// A server should send its certificate and the intermediate that signed it.
+/// Some send only their own, and browsers paper over that by fetching the
+/// missing piece; this client, like most programs, refuses instead. Each
+/// certificate here is a public intermediate, downloaded from its authority's
+/// own address and signed by a root that Sajilo already trusts (Mozilla's
+/// list), so adding it only fills a gap a server left; it trusts no one new.
+///
+/// - Sectigo DV R36, under Sectigo Root R46: Global IME Capital.
+/// - GlobalSign RSA OV SSL CA 2018, under GlobalSign Root R3: Nepal Telecom.
+const MISSING_INTERMEDIATES: [&str; 2] = [
+    include_str!("../certs/sectigo-public-server-authentication-ca-dv-r36.pem"),
+    include_str!("../certs/globalsign-rsa-ov-ssl-ca-2018.pem"),
+];
+
 /// The answer to a conditional GET.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Conditional {
@@ -40,7 +56,13 @@ pub struct HttpClient {
 
 impl HttpClient {
     pub fn new() -> Self {
-        let inner = reqwest::Client::builder()
+        let mut builder = reqwest::Client::builder();
+        for pem in MISSING_INTERMEDIATES {
+            let certificate = reqwest::Certificate::from_pem(pem.as_bytes())
+                .expect("bundled intermediates are valid PEM");
+            builder = builder.add_root_certificate(certificate);
+        }
+        let inner = builder
             .user_agent(USER_AGENT)
             .timeout(REQUEST_TIMEOUT)
             .connect_timeout(CONNECT_TIMEOUT)
@@ -213,5 +235,20 @@ impl HttpClient {
 impl Default for HttpClient {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_bundled_intermediate_is_a_certificate() {
+        for pem in MISSING_INTERMEDIATES {
+            assert!(pem.starts_with("-----BEGIN CERTIFICATE-----"));
+            assert!(reqwest::Certificate::from_pem(pem.as_bytes()).is_ok());
+        }
+        // And the client that bundles them builds.
+        let _ = HttpClient::new();
     }
 }

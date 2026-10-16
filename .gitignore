@@ -35,6 +35,8 @@ apps/desktop/src-tauri/gen/
 .env
 .env.*
 *.pem
+# Public intermediate certificates bundled into the HTTP client, not secrets.
+!crates/sajilo-providers/certs/*.pem
 *.p12
 *.mobileprovision
 
