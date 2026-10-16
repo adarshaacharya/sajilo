@@ -124,12 +124,14 @@ export function UpNext({
     }
   }
 
-  const due =
-    modules.keeperEnabled && keeper
-      ? upcomingOf(keeper.records, keeper.items).filter(
-          (entry) => entry.days <= KEEPER_HORIZON_DAYS,
-        )
-      : [];
+  // Keeper stores both; documents show in Documents, bills in Bills, and
+  // each counts only while its screen is on.
+  const due = keeper
+    ? upcomingOf(
+        modules.keeperEnabled ? keeper.records : [],
+        modules.billsEnabled ? keeper.items : [],
+      ).filter((entry) => entry.days <= KEEPER_HORIZON_DAYS)
+    : [];
   let keeperRow: Row | null = null;
   const first = due[0];
   if (first) {
@@ -144,7 +146,7 @@ export function UpNext({
       when: dueLabel(t, first.days),
       // Today, tomorrow, or already late: lead with it.
       urgent: first.days <= 1,
-      open: () => navigate("/keeper"),
+      open: () => navigate(first.item ? "/bills" : "/keeper"),
     };
   }
 

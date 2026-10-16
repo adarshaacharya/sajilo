@@ -34,6 +34,15 @@ const ROUTES: Record<ReminderKind, string> = {
   announcement: "/",
 };
 
+/** Keeper's kind is shared by the bills, the documents and share allotments,
+ * so its cards say by their id which screen they belong to. */
+function routeOf(reminder: ReminderCardView["reminder"]): string {
+  if (reminder.kind !== "keeper") return ROUTES[reminder.kind];
+  if (reminder.id.startsWith("sajilo.boid.")) return "/bazar?tab=stocks&view=nepse&boid=1";
+  if (reminder.id.startsWith("sajilo.keeper.record.")) return "/keeper";
+  return "/bills";
+}
+
 const KIND_LABELS = {
   plan: "reminder.kind.plan",
   festival: "reminder.kind.festival",
@@ -176,7 +185,7 @@ export function ReminderCard() {
     setBusy(true);
     api.dismissReminder(route).catch(() => setBusy(false));
   };
-  const dismiss = (open: boolean) => close(open ? ROUTES[reminder.kind] : null);
+  const dismiss = (open: boolean) => close(open ? routeOf(reminder) : null);
   const cardSwitch = switchFor(reminder);
   /** Switches this kind off, as Settings › Notifications would, and moves on. */
   const turnOff = async () => {

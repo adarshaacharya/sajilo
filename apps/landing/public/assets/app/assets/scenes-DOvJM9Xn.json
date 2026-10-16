@@ -2063,7 +2063,7 @@
         }
       }
     },
-    "get_boid_account": null,
+    "get_boid_accounts": [],
     "get_boid_report": {
       "status": "unavailable"
     },

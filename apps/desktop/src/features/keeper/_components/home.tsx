@@ -1,31 +1,25 @@
-import { type CSSProperties, type ReactNode, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { ScrollRow } from "../../../shared/components/scroll-row";
-import { Segmented } from "../../../shared/components/segmented";
 import type {
   KeeperDate,
-  KeeperItem,
   KeeperPerson,
   KeeperRecord,
   KeeperSnapshot,
 } from "../../../shared/lib/ipc";
-import { LIMITS } from "../../../shared/lib/limits";
-import type { SipStatus } from "../../../types/api/SipStatus";
 import { documentSpec, personName, recordName } from "../_lib/documents";
-import { groupDocuments, groupItems, groupName, itemGroupName } from "../_lib/groups";
+import { groupDocuments, groupName } from "../_lib/groups";
 import { DOCUMENT_ICONS } from "../_lib/icons";
 import { daysUntil, dueLabel, dueTone, type TFn } from "../_lib/shared";
 import { type Upcoming, upcomingOf } from "../_lib/upcoming";
-import { DueTile, ItemGroupRow, TickButton } from "./rows";
-import { SipGroupRow } from "./sip-reminders";
+import { DueTile } from "./rows";
 
-export type View = "documents" | "reminders";
 /** `null` is everyone; `""` is the user / household (no person). */
 export type PersonFilter = string | null;
 
-/** How far ahead each kind starts counting down: renewing a passport takes
- * weeks, paying a bill takes a minute. Matches `upcomingOf`. */
-const RUNWAY = { record: 60, item: 14 };
+/** How far ahead a document starts counting down: renewing a passport takes
+ * weeks. Matches `upcomingOf`. */
+const RUNWAY = 60;
 
 /** One urgency scale as a colour: late, close, or comfortably ahead. */
 function toneOf(days: number | null, close: number): string {
@@ -37,60 +31,40 @@ function toneOf(days: number | null, close: number): string {
 
 const toned = (tone: string) => ({ "--tone": tone }) as CSSProperties;
 
+/** The documents, whose they are, and what needs renewing next. */
 export function Home({
   data,
-  sips,
-  view,
-  onView,
   person,
   onPerson,
   onAdd,
-  picker,
   onOpenGroup,
-  onOpenItemGroup,
   onOpenRecord,
-  onOpenItem,
-  onOpenSips,
-  onToggleItem,
   t,
 }: {
   data: KeeperSnapshot;
-  sips: readonly SipStatus[];
-  view: View;
-  onView: (view: View) => void;
   person: PersonFilter;
   onPerson: (person: PersonFilter) => void;
-  onAdd: (only: View) => void;
-  /** The add choices for one tab, shown in place when that tab is empty. */
-  picker: (only: View) => ReactNode;
+  onAdd: () => void;
   onOpenGroup: (key: string) => void;
-  onOpenItemGroup: (key: string) => void;
   onOpenRecord: (id: string) => void;
-  onOpenItem: (item: KeeperItem) => void;
-  onOpenSips: () => void;
-  onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
-  const [search, setSearch] = useState("");
   const matchesPerson = (personId: string | null) =>
     person === null || (person === "" ? personId === null : personId === person);
   const nameOf = (personId: string | null) =>
     personId ? personName(t, data.people, personId) : undefined;
 
   const records = data.records.filter((record) => matchesPerson(record.personId));
-  const items = data.items.filter((item) => matchesPerson(item.personId));
-  const visibleSips = person === null || person === "" ? sips : [];
-  const upcoming = upcomingOf(records, items);
+  const upcoming = upcomingOf(records, []);
   const [next, ...rest] = upcoming;
-  const open = (entry: Upcoming) =>
-    entry.record ? onOpenRecord(entry.record.id) : entry.item && onOpenItem(entry.item);
+  const open = (entry: Upcoming) => entry.record && onOpenRecord(entry.record.id);
 
   return (
     <>
       {data.people.length > 0 && (
         <PeopleRow
           people={data.people}
-          late={upcomingOf(data.records, data.items).filter((entry) => entry.days < 0)}
+          late={upcomingOf(data.records, []).filter((entry) => entry.days < 0)}
           person={person}
           onPerson={onPerson}
           t={t}
@@ -100,9 +74,8 @@ export function Home({
       {next && (
         <NextUp
           entry={next}
-          owner={nameOf(next.record?.personId ?? next.item?.personId ?? null)}
+          owner={nameOf(next.record?.personId ?? null)}
           onOpen={() => open(next)}
-          onToggleItem={onToggleItem}
           t={t}
         />
       )}
@@ -114,8 +87,7 @@ export function Home({
           </h2>
           <div className="surface-card px-3">
             {rest.slice(0, 5).map((entry) => {
-              const item = entry.item;
-              const date = entry.record?.expiryDate ?? item?.dueDate;
+              const date = entry.record?.expiryDate;
               return (
                 <div
                   key={entry.key}
@@ -129,16 +101,15 @@ export function Home({
                     {date && <DueTile date={date as KeeperDate} days={entry.days} />}
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[12px] font-medium">
-                        {entry.record ? recordName(t, entry.record) : item?.title}
+                        {entry.record && recordName(t, entry.record)}
                       </span>
                       <span className="mt-0.5 block truncate text-[10px] text-text-muted">
-                        {nameOf(entry.record?.personId ?? item?.personId ?? null)}
-                        {nameOf(entry.record?.personId ?? item?.personId ?? null) && " · "}
+                        {nameOf(entry.record?.personId ?? null)}
+                        {nameOf(entry.record?.personId ?? null) && " · "}
                         <span className={dueTone(entry.days)}>{dueLabel(t, entry.days)}</span>
                       </span>
                     </span>
                   </button>
-                  {item && <TickButton item={item} onToggle={() => onToggleItem(item)} t={t} />}
                 </div>
               );
             })}
@@ -146,62 +117,14 @@ export function Home({
         </section>
       )}
 
-      <Segmented
-        label={t("keeper.title")}
-        value={view}
-        onChange={onView}
-        scrollable={false}
-        options={[
-          { id: "documents" as const, label: t("keeper.tab-records") },
-          { id: "reminders" as const, label: t("keeper.tab-reminders") },
-        ]}
+      <Wallet
+        records={records}
+        people={data.people}
+        onOpen={onOpenRecord}
+        onOpenGroup={onOpenGroup}
+        onAdd={onAdd}
+        t={t}
       />
-
-      {view === "documents" ? (
-        records.length === 0 ? (
-          // An empty tab offers its own choices, not a button to a screen
-          // that would.
-          picker("documents")
-        ) : (
-          <Wallet
-            records={records}
-            people={data.people}
-            onOpen={onOpenRecord}
-            onOpenGroup={onOpenGroup}
-            onAdd={() => onAdd("documents")}
-            t={t}
-          />
-        )
-      ) : items.length === 0 && visibleSips.length === 0 ? (
-        picker("reminders")
-      ) : (
-        <>
-          <div className="control-field flex min-w-0 items-center gap-1.5 rounded-md px-2">
-            <Icon name="search" className="size-3 text-text-muted" />
-            <input
-              value={search}
-              maxLength={LIMITS.SEARCH}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder={t("keeper.search-placeholder")}
-              aria-label={t("keeper.search-placeholder")}
-              className="min-w-0 flex-1 bg-transparent py-1.5 text-[11px] outline-none placeholder:text-text-muted"
-            />
-          </div>
-          <ReminderList
-            items={items.filter((item) =>
-              `${item.title} ${item.note}`.toLowerCase().includes(search.toLowerCase()),
-            )}
-            sips={visibleSips.filter((sip) =>
-              `${sip.name} ${sip.symbol}`.toLowerCase().includes(search.toLowerCase()),
-            )}
-            nameOf={nameOf}
-            onOpenGroup={onOpenItemGroup}
-            onOpenSips={onOpenSips}
-            onAdd={() => onAdd("reminders")}
-            t={t}
-          />
-        </>
-      )}
 
       <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">
         {t("keeper.footer-note")}
@@ -267,39 +190,23 @@ function PeopleRow({
   );
 }
 
-/** The one thing to do next, large: how long is left, how much of its
- * runway is used up, and the button that settles it. */
+/** The one document to renew next, large: how long is left, and how much of
+ * its runway is used up. */
 function NextUp({
   entry,
   owner,
   onOpen,
-  onToggleItem,
   t,
 }: {
   entry: Upcoming;
   owner: string | undefined;
   onOpen: () => void;
-  onToggleItem: (item: KeeperItem) => void;
   t: TFn;
 }) {
-  const { record, item, days } = entry;
-  const runway = record ? RUNWAY.record : RUNWAY.item;
-  const tone = toneOf(days, record ? 30 : 3);
-  const used = days < 0 ? 1 : Math.min(Math.max(1 - days / runway, 0.04), 1);
-  const date = (record?.expiryDate ?? item?.dueDate) as KeeperDate | null;
-  const [flash, setFlash] = useState(false);
-
-  useEffect(() => {
-    if (!flash) return;
-    const id = setTimeout(() => setFlash(false), 1100);
-    return () => clearTimeout(id);
-  }, [flash]);
-
-  const settle = () => {
-    if (!item) return;
-    setFlash(true);
-    onToggleItem(item);
-  };
+  const { record, days } = entry;
+  const tone = toneOf(days, 30);
+  const used = days < 0 ? 1 : Math.min(Math.max(1 - days / RUNWAY, 0.04), 1);
+  const date = (record?.expiryDate ?? null) as KeeperDate | null;
 
   return (
     <section
@@ -321,7 +228,7 @@ function NextUp({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[15px] font-semibold leading-tight">
-            {record ? recordName(t, record) : item?.title}
+            {record && recordName(t, record)}
           </span>
           <span className="mt-0.5 block truncate text-[11px] text-text-muted">
             {[owner, date ? `${date.bs.day} ${date.bs.monthName}` : null]
@@ -337,29 +244,9 @@ function NextUp({
         />
       </div>
       <div className="flex gap-2">
-        {item ? (
-          <>
-            <button type="button" onClick={settle} className="keeper-pill keeper-pill--primary">
-              <Icon name="checkmark" className="size-3" />
-              {item.recurrence !== "none" ? t("keeper.mark-paid") : t("keeper.action.done")}
-            </button>
-            <button type="button" onClick={onOpen} className="keeper-pill">
-              {t("keeper.details")}
-            </button>
-          </>
-        ) : (
-          <button type="button" onClick={onOpen} className="keeper-pill keeper-pill--primary">
-            {t("keeper.how-to-renew")}
-          </button>
-        )}
-      </div>
-      <div className={`keeper-flash ${flash ? "keeper-flash--on" : ""}`} aria-live="polite">
-        {flash && (
-          <>
-            <Icon name="checkmark" className="size-4" />
-            {t("keeper.done")}
-          </>
-        )}
+        <button type="button" onClick={onOpen} className="keeper-pill keeper-pill--primary">
+          {t("keeper.how-to-renew")}
+        </button>
       </div>
     </section>
   );
@@ -393,7 +280,7 @@ function Wallet({
         const status =
           days === null
             ? t("keeper.hint.on-file")
-            : days <= RUNWAY.record
+            : days <= RUNWAY
               ? dueLabel(t, days)
               : t("keeper.status.valid");
         const owners = [
@@ -429,70 +316,5 @@ function Wallet({
         {t("keeper.add-document")}
       </button>
     </div>
-  );
-}
-
-function ReminderList({
-  items,
-  sips,
-  nameOf,
-  onOpenGroup,
-  onOpenSips,
-  onAdd,
-  t,
-}: {
-  items: readonly KeeperItem[];
-  sips: readonly SipStatus[];
-  nameOf: (personId: string | null) => string | undefined;
-  onOpenGroup: (key: string) => void;
-  onOpenSips: () => void;
-  onAdd: () => void;
-  t: TFn;
-}) {
-  if (items.length === 0 && sips.length === 0) {
-    return (
-      <section className="surface-card px-4 py-8 text-center">
-        <Icon name="keeper" className="mx-auto size-6 text-text-muted" />
-        <p className="mt-2 text-[12px] font-medium">{t("keeper.empty-search-title")}</p>
-        <p className="mt-1 text-[10px] text-text-muted">{t("keeper.empty-search-body")}</p>
-      </section>
-    );
-  }
-  // One row per kind, each opening its page: that's where the tick boxes and
-  // "Add another" live, whether the kind holds one reminder or five.
-  return (
-    <section className="surface-card px-3">
-      {sips.length > 0 && <SipGroupRow sips={sips} onOpen={onOpenSips} t={t} />}
-      {groupItems(items).map((group) => {
-        const name = itemGroupName(group);
-        // Renamed members (Netflix, Spotify) say more than whose they are.
-        const titles = [...new Set(group.items.map((item) => item.title))].filter(
-          (title) => title !== name,
-        );
-        const owners = [
-          ...new Set(group.items.map((item) => nameOf(item.personId) ?? t("keeper.person.me"))),
-        ];
-        return (
-          <ItemGroupRow
-            key={group.key}
-            name={name}
-            items={group.items}
-            detail={(titles.length > 0 ? titles : owners).join(" · ")}
-            onOpen={() => onOpenGroup(group.key)}
-            t={t}
-          />
-        );
-      })}
-      <button
-        type="button"
-        onClick={onAdd}
-        className="flex w-full items-center gap-2.5 py-2.5 text-left text-[11px] font-medium text-accent-mark"
-      >
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-[5px] border border-dashed border-[color:color-mix(in_srgb,var(--color-accent-mark)_45%,transparent)]">
-          <Icon name="plus" className="size-3" />
-        </span>
-        {t("keeper.add-reminder")}
-      </button>
-    </section>
   );
 }

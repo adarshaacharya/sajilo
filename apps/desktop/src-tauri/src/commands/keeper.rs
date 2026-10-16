@@ -995,9 +995,14 @@ fn due_body(person: &str, days: i64) -> String {
     }
 }
 
+/// Reminders for what Keeper holds: `bills` are its reminders, shown in
+/// Bills; `documents` its records, shown in Documents. Each screen switched
+/// off in Settings silences its own.
 pub fn pending_notifications(
     app: &AppHandle<Wry>,
     now: chrono::DateTime<Utc>,
+    bills: bool,
+    documents: bool,
 ) -> Vec<PlannedNotification> {
     let today = now
         .with_timezone(&sajilo_core::nepal_time::offset())
@@ -1019,7 +1024,7 @@ pub fn pending_notifications(
     for item in items(app)
         .unwrap_or_default()
         .into_iter()
-        .filter(|item| item.status == "active")
+        .filter(|item| bills && item.status == "active")
     {
         if let Some(due) = next_due(&item, yesterday) {
             result.extend(plan_due(
@@ -1032,7 +1037,11 @@ pub fn pending_notifications(
             ));
         }
     }
-    for record in records(app).unwrap_or_default() {
+    for record in records(app)
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|_| documents)
+    {
         let Some(due) = record
             .expiry_date
             .as_ref()
@@ -1053,6 +1062,77 @@ pub fn pending_notifications(
     result.sort_by_key(|item| item.fire_at);
     result.truncate(LIMIT);
     result
+}
+
+/// Where a medicine refill went before it became a day plan: done once, so a
+/// plan deleted afterwards never comes back.
+const MEDICINE_MOVED_KEY: &str = "keeperMedicineToPlans.v1";
+
+/// A medicine refill as a day plan. Keeper's reminders are now the household's
+/// bills; a refill is neither a bill nor a document, and repeating day plans
+/// already do what it needs. `None` for one that can't be one: undated.
+fn medicine_plan(item: &KeeperItem) -> Option<sajilo_core::planner::DayPlan> {
+    use sajilo_core::planner::{DayPlan, PlanTime, Recurrence, Reminder};
+    let due = item.due_date.as_ref()?;
+    let date = sajilo_core::NepaliDate::new(due.bs.year, due.bs.month, due.bs.day);
+    let recurrence = match item.recurrence.as_str() {
+        "monthly" | "monthlyBs" => Recurrence::MonthlyBikramSambat,
+        "yearlyAd" | "yearlyBs" => Recurrence::YearlyBikramSambat,
+        _ => Recurrence::None,
+    };
+    let mut done = std::collections::BTreeSet::new();
+    if item.status == "completed" {
+        done.insert(date);
+    }
+    Some(DayPlan {
+        id: format!("keeper-{}", item.id),
+        date,
+        title: item.title.clone(),
+        time: Some(PlanTime { hour: 9, minute: 0 }),
+        // Keeper reminded days ahead; a plan reminds once, so the day before.
+        reminder: Some(Reminder(if item.remind_days.iter().any(|d| *d > 0) {
+            1440
+        } else {
+            0
+        })),
+        note: item.note.clone(),
+        recurrence,
+        created_at: chrono::DateTime::parse_from_rfc3339(&item.created_at)
+            .map_or_else(|_| Utc::now(), |at| at.with_timezone(&Utc)),
+        done,
+    })
+}
+
+/// Moves medicine refills out of Keeper into day plans, once. One with photos
+/// stays where it is: a plan can't hold them, and photos are never dropped.
+pub fn move_medicine_to_plans(app: &AppHandle<Wry>) {
+    if matches!(db::get_json(app, MEDICINE_MOVED_KEY), Ok(Some(_))) {
+        return;
+    }
+    let Ok(all) = items(app) else { return };
+    let Ok(connection) = db::open(app) else {
+        return;
+    };
+    for item in all
+        .iter()
+        .filter(|item| item.template.as_deref() == Some("medicine"))
+    {
+        let photos: i64 = connection
+            .query_row(
+                "SELECT COUNT(*) FROM keeper_attachments WHERE owner_kind = 'item' AND owner_id = ?1",
+                [&item.id],
+                |row| row.get(0),
+            )
+            .unwrap_or(1);
+        let Some(plan) = medicine_plan(item).filter(|_| photos == 0) else {
+            continue;
+        };
+        if crate::commands::plans::save(app, &plan).is_ok() {
+            let _ = connection.execute("DELETE FROM keeper_items WHERE id = ?1", [&item.id]);
+        }
+    }
+    let _ = db::set_json(app, MEDICINE_MOVED_KEY, &serde_json::Value::Bool(true));
+    crate::commands::notify::reschedule();
 }
 
 #[cfg(test)]
@@ -1255,6 +1335,30 @@ mod tests {
             template: None,
             repeat_day: None,
         }
+    }
+
+    #[test]
+    fn a_medicine_refill_becomes_a_day_plan() {
+        use sajilo_core::planner::Recurrence;
+        let date = sajilo_core::NepaliDate::new(2083, 7, 10);
+        let mut item = dated_item(date, "monthly");
+        item.title = "Aama's BP tablets".to_owned();
+        item.remind_days = vec![3, 0];
+        let plan = medicine_plan(&item).unwrap();
+        assert_eq!(plan.date, date);
+        assert_eq!(plan.title, "Aama's BP tablets");
+        assert_eq!(plan.recurrence, Recurrence::MonthlyBikramSambat);
+        assert_eq!(plan.reminder.map(|r| r.0), Some(1440));
+        assert!(plan.done.is_empty());
+
+        item.status = "completed".to_owned();
+        item.recurrence = "none".to_owned();
+        let done = medicine_plan(&item).unwrap();
+        assert_eq!(done.recurrence, Recurrence::None);
+        assert!(done.done.contains(&date));
+
+        item.due_date = None;
+        assert!(medicine_plan(&item).is_none(), "undated stays in Keeper");
     }
 
     /// An unpaid BS monthly bill still comes due next Nepali month, on its

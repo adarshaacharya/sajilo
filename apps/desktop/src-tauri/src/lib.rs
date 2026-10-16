@@ -150,6 +150,7 @@ pub fn run() {
             // Create and migrate the single local database before any tray or
             // notification code reads user-owned state.
             db::open(app.handle()).map_err(std::io::Error::other)?;
+            commands::keeper::move_medicine_to_plans(app.handle());
             // The last verified remote config, before any screen reads a
             // joke, a holiday or a source.
             remote_config::restore(app.handle());

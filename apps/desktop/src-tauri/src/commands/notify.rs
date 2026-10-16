@@ -80,13 +80,17 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
     } else {
         Vec::new()
     };
-    // Hiding Keeper in Settings silences it too; a module you turned off
-    // shouldn't keep talking.
-    if options.keeper && crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED) {
-        all.extend(crate::commands::keeper::pending_notifications(app, now));
+    // A screen hidden in Settings goes quiet too; a module you turned off
+    // shouldn't keep talking. Keeper's reminders are shown in Bills, its
+    // documents in Documents.
+    let bills = crate::background_refresh::enabled(app, prefs::BILLS_ENABLED);
+    let documents = crate::background_refresh::enabled(app, prefs::KEEPER_ENABLED);
+    if options.keeper && (bills || documents) {
+        all.extend(crate::commands::keeper::pending_notifications(
+            app, now, bills, documents,
+        ));
     }
-    // Bills & status switched off in Settings goes quiet too.
-    if crate::background_refresh::enabled(app, prefs::BILLS_ENABLED) {
+    if bills {
         all.extend(crate::commands::electricity::pending_notifications(
             app, now,
         ));

@@ -1,32 +1,26 @@
 import { Icon, type IconName } from "../../../shared/components/icon";
-import { useDirectory } from "../../../shared/lib/directory";
 import type { KeeperDocumentType } from "../../../shared/lib/ipc";
 import { docTypeLabel, documentSpec, RECURRENCE_LABELS } from "../_lib/documents";
-import { DOCUMENT_ICONS, REMINDER_ICONS } from "../_lib/icons";
+import { DOCUMENT_ICONS } from "../_lib/icons";
 import type { TFn } from "../_lib/shared";
-import type { ReminderTemplate } from "../_lib/templates";
 
-/** What most households keep first: the car's papers and the monthly bill. */
-const STARTER_DOCUMENTS: KeeperDocumentType[] = ["bluebook", "drivingLicence"];
-const STARTER_REMINDER = "electricity";
+/** What most households keep first: the car's papers and a passport. */
+const STARTER_DOCUMENTS: KeeperDocumentType[] = ["bluebook", "drivingLicence", "passport"];
 
 /**
- * Keeper with nothing in it: a welcome, three one-tap starts, and the full
+ * No documents yet: a welcome, three one-tap starts, and the full
  * list one tap further. Twenty choices on a first visit is a form; three is
  * an invitation.
  */
 export function Starters({
   onDocument,
-  onReminder,
   onSeeAll,
   t,
 }: {
   onDocument: (type: KeeperDocumentType) => void;
-  onReminder: (template: ReminderTemplate) => void;
   onSeeAll: () => void;
   t: TFn;
 }) {
-  const reminder = useDirectory().reminderTemplates.find((entry) => entry.id === STARTER_REMINDER);
   const rows: { key: string; icon: IconName; title: string; hint: string; onPick: () => void }[] = [
     ...STARTER_DOCUMENTS.map((type) => {
       const spec = documentSpec({ documentType: type, details: {} });
@@ -41,17 +35,6 @@ export function Starters({
         onPick: () => onDocument(type),
       };
     }),
-    ...(reminder
-      ? [
-          {
-            key: reminder.id,
-            icon: REMINDER_ICONS[reminder.id] ?? "bolt",
-            title: reminder.title,
-            hint: t(RECURRENCE_LABELS[reminder.recurrence ?? "none"]),
-            onPick: () => onReminder(reminder),
-          },
-        ]
-      : []),
   ];
 
   return (

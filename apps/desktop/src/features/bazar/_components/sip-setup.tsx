@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { CONTROL } from "../../../shared/components/control";
-import { Icon } from "../../../shared/components/icon";
 import { RemindDays } from "../../../shared/components/remind-days";
 import { Select } from "../../../shared/components/select";
 import { Switch } from "../../../shared/components/switch";
@@ -26,7 +24,6 @@ export function SipSetup({
   onRemove: () => void;
 }) {
   const { t, language } = useSettings();
-  const navigate = useNavigate();
   const [amount, setAmount] = useState(sip?.amount ? String(sip.amount) : "");
   useEffect(() => setAmount(sip?.amount ? String(sip.amount) : ""), [sip?.amount]);
 
@@ -99,14 +96,6 @@ export function SipSetup({
           {sip.day > 28 && (
             <p className="text-[10px] leading-snug text-text-muted">{t("funds.sip-short-month")}</p>
           )}
-          <button
-            type="button"
-            onClick={() => navigate("/keeper?view=reminders&section=sips")}
-            className="flex items-center gap-1 text-[10px] font-medium text-accent-mark hover:underline"
-          >
-            {t("funds.sip-view-keeper")}
-            <Icon name="link" className="size-2.5" />
-          </button>
         </div>
       )}
     </div>
