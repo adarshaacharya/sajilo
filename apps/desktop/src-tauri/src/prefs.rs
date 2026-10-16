@@ -92,9 +92,12 @@ pub const JOBS_SEEN: &str = "jobsSeen";
 /// Never leaves this computer except to NEA's own bill check.
 pub const NEA_ACCOUNT: &str = "neaAccount";
 pub const NEA_OFFICES_KEY: &str = "neaOffices.v1";
-/// The WorldLink username whose subscription is checked. Sent only to
-/// WorldLink's own renewal lookup.
+/// The single WorldLink username saved before there could be several; read
+/// as the first of them until the list is next saved, then removed.
 pub const WORLDLINK_ACCOUNT: &str = "worldlinkAccount";
+/// The WorldLink usernames, each with a name, whose subscriptions are
+/// checked. Sent only to WorldLink's own renewal lookup.
+pub const WORLDLINK_ACCOUNTS: &str = "worldlinkAccounts";
 /// The single BOID saved before there could be several; read as the first of
 /// them until the list is next saved, then removed.
 pub const BOID_ACCOUNT: &str = "boidAccount";

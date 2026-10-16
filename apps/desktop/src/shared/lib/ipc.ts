@@ -13,6 +13,7 @@ import type { ForexHistory } from "../../types/api/ForexHistory";
 import type { ForexSnapshot } from "../../types/api/ForexSnapshot";
 import type { FuelPriceSnapshot } from "../../types/api/FuelPriceSnapshot";
 import type { IndexIntraday } from "../../types/api/IndexIntraday";
+import type { InternetAccount } from "../../types/api/InternetAccount";
 import type { InternetStatus } from "../../types/api/InternetStatus";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
 import type { JobDetailPart } from "../../types/api/JobDetailPart";
@@ -949,13 +950,16 @@ export const api = {
     invoke<BoidAccount[]>("set_boid_accounts", { accounts }),
   /** Allotments and dividends for every BOID; a new BOID's first check takes ~30s. */
   getBoidReport: (refresh = false) => invoke<LoadState<BoidReport>>("get_boid_report", { refresh }),
-  getWorldlinkAccount: () => invoke<WorldLinkAccount | null>("get_worldlink_account"),
-  /** Checks the username with WorldLink before saving; rejects with a readable reason. */
-  setWorldlinkAccount: (account: WorldLinkAccount) =>
-    invoke<InternetStatus>("set_worldlink_account", { account }),
-  clearWorldlinkAccount: () => invoke<void>("clear_worldlink_account"),
-  /** The saved WorldLink subscription; `unavailable` when none is saved. */
-  getInternet: (refresh = false) => invoke<LoadState<InternetStatus>>("get_internet", { refresh }),
+  getWorldlinkAccounts: () => invoke<WorldLinkAccount[]>("get_worldlink_accounts"),
+  /** Checks the username with WorldLink first; rejects with a readable reason. */
+  addWorldlinkAccount: (account: WorldLinkAccount) =>
+    invoke<InternetStatus>("add_worldlink_account", { account }),
+  renameWorldlinkAccount: (username: string, label: string) =>
+    invoke<WorldLinkAccount[]>("rename_worldlink_account", { username, label }),
+  removeWorldlinkAccount: (username: string) =>
+    invoke<WorldLinkAccount[]>("remove_worldlink_account", { username }),
+  /** Every saved WorldLink account, each with its own load state. */
+  getInternet: (refresh = false) => invoke<InternetAccount[]>("get_internet", { refresh }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

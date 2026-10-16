@@ -11,8 +11,11 @@ pub const REMINDER_HOUR: u32 = 9;
 pub const AHEAD: [i64; 3] = [7, 3, 0];
 
 /// Reminders for a subscription that runs out on `expires_on`. The id holds
-/// the date, so a renewal (a later date) replaces them rather than adding.
+/// `key` (which subscription) and the date, so a renewal (a later date)
+/// replaces them rather than adding. `provider` is what the title calls it:
+/// "WorldLink", or "WorldLink (Shop)" when there are several.
 pub fn plan(
+    key: &str,
     provider: &str,
     package: &str,
     expires_on: NaiveDate,
@@ -36,7 +39,7 @@ pub fn plan(
                 days => format!("{provider} runs out in {days} days"),
             };
             Some(PlannedNotification {
-                id: format!("sajilo.internet.{provider}.{expires_on}.{days}"),
+                id: format!("sajilo.internet.{key}.{expires_on}.{days}"),
                 kind: ReminderKind::Keeper,
                 title,
                 body: format!("{package}.{price}"),
@@ -55,7 +58,14 @@ mod tests {
     fn a_week_three_days_and_the_day() {
         let expires = NaiveDate::from_ymd_opt(2027, 2, 9).unwrap();
         let now = Utc.with_ymd_and_hms(2026, 10, 15, 0, 0, 0).unwrap();
-        let planned = plan("WorldLink", "6G 400Mbps", expires, Some(18080.0), now);
+        let planned = plan(
+            "WorldLink",
+            "WorldLink",
+            "6G 400Mbps",
+            expires,
+            Some(18080.0),
+            now,
+        );
         let titles: Vec<&str> = planned.iter().map(|p| p.title.as_str()).collect();
         assert_eq!(
             titles,
@@ -73,6 +83,9 @@ mod tests {
         let expires = NaiveDate::from_ymd_opt(2027, 2, 9).unwrap();
         // Four days out: the week-ahead one has passed.
         let now = Utc.with_ymd_and_hms(2027, 2, 5, 6, 0, 0).unwrap();
-        assert_eq!(plan("WorldLink", "x", expires, None, now).len(), 2);
+        assert_eq!(
+            plan("WorldLink", "WorldLink", "x", expires, None, now).len(),
+            2
+        );
     }
 }

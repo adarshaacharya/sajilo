@@ -26244,9 +26244,7 @@
         "symbol": "NMBSBF"
       }
     },
-    "get_internet": {
-      "status": "unavailable"
-    },
+    "get_internet": [],
     "get_ipos": {
       "status": "fresh",
       "value": {
@@ -46530,7 +46528,7 @@
         "temperatureCelsius": 23.1
       }
     },
-    "get_worldlink_account": null,
+    "get_worldlink_accounts": [],
     "group_number:-0.009999999776482582:0": "-0",
     "group_number:-0.009999999776482582:1": "-0.0",
     "group_number:-0.009999999776482582:2": "-0.01",

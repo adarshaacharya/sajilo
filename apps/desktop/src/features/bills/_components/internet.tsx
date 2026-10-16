@@ -4,7 +4,8 @@ import { Icon } from "../../../shared/components/icon";
 import { StateBanner } from "../../../shared/components/state-banner";
 import type { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
-import { catchAsFailed, loadBanner, loadedValue } from "../../../shared/lib/load-state";
+import { loadBanner, loadedValue } from "../../../shared/lib/load-state";
+import type { InternetAccount } from "../../../types/api/InternetAccount";
 import type { InternetStatus } from "../../../types/api/InternetStatus";
 import { internetTone, rupees, useInternet } from "../internet-due";
 
@@ -12,6 +13,7 @@ type TFn = ReturnType<typeof useSettings>["t"];
 
 /** Longer than any WorldLink username. */
 const MAX_USERNAME = 60;
+const MAX_LABEL = 24;
 
 /** "117 days left", "Last day today", or "Expired". */
 export function daysText(t: TFn, status: InternetStatus): string {
@@ -21,15 +23,23 @@ export function daysText(t: TFn, status: InternetStatus): string {
   return t("internet.days-left").replace("{n}", String(days));
 }
 
-/** The WorldLink row in Bills & status. */
-export function InternetRow({ onOpen, t }: { onOpen: () => void; t: TFn }) {
-  const { data } = useInternet();
-  const status = loadedValue(data);
-  const detail = !data
-    ? ""
-    : data.status === "unavailable"
-      ? t("internet.row-setup")
-      : (status?.package ?? t("internet.row-checking"));
+/** One WorldLink account's row in Bills. */
+export function InternetRow({
+  account,
+  named,
+  onOpen,
+  t,
+}: {
+  account: InternetAccount;
+  /** Several accounts: the row says whose. */
+  named: boolean;
+  onOpen: () => void;
+  t: TFn;
+}) {
+  const status = loadedValue(account.state);
+  const detail =
+    status?.package ??
+    (account.state.status === "failed" ? t("internet.unreachable") : t("internet.row-checking"));
 
   return (
     <section className="surface-card px-3">
@@ -42,7 +52,11 @@ export function InternetRow({ onOpen, t }: { onOpen: () => void; t: TFn }) {
           <Icon name="wifi" className="size-3.5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[12px] font-medium">{t("internet.title")}</span>
+          <span className="block truncate text-[12px] font-medium">
+            {named
+              ? t("internet.title-named").replace("{name}", account.name)
+              : t("internet.title")}
+          </span>
           <span className="mt-0.5 block truncate text-[10px] text-text-muted">{detail}</span>
         </span>
         {status ? (
@@ -57,35 +71,43 @@ export function InternetRow({ onOpen, t }: { onOpen: () => void; t: TFn }) {
   );
 }
 
-/** The subscription's page: set up once, then days left and renewal. */
-export function InternetPage({ t }: { t: TFn }) {
+/**
+ * One account's page: days left, renewal, and renaming or removing it. With
+ * no `username`, the form that adds one.
+ */
+export function InternetPage({
+  username,
+  onAdded,
+  onRemoved,
+  t,
+}: {
+  username: string | null;
+  onAdded: (username: string) => void;
+  onRemoved: () => void;
+  t: TFn;
+}) {
   const { data, mutate, isValidating } = useInternet();
-  const [editing, setEditing] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const account = data?.find((entry) => entry.username === username);
 
-  if (!data) return <StateBanner state={{ status: "loading" }} />;
-  if (data.status === "unavailable" || editing) {
+  if (username === null) {
     return (
       <Setup
         t={t}
-        onSaved={(status) => {
-          setEditing(false);
-          void mutate({ status: "fresh", value: status }, { revalidate: false });
-        }}
-        onCancel={data.status === "unavailable" ? undefined : () => setEditing(false)}
-        onRemoved={() => {
-          setEditing(false);
-          void mutate({ status: "unavailable" }, { revalidate: false });
+        onSaved={(added) => {
+          void mutate();
+          onAdded(added);
         }}
       />
     );
   }
+  if (!data) return <StateBanner state={{ status: "loading" }} />;
+  if (!account) return null;
 
-  const status = loadedValue(data);
+  const status = loadedValue(account.state);
+  const refresh = () => mutate(api.getInternet(true), { revalidate: false }).catch(() => undefined);
   return (
-    <StateBanner
-      state={loadBanner(data)}
-      onRetry={() => mutate(catchAsFailed(api.getInternet(true)))}
-    >
+    <StateBanner state={loadBanner(account.state)} onRetry={refresh}>
       {status && (
         <section className="surface-card p-3">
           <p className="text-[11px] font-semibold text-text-secondary">{status.package}</p>
@@ -98,6 +120,10 @@ export function InternetPage({ t }: { t: TFn }) {
             </p>
           )}
           <div className="mt-2 space-y-1 border-divider border-t pt-2 text-[11px]">
+            <p className="flex justify-between gap-2">
+              <span className="text-text-muted">{t("internet.username")}</span>
+              <span>{account.username}</span>
+            </p>
             {status.renewalRate != null && (
               <p className="flex justify-between gap-2">
                 <span className="text-text-muted">{t("internet.renewal")}</span>
@@ -119,24 +145,49 @@ export function InternetPage({ t }: { t: TFn }) {
           </div>
         </section>
       )}
-      <div className="mt-2.5 flex items-center justify-between gap-2 px-0.5">
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="text-[11px] font-medium text-accent-mark"
-        >
-          {t("internet.change")}
-        </button>
-        <button
-          type="button"
-          onClick={() => mutate(catchAsFailed(api.getInternet(true)), { revalidate: false })}
-          disabled={isValidating}
-          className="icon-btn"
-          aria-label={t("action.refresh")}
-        >
-          <Icon name="refresh" className={`size-3.5 ${isValidating ? "animate-spin" : ""}`} />
-        </button>
-      </div>
+      {renaming ? (
+        <Rename
+          account={account}
+          onDone={() => {
+            setRenaming(false);
+            void mutate();
+          }}
+          t={t}
+        />
+      ) : (
+        <div className="mt-2.5 flex items-center gap-3 px-0.5">
+          <button
+            type="button"
+            onClick={() => setRenaming(true)}
+            className="text-[11px] font-medium text-accent-mark"
+          >
+            {t("internet.rename")}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              api
+                .removeWorldlinkAccount(account.username)
+                .then(() => mutate())
+                .then(onRemoved)
+                .catch(() => {});
+            }}
+            className="text-[11px] text-text-muted hover:text-text-secondary"
+          >
+            {t("internet.remove")}
+          </button>
+          <span className="flex-1" />
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={isValidating}
+            className="icon-btn"
+            aria-label={t("action.refresh")}
+          >
+            <Icon name="refresh" className={`size-3.5 ${isValidating ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+      )}
       <p className="mt-2 px-0.5 text-[10px] leading-relaxed text-text-muted">
         {t("internet.reminders")}
       </p>
@@ -144,27 +195,54 @@ export function InternetPage({ t }: { t: TFn }) {
   );
 }
 
-/** The username, checked with WorldLink before it's kept. */
-function Setup({
-  t,
-  onSaved,
-  onCancel,
-  onRemoved,
-}: {
-  t: TFn;
-  onSaved: (status: InternetStatus) => void;
-  onCancel?: () => void;
-  onRemoved: () => void;
-}) {
+/** A new name for one account, in place. */
+function Rename({ account, onDone, t }: { account: InternetAccount; onDone: () => void; t: TFn }) {
+  const [label, setLabel] = useState(account.name === account.username ? "" : account.name);
+  const save = () =>
+    api
+      .renameWorldlinkAccount(account.username, label)
+      .then(onDone)
+      .catch(() => {});
+  return (
+    <div className="mt-2.5 flex items-end gap-1.5 px-0.5">
+      <label className="block min-w-0 flex-1">
+        <span className={CONTROL_LABEL}>{t("internet.name-label")}</span>
+        <input
+          value={label}
+          maxLength={MAX_LABEL}
+          onChange={(event) => setLabel(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") void save();
+          }}
+          placeholder={t("internet.name-placeholder")}
+          className={CONTROL}
+        />
+      </label>
+      <button
+        type="button"
+        onClick={() => void save()}
+        className="settings-btn settings-btn--accent h-[22px] shrink-0"
+      >
+        {t("electricity.save")}
+      </button>
+    </div>
+  );
+}
+
+/** A username and a name, checked with WorldLink before it's kept. */
+function Setup({ t, onSaved }: { t: TFn; onSaved: (username: string) => void }) {
   const [username, setUsername] = useState("");
+  const [label, setLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const save = async () => {
+    if (!username.trim() || busy) return;
     setBusy(true);
     setError("");
     try {
-      onSaved(await api.setWorldlinkAccount({ username }));
+      await api.addWorldlinkAccount({ username, label });
+      onSaved(username.trim());
     } catch (reason) {
       setError(String(reason));
     } finally {
@@ -185,56 +263,50 @@ function Setup({
           </p>
         </div>
       </div>
-      <label className="block">
-        <span className={CONTROL_LABEL}>{t("internet.username-label")}</span>
-        <input
-          value={username}
-          maxLength={MAX_USERNAME}
-          onChange={(event) => setUsername(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && username.trim()) void save();
-          }}
-          placeholder="ramthapa"
-          spellCheck={false}
-          autoCapitalize="off"
-          className={CONTROL}
-        />
-      </label>
+      <div className="flex gap-1.5">
+        <label className="block w-[38%] min-w-0">
+          <span className={CONTROL_LABEL}>{t("internet.name-label")}</span>
+          <input
+            value={label}
+            maxLength={MAX_LABEL}
+            onChange={(event) => setLabel(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void save();
+            }}
+            placeholder={t("internet.name-placeholder")}
+            className={CONTROL}
+          />
+        </label>
+        <label className="block min-w-0 flex-1">
+          <span className={CONTROL_LABEL}>{t("internet.username-label")}</span>
+          <input
+            value={username}
+            maxLength={MAX_USERNAME}
+            onChange={(event) => setUsername(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void save();
+            }}
+            placeholder="ramthapa"
+            spellCheck={false}
+            autoCapitalize="off"
+            className={CONTROL}
+          />
+        </label>
+      </div>
       <p className="text-[10px] leading-snug text-text-muted">{t("internet.privacy")}</p>
       {error && (
         <p role="alert" className="text-[11px] text-holiday">
           {error}
         </p>
       )}
-      <div className={`grid gap-2 ${onCancel ? "grid-cols-2" : "grid-cols-1"}`}>
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="settings-btn w-full justify-center">
-            {t("electricity.cancel")}
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={save}
-          disabled={busy || !username.trim()}
-          className="settings-btn settings-btn--accent w-full justify-center"
-        >
-          {busy ? t("internet.checking") : t("electricity.save")}
-        </button>
-      </div>
-      {onCancel && (
-        <button
-          type="button"
-          onClick={() => {
-            api
-              .clearWorldlinkAccount()
-              .then(onRemoved)
-              .catch(() => {});
-          }}
-          className="text-[11px] text-text-muted hover:text-text-secondary"
-        >
-          {t("internet.remove")}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => void save()}
+        disabled={busy || !username.trim()}
+        className="settings-btn settings-btn--accent w-full justify-center"
+      >
+        {busy ? t("internet.checking") : t("electricity.save")}
+      </button>
     </section>
   );
 }

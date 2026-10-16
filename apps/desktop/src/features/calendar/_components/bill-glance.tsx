@@ -4,7 +4,7 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { useBoidReport } from "../../bazar/boid-due";
 import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electricity-due";
-import { internetTone, SOON_DAYS, useInternet } from "../../bills/internet-due";
+import { internetTone, soonest, useInternet } from "../../bills/internet-due";
 
 /**
  * The electricity bill on the home screen, only while there is one to pay:
@@ -59,27 +59,35 @@ function AllotmentGlance() {
   );
 }
 
-/** WorldLink on the home screen, only when renewal is a week away or past. */
+/** WorldLink on the home screen, only when an account's renewal is a week
+ * away or past: the one that runs out first. */
 function InternetGlance() {
   const { t, modules } = useSettings();
   const navigate = useNavigate();
   const { data } = useInternet();
-  const status = loadedValue(data);
-  const days = status?.daysLeft ?? null;
-  if (!modules.billsEnabled || !status || days === null) return null;
-  if (!status.disabled && days > SOON_DAYS) return null;
+  const first = data ? soonest(data) : undefined;
+  if (!modules.billsEnabled || !first) return null;
+  const { account, status } = first;
+  const days = status.daysLeft ?? 0;
+  const named = (data?.length ?? 0) > 1;
 
   return (
     <button
       type="button"
-      onClick={() => navigate("/bills?open=internet")}
+      onClick={() =>
+        navigate(`/bills?open=internet&username=${encodeURIComponent(account.username)}`)
+      }
       className="surface-card flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
     >
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
         <Icon name="wifi" className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12px] font-semibold">{t("internet.glance")}</span>
+        <span className="block truncate text-[12px] font-semibold">
+          {named
+            ? t("internet.glance-named").replace("{name}", account.name)
+            : t("internet.glance")}
+        </span>
         <span className={`mt-0.5 block truncate text-[10.5px] font-medium ${internetTone(status)}`}>
           {status.disabled || days < 0
             ? t("internet.expired")

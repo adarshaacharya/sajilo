@@ -26,7 +26,8 @@ type Checked = "electricity" | "internet";
 
 /** Bills' own navigation: a small stack, so back is always the screen before. */
 type Screen =
-  | { name: "checked"; which: Checked }
+  /** For internet, which account; `null` adds one. */
+  | { name: "checked"; which: Checked; username?: string | null }
   | { name: "add" }
   | { name: "how"; which: Checked; template: ReminderTemplate }
   | { name: "group"; key: string }
@@ -48,9 +49,12 @@ export function Bills() {
   const internet = useInternet();
   const [stack, setStack] = useState<Screen[]>(() => {
     const linked = new URLSearchParams(search).get("open");
-    return linked === "electricity" || linked === "internet"
-      ? [{ name: "checked", which: linked }]
-      : [];
+    const params = new URLSearchParams(search);
+    if (linked === "electricity") return [{ name: "checked", which: linked }];
+    if (linked === "internet") {
+      return [{ name: "checked", which: linked, username: params.get("username") }];
+    }
+    return [];
   });
   const screen = stack.at(-1) ?? null;
   const push = (next: Screen) => setStack((current) => [...current, next]);
@@ -63,13 +67,17 @@ export function Bills() {
 
   const groups = groupBills(bills.items);
   const group = screen?.name === "group" ? groups.find((g) => g.key === screen.key) : undefined;
-  const titles: Record<Checked, string> = {
-    electricity: t("electricity.title"),
-    internet: t("internet.title"),
+  const internetAccounts = internet.data ?? [];
+  const named = internetAccounts.length > 1;
+  const internetTitle = (username: string | null | undefined) => {
+    const account = internetAccounts.find((entry) => entry.username === username);
+    return account && named
+      ? t("internet.title-named").replace("{name}", account.name)
+      : t("internet.title");
   };
   const isSetUp = {
     electricity: !!electricity.data && electricity.data.status !== "unavailable",
-    internet: !!internet.data && internet.data.status !== "unavailable",
+    internet: internetAccounts.length > 0,
   };
 
   useHeaderInner(
@@ -78,7 +86,9 @@ export function Bills() {
       : {
           title:
             screen.name === "checked"
-              ? titles[screen.which]
+              ? screen.which === "electricity"
+                ? t("electricity.title")
+                : internetTitle(screen.username)
               : screen.name === "add"
                 ? t("bills.add")
                 : screen.name === "how"
@@ -111,7 +121,17 @@ export function Bills() {
 
   let body: ReactNode;
   if (screen?.name === "checked") {
-    body = screen.which === "electricity" ? <ElectricityPage t={t} /> : <InternetPage t={t} />;
+    body =
+      screen.which === "electricity" ? (
+        <ElectricityPage t={t} />
+      ) : (
+        <InternetPage
+          username={screen.username ?? null}
+          onAdded={(username) => replace({ name: "checked", which: "internet", username })}
+          onRemoved={back}
+          t={t}
+        />
+      );
   } else if (screen?.name === "add") {
     body = <BillPicker onPick={pick} t={t} />;
   } else if (screen?.name === "how") {
@@ -201,9 +221,15 @@ export function Bills() {
         {checkedList.includes("electricity") && (
           <ElectricityRow onOpen={() => push({ name: "checked", which: "electricity" })} t={t} />
         )}
-        {checkedList.includes("internet") && (
-          <InternetRow onOpen={() => push({ name: "checked", which: "internet" })} t={t} />
-        )}
+        {internetAccounts.map((account) => (
+          <InternetRow
+            key={account.username}
+            account={account}
+            named={named}
+            onOpen={() => push({ name: "checked", which: "internet", username: account.username })}
+            t={t}
+          />
+        ))}
         {groups.length > 0 && (
           <section className="surface-card px-3" aria-label={t("screen.bills")}>
             <BillGroupRows

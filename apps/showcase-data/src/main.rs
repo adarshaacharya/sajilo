@@ -770,11 +770,8 @@ fn record_electricity(commands: &mut BTreeMap<String, Value>, read: &dyn Fn(&str
         json!({ "status": "unavailable" }),
     );
     commands.insert("get_nea_account".to_owned(), Value::Null);
-    commands.insert(
-        "get_internet".to_owned(),
-        json!({ "status": "unavailable" }),
-    );
-    commands.insert("get_worldlink_account".to_owned(), Value::Null);
+    commands.insert("get_internet".to_owned(), json!([]));
+    commands.insert("get_worldlink_accounts".to_owned(), json!([]));
     commands.insert(
         "get_boid_report".to_owned(),
         json!({ "status": "unavailable" }),
