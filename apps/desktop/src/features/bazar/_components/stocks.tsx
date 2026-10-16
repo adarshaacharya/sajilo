@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
+import { BackButton } from "../../../shared/components/back-button";
 import { Icon } from "../../../shared/components/icon";
 import { SearchField } from "../../../shared/components/search-field";
 import { Segmented } from "../../../shared/components/segmented";
@@ -29,6 +30,7 @@ import {
   searchQuotes,
   shortSectorName,
 } from "../_lib/stock-tone";
+import { BoidPage, BoidRow } from "./boid";
 import { CompanyDetail } from "./company-detail";
 import { DividendCard } from "./dividend-card";
 import { FollowButton } from "./follow-button";
@@ -58,7 +60,8 @@ const WATCHLIST_LIMIT = 12;
 type Panel =
   | { kind: "quote"; symbol: string }
   | { kind: "ipos" }
-  | { kind: "ipo"; key: string; from: "market" | "ipos" };
+  | { kind: "ipo"; key: string; from: "market" | "ipos" }
+  | { kind: "boid" };
 
 function banner(state: LoadState<StockMarketSnapshot> | undefined): LoadStatus {
   if (!state) return { status: "loading" };
@@ -83,6 +86,7 @@ export function Stocks({
   onRetryIntraday,
   linkedIpo = null,
   linkedIpoList = false,
+  linkedBoid = false,
   footer = null,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
@@ -96,6 +100,8 @@ export function Stocks({
   /** An issue key to open on arrival, e.g. from the home screen's up-next row. */
   linkedIpo?: string | null;
   linkedIpoList?: boolean;
+  /** Opens the BOID allotments page, as a new-allotment card does. */
+  linkedBoid?: boolean;
   /** Drawn under the market view only, never under a drilled-in panel. */
   footer?: ReactNode;
 }) {
@@ -104,6 +110,7 @@ export function Stocks({
   const ipoSnapshot = loadedValue(ipoState);
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<Panel | null>(() => {
+    if (linkedBoid) return { kind: "boid" };
     if (linkedIpo) return { kind: "ipo", key: linkedIpo, from: "market" };
     return linkedIpoList ? { kind: "ipos" } : null;
   });
@@ -181,8 +188,20 @@ export function Stocks({
     [snapshot, query],
   );
 
-  // IPO panels do not depend on the ShareSansar feed, so they open even when
-  // the market itself failed to load.
+  // These panels do not depend on the ShareSansar feed, so they open even
+  // when the market itself failed to load.
+  if (panel?.kind === "boid") {
+    return (
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 px-0.5">
+          <BackButton onClick={() => setPanel(null)} />
+          <p className="flex-1 text-[13px] font-semibold">{t("boid.title")}</p>
+        </div>
+        <BoidPage t={t} />
+      </div>
+    );
+  }
+
   if (panel?.kind === "ipos" && ipoGroups) {
     return (
       <IpoList
@@ -333,6 +352,7 @@ export function Stocks({
           </section>
         ) : section === "mine" ? (
           <>
+            <BoidRow onOpen={() => setPanel({ kind: "boid" })} t={t} />
             {held.length > 0 && portfolio ? (
               <HoldingsCard
                 portfolio={portfolio}

@@ -87,8 +87,6 @@ pub fn parse_allotment(
         applied: None,
         allotted,
         published_on: None,
-        is_new: false,
-        published_label: None,
     }))
 }
 

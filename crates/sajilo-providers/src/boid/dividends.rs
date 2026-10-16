@@ -75,6 +75,7 @@ pub fn parse_global_ime(body: &str) -> Result<Vec<UnclaimedDividend>> {
                 fiscal_year: row["fiscal_year"].as_str().map(str::to_owned),
                 amount,
                 kitta: super::kitta(&row["total_kitta"]),
+                holder: String::new(),
             })
         })
         .collect())

@@ -398,6 +398,7 @@ export function Bazar() {
           onRetryIntraday={retryIntraday}
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
+          linkedBoid={linked.has("boid")}
           footer={<FundsLink state={funds} onOpen={() => pickView("funds")} />}
         />
       )}

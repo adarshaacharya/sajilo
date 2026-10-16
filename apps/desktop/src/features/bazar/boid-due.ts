@@ -3,6 +3,11 @@ import { api } from "../../shared/lib/ipc";
 import { catchAsFailed } from "../../shared/lib/load-state";
 import type { Registrar } from "../../types/api/Registrar";
 
+/** The saved BOIDs, each with its name. */
+export function useBoidAccounts() {
+  return useSWR("boid-accounts", () => api.getBoidAccounts());
+}
+
 /** The BOID report, shared by the row, the page and Today's card. */
 export function useBoidReport() {
   return useSWR("boid-report", () => catchAsFailed(api.getBoidReport(false)));

@@ -69,7 +69,9 @@ async fn refresh(app: &AppHandle<Wry>) {
         async move {
             if bazar_enabled {
                 commands::bazar::get_bazar(bazar_app, Some(false)).await;
-                commands::stocks::get_stocks(stocks_app, Some(false)).await;
+                commands::stocks::get_stocks(stocks_app.clone(), Some(false)).await;
+                // Reschedules itself when it finds a new allotment.
+                commands::boid::get_boid_report(stocks_app, Some(false)).await;
             }
         },
         async move {
@@ -86,7 +88,6 @@ async fn refresh(app: &AppHandle<Wry>) {
             if bills_enabled {
                 commands::electricity::get_electricity(electricity_app.clone(), Some(false)).await;
                 commands::internet::get_internet(electricity_app.clone(), Some(false)).await;
-                commands::boid::get_boid_report(electricity_app.clone(), Some(false)).await;
                 // A new bill found means new reminders.
                 crate::commands::notify::reschedule();
             }

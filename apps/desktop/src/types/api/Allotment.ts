@@ -2,7 +2,7 @@
 import type { Registrar } from "./Registrar";
 
 /**
- * Shares allotted in one issue.
+ * Shares allotted to one BOID in one issue, as a registrar answered.
  */
 export type Allotment = { 
 /**
@@ -17,9 +17,4 @@ company: string, applied: number | null, allotted: number,
 /**
  * When the registrar published the result.
  */
-publishedOn: string | null, 
-/**
- * Found since the last check, not in the first one. Worked out
- * when served.
- */
-isNew: boolean, publishedLabel: string | null, };
+publishedOn: string | null, };

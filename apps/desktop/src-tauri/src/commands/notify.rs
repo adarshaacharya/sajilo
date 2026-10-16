@@ -91,6 +91,9 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
             app, now,
         ));
         all.extend(crate::commands::internet::pending_notifications(app, now));
+    }
+    // Allotments live in Bazar, beside the IPOs they came from.
+    if crate::background_refresh::enabled(app, prefs::BAZAR_ENABLED) {
         all.extend(crate::commands::boid::pending_notifications(app, now));
     }
     all.extend(ipo_closing(app, options, now));

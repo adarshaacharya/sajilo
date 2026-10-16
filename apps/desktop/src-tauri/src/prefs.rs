@@ -95,9 +95,12 @@ pub const NEA_OFFICES_KEY: &str = "neaOffices.v1";
 /// The WorldLink username whose subscription is checked. Sent only to
 /// WorldLink's own renewal lookup.
 pub const WORLDLINK_ACCOUNT: &str = "worldlinkAccount";
-/// The BOID whose allotments and dividends are checked. Sent only to the
-/// share registrars' own lookups.
+/// The single BOID saved before there could be several; read as the first of
+/// them until the list is next saved, then removed.
 pub const BOID_ACCOUNT: &str = "boidAccount";
+/// The BOIDs, each with a name, whose allotments and dividends are checked.
+/// Sent only to the share registrars' own lookups.
+pub const BOID_ACCOUNTS: &str = "boidAccounts";
 pub const FOREX_FAVOURITES: &str = "forexFavourites";
 pub const LANGUAGE: &str = "language";
 pub const SHOWS_DOCK_ICON: &str = "showsDockIcon";

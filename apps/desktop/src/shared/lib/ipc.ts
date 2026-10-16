@@ -943,11 +943,11 @@ export const api = {
   getElectricity: (refresh = false) =>
     invoke<LoadState<ElectricityStatement>>("get_electricity", { refresh }),
 
-  getBoidAccount: () => invoke<BoidAccount | null>("get_boid_account"),
-  /** Saves a 16-digit BOID; rejects with a readable reason. */
-  setBoidAccount: (account: BoidAccount) => invoke<BoidAccount>("set_boid_account", { account }),
-  clearBoidAccount: () => invoke<void>("clear_boid_account"),
-  /** Allotments and dividends at the registrars; the first check takes ~30s. */
+  getBoidAccounts: () => invoke<BoidAccount[]>("get_boid_accounts"),
+  /** Saves the whole list, up to 10; rejects with a readable reason. */
+  setBoidAccounts: (accounts: BoidAccount[]) =>
+    invoke<BoidAccount[]>("set_boid_accounts", { accounts }),
+  /** Allotments and dividends for every BOID; a new BOID's first check takes ~30s. */
   getBoidReport: (refresh = false) => invoke<LoadState<BoidReport>>("get_boid_report", { refresh }),
   getWorldlinkAccount: () => invoke<WorldLinkAccount | null>("get_worldlink_account"),
   /** Checks the username with WorldLink before saving; rejects with a readable reason. */

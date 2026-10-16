@@ -135,8 +135,6 @@ pub fn parse_allotment(
         applied: kitta(&row["applied_kitta"]),
         allotted,
         published_on: row["created_at"].as_str().and_then(date_of),
-        is_new: false,
-        published_label: None,
     }))
 }
 
@@ -175,6 +173,7 @@ pub fn parse_sanima_dividends(body: &str) -> Result<Vec<sajilo_api::boid::Unclai
                 amount: super::kitta(&row["div_amount"])
                     .map_or_else(|| row["div_amount"].as_f64().unwrap_or(0.0), f64::from),
                 kitta: kitta(&row["total_kitta"]),
+                holder: String::new(),
             })
         })
         .collect())

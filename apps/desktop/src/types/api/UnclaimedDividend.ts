@@ -8,4 +8,8 @@ export type UnclaimedDividend = { registrar: Registrar, company: string, fiscalY
 /**
  * After tax, where the registrar says.
  */
-amount: number, kitta: number | null, };
+amount: number, kitta: number | null, 
+/**
+ * Whose it is: the account's name. Filled in when served.
+ */
+holder: string, };

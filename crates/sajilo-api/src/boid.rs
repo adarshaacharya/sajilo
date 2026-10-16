@@ -18,13 +18,17 @@ dto_enum! {
 }
 
 dto! {
-    /// What the lookups need, entered once and kept on this computer.
+    /// One BOID to check, entered once and kept on this computer. A family
+    /// usually applies in several names, so there can be a few.
     pub struct BoidAccount {
         /// 16 digits, `1301…`.
         pub boid: String,
+        /// Whatever the user calls it: a name, "Aama". May be empty.
+        #[serde(default)]
+        pub label: String,
     }
 
-    /// Shares allotted in one issue.
+    /// Shares allotted to one BOID in one issue, as a registrar answered.
     pub struct Allotment {
         /// Stable: registrar and its own id for the issue.
         pub id: String,
@@ -38,12 +42,6 @@ dto! {
         /// When the registrar published the result.
         #[serde(default)]
         pub published_on: Option<NaiveDate>,
-        /// Found since the last check, not in the first one. Worked out
-        /// when served.
-        #[serde(default)]
-        pub is_new: bool,
-        #[serde(default)]
-        pub published_label: Option<String>,
     }
 
     /// A cash dividend waiting to be collected.
@@ -56,6 +54,9 @@ dto! {
         pub amount: f64,
         #[serde(default)]
         pub kitta: Option<u32>,
+        /// Whose it is: the account's name. Filled in when served.
+        #[serde(default)]
+        pub holder: String,
     }
 
     /// How one registrar's check went.
@@ -66,11 +67,68 @@ dto! {
         pub issues: u32,
     }
 
-    /// Everything found for a BOID.
+    /// One account's answer for one issue.
+    pub struct HolderResult {
+        pub boid: String,
+        /// The label, or the BOID's last digits when there is none.
+        pub name: String,
+        /// `None` when not allotted, or not asked yet (`checked` tells which).
+        pub allotted: Option<u32>,
+        pub applied: Option<u32>,
+        pub checked: bool,
+        /// Found since that account's first check, within the last fortnight.
+        pub is_new: bool,
+    }
+
+    /// One issue in which at least one account was allotted shares, with what
+    /// every account got.
+    pub struct IpoResult {
+        /// Stable: registrar and its own id for the issue.
+        pub id: String,
+        pub registrar: Registrar,
+        pub company: String,
+        pub published_on: Option<NaiveDate>,
+        pub published_label: Option<String>,
+        /// Someone's allotment in it is new.
+        pub is_new: bool,
+        /// In the order the accounts were added.
+        pub holders: Vec<HolderResult>,
+    }
+
+    /// One account at a glance.
+    pub struct AccountSummary {
+        pub boid: String,
+        pub name: String,
+        /// Issues it was allotted shares in.
+        pub allotments: u32,
+        /// False when its check failed and nothing was known before.
+        pub ok: bool,
+    }
+
+    /// Everything found for every account.
     pub struct BoidReport {
-        pub allotments: Vec<Allotment>,
+        /// Newest first.
+        pub ipos: Vec<IpoResult>,
         pub dividends: Vec<UnclaimedDividend>,
+        pub accounts: Vec<AccountSummary>,
+        /// Merged across accounts: ok only if every account's check was.
         pub registrars: Vec<RegistrarCheck>,
+    }
+}
+
+impl BoidAccount {
+    /// The label, or `BOID …0001` when there is none.
+    pub fn name(&self) -> String {
+        let label = self.label.trim();
+        if label.is_empty() {
+            let tail = self
+                .boid
+                .get(self.boid.len().saturating_sub(4)..)
+                .unwrap_or_default();
+            format!("BOID …{tail}")
+        } else {
+            label.to_owned()
+        }
     }
 }
 

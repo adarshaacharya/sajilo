@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { loadedValue } from "../../../shared/lib/load-state";
-import { useBoidReport } from "../../bills/boid-due";
+import { useBoidReport } from "../../bazar/boid-due";
 import { dueLine, dueToneOf, rupees, useElectricity } from "../../bills/electricity-due";
 import { internetTone, SOON_DAYS, useInternet } from "../../bills/internet-due";
 
@@ -26,14 +26,17 @@ function AllotmentGlance() {
   const { t, modules } = useSettings();
   const navigate = useNavigate();
   const { data } = useBoidReport();
-  const fresh = loadedValue(data)?.allotments.filter((allotment) => allotment.isNew) ?? [];
+  const report = loadedValue(data);
+  const fresh = report?.ipos.filter((ipo) => ipo.isNew) ?? [];
   const first = fresh[0];
-  if (!modules.billsEnabled || !first) return null;
+  const holder = first?.holders.find((h) => h.isNew);
+  if (!modules.bazarEnabled || !first || holder?.allotted == null) return null;
+  const named = (report?.accounts.length ?? 0) > 1;
 
   return (
     <button
       type="button"
-      onClick={() => navigate("/bills?open=boid")}
+      onClick={() => navigate("/bazar?tab=stocks&view=nepse&boid=1")}
       className="surface-card flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
     >
       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
@@ -41,7 +44,10 @@ function AllotmentGlance() {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[12px] font-semibold">
-          {t("boid.glance").replace("{n}", String(first.allotted))}
+          {(named
+            ? t("boid.glance-named").replace("{name}", holder.name)
+            : t("boid.glance")
+          ).replace("{n}", String(holder.allotted))}
         </span>
         <span className="mt-0.5 block truncate text-[10.5px] text-text-secondary">
           {first.company}
