@@ -686,7 +686,7 @@
         {
           "breakSeconds": 20,
           "enabled": false,
-          "everyMinutes": 20,
+          "everyMinutes": 40,
           "kind": "eyes",
           "maxBreakSeconds": 120,
           "maxMinutes": 480,
@@ -710,7 +710,7 @@
         {
           "breakSeconds": 0,
           "enabled": false,
-          "everyMinutes": 60,
+          "everyMinutes": 90,
           "kind": "water",
           "maxBreakSeconds": 0,
           "maxMinutes": 480,
@@ -753,7 +753,7 @@
         "endOfDay": true,
         "eyes": {
           "enabled": false,
-          "everyMinutes": 20
+          "everyMinutes": 40
         },
         "eyesSeconds": 20,
         "hold": {
@@ -804,6 +804,10 @@
           }
         },
         "routineAsked": false,
+        "startWorkAt": {
+          "hour": 9,
+          "minute": 0
+        },
         "stopWorkAt": {
           "hour": 18,
           "minute": 0
@@ -811,7 +815,7 @@
         "style": "card",
         "water": {
           "enabled": false,
-          "everyMinutes": 60
+          "everyMinutes": 90
         },
         "waterGoalMl": 2500,
         "workDays": [
@@ -37141,6 +37145,17 @@
       "ipoClosingDay": true,
       "keeper": true,
       "pausedUntil": null,
+      "quiet": {
+        "enabled": true,
+        "from": {
+          "hour": 21,
+          "minute": 0
+        },
+        "to": {
+          "hour": 7,
+          "minute": 0
+        }
+      },
       "rashifalTime": null,
       "sajiloAsks": false,
       "sajiloGreetings": true,

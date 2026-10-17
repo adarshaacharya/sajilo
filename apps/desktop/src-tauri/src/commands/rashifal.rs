@@ -201,6 +201,12 @@ pub mod reminder {
         // the user lets hold reminders back; while it is off, nothing does.
         let held = background_refresh::enabled(app, prefs::FOCUS_ENABLED)
             && crate::commands::focus::holding(app);
+        // A reading caught up late waits out the quiet hours too, unless the
+        // time the user chose is itself in them.
+        let options = crate::commands::notify::options(app);
+        let quiet = crate::commands::notify::in_quiet_hours(&options, Utc::now())
+            && !options.quiet.contains(at);
+        let held = held || quiet;
         let mut state = state(app);
         let step = rashifal::step(
             &mut state,

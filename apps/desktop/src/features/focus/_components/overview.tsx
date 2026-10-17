@@ -6,6 +6,7 @@ import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../..
 import { digits } from "../../../shared/lib/numerals";
 import { usePersistedList } from "../../../shared/lib/persisted";
 import {
+  clock,
   duration,
   HOLD_ICONS,
   HOLD_LABELS,
@@ -113,6 +114,10 @@ function StatusCard({
     lead = <Chip icon={HOLD_ICONS[snapshot.hold]} tint="var(--color-accent-mark)" />;
     title = t("focus.held.title").replace("{what}", t(HOLD_LABELS[snapshot.hold]));
     detail = t("focus.held.detail");
+  } else if (status === "afterHours") {
+    lead = <Chip icon="moon" tint="var(--color-accent-mark)" />;
+    title = t("focus.after-hours.title").replace("{time}", clock(snapshot.settings.startWorkAt));
+    detail = t("focus.after-hours.detail");
   } else if (status === "dayOff") {
     const holiday = snapshot.dayOff === "publicHoliday";
     lead = <Chip icon="sun" tint={holiday ? "var(--color-holiday)" : "var(--color-accent-mark)"} />;

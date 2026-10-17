@@ -9,7 +9,7 @@
 
 use std::collections::BTreeMap;
 
-use chrono::{DateTime, Duration, NaiveDate, TimeZone, Utc};
+use chrono::{DateTime, Duration, FixedOffset, NaiveDate, NaiveTime, TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::calendar::bikram_sambat::{LAST_YEAR, gregorian_date_from, nepali_date_from};
@@ -79,6 +79,73 @@ pub struct NotificationOptions {
     pub sajilo_tips: bool,
     #[serde(default)]
     pub sajilo_asks: bool,
+    /// The night, when nothing chimes. On by default: people were woken by
+    /// reminders that waited for the computer to wake.
+    #[serde(default)]
+    pub quiet: QuietHours,
+}
+
+/// The hours nothing is delivered, on the computer's own clock: it is the
+/// user's night, wherever they are. What comes due inside them waits for the
+/// morning; a day plan keeps its own time, since that time was chosen.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct QuietHours {
+    pub enabled: bool,
+    pub from: PlanTime,
+    pub to: PlanTime,
+}
+
+impl Default for QuietHours {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            from: PlanTime {
+                hour: 21,
+                minute: 0,
+            },
+            to: PlanTime { hour: 7, minute: 0 },
+        }
+    }
+}
+
+impl QuietHours {
+    fn bound(time: PlanTime) -> NaiveTime {
+        NaiveTime::from_hms_opt(time.hour.min(23), time.minute.min(59), 0).unwrap_or_default()
+    }
+
+    /// Whether `time` falls in the quiet hours. They may run past midnight,
+    /// as they usually do.
+    pub fn contains(&self, time: NaiveTime) -> bool {
+        let (from, to) = (Self::bound(self.from), Self::bound(self.to));
+        if !self.enabled || from == to {
+            return false;
+        }
+        if from < to {
+            from <= time && time < to
+        } else {
+            time >= from || time < to
+        }
+    }
+
+    /// `at`, or the moment the quiet hours it falls in end, at `offset`.
+    pub fn defer(&self, at: DateTime<Utc>, offset: FixedOffset) -> DateTime<Utc> {
+        let local = at.with_timezone(&offset);
+        if !self.contains(local.time()) {
+            return at;
+        }
+        let to = Self::bound(self.to);
+        // Before midnight, the quiet ends tomorrow morning.
+        let date = if local.time() >= to {
+            local.date_naive() + Duration::days(1)
+        } else {
+            local.date_naive()
+        };
+        offset
+            .from_local_datetime(&date.and_time(to))
+            .single()
+            .map_or(at, |end| end.with_timezone(&Utc))
+    }
 }
 
 fn default_hour() -> u32 {
@@ -110,6 +177,7 @@ impl Default for NotificationOptions {
             sajilo_updates: enabled_by_default(),
             sajilo_tips: false,
             sajilo_asks: false,
+            quiet: QuietHours::default(),
         }
     }
 }
@@ -604,5 +672,43 @@ pub fn pause_end(pause: PauseFor, now: DateTime<Utc>) -> DateTime<Utc> {
                     morning.with_timezone(&Utc)
                 })
         }
+    }
+}
+
+#[cfg(test)]
+mod quiet_tests {
+    use super::*;
+
+    #[test]
+    fn quiet_hours_run_past_midnight() {
+        let quiet = QuietHours::default();
+        let at = |h, m| NaiveTime::from_hms_opt(h, m, 0).unwrap();
+        assert!(quiet.contains(at(21, 0)));
+        assert!(quiet.contains(at(23, 59)));
+        assert!(quiet.contains(at(3, 0)));
+        assert!(!quiet.contains(at(7, 0)));
+        assert!(!quiet.contains(at(20, 59)));
+        let off = QuietHours {
+            enabled: false,
+            ..quiet
+        };
+        assert!(!off.contains(at(23, 0)));
+    }
+
+    #[test]
+    fn what_comes_due_at_night_waits_for_the_morning() {
+        let quiet = QuietHours::default();
+        let kathmandu = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
+        let local = |d, h, m| {
+            kathmandu
+                .with_ymd_and_hms(2026, 10, d, h, m, 0)
+                .unwrap()
+                .with_timezone(&Utc)
+        };
+        // 23:00 waits for 07:00 the next day; 02:00 for 07:00 the same day.
+        assert_eq!(quiet.defer(local(16, 23, 0), kathmandu), local(17, 7, 0));
+        assert_eq!(quiet.defer(local(17, 2, 0), kathmandu), local(17, 7, 0));
+        // The day is left alone.
+        assert_eq!(quiet.defer(local(17, 19, 0), kathmandu), local(17, 19, 0));
     }
 }

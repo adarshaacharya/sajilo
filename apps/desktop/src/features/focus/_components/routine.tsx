@@ -5,6 +5,7 @@ import { TimeField } from "../../../shared/components/time-field";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { FocusSettings, Routine } from "../../../shared/lib/ipc";
 import { clock, KIND_ICONS, KIND_LABELS, KIND_TINTS, parseClock } from "../_lib/format";
+import { WorkHours } from "./reminder-list";
 
 const MEALS = ["breakfast", "lunch", "dinner", "bedtime"] as const;
 
@@ -74,6 +75,10 @@ export function RoutineAsk({
   onSave: (settings: FocusSettings) => void;
 }) {
   const { t } = useSettings();
+  const [hours, setHours] = useState(() => ({
+    startWorkAt: settings.startWorkAt,
+    stopWorkAt: settings.stopWorkAt,
+  }));
   const [draft, setDraft] = useState<Routine>(() => ({
     breakfast: { ...settings.routine.breakfast, enabled: true },
     lunch: { ...settings.routine.lunch, enabled: true },
@@ -87,6 +92,16 @@ export function RoutineAsk({
       <p className="mt-1.5 text-[12px] leading-relaxed text-text-secondary">
         {t("focus.routine.ask-body")}
       </p>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <p className="text-[12px] font-medium">{t("focus.routine.ask-work")}</p>
+        <WorkHours
+          settings={{ ...settings, ...hours }}
+          onSettings={(next) =>
+            setHours({ startWorkAt: next.startWorkAt, stopWorkAt: next.stopWorkAt })
+          }
+          t={t}
+        />
+      </div>
       <div className="mt-3">
         <RoutineRows routine={draft} onChange={setDraft} />
       </div>
@@ -95,14 +110,14 @@ export function RoutineAsk({
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => onSave({ ...settings, routineAsked: true })}
+          onClick={() => onSave({ ...settings, ...hours, routineAsked: true })}
           className="settings-btn w-full justify-center text-center text-[12px]"
         >
           {t("focus.routine.skip")}
         </button>
         <button
           type="button"
-          onClick={() => onSave({ ...settings, routine: draft, routineAsked: true })}
+          onClick={() => onSave({ ...settings, ...hours, routine: draft, routineAsked: true })}
           className="settings-btn settings-btn--accent w-full justify-center text-center text-[12px]"
         >
           {t("focus.routine.save")}

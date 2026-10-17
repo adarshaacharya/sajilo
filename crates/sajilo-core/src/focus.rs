@@ -57,9 +57,9 @@ pub const SNOOZE_MINUTES: u32 = 5;
 /// joke heard for the fifth time is worse than none. Meals, bedtime and the
 /// stop-work nudge come once a day, so they always have one.
 pub const JOKE_EVERY: u32 = 3;
-/// Two breaks due in the same moment: the second comes this much more use
-/// after the first, not straight after it.
-pub const STAGGER_MINUTES: u32 = 5;
+/// A break due within this many minutes of use rides along on the card
+/// that is showing, rather than coming as a card of its own just after.
+pub const COMBINE_MINUTES: u32 = 10;
 /// "In 15 min" on a meal or bedtime card: five minutes is not long enough to
 /// finish what was on screen and get to the table.
 pub const ROUTINE_SNOOZE_MINUTES: u32 = 15;
@@ -188,8 +188,12 @@ pub struct FocusSettings {
     pub move_seconds: u32,
     /// Millilitres a day. Water reminders stop once it is reached.
     pub water_goal_ml: u32,
-    /// When the stop-work nudge comes. Read from the old "work hours end"
-    /// setting, which it replaces: work hours no longer gate breaks.
+    /// When breaks start for the day. Look-away, stand-up, water and the
+    /// user's own reminder come only between this and [`Self::stop_work_at`]:
+    /// a break every twenty minutes from morning to midnight was the most
+    /// common complaint. Meals and bedtime keep their own times.
+    pub start_work_at: PlanTime,
+    /// When breaks stop for the day, and the stop-work nudge comes.
     #[serde(alias = "workEnd")]
     pub stop_work_at: PlanTime,
     /// Sunday first. The days not ticked, and public holidays, are days off.
@@ -417,12 +421,15 @@ pub enum ReminderStyle {
 impl Default for FocusSettings {
     fn default() -> Self {
         Self {
-            eyes: BreakRule::off(20),
+            // Every 40 minutes, not the 20-20-20 rule's 20: three cards an
+            // hour was more than anyone kept on.
+            eyes: BreakRule::off(40),
             move_break: BreakRule::off(60),
-            water: BreakRule::off(60),
+            water: BreakRule::off(90),
             eyes_seconds: 20,
             move_seconds: 2 * 60,
             water_goal_ml: DEFAULT_WATER_GOAL_ML,
+            start_work_at: PlanTime { hour: 9, minute: 0 },
             stop_work_at: PlanTime {
                 hour: 18,
                 minute: 0,
@@ -545,8 +552,20 @@ impl FocusSettings {
         ] {
             rule.at = clamp_time(rule.at);
         }
+        self.start_work_at = clamp_time(self.start_work_at);
         self.stop_work_at = clamp_time(self.stop_work_at);
         self
+    }
+
+    /// Whether `time` is inside the hours breaks come in. Equal ends mean
+    /// all day; a start after the stop runs past midnight, for night shifts.
+    pub fn in_work_hours(&self, time: NaiveTime) -> bool {
+        let (start, stop) = (as_time(self.start_work_at), as_time(self.stop_work_at));
+        match start.cmp(&stop) {
+            std::cmp::Ordering::Equal => true,
+            std::cmp::Ordering::Less => start <= time && time < stop,
+            std::cmp::Ordering::Greater => time >= start || time < stop,
+        }
     }
 
     fn is_work_day(&self, date: NaiveDate) -> bool {
@@ -837,6 +856,9 @@ pub struct ActiveBreak {
     /// long enough to mention.
     #[serde(default)]
     pub after_hold: Option<AfterHold>,
+    /// Other breaks folded into this card, named under its own.
+    #[serde(default)]
+    pub also: Vec<BreakKind>,
 }
 
 impl ActiveBreak {
@@ -899,6 +921,7 @@ impl ActiveBreak {
                 SNOOZE_MINUTES
             },
             after_hold: None,
+            also: Vec::new(),
         }
     }
 }
@@ -978,6 +1001,8 @@ pub enum FocusStatus {
     Held,
     /// A day off with interval breaks set to rest.
     DayOff,
+    /// Outside the hours breaks come in.
+    AfterHours,
     Away,
     Active,
 }
@@ -1012,6 +1037,15 @@ fn quiet_reason(
     }
     if settings.days_off == DaysOff::Off && state.day_off(settings, local.date()).is_some() {
         return Some(FocusStatus::DayOff);
+    }
+    // Only when an interval break is on: meals and bedtime alone keep their
+    // own times and are never "after hours".
+    if BreakKind::ALL
+        .iter()
+        .any(|kind| settings.rule(*kind).enabled)
+        && !settings.in_work_hours(local.time())
+    {
+        return Some(FocusStatus::AfterHours);
     }
     None
 }
@@ -1187,15 +1221,19 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
         due.retain(|kind| *kind != BreakKind::Eyes);
         state.since_break[0] = 0;
     }
-    // One break at a time. The rest come a few minutes of use later rather
-    // than stacked behind it: stand-up and water both default to an hour.
+    // One card, not two in a row: whatever else is due, or would be within
+    // a few minutes, rides along on it and its timer starts over. A stand-up
+    // takes the eyes along without a word.
     let kind = due[0];
-    for later in &due[1..] {
-        stagger(state, settings, *later);
-    }
+    let also = ride_along(state, settings, date, kind);
     mark_reminded(state, date, tick.now, kind);
 
     open_card(state, settings, kind, tick.now);
+    if let Some(card) = state.active_break.as_mut()
+        && card.started_at == tick.now
+    {
+        card.also = also;
+    }
     let after_hold = state.after_hold.take();
     if let Some(card) = state.active_break.as_mut()
         && card.started_at == tick.now
@@ -1217,15 +1255,39 @@ fn mark_reminded(state: &mut FocusState, date: NaiveDate, now: DateTime<Utc>, ki
     }
 }
 
-/// Puts `kind` off until [`STAGGER_MINUTES`] more of use, because another
-/// break came due in the same moment and went first.
-fn stagger(state: &mut FocusState, settings: &FocusSettings, kind: BreakKind) {
-    if let Some(index) = kind.slot() {
-        state.since_break[index] = settings
-            .rule(kind)
-            .every_seconds()
-            .saturating_sub(STAGGER_MINUTES * 60);
+/// The other interval breaks due now or within [`COMBINE_MINUTES`] of use,
+/// folded into `kind`'s card: their timers start over, and the card names
+/// them. The eyes go along with a stand-up unnamed, since standing up rests
+/// them anyway.
+fn ride_along(
+    state: &mut FocusState,
+    settings: &FocusSettings,
+    date: NaiveDate,
+    kind: BreakKind,
+) -> Vec<BreakKind> {
+    let day_off = state.day_off(settings, date).is_some();
+    let goal_met = state.day_mut(date).water_ml >= settings.water_goal_ml;
+    let mut also = Vec::new();
+    for other in BreakKind::ALL {
+        let Some(index) = other.slot() else {
+            continue;
+        };
+        let rule = settings.rule(other);
+        if other == kind
+            || !rule.enabled
+            || !settings.runs_today(other, day_off)
+            || state.awaiting[index].is_some()
+            || (other == BreakKind::Water && goal_met)
+            || state.since_break[index] + COMBINE_MINUTES * 60 < rule.every_seconds()
+        {
+            continue;
+        }
+        state.since_break[index] = 0;
+        if !(kind == BreakKind::Move && other == BreakKind::Eyes) {
+            also.push(other);
+        }
     }
+    also
 }
 
 /// Adds `active` seconds to every interval that runs today and returns the

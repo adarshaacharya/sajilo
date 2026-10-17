@@ -316,6 +316,14 @@ export function BreakCard() {
           <p className="break-card__body" data-tauri-drag-region>
             {body}
           </p>
+          {card.also.length > 0 && (
+            <p className="break-card__also" data-tauri-drag-region>
+              {t("break.also").replace(
+                "{list}",
+                card.also.map((kind) => kindLabel(kind, snapshot.settings, t)).join(", "),
+              )}
+            </p>
+          )}
           {/* A joke replaces the instruction, but never the number that matters. */}
           {card.kind === "water" && <WaterBar ml={waterMl} goalMl={goalMl} />}
         </div>

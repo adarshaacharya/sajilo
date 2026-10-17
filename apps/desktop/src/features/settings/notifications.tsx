@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { Icon } from "../../shared/components/icon";
 import { Segmented } from "../../shared/components/segmented";
 import { Switch } from "../../shared/components/switch";
+import { TimeField } from "../../shared/components/time-field";
 import { useSettings } from "../../shared/context/settings-context";
 import type { translate } from "../../shared/lib/i18n";
 import {
@@ -10,6 +11,7 @@ import {
   type NotificationOptions,
   type PauseFor,
   type PermissionState,
+  type PlanTime,
   type ReminderStyle,
 } from "../../shared/lib/ipc";
 import { ReadingTime } from "../rashifal/reading-time";
@@ -121,6 +123,11 @@ const GROUPS: {
 export const SOURCES: Source[] = GROUPS.flatMap((group) => group.rows.map((row) => row.source));
 
 /** `14:30`, in the computer's own clock: when a pause ends, as the user reads time. */
+/** `{ hour: 7, minute: 0 }` → "07:00", as the time field takes it. */
+function hhmm(time: PlanTime) {
+  return `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")}`;
+}
+
 function clockText(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
@@ -207,6 +214,51 @@ export function Notifications() {
           </div>
         )}
       </section>
+
+      <SettingsSection
+        title={t("notifications.quiet")}
+        footnote={t(options.quiet.enabled ? "notifications.quiet-note" : "notifications.quiet-off")}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[12px]">{t("notifications.quiet-label")}</p>
+          <Switch
+            checked={options.quiet.enabled}
+            onChange={(enabled) =>
+              void update({ ...options, quiet: { ...options.quiet, enabled } })
+            }
+            ariaLabel={t("notifications.quiet-label")}
+          />
+        </div>
+        {options.quiet.enabled && (
+          <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-hover px-2.5 py-1.5">
+            <span className="text-[11.5px] text-text-secondary">
+              {t("notifications.quiet-hours")}
+            </span>
+            <div className="flex shrink-0 items-center gap-1.5">
+              {(["from", "to"] as const).map((end, index) => (
+                <div key={end} className="flex items-center gap-1.5">
+                  {index > 0 && <span className="text-[11px] text-text-muted">–</span>}
+                  <div className="w-[84px]">
+                    <TimeField
+                      value={hhmm(options.quiet[end])}
+                      ariaLabel={t(
+                        end === "from" ? "notifications.quiet-from" : "notifications.quiet-to",
+                      )}
+                      onChange={(value) => {
+                        const [hour = 0, minute = 0] = value.split(":").map(Number);
+                        void update({
+                          ...options,
+                          quiet: { ...options.quiet, [end]: { hour, minute } },
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </SettingsSection>
 
       <div className={paused ? "opacity-50 transition-opacity" : "transition-opacity"}>
         {GROUPS.map((group) => (

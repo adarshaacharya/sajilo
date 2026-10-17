@@ -6,14 +6,14 @@
 //! it.
 
 use crate::{db, prefs, prefs::NOTIFICATION_OPTIONS as OPTIONS_KEY};
-use chrono::{NaiveDate, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::calendar::upcoming;
 use sajilo_core::focus::ReminderStyle;
 use sajilo_core::nepal_time;
 use sajilo_core::notify::{
-    IpoDeadline, LastFired, NotificationOptions, PlannedNotification, next_wake, plan_day_plans,
-    plan_festivals, plan_ipo_closing, plan_sip_payments, should_fire_late,
+    IpoDeadline, LastFired, NotificationOptions, PlannedNotification, ReminderKind, next_wake,
+    plan_day_plans, plan_festivals, plan_ipo_closing, plan_sip_payments, should_fire_late,
 };
 use tauri::{AppHandle, Wry};
 use tauri_plugin_notification::{NotificationExt, PermissionState};
@@ -59,6 +59,18 @@ fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &st
         .flatten()
         .and_then(|value| serde_json::from_value(value).ok())
         .unwrap_or_default()
+}
+
+/// The computer's own offset from UTC: quiet hours are the user's night.
+pub fn local_offset() -> chrono::FixedOffset {
+    *chrono::Local::now().offset()
+}
+
+/// Whether `now` falls in the user's quiet hours.
+pub fn in_quiet_hours(options: &NotificationOptions, now: DateTime<Utc>) -> bool {
+    options
+        .quiet
+        .contains(now.with_timezone(&local_offset()).time())
 }
 
 /// The user's notification options, as Settings saved them.
@@ -119,6 +131,15 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
             upcoming::DEFAULT_HORIZON_DAYS,
         );
         all.extend(plan_festivals(&events, options, now));
+    }
+
+    // Nothing chimes in the quiet hours: what falls in them waits for the
+    // morning. A day plan keeps its time; the user chose it.
+    let offset = local_offset();
+    for notification in &mut all {
+        if notification.kind != ReminderKind::Plan {
+            notification.fire_at = options.quiet.defer(notification.fire_at, offset);
+        }
     }
 
     all.sort_by_key(|notification| notification.fire_at);
@@ -268,8 +289,14 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
     let as_cards = options.style == ReminderStyle::Card;
     let mut cards = Vec::new();
 
+    let quiet_now = in_quiet_hours(&options, now);
     for notification in pending(app) {
         if !should_fire_late(&notification, now, &fired) {
+            continue;
+        }
+        // Missed before the night and found during it: it waits, rather
+        // than waking anyone. Not recorded, so the morning may still bring it.
+        if quiet_now && notification.kind != ReminderKind::Plan {
             continue;
         }
         if paused {

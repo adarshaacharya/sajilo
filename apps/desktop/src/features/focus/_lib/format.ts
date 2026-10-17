@@ -44,6 +44,7 @@ export const STATUS_LABELS: Record<FocusStatus, I18nKey> = {
   paused: "focus.status.paused",
   held: "focus.status.held",
   dayOff: "focus.status.dayOff",
+  afterHours: "focus.status.afterHours",
   away: "focus.status.away",
   active: "focus.status.active",
 };

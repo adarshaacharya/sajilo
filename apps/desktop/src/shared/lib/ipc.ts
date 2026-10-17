@@ -249,6 +249,9 @@ export interface FocusSettings {
   /** Millilitres a day. */
   waterGoalMl: number;
   /** When the stop-work nudge comes, on a work day. */
+  /** Breaks come between this and `stopWorkAt`; meals and bedtime keep
+   * their own times. */
+  startWorkAt: PlanTime;
   stopWorkAt: PlanTime;
   /** Sunday first. Days not ticked, and public holidays, are days off. */
   workDays: boolean[];
@@ -359,6 +362,8 @@ export interface ActiveBreak {
   snoozeMinutes: number;
   /** The call or fullscreen stretch this break waited out, when long enough to say. */
   afterHold: AfterHold | null;
+  /** Other breaks folded into this card, named under it. */
+  also: BreakKind[];
 }
 
 /** One joke in both of the app's languages; the card shows the one set. */
@@ -411,7 +416,7 @@ export interface WeekSummary {
   longestStretch: { weekday: number; today: boolean; seconds: number } | null;
 }
 
-export type FocusStatus = "off" | "paused" | "held" | "dayOff" | "away" | "active";
+export type FocusStatus = "off" | "paused" | "held" | "dayOff" | "afterHours" | "away" | "active";
 
 export interface NextBreak {
   kind: BreakKind;
@@ -679,6 +684,14 @@ export interface NotificationOptions {
   sajiloAsks: boolean;
   /** Nothing arrives before this (ISO time); what comes due meanwhile is let go. */
   pausedUntil: string | null;
+  /** The night, on this computer's clock: what comes due waits for the morning. */
+  quiet: QuietHours;
+}
+
+export interface QuietHours {
+  enabled: boolean;
+  from: PlanTime;
+  to: PlanTime;
 }
 
 export type PauseFor = "oneHour" | "oneDay" | "untilTomorrow";
