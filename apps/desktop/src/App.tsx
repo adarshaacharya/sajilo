@@ -170,7 +170,9 @@ function Shell() {
               key={route.path}
               path={route.path}
               element={
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                // Keyed so each screen gets its own scroll box: otherwise React
+                // reuses one, and a tab opens as far down as the last was left.
+                <div key={route.path} className="flex min-h-0 min-w-0 flex-1 flex-col">
                   {route.path !== "/" && <Header title={t(route.titleKey)} />}
                   <main
                     className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
