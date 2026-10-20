@@ -3334,6 +3334,52 @@
         ]
       },
       "answer": 2
+    },
+    {
+      "id": "largest-metro-by-area",
+      "category": "geography",
+      "en": {
+        "q": "By land area, which metropolitan city in Nepal is the largest—roughly 464 km² after merging valleys, hills, and lakeside wards around Pokhara?",
+        "options": [
+          "Kathmandu",
+          "Lalitpur",
+          "Bharatpur",
+          "Pokhara"
+        ]
+      },
+      "ne": {
+        "q": "क्षेत्रफलका हिसाबले नेपालकी कुन महानगरपालिका सबैभन्दा ठूली हो — पोखरा वरपरका उपत्यका, पहाड र तालवटा वडाहरू मिलाएर लगभग ४६४ वर्ग कि.मी.?",
+        "options": [
+          "काठमाडौं",
+          "ललितपुर",
+          "भरतपुर",
+          "पोखरा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "dolpa-largest-district-area",
+      "category": "geography",
+      "en": {
+        "q": "Which district is Nepal's largest by area—about 7,889 km² of trans-Himalayan high desert and rugged mountains in Karnali?",
+        "options": [
+          "Humla",
+          "Mustang",
+          "Sankhuwasabha",
+          "Dolpa"
+        ]
+      },
+      "ne": {
+        "q": "क्षेत्रफलका हिसाबले नेपालको सबैभन्दा ठूलो जिल्ला कुन हो — कर्णालीको लगभग ७,८८९ वर्ग कि.मी. हिमालपारीको शुष्क पहाड र भिरालो भूभाग?",
+        "options": [
+          "हुम्ला",
+          "मुस्ताङ्",
+          "सङ्खुवासभा",
+          "डोल्पा"
+        ]
+      },
+      "answer": 3
     }
   ]
 }
