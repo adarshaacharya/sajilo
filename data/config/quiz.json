@@ -1,29 +1,6 @@
 {
   "questions": [
     {
-      "id": "flag-not-rectangle",
-      "category": "nepal",
-      "en": {
-        "q": "What makes Nepal's national flag unique among every country in the world?",
-        "options": [
-          "It is the only one that is not a rectangle",
-          "It is the only one with a dragon on it",
-          "It is the only square flag",
-          "It is the only one without any red"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रिय झण्डा संसारका सबै देशका झण्डाहरूमा कसरी अनौठो छ?",
-        "options": [
-          "यो एक मात्र चतुर्भुज (आयत) नभएको झण्डा हो",
-          "यो एक मात्र ड्रयागन चित्र भएको झण्डा हो",
-          "यो एक मात्र वर्गाकार झण्डा हो",
-          "यो एक मात्र रातो रङ नभएको झण्डा हो"
-        ]
-      },
-      "answer": 0
-    },
-    {
       "id": "flag-sun-moon",
       "category": "nepal",
       "en": {
@@ -45,75 +22,6 @@
         ]
       },
       "answer": 1
-    },
-    {
-      "id": "flag-crimson",
-      "category": "nepal",
-      "en": {
-        "q": "Nepal's national colour simrik (crimson) is inspired by what?",
-        "options": [
-          "The red mud of the hills",
-          "The setting Himalayan sun",
-          "The rhododendron, the national flower",
-          "The Nepali dhaka topi"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रिय रङ 'सिम्रिक' (गाढा रातो) को प्रेरणा कहाँबाट लिइएको हो?",
-        "options": [
-          "पहाडको रातो माटोबाट",
-          "हिमालमा अस्ताउने सूर्यबाट",
-          "राष्ट्रिय फूल लालीगुराँसको रङबाट",
-          "नेपाली ढाकाटोपीबाट"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "kumari-retire",
-      "category": "nepal",
-      "en": {
-        "q": "When does a Kumari, the living goddess, give up her divine role?",
-        "options": [
-          "When she turns 18",
-          "Whenever she chooses to",
-          "After ten years of service",
-          "When the girl reaches puberty"
-        ]
-      },
-      "ne": {
-        "q": "जीवित देवी कुमारीको दिव्य पद कहिले अन्त्य हुन्छ?",
-        "options": [
-          "जब उनी १८ वर्षकी पुग्छिन्",
-          "जब उनी आफैँ राजी भइन्",
-          "१० वर्ष सेवा पूरा भएपछि",
-          "बालिका वयस्क (किशोरी) हुँदा"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "kumari-clan",
-      "category": "nepal",
-      "en": {
-        "q": "From which community is the Kumari traditionally chosen?",
-        "options": [
-          "Newar girls of the Shakya clan",
-          "Sherpa girls",
-          "Tharu girls",
-          "Gurung girls"
-        ]
-      },
-      "ne": {
-        "q": "कुमारी परम्परागत रूपमा कुन समुदायका बालिकाबाट छानिन्छिन्?",
-        "options": [
-          "नेवार (शाक्य थर) समुदाय",
-          "शेर्पा समुदाय",
-          "थारू समुदाय",
-          "गुरुङ् समुदाय"
-        ]
-      },
-      "answer": 0
     },
     {
       "id": "taleju-gambler",
@@ -139,56 +47,10 @@
       "answer": 1
     },
     {
-      "id": "buddha-lumbini",
-      "category": "nepal",
-      "en": {
-        "q": "The Buddha was born in which Nepali town?",
-        "options": [
-          "Kapilvastu",
-          "Bodh Gaya",
-          "Lumbini",
-          "Ramgram"
-        ]
-      },
-      "ne": {
-        "q": "गौतम बुद्धको जन्म कुन ठाउँमा भएको थियो?",
-        "options": [
-          "कपिलवस्तु",
-          "बोधगया",
-          "लुम्बिनी",
-          "रामग्राम"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "no-independence-day",
-      "category": "nepal",
-      "en": {
-        "q": "Why doesn't Nepal celebrate an Independence Day?",
-        "options": [
-          "It became independent in 1947 and stopped",
-          "The date was simply forgotten",
-          "Independence days were banned by law",
-          "It was never colonised by any foreign power"
-        ]
-      },
-      "ne": {
-        "q": "नेपालले स्वतन्त्रता दिवस किन मनाउँदैन?",
-        "options": [
-          "सन् १९४७ मा स्वतन्त्र भएर मनाउन छोडिएको हो",
-          "मिति नै बिर्सिएको हुनाले",
-          "कानुनले स्वतन्त्रता दिवस निषेध गरेको हुनाले",
-          "कुनै विदेशी शक्तिले नेपाललाई कहिल्यै उपनिवेश बनाएन"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "sugauli-treaty",
       "category": "nepal",
       "en": {
-        "q": "Which treaty ended the 1814–16 Anglo-Nepal war, costing Nepal a third of its territory?",
+        "q": "Which treaty forced Nepal to give up a large share of its territory after war with Britain?",
         "options": [
           "The Treaty of Sugauli",
           "The Treaty of Titalia",
@@ -197,7 +59,7 @@
         ]
       },
       "ne": {
-        "q": "सन् १८१४–१६ को नेपाल–अङ्ग्रेज युद्ध कुन सन्धिबाट टुङ्गियो, जसमा नेपालले ठूलो भूभाग गुमायो?",
+        "q": "बेलायतसँगको युद्धपछि नेपालले ठूलो भूभाग गुमाउनुपर्ने कुन सन्धि थियो?",
         "options": [
           "सुगौली सन्धि",
           "टिटालिया सन्धि",
@@ -229,121 +91,6 @@
         ]
       },
       "answer": 1
-    },
-    {
-      "id": "gurkha-motto",
-      "category": "nepal",
-      "en": {
-        "q": "What is the famous motto of the Gurkha soldiers?",
-        "options": [
-          "Surrender is not an option",
-          "One for all, all for one",
-          "Better to die than be a coward",
-          "Peace through strength"
-        ]
-      },
-      "ne": {
-        "q": "गोर्खाली सिपाहीहरूको प्रसिद्ध आदर्श वाक्य कुन हो?",
-        "options": [
-          "आत्मसमर्पण कहिल्यै होइन",
-          "एकले सबैका लागि, सबैले एकका लागि",
-          "डराउनुभन्दा मर्नु राम्रो",
-          "शक्तिमा शान्ति"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "last-hindu-kingdom",
-      "category": "nepal",
-      "en": {
-        "q": "Until 2008, Nepal was the world's last official what?",
-        "options": [
-          "Buddhist kingdom",
-          "Empire",
-          "Princely state",
-          "Hindu kingdom"
-        ]
-      },
-      "ne": {
-        "q": "सन् २००८ सम्म नेपाल संसारको अन्तिम आधिकारिक के थियो?",
-        "options": [
-          "बौद्ध राज्य",
-          "साम्राज्य",
-          "रियासत",
-          "हिन्दू राज्य"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "kot-parva-ranas",
-      "category": "nepal",
-      "en": {
-        "q": "The Kot massacre of 1846 put which family in power for the next 104 years?",
-        "options": [
-          "The Ranas",
-          "The Shahs",
-          "The Mallas",
-          "The Thapas"
-        ]
-      },
-      "ne": {
-        "q": "वि.सं. १९०३ (सन् १८४६) को कोत पर्वपछि कुन परिवारले १०४ वर्षसम्म शासन गर्‍यो?",
-        "options": [
-          "राणा परिवार",
-          "शाह परिवार",
-          "मल्ल परिवार",
-          "थापा परिवार"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "royal-massacre-palace",
-      "category": "nepal",
-      "en": {
-        "q": "The 2001 royal massacre took place in which palace?",
-        "options": [
-          "Singha Durbar",
-          "Narayanhiti Palace",
-          "Hanuman Dhoka",
-          "Gorkha Durbar"
-        ]
-      },
-      "ne": {
-        "q": "सन् २००१ को दरबार हत्याकाण्ड कुन दरबारमा भयो?",
-        "options": [
-          "सिंहदरबार",
-          "नारायणहिटी दरबार",
-          "हनुमानढोका",
-          "गोरखा दरबार"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "republic-year",
-      "category": "nepal",
-      "en": {
-        "q": "In which year was Nepal declared a federal republic?",
-        "options": [
-          "2006",
-          "2010",
-          "2008",
-          "2015"
-        ]
-      },
-      "ne": {
-        "q": "नेपाललाई संघीय गणतन्त्र घोषित गरिएको कुन वर्ष हो?",
-        "options": [
-          "सन् २००६",
-          "सन् २०१०",
-          "सन् २००८",
-          "सन् २०१५"
-        ]
-      },
-      "answer": 2
     },
     {
       "id": "national-sport",
@@ -390,75 +137,6 @@
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "national-animal",
-      "category": "nepal",
-      "en": {
-        "q": "Nepal's national animal is the...",
-        "options": [
-          "One-horned rhino",
-          "Cow",
-          "Snow leopard",
-          "Bengal tiger"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रिय जनावर कुन हो?",
-        "options": [
-          "एकसिङ्गे गैंडा",
-          "गाई",
-          "हिउँ चितुवा",
-          "बंगाल बाघ"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "national-bird",
-      "category": "nepal",
-      "en": {
-        "q": "Which colourful Himalayan pheasant is Nepal's national bird?",
-        "options": [
-          "Sarus crane",
-          "Spiny babbler",
-          "Danphe (Himalayan monal)",
-          "Koel"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रिय चरा कुन हो?",
-        "options": [
-          "सारस",
-          "काँडे भ्याकुर",
-          "डाँफे",
-          "कोइली"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "national-flower",
-      "category": "nepal",
-      "en": {
-        "q": "Nepal's national flower is the...",
-        "options": [
-          "Marigold (sayapatri)",
-          "Lotus",
-          "Sunflower",
-          "Rhododendron (lali gurans)"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रिय फूल कुन हो?",
-        "options": [
-          "सयपत्री",
-          "लोटस",
-          "सूर्यमुखी",
-          "लालीगुराँस"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "spiny-babbler",
@@ -645,52 +323,6 @@
       "answer": 3
     },
     {
-      "id": "lukla-airport",
-      "category": "nepal",
-      "en": {
-        "q": "Trekkers heading for Everest Base Camp land at which famously hair-raising airport?",
-        "options": [
-          "Lukla (Tenzing–Hillary) airport",
-          "Jomsom airport",
-          "Simikot airport",
-          "Tumlingtar airport"
-        ]
-      },
-      "ne": {
-        "q": "सगरमाथा आधार शिविर जाने ट्रेकरहरू कुन प्रसिद्ध (र प्रसिद्धै डरलाग्दो) विमानस्थलमा उत्रन्छन्?",
-        "options": [
-          "लुक्ला (तेन्जिङ–हिलारी) विमानस्थल",
-          "जोमसोम विमानस्थल",
-          "सिमिकोट विमानस्थल",
-          "तुम्लिङ्टार विमानस्थल"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "everest-first-ascent",
-      "category": "nepal",
-      "en": {
-        "q": "Who first stood on top of Everest, on 29 May 1953?",
-        "options": [
-          "George Mallory and Sandy Irvine",
-          "Edmund Hillary and Tenzing Norgay",
-          "Maurice Herzog and Louis Lachenal",
-          "Reinhold Messner and Peter Habeler"
-        ]
-      },
-      "ne": {
-        "q": "सन् १९५३ मे २९ मा सगरमाथाको सिरानमा पहिलो पटक कसले पुगे?",
-        "options": [
-          "जर्ज मलोरी र स्यान्डी इर्भिन",
-          "एडमन्ड हिलारी र तेन्जिङ नोर्गे",
-          "मोरिस हर्जोग र लुइ लाशेनाल",
-          "रेइनहोल्ड मेस्नर र पिटर हाबलर"
-        ]
-      },
-      "answer": 1
-    },
-    {
       "id": "everest-new-height",
       "category": "nepal",
       "en": {
@@ -714,29 +346,6 @@
       "answer": 2
     },
     {
-      "id": "kami-rita-record",
-      "category": "nepal",
-      "en": {
-        "q": "Who holds the record for the most ascents of Everest?",
-        "options": [
-          "Apa Sherpa",
-          "Nims Purja",
-          "Tenzing Norgay",
-          "Kami Rita Sherpa"
-        ]
-      },
-      "ne": {
-        "q": "सगरमाथा सबैभन्दा धेरै पटक चढ्ने विश्व किर्तिमान कसको नाममा छ?",
-        "options": [
-          "आपा शेर्पा",
-          "निम्स पुर्जा",
-          "तेन्जिङ नोर्गे",
-          "कामी रिता शेर्पा"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "ang-rita-snow-leopard",
       "category": "nepal",
       "en": {
@@ -758,29 +367,6 @@
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "pasang-lhamu-first",
-      "category": "nepal",
-      "en": {
-        "q": "Who was the first Nepali woman to summit Everest, in 1993?",
-        "options": [
-          "Nima Jangmu Sherpa",
-          "Pasang Lhamu Sherpa",
-          "Maya Sherpa",
-          "Dawa Futu Sherpa"
-        ]
-      },
-      "ne": {
-        "q": "सन् १९९३ मा सगरमाथा चढ्ने पहिलो नेपाली महिला को हुन्?",
-        "options": [
-          "निमा जाङ्मु शेर्पा",
-          "पासाङ ल्हामु शेर्पा",
-          "माया शेर्पा",
-          "दावा फुतु शेर्पा"
-        ]
-      },
-      "answer": 1
     },
     {
       "id": "junko-tabei",
@@ -809,30 +395,30 @@
       "id": "nims-purja-record",
       "category": "nepal",
       "en": {
-        "q": "In 2019, Nims Purja climbed all 14 of the world's 8,000 m peaks in how much time?",
+        "q": "Roughly how long did Nims Purja take to climb all 14 peaks above 8,000 m—a record at the time?",
         "options": [
+          "6 months and 6 days",
           "1 year",
           "2 years",
-          "5 years",
-          "6 months and 6 days"
+          "5 years"
         ]
       },
       "ne": {
-        "q": "सन् २०१९ मा निम्स पुर्जाले आठ हजार मिटरमाथिका सबै १४ शिखर कति समयमै चढेर विश्व किर्तिमान बनाए?",
+        "q": "निम्स पुर्जाले आठ हजार मिटरमाथिका सबै १४ शिखर चढ्न करिब कति समय लगाए (त्यतिबेला विश्व किर्तिमान)?",
         "options": [
+          "६ महिना ६ दिन",
           "१ वर्ष",
           "२ वर्ष",
-          "५ वर्ष",
-          "६ महिना ६ दिन"
+          "५ वर्ष"
         ]
       },
-      "answer": 3
+      "answer": 0
     },
     {
       "id": "k2-winter-nepali",
       "category": "nepal",
       "en": {
-        "q": "The first-ever winter ascent of K2, in January 2021, was made by whom?",
+        "q": "Who made the first-ever winter ascent of K2?",
         "options": [
           "An all-Nepali team of ten climbers",
           "An American–British team",
@@ -841,7 +427,7 @@
         ]
       },
       "ne": {
-        "q": "जनवरी २०२१ मा इतिहासमै पहिलो पटक हिउँदमा के–२ शिखर जित्ने टोली कस्तो थियो?",
+        "q": "के–२ मा पहिलो पटक हिउँदमा शिखर जित्ने टोली कस्तो थियो?",
         "options": [
           "पूर्ण नेपाली (१० जना) टोली",
           "अमेरिकी–बेलायती टोली",
@@ -990,29 +576,6 @@
       "answer": 2
     },
     {
-      "id": "gorkha-earthquake",
-      "category": "nepal",
-      "en": {
-        "q": "In which year did the Gorkha earthquake destroy Dharahara, Kasthamandap and other landmarks?",
-        "options": [
-          "2011",
-          "2018",
-          "2019",
-          "2015"
-        ]
-      },
-      "ne": {
-        "q": "धरहरा, काष्ठमण्डप लगायत संरचना भत्काउने ठूलो गोरखा भुइँचालो कुन वर्ष गएको थियो?",
-        "options": [
-          "सन् २०११",
-          "सन् २०१८",
-          "सन् २०१९",
-          "सन् २०१५"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "dharahara-builder",
       "category": "nepal",
       "en": {
@@ -1034,75 +597,6 @@
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "dal-bhat-power",
-      "category": "nepal",
-      "en": {
-        "q": "Complete the famous trekking saying: 'Dal bhat power —'",
-        "options": [
-          "12 hour!",
-          "24 hour!",
-          "till the pass!",
-          "for a lifetime!"
-        ]
-      },
-      "ne": {
-        "q": "प्रसिद्ध ट्रेकर भनाइ पूरा गर्नुहोस्: 'दालभात पावर —'",
-        "options": [
-          "बाह्रै घण्टा!",
-          "चौबिसै घण्टा!",
-          "भन्ज्याङ् कटेसम्म!",
-          "जीवनभर!"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "tongba-what",
-      "category": "nepal",
-      "en": {
-        "q": "What is tongba?",
-        "options": [
-          "A steamed bread",
-          "A bamboo drum",
-          "Fermented millet served in a bamboo vessel, sipped through a straw",
-          "A woolen blanket"
-        ]
-      },
-      "ne": {
-        "q": "'तोङ्बा' के हो?",
-        "options": [
-          "सेकिएको रोटी",
-          "बाँसको डोलो",
-          "बाँसको पात्रमा राखेर प्वालै सेलाइ पिइने कोदोको छाङ्",
-          "उनको लोडो (कम्बल)"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "gundruk-what",
-      "category": "nepal",
-      "en": {
-        "q": "Nepal's beloved gundruk is made by fermenting what?",
-        "options": [
-          "Lentils",
-          "Rice",
-          "Milk",
-          "Leafy greens"
-        ]
-      },
-      "ne": {
-        "q": "नेपालीको मायाको परिकार गुन्द्रुक केको किण्वनबाट बनाइन्छ?",
-        "options": [
-          "दालको",
-          "चामलको",
-          "दूधको",
-          "सागपातको"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "languages-census",
@@ -1149,52 +643,6 @@
         ]
       },
       "answer": 1
-    },
-    {
-      "id": "female-yak",
-      "category": "nepal",
-      "en": {
-        "q": "What is a female yak called?",
-        "options": [
-          "Chauri",
-          "Yaki",
-          "Nak",
-          "Jhopa"
-        ]
-      },
-      "ne": {
-        "q": "पोथी याकलाई के भनिन्छ?",
-        "options": [
-          "चौरी",
-          "याकी",
-          "नाक",
-          "जोपा"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "anthem-meaning",
-      "category": "nepal",
-      "en": {
-        "q": "In the national anthem 'Sayaun Thunga Phulka Hami', what do the 'hundreds of flowers' stand for?",
-        "options": [
-          "The alpine flower gardens",
-          "The spring season",
-          "The national colour",
-          "Nepal's many peoples, languages and cultures"
-        ]
-      },
-      "ne": {
-        "q": "राष्ट्रिय गान 'सयौँ थुँगा फूलका हामी' मा 'सयौँ थुँगा फूल' ले के बुझाउँछ?",
-        "options": [
-          "हिमाली फूलका बगैंचा",
-          "वसन्त ऋतु",
-          "राष्ट्रिय रङ",
-          "नेपालका विविध जाति, भाषा र संस्कृति"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "gai-jatra-satire",
@@ -1264,167 +712,6 @@
         ]
       },
       "answer": 2
-    },
-    {
-      "id": "sagarmatha-meaning",
-      "category": "nepal",
-      "en": {
-        "q": "What does 'Sagarmatha' literally mean?",
-        "options": [
-          "Goddess of the wind",
-          "Roof of the world",
-          "Crown of the Himalayas",
-          "Head touching the sky"
-        ]
-      },
-      "ne": {
-        "q": "'सगरमाथा' शब्दको अर्थ के हो?",
-        "options": [
-          "हावाकी देवी",
-          "संसारको छत",
-          "हिमालको ताज",
-          "आकाशको माथो"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "prithvi-unifier",
-      "category": "nepal",
-      "en": {
-        "q": "Who unified Nepal's tiny kingdoms into one nation by conquering the Kathmandu Valley in 1768?",
-        "options": [
-          "Prithvi Narayan Shah of Gorkha",
-          "Jaya Prakash Malla",
-          "Ranjit Malla",
-          "Amsuverma"
-        ]
-      },
-      "ne": {
-        "q": "सन् १७६८ मा काठमाडौँ उपत्यका जितेर नेपाललाई एक राष्ट्रमा एकीकृत गर्ने राजा को हुन्?",
-        "options": [
-          "गोरखाका पृथ्वीनारायण शाह",
-          "जयप्रकाश मल्ल",
-          "रणजित मल्ल",
-          "अंशुवर्मा"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "bp-koirala",
-      "category": "nepal",
-      "en": {
-        "q": "Who was Nepal's first democratically elected Prime Minister?",
-        "options": [
-          "Matrika Prasad Koirala",
-          "Bishweshwar Prasad (B.P.) Koirala",
-          "Girija Prasad Koirala",
-          "Pushpa Kamal Dahal"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको पहिलो निर्वाचित प्रधानमन्त्री को हुन्?",
-        "options": [
-          "मातृकाप्रसाद कोइराला",
-          "विश्वेश्वरप्रसाद (वि.पी.) कोइराला",
-          "गिरिजाप्रसाद कोइराला",
-          "पुष्पकमल दाहाल"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "first-president",
-      "category": "nepal",
-      "en": {
-        "q": "Who became Nepal's first President in 2008?",
-        "options": [
-          "Girija Prasad Koirala",
-          "Bidhya Devi Bhandari",
-          "Ram Baran Yadav",
-          "Subas Chandra Nembang"
-        ]
-      },
-      "ne": {
-        "q": "सन् २००८ मा नेपालको पहिलो राष्ट्रपति हुनुहुने व्यक्ति को हुन्?",
-        "options": [
-          "गिरिजाप्रसाद कोइराला",
-          "विद्यादेवी भण्डारी",
-          "रामवरण यादव",
-          "सुवासचन्द्र नेम्वाङ्"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "first-woman-president",
-      "category": "nepal",
-      "en": {
-        "q": "Who was the first woman to serve as Nepal's President?",
-        "options": [
-          "Onsari Gharti Magar",
-          "Sushila Karki",
-          "Sujata Koirala",
-          "Bidhya Devi Bhandari"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रपति पद सम्हाल्ने पहिलो महिला को हुन्?",
-        "options": [
-          "अन्सारी घर्ति मगर",
-          "सुशीला कार्की",
-          "सुजाता कोइराला",
-          "विद्यादेवी भण्डारी"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "muna-madan-author",
-      "category": "nepal",
-      "en": {
-        "q": "Who wrote the much-loved Nepali epic Muna Madan?",
-        "options": [
-          "Laxmi Prasad Devkota",
-          "Bhanubhakta Acharya",
-          "Bhupi Sherchan",
-          "Bal Krishna Sama"
-        ]
-      },
-      "ne": {
-        "q": "सर्वाधिक माया गरिने महाकाव्य 'मुनामदन' का रचनाकार को हुन्?",
-        "options": [
-          "लक्ष्मीप्रसाद देवकोटा",
-          "भानुभक्त आचार्य",
-          "भूपि शेरचन",
-          "बालकृष्ण सम"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "bhanubhakta-ramayana",
-      "category": "nepal",
-      "en": {
-        "q": "Who first translated the Ramayana into the Nepali language?",
-        "options": [
-          "Laxmi Prasad Devkota",
-          "Bhanubhakta Acharya",
-          "Motiram Bhatta",
-          "Siddhidas Amatya"
-        ]
-      },
-      "ne": {
-        "q": "रामायणलाई पहिलो पटक नेपाली भाषामा अनुवाद गर्नुहुने को हुन्?",
-        "options": [
-          "लक्ष्मीप्रसाद देवकोटा",
-          "भानुभक्त आचार्य",
-          "मोतिराम भट्ट",
-          "सिद्धिदास अमात्य"
-        ]
-      },
-      "answer": 1
     },
     {
       "id": "forbidden-kingdom",
@@ -1519,29 +806,6 @@
       "answer": 1
     },
     {
-      "id": "chitwan-first-park",
-      "category": "nepal",
-      "en": {
-        "q": "Which was Nepal's first national park, established in 1973?",
-        "options": [
-          "Sagarmatha National Park",
-          "Rara National Park",
-          "Chitwan National Park",
-          "Langtang National Park"
-        ]
-      },
-      "ne": {
-        "q": "सन् १९७३ मा स्थापित नेपालको पहिलो राष्ट्रिय निकुञ्ज कुन हो?",
-        "options": [
-          "सगरमाथा राष्ट्रिय निकुञ्ज",
-          "रारा राष्ट्रिय निकुञ्ज",
-          "चितवन राष्ट्रिय निकुञ्ज",
-          "लाङ्टाङ् राष्ट्रिय निकुञ्ज"
-        ]
-      },
-      "answer": 2
-    },
-    {
       "id": "dhorpatan-reserve",
       "category": "nepal",
       "en": {
@@ -1588,29 +852,6 @@
       "answer": 0
     },
     {
-      "id": "snow-leopard-ghost",
-      "category": "nepal",
-      "en": {
-        "q": "The rarely-seen snow leopard is famously nicknamed what?",
-        "options": [
-          "The king of the Himalayas",
-          "The ghost of the mountains",
-          "The grey wind",
-          "The night stalker"
-        ]
-      },
-      "ne": {
-        "q": "देख्न गाह्रो मानिने हिउँ चितुवाको प्रसिद्ध उपनाम के हो?",
-        "options": [
-          "हिमालको राजा",
-          "हिमालको भूत",
-          "खैरो हावा",
-          "रात्रीको सिकारी"
-        ]
-      },
-      "answer": 1
-    },
-    {
       "id": "arna-koshi-tappu",
       "category": "nepal",
       "en": {
@@ -1632,29 +873,6 @@
         ]
       },
       "answer": 2
-    },
-    {
-      "id": "kwati-janai-purnima",
-      "category": "nepal",
-      "en": {
-        "q": "Kwati, the soup of nine sprouted beans, is the treat of which festival?",
-        "options": [
-          "Dashain",
-          "Tihar",
-          "Holi",
-          "Janai Purnima"
-        ]
-      },
-      "ne": {
-        "q": "नौ किसिमका गेडागुडी उमारेर पकाइने 'क्वाँटी' कुन पर्वको विशेष परिकार हो?",
-        "options": [
-          "दशैँ",
-          "तिहार",
-          "होली",
-          "जनै पूर्णिमा"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "sinja-nepali-origin",
@@ -1749,29 +967,6 @@
       "answer": 3
     },
     {
-      "id": "rara-largest",
-      "category": "geography",
-      "en": {
-        "q": "Which is Nepal's largest lake?",
-        "options": [
-          "Rara",
-          "Phewa",
-          "Tilicho",
-          "Begnas"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको सबैभन्दा ठूलो ताल कुन हो?",
-        "options": [
-          "रारा",
-          "फेवा",
-          "तिलिचो",
-          "बेगनास"
-        ]
-      },
-      "answer": 0
-    },
-    {
       "id": "phoksundo-deepest",
       "category": "geography",
       "en": {
@@ -1793,52 +988,6 @@
         ]
       },
       "answer": 1
-    },
-    {
-      "id": "eight-thousanders",
-      "category": "geography",
-      "en": {
-        "q": "How many of the world's 14 peaks above 8,000 m lie in Nepal?",
-        "options": [
-          "5",
-          "10",
-          "8",
-          "14"
-        ]
-      },
-      "ne": {
-        "q": "आठ हजार मिटरमाथिका १४ शिखरमध्ये कति नेपालमा पर्छन्?",
-        "options": [
-          "५",
-          "१०",
-          "८",
-          "१४"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "kanchenjunga-third",
-      "category": "geography",
-      "en": {
-        "q": "The world's third-highest mountain, on Nepal's eastern border, is...",
-        "options": [
-          "Lhotse",
-          "Makalu",
-          "Dhaulagiri",
-          "Kangchenjunga"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको पूर्वी सीमामा रहेको संसारको तेस्रो अग्लो हिमाल कुन हो?",
-        "options": [
-          "ल्होत्से",
-          "मकालु",
-          "धौलागिरि",
-          "कन्चनजुङ्घा"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "highest-fully-in-nepal",
@@ -1885,52 +1034,6 @@
         ]
       },
       "answer": 1
-    },
-    {
-      "id": "koshi-system",
-      "category": "geography",
-      "en": {
-        "q": "Nepal's largest river system is the...",
-        "options": [
-          "Karnali",
-          "Narayani",
-          "Koshi (Sapta Koshi)",
-          "Mahakali"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको सबैभन्दा ठूलो नदी प्रणाली कुन हो?",
-        "options": [
-          "कर्णाली",
-          "नारायणी",
-          "कोशी (सप्तकोशी)",
-          "महाकाली"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "bagmati-pashupati",
-      "category": "geography",
-      "en": {
-        "q": "Which river flows past Pashupatinath temple?",
-        "options": [
-          "The Bishnumati",
-          "The Dhobi Khola",
-          "The Trishuli",
-          "The Bagmati"
-        ]
-      },
-      "ne": {
-        "q": "पशुपतिनाथ मन्दिरको किनारमा बग्ने नदी कुन हो?",
-        "options": [
-          "विष्णुमती",
-          "धोबीखोला",
-          "त्रिशुली",
-          "बागमती"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "kechana-lowest",
@@ -2002,29 +1105,6 @@
       "answer": 2
     },
     {
-      "id": "upper-mustang-opened",
-      "category": "geography",
-      "en": {
-        "q": "Upper Mustang was closed to trekkers until which year?",
-        "options": [
-          "1975",
-          "2005",
-          "2010",
-          "1992"
-        ]
-      },
-      "ne": {
-        "q": "माथिल्लो मुस्ताङ्मा ट्रेकरहरूलाई पहुँच कुन वर्षदेखि खुल्यो?",
-        "options": [
-          "सन् १९७५",
-          "सन् २००५",
-          "सन् २०१०",
-          "सन् १९९२"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "caravan-film-dolpo",
       "category": "geography",
       "en": {
@@ -2046,167 +1126,6 @@
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "muktinath-both-faiths",
-      "category": "geography",
-      "en": {
-        "q": "Muktinath, with its 108 sacred water spouts, is holy to whom?",
-        "options": [
-          "Only Hindus",
-          "Both Hindus and Buddhists",
-          "Only Buddhists",
-          "Only Jains"
-        ]
-      },
-      "ne": {
-        "q": "१०८ धारा भएको मुक्तिनाथ कसका लागि पवित्र हो?",
-        "options": [
-          "हिन्दू मात्रका लागि",
-          "हिन्दू र बौद्ध दुवैका लागि",
-          "बौद्ध मात्रका लागि",
-          "जैन मात्रका लागि"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "gosaikunda-pilgrims",
-      "category": "geography",
-      "en": {
-        "q": "Which Himalayan lake is the pilgrimage goal of Janai Purnima?",
-        "options": [
-          "Phoksundo",
-          "Rara",
-          "Gosaikunda",
-          "Panch Pokhari"
-        ]
-      },
-      "ne": {
-        "q": "जनै पूर्णिमामा जात्रा जाने प्रसिद्ध हिमाली पोखरी कुन हो?",
-        "options": [
-          "फोक्सुन्डो",
-          "रारा",
-          "गोसाइँकुण्ड",
-          "पाँचपोखरी"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "janakpur-sita",
-      "category": "geography",
-      "en": {
-        "q": "Janakpur is the birthplace of which figure from the Ramayana?",
-        "options": [
-          "Ram",
-          "Hanuman",
-          "Dasharath",
-          "Sita"
-        ]
-      },
-      "ne": {
-        "q": "जनकपुर रामायणका कुन पात्रको जन्मस्थल हो?",
-        "options": [
-          "राम",
-          "हनुमान",
-          "दशरथ",
-          "सीता"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "swayambhu-monkeys",
-      "category": "geography",
-      "en": {
-        "q": "Which hilltop stupa is nicknamed the Monkey Temple?",
-        "options": [
-          "Swayambhunath",
-          "Boudhanath",
-          "Namobuddha",
-          "Charumati"
-        ]
-      },
-      "ne": {
-        "q": "कुन डाँडामा रहेको स्तूपलाई 'बाँदर मन्दिर' भनिन्छ?",
-        "options": [
-          "स्वयम्भूनाथ",
-          "बौद्धनाथ",
-          "नमोबुद्ध",
-          "चरुमती"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "manakamana-cable-car",
-      "category": "geography",
-      "en": {
-        "q": "Nepal's first cable car (1998) carries pilgrims up to which temple?",
-        "options": [
-          "Chandragiri",
-          "Manakamana",
-          "Pathibhara",
-          "Kalika"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको पहिलो केबलकार (सन् १९९८) कुन मन्दिरमा जाने तीर्थयात्रीलाई ओसार्छ?",
-        "options": [
-          "चन्द्रागिरि",
-          "मनकामना",
-          "पाथिभरा",
-          "कालिका"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "sarangkot-paragliding",
-      "category": "geography",
-      "en": {
-        "q": "Paragliders soar above Phewa Lake after launching from which famous Pokhara viewpoint?",
-        "options": [
-          "Pumdikot",
-          "Kaskikot",
-          "Sarangkot",
-          "The World Peace Pagoda"
-        ]
-      },
-      "ne": {
-        "q": "पोखरामा फेवा तालमाथि प्याराग्लाइडिङ् कहाँबाट उडान भरिन्छ?",
-        "options": [
-          "पुम्दीकोटबाट",
-          "कास्कीकोटबाट",
-          "साराङ्कोटबाट",
-          "विश्व शान्ति स्तूपबाट"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "water-towers",
-      "category": "geography",
-      "en": {
-        "q": "Why is Nepal called the 'water towers of South Asia'?",
-        "options": [
-          "It exports bottled water worldwide",
-          "It has the world's most waterfalls",
-          "Its lakes are all man-made reservoirs",
-          "Its Himalayan snows feed the great rivers of South Asia"
-        ]
-      },
-      "ne": {
-        "q": "नेपाललाई 'दक्षिण एसियाको पानीको टावर' किन भनिन्छ?",
-        "options": [
-          "विश्वभर बोतल पानी निर्यात गर्ने हुनाले",
-          "संसारकै सबैभन्दा धेरै झरना भएकोले",
-          "यहाँका तालहरू सबै मानवनिर्मित भएकोले",
-          "हिमालको हिउँ र हिमनदीबाट बग्ने ठूला नदीहरू दक्षिण एसियाभरि पुग्ने हुनाले"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "bhote-koshi-bungee",
@@ -2255,144 +1174,6 @@
       "answer": 1
     },
     {
-      "id": "namche-sherpa-capital",
-      "category": "geography",
-      "en": {
-        "q": "Which town is the unofficial 'capital' of the Sherpa highlands?",
-        "options": [
-          "Lukla",
-          "Khumjung",
-          "Namche Bazaar",
-          "Phortse"
-        ]
-      },
-      "ne": {
-        "q": "शेर्पा बस्तीको अनौपचारिक 'राजधानी' मानिने शहर कुन हो?",
-        "options": [
-          "लुक्ला",
-          "खुम्जुङ्",
-          "नाम्चे बजार",
-          "फर्त्से"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "constitution-parts",
-      "category": "civics",
-      "en": {
-        "q": "How many parts does Nepal's current Constitution have?",
-        "options": [
-          "30",
-          "37",
-          "25",
-          "35"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको हालको संविधानमा कति भाग छन्?",
-        "options": [
-          "३०",
-          "३७",
-          "२५",
-          "३५"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "constitution-promulgated",
-      "category": "civics",
-      "en": {
-        "q": "When was Nepal's current Constitution promulgated?",
-        "options": [
-          "Asoj 3, 2072 (20 September 2015)",
-          "Jestha 15, 2065",
-          "Magh 1, 2063",
-          "Falgun 7, 2046"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको हालको संविधान कहिले जारी भयो?",
-        "options": [
-          "असोज ३, २०७२ (सेप्टेम्बर २०, २०१५)",
-          "जेठ १५, २०६५",
-          "माघ १, २०६३",
-          "फागुन ७, २०४६"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "first-ca-election",
-      "category": "civics",
-      "en": {
-        "q": "Nepal's first Constituent Assembly election was held in which year?",
-        "options": [
-          "1990",
-          "2008",
-          "2013",
-          "1959"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको पहिलो संविधानसभा निर्वाचन कुन वर्ष भयो?",
-        "options": [
-          "सन् १९९०",
-          "सन् २००८",
-          "सन् २०१३",
-          "सन् १९५९"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "two-ca-elections",
-      "category": "civics",
-      "en": {
-        "q": "How many Constituent Assembly elections did it take to finally write the constitution?",
-        "options": [
-          "1",
-          "3",
-          "2",
-          "4"
-        ]
-      },
-      "ne": {
-        "q": "संविधान बनाउन कति पटक संविधानसभा निर्वाचन गर्नुपर्‍यो?",
-        "options": [
-          "१",
-          "३",
-          "२",
-          "४"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "local-levels-count",
-      "category": "civics",
-      "en": {
-        "q": "How many local levels (gaunpalika to mahapatan) does federal Nepal have?",
-        "options": [
-          "744",
-          "751",
-          "77",
-          "753"
-        ]
-      },
-      "ne": {
-        "q": "संघीय नेपालमा स्थानीय तह कति छन्?",
-        "options": [
-          "७४४",
-          "७५१",
-          "७७",
-          "७५३"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "national-assembly-members",
       "category": "civics",
       "en": {
@@ -2414,29 +1195,6 @@
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "house-members",
-      "category": "civics",
-      "en": {
-        "q": "How many members does the House of Representatives have?",
-        "options": [
-          "265",
-          "275",
-          "240",
-          "300"
-        ]
-      },
-      "ne": {
-        "q": "प्रतिनिधि सभामा कति सदस्य हुन्छन्?",
-        "options": [
-          "२६५",
-          "२७५",
-          "२४०",
-          "३००"
-        ]
-      },
-      "answer": 1
     },
     {
       "id": "house-vote-mix",
@@ -2485,52 +1243,6 @@
       "answer": 3
     },
     {
-      "id": "president-term",
-      "category": "civics",
-      "en": {
-        "q": "For how long is Nepal's President elected?",
-        "options": [
-          "5 years",
-          "4 years",
-          "6 years",
-          "7 years"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको राष्ट्रपति कति अवधिका लागि निर्वाचित हुनुहुन्छ?",
-        "options": [
-          "५ वर्ष",
-          "४ वर्ष",
-          "६ वर्ष",
-          "७ वर्ष"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "voting-age",
-      "category": "civics",
-      "en": {
-        "q": "At what age can Nepalis vote?",
-        "options": [
-          "16",
-          "18",
-          "21",
-          "20"
-        ]
-      },
-      "ne": {
-        "q": "नेपालमा मतदानको न्यूनतम उमेर कति हो?",
-        "options": [
-          "१६ वर्ष",
-          "१८ वर्ष",
-          "२१ वर्ष",
-          "२० वर्ष"
-        ]
-      },
-      "answer": 1
-    },
-    {
       "id": "flag-schedule-one",
       "category": "civics",
       "en": {
@@ -2557,185 +1269,47 @@
       "id": "secular-declaration",
       "category": "civics",
       "en": {
-        "q": "Which document first declared Nepal a secular state?",
+        "q": "Nepal was first declared a secular state in which kind of document?",
         "options": [
-          "The Constitution of 1990 (2047)",
-          "The Constitution of 1962 (2019)",
-          "The Constitution of 2015 (2072)",
-          "The Interim Constitution of 2007 (2063)"
+          "An interim constitution",
+          "The royal coronation speech",
+          "A village council notice",
+          "A trade treaty with India"
         ]
       },
       "ne": {
-        "q": "नेपाल पहिलो पटक कुन दस्तावेजबाट धर्मनिरपेक्ष राष्ट्र घोषित भयो?",
+        "q": "नेपाल पहिलो पटक धर्मनिरपेक्ष राष्ट्र कस्तो दस्तावेजबाट घोषित भयो?",
         "options": [
-          "वि.सं. २०४७ को संविधानबाट",
-          "वि.सं. २०१९ को संविधानबाट",
-          "वि.सं. २०७२ को संविधानबाट",
-          "वि.सं. २०६३ को अन्तरिम संविधानबाट"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "ciaa-role",
-      "category": "civics",
-      "en": {
-        "q": "What is the CIAA, a powerful constitutional body, mainly in charge of?",
-        "options": [
-          "Investigating corruption and abuse of authority",
-          "Conducting elections",
-          "Auditing government accounts",
-          "Monitoring human rights"
-        ]
-      },
-      "ne": {
-        "q": "शक्तिशाली संवैधानिक निकाय दुरुपयोग अनुसन्धान आयोग (CIAA) ले मुख्यतः के गर्छ?",
-        "options": [
-          "भ्रष्टाचार र अधिकारको दुरुपयोगको छानबिन",
-          "निर्वाचन सञ्चालन",
-          "सरकारी लेखापरीक्षण",
-          "मानव अधिकारको अनुगमन"
+          "अन्तरिम संविधानबाट",
+          "राज्याभिषेक भाषणबाट",
+          "गाउँ सभाको सूचनाबाट",
+          "भारतसँगको व्यापार सन्धिबाट"
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "seven-constitutions",
-      "category": "civics",
-      "en": {
-        "q": "Including the current one, how many constitutions has Nepal had since 1948?",
-        "options": [
-          "5",
-          "7",
-          "6",
-          "4"
-        ]
-      },
-      "ne": {
-        "q": "सन् १९४८ देखि अहिलेसम्म नेपालले कति संविधान बनाएको छ?",
-        "options": [
-          "५",
-          "७",
-          "६",
-          "४"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "first-constitution-1948",
-      "category": "civics",
-      "en": {
-        "q": "In which year did Nepal get its first written constitution?",
-        "options": [
-          "1951 (2007 BS)",
-          "1959 (2015 BS)",
-          "1948 (2004 BS)",
-          "1962 (2019 BS)"
-        ]
-      },
-      "ne": {
-        "q": "नेपालको पहिलो लिखित संविधान कुन वर्ष आयो?",
-        "options": [
-          "सन् १९५१ (वि.सं. २००७)",
-          "सन् १९५९ (वि.सं. २०१५)",
-          "सन् १९४८ (वि.सं. २००४)",
-          "सन् १९६२ (वि.सं. २०१९)"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "panchayat-end-1990",
-      "category": "civics",
-      "en": {
-        "q": "The 1990 people's movement (Jana Andolan) brought down which system?",
-        "options": [
-          "Rana rule",
-          "The monarchy",
-          "Multi-party democracy",
-          "The Panchayat system"
-        ]
-      },
-      "ne": {
-        "q": "सन् २०४६ (१९९०) को जनआन्दोलनले कुन प्रणालीको अन्त्य गर्‍यो?",
-        "options": [
-          "राणाशासन",
-          "राजतन्त्र",
-          "बहुदलीय लोकतन्त्र",
-          "पञ्चायत प्रणाली"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "provinces-first-numbered",
       "category": "civics",
       "en": {
-        "q": "When the 2015 constitution created seven provinces, how were they first identified?",
+        "q": "When Nepal became federal, the seven provinces were first known publicly by what?",
         "options": [
-          "By number, 1 to 7, until names were chosen later",
-          "By their capitals' names",
-          "By rivers",
-          "By compass directions"
+          "Numbers 1 to 7, before they got proper names",
+          "Their capitals' names only",
+          "River names only",
+          "Compass directions only"
         ]
       },
       "ne": {
-        "q": "संविधानले प्रदेशहरू सुरुमा कसरी चिनाइएका थिए?",
+        "q": "संघीय नेपालमा सात प्रदेश सुरुमा जनतासम्म कसरी चिनाइए?",
         "options": [
-          "नम्बर (१ देखि ७) ले — नाम पछि राखिएको",
-          "राजधानीका नामले",
-          "नदीका नामले",
-          "दिशाका नामले"
+          "नम्बर १ देखि ७ — नाम पछि राखिएको",
+          "राजधानीका नामले मात्र",
+          "नदीका नामले मात्र",
+          "दिशाका नामले मात्र"
         ]
       },
       "answer": 0
-    },
-    {
-      "id": "districts-count",
-      "category": "civics",
-      "en": {
-        "q": "How many districts does Nepal have today?",
-        "options": [
-          "75",
-          "77",
-          "74",
-          "80"
-        ]
-      },
-      "ne": {
-        "q": "नेपालमा अहिले कति जिल्ला छन्?",
-        "options": [
-          "७५",
-          "७७",
-          "७४",
-          "८०"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "provinces-count",
-      "category": "civics",
-      "en": {
-        "q": "How many provinces does federal Nepal have?",
-        "options": [
-          "5",
-          "6",
-          "7",
-          "9"
-        ]
-      },
-      "ne": {
-        "q": "संघीय नेपालमा कति प्रदेश छन्?",
-        "options": [
-          "५",
-          "६",
-          "७",
-          "९"
-        ]
-      },
-      "answer": 2
     },
     {
       "id": "bs-years-ahead",
@@ -2756,98 +1330,6 @@
           "करिब १०० वर्ष",
           "करिब ८८० वर्ष",
           "करिब ५७ वर्ष"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "bs-epoch",
-      "category": "calendar",
-      "en": {
-        "q": "Bikram Sambat counts its years from which starting point?",
-        "options": [
-          "57 BC",
-          "567 BC",
-          "879 AD",
-          "1 BC"
-        ]
-      },
-      "ne": {
-        "q": "विक्रम संवत् संवत् गणना कहिलेदेखि सुरु हुन्छ?",
-        "options": [
-          "ईशापूर्व ५७ बाट",
-          "ईशापूर्व ५६७ बाट",
-          "सन् ८७९ बाट",
-          "ईशापूर्व १ बाट"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "bs-new-year",
-      "category": "calendar",
-      "en": {
-        "q": "The Bikram Sambat new year falls on...",
-        "options": [
-          "January 1",
-          "Mid-April (Baishakh 1)",
-          "October–November",
-          "Early March"
-        ]
-      },
-      "ne": {
-        "q": "विक्रम संवत्को नयाँ वर्ष कहिले पर्छ?",
-        "options": [
-          "जनवरी १ गते",
-          "अप्रिलको मध्यमा (बैशाख १ गते)",
-          "अक्टोबर–नोभेम्बरमा",
-          "मार्चको सुरुमा"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "bs-first-month",
-      "category": "calendar",
-      "en": {
-        "q": "Which is the first month of the Bikram Sambat year?",
-        "options": [
-          "Jestha",
-          "Magh",
-          "Baishakh",
-          "Chaitra"
-        ]
-      },
-      "ne": {
-        "q": "विक्रम संवत्को पहिलो महिना कुन हो?",
-        "options": [
-          "जेठ",
-          "माघ",
-          "बैशाख",
-          "चैत"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "bs-last-month",
-      "category": "calendar",
-      "en": {
-        "q": "Which month ends the Bikram Sambat year?",
-        "options": [
-          "Baishakh",
-          "Falgun",
-          "Mangsir",
-          "Chaitra"
-        ]
-      },
-      "ne": {
-        "q": "विक्रम संवत्को अन्तिम महिना कुन हो?",
-        "options": [
-          "बैशाख",
-          "फागुन",
-          "मंसिर",
-          "चैत"
         ]
       },
       "answer": 3
@@ -2899,213 +1381,6 @@
       "answer": 1
     },
     {
-      "id": "nepal-sambat-year",
-      "category": "calendar",
-      "en": {
-        "q": "The Nepal Sambat era began in which year?",
-        "options": [
-          "1258 AD",
-          "57 BC",
-          "879 AD",
-          "1769 AD"
-        ]
-      },
-      "ne": {
-        "q": "नेपाल संवत् कुन वर्षबाट सुरु भयो?",
-        "options": [
-          "सन् १२५८",
-          "ईशापूर्व ५७",
-          "सन् ८७९",
-          "सन् १७६९"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "nepal-sambat-new-year",
-      "category": "calendar",
-      "en": {
-        "q": "Nepal Sambat's new year falls in which months?",
-        "options": [
-          "April",
-          "January",
-          "June",
-          "October–November"
-        ]
-      },
-      "ne": {
-        "q": "नेपाल संवत्को नयाँ वर्ष कुन महिनामा पर्छ?",
-        "options": [
-          "अप्रिलमा",
-          "जनवरीमा",
-          "जुनमा",
-          "अक्टोबर–नोभेम्बरमा"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "democracy-day",
-      "category": "calendar",
-      "en": {
-        "q": "Falgun 7 is celebrated as which national day?",
-        "options": [
-          "Democracy Day (Prajatantra Diwas)",
-          "Republic Day",
-          "Constitution Day",
-          "National Unity Day"
-        ]
-      },
-      "ne": {
-        "q": "फागुन ७ लाई कुन दिवसका रूपमा मनाइन्छ?",
-        "options": [
-          "प्रजातन्त्र दिवस",
-          "गणतन्त्र दिवस",
-          "संविधान दिवस",
-          "राष्ट्रिय एकता दिवस"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "constitution-day",
-      "category": "calendar",
-      "en": {
-        "q": "Asoj 3 is celebrated as which national day?",
-        "options": [
-          "Democracy Day",
-          "Constitution Day",
-          "Martyrs' Day",
-          "Republic Day"
-        ]
-      },
-      "ne": {
-        "q": "असोज ३ लाई कुन दिवस मनाइन्छ?",
-        "options": [
-          "प्रजातन्त्र दिवस",
-          "संविधान दिवस",
-          "शहीद दिवस",
-          "गणतन्त्र दिवस"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "unity-day",
-      "category": "calendar",
-      "en": {
-        "q": "Poush 27, the birthday of Prithvi Narayan Shah, is celebrated as what?",
-        "options": [
-          "Constitution Day",
-          "Martyrs' Day",
-          "National Unity Day",
-          "Democracy Day"
-        ]
-      },
-      "ne": {
-        "q": "पौष २७ (पृथ्वी जयन्ती) लाई कुन दिवस भनिन्छ?",
-        "options": [
-          "संविधान दिवस",
-          "शहीद दिवस",
-          "राष्ट्रिय एकता दिवस",
-          "प्रजातन्त्र दिवस"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "martyrs-day",
-      "category": "calendar",
-      "en": {
-        "q": "Magh 16 is observed as which national day?",
-        "options": [
-          "Democracy Day",
-          "Republic Day",
-          "Unity Day",
-          "Martyrs' Day (Sahid Diwas)"
-        ]
-      },
-      "ne": {
-        "q": "माघ १६ मा मनाइने दिवस कुन हो?",
-        "options": [
-          "प्रजातन्त्र दिवस",
-          "गणतन्त्र दिवस",
-          "एकता दिवस",
-          "शहीद दिवस"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "republic-day",
-      "category": "calendar",
-      "en": {
-        "q": "Jestha 15 is celebrated as which national day?",
-        "options": [
-          "Republic Day (Ganatantra Diwas)",
-          "Democracy Day",
-          "Constitution Day",
-          "Martyrs' Day"
-        ]
-      },
-      "ne": {
-        "q": "जेठ १५ लाई कुन दिवसका रूपमा मनाइन्छ?",
-        "options": [
-          "गणतन्त्र दिवस",
-          "प्रजातन्त्र दिवस",
-          "संविधान दिवस",
-          "शहीद दिवस"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "dashain-length",
-      "category": "calendar",
-      "en": {
-        "q": "The festival of Dashain runs for how many days?",
-        "options": [
-          "5",
-          "15",
-          "7",
-          "10"
-        ]
-      },
-      "ne": {
-        "q": "दशैँ पर्व कति दिनसम्म चल्छ?",
-        "options": [
-          "५ दिन",
-          "१५ दिन",
-          "७ दिन",
-          "१० दिन"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "tihar-length",
-      "category": "calendar",
-      "en": {
-        "q": "How many days does Tihar last?",
-        "options": [
-          "3",
-          "7",
-          "5",
-          "10"
-        ]
-      },
-      "ne": {
-        "q": "तिहार कति दिनसम्म मनाइन्छ?",
-        "options": [
-          "३ दिन",
-          "७ दिन",
-          "५ दिन",
-          "१० दिन"
-        ]
-      },
-      "answer": 2
-    },
-    {
       "id": "lhosar-kinds",
       "category": "calendar",
       "en": {
@@ -3127,52 +1402,6 @@
         ]
       },
       "answer": 3
-    },
-    {
-      "id": "maghi-tharu-new-year",
-      "category": "calendar",
-      "en": {
-        "q": "Which community celebrates Maghi as its new year?",
-        "options": [
-          "Tharu",
-          "Newar",
-          "Sherpa",
-          "Gurung"
-        ]
-      },
-      "ne": {
-        "q": "माघे सङ्क्रान्ति (माघी) लाई आफ्नो नयाँ वर्षका रूपमा मनाउने जाति कुन हो?",
-        "options": [
-          "थारू",
-          "नेवार",
-          "शेर्पा",
-          "गुरुङ्"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "buddha-jayanti-month",
-      "category": "calendar",
-      "en": {
-        "q": "Buddha Jayanti falls on the full moon of which Bikram Sambat month?",
-        "options": [
-          "Jestha",
-          "Baishakh",
-          "Ashadh",
-          "Kartik"
-        ]
-      },
-      "ne": {
-        "q": "बुद्ध जयन्ती विक्रम संवत्को कुन महिनाको पूर्णिमामा पर्छ?",
-        "options": [
-          "जेठ",
-          "बैशाख",
-          "असार",
-          "कार्तिक"
-        ]
-      },
-      "answer": 1
     },
     {
       "id": "chhath-month",
@@ -3198,29 +1427,6 @@
       "answer": 2
     },
     {
-      "id": "shivaratri-sadhus",
-      "category": "calendar",
-      "en": {
-        "q": "During which festival do thousands of painted sadhus gather at Pashupatinath?",
-        "options": [
-          "Tihar",
-          "Holi",
-          "Janai Purnima",
-          "Maha Shivaratri"
-        ]
-      },
-      "ne": {
-        "q": "कुन पर्वमा हजारौँ साधु–सन्त पशुपतिनाथमा भेला हुन्छन्?",
-        "options": [
-          "तिहारमा",
-          "होलीमा",
-          "जनै पूर्णिमामा",
-          "महाशिवरात्रिमा"
-        ]
-      },
-      "answer": 3
-    },
-    {
       "id": "ropani-shape",
       "category": "units",
       "en": {
@@ -3239,98 +1445,6 @@
           "६० फिट × ६० फिट",
           "१०० फिट × ५० फिट",
           "८४ फिट × ६४ फिट"
-        ]
-      },
-      "answer": 0
-    },
-    {
-      "id": "ropani-to-aana",
-      "category": "units",
-      "en": {
-        "q": "One ropani equals how many aana?",
-        "options": [
-          "4",
-          "16",
-          "20",
-          "10"
-        ]
-      },
-      "ne": {
-        "q": "एक रोपनीमा कति आना हुन्छन्?",
-        "options": [
-          "४",
-          "१६",
-          "२०",
-          "१०"
-        ]
-      },
-      "answer": 1
-    },
-    {
-      "id": "paisa-to-dam",
-      "category": "units",
-      "en": {
-        "q": "One paisa equals how many dam?",
-        "options": [
-          "2",
-          "16",
-          "4",
-          "20"
-        ]
-      },
-      "ne": {
-        "q": "एक पैसामा कति दाम हुन्छन्?",
-        "options": [
-          "२",
-          "१६",
-          "४",
-          "२०"
-        ]
-      },
-      "answer": 2
-    },
-    {
-      "id": "bigha-to-kattha",
-      "category": "units",
-      "en": {
-        "q": "One bigha equals how many kattha?",
-        "options": [
-          "16",
-          "10",
-          "25",
-          "20"
-        ]
-      },
-      "ne": {
-        "q": "एक बिघामा कति कट्ठा हुन्छन्?",
-        "options": [
-          "१६",
-          "१०",
-          "२५",
-          "२०"
-        ]
-      },
-      "answer": 3
-    },
-    {
-      "id": "kattha-to-dhur",
-      "category": "units",
-      "en": {
-        "q": "One kattha equals how many dhur?",
-        "options": [
-          "20",
-          "16",
-          "18",
-          "25"
-        ]
-      },
-      "ne": {
-        "q": "एक कट्ठामा कति धुर हुन्छन्?",
-        "options": [
-          "२०",
-          "१६",
-          "१८",
-          "२५"
         ]
       },
       "answer": 0
@@ -3405,29 +1519,6 @@
       "answer": 3
     },
     {
-      "id": "crore-in-lakh",
-      "category": "units",
-      "en": {
-        "q": "One crore equals how many lakh?",
-        "options": [
-          "100",
-          "10",
-          "1,000",
-          "50"
-        ]
-      },
-      "ne": {
-        "q": "एक करोडमा कति लाख हुन्छन्?",
-        "options": [
-          "१००",
-          "१०",
-          "१०००",
-          "५०"
-        ]
-      },
-      "answer": 0
-    },
-    {
       "id": "arab-in-crore",
       "category": "units",
       "en": {
@@ -3472,29 +1563,6 @@
         ]
       },
       "answer": 2
-    },
-    {
-      "id": "mana-in-pathi",
-      "category": "units",
-      "en": {
-        "q": "One pathi equals how many mana?",
-        "options": [
-          "2",
-          "8",
-          "16",
-          "4"
-        ]
-      },
-      "ne": {
-        "q": "एक पाथीमा कति माना हुन्छन्?",
-        "options": [
-          "२",
-          "८",
-          "१६",
-          "४"
-        ]
-      },
-      "answer": 3
     },
     {
       "id": "haat-cloth",
@@ -3561,6 +1629,1708 @@
           "UTC+६:०० मा",
           "UTC+५:४५ मा",
           "UTC+५:०० मा"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "balen-rapper-mayor",
+      "category": "civics",
+      "en": {
+        "q": "Balendra Shah (Balen) became Kathmandu mayor after fame as a...",
+        "options": [
+          "Rapper and structural engineer",
+          "Cricket captain",
+          "Film director",
+          "Army general"
+        ]
+      },
+      "ne": {
+        "q": "बालेनद्र शाह (बालेन) काठमाडौँ महानगरपालिकाको मेयर बन्नुअघि के को रूपमा चिनिन्थे?",
+        "options": [
+          "र्यापर र संरचना इन्जिनियर",
+          "क्रिकेट कप्तान",
+          "चलचित्र निर्देशक",
+          "सेनापति"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "chitwan-diclofenac-ban",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal banned veterinary diclofenac largely to save which birds from poisoning?",
+        "options": [
+          "Vultures",
+          "Eagles",
+          "Danphe pheasants",
+          "Spiny babblers"
+        ]
+      },
+      "ne": {
+        "q": "पशुचिकित्सामा डाइक्लोफेनाक प्रतिबन्ध मुख्यतः कुन चराहरू बचाउन गरिएको थियो?",
+        "options": [
+          "गिद्ध",
+          "चील",
+          "डाँफे",
+          "काँडे भ्याकुर"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "constitution-articles",
+      "category": "civics",
+      "en": {
+        "q": "Nepal's current Constitution has how many articles?",
+        "options": [
+          "275",
+          "753",
+          "35",
+          "308"
+        ]
+      },
+      "ne": {
+        "q": "हालको नेपालको संविधानमा कति धारा छन्?",
+        "options": [
+          "२७५",
+          "७५३",
+          "३५",
+          "३०८"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "dipendra-nine-ball-fifty",
+      "category": "nepal",
+      "en": {
+        "q": "Dipendra Singh Airee holds the men's T20I record for the fastest fifty—how many balls?",
+        "options": [
+          "12",
+          "9",
+          "15",
+          "20"
+        ]
+      },
+      "ne": {
+        "q": "दिपेन्द्र सिंह ऐरीको पुरुष टी–२० अन्तर्राष्ट्रियमा सबैभन्दा छिटो अर्धशतक कति बलमा?",
+        "options": [
+          "१२",
+          "९",
+          "१५",
+          "२०"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "dipendra-six-sixes-over",
+      "category": "nepal",
+      "en": {
+        "q": "Dipendra Singh Airee joined an elite club by hitting six sixes in one over in a men's T20I—how many others had done it before him?",
+        "options": [
+          "Two (Yuvraj Singh and Kieron Pollard)",
+          "None",
+          "Five",
+          "Ten"
+        ]
+      },
+      "ne": {
+        "q": "एक ओभरमा छक्का छक्का गर्ने पुरुष टी–२० अन्तर्राष्ट्रियमा दिपेन्द्र अघि कति जनाले गरेका थिए?",
+        "options": [
+          "२ जना (युवराज सिंह र काइरन पोलार्ड)",
+          "कसैले पनि होइन",
+          "५ जना",
+          "१० जना"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "ibm-census-computer",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal first used a mainframe computer (IBM 1401) mainly to help with what national task?",
+        "options": [
+          "Weather forecasting only",
+          "Printing banknotes",
+          "The population census",
+          "Running elections only"
+        ]
+      },
+      "ne": {
+        "q": "नेपालले पहिलो पटक मेनफ्रेम कम्प्युटर (आईबीएम १४०१) मुख्यतः कुन राष्ट्रिय काममा प्रयोग गर्‍यो?",
+        "options": [
+          "मौसम पूर्वानुमान मात्र",
+          "नोट छाप्न",
+          "जनगणना",
+          "निर्वाचन मात्र"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "kushal-34-century",
+      "category": "nepal",
+      "en": {
+        "q": "Kushal Malla's Asian Games century against Mongolia took how many balls—the fastest men's T20I ton at the time?",
+        "options": [
+          "35",
+          "50",
+          "34",
+          "30"
+        ]
+      },
+      "ne": {
+        "q": "कुशल मल्लाको मंगोलियाविरुद्धको शतक कति बलमा (त्यतिबेला पुरुष टी–२० अन्तर्राष्ट्रियको सबैभन्दा छिटो)?",
+        "options": [
+          "३५",
+          "५०",
+          "३४",
+          "३०"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "nepal-273-margin",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal's win over Mongolia by 273 runs set a record for the largest victory margin in what format?",
+        "options": [
+          "Test cricket",
+          "T20 cricket (all levels)",
+          "One-day cricket only",
+          "Football"
+        ]
+      },
+      "ne": {
+        "q": "मंगोलियाविरुद्ध २७३ रनको जितले कुन खेलमा सबैभन्दा ठूलो रन अन्तरको किर्तिमान बनायो?",
+        "options": [
+          "टेस्ट क्रिकेट",
+          "टी–२० क्रिकेट (सबै स्तर)",
+          "एकदिवसीय मात्र",
+          "फुटबल"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "nepal-314-t20",
+      "category": "nepal",
+      "en": {
+        "q": "Against Mongolia at the Asian Games, Nepal became the first men's team to score how many in a T20 innings?",
+        "options": [
+          "250 runs exactly",
+          "400 runs",
+          "200 runs",
+          "300 or more runs"
+        ]
+      },
+      "ne": {
+        "q": "एसियन खेलकुदमा मंगोलियाविरुद्ध नेपाल पुरुष टी–२०मा पहिलो पटक कति रनभन्दा बढी बनाउने टोली बन्यो?",
+        "options": [
+          "ठ्याक्कै २५०",
+          "४००",
+          "२००",
+          "३०० वा सोभन्दा बढी"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "nepali-sikkim-too",
+      "category": "nepal",
+      "en": {
+        "q": "Nepali is Nepal's official language—and it also has official status in which neighbouring Indian state?",
+        "options": [
+          "Bihar",
+          "Sikkim",
+          "Punjab",
+          "Kerala"
+        ]
+      },
+      "ne": {
+        "q": "नेपाली नेपालको आधिकारिक भाषा हो — भारतको कुन छिमेकी राज्यमा पनि आधिकारिक छ?",
+        "options": [
+          "बिहार",
+          "सिक्किम",
+          "पञ्जाब",
+          "केरला"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "nepalisat-name",
+      "category": "nepal",
+      "en": {
+        "q": "What is the name of Nepal's first satellite, built by Nepali scientists?",
+        "options": [
+          "Sagarmatha-1",
+          "HimalSat",
+          "NepaliSat-1",
+          "Kathmandu-1"
+        ]
+      },
+      "ne": {
+        "q": "नेपाली वैज्ञानिकले बनाएको पहिलो उपग्रहको नाम के हो?",
+        "options": [
+          "सगरमाथा–१",
+          "हिमालस्याट",
+          "नेपालीस्याट–१",
+          "काठमाडौँ–१"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "netflix-14-peaks",
+      "category": "nepal",
+      "en": {
+        "q": "The Netflix film '14 Peaks: Nothing Is Impossible' follows which Nepali mountaineer?",
+        "options": [
+          "Kami Rita Sherpa",
+          "Ang Rita Sherpa",
+          "Pasang Lhamu Sherpa",
+          "Nirmal (Nims) Purja"
+        ]
+      },
+      "ne": {
+        "q": "नेटफ्लिक्स चलचित्र '१४ पिक्स' कुन नेपाली आरोहीको कथा हो?",
+        "options": [
+          "कामी रिता शेर्पा",
+          "एङ्ग रिता शेर्पा",
+          "पासाङ ल्हामु शेर्पा",
+          "निर्मल (निम्स) पुर्जा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "samesex-south-asia",
+      "category": "civics",
+      "en": {
+        "q": "Nepal made South Asian history by becoming the first country in the region to officially register what?",
+        "options": [
+          "Dual citizenship for all",
+          "A state religion",
+          "Same-sex marriages",
+          "Private armies"
+        ]
+      },
+      "ne": {
+        "q": "दक्षिण एसियामा नेपालले पहिलो पटक आधिकारिक रूपमा के दर्ता गर्‍यो?",
+        "options": [
+          "सबैका लागि दोहोरो नागरिकता",
+          "राज्य धर्म",
+          "समलिङ्गी विवाह",
+          "निजी सेना"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "sunil-pant-mp",
+      "category": "civics",
+      "en": {
+        "q": "Sunil Babu Pant is remembered as Nepal's first openly gay person elected to what?",
+        "options": [
+          "The Supreme Court",
+          "The Constituent Assembly / Parliament",
+          "The Army chief post",
+          "Village mayor only"
+        ]
+      },
+      "ne": {
+        "q": "सुनिलबाबु पन्त नेपालको पहिलो खुलाएर समलिङ्गी व्यक्ति कुन पदमा निर्वाचित हुनुभयो?",
+        "options": [
+          "महान्यायालय",
+          "संविधानसभा / संसद",
+          "सेना प्रमुख",
+          "गाउँपालिका अध्यक्ष मात्र"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "third-gender-census",
+      "category": "civics",
+      "en": {
+        "q": "Nepal was the world's first country to include what on its federal census?",
+        "options": [
+          "Caste in every question",
+          "Income of every child",
+          "Passport numbers",
+          "A third gender option"
+        ]
+      },
+      "ne": {
+        "q": "संघीय जनगणनामा संसारको पहिलो देश भएर नेपालले के समावेश गर्‍यो?",
+        "options": [
+          "हरेक प्रश्नमा जात",
+          "हरेक बच्चाको आय",
+          "राहदानी नम्बर",
+          "तेस्रो लिङ्ग विकल्प"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "third-gender-passport",
+      "category": "civics",
+      "en": {
+        "q": "Nepali passports can list a holder's gender as male, female, or...",
+        "options": [
+          "Other (third gender)",
+          "Not specified only",
+          "Royal only",
+          "Monk only"
+        ]
+      },
+      "ne": {
+        "q": "नेपाली राहदानीमा लिङ्ग पुरुष, महिला वा के अर्को विकल्प हुन सक्छ?",
+        "options": [
+          "अन्य (तेस्रो लिङ्ग)",
+          "नखुलाउने मात्र",
+          "राजकीय मात्र",
+          "भिक्षु मात्र"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "upper-mustang-forbidden",
+      "category": "geography",
+      "en": {
+        "q": "Upper Mustang was long called a 'forbidden kingdom' mainly because...",
+        "options": [
+          "It has no roads at all",
+          "It is underwater in monsoon",
+          "Foreign travel there was tightly restricted for decades",
+          "Climbing any peak there is banned"
+        ]
+      },
+      "ne": {
+        "q": "माथिल्लो मुस्ताङ् लामो समय 'निषेधित राज्य' किन भनिन्थ्यो?",
+        "options": [
+          "त्यहाँ बाटो छैन",
+          "मनसुनमा पानीमा डुब्छ",
+          "दशकौँसम्म विदेशी यात्रामा कडा प्रतिबन्ध थियो",
+          "कुनै पनि शिखर चढ्न बन्द छ"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "upper-tamakoshi-hydro",
+      "category": "geography",
+      "en": {
+        "q": "Which project is Nepal's largest hydropower plant (about 456 MW)?",
+        "options": [
+          "Kaligandaki A",
+          "Marsyangdi",
+          "Upper Tamakoshi",
+          "Kulekhani"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको सबैभन्दा ठूलो जलविद्युत् आयोजना (करिब ४५६ मेगावाट) कुन हो?",
+        "options": [
+          "कालीगण्डकी ए",
+          "मर्स्याङ्दी",
+          "माथिल्लो तामाकोशी",
+          "कुलेखानी"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "visit-nepal-yeti",
+      "category": "nepal",
+      "en": {
+        "q": "The Yeti was the mascot for which kind of national campaign?",
+        "options": [
+          "A military draft",
+          "A school leaving exam",
+          "A Visit Nepal tourism drive",
+          "A fuel ration scheme"
+        ]
+      },
+      "ne": {
+        "q": "यती कुन प्रकारको राष्ट्रिय अभियानको प्रतीक चरित्र (मास्कट) थियो?",
+        "options": [
+          "सैन्य भर्ना",
+          "स्कूल परीक्षा",
+          "भिजिट नेपाल पर्यटन अभियान",
+          "इन्धन वितरण योजना"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "vulture-restaurant-what",
+      "category": "nepal",
+      "en": {
+        "q": "A 'vulture restaurant' in Nepal is really a place where...",
+        "options": [
+          "People dine next to vultures",
+          "Vultures are sold as food",
+          "Only tourists are fed",
+          "Vultures safely eat diclofenac-free livestock carcasses"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको 'गिद्ध रेस्टुरेन्ट' वास्तवमा के हो?",
+        "options": [
+          "मान्छे गिद्धसँगै खान्छ",
+          "गिद्ध बेचिन्छ",
+          "पर्यटकलाई मात्र खाना",
+          "गिद्धले डाइक्लोफेनाकमुक्त मृत पशुको मासु सुरक्षित खान्छन्"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "time-meridian-gaurishankar",
+      "category": "units",
+      "en": {
+        "q": "Nepal Standard Time (UTC+5:45) is based on a meridian that passes through which mountain?",
+        "options": [
+          "Everest",
+          "Machhapuchhre",
+          "Kanchenjunga",
+          "Gaurishankar"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको मानक समय (UTC+५:४५) कुन हिमाल हुँदै जाने रेखामा आधारित छ?",
+        "options": [
+          "सगरमाथा",
+          "माछापुच्छ्रे",
+          "कन्चनजुङ्घा",
+          "गौरीशङ्कर"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "time-ahead-of-india",
+      "category": "units",
+      "en": {
+        "q": "Nepal Standard Time sits how far ahead of Indian Standard Time?",
+        "options": [
+          "15 minutes",
+          "30 minutes",
+          "45 minutes",
+          "1 hour"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको समय भारतीय मानक समयभन्दा कति अगाडि छ?",
+        "options": [
+          "१५ मिनेट",
+          "३० मिनेट",
+          "४५ मिनेट",
+          "१ घण्टा"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "utc-45-rarity",
+      "category": "units",
+      "en": {
+        "q": "UTC+5:45 is rare worldwide. Roughly how many time zones use a 45-minute offset from UTC?",
+        "options": [
+          "Almost every country",
+          "Only a handful (about three)",
+          "None besides Nepal",
+          "About fifty"
+        ]
+      },
+      "ne": {
+        "q": "UTC+४५ मिनेटको समय क्षेत्र संसारमा कति दुर्लभ हो?",
+        "options": [
+          "लगभग सबै देश",
+          "एकदम थोरै (करिब तीन)",
+          "नेपालबाहेक कुनै होइन",
+          "करिब पचास"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "mha-puja-new-year",
+      "category": "calendar",
+      "en": {
+        "q": "Mha Puja, the Newar 'worship of the self', also marks the new year of which calendar?",
+        "options": [
+          "Bikram Sambat",
+          "Gregorian",
+          "Nepal Sambat",
+          "Yele Sambat"
+        ]
+      },
+      "ne": {
+        "q": "आफ्नो पूजा गरिने म्ह पूजा कुन पात्रोको नयाँ वर्ष पनि हो?",
+        "options": [
+          "विक्रम संवत्",
+          "ग्रेगोरियन",
+          "नेपाल संवत्",
+          "येले संवत्"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "death-penalty-banned",
+      "category": "civics",
+      "en": {
+        "q": "Article 16 of the Constitution forbids making any law that provides for what?",
+        "options": [
+          "Income tax",
+          "Federalism",
+          "Private schools",
+          "The death penalty"
+        ]
+      },
+      "ne": {
+        "q": "संविधानको धारा १६ ले कुन कुराको कानुन बनाउन निषेध गर्छ?",
+        "options": [
+          "आयकर",
+          "संघीयता",
+          "निजी विद्यालय",
+          "मृत्युदण्ड"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "residual-powers-federation",
+      "category": "civics",
+      "en": {
+        "q": "If a subject is not listed in any constitutional power schedule, who gets that residual power?",
+        "options": [
+          "The Federation (centre)",
+          "The province",
+          "The local level",
+          "The Supreme Court"
+        ]
+      },
+      "ne": {
+        "q": "संविधानका अनुसूचीमा नपरेको विषयको अवशिष्ट अधिकार कसलाई जान्छ?",
+        "options": [
+          "संघ (केन्द्र)",
+          "प्रदेश",
+          "स्थानीय तह",
+          "सर्वोच्च अदालत"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "schedules-count",
+      "category": "civics",
+      "en": {
+        "q": "How many schedules (anusuchi) does the Constitution have?",
+        "options": [
+          "7",
+          "9",
+          "12",
+          "35"
+        ]
+      },
+      "ne": {
+        "q": "संविधानमा कति अनुसूची छन्?",
+        "options": [
+          "७",
+          "९",
+          "१२",
+          "३५"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "mehboob-ten-wickets",
+      "category": "nepal",
+      "en": {
+        "q": "Which Nepali bowler took all ten wickets in an ICC limited-overs international, against Mozambique?",
+        "options": [
+          "Sandeep Lamichhane",
+          "Sompal Kami",
+          "Mehboob Alam",
+          "Paras Khadka"
+        ]
+      },
+      "ne": {
+        "q": "आईसीसी सीमित ओभर अन्तर्राष्ट्रियमा मोजाम्बिकविरुद्ध दसै विकेट लिने नेपाली गेंदबाज को हुन्?",
+        "options": [
+          "सन्दीप लामिछाने",
+          "सोम्पाल कामी",
+          "मेहबूब आलम",
+          "पारस खड्का"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "gaurika-youngest-rio",
+      "category": "nepal",
+      "en": {
+        "q": "Gaurika Singh made headlines at Rio 2016 as the Games' youngest Olympian—in which sport?",
+        "options": [
+          "Taekwondo",
+          "Athletics",
+          "Shooting",
+          "Swimming"
+        ]
+      },
+      "ne": {
+        "q": "रियो २०१६ मा सबैभन्दा कान्छी ओलम्पियन बनेकी गौरिका सिंह कुन खेलकी खेलाडी हुन्?",
+        "options": [
+          "टेक्वान्डो",
+          "एथलेटिक्स",
+          "सुटिङ",
+          "पौडी"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "chandra-shortest-man",
+      "category": "nepal",
+      "en": {
+        "q": "Chandra Bahadur Dangi of Nepal held the Guinness record as the world's shortest adult man. His verified height was about...",
+        "options": [
+          "54.6 cm",
+          "67 cm",
+          "80 cm",
+          "100 cm"
+        ]
+      },
+      "ne": {
+        "q": "चन्द्रबहादुर डाँगी विश्वका सबैभन्दा होचा वयस्क पुरुषको गिनेस किर्तिमानी थिए — उचाइ करिब कति?",
+        "options": [
+          "५४.६ सेन्टिमिटर",
+          "६७ सेन्टिमिटर",
+          "८० सेन्टिमिटर",
+          "१०० सेन्टिमिटर"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "highest-pit-viper",
+      "category": "geography",
+      "en": {
+        "q": "The Himalayan pit viper is often cited as the world's highest living snake, found up to about...",
+        "options": [
+          "2,000 m",
+          "4,900 m",
+          "8,000 m",
+          "Sea level only"
+        ]
+      },
+      "ne": {
+        "q": "हिमाली पिट भाइपर संसारकै सबैभन्दा उचाइमा पाइने सर्प मानिन्छ — करिब कति मिटरसम्म?",
+        "options": [
+          "२,००० मिटर",
+          "४,९०० मिटर",
+          "८,००० मिटर",
+          "समुद्र सतह मात्र"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "hotel-everest-view",
+      "category": "geography",
+      "en": {
+        "q": "Hotel Everest View, long billed as the world's highest-altitude hotel, sits above which village?",
+        "options": [
+          "Lukla",
+          "Pokhara",
+          "Namche Bazaar",
+          "Jomsom"
+        ]
+      },
+      "ne": {
+        "q": "संसारको सबैभन्दा उचाइको होटल भनेर चिनिने होटल एभरेस्ट भ्यू कुन गाउँमाथि छ?",
+        "options": [
+          "लुक्ला",
+          "पोखरा",
+          "नाम्चे बजार",
+          "जोमसोम"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "lumle-wettest",
+      "category": "geography",
+      "en": {
+        "q": "Which station in Kaski is regularly among Nepal's wettest, often recording over 4,000 mm of rain in a year?",
+        "options": [
+          "Jomsom",
+          "Mustang's Lo Manthang",
+          "Dunai",
+          "Lumle"
+        ]
+      },
+      "ne": {
+        "q": "कास्कीको कुन मौसम केन्द्र नेपालकै सबैभन्दा धेरै वर्षा हुने ठाउँमा पर्छ (वर्षमा ४,००० मिमीभन्दा बढी)?",
+        "options": [
+          "जोमसोम",
+          "लोमान्थाङ्",
+          "दुनै",
+          "लुम्ले"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "jomsom-rain-shadow",
+      "category": "geography",
+      "en": {
+        "q": "Why is Jomsom so much drier than nearby Lumle, even though both sit in Gandaki?",
+        "options": [
+          "It lies in the Himalayan rain shadow",
+          "It is below sea level",
+          "It has no rivers",
+          "Clouds are banned there"
+        ]
+      },
+      "ne": {
+        "q": "गण्डकीमै भए पनि जोमसोम लुम्लेभन्दा किन निकै सुख्खा छ?",
+        "options": [
+          "हिमाली वर्षा छायाँमा पर्ने हुनाले",
+          "समुद्र सतहभन्दा तल भएकोले",
+          "नदी नभएकोले",
+          "बादल निषेध भएकोले"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "char-kose-jhadi",
+      "category": "geography",
+      "en": {
+        "q": "The dense Terai forest belt historically called 'Char Kose Jhadi' is named for being how wide?",
+        "options": [
+          "Four metres",
+          "About four kos (roughly 8 miles)",
+          "Four districts",
+          "Four mountain ranges"
+        ]
+      },
+      "ne": {
+        "q": "तराईको प्रसिद्ध 'चारकोसे झाडी' नाम कति चौडाइबाट आएको हो?",
+        "options": [
+          "चार मिटर",
+          "करिब चार कोस (लगभग ८ माइल)",
+          "चार जिल्ला",
+          "चार हिमश्रृंखला"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "arun-valley-deep",
+      "category": "geography",
+      "en": {
+        "q": "The Arun Valley is often described as one of the world's deepest river valleys. It lies mainly in which part of Nepal?",
+        "options": [
+          "Far-western Terai",
+          "Mustang",
+          "The eastern Himalaya (Sankhuwasabha / Koshi)",
+          "Chitwan"
+        ]
+      },
+      "ne": {
+        "q": "संसारकै गहिरा उपत्यकामध्ये गनिने अरुण उपत्यका नेपालको कुन भागमा पर्छ?",
+        "options": [
+          "सुदूरपश्चिम तराई",
+          "मुस्ताङ्",
+          "पूर्वी हिमाल (सङ्खुवासभा / कोशी)",
+          "चितवन"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "bandana-dance-record",
+      "category": "nepal",
+      "en": {
+        "q": "Bandana Nepal held a Guinness record for the longest dancing marathon by an individual—about how long?",
+        "options": [
+          "12 hours",
+          "24 hours",
+          "48 hours",
+          "126 hours"
+        ]
+      },
+      "ne": {
+        "q": "बन्दना नेपालको गिनेस किर्तिमान — एक्लै सबैभन्दा लामो नृत्य म्याराथन — करिब कति लामो थियो?",
+        "options": [
+          "१२ घण्टा",
+          "२४ घण्टा",
+          "४८ घण्टा",
+          "१२६ घण्टा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "olympic-medal-zero",
+      "category": "nepal",
+      "en": {
+        "q": "How many Olympic medals has Nepal won so far?",
+        "options": [
+          "None",
+          "One gold",
+          "Three bronzes",
+          "Five silvers"
+        ]
+      },
+      "ne": {
+        "q": "नेपालले अहिलेसम्म कति ओलम्पिक पदक जितेको छ?",
+        "options": [
+          "एक पनि होइन",
+          "एक स्वर्ण",
+          "तीन कांस्य",
+          "पाँच रजत"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "messner-no-oxygen",
+      "category": "nepal",
+      "en": {
+        "q": "The first climbers to summit Everest without bottled oxygen were...",
+        "options": [
+          "Hillary and Tenzing",
+          "Reinhold Messner and Peter Habeler",
+          "Nims Purja and Mingma G",
+          "Junko Tabei and Pasang Lhamu"
+        ]
+      },
+      "ne": {
+        "q": "बिना बोतल अक्सिजन सगरमाथा चढ्ने पहिलो जोडी को हुन्?",
+        "options": [
+          "हिलारी र तेन्जिङ",
+          "रेइनहोल्ड मेस्नर र पिटर हाबलर",
+          "निम्स पुर्जा र मिङ्मा जी",
+          "जुन्को ताबेइ र पासाङ ल्हामु"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "highest-fashion-show",
+      "category": "nepal",
+      "en": {
+        "q": "A high-altitude fashion runway was staged near Everest at Kala Patthar, at about...",
+        "options": [
+          "1,400 m",
+          "8,848 m",
+          "5,340 m",
+          "Sea level"
+        ]
+      },
+      "ne": {
+        "q": "सगरमाथा नजिक काला पत्थरमा उच्च उचाइको फेसन शो करिब कति मिटरमा भएको थियो?",
+        "options": [
+          "१,४०० मिटर",
+          "८,८४८ मिटर",
+          "५,३४० मिटर",
+          "समुद्र सतह"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "anthem-replaced-shriman",
+      "category": "nepal",
+      "en": {
+        "q": "The current national anthem replaced which older royal-era anthem?",
+        "options": [
+          "Shriman Gambhira",
+          "Sayaun Thunga Phulka Hami (it was always this)",
+          "Jana Gana Mana",
+          "God Save the King"
+        ]
+      },
+      "ne": {
+        "q": "हालको राष्ट्रिय गानले कुन पुरानो राजकीय गानलाई विस्थापित गर्‍यो?",
+        "options": [
+          "श्रीमान् गम्भीर",
+          "सयौँ थुँगा फूलका हामी (पहिलेदेखि यही)",
+          "जन गण मन",
+          "गड सेभ द किङ"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "pathi-is-gallon",
+      "category": "units",
+      "en": {
+        "q": "One pathi of grain is traditionally about the same volume as...",
+        "options": [
+          "One teaspoon",
+          "One imperial gallon (about 4.5 litres)",
+          "One oil drum",
+          "One truck"
+        ]
+      },
+      "ne": {
+        "q": "अन्न नाप्ने एक पाथी करिब कति हुन्छ?",
+        "options": [
+          "एक चम्चा",
+          "एक इम्पेरियल ग्यालन (करिब ४.५ लिटर)",
+          "एक तेलको ड्रम",
+          "एक ट्रक"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "khetmuri-ropani",
+      "category": "units",
+      "en": {
+        "q": "In old hill land records, one khetmuri equals how many ropani?",
+        "options": [
+          "16",
+          "13",
+          "25",
+          "1"
+        ]
+      },
+      "ne": {
+        "q": "पुरानो पहाडी जग्गा अभिलेखमा एक खेतमुरि कति रोपनी बराबर हो?",
+        "options": [
+          "१६",
+          "१३",
+          "२५",
+          "१"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "tamu-sonam-gyalpo",
+      "category": "calendar",
+      "en": {
+        "q": "Tamu Lhosar, Sonam Lhosar and Gyalpo Lhosar are new years of which communities, in that order?",
+        "options": [
+          "Newar, Tharu, Rai",
+          "Tharu, Magar, Limbu",
+          "Sherpa, Gurung, Newar",
+          "Gurung, Tamang, Sherpa"
+        ]
+      },
+      "ne": {
+        "q": "तामु, सोनाम र ग्याल्पो ल्होसार क्रमशः कुन समुदायका नयाँ वर्ष हुन्?",
+        "options": [
+          "नेवार, थारू, राई",
+          "थारू, मगर, लिम्बु",
+          "शेर्पा, गुरुङ्, नेवार",
+          "गुरुङ्, तामाङ्, शेर्पा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "annapurna-conservation",
+      "category": "geography",
+      "en": {
+        "q": "Nepal's largest protected area by land is the...",
+        "options": [
+          "Chitwan National Park",
+          "Annapurna Conservation Area",
+          "Sagarmatha National Park",
+          "Rara National Park"
+        ]
+      },
+      "ne": {
+        "q": "क्षेत्रफलका हिसाबले नेपालको सबैभन्दा ठूलो संरक्षित क्षेत्र कुन हो?",
+        "options": [
+          "चितवन राष्ट्रिय निकुञ्ज",
+          "अन्नपूर्ण संरक्षण क्षेत्र",
+          "सगरमाथा राष्ट्रिय निकुञ्ज",
+          "रारा राष्ट्रिय निकुञ्ज"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "shey-phoksundo-park",
+      "category": "geography",
+      "en": {
+        "q": "Shey Phoksundo National Park, home to Nepal's deepest lake, is mainly in which district?",
+        "options": [
+          "Manang",
+          "Solukhumbu",
+          "Dolpa",
+          "Ilam"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको सबैभन्दा गहिरो ताल रहेको शे–फोक्सुन्डो राष्ट्रिय निकुञ्ज मुख्यतः कुन जिल्लामा छ?",
+        "options": [
+          "मनाङ्",
+          "सोलुखुम्बु",
+          "डोल्पा",
+          "इलाम"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "kanwa-terai",
+      "category": "units",
+      "en": {
+        "q": "In the Terai land system, the unit smaller than a dhur is often called...",
+        "options": [
+          "Aana",
+          "Ropani",
+          "Tola",
+          "Kanwa"
+        ]
+      },
+      "ne": {
+        "q": "तराईको जग्गा नापमा धुरभन्दा सानो इकाईलाई प्रायः के भनिन्छ?",
+        "options": [
+          "आना",
+          "रोपनी",
+          "तोला",
+          "कनवा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "national-motto-heaven",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal's national motto, shown on the coat of arms, is a Sanskrit line that means roughly...",
+        "options": [
+          "Mother and motherland are greater than heaven",
+          "Unity in diversity",
+          "Better to die than be a coward",
+          "Peace and prosperity"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको राष्ट्रिय आदर्श वाक्य (निशान छापमा) को अर्थ करिब के हो?",
+        "options": [
+          "आमा र मातृभूमि स्वर्गभन्दा ठूला हुन्",
+          "विविधतामा एकता",
+          "डराउनुभन्दा मर्नु राम्रो",
+          "शान्ति र समृद्धि"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "first-tornado-bara-parsa",
+      "category": "geography",
+      "en": {
+        "q": "Nepal's first officially recorded tornado tore through which Terai districts?",
+        "options": [
+          "Jhapa and Ilam",
+          "Kaski and Manang",
+          "Mustang and Dolpa",
+          "Bara and Parsa"
+        ]
+      },
+      "ne": {
+        "q": "नेपालमा आधिकारिक रूपमा पहिलो पटक रेकर्ड गरिएको घुम्रपात (टोर्नाडो) कुन तराई जिल्लाहरूमा आयो?",
+        "options": [
+          "झापा र इलाम",
+          "कास्की र मनाङ्",
+          "मुस्ताङ् र डोल्पा",
+          "बारा र पर्सा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "ghumrapaat-nepali-tornado",
+      "category": "nepal",
+      "en": {
+        "q": "After that first tornado, meteorologists coined which Nepali word for 'tornado'?",
+        "options": [
+          "Huri (हुरी)",
+          "Ghumrapaat (घुम्रपात)",
+          "Baadal (बादल)",
+          "Bhukampa (भुइँचालो)"
+        ]
+      },
+      "ne": {
+        "q": "पहिलो टोर्नाडोपछि मौसमविद्हरूले टोर्नाडोलाई नेपालीमा के नाम दिए?",
+        "options": [
+          "हुरी",
+          "घुम्रपात",
+          "बादल",
+          "भुइँचालो"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "shaligram-ammonite",
+      "category": "geography",
+      "en": {
+        "q": "A shaligram, worshipped as a form of Vishnu, is geologically what?",
+        "options": [
+          "A meteorite from Everest",
+          "Volcanic glass",
+          "A man-made stone idol",
+          "A fossil ammonite from an ancient sea"
+        ]
+      },
+      "ne": {
+        "q": "विष्णुको रूप मानिने शालिग्राम भौगर्भिक रूपमा के हो?",
+        "options": [
+          "सगरमाथाको उल्कापिण्ड",
+          "ज्वालामुखी काँच",
+          "मानवनिर्मित मूर्ति",
+          "प्राचीन समुद्रको अमोनाइट जीवाश्म"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "shaligram-kali-gandaki",
+      "category": "geography",
+      "en": {
+        "q": "Authentic shaligram stones are mainly found in which river valley?",
+        "options": [
+          "The Bagmati in Kathmandu",
+          "The Kali Gandaki in Mustang",
+          "The Koshi in the east",
+          "The Mahakali on the western border"
+        ]
+      },
+      "ne": {
+        "q": "असली शालिग्राम मुख्यतः कुन नदी उपत्यकामा पाइन्छ?",
+        "options": [
+          "काठमाडौँको बागमतीमा",
+          "मुस्ताङ्को कालीगण्डकीमा",
+          "पूर्वको कोशीमा",
+          "पश्चिम सीमाको महाकालीमा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "himalaya-tethys-sea",
+      "category": "geography",
+      "en": {
+        "q": "Fossils of sea creatures high in the Himalaya exist because those rocks once sat under which vanished ocean?",
+        "options": [
+          "The Pacific",
+          "The Atlantic",
+          "The Arctic Ocean",
+          "The Tethys Sea"
+        ]
+      },
+      "ne": {
+        "q": "हिमालमा समुद्री जीवका जीवाश्म किन छन्?",
+        "options": [
+          "प्रशान्त महासागरबाट",
+          "एटलान्टिकबाट",
+          "उत्तरी ध्रुवीय महासागरबाट",
+          "ती चट्टान एक समय टेथिस सागरमुनि थिए"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "ihi-bel-marriage",
+      "category": "nepal",
+      "en": {
+        "q": "In the Newar Ihi rite, a girl is symbolically married so that, traditionally, she can never be considered a...",
+        "options": [
+          "Citizen",
+          "Widow",
+          "Priest",
+          "Farmer"
+        ]
+      },
+      "ne": {
+        "q": "नेवारको इही (बेल बिवाह) मा के विश्वास छ — छोरी कहिल्यै के हुँदिनन्?",
+        "options": [
+          "नागरिक",
+          "विधवा",
+          "पुजारी",
+          "किसान"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "ihi-fruit",
+      "category": "nepal",
+      "en": {
+        "q": "The fruit used in Ihi (Bel Bibaha) is the wood apple. What is it called in Nepali?",
+        "options": [
+          "Lapsi",
+          "Amala",
+          "Junar",
+          "Bel"
+        ]
+      },
+      "ne": {
+        "q": "इही (बेल बिवाह) मा प्रयोग हुने फल नेपालीमा के हो?",
+        "options": [
+          "लप्सी",
+          "अमला",
+          "जुनार",
+          "बेल"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "machhindranath-longest-jatra",
+      "category": "nepal",
+      "en": {
+        "q": "Which is Nepal's longest chariot festival, stretching over several weeks in Lalitpur?",
+        "options": [
+          "Indra Jatra",
+          "Rato Machhindranath Jatra",
+          "Bisket Jatra",
+          "Gai Jatra"
+        ]
+      },
+      "ne": {
+        "q": "ललितपुरमा हप्ताौँसम्म चल्ने नेपालको सबैभन्दा लामो रथयात्रा कुन हो?",
+        "options": [
+          "इन्द्रजात्रा",
+          "रातो मच्छिन्द्रनाथ जात्रा",
+          "बिस्केट जात्रा",
+          "गाईजात्रा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "bhoto-jatra-what",
+      "category": "nepal",
+      "en": {
+        "q": "Bhoto Jatra, which ends the Rato Machhindranath procession, is the public showing of what?",
+        "options": [
+          "A royal crown",
+          "A golden plough",
+          "A living kumari",
+          "A jewelled vest (bhoto)"
+        ]
+      },
+      "ne": {
+        "q": "रातो मच्छिन्द्रनाथ जात्राको अन्त्यमा हुने भोटो जात्रामा के देखाइन्छ?",
+        "options": [
+          "राजकीय मुकुट",
+          "सुनको हलो",
+          "जीवित कुमारी",
+          "जवाहर जडित भोटो (टोलो)"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "gharial-kasara",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal's Gharial Conservation and Breeding Centre, started to save a fish-eating crocodile, is at...",
+        "options": [
+          "Namche Bazaar",
+          "Kasara in Chitwan National Park",
+          "Rara Lake",
+          "Pokhara Lakeside"
+        ]
+      },
+      "ne": {
+        "q": "माछा खाने घडियाल गोही जोगाउन थालिएको प्रजनन केन्द्र कहाँ छ?",
+        "options": [
+          "नाम्चे बजारमा",
+          "चितवन निकुञ्जको कसारमा",
+          "रारा तालमा",
+          "पोखरा लेकसाइडमा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "gharial-snout",
+      "category": "nepal",
+      "en": {
+        "q": "How can you tell a gharial from Nepal's other crocodile, the mugger?",
+        "options": [
+          "The gharial has no teeth",
+          "The gharial lives only in snow",
+          "The gharial is bright red",
+          "The gharial has a long, thin snout for catching fish"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको अर्को गोही (मगर) बाट घडियाल कसरी छुट्याइन्छ?",
+        "options": [
+          "घडियालको दाँत हुँदैन",
+          "घडियाल हिउँमा मात्र बस्छ",
+          "घडियाल रातो हुन्छ",
+          "घडियालको लामो पातलो थुतुनो माछा समात्न हुन्छ"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "endemic-field-mouse",
+      "category": "geography",
+      "en": {
+        "q": "Which is often listed as Nepal's only endemic mammal species?",
+        "options": [
+          "The Bengal tiger",
+          "The Himalayan field mouse (Apodemus gurkha)",
+          "The one-horned rhino",
+          "The yak"
+        ]
+      },
+      "ne": {
+        "q": "नेपालमा मात्र पाइने स्तनधारी प्रजाति भनेर प्रायः कुनलाई लिइन्छ?",
+        "options": [
+          "बंगाल बाघ",
+          "हिमाली खेत मुसा (अपोडेमस गुर्खा)",
+          "एकसिङ्गे गैंडा",
+          "याक"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "dolphin-karnali",
+      "category": "geography",
+      "en": {
+        "q": "Nepal's last Gangetic river dolphins survive mainly in which river system?",
+        "options": [
+          "Phewa Lake only",
+          "The Kali Gandaki gorge only",
+          "Everest meltwater",
+          "The Karnali (and also stretches of the Narayani)"
+        ]
+      },
+      "ne": {
+        "q": "नेपालका अन्तिम गङ्गा नदीय डल्फिन मुख्यतः कुन नदी प्रणालीमा छन्?",
+        "options": [
+          "फेवा तालमा मात्र",
+          "कालीगण्डकी खोंचमा मात्र",
+          "सगरमाथाको पग्लने पानीमा",
+          "कर्णाली (र नारायणीका केही खण्ड)"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "ramsar-count",
+      "category": "geography",
+      "en": {
+        "q": "How many Ramsar wetlands of international importance does Nepal have?",
+        "options": [
+          "2",
+          "9",
+          "77",
+          "1"
+        ]
+      },
+      "ne": {
+        "q": "नेपालमा अन्तर्राष्ट्रिय महत्वका रामसार सिमसार क्षेत्र कति छन्?",
+        "options": [
+          "२",
+          "९",
+          "७७",
+          "१"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "no-daylight-saving",
+      "category": "units",
+      "en": {
+        "q": "Besides the odd +5:45 offset, what else is unusual about Nepal's clocks?",
+        "options": [
+          "Clocks jump two hours every monsoon",
+          "Each province has its own time",
+          "Shops legally close at noon",
+          "The country has never used daylight saving time"
+        ]
+      },
+      "ne": {
+        "q": "UTC+५:४५ बाहेक नेपालको घडीबारे अरू के अनौठो छ?",
+        "options": [
+          "मनसुनमा घडी दुई घण्टा अगाडि सारिन्छ",
+          "प्रत्येक प्रदेशको छुट्टै समय छ",
+          "दोकान दिउँसो बन्द हुनुपर्छ",
+          "दिनको बचत समय (डीएसटी) कहिल्यै लागु भएको छैन"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "dial-code-977",
+      "category": "units",
+      "en": {
+        "q": "When you call Nepal from abroad, which country code do you dial?",
+        "options": [
+          "+91",
+          "+977",
+          "+86",
+          "+1"
+        ]
+      },
+      "ne": {
+        "q": "विदेशबाट नेपाल फोन गर्दा कुन देश कोड लगाइन्छ?",
+        "options": [
+          "+९१",
+          "+९७७",
+          "+८६",
+          "+१"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "jyah-janko-longevity",
+      "category": "calendar",
+      "en": {
+        "q": "Jyah Janko is a Newar longevity rite first performed when someone reaches about...",
+        "options": [
+          "18 years exactly",
+          "50 years",
+          "12 days old",
+          "77 years, 7 months and 7 days"
+        ]
+      },
+      "ne": {
+        "q": "नेवारको ज्याः जंको दीर्घायु संस्कार पहिलो पटक करिब कहिले गरिन्छ?",
+        "options": [
+          "ठ्याक्कै १८ वर्षमा",
+          "५० वर्षमा",
+          "१२ दिनको उमेरमा",
+          "७७ वर्ष ७ महिना ७ दिनमा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "yak-blood-thakali",
+      "category": "nepal",
+      "en": {
+        "q": "In an old high-Himalayan Thakali custom, people drank a little fresh yak blood believing it was...",
+        "options": [
+          "A tax paid to Tibet",
+          "Medicine, because yaks graze on alpine herbs",
+          "A way to dye wool",
+          "An Olympic sport"
+        ]
+      },
+      "ne": {
+        "q": "थकाली समुदायको पुरानो चलनमा ताजा याकको रगत किन पिइन्थ्यो?",
+        "options": [
+          "तिब्बतलाई कर तिर्न",
+          "औषधि मानिन्थ्यो — याकले हिमाली जडीबुटी खान्छन्",
+          "ऊन रङ्गाउन",
+          "ओलम्पिक खेल भएर"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "biodiversity-tiny-land",
+      "category": "geography",
+      "en": {
+        "q": "Nepal covers about 0.1% of Earth's land, yet it holds roughly what share of the world's known bird species?",
+        "options": [
+          "Less than 0.1%",
+          "Half of all birds",
+          "None; Nepal has no endemic birds",
+          "About 9%"
+        ]
+      },
+      "ne": {
+        "q": "नेपाल पृथ्वीको करिब ०.१% भूभाग मात्र हो, तर विश्वका ज्ञात चरा प्रजातिमध्ये करिब कति यहाँ छन्?",
+        "options": [
+          "०.१ प्रतिशतभन्दा कम",
+          "आधा चरा",
+          "नेपालमा चरा छैनन्",
+          "करिब ९ प्रतिशत"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "ghodaghodi-tharu",
+      "category": "geography",
+      "en": {
+        "q": "Ghodaghodi, a Ramsar lake in Kailali, is especially sacred to which community?",
+        "options": [
+          "Sherpa",
+          "Tharu",
+          "Gurung",
+          "Limbu"
+        ]
+      },
+      "ne": {
+        "q": "कैलालीको रामसार ताल घोडाघोडी कुन समुदायका लागि विशेष पवित्र मानिन्छ?",
+        "options": [
+          "शेर्पा",
+          "थारू",
+          "गुरुङ्",
+          "लिम्बु"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "mai-pokhari-ilam",
+      "category": "geography",
+      "en": {
+        "q": "Mai Pokhari, one of Nepal's mountain Ramsar sites, is in which district famous for tea?",
+        "options": [
+          "Mustang",
+          "Bara",
+          "Humla",
+          "Ilam"
+        ]
+      },
+      "ne": {
+        "q": "पहाडी रामसार स्थल माईपोखरी चियाका लागि प्रसिद्ध कुन जिल्लामा छ?",
+        "options": [
+          "मुस्ताङ्",
+          "बारा",
+          "हुम्ला",
+          "इलाम"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "noon-cannon-kathmandu",
+      "category": "calendar",
+      "en": {
+        "q": "In old Kathmandu, a cannon was fired so people would know it was...",
+        "options": [
+          "Midnight",
+          "Noon",
+          "New Year",
+          "Eclipse time"
+        ]
+      },
+      "ne": {
+        "q": "पुरानो काठमाडौँमा तोप पड्काएर के समय जनाइन्थ्यो?",
+        "options": [
+          "मध्यरात",
+          "दिउँसो बाह्र बजे",
+          "नयाँ वर्ष",
+          "ग्रहणको समय"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "pala-water-clock",
+      "category": "units",
+      "en": {
+        "q": "Before mechanical clocks, Kathmandu timekeepers used a sinking bowl (pala) that filled in about...",
+        "options": [
+          "1 second",
+          "12 hours",
+          "A full month",
+          "24 minutes"
+        ]
+      },
+      "ne": {
+        "q": "यान्त्रिक घडीअघि काठमाडौँमा पानीको कचौरा (पला) करिब कतिमा डुब्थ्यो?",
+        "options": [
+          "१ सेकेन्डमा",
+          "१२ घण्टामा",
+          "एक महिनामा",
+          "२४ मिनेटमा"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "internet-tld-np",
+      "category": "units",
+      "en": {
+        "q": "Nepal's country-code internet domain is...",
+        "options": [
+          ".ne",
+          ".np",
+          ".nl",
+          ".npn"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको इन्टरनेट देश डोमेन के हो?",
+        "options": [
+          ".ne",
+          ".np",
+          ".nl",
+          ".npn"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "gharial-protected-act",
+      "category": "civics",
+      "en": {
+        "q": "The gharial is listed as a protected species under which early conservation law?",
+        "options": [
+          "The Motor Vehicles Act",
+          "The Postal Act",
+          "The Cinema Act",
+          "The National Parks and Wildlife Conservation Act"
+        ]
+      },
+      "ne": {
+        "q": "घडियाल कुन पुरानो संरक्षण कानुनअन्तर्गत संरक्षित प्रजाति हो?",
+        "options": [
+          "सवारी ऐन",
+          "हुलाक ऐन",
+          "चलचित्र ऐन",
+          "राष्ट्रिय निकुञ्ज तथा वन्यजन्तु संरक्षण ऐन"
+        ]
+      },
+      "answer": 3
+    },
+    {
+      "id": "amar-singh-west",
+      "category": "nepal",
+      "en": {
+        "q": "Badakaji Amar Singh Thapa led Gorkhali expansion as far west as which region, later lost after the Anglo-Nepal war?",
+        "options": [
+          "Lhasa",
+          "Calcutta",
+          "Kangra (beyond the Sutlej)",
+          "Singapore"
+        ]
+      },
+      "ne": {
+        "q": "बडाकाजी अमरसिंह थापाले गोरखाली विस्तार पश्चिममा कहाँसम्म पुर्‍याए (अङ्ग्रेज युद्धपछि गुमेको)?",
+        "options": [
+          "ल्हासा",
+          "कलकत्ता",
+          "काङ्गडा (सतलजपारि)",
+          "सिंगापुर"
         ]
       },
       "answer": 2
