@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { ReactNode } from "react";
 import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
@@ -22,17 +22,15 @@ export type ToolId =
   | "emergency"
   | "nepali";
 
-type Calculator = { id: ToolId; label: string; hint: string; icon: IconName; tint: string };
-
-const tinted = (tint: string) => ({ "--tint": tint }) as CSSProperties;
+/** A tool's row: icon, name, one line of live detail, and where it goes. */
+type Row = { id: ToolId; icon: IconName; label: string; detail: ReactNode };
 
 /**
- * Tools' front page. The Directory leads: it is the tool people open most,
- * and 100/101/102 should never be a scroll away. Then the three live tools
- * as one row of small tiles, each showing its answer before it is opened —
- * today in both calendars, the time where you follow, the stopwatch's run.
- * Calculators sit below, each in its own colour so they read as four
- * different things rather than one repeated tile.
+ * Tools' front page: one row style throughout, grouped by what the tools
+ * are for, so the page reads as a list rather than a collage. Each row's
+ * second line carries its live answer — today's date, a city's time, the
+ * stopwatch — where it used to take a tile of its own. Emergency numbers
+ * stay first, in the only red on the page.
  */
 export function ToolsHome({
   onOpen,
@@ -42,298 +40,215 @@ export function ToolsHome({
 }) {
   const { t } = useSettings();
 
-  const calculators: readonly Calculator[] = [
+  const everyday: Row[] = [
+    { id: "date", icon: "calendar", label: t("tools.date"), detail: <TodayDetail /> },
     {
-      id: "land",
-      label: t("tools.land"),
-      hint: t("tools.land-hint-short"),
-      icon: "land",
-      tint: "var(--color-positive)",
+      id: "nepali",
+      icon: "keyboard",
+      label: t("tools.typing"),
+      detail: "mero naam → मेरो नाम",
     },
+    { id: "clock", icon: "clock", label: t("tools.clock"), detail: <ClockDetail /> },
+  ];
+  const calculators: Row[] = [
+    { id: "land", icon: "land", label: t("tools.land"), detail: t("tools.land-hint-short") },
     {
       id: "weight",
-      label: t("tools.weight"),
-      hint: t("tools.weight-hint-short"),
       icon: "weight",
-      tint: "var(--color-accent-mark)",
+      label: t("tools.weight"),
+      detail: t("tools.weight-hint-short"),
     },
-    {
-      id: "vat",
-      label: t("tools.vat"),
-      hint: t("tools.vat-hint-short"),
-      icon: "percent",
-      tint: "var(--color-weather-tint)",
-    },
+    { id: "vat", icon: "percent", label: t("tools.vat"), detail: t("tools.vat-hint-short") },
     {
       id: "interest",
-      label: t("tools.interest"),
-      hint: t("tools.interest-hint-short"),
       icon: "interest",
-      tint: "var(--color-violet)",
+      label: t("tools.interest"),
+      detail: t("tools.interest-hint-short"),
     },
   ];
 
   return (
     <div className="space-y-3 pt-0.5">
-      <DirectoryCard onOpen={(section) => onOpen("emergency", section)} />
+      <EmergencyStrip onOpen={() => onOpen("emergency", "phones")} />
 
-      <div className="grid grid-cols-3 gap-2">
-        <DateCard onOpen={() => onOpen("date")} />
-        <ClockCard onOpen={() => onOpen("clock")} />
-        <StopwatchCard onOpen={() => onOpen("stopwatch")} />
-      </div>
+      <Group title={t("tools.everyday")}>
+        {everyday.map((row) => (
+          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
+        ))}
+        <StopwatchRow onOpen={() => onOpen("stopwatch")} />
+      </Group>
 
-      <TypingCard onOpen={() => onOpen("nepali")} />
+      <Group title={t("tools.calculators")}>
+        {calculators.map((row) => (
+          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
+        ))}
+      </Group>
 
-      <section aria-labelledby="tools-calculators" className="space-y-1.5">
-        <h2 id="tools-calculators" className="px-0.5 text-[11px] font-semibold text-text-secondary">
-          {t("tools.calculators")}
-        </h2>
-        <div className="grid grid-cols-2 gap-2">
-          {calculators.map((tool) => (
-            <button
-              key={tool.id}
-              type="button"
-              onClick={() => onOpen(tool.id)}
-              className="tool-card tool-calc"
-              style={tinted(tool.tint)}
-            >
-              <span className="tool-card__icon">
-                <Icon name={tool.icon} className="size-4" />
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-[12px] font-semibold">{tool.label}</span>
-                <span className="block truncate text-[10px] text-text-muted">{tool.hint}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
+      <Group title={t("tools.directory")}>
+        <ToolRow
+          row={{
+            id: "emergency",
+            icon: "phone",
+            label: t("tools.directory-more-numbers"),
+            detail: t("tools.directory-numbers-hint"),
+          }}
+          onOpen={() => onOpen("emergency", "phones")}
+        />
+        <ToolRow
+          row={{
+            id: "emergency",
+            icon: "openExternal",
+            label: t("tools.directory-more-sites"),
+            detail: t("tools.directory-sites-hint"),
+          }}
+          onOpen={() => onOpen("emergency", "websites")}
+        />
+      </Group>
     </div>
   );
 }
 
-/**
- * Nepali typing, the width of the page: it is a writing tool, not a fifth
- * calculator, and its example is the clearest way to say what it does.
- */
-function TypingCard({ onOpen }: { onOpen: () => void }) {
-  const { t } = useSettings();
+function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="tool-card tool-calc w-full"
-      style={tinted("var(--color-holiday)")}
-    >
-      <span className="tool-card__icon">
-        <Icon name="keyboard" className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12px] font-semibold">{t("tools.typing")}</span>
-        <span className="block truncate text-[10px] text-text-muted">
-          {t("tools.typing-hint-short")}
-        </span>
-      </span>
-      <span className="shrink-0 text-[13px] text-text-secondary">mero naam → मेरो नाम</span>
-    </button>
+    <section className="space-y-1.5" aria-label={title}>
+      <h2 className="px-0.5 text-[11px] font-semibold text-text-secondary">{title}</h2>
+      <ul className="surface-card overflow-hidden">{children}</ul>
+    </section>
   );
 }
 
-/**
- * The stopwatch, live on its card while it has time on it, so a run started
- * earlier is visible from the Tools page. The play button starts or pauses it
- * without opening the tool.
- */
-function StopwatchCard({ onOpen }: { onOpen: () => void }) {
+function ToolRow({
+  row,
+  onOpen,
+  trailing,
+}: {
+  row: Row;
+  onOpen: () => void;
+  /** A control of its own at the end of the row, instead of the chevron. */
+  trailing?: ReactNode;
+}) {
+  return (
+    <li className="flex items-center border-b border-divider last:border-b-0">
+      <button type="button" onClick={onOpen} className="more-row min-w-0 flex-1 text-left">
+        <span className="more-row__icon">
+          <Icon name={row.icon} className="size-3.5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[12.5px] font-medium">{row.label}</span>
+          <span className="mt-0.5 block truncate text-[10.5px] text-text-muted">{row.detail}</span>
+        </span>
+        {!trailing && <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />}
+      </button>
+      {trailing && <span className="shrink-0 pr-2.5">{trailing}</span>}
+    </li>
+  );
+}
+
+/** 100 · 101 · 102 in one slim line: never a scroll away, never the
+ * biggest thing on the page. */
+function EmergencyStrip({ onOpen }: { onOpen: () => void }) {
+  const { t, language } = useSettings();
+  const ne = language === "ne";
+  const { contacts } = useDirectory();
+  const emergency = contacts.filter((contact) => contact.category === "emergency").slice(0, 3);
+  return (
+    <section
+      aria-label={t("tools.directory-emergency")}
+      className="surface-card flex items-center gap-1 px-2 py-1.5"
+    >
+      <span className="shrink-0 px-1 text-[10px] font-semibold text-text-muted">
+        {t("tools.directory-emergency")}
+      </span>
+      {emergency.map((contact) => (
+        <button
+          key={contact.number}
+          type="button"
+          onClick={onOpen}
+          className="flex min-w-0 flex-1 flex-col items-center rounded-md px-1 py-1 transition-colors hover:bg-surface-hover"
+        >
+          <span className="text-[14px] font-bold leading-tight tabular-nums text-holiday">
+            {contact.number}
+          </span>
+          <span className="max-w-full truncate text-[10px] leading-tight text-text-muted">
+            {ne ? contact.nameNe : contact.name}
+          </span>
+        </button>
+      ))}
+    </section>
+  );
+}
+
+/** The stopwatch's row: its time as the detail, and play/pause at the end
+ * so a run can start without opening it. */
+function StopwatchRow({ onOpen }: { onOpen: () => void }) {
   const { t, numerals } = useSettings();
   const watch = stopwatch.useStopwatch();
   const ms = stopwatch.useElapsed(watch, 4);
   const running = stopwatch.isRunning(watch);
   const started = running || ms > 0;
   return (
-    <div className="tool-card tool-live relative" style={tinted("var(--color-violet)")}>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex min-w-0 flex-1 flex-col justify-between gap-1.5 text-left"
-      >
-        <span className="tool-live__label pr-6">{t("tools.stopwatch")}</span>
-        <span
-          className={`block truncate text-[15px] font-bold leading-none tabular-nums ${
-            started ? "" : "text-text-muted"
-          }`}
+    <ToolRow
+      row={{
+        id: "stopwatch",
+        icon: "stopwatch",
+        label: t("tools.stopwatch"),
+        detail: (
+          <span className={`tabular-nums ${running ? "text-accent-mark" : ""}`}>
+            {started ? clockText(ms, numerals) : t("tools.stopwatch-hint")}
+          </span>
+        ),
+      }}
+      onOpen={onOpen}
+      trailing={
+        <button
+          type="button"
+          onClick={() => stopwatch.toggle()}
+          aria-label={t(
+            running
+              ? "stopwatch.tap-pause"
+              : started
+                ? "stopwatch.tap-resume"
+                : "stopwatch.tap-start",
+          )}
+          className="icon-btn"
         >
-          {clockText(ms, numerals)}
-        </span>
-      </button>
-      <button
-        type="button"
-        onClick={() => stopwatch.toggle()}
-        aria-label={t(
-          running
-            ? "stopwatch.tap-pause"
-            : started
-              ? "stopwatch.tap-resume"
-              : "stopwatch.tap-start",
-        )}
-        className="icon-btn tool-live__action"
-      >
-        <Icon name={running ? "pause" : "play"} className="size-3" />
-      </button>
-    </div>
+          <Icon name={running ? "pause" : "play"} className="size-3" />
+        </button>
+      }
+    />
   );
 }
 
 /** Today in both calendars — the converter's most common answer, given free. */
-function DateCard({ onOpen }: { onOpen: () => void }) {
-  const { t, numerals } = useSettings();
+function TodayDetail() {
+  const { numerals } = useSettings();
   const day = useNepalDay();
   const { data: today } = useSWR(["tools:today", day], () => api.today());
-  const ad = today
-    ? new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(new Date(`${today.gregorian}T00:00:00`))
-    : "";
-
+  if (!today) return <>—</>;
+  const ad = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(`${today.gregorian}T00:00:00`));
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="tool-card tool-live"
-      style={tinted("var(--color-accent-mark)")}
-    >
-      <span className="tool-live__label">{t("tools.date")}</span>
-      <span className="min-w-0">
-        {today ? (
-          <>
-            <span className="block truncate text-[15px] font-bold leading-tight">
-              {today.nepaliMonthName} {digits(today.nepali.day, numerals)}
-            </span>
-            <span className="mt-0.5 block truncate text-[10px] text-text-muted">{ad}</span>
-          </>
-        ) : (
-          <span className="block text-[15px] font-bold leading-tight">—</span>
-        )}
-      </span>
-    </button>
+    <>
+      {today.nepaliMonthName} {digits(today.nepali.day, numerals)} · {ad}
+    </>
   );
 }
 
-/** The first city you follow, ticking; or an invitation to pick one. */
-function ClockCard({ onOpen }: { onOpen: () => void }) {
+/** The first city you follow and its time, or an invitation to pick one. */
+function ClockDetail() {
   const { t, modules } = useSettings();
   const zone = modules.clocks[0] ?? null;
   const readings = useWorldClocks(zone ? [zone] : []);
   const reading = zone ? readings[zone] : undefined;
-
+  if (!zone) return <>{t("tools.clock-add")}</>;
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="tool-card tool-live"
-      style={tinted("var(--color-weather-tint)")}
-    >
-      <span className="flex items-center justify-between gap-1">
-        <span className="tool-live__label">{t("tools.clock")}</span>
-        {zone && reading && reading.dayOffset !== 0 && (
-          <span className="shrink-0 text-[10px] text-text-muted">
-            {formatDayOffset(reading.dayOffset)}
-          </span>
-        )}
-      </span>
-      <span className="min-w-0">
-        {zone ? (
-          <>
-            <span className="block text-[15px] font-bold leading-none tabular-nums">
-              {reading?.time ?? "--:--"}
-            </span>
-            <span className="mt-1 block truncate text-[10px] text-text-muted">
-              {flagFor(zone)} {cityFor(zone).city}
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="block text-[15px] font-bold leading-none tabular-nums text-text-muted">
-              --:--
-            </span>
-            <span className="mt-1 block truncate text-[10px] text-text-muted">
-              {t("tools.clock-add")}
-            </span>
-          </>
-        )}
-      </span>
-    </button>
-  );
-}
-
-/**
- * The Directory at a glance: emergency lines up front; the rest is one tap
- * away under numbers or sites.
- */
-function DirectoryCard({ onOpen }: { onOpen: (section: DirectorySection) => void }) {
-  const { t, language } = useSettings();
-  const ne = language === "ne";
-  const { contacts } = useDirectory();
-  const emergency = contacts.filter((contact) => contact.category === "emergency").slice(0, 3);
-
-  return (
-    <section
-      aria-labelledby="tools-directory"
-      className="tool-card flex flex-col gap-2.5 active:transform-none"
-      style={tinted("var(--color-holiday)")}
-    >
-      <div className="flex items-center gap-2">
-        <span className="tool-card__icon" style={tinted("var(--color-holiday)")}>
-          <Icon name="directory" className="size-3.5" />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span id="tools-directory" className="block text-[12px] font-semibold">
-            {t("tools.directory")}
-          </span>
-          <span className="block text-[10px] text-text-muted">
-            {t("tools.directory-hint-short")}
-          </span>
-        </span>
-      </div>
-
-      <p className="px-0.5 text-[10px] font-medium text-text-muted">
-        {t("tools.directory-emergency")}
-      </p>
-      <div className="-mt-1 grid grid-cols-3 gap-1.5 rounded-md border border-border bg-canvas p-2">
-        {emergency.map((contact) => (
-          <button
-            key={contact.number}
-            type="button"
-            onClick={() => onOpen("phones")}
-            className="grid min-w-0 gap-0.5 rounded-sm px-0.5 py-1 text-center text-[10px] leading-tight text-text-muted transition-colors hover:bg-surface-hover"
-          >
-            <span className="text-[17px] font-bold leading-none tabular-nums text-holiday">
-              {contact.number}
-            </span>
-            <span className="truncate">{ne ? contact.nameNe : contact.name}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-2 gap-1.5">
-        <button
-          type="button"
-          onClick={() => onOpen("phones")}
-          className="rounded-md border border-border bg-canvas px-2 py-1.5 text-left text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
-        >
-          {t("tools.directory-more-numbers")}
-        </button>
-        <button
-          type="button"
-          onClick={() => onOpen("websites")}
-          className="rounded-md border border-border bg-canvas px-2 py-1.5 text-left text-[11px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text"
-        >
-          {t("tools.directory-more-sites")}
-        </button>
-      </div>
-    </section>
+    <>
+      {flagFor(zone)} {cityFor(zone).city} ·{" "}
+      <span className="tabular-nums">{reading?.time ?? "--:--"}</span>
+      {reading && reading.dayOffset !== 0 && ` (${formatDayOffset(reading.dayOffset)})`}
+    </>
   );
 }

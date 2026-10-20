@@ -43,6 +43,7 @@ import { SFFolder } from "sf-symbols-lib/monochrome/SFFolder";
 import { SFFolderBadgePlus } from "sf-symbols-lib/monochrome/SFFolderBadgePlus";
 import { SFForkKnife } from "sf-symbols-lib/monochrome/SFForkKnife";
 import { SFFuelpump } from "sf-symbols-lib/monochrome/SFFuelpump";
+import { SFGamecontroller } from "sf-symbols-lib/monochrome/SFGamecontroller";
 import { SFGearshape } from "sf-symbols-lib/monochrome/SFGearshape";
 import { SFGraduationcap } from "sf-symbols-lib/monochrome/SFGraduationcap";
 import { SFHouse } from "sf-symbols-lib/monochrome/SFHouse";
@@ -59,6 +60,7 @@ import { SFMoonStarsFill } from "sf-symbols-lib/monochrome/SFMoonStarsFill";
 import { SFMoonZzz } from "sf-symbols-lib/monochrome/SFMoonZzz";
 import { SFNewspaper } from "sf-symbols-lib/monochrome/SFNewspaper";
 import { SFPauseFill } from "sf-symbols-lib/monochrome/SFPauseFill";
+import { SFPawprint } from "sf-symbols-lib/monochrome/SFPawprint";
 import { SFPencil } from "sf-symbols-lib/monochrome/SFPencil";
 import { SFPercent } from "sf-symbols-lib/monochrome/SFPercent";
 import { SFPersonCropRectangle } from "sf-symbols-lib/monochrome/SFPersonCropRectangle";
@@ -70,6 +72,7 @@ import { SFPinFill } from "sf-symbols-lib/monochrome/SFPinFill";
 import { SFPlayFill } from "sf-symbols-lib/monochrome/SFPlayFill";
 import { SFPlus } from "sf-symbols-lib/monochrome/SFPlus";
 import { SFPower } from "sf-symbols-lib/monochrome/SFPower";
+import { SFQuestionmarkCircle } from "sf-symbols-lib/monochrome/SFQuestionmarkCircle";
 import { SFRotateRight } from "sf-symbols-lib/monochrome/SFRotateRight";
 import { SFSliderHorizontal3 } from "sf-symbols-lib/monochrome/SFSliderHorizontal3";
 import { SFSofa } from "sf-symbols-lib/monochrome/SFSofa";
@@ -79,16 +82,19 @@ import { SFSquareAndArrowDown } from "sf-symbols-lib/monochrome/SFSquareAndArrow
 import { SFSquareAndArrowUp } from "sf-symbols-lib/monochrome/SFSquareAndArrowUp";
 import { SFSquareAndPencil } from "sf-symbols-lib/monochrome/SFSquareAndPencil";
 import { SFSquareGrid2x2 } from "sf-symbols-lib/monochrome/SFSquareGrid2x2";
+import { SFSquareGrid3x3 } from "sf-symbols-lib/monochrome/SFSquareGrid3x3";
 import { SFSquareOnSquare } from "sf-symbols-lib/monochrome/SFSquareOnSquare";
 import { SFStar } from "sf-symbols-lib/monochrome/SFStar";
 import { SFStarFill } from "sf-symbols-lib/monochrome/SFStarFill";
 import { SFSteeringwheel } from "sf-symbols-lib/monochrome/SFSteeringwheel";
 import { SFStopFill } from "sf-symbols-lib/monochrome/SFStopFill";
+import { SFStopwatch } from "sf-symbols-lib/monochrome/SFStopwatch";
 import { SFStorefront } from "sf-symbols-lib/monochrome/SFStorefront";
 import { SFSunMax } from "sf-symbols-lib/monochrome/SFSunMax";
 import { SFSunriseFill } from "sf-symbols-lib/monochrome/SFSunriseFill";
 import { SFSunsetFill } from "sf-symbols-lib/monochrome/SFSunsetFill";
 import { SFTextDocument } from "sf-symbols-lib/monochrome/SFTextDocument";
+import { SFTextformat } from "sf-symbols-lib/monochrome/SFTextformat";
 import { SFTextformatSize } from "sf-symbols-lib/monochrome/SFTextformatSize";
 import { SFTextPadHeader } from "sf-symbols-lib/monochrome/SFTextPadHeader";
 import { SFTrash } from "sf-symbols-lib/monochrome/SFTrash";
@@ -162,6 +168,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   shrink: SFArrowDownRightAndArrowUpLeft,
   expand: SFArrowUpLeftAndArrowDownRight,
   stop: SFStopFill,
+  stopwatch: SFStopwatch,
   speaker: SFSpeakerWave2,
   speakerMute: SFSpeakerSlash,
   star: SFStar,
@@ -209,6 +216,11 @@ const GLYPHS: Record<IconName, SFComp> = {
   keyboard: SFKeyboard,
   briefcase: SFBriefcase,
   bills: SFDocumentBadgeClock,
+  games: SFGamecontroller,
+  wordGame: SFTextformat,
+  quiz: SFQuestionmarkCircle,
+  sudoku: SFSquareGrid3x3,
+  baghChal: SFPawprint,
 };
 
 export type IconName =
@@ -268,6 +280,7 @@ export type IconName =
   | "shrink"
   | "expand"
   | "stop"
+  | "stopwatch"
   | "speaker"
   | "speakerMute"
   | "star"
@@ -314,7 +327,12 @@ export type IconName =
   | "heading"
   | "keyboard"
   | "briefcase"
-  | "bills";
+  | "bills"
+  | "games"
+  | "wordGame"
+  | "quiz"
+  | "sudoku"
+  | "baghChal";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

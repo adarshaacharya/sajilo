@@ -86,6 +86,7 @@ pub const NOTES_ENABLED: &str = "notesEnabled";
 pub const TOOLS_ENABLED: &str = "toolsEnabled";
 pub const JOBS_ENABLED: &str = "jobsEnabled";
 pub const BILLS_ENABLED: &str = "billsEnabled";
+pub const GAMES_ENABLED: &str = "gamesEnabled";
 /// Vacancy ids already shown on the Jobs screen, so only later ones are new.
 pub const JOBS_SEEN: &str = "jobsSeen";
 /// The NEA account whose bill is checked: office, SC number, consumer id.

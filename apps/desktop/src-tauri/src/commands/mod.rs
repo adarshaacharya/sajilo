@@ -10,6 +10,7 @@ pub mod electricity;
 pub mod external;
 pub mod focus;
 pub mod forex;
+pub mod games;
 pub mod internet;
 pub mod ipos;
 pub mod jobs;

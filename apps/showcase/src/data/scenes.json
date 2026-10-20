@@ -12,6 +12,157 @@
       "weekday": 3,
       "weeklyHoliday": null
     },
+    "bagh_get": {
+      "game": {
+        "captured": 2,
+        "goatsInHand": 17,
+        "last": {
+          "capture": 6,
+          "from": 0,
+          "to": 12
+        },
+        "level": "easy",
+        "moves": [
+          {
+            "capture": null,
+            "from": null,
+            "to": 0
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 1
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 2
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 3
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 4
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 5
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 6
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 7
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 9
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 10
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 11
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 13
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 14
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 15
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 17
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 18
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 19
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 21
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 22
+          },
+          {
+            "capture": null,
+            "from": null,
+            "to": 23
+          }
+        ],
+        "outcome": null,
+        "player": "goat",
+        "points": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          "goat",
+          null,
+          null,
+          null,
+          "tiger",
+          null,
+          null,
+          null,
+          "tiger",
+          null,
+          null,
+          null,
+          "tiger",
+          null,
+          null,
+          null,
+          "tiger"
+        ],
+        "turn": "goat"
+      },
+      "stats": {
+        "draws": 0,
+        "lostAsGoats": 0,
+        "lostAsTigers": 0,
+        "wonAsGoats": 0,
+        "wonAsTigers": 0
+      }
+    },
     "bs_to_ad": {
       "englishMonthName": "Bhadra",
       "gregorian": "2026-08-26",
@@ -37137,6 +37288,7 @@
       }
     },
     "get_notification_options": {
+      "dailyQuiz": true,
       "dailyRashifal": false,
       "dayPlans": true,
       "eveOfFestival": true,
@@ -86500,7 +86652,71 @@
     "pending_notifications": [],
     "plan_days": [],
     "plans_for_day": [],
+    "quiz_get": {
+      "finished": false,
+      "inRound": false,
+      "question": null,
+      "roundTotal": 0,
+      "score": 0,
+      "stats": {
+        "answered": 0,
+        "bestRound": 0,
+        "correct": 0,
+        "rounds": 0
+      },
+      "topic": null,
+      "topics": [
+        {
+          "category": "nepal",
+          "total": 103,
+          "unseen": 103
+        },
+        {
+          "category": "civics",
+          "total": 31,
+          "unseen": 31
+        },
+        {
+          "category": "geography",
+          "total": 183,
+          "unseen": 183
+        },
+        {
+          "category": "calendar",
+          "total": 26,
+          "unseen": 26
+        },
+        {
+          "category": "units",
+          "total": 11,
+          "unseen": 11
+        }
+      ]
+    },
     "request_notification_permission": "unknown",
+    "shabda_today": {
+      "answer": null,
+      "length": 3,
+      "maxGuesses": 6,
+      "number": 1,
+      "rows": [],
+      "share": null,
+      "stats": {
+        "bestStreak": 0,
+        "distribution": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "played": 0,
+        "streak": 0,
+        "won": 0
+      },
+      "status": "playing"
+    },
     "shift_month:2083:5:-1": {
       "day": 1,
       "month": 4,
@@ -86517,6 +86733,131 @@
       "year": 2083
     },
     "station_stream": null,
+    "sudoku_get": {
+      "game": {
+        "cells": [
+          6,
+          0,
+          4,
+          2,
+          0,
+          0,
+          0,
+          5,
+          0,
+          4,
+          6,
+          0,
+          5,
+          0,
+          0,
+          6,
+          0,
+          2,
+          1,
+          2,
+          0,
+          3,
+          0,
+          4,
+          4,
+          0,
+          5,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          6
+        ],
+        "conflicts": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "givens": [
+          6,
+          0,
+          4,
+          2,
+          0,
+          0,
+          0,
+          5,
+          0,
+          4,
+          6,
+          0,
+          5,
+          0,
+          0,
+          6,
+          0,
+          2,
+          1,
+          2,
+          0,
+          3,
+          0,
+          4,
+          4,
+          0,
+          5,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          6
+        ],
+        "level": "easy",
+        "solvedIn": null,
+        "startedAt": "2026-08-26T14:20:00Z"
+      },
+      "stats": {
+        "bestSeconds": [],
+        "solved": []
+      }
+    },
     "supported_range": {
       "firstEventYear": 2066,
       "firstYear": 1992,

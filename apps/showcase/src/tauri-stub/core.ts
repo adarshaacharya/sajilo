@@ -132,7 +132,7 @@ const WRITES = new Set([
  * fresh as it was when recorded, and the one below it is still the hour older
  * that it really is.
  */
-const INSTANT_FIELDS = new Set(["published", "fetchedAt", "sourceTimestamp"]);
+const INSTANT_FIELDS = new Set(["published", "fetchedAt", "sourceTimestamp", "startedAt"]);
 
 function shift(value: unknown, drift: number): unknown {
   if (Array.isArray(value)) return value.map((item) => shift(item, drift));

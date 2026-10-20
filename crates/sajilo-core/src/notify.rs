@@ -79,6 +79,10 @@ pub struct NotificationOptions {
     pub sajilo_tips: bool,
     #[serde(default)]
     pub sajilo_asks: bool,
+    /// One quiz question a day, on a card. On for everyone; Games › Quiz
+    /// and Settings turn it off.
+    #[serde(default = "enabled_by_default")]
+    pub daily_quiz: bool,
     /// The night, when nothing chimes. On by default: people were woken by
     /// reminders that waited for the computer to wake.
     #[serde(default)]
@@ -177,6 +181,7 @@ impl Default for NotificationOptions {
             sajilo_updates: enabled_by_default(),
             sajilo_tips: false,
             sajilo_asks: false,
+            daily_quiz: enabled_by_default(),
             quiet: QuietHours::default(),
         }
     }
@@ -226,6 +231,8 @@ pub enum ReminderKind {
     Rashifal,
     /// An announcement from Sajilo, popped up because its delivery asks to.
     Announcement,
+    /// The quiz's question of the day, answered on the card.
+    Quiz,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.

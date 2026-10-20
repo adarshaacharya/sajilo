@@ -15,7 +15,9 @@ pub mod directory;
 pub mod flags;
 pub mod jokes;
 pub mod kalimati;
+pub mod quiz;
 pub mod sources;
+pub mod words;
 
 use std::sync::{Arc, OnceLock, RwLock};
 

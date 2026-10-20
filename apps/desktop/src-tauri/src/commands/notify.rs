@@ -108,6 +108,10 @@ pub fn pending(app: &AppHandle<Wry>) -> Vec<PlannedNotification> {
         ));
         all.extend(crate::commands::internet::pending_notifications(app, now));
     }
+    // The quiz's question of the day, while Games is on.
+    if options.daily_quiz && crate::background_refresh::enabled(app, prefs::GAMES_ENABLED) {
+        all.extend(crate::commands::games::pending_notifications(app, now));
+    }
     // Allotments live in Bazar, beside the IPOs they came from.
     if crate::background_refresh::enabled(app, prefs::BAZAR_ENABLED) {
         all.extend(crate::commands::boid::pending_notifications(app, now));

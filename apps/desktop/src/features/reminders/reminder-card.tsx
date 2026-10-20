@@ -9,7 +9,9 @@ import {
 } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
+import type { QuizDaily } from "../../types/api/QuizDaily";
 import { useSentenceNumerals } from "../focus/_lib/format";
+import { DailyQuestion } from "../games/daily-question";
 
 const ICONS: Record<ReminderKind, IconName> = {
   plan: "calendar",
@@ -20,6 +22,7 @@ const ICONS: Record<ReminderKind, IconName> = {
   keeper: "keeper",
   rashifal: "rashifal",
   announcement: "bell",
+  quiz: "quiz",
 };
 
 /** Where "Open" takes the popover for each kind of reminder. */
@@ -32,6 +35,7 @@ const ROUTES: Record<ReminderKind, string> = {
   keeper: "/keeper",
   rashifal: "/rashifal",
   announcement: "/",
+  quiz: "/games?open=quiz",
 };
 
 /** Keeper's kind is shared by the bills, the documents and share allotments,
@@ -52,6 +56,7 @@ const KIND_LABELS = {
   keeper: "reminder.kind.keeper",
   rashifal: "reminder.kind.rashifal",
   announcement: "reminder.kind.announcement",
+  quiz: "reminder.kind.quiz",
 } as const satisfies Record<ReminderKind, string>;
 
 /** Festival and holiday titles are ours, so they follow the language; the
@@ -73,6 +78,7 @@ const SWITCHES: Record<Exclude<ReminderKind, "announcement">, keyof Notification
   sip: "sipPayment",
   keeper: "keeper",
   rashifal: "dailyRashifal",
+  quiz: "dailyQuiz",
 };
 
 const TURN_OFF_LABELS = {
@@ -83,6 +89,7 @@ const TURN_OFF_LABELS = {
   sip: "reminder.off.sip",
   keeper: "reminder.off.keeper",
   rashifal: "reminder.off.rashifal",
+  quiz: "reminder.off.quiz",
   notice: "reminder.off.notice",
   greeting: "reminder.off.greeting",
   update: "reminder.off.update",
@@ -129,6 +136,8 @@ export function ReminderCard() {
   // The ⋯ choices replace the buttons in place: the card is its own small
   // window, sized to fit, so a dropdown would be cut off.
   const [options, setOptions] = useState(false);
+  const [quizDone, setQuizDone] = useState(false);
+  const markQuizDone = useCallback(() => setQuizDone(true), []);
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   useFitWindow(element);
 
@@ -163,6 +172,10 @@ export function ReminderCard() {
   // Shakes as it arrives and once more if still waiting, like the break card.
   const [shakes, setShakes] = useState(0);
   const id = view?.reminder.id;
+  // A new card has not been answered yet.
+  useEffect(() => {
+    if (id) setQuizDone(false);
+  }, [id]);
   useEffect(() => {
     if (!id) return;
     const timer = window.setTimeout(() => setShakes((count) => count + 1), NUDGE_MS);
@@ -171,13 +184,20 @@ export function ReminderCard() {
 
   if (!view) return null;
   const { reminder } = view;
+  const quiz = reminder.kind === "quiz";
   const titleKey =
     reminder.kind === "festival" || reminder.kind === "holiday"
       ? TRANSLATED_TITLES[reminder.kind]
       : null;
 
-  // The reading is the point of this card, so its button says so.
-  const openLabel = reminder.kind === "rashifal" ? "reminder.read" : "reminder.open";
+  // The reading is the point of this card, so its button says so; the
+  // quiz's leads on to more questions.
+  const openLabel =
+    reminder.kind === "rashifal"
+      ? "reminder.read"
+      : reminder.kind === "quiz"
+        ? "quiz.daily.more"
+        : "reminder.open";
 
   /** Closes the card, opening the popover at `route` if given. */
   const close = (route: string | null) => {
@@ -216,17 +236,24 @@ export function ReminderCard() {
           {/* A festival or holiday title already says what it is. */}
           {(!titleKey || view.preview) && (
             <p className="break-card__eyebrow" data-tauri-drag-region>
-              {!titleKey && t(KIND_LABELS[reminder.kind])}
+              {!titleKey && (quiz ? reminder.title : t(KIND_LABELS[reminder.kind]))}
               {view.preview && <span className="break-card__example">{t("break.example")}</span>}
             </p>
           )}
-          <p className="break-card__title" data-tauri-drag-region>
-            {titleKey ? t(titleKey) : reminder.title}
-          </p>
-          {reminder.body && (
-            <p className="break-card__body" data-tauri-drag-region>
-              {reminder.body}
+          {/* The question is the quiz card's title; its label says what it is. */}
+          {!quiz && (
+            <p className="break-card__title" data-tauri-drag-region>
+              {titleKey ? t(titleKey) : reminder.title}
             </p>
+          )}
+          {quiz ? (
+            <CardQuestion fallback={reminder.body} onAnswered={markQuizDone} t={t} />
+          ) : (
+            reminder.body && (
+              <p className="break-card__body" data-tauri-drag-region>
+                {reminder.body}
+              </p>
+            )
           )}
         </div>
         <button
@@ -261,24 +288,85 @@ export function ReminderCard() {
               </span>
             )}
           </span>
-          <button
-            type="button"
-            onClick={() => dismiss(true)}
-            disabled={busy}
-            className="break-card__button break-card__button--quiet"
-          >
-            {t(openLabel)}
-          </button>
-          <button
-            type="button"
-            onClick={() => dismiss(false)}
-            disabled={busy}
-            className="break-card__button break-card__button--main"
-          >
-            {t("reminder.dismiss")}
-          </button>
+          {quiz && !quizDone ? (
+            // Unanswered, there is only one thing to do instead: not now.
+            <button
+              type="button"
+              onClick={() => dismiss(false)}
+              disabled={busy}
+              className="break-card__button break-card__button--quiet"
+            >
+              {t("quiz.daily.skip")}
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => dismiss(true)}
+                disabled={busy}
+                className="break-card__button break-card__button--quiet"
+              >
+                {t(openLabel)}
+              </button>
+              <button
+                type="button"
+                onClick={() => dismiss(false)}
+                disabled={busy}
+                className="break-card__button break-card__button--main"
+              >
+                {t(quiz ? "quiz.daily.done" : "reminder.dismiss")}
+              </button>
+            </>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+/** The question of the day, answered on the card itself. The question
+ * text stands alone if the quiz can't be read. */
+function CardQuestion({
+  fallback,
+  onAnswered,
+  t,
+}: {
+  fallback: string;
+  onAnswered: () => void;
+  t: ReturnType<typeof useSettings>["t"];
+}) {
+  const [daily, setDaily] = useState<QuizDaily | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    api
+      .quizDaily()
+      .then((today) => {
+        setDaily(today);
+        if (today?.chosen != null) onAnswered();
+      })
+      .catch(() => {});
+  }, [onAnswered]);
+  if (!daily) {
+    return <p className="break-card__body">{fallback}</p>;
+  }
+  return (
+    <div className="mt-1">
+      <DailyQuestion
+        daily={daily}
+        busy={busy}
+        onAnswer={(place) => {
+          setBusy(true);
+          api
+            .quizDailyAnswer(place)
+            .then((next) => {
+              setDaily(next);
+              onAnswered();
+            })
+            .catch(() => {})
+            .finally(() => setBusy(false));
+        }}
+        t={t}
+      />
     </div>
   );
 }

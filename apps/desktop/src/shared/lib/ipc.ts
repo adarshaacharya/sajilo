@@ -1,5 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { AnnouncementResponse } from "../../types/api/AnnouncementResponse";
+import type { BaghLevel } from "../../types/api/BaghLevel";
+import type { BaghPiece } from "../../types/api/BaghPiece";
+import type { BaghView } from "../../types/api/BaghView";
 import type { BoidAccount } from "../../types/api/BoidAccount";
 import type { BoidReport } from "../../types/api/BoidReport";
 import type { CryptoChart } from "../../types/api/CryptoChart";
@@ -35,10 +38,14 @@ import type { NoteSearchHit } from "../../types/api/NoteSearchHit";
 import type { NotesList } from "../../types/api/NotesList";
 import type { NoteTrashed } from "../../types/api/NoteTrashed";
 import type { Place } from "../../types/api/Place";
+import type { QuizCategory } from "../../types/api/QuizCategory";
+import type { QuizDaily } from "../../types/api/QuizDaily";
+import type { QuizView } from "../../types/api/QuizView";
 import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalPeriod } from "../../types/api/RashifalPeriod";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RemoteConfigStatus } from "../../types/api/RemoteConfigStatus";
+import type { ShabdaView } from "../../types/api/ShabdaView";
 import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
 import type { StockChart } from "../../types/api/StockChart";
@@ -48,6 +55,8 @@ import type { StockPortfolio } from "../../types/api/StockPortfolio";
 import type { StockPrice } from "../../types/api/StockPrice";
 import type { StockTradeEstimate } from "../../types/api/StockTradeEstimate";
 import type { StockTransactionKind } from "../../types/api/StockTransactionKind";
+import type { SudokuLevel } from "../../types/api/SudokuLevel";
+import type { SudokuView } from "../../types/api/SudokuView";
 import type { VegetableMarketSnapshot } from "../../types/api/VegetableMarketSnapshot";
 import type { WeatherSnapshot } from "../../types/api/WeatherSnapshot";
 import type { WorldLinkAccount } from "../../types/api/WorldLinkAccount";
@@ -682,6 +691,8 @@ export interface NotificationOptions {
   sajiloUpdates: boolean;
   sajiloTips: boolean;
   sajiloAsks: boolean;
+  /** The quiz's question of the day, on a card. On by default. */
+  dailyQuiz: boolean;
   /** Nothing arrives before this (ISO time); what comes due meanwhile is let go. */
   pausedUntil: string | null;
   /** The night, on this computer's clock: what comes due waits for the morning. */
@@ -704,7 +715,8 @@ export type ReminderKind =
   | "sip"
   | "keeper"
   | "rashifal"
-  | "announcement";
+  | "announcement"
+  | "quiz";
 
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {
@@ -973,6 +985,34 @@ export const api = {
     invoke<WorldLinkAccount[]>("remove_worldlink_account", { username }),
   /** Every saved WorldLink account, each with its own load state. */
   getInternet: (refresh = false) => invoke<InternetAccount[]>("get_internet", { refresh }),
+
+  /** Today's word puzzle, with any guesses already made. */
+  shabdaToday: () => invoke<ShabdaView>("shabda_today"),
+  /** What typed text reads as, letter by letter ("kalam" → क, ल, म). */
+  shabdaLetters: (text: string) => invoke<string[]>("shabda_letters", { text }),
+  /** Plays a guess; rejects with a readable reason. */
+  shabdaGuess: (text: string) => invoke<ShabdaView>("shabda_guess", { text }),
+
+  quizGet: () => invoke<QuizView>("quiz_get"),
+  /** A round of ten from one topic, or `null` for all. */
+  quizStart: (topic: QuizCategory | null) => invoke<QuizView>("quiz_start", { topic }),
+  quizAnswer: (place: number) => invoke<QuizView>("quiz_answer", { place }),
+  quizNext: () => invoke<QuizView>("quiz_next"),
+  quizQuit: () => invoke<QuizView>("quiz_quit"),
+  /** Today's question of the day; null when the quiz has none. */
+  quizDaily: () => invoke<QuizDaily | null>("quiz_daily"),
+  quizDailyAnswer: (place: number) => invoke<QuizDaily | null>("quiz_daily_answer", { place }),
+  quizDailyEnable: (enabled: boolean) => invoke<void>("quiz_daily_enable", { enabled }),
+
+  sudokuGet: () => invoke<SudokuView>("sudoku_get"),
+  sudokuNew: (level: SudokuLevel) => invoke<SudokuView>("sudoku_new", { level }),
+  /** Puts `digit` in `cell` (0–35), 0 to clear. */
+  sudokuSet: (cell: number, digit: number) => invoke<SudokuView>("sudoku_set", { cell, digit }),
+
+  baghGet: () => invoke<BaghView>("bagh_get"),
+  baghNew: (player: BaghPiece, level: BaghLevel) => invoke<BaghView>("bagh_new", { player, level }),
+  /** The player's move (`from` null to place a goat) and the computer's answer. */
+  baghPlay: (from: number | null, to: number) => invoke<BaghView>("bagh_play", { from, to }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

@@ -10,6 +10,7 @@ import { Events } from "./features/calendar/events";
 import { MiniView } from "./features/calendar/mini-view";
 import { BreakCard } from "./features/focus/break-card";
 import { Focus } from "./features/focus/focus";
+import { Games } from "./features/games/games";
 import { Jobs } from "./features/jobs/jobs";
 import { Keeper } from "./features/keeper/keeper";
 import { PhotoViewer } from "./features/keeper/photo-viewer";
@@ -62,6 +63,7 @@ const ROUTES = [
   { path: "/keeper", titleKey: "screen.keeper", element: <Keeper /> },
   { path: "/jobs", titleKey: "screen.jobs", element: <Jobs /> },
   { path: "/bills", titleKey: "screen.bills", element: <Bills /> },
+  { path: "/games", titleKey: "screen.games", element: <Games /> },
   { path: "/more", titleKey: "screen.more", element: <More /> },
   { path: "/settings", titleKey: "screen.settings", element: <Settings /> },
   {

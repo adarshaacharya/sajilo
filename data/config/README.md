@@ -15,6 +15,7 @@ up within about an hour. Nothing else changes a remote value.
 | `flags.json` | Kill switches: pause a remote module (`news`) or one feed (`bazar.fuel`), with the reason shown | `sajilo_core::config::flags::FlagsPack` |
 | `sources.json` | URL prefix rewrites for a source that moved | `sajilo_core::config::sources::SourcesPack` |
 | `kalimati.json` | English names for Kalimati's Nepali produce names | `sajilo_core::config::kalimati::KalimatiPack` |
+| `words.json` | The daily word puzzle's answers (शब्द), played in order | `sajilo_core::config::words::WordsPack` |
 | `calendar.json` | The Sunday-holiday rule; per-day festival and holiday corrections | `sajilo_core::config::calendar::CalendarPack` |
 | `calendar-years.json` | Festival data for years after the bundled range (up to two years, same shape as `data/calendar-events/`) | `sajilo_core::config::calendar_years::CalendarYearsPack` |
 | `news-sources.json` | Extra newsrooms: any site with an RSS or Atom feed (up to 20) | `sajilo_api::news::NewsSourcesPack` |

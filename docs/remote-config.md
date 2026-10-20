@@ -264,6 +264,19 @@ cheers after a break (`eyes`, `move`, `water`, and `any`).
 - Keep the voice: Kathmandu-specific, about the day at the desk, never about
   anyone's family.
 
+### Add or fix puzzle words
+
+`words.json`: `answers` is the daily word puzzle's list, played in order:
+puzzle #1 (2 Kartik 2083) is the first word, #2 the next, round again at
+the end. Everyone gets the same word on the same Nepali day.
+
+- Every word exactly 3 letters (aksharas): कि, क्ष and न्त each count as
+  one. `check` refuses any other length.
+- Common words people know; no names, nothing rude, no duplicates.
+- Add new words at the **end**. Inserting or removing in the middle shifts
+  which word every later day gets, including today's for people mid-game.
+- A misspelt word can be corrected in place.
+
 ---
 
 ## Yearly: next year's festivals

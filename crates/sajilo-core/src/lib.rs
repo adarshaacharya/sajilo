@@ -10,6 +10,7 @@ pub mod config;
 pub mod electricity;
 pub mod error;
 pub mod focus;
+pub mod games;
 pub mod internet;
 pub mod limits;
 pub mod nepal_time;

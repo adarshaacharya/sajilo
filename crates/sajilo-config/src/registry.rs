@@ -9,7 +9,9 @@ use sajilo_core::config::directory::DirectoryPack;
 use sajilo_core::config::flags::FlagsPack;
 use sajilo_core::config::jokes::JokesPack;
 use sajilo_core::config::kalimati::KalimatiPack;
+use sajilo_core::config::quiz::QuizPack;
 use sajilo_core::config::sources::SourcesPack;
+use sajilo_core::config::words::WordsPack;
 use sajilo_core::config::{Pack, PackError};
 
 pub struct PackInfo {
@@ -38,7 +40,7 @@ const fn info<T: Pack + serde::Serialize>() -> PackInfo {
     }
 }
 
-static PACKS: [PackInfo; 10] = [
+static PACKS: [PackInfo; 12] = [
     info::<AnnouncementsPack>(),
     info::<CalendarPack>(),
     info::<CalendarYearsPack>(),
@@ -46,6 +48,8 @@ static PACKS: [PackInfo; 10] = [
     info::<FlagsPack>(),
     info::<JokesPack>(),
     info::<KalimatiPack>(),
+    info::<WordsPack>(),
+    info::<QuizPack>(),
     info::<NewsSourcesPack>(),
     info::<RadioPack>(),
     info::<SourcesPack>(),

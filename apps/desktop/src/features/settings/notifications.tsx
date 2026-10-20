@@ -34,6 +34,7 @@ type Source = keyof Pick<
   | "sajiloUpdates"
   | "sajiloTips"
   | "sajiloAsks"
+  | "dailyQuiz"
 >;
 
 const GROUPS: {
@@ -75,6 +76,7 @@ const GROUPS: {
         whenKey: "notifications.when.plans",
       },
       { source: "keeper", labelKey: "notifications.keeper", whenKey: "notifications.when.keeper" },
+      { source: "dailyQuiz", labelKey: "quiz.daily.title", whenKey: "notifications.when.quiz" },
     ],
   },
   {

@@ -521,6 +521,7 @@ fn modules(commands: &mut BTreeMap<String, Value>, root: &Path, now: DateTime<Ut
     record_forex(commands, &read, now);
     record_rashifal(commands, &read, now);
     record_jobs(commands, &read, now);
+    record_games(commands, now);
     record_electricity(commands, &read);
     commands.insert(
         "get_stations".to_owned(),
@@ -712,6 +713,65 @@ fn record_forex(
 /// Every Jobs source from its recorded page, through the same parsers the app
 /// ships, served as of the recording day. Lok Sewa's recording is the
 /// central office over two pages, and Pokhara's from the year before.
+/// The word puzzle as a first-time player sees it on the recording day: the
+/// real day's puzzle number, no guesses, and no answer shown.
+fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
+    use sajilo_core::config::Pack;
+    use sajilo_core::config::words::WordsPack;
+    use sajilo_core::games::shabda::{self, ShabdaState};
+
+    let today = sajilo_core::calendar::bikram_sambat::nepali_date_from(now.date_naive())
+        .expect("the recording day is in the BS table");
+    let number = shabda::number(today).unwrap_or(1);
+    let words = WordsPack::active();
+    let answer = shabda::answer(number, &words.answers).expect("the words pack is never empty");
+    let mut state = ShabdaState::default();
+    state.open(today);
+    insert(
+        commands,
+        "shabda_today",
+        &sajilo_api::games::shabda_view(&state, today, number, answer),
+    );
+    insert(
+        commands,
+        "quiz_get",
+        &sajilo_api::games::quiz_view(
+            &sajilo_core::games::quiz::QuizState::default(),
+            &sajilo_core::config::quiz::QuizPack::active(),
+            false,
+        ),
+    );
+    // A puzzle and a board in play, made by the engines from fixed seeds.
+    use sajilo_core::games::{bagh_chal, sudoku};
+    let sudoku_state = sudoku::SudokuState {
+        game: Some(sudoku::SudokuGame::new(
+            sudoku::SudokuLevel::Easy,
+            2083,
+            now,
+        )),
+        stats: sudoku::SudokuStats::default(),
+    };
+    insert(
+        commands,
+        "sudoku_get",
+        &sajilo_api::games::sudoku_view(&sudoku_state),
+    );
+    let mut bagh =
+        bagh_chal::BaghGame::new(bagh_chal::BaghPiece::Goat, bagh_chal::BaghLevel::Easy, 7);
+    for to in [12, 6, 8] {
+        bagh.play(None, to);
+    }
+    let bagh_state = bagh_chal::BaghState {
+        game: Some(bagh),
+        stats: bagh_chal::BaghStats::default(),
+    };
+    insert(
+        commands,
+        "bagh_get",
+        &sajilo_api::games::bagh_view(&bagh_state),
+    );
+}
+
 fn record_jobs(
     commands: &mut BTreeMap<String, Value>,
     read: &dyn Fn(&str) -> String,
