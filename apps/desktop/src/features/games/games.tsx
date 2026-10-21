@@ -6,14 +6,14 @@ import { useSettings } from "../../shared/context/settings-context";
 import { track } from "../../shared/lib/usage";
 import { BaghChal } from "./_components/bagh-chal";
 import { Katakuti } from "./_components/katakuti";
+import { type Game, Lobby } from "./_components/lobby";
 import { Quiz } from "./_components/quiz";
 import { SaapSidhi } from "./_components/saap-sidhi";
 import { Shabda } from "./_components/shabda";
 import { Sudoku } from "./_components/sudoku";
 import { useBagh, useKata, useQuiz, useSaap, useShabda, useSudoku } from "./games-data";
 
-type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap";
-const GAMES: Game[] = ["shabda", "quiz", "sudoku", "bagh", "kata", "saap"];
+const GAMES: Game[] = ["kata", "saap", "quiz", "shabda", "sudoku", "bagh"];
 const TITLES = {
   shabda: "shabda.title",
   quiz: "quiz.title",
@@ -22,6 +22,16 @@ const TITLES = {
   kata: "kata.title",
   saap: "saap.title",
 } as const satisfies Record<Game, string>;
+
+/** Each game's start-screen icon and one-line description. */
+const LOBBY = {
+  kata: { icon: "katakuti", about: "kata.card" },
+  saap: { icon: "saapSidhi", about: "saap.card" },
+  quiz: { icon: "quiz", about: "quiz.card" },
+  shabda: { icon: "wordGame", about: "shabda.card" },
+  sudoku: { icon: "sudoku", about: "sudoku.card" },
+  bagh: { icon: "baghChal", about: "bagh.card" },
+} as const satisfies Record<Game, { icon: IconName; about: string }>;
 
 /**
  * Short games, each a few minutes: a break from the screen's other work,
@@ -34,11 +44,38 @@ export function Games() {
     const linked = new URLSearchParams(search).get("open");
     return GAMES.find((game) => game === linked) ?? null;
   });
+  // A game opens on its start screen; a link straight to one (the daily
+  // question's "More") goes on into it.
+  const [playing, setPlaying] = useState(() => open !== null);
   useEffect(() => {
     if (open) track(`tab.games.${open}`);
   }, [open]);
-  useHeaderInner(open ? { title: t(TITLES[open]), onBack: () => setOpen(null) } : null);
+  const choose = (game: Game) => {
+    setPlaying(false);
+    setOpen(game);
+  };
+  useHeaderInner(
+    open
+      ? {
+          title: t(TITLES[open]),
+          // Back from a game is its start screen; back again, the list.
+          onBack: () => (playing ? setPlaying(false) : setOpen(null)),
+        }
+      : null,
+  );
 
+  if (open && !playing) {
+    return (
+      <Lobby
+        game={open}
+        icon={LOBBY[open].icon}
+        title={t(TITLES[open])}
+        about={t(LOBBY[open].about)}
+        onPlay={() => setPlaying(true)}
+        t={t}
+      />
+    );
+  }
   if (open === "shabda") return <Shabda t={t} />;
   if (open === "quiz") return <Quiz t={t} />;
   if (open === "sudoku") return <Sudoku t={t} />;
@@ -48,12 +85,12 @@ export function Games() {
 
   return (
     <div className="space-y-2.5">
-      <ShabdaCard onOpen={() => setOpen("shabda")} t={t} />
-      <QuizCard onOpen={() => setOpen("quiz")} t={t} />
-      <SudokuCard onOpen={() => setOpen("sudoku")} t={t} />
-      <BaghCard onOpen={() => setOpen("bagh")} t={t} />
-      <KataCard onOpen={() => setOpen("kata")} t={t} />
-      <SaapCard onOpen={() => setOpen("saap")} t={t} />
+      <KataCard onOpen={() => choose("kata")} t={t} />
+      <SaapCard onOpen={() => choose("saap")} t={t} />
+      <QuizCard onOpen={() => choose("quiz")} t={t} />
+      <ShabdaCard onOpen={() => choose("shabda")} t={t} />
+      <SudokuCard onOpen={() => choose("sudoku")} t={t} />
+      <BaghCard onOpen={() => choose("bagh")} t={t} />
       <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">{t("games.note")}</p>
     </div>
   );

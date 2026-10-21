@@ -7,7 +7,7 @@ import type { KataMark } from "../../../types/api/KataMark";
 import type { KataOutcome } from "../../../types/api/KataOutcome";
 import type { KataView } from "../../../types/api/KataView";
 import { useKata } from "../games-data";
-import { StatTiles } from "./stat-tiles";
+import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -38,6 +38,8 @@ export function Katakuti({ t }: { t: TFn }) {
   const { data, mutate } = useKata();
   const [pending, setPending] = useState<number | null>(null);
   const [level, setLevel] = useState<KataLevel | null>(null);
+  // The result popup, until "See board" folds it.
+  const [closed, setClosed] = useState(false);
 
   if (!data) return null;
   const game = data.game;
@@ -45,6 +47,7 @@ export function Katakuti({ t }: { t: TFn }) {
 
   const start = async (next: KataLevel) => {
     setLevel(next);
+    setClosed(false);
     await mutate(await api.kataNew(next), { revalidate: false });
   };
   const play = async (cell: number) => {
@@ -99,6 +102,31 @@ export function Katakuti({ t }: { t: TFn }) {
         {game.line && <Strike line={game.line} />}
       </div>
 
+      {over && game.outcome && !closed && pending === null && (
+        <GameOver
+          result={game.outcome === "won" ? "won" : game.outcome === "draw" ? "draw" : "lost"}
+          title={t(OUTCOME_KEYS[game.outcome])}
+          detail={t(LEVEL_KEYS[game.level])}
+          stats={[
+            {
+              value: String(data.stats.won[LEVELS.indexOf(game.level)] ?? 0),
+              label: t("kata.stat.won"),
+            },
+            {
+              value: String(data.stats.drawn[LEVELS.indexOf(game.level)] ?? 0),
+              label: t("kata.stat.drawn"),
+            },
+            {
+              value: String(data.stats.lost[LEVELS.indexOf(game.level)] ?? 0),
+              label: t("kata.stat.lost"),
+            },
+          ]}
+          againLabel={t("kata.again")}
+          onAgain={() => void start(chosen)}
+          closeLabel={t("games.see-board")}
+          onClose={() => setClosed(true)}
+        />
+      )}
       {over ? (
         <section className="surface-card space-y-2.5 p-3">
           <LevelChips level={chosen} onLevel={setLevel} t={t} />
@@ -192,20 +220,8 @@ function Start({
   onStart: (level: KataLevel) => Promise<void>;
   t: TFn;
 }) {
-  const sum = (list: number[]) => list.reduce((total, n) => total + n, 0);
-  const { stats } = view;
-  const played = sum(stats.won) + sum(stats.drawn) + sum(stats.lost);
   return (
     <div className="space-y-2.5">
-      {played > 0 && (
-        <StatTiles
-          stats={[
-            { value: String(sum(stats.won)), label: t("kata.stat.won") },
-            { value: String(sum(stats.drawn)), label: t("kata.stat.drawn") },
-            { value: String(sum(stats.lost)), label: t("kata.stat.lost") },
-          ]}
-        />
-      )}
       <section className="surface-card space-y-3 p-3">
         <div>
           <p className="text-[14px] font-semibold">{t("kata.title")}</p>

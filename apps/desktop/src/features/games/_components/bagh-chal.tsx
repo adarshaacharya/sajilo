@@ -5,7 +5,7 @@ import type { BaghLevel } from "../../../types/api/BaghLevel";
 import type { BaghPiece } from "../../../types/api/BaghPiece";
 import type { BaghView } from "../../../types/api/BaghView";
 import { useBagh } from "../games-data";
-import { StatTiles } from "./stat-tiles";
+import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -42,6 +42,9 @@ export function BaghChal({ t }: { t: TFn }) {
   const { data, mutate } = useBagh();
   const [from, setFrom] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
+  // The result popup over the final board, until it is folded; then the
+  // setup to play again.
+  const [closed, setClosed] = useState(false);
   if (!data) return null;
   const game = data.game;
 
@@ -56,15 +59,21 @@ export function BaghChal({ t }: { t: TFn }) {
     }
   };
 
-  if (!game || game.outcome) {
-    return (
-      <Start
-        view={data}
-        onStart={(player, level) => void apply(api.baghNew(player, level))}
-        t={t}
-      />
-    );
+  const startNew = (player: BaghPiece, level: BaghLevel) => {
+    setClosed(false);
+    void apply(api.baghNew(player, level));
+  };
+  if (!game || (game.outcome && closed)) {
+    return <Start view={data} onStart={startNew} t={t} />;
   }
+  const result = !game.outcome
+    ? null
+    : game.outcome === "draw"
+      ? "draw"
+      : (game.outcome === "goatsWin") === (game.player === "goat")
+        ? "won"
+        : "lost";
+  const { stats } = data;
 
   const placing = game.moves.some((move) => move.from === null);
   const movable = new Set(game.moves.flatMap((move) => (move.from === null ? [] : [move.from])));
@@ -150,6 +159,24 @@ export function BaghChal({ t }: { t: TFn }) {
       <p className="px-0.5 text-center text-[10.5px] text-text-muted">
         {game.player === "goat" ? t("bagh.goal-goat") : t("bagh.goal-tiger")}
       </p>
+
+      {result && (
+        <GameOver
+          result={result}
+          title={t(result === "won" ? "bagh.won" : result === "draw" ? "bagh.draw" : "bagh.lost")}
+          detail={t(LEVEL_KEYS[game.level])}
+          stats={[
+            { value: String(stats.wonAsGoats + stats.wonAsTigers), label: t("bagh.stat.won") },
+            { value: `${stats.wonAsGoats}–${stats.lostAsGoats}`, label: t("bagh.stat.goats") },
+            { value: `${stats.wonAsTigers}–${stats.lostAsTigers}`, label: t("bagh.stat.tigers") },
+          ]}
+          againLabel={t("bagh.again")}
+          onAgain={() => startNew(game.player, game.level)}
+          closeLabel={t("games.see-board")}
+          onClose={() => setClosed(true)}
+          busy={busy}
+        />
+      )}
     </div>
   );
 }
@@ -171,21 +198,8 @@ function Start({
     ((outcome === "goatsWin" && view.game?.player === "goat") ||
       (outcome === "tigersWin" && view.game?.player === "tiger"));
   const { stats } = view;
-  const wins = stats.wonAsGoats + stats.wonAsTigers;
-  const played = wins + stats.lostAsGoats + stats.lostAsTigers + stats.draws;
-
   return (
     <div className="space-y-2.5">
-      {played > 0 && (
-        <StatTiles
-          stats={[
-            { value: `${wins}/${played}`, label: t("bagh.stat.won") },
-            { value: `${stats.wonAsGoats}–${stats.lostAsGoats}`, label: t("bagh.stat.goats") },
-            { value: `${stats.wonAsTigers}–${stats.lostAsTigers}`, label: t("bagh.stat.tigers") },
-            { value: String(stats.draws), label: t("bagh.stat.draws") },
-          ]}
-        />
-      )}
       {outcome && (
         <section className="surface-card p-3 text-center">
           <p className="text-[24px]">{outcome === "draw" ? "🤝" : won ? "🎉" : "😅"}</p>

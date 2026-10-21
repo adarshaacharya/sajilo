@@ -5,6 +5,7 @@ import { api } from "../../../shared/lib/ipc";
 import type { ShabdaKey } from "../../../types/api/ShabdaKey";
 import type { ShabdaView } from "../../../types/api/ShabdaView";
 import { useShabda } from "../games-data";
+import { GameOver } from "./game-over";
 import { StatTiles } from "./stat-tiles";
 
 type TFn = ReturnType<typeof useSettings>["t"];
@@ -21,6 +22,8 @@ export function Shabda({ t }: { t: TFn }) {
   const [help, setHelp] = useState(false);
   // Bumped on a miss, so the lives shake once each time.
   const [missed, setMissed] = useState(0);
+  // The result popup, until "See the word" folds it.
+  const [closed, setClosed] = useState(false);
 
   const run = async (task: () => Promise<ShabdaView>) => {
     if (busy) return;
@@ -38,7 +41,10 @@ export function Shabda({ t }: { t: TFn }) {
     }
   };
   const guess = (letter: string) => void run(() => api.shabdaLetter(letter));
-  const next = () => void run(() => api.shabdaNext());
+  const next = () => {
+    setClosed(false);
+    void run(() => api.shabdaNext());
+  };
 
   const playing = data?.status === "playing";
   const keys = data ? [...data.vowels, ...data.consonants] : [];
@@ -136,6 +142,31 @@ export function Shabda({ t }: { t: TFn }) {
         </p>
       )}
 
+      {over && !closed && (
+        <GameOver
+          result={data.status === "won" ? "won" : "lost"}
+          title={
+            data.status === "won"
+              ? t("shabda.won")
+              : t("shabda.lost").replace("{word}", data.answer ?? "")
+          }
+          detail={data.status === "won" ? (data.answer ?? undefined) : (data.clue ?? undefined)}
+          stats={[
+            { value: String(data.stats.played), label: t("shabda.stat.played") },
+            {
+              value: `${data.stats.played > 0 ? Math.round((data.stats.won / data.stats.played) * 100) : 0}%`,
+              label: t("shabda.stat.won"),
+            },
+            { value: String(data.stats.run), label: t("shabda.stat.run") },
+            { value: String(data.stats.bestRun), label: t("shabda.stat.best") },
+          ]}
+          againLabel={t("shabda.next")}
+          onAgain={next}
+          closeLabel={t("shabda.see-word")}
+          onClose={() => setClosed(true)}
+          busy={busy}
+        />
+      )}
       {over ? (
         <Result view={data} busy={busy} onNext={next} t={t} />
       ) : (

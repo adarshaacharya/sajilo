@@ -1558,7 +1558,7 @@
   "shabda.stat.won": "जित",
   "shabda.stat.run": "लगातार",
   "shabda.stat.best": "उत्कृष्ट",
-  "quiz.title": "ज्ञानगुन",
+  "quiz.title": "प्रश्नोत्तर",
   "quiz.card": "नेपालबारे दस प्रश्न। करिब दुई मिनेट।",
   "quiz.card-playing": "एउटा राउन्ड चलिरहेको छ। जहाँ छोड्नुभएको थियो त्यहीँबाट।",
   "quiz.card-best": "अहिलेसम्मको उत्कृष्ट: {best}/१०।",
@@ -1692,5 +1692,17 @@
   "saap.stat.won": "जित",
   "saap.stat.lost": "हार",
   "saap.stat.ladders": "सिँढी",
-  "saap.stat.snakes": "साँप"
+  "saap.stat.snakes": "साँप",
+  "games.see-board": "बोर्ड हेर्नुहोस्",
+  "saap.final": "अन्तिम कोठा: तपाईं {you}, कम्प्युटर {computer}।",
+  "sudoku.solved-title": "हल भयो!",
+  "quiz.another": "अर्को राउन्ड",
+  "quiz.score": "{total} मध्ये {n} सही",
+  "quiz.topics": "विषय छान्नुहोस्",
+  "shabda.see-word": "शब्द हेर्नुहोस्",
+  "lobby.play": "खेल्नुहोस्",
+  "lobby.continue": "खेल जारी राख्नुहोस्",
+  "lobby.record": "तपाईंको रेकर्ड",
+  "lobby.empty": "अहिलेसम्म कुनै खेल छैन। खेलेपछि रेकर्ड यहाँ देखिन्छ।",
+  "lobby.best-easy": "उत्कृष्ट सजिलो"
 }

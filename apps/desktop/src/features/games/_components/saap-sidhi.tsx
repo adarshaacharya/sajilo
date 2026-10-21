@@ -6,15 +6,19 @@ import type { SaapJump } from "../../../types/api/SaapJump";
 import type { SaapMove } from "../../../types/api/SaapMove";
 import type { SaapView } from "../../../types/api/SaapView";
 import { useSaap } from "../games-data";
-import { StatTiles } from "./stat-tiles";
+import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
-/** How long each part of a move takes to show, in ms. */
-const ROLL_MS = 450;
-const HOP_MS = 130;
-const JUMP_MS = 480;
-const BETWEEN_MS = 380;
+/** How long each part of a move takes to show, in ms: unhurried enough to
+ * follow each hop, and a clear pause before the other side moves. */
+const ROLL_MS = 650;
+/** The die shows a new face this often while it rolls. */
+const FLICK_MS = 80;
+const HOP_MS = 240;
+const BEFORE_JUMP_MS = 320;
+const JUMP_MS = 850;
+const BETWEEN_MS = 700;
 
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
@@ -44,6 +48,8 @@ export function SaapSidhi({ t }: { t: TFn }) {
   const [glide, setGlide] = useState(false);
   // Whose move is playing out, to light their side of the bar.
   const [mover, setMover] = useState<"you" | "computer" | null>(null);
+  // The result popup, until "See board" folds it.
+  const [closed, setClosed] = useState(false);
   // Whether the screen is still open, so a replay stops if it closes. Set
   // on every mount: React may mount, unmount and mount again.
   const alive = useRef(true);
@@ -64,10 +70,18 @@ export function SaapSidhi({ t }: { t: TFn }) {
     for (const move of view.moves) {
       if (!alive.current) return;
       setMover(move.side);
+      // The die flicks through faces, then lands on the roll.
       setRolling(true);
+      const flick = window.setInterval(
+        // A different face each flick, always 1 to 6.
+        () => setFace((last) => ((last + Math.floor(Math.random() * 4)) % 6) + 1),
+        FLICK_MS,
+      );
       await wait(ROLL_MS);
+      window.clearInterval(flick);
       setRolling(false);
       setFace(move.roll);
+      await wait(200);
       setLine(describe(move, t));
       const key = move.side === "you" ? "you" : "computer";
       for (
@@ -80,7 +94,7 @@ export function SaapSidhi({ t }: { t: TFn }) {
         await wait(HOP_MS);
       }
       if (move.to !== move.landed) {
-        await wait(160);
+        await wait(BEFORE_JUMP_MS);
         setGlide(true);
         at = { ...at, [key]: move.to };
         setShown(at);
@@ -106,7 +120,10 @@ export function SaapSidhi({ t }: { t: TFn }) {
 
   if (!data) return null;
   const roll = () => void run(() => api.saapRoll(), pos);
-  const begin = () => void run(() => api.saapNew(), { you: 0, computer: 0 });
+  const begin = () => {
+    setClosed(false);
+    void run(() => api.saapNew(), { you: 0, computer: 0 });
+  };
 
   if (!game) return <Start view={data} onStart={begin} busy={busy} t={t} />;
 
@@ -162,6 +179,25 @@ export function SaapSidhi({ t }: { t: TFn }) {
         {status}
       </p>
 
+      {over && !closed && (
+        <GameOver
+          result={game.winner === "you" ? "won" : "lost"}
+          title={t(game.winner === "you" ? "saap.won" : "saap.lost")}
+          detail={t("saap.final")
+            .replace("{you}", String(pos.you))
+            .replace("{computer}", String(pos.computer))}
+          stats={[
+            { value: String(data.stats.won), label: t("saap.stat.won") },
+            { value: String(data.stats.lost), label: t("saap.stat.lost") },
+            { value: String(data.stats.ladders), label: t("saap.stat.ladders") },
+            { value: String(data.stats.snakes), label: t("saap.stat.snakes") },
+          ]}
+          againLabel={t("saap.again")}
+          onAgain={begin}
+          closeLabel={t("games.see-board")}
+          onClose={() => setClosed(true)}
+        />
+      )}
       {over && (
         <section className="surface-card space-y-2.5 p-3">
           <button
@@ -405,19 +441,8 @@ function Start({
   busy: boolean;
   t: TFn;
 }) {
-  const { stats } = view;
   return (
     <div className="space-y-2.5">
-      {stats.won + stats.lost > 0 && (
-        <StatTiles
-          stats={[
-            { value: String(stats.won), label: t("saap.stat.won") },
-            { value: String(stats.lost), label: t("saap.stat.lost") },
-            { value: String(stats.ladders), label: t("saap.stat.ladders") },
-            { value: String(stats.snakes), label: t("saap.stat.snakes") },
-          ]}
-        />
-      )}
       <section className="surface-card space-y-3 p-3">
         <div>
           <p className="text-[14px] font-semibold">{t("saap.title")}</p>

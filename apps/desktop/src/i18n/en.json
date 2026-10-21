@@ -1558,7 +1558,7 @@
   "shabda.stat.won": "Won",
   "shabda.stat.run": "In a row",
   "shabda.stat.best": "Best run",
-  "quiz.title": "ज्ञानगुन · Gyan Gun",
+  "quiz.title": "Quiz",
   "quiz.card": "Ten questions about Nepal. About two minutes.",
   "quiz.card-playing": "A round is under way. Pick up where you left it.",
   "quiz.card-best": "Best round so far: {best}/10.",
@@ -1692,5 +1692,17 @@
   "saap.stat.won": "Won",
   "saap.stat.lost": "Lost",
   "saap.stat.ladders": "Ladders",
-  "saap.stat.snakes": "Snakes"
+  "saap.stat.snakes": "Snakes",
+  "games.see-board": "See the board",
+  "saap.final": "Final squares: you {you}, computer {computer}.",
+  "sudoku.solved-title": "Solved!",
+  "quiz.another": "Another round",
+  "quiz.score": "{n} of {total} right",
+  "quiz.topics": "Pick a topic",
+  "shabda.see-word": "See the word",
+  "lobby.play": "Play",
+  "lobby.continue": "Continue the game",
+  "lobby.record": "Your record",
+  "lobby.empty": "No games yet. Your record will show here once you play.",
+  "lobby.best-easy": "Best easy"
 }

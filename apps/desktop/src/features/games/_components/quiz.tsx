@@ -8,7 +8,7 @@ import type { QuizCategory } from "../../../types/api/QuizCategory";
 import type { QuizView } from "../../../types/api/QuizView";
 import { DailyQuestion } from "../daily-question";
 import { useQuiz } from "../games-data";
-import { StatTiles } from "./stat-tiles";
+import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -24,6 +24,8 @@ const TOPIC_KEYS = {
 export function Quiz({ t }: { t: TFn }) {
   const { data, mutate } = useQuiz();
   const [busy, setBusy] = useState(false);
+  // The round's result popup, until it is folded.
+  const [closed, setClosed] = useState(false);
   if (!data) return null;
 
   const act = async (task: Promise<QuizView>) => {
@@ -100,21 +102,41 @@ export function Quiz({ t }: { t: TFn }) {
     );
   }
 
-  const seen = data.topics.reduce((sum, topic) => sum + topic.total - topic.unseen, 0);
-  const total = data.topics.reduce((sum, topic) => sum + topic.total, 0);
   return (
     <div className="space-y-2.5">
-      {data.stats.answered > 0 && (
-        <StatTiles
-          stats={[
-            {
-              value: `${Math.round((data.stats.correct / data.stats.answered) * 100)}%`,
-              label: t("quiz.stat.right"),
-            },
-            { value: `${seen}/${total}`, label: t("quiz.stat.seen") },
-            { value: `${data.stats.bestRound}/10`, label: t("quiz.stat.best") },
-            { value: String(data.stats.rounds), label: t("quiz.stat.rounds") },
-          ]}
+      {data.finished && !closed && (
+        <GameOver
+          result={data.score >= data.roundTotal * 0.7 ? "won" : "lost"}
+          title={
+            data.score === data.roundTotal
+              ? t("quiz.perfect")
+              : data.score >= data.roundTotal * 0.7
+                ? t("quiz.great")
+                : t("quiz.again")
+          }
+          detail={t("quiz.score")
+            .replace("{n}", String(data.score))
+            .replace("{total}", String(data.roundTotal))}
+          stats={
+            data.stats.answered > 0
+              ? [
+                  {
+                    value: `${Math.round((data.stats.correct / data.stats.answered) * 100)}%`,
+                    label: t("quiz.stat.right"),
+                  },
+                  { value: `${data.stats.bestRound}/10`, label: t("quiz.stat.best") },
+                  { value: String(data.stats.rounds), label: t("quiz.stat.rounds") },
+                ]
+              : undefined
+          }
+          againLabel={t("quiz.another")}
+          onAgain={() => {
+            setClosed(false);
+            void act(api.quizStart(data.topic ?? null));
+          }}
+          closeLabel={t("quiz.topics")}
+          onClose={() => setClosed(true)}
+          busy={busy}
         />
       )}
       {data.finished && (

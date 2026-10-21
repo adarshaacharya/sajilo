@@ -6,6 +6,7 @@ import { digits } from "../../../shared/lib/numerals";
 import type { SudokuLevel } from "../../../types/api/SudokuLevel";
 import type { SudokuView } from "../../../types/api/SudokuView";
 import { useSudoku } from "../games-data";
+import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -47,6 +48,8 @@ export function Sudoku({ t }: { t: TFn }) {
   const { data, mutate } = useSudoku();
   const [selected, setSelected] = useState<number | null>(null);
   const [help, setHelp] = useState(false);
+  // The solved popup, until "See board" folds it.
+  const [closed, setClosed] = useState(false);
   const game = data?.game ?? null;
   const elapsed = useElapsed(game?.startedAt, game?.solvedIn);
 
@@ -62,6 +65,7 @@ export function Sudoku({ t }: { t: TFn }) {
   }, [startedAt]);
 
   const apply = async (task: Promise<SudokuView>) => {
+    setClosed(false);
     await mutate(await task, { revalidate: false });
   };
   const put = (digit: number) => {
@@ -183,6 +187,23 @@ export function Sudoku({ t }: { t: TFn }) {
         })}
       </div>
 
+      {solved && !closed && (
+        <GameOver
+          result="won"
+          title={t("sudoku.solved-title")}
+          detail={`${t("sudoku.solved").replace("{time}", clock(game.solvedIn ?? 0))} ${t(
+            "sudoku.best",
+          ).replace("{time}", clock(data.stats.bestSeconds[LEVELS.indexOf(game.level)] ?? 0))}`}
+          stats={LEVELS.map((level, index) => ({
+            value: String(data.stats.solved[index] ?? 0),
+            label: t(LEVEL_KEYS[level]),
+          }))}
+          againLabel={t("sudoku.new")}
+          onAgain={() => void apply(api.sudokuNew(game.level))}
+          closeLabel={t("games.see-board")}
+          onClose={() => setClosed(true)}
+        />
+      )}
       {solved ? (
         <section className="surface-card space-y-2.5 p-3">
           <div>

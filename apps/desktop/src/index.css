@@ -4362,16 +4362,16 @@ input[type="search"]::-webkit-search-decoration {
   border: 2.5px solid #fffdf6;
   transform: translate(-50%, -50%);
   transition:
-    left 0.12s ease-out,
-    top 0.12s ease-out;
+    left 0.22s ease-in-out,
+    top 0.22s ease-in-out;
   box-shadow:
     0 0 0 1.5px var(--saap-ink),
     0 2px 5px rgb(0 0 0 / 0.45);
 }
 .saap-board--glide .saap-piece {
   transition:
-    left 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-    top 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    left 0.8s cubic-bezier(0.45, 0, 0.25, 1),
+    top 0.8s cubic-bezier(0.45, 0, 0.25, 1);
 }
 .saap-piece--you {
   background: #c9302c;
@@ -4442,7 +4442,7 @@ input[type="search"]::-webkit-search-decoration {
   transform: translateY(2px);
 }
 .saap-die--rolling {
-  animation: saap-roll 0.45s ease-in-out;
+  animation: saap-roll 0.65s ease-in-out;
 }
 @keyframes saap-nudge {
   0%,
@@ -4457,15 +4457,22 @@ input[type="search"]::-webkit-search-decoration {
       0 0 0 6px color-mix(in srgb, var(--color-accent-mark) 0%, transparent);
   }
 }
+/* No spin: a soft lift while the faces flick, then a small landing. */
 @keyframes saap-roll {
-  25% {
-    transform: rotate(-18deg) scale(0.92);
+  0% {
+    transform: none;
   }
-  50% {
-    transform: rotate(14deg) scale(1.05);
+  20% {
+    transform: translateY(-5px);
   }
-  75% {
-    transform: rotate(-8deg);
+  80% {
+    transform: translateY(-5px);
+  }
+  92% {
+    transform: translateY(1px) scale(1.02, 0.98);
+  }
+  100% {
+    transform: none;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -4478,3 +4485,121 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 
+
+/* Games — the end of a game: a card over the board, the same in every
+   game. The board stays faintly visible behind; a win rains confetti. */
+.game-over {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--color-canvas) 62%, transparent);
+  backdrop-filter: blur(3px);
+  animation: game-over-fade 0.25s ease-out both;
+}
+.game-over__card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 300px;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 20px 16px 12px;
+  text-align: center;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 0.35);
+  animation: game-over-pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.game-over__card--won {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+}
+.game-over__badge {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+  font-size: 30px;
+  line-height: 1;
+}
+.game-over__card--lost .game-over__badge {
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+.game-over__title {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.game-over__card--won .game-over__title {
+  color: var(--color-accent-mark);
+}
+.game-over__detail {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.game-over__close {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  transition: color 0.15s ease;
+}
+.game-over__close:hover {
+  color: var(--color-text);
+}
+.game-over__confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.game-over__confetti span {
+  position: absolute;
+  top: -12px;
+  border-radius: 2px;
+  animation: game-over-confetti linear both;
+}
+@keyframes game-over-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes game-over-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+}
+@keyframes game-over-confetti {
+  to {
+    transform: translate(var(--drift), 110vh) rotate(var(--turn));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-over,
+  .game-over__card {
+    animation: none;
+  }
+  .game-over__confetti {
+    display: none;
+  }
+}
+
+/* A game's start screen: its icon in a soft gilt tile. */
+.lobby-icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 14px;
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+}
