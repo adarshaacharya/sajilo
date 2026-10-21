@@ -107,25 +107,57 @@ export const SIGNS: readonly {
   },
 ];
 
+/** A name's letters as the syllable table spells them: ब and व are one
+ * sound for a rashi (बिकास, विकास), and long and short ि/ी, ु/ू are too
+ * (दीपक starts with दि). */
+function spelled(text: string): string {
+  return text
+    .replace(/ब/g, "व")
+    .replace(/\u0940/g, "\u093F")
+    .replace(/\u0942/g, "\u0941")
+    .replace(/ई/g, "इ")
+    .replace(/ऊ/g, "उ");
+}
+
 /**
  * Signs a search box entry points to: a name ("सुरेश"), its first syllable
  * ("सु"), or the sign's own English or western name ("ka", "Leo"). A name
  * whose opening syllable isn't listed ("कमल" has only का, कि, कु) falls back
  * to its first letter, so a search never dead-ends on an inherent vowel.
+ * With `byName` false only syllables count: a name read from English
+ * letters ("meena", मीन) is a person's, not the sign called मीन.
  */
-export function matchSigns(query: string): Set<RashiSign> {
-  const q = query.trim().toLowerCase();
+export function matchSigns(query: string, byName = true): Set<RashiSign> {
+  const q = spelled(query.trim().toLowerCase());
   const found = new Set<RashiSign>();
   if (!q) return found;
   for (const sign of SIGNS) {
-    const named = [sign.en, sign.western, sign.ne].some((name) => name.toLowerCase().startsWith(q));
-    const syllable = sign.syllables.some((y) => q.startsWith(y) || y.startsWith(q));
+    const named =
+      byName && [sign.en, sign.western, sign.ne].some((name) => name.toLowerCase().startsWith(q));
+    const syllable = sign.syllables.some((each) => {
+      const y = spelled(each);
+      return q.startsWith(y) || y.startsWith(q);
+    });
     if (named || syllable) found.add(sign.id);
   }
   if (found.size > 0) return found;
   const first = q.charAt(0);
   for (const sign of SIGNS) {
-    if (sign.syllables.some((y) => y.startsWith(first))) found.add(sign.id);
+    if (sign.syllables.some((y) => spelled(y).startsWith(first))) found.add(sign.id);
+  }
+  return found;
+}
+
+/** Signs whose English, western or Nepali name starts with `query`: "leo",
+ * "tu", "मेष". */
+export function matchSignNames(query: string): Set<RashiSign> {
+  const q = query.trim().toLowerCase();
+  const found = new Set<RashiSign>();
+  if (!q) return found;
+  for (const sign of SIGNS) {
+    if ([sign.en, sign.western, sign.ne].some((name) => name.toLowerCase().startsWith(q))) {
+      found.add(sign.id);
+    }
   }
   return found;
 }

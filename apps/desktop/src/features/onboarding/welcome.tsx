@@ -19,7 +19,8 @@ import type { RashiSign } from "../../types/api/RashiSign";
 import { WEEKDAYS_NE_LONG } from "../calendar/_components/date-summary-panel";
 import { Confetti } from "../games/_components/game-over";
 import { SignGrid } from "../rashifal/_components/sign-grid";
-import { matchSigns, SIGNS } from "../rashifal/_lib/signs";
+import { SIGNS } from "../rashifal/_lib/signs";
+import { useSignSearch } from "../rashifal/_lib/use-sign-search";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -359,7 +360,7 @@ function Rashi({ t }: { t: TFn }) {
   const [sign, setSign] = useState<RashiSign | null>(null);
   const [query, setQuery] = useState("");
   const [daily, setDaily] = useState(true);
-  const matches = query.trim() ? matchSigns(query) : null;
+  const matches = useSignSearch(query);
   const matched = matches ? SIGNS.filter((each) => matches.has(each.id)) : [];
 
   useEffect(() => {

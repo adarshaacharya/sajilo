@@ -3,7 +3,8 @@ import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import { LIMITS } from "../../../shared/lib/limits";
 import type { RashiSign } from "../../../types/api/RashiSign";
-import { matchSigns, SIGNS } from "../_lib/signs";
+import { SIGNS } from "../_lib/signs";
+import { useSignSearch } from "../_lib/use-sign-search";
 import { SignGrid } from "./sign-grid";
 
 /**
@@ -13,7 +14,7 @@ import { SignGrid } from "./sign-grid";
 export function SignFinder({ onChoose }: { onChoose: (id: RashiSign) => void }) {
   const { t } = useSettings();
   const [query, setQuery] = useState("");
-  const matches = query.trim() ? matchSigns(query) : null;
+  const matches = useSignSearch(query);
   const matched = matches ? SIGNS.filter((sign) => matches.has(sign.id)) : [];
 
   return (
