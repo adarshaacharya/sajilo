@@ -23,6 +23,8 @@ import type { JobDetailPart } from "../../types/api/JobDetailPart";
 import type { JobSource } from "../../types/api/JobSource";
 import type { JobSourceInfo } from "../../types/api/JobSourceInfo";
 import type { JobVacancy } from "../../types/api/JobVacancy";
+import type { KataLevel } from "../../types/api/KataLevel";
+import type { KataView } from "../../types/api/KataView";
 import type { LoadState } from "../../types/api/LoadState";
 import type { MetalHistory } from "../../types/api/MetalHistory";
 import type { MetalRateSnapshot } from "../../types/api/MetalRateSnapshot";
@@ -987,11 +989,14 @@ export const api = {
   getInternet: (refresh = false) => invoke<InternetAccount[]>("get_internet", { refresh }),
 
   /** Today's word puzzle, with any guesses already made. */
-  shabdaToday: () => invoke<ShabdaView>("shabda_today"),
-  /** What typed text reads as, letter by letter ("kalam" → क, ल, म). */
-  shabdaLetters: (text: string) => invoke<string[]>("shabda_letters", { text }),
-  /** Plays a guess; rejects with a readable reason. */
-  shabdaGuess: (text: string) => invoke<ShabdaView>("shabda_guess", { text }),
+  /** The word under way, or a new one. */
+  shabdaGet: () => invoke<ShabdaView>("shabda_get"),
+  /** Tries one letter of the pad. */
+  shabdaLetter: (letter: string) => invoke<ShabdaView>("shabda_letter", { letter }),
+  /** The next word; one left unfinished counts as lost. */
+  shabdaNext: () => invoke<ShabdaView>("shabda_next"),
+  /** Shows one more letter of the word, for a life. */
+  shabdaHint: () => invoke<ShabdaView>("shabda_hint"),
 
   quizGet: () => invoke<QuizView>("quiz_get"),
   /** A round of ten from one topic, or `null` for all. */
@@ -1013,6 +1018,12 @@ export const api = {
   baghNew: (player: BaghPiece, level: BaghLevel) => invoke<BaghView>("bagh_new", { player, level }),
   /** The player's move (`from` null to place a goat) and the computer's answer. */
   baghPlay: (from: number | null, to: number) => invoke<BaghView>("bagh_play", { from, to }),
+
+  kataGet: () => invoke<KataView>("kata_get"),
+  /** A new game at `level`; who opens alternates. */
+  kataNew: (level: KataLevel) => invoke<KataView>("kata_new", { level }),
+  /** The player's move (cell 0–8) and the computer's answer. */
+  kataPlay: (cell: number) => invoke<KataView>("kata_play", { cell }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

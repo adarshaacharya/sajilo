@@ -1,81 +1,86 @@
 //! Games as the screen shows them. The rules are `sajilo_core::games`.
 
-use sajilo_core::NepaliDate;
 use sajilo_core::games::shabda::{
-    self, LENGTH, MAX_GUESSES, ShabdaMark, ShabdaState, ShabdaStats, ShabdaStatus, aksharas, score,
+    CONSONANTS, MAX_WRONG, ShabdaState, ShabdaStats, ShabdaStatus, VOWELS,
 };
 
 dto! {
+    /// One place in the word: its akshar once found, or at the end.
     pub struct ShabdaTile {
-        pub akshar: String,
-        pub mark: ShabdaMark,
+        /// `None` while hidden.
+        pub akshar: Option<String>,
+        /// Shown only because the word was lost.
+        pub missed: bool,
     }
 
-    /// Today's word puzzle.
+    /// A letter on the pad, and what guessing it showed.
+    pub struct ShabdaKey {
+        pub letter: String,
+        pub state: ShabdaKeyState,
+    }
+
+    /// The word under way.
     pub struct ShabdaView {
-        pub number: u32,
-        pub length: u32,
-        pub max_guesses: u32,
-        pub rows: Vec<Vec<ShabdaTile>>,
+        pub tiles: Vec<ShabdaTile>,
+        /// The word's meaning in a few words, in the reader's language.
+        pub clue: Option<String>,
+        /// The vowels, then the consonants, in the alphabet's order.
+        pub vowels: Vec<ShabdaKey>,
+        pub consonants: Vec<ShabdaKey>,
         pub status: ShabdaStatus,
-        /// Shown once the puzzle is over, never before.
+        pub lives: u32,
+        pub lives_left: u32,
+        pub hint_left: bool,
+        /// The word, once it is over.
         pub answer: Option<String>,
-        /// The result as coloured squares, to paste anywhere. Once it is over.
-        pub share: Option<String>,
         pub stats: ShabdaStats,
     }
 }
 
-/// Today's puzzle for `state`, already opened on `today`.
-pub fn shabda_view(
-    state: &ShabdaState,
-    today: NepaliDate,
-    number: u32,
-    answer: &str,
-) -> ShabdaView {
-    let answer_letters = aksharas(answer).unwrap_or_default();
-    let rows: Vec<Vec<ShabdaTile>> = state
-        .guesses
-        .iter()
-        .map(|guess| {
-            let letters = aksharas(guess).unwrap_or_default();
-            let marks = score(&letters, &answer_letters);
-            letters
-                .into_iter()
-                .zip(marks)
-                .map(|(akshar, mark)| ShabdaTile { akshar, mark })
-                .collect()
+dto_enum! {
+    pub enum ShabdaKeyState {
+        Unused,
+        /// In the word.
+        Hit,
+        /// Not in the word: a life gone.
+        Miss,
+    }
+}
+
+/// The word game as it stands, with the word's clue.
+pub fn shabda_view(state: &ShabdaState, clue: Option<&str>) -> ShabdaView {
+    let status = state.status();
+    let over = status != ShabdaStatus::Playing;
+    let tiles = state
+        .aksharas()
+        .into_iter()
+        .zip(state.shown())
+        .map(|(akshar, shown)| ShabdaTile {
+            missed: over && !shown,
+            akshar: (shown || over).then_some(akshar),
         })
         .collect();
-    let status = state.status(answer);
-    let over = status != ShabdaStatus::Playing;
-    let share = over.then(|| {
-        let tries = if status == ShabdaStatus::Won {
-            rows.len().to_string()
+    let key = |letter: &char| ShabdaKey {
+        letter: letter.to_string(),
+        state: if !state.guessed.contains(letter) {
+            ShabdaKeyState::Unused
+        } else if state.has(*letter) {
+            ShabdaKeyState::Hit
         } else {
-            "X".to_owned()
-        };
-        let grid: Vec<String> = rows
-            .iter()
-            .map(|row| row.iter().map(|tile| shabda::square(tile.mark)).collect())
-            .collect();
-        format!(
-            "शब्द #{number} {tries}/{MAX_GUESSES}\n{}\nsajilo.fyi",
-            grid.join("\n")
-        )
-    });
-    let mut stats = state.stats.clone();
-    stats.streak = state.current_streak(today);
-    stats.distribution.resize(MAX_GUESSES, 0);
+            ShabdaKeyState::Miss
+        },
+    };
     ShabdaView {
-        number,
-        length: LENGTH as u32,
-        max_guesses: MAX_GUESSES as u32,
-        rows,
+        tiles,
+        clue: clue.map(str::to_owned),
+        vowels: VOWELS.iter().map(key).collect(),
+        consonants: CONSONANTS.iter().map(key).collect(),
         status,
-        answer: over.then(|| answer.to_owned()),
-        share,
-        stats,
+        lives: MAX_WRONG,
+        lives_left: MAX_WRONG.saturating_sub(state.wrong()),
+        hint_left: state.hint_left(),
+        answer: over.then(|| state.word.clone()).flatten(),
+        stats: state.stats.clone(),
     }
 }
 
@@ -84,33 +89,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_answer_and_the_grid_wait_until_it_is_over() {
+    fn hidden_until_found_and_all_shown_once_lost() {
         let mut state = ShabdaState::default();
-        let day = NepaliDate::new(2083, 7, 3);
-        state.guess(day, "बजार", "कलम").unwrap();
-        let playing = shabda_view(&state, day, 1, "कलम");
-        assert_eq!((playing.answer, playing.share), (None, None));
-        assert_eq!(playing.rows[0][1].akshar, "जा");
+        state.next(&["कमल".to_owned()], 0);
+        state.guess('म').unwrap();
+        let view = shabda_view(&state, Some("A flower that blooms in mud"));
+        assert_eq!(view.tiles[0].akshar, None);
+        assert_eq!(view.tiles[1].akshar.as_deref(), Some("म"));
+        assert_eq!(view.answer, None);
+        let m = view.consonants.iter().find(|k| k.letter == "म").unwrap();
+        assert_eq!(m.state, ShabdaKeyState::Hit);
 
-        for word in ["सपना", "मौसम", "पहाड", "बादल", "गमला"]
-        {
-            state.guess(day, word, "कलम").unwrap();
+        for letter in ['ख', 'ग', 'घ', 'च', 'छ', 'ज'] {
+            state.guess(letter).unwrap();
         }
-        let lost = shabda_view(&state, day, 1, "कलम");
+        let lost = shabda_view(&state, None);
         assert_eq!(lost.status, ShabdaStatus::Lost);
-        assert_eq!(lost.answer.as_deref(), Some("कलम"));
-        assert!(lost.share.unwrap().starts_with("शब्द #1 X/6\n"));
-    }
-
-    #[test]
-    fn a_win_shares_its_squares() {
-        let mut state = ShabdaState::default();
-        let day = NepaliDate::new(2083, 7, 3);
-        state.guess(day, "कमल", "कलम").unwrap();
-        state.guess(day, "कलम", "कलम").unwrap();
-        let won = shabda_view(&state, day, 7, "कलम");
-        assert_eq!(won.share.unwrap(), "शब्द #7 2/6\n🟩🟨🟨\n🟩🟩🟩\nsajilo.fyi");
-        assert_eq!(won.stats.distribution, [0, 1, 0, 0, 0, 0]);
+        assert_eq!(lost.lives_left, 0);
+        assert!(lost.tiles[0].missed && !lost.tiles[1].missed);
+        assert_eq!(lost.tiles[0].akshar.as_deref(), Some("क"));
+        assert_eq!(lost.answer.as_deref(), Some("कमल"));
     }
 }
 
@@ -324,6 +322,56 @@ mod boards_view {
                 outcome: game.board.outcome(),
             }),
             stats: state.stats.clone(),
+        }
+    }
+}
+
+pub use kata_view::*;
+
+mod kata_view {
+    use sajilo_core::games::katakuti::{
+        KataLevel, KataMark, KataOutcome, KataState, KataStats, turn, winner,
+    };
+
+    dto! {
+        pub struct KataGameView {
+            /// Nine cells, row by row.
+            pub cells: Vec<Option<KataMark>>,
+            pub player: KataMark,
+            pub level: KataLevel,
+            /// Whether it is the player's move.
+            pub your_turn: bool,
+            /// The computer's last move.
+            pub last: Option<u8>,
+            pub outcome: Option<KataOutcome>,
+            /// The three in a row, once there is one.
+            pub line: Option<Vec<u8>>,
+        }
+
+        pub struct KataView {
+            pub game: Option<KataGameView>,
+            pub stats: KataStats,
+            /// Whether the computer opens the next game.
+            pub computer_starts: bool,
+        }
+    }
+
+    pub fn kata_view(state: &KataState) -> KataView {
+        KataView {
+            game: state.game.as_ref().map(|game| {
+                let outcome = game.outcome();
+                KataGameView {
+                    cells: game.board.to_vec(),
+                    player: game.player,
+                    level: game.level,
+                    your_turn: outcome.is_none() && turn(&game.board) == game.player,
+                    last: game.last.map(|cell| cell as u8),
+                    outcome,
+                    line: winner(&game.board).map(|(_, line)| line.map(|c| c as u8).to_vec()),
+                }
+            }),
+            stats: state.stats.clone(),
+            computer_starts: state.computer_starts,
         }
     }
 }

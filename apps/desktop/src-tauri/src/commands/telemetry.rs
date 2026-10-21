@@ -92,6 +92,7 @@ pub const EVENTS: &[&str] = &[
     "tab.games.quiz",
     "tab.games.sudoku",
     "tab.games.bagh",
+    "tab.games.kata",
     "tab.rashifal.daily",
     "tab.rashifal.weekly",
     "tab.rashifal.monthly",

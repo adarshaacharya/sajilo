@@ -104,6 +104,28 @@ import { SFXmark } from "sf-symbols-lib/monochrome/SFXmark";
 
 type SFComp = ComponentType<{ size?: number; className?: string }>;
 
+/** A tic-tac-toe board with an X and an O: SF Symbols has no such glyph.
+ * Drawn on the same 24-unit box, stroked in `currentColor`. */
+function TicTacToe({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+      <path d="M4.2 4.2l2.6 2.6M6.8 4.2L4.2 6.8" />
+      <circle cx="18" cy="18" r="1.9" />
+    </svg>
+  );
+}
+
 /**
  * Named glyphs mapped to the same SF Symbols the Swift app uses
  * (`newspaper`, `storefront`, `moon.stars.fill`, …).
@@ -221,6 +243,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   quiz: SFQuestionmarkCircle,
   sudoku: SFSquareGrid3x3,
   baghChal: SFPawprint,
+  katakuti: TicTacToe,
 };
 
 export type IconName =
@@ -332,7 +355,8 @@ export type IconName =
   | "wordGame"
   | "quiz"
   | "sudoku"
-  | "baghChal";
+  | "baghChal"
+  | "katakuti";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

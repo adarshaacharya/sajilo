@@ -3,104 +3,101 @@
 //! record stays on this computer.
 
 use sajilo_api::games::{
-    BaghView, QuizDaily, QuizView, ShabdaView, SudokuView, bagh_view, quiz_daily as daily_view,
-    quiz_view, shabda_view, sudoku_view,
+    BaghView, KataView, QuizDaily, QuizView, ShabdaView, SudokuView, bagh_view, kata_view,
+    quiz_daily as daily_view, quiz_view, shabda_view, sudoku_view,
 };
-use sajilo_core::calendar::bikram_sambat::nepali_date_from;
 use sajilo_core::config::Pack;
 use sajilo_core::config::quiz::{QuizCategory, QuizPack};
 use sajilo_core::config::words::WordsPack;
 use sajilo_core::focus::Language;
 use sajilo_core::games::bagh_chal::{BaghGame, BaghLevel, BaghPiece, BaghState};
+use sajilo_core::games::katakuti::{KataLevel, KataState};
 use sajilo_core::games::quiz::QuizState;
-use sajilo_core::games::shabda::{self, GuessError, ShabdaState};
+use sajilo_core::games::shabda::{GuessError, HintError, ShabdaState};
 use sajilo_core::games::sudoku::{SudokuGame, SudokuLevel, SudokuState};
-use sajilo_core::{NepaliDate, nepal_time};
+use sajilo_core::nepal_time;
 use tauri::{AppHandle, Wry};
 
 use crate::{db, prefs};
 
-const SHABDA_KEY: &str = "games.shabda.v1";
+/// The word game's state. A new key: the daily puzzle's state before it
+/// has nothing a word found letter by letter can use.
+const SHABDA_KEY: &str = "games.shabda.v2";
 
-fn load(app: &AppHandle<Wry>) -> ShabdaState {
-    db::get_json(app, SHABDA_KEY)
-        .ok()
-        .flatten()
-        .and_then(|value| serde_json::from_value(value).ok())
-        .unwrap_or_default()
-}
-
-fn save(app: &AppHandle<Wry>, state: &ShabdaState) {
-    if let Ok(value) = serde_json::to_value(state) {
-        let _ = db::set_json(app, SHABDA_KEY, &value);
+/// The word game, with a word to play: the one under way, or a new one.
+fn shabda_state(app: &AppHandle<Wry>) -> ShabdaState {
+    let mut state: ShabdaState = stored(app, SHABDA_KEY);
+    if state.word.is_none() {
+        state.next(&WordsPack::active().answers, seed());
+        store(app, SHABDA_KEY, &state);
     }
-}
-
-/// Today in Nepal, its puzzle number and its answer. Before the first
-/// puzzle (a clock set back) it is puzzle #1.
-fn today() -> Result<(NepaliDate, u32, String), String> {
-    let day = nepali_date_from(nepal_time::today()).map_err(|e| e.to_string())?;
-    let number = shabda::number(day).unwrap_or(1);
-    let pack = WordsPack::active();
-    let answer = shabda::answer(number, &pack.answers)
-        .cloned()
-        .ok_or("No words to play today.")?;
-    Ok((day, number, answer))
-}
-
-/// Today's puzzle, with any guesses already made.
-#[tauri::command]
-pub fn shabda_today(app: AppHandle<Wry>) -> Result<ShabdaView, String> {
-    let (day, number, answer) = today()?;
-    let mut state = load(&app);
-    state.open(day);
-    save(&app, &state);
-    Ok(shabda_view(&state, day, number, &answer))
-}
-
-/// What `text` reads as, letter by letter, for the tiles while typing. English
-/// letters are read as Nepali the way the typing tool reads them: "kalam" is
-/// कलम.
-#[tauri::command]
-pub fn shabda_letters(text: String) -> Vec<String> {
-    let word = sajilo_core::tools::nepali::transliterate(text.trim(), true);
-    shabda::aksharas(&word).unwrap_or_default()
-}
-
-/// Plays a guess, typed in Nepali or in English letters.
-#[tauri::command]
-pub fn shabda_guess(app: AppHandle<Wry>, text: String) -> Result<ShabdaView, String> {
-    let (day, number, answer) = today()?;
-    let nepali = prefs::language(&app) == Language::Ne;
-    let word = sajilo_core::tools::nepali::transliterate(text.trim(), true);
-    let mut state = load(&app);
     state
-        .guess(day, &word, &answer)
-        .map_err(|error| message(&error, nepali))?;
-    save(&app, &state);
-    Ok(shabda_view(&state, day, number, &answer))
+}
+
+fn shabda_save(app: &AppHandle<Wry>, state: &ShabdaState) -> ShabdaView {
+    store(app, SHABDA_KEY, state);
+    let nepali = prefs::language(app) == Language::Ne;
+    let pack = WordsPack::active();
+    let clue = state
+        .word
+        .as_deref()
+        .and_then(|word| pack.clue(word, nepali));
+    shabda_view(state, clue)
+}
+
+/// The word under way, or a new one.
+#[tauri::command]
+pub fn shabda_get(app: AppHandle<Wry>) -> ShabdaView {
+    let state = shabda_state(&app);
+    shabda_save(&app, &state)
+}
+
+/// Tries one letter of the pad.
+#[tauri::command]
+pub fn shabda_letter(app: AppHandle<Wry>, letter: String) -> Result<ShabdaView, String> {
+    let mut state = shabda_state(&app);
+    let nepali = prefs::language(&app) == Language::Ne;
+    let mut chars = letter.trim().chars();
+    let (Some(c), None) = (chars.next(), chars.next()) else {
+        return Err(message(&GuessError::NotALetter, nepali));
+    };
+    state.guess(c).map_err(|error| message(&error, nepali))?;
+    Ok(shabda_save(&app, &state))
+}
+
+/// Shows one more akshar of the word, for a life.
+#[tauri::command]
+pub fn shabda_hint(app: AppHandle<Wry>) -> Result<ShabdaView, String> {
+    let mut state = shabda_state(&app);
+    let nepali = prefs::language(&app) == Language::Ne;
+    state.hint().map_err(|error| {
+        let (en, ne) = match error {
+            HintError::Finished => ("This word is done.", "यो शब्द सकियो।"),
+            HintError::NoneLeft => ("No hint left for this word.", "यो शब्दका लागि सङ्केत बाँकी छैन।"),
+        };
+        if nepali { ne } else { en }.to_owned()
+    })?;
+    Ok(shabda_save(&app, &state))
+}
+
+/// The next word. One left unfinished counts as lost.
+#[tauri::command]
+pub fn shabda_next(app: AppHandle<Wry>) -> ShabdaView {
+    let mut state = shabda_state(&app);
+    state.next(&WordsPack::active().answers, seed());
+    shabda_save(&app, &state)
 }
 
 fn message(error: &GuessError, nepali: bool) -> String {
     let (en, ne) = match error {
-        GuessError::NotDevanagari => (
-            "Type a Nepali word, in Nepali or English letters.".to_owned(),
-            "नेपाली शब्द लेख्नुहोस्, नेपाली वा अङ्ग्रेजी अक्षरमा।".to_owned(),
+        GuessError::NotALetter => (
+            "Pick a Nepali letter from the pad.",
+            "प्याडबाट एउटा नेपाली अक्षर छान्नुहोस्।",
         ),
-        GuessError::WrongLength(n) => (
-            format!("That's {n} letters; the word has {}.", shabda::LENGTH),
-            format!("यो {n} अक्षर भयो; शब्दमा {} अक्षर छन्।", shabda::LENGTH),
-        ),
-        GuessError::AlreadyGuessed => (
-            "Already tried that one.".to_owned(),
-            "त्यो पहिले नै प्रयास गरिसक्नुभयो।".to_owned(),
-        ),
-        GuessError::Finished => (
-            "Today's puzzle is done. A new one comes tomorrow.".to_owned(),
-            "आजको पजल सकियो। भोलि नयाँ आउँछ।".to_owned(),
-        ),
+        GuessError::AlreadyGuessed => ("Already tried that one.", "त्यो पहिले नै प्रयास गरिसक्नुभयो।"),
+        GuessError::Finished => ("This word is done.", "यो शब्द सकियो।"),
     };
-    if nepali { ne } else { en }
+    if nepali { ne } else { en }.to_owned()
 }
 
 const QUIZ_KEY: &str = "games.quiz.v1";
@@ -243,11 +240,36 @@ pub fn bagh_play(app: AppHandle<Wry>, from: Option<u8>, to: u8) -> BaghView {
         && game.play(from, to)
         && let Some(outcome) = game.board.outcome()
     {
-        let player = game.player;
-        state.stats.record(player, outcome);
+        let (player, level) = (game.player, game.level);
+        state.stats.record(player, level, outcome);
     }
     store(&app, BAGH_KEY, &state);
     bagh_view(&state)
+}
+
+const KATA_KEY: &str = "games.katakuti.v1";
+
+#[tauri::command]
+pub fn kata_get(app: AppHandle<Wry>) -> KataView {
+    kata_view(&stored::<KataState>(&app, KATA_KEY))
+}
+
+/// A new game at `level`; who opens alternates.
+#[tauri::command]
+pub fn kata_new(app: AppHandle<Wry>, level: KataLevel) -> KataView {
+    let mut state: KataState = stored(&app, KATA_KEY);
+    state.start(level, seed());
+    store(&app, KATA_KEY, &state);
+    kata_view(&state)
+}
+
+/// The player's move at `cell` and the computer's answer.
+#[tauri::command]
+pub fn kata_play(app: AppHandle<Wry>, cell: u8) -> KataView {
+    let mut state: KataState = stored(&app, KATA_KEY);
+    state.play(usize::from(cell));
+    store(&app, KATA_KEY, &state);
+    kata_view(&state)
 }
 
 /// Today in Nepal, as a day count: a new day, a new question.

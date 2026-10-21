@@ -6,9 +6,9 @@ export function useQuiz() {
   return useSWR("quiz", () => api.quizGet());
 }
 
-/** Today's word puzzle, shared by the hub card and the game. */
+/** The word game, shared by the hub card and the game. */
 export function useShabda() {
-  return useSWR("shabda", () => api.shabdaToday());
+  return useSWR("shabda", () => api.shabdaGet());
 }
 
 /** Mini Sudoku: the puzzle under way, if any, and the record. */
@@ -19,4 +19,9 @@ export function useSudoku() {
 /** Bagh-Chal: the game under way, if any, and the record. */
 export function useBagh() {
   return useSWR("bagh", () => api.baghGet());
+}
+
+/** काटाकुटी: the game under way, if any, and the record. */
+export function useKata() {
+  return useSWR("kata", () => api.kataGet());
 }

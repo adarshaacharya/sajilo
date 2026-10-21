@@ -713,24 +713,26 @@ fn record_forex(
 /// Every Jobs source from its recorded page, through the same parsers the app
 /// ships, served as of the recording day. Lok Sewa's recording is the
 /// central office over two pages, and Pokhara's from the year before.
-/// The word puzzle as a first-time player sees it on the recording day: the
-/// real day's puzzle number, no guesses, and no answer shown.
+/// The word game a couple of letters in: the first word from a fixed seed,
+/// one letter found and one missed, both played by the engine.
 fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
     use sajilo_core::config::Pack;
     use sajilo_core::config::words::WordsPack;
-    use sajilo_core::games::shabda::{self, ShabdaState};
+    use sajilo_core::games::shabda::{CONSONANTS, ShabdaState, letters_in};
 
-    let today = sajilo_core::calendar::bikram_sambat::nepali_date_from(now.date_naive())
-        .expect("the recording day is in the BS table");
-    let number = shabda::number(today).unwrap_or(1);
     let words = WordsPack::active();
-    let answer = shabda::answer(number, &words.answers).expect("the words pack is never empty");
     let mut state = ShabdaState::default();
-    state.open(today);
+    state.next(&words.answers, 2083);
+    let word = state.word.clone().expect("the words pack is never empty");
+    let found = state.aksharas().first().map(|akshar| letters_in(akshar)[0]);
+    let missed = CONSONANTS.iter().copied().find(|c| !state.has(*c));
+    for letter in found.into_iter().chain(missed) {
+        let _ = state.guess(letter);
+    }
     insert(
         commands,
-        "shabda_today",
-        &sajilo_api::games::shabda_view(&state, today, number, answer),
+        "shabda_get",
+        &sajilo_api::games::shabda_view(&state, words.clue(&word, false)),
     );
     insert(
         commands,
@@ -770,6 +772,12 @@ fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
         "bagh_get",
         &sajilo_api::games::bagh_view(&bagh_state),
     );
+    // A game of काटाकुटी two moves in, the computer's answer by the engine.
+    use sajilo_core::games::katakuti::{KataLevel, KataState};
+    let mut kata = KataState::default();
+    kata.start(KataLevel::Medium, 7);
+    kata.play(4);
+    insert(commands, "kata_get", &sajilo_api::games::kata_view(&kata));
 }
 
 fn record_jobs(

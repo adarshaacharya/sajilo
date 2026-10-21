@@ -3,6 +3,7 @@
 //! the screen only draws it.
 
 pub mod bagh_chal;
+pub mod katakuti;
 pub mod quiz;
 pub mod shabda;
 pub mod sudoku;

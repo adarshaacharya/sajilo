@@ -159,8 +159,10 @@
         "draws": 0,
         "lostAsGoats": 0,
         "lostAsTigers": 0,
+        "playedByLevel": [],
         "wonAsGoats": 0,
-        "wonAsTigers": 0
+        "wonAsTigers": 0,
+        "wonByLevel": []
       }
     },
     "bs_to_ad": {
@@ -75609,6 +75611,33 @@
         "url": "https://tusc.tu.edu.np/notices?notice_type=38"
       }
     ],
+    "kata_get": {
+      "computerStarts": true,
+      "game": {
+        "cells": [
+          null,
+          null,
+          null,
+          null,
+          "x",
+          null,
+          null,
+          "o",
+          null
+        ],
+        "last": 7,
+        "level": "medium",
+        "line": null,
+        "outcome": null,
+        "player": "x",
+        "yourTurn": true
+      },
+      "stats": {
+        "drawn": [],
+        "lost": [],
+        "won": []
+      }
+    },
     "keeper_snapshot": {
       "items": [],
       "people": [],
@@ -86668,54 +86697,239 @@
       "topics": [
         {
           "category": "nepal",
-          "total": 103,
-          "unseen": 103
+          "total": 70,
+          "unseen": 70
         },
         {
           "category": "civics",
-          "total": 31,
-          "unseen": 31
+          "total": 16,
+          "unseen": 16
         },
         {
           "category": "geography",
-          "total": 183,
-          "unseen": 183
+          "total": 33,
+          "unseen": 33
         },
         {
           "category": "calendar",
-          "total": 26,
-          "unseen": 26
+          "total": 9,
+          "unseen": 9
         },
         {
           "category": "units",
-          "total": 11,
-          "unseen": 11
+          "total": 19,
+          "unseen": 19
         }
       ]
     },
     "request_notification_permission": "unknown",
-    "shabda_today": {
+    "shabda_get": {
       "answer": null,
-      "length": 3,
-      "maxGuesses": 6,
-      "number": 1,
-      "rows": [],
-      "share": null,
+      "clue": "A pot for making tea",
+      "consonants": [
+        {
+          "letter": "क",
+          "state": "hit"
+        },
+        {
+          "letter": "ख",
+          "state": "miss"
+        },
+        {
+          "letter": "ग",
+          "state": "unused"
+        },
+        {
+          "letter": "घ",
+          "state": "unused"
+        },
+        {
+          "letter": "ङ",
+          "state": "unused"
+        },
+        {
+          "letter": "च",
+          "state": "unused"
+        },
+        {
+          "letter": "छ",
+          "state": "unused"
+        },
+        {
+          "letter": "ज",
+          "state": "unused"
+        },
+        {
+          "letter": "झ",
+          "state": "unused"
+        },
+        {
+          "letter": "ञ",
+          "state": "unused"
+        },
+        {
+          "letter": "ट",
+          "state": "unused"
+        },
+        {
+          "letter": "ठ",
+          "state": "unused"
+        },
+        {
+          "letter": "ड",
+          "state": "unused"
+        },
+        {
+          "letter": "ढ",
+          "state": "unused"
+        },
+        {
+          "letter": "ण",
+          "state": "unused"
+        },
+        {
+          "letter": "त",
+          "state": "unused"
+        },
+        {
+          "letter": "थ",
+          "state": "unused"
+        },
+        {
+          "letter": "द",
+          "state": "unused"
+        },
+        {
+          "letter": "ध",
+          "state": "unused"
+        },
+        {
+          "letter": "न",
+          "state": "unused"
+        },
+        {
+          "letter": "प",
+          "state": "unused"
+        },
+        {
+          "letter": "फ",
+          "state": "unused"
+        },
+        {
+          "letter": "ब",
+          "state": "unused"
+        },
+        {
+          "letter": "भ",
+          "state": "unused"
+        },
+        {
+          "letter": "म",
+          "state": "unused"
+        },
+        {
+          "letter": "य",
+          "state": "unused"
+        },
+        {
+          "letter": "र",
+          "state": "unused"
+        },
+        {
+          "letter": "ल",
+          "state": "unused"
+        },
+        {
+          "letter": "व",
+          "state": "unused"
+        },
+        {
+          "letter": "श",
+          "state": "unused"
+        },
+        {
+          "letter": "ष",
+          "state": "unused"
+        },
+        {
+          "letter": "स",
+          "state": "unused"
+        },
+        {
+          "letter": "ह",
+          "state": "unused"
+        }
+      ],
+      "hintLeft": true,
+      "lives": 6,
+      "livesLeft": 5,
       "stats": {
-        "bestStreak": 0,
-        "distribution": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
+        "bestRun": 0,
         "played": 0,
-        "streak": 0,
+        "run": 0,
         "won": 0
       },
-      "status": "playing"
+      "status": "playing",
+      "tiles": [
+        {
+          "akshar": "के",
+          "missed": false
+        },
+        {
+          "akshar": null,
+          "missed": false
+        },
+        {
+          "akshar": null,
+          "missed": false
+        }
+      ],
+      "vowels": [
+        {
+          "letter": "अ",
+          "state": "unused"
+        },
+        {
+          "letter": "आ",
+          "state": "unused"
+        },
+        {
+          "letter": "इ",
+          "state": "unused"
+        },
+        {
+          "letter": "ई",
+          "state": "unused"
+        },
+        {
+          "letter": "उ",
+          "state": "unused"
+        },
+        {
+          "letter": "ऊ",
+          "state": "unused"
+        },
+        {
+          "letter": "ऋ",
+          "state": "unused"
+        },
+        {
+          "letter": "ए",
+          "state": "unused"
+        },
+        {
+          "letter": "ऐ",
+          "state": "unused"
+        },
+        {
+          "letter": "ओ",
+          "state": "unused"
+        },
+        {
+          "letter": "औ",
+          "state": "unused"
+        }
+      ]
     },
     "shift_month:2083:5:-1": {
       "day": 1,

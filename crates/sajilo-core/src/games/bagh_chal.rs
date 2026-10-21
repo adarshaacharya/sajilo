@@ -257,6 +257,12 @@ pub enum BaghLevel {
 }
 
 impl BaghLevel {
+    pub const ALL: [Self; 3] = [Self::Easy, Self::Medium, Self::Hard];
+
+    pub fn index(self) -> usize {
+        self as usize
+    }
+
     fn depth(self) -> u32 {
         match self {
             Self::Easy => 1,
@@ -328,6 +334,9 @@ pub struct BaghStats {
     pub won_as_tigers: u32,
     pub lost_as_tigers: u32,
     pub draws: u32,
+    /// Games finished and won against each level: easy, medium, hard.
+    pub played_by_level: Vec<u32>,
+    pub won_by_level: Vec<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -404,7 +413,17 @@ impl BaghGame {
 }
 
 impl BaghStats {
-    pub fn record(&mut self, player: BaghPiece, outcome: BaghOutcome) {
+    pub fn record(&mut self, player: BaghPiece, level: BaghLevel, outcome: BaghOutcome) {
+        self.played_by_level.resize(BaghLevel::ALL.len(), 0);
+        self.won_by_level.resize(BaghLevel::ALL.len(), 0);
+        self.played_by_level[level.index()] += 1;
+        let won = matches!(
+            (player, outcome),
+            (BaghPiece::Goat, BaghOutcome::GoatsWin) | (BaghPiece::Tiger, BaghOutcome::TigersWin)
+        );
+        if won {
+            self.won_by_level[level.index()] += 1;
+        }
         match (player, outcome) {
             (_, BaghOutcome::Draw) => self.draws += 1,
             (BaghPiece::Goat, BaghOutcome::GoatsWin) => self.won_as_goats += 1,
@@ -522,5 +541,19 @@ mod tests {
         let game = BaghGame::new(BaghPiece::Tiger, BaghLevel::Easy, 2);
         assert_eq!(game.board.goats_in_hand, GOATS - 1);
         assert_eq!(game.board.turn, BaghPiece::Tiger);
+    }
+
+    #[test]
+    fn the_record_keeps_each_level_apart() {
+        let mut stats = BaghStats::default();
+        stats.record(BaghPiece::Goat, BaghLevel::Hard, BaghOutcome::GoatsWin);
+        stats.record(BaghPiece::Tiger, BaghLevel::Hard, BaghOutcome::GoatsWin);
+        stats.record(BaghPiece::Tiger, BaghLevel::Easy, BaghOutcome::Draw);
+        assert_eq!(stats.played_by_level, [1, 0, 2]);
+        assert_eq!(stats.won_by_level, [0, 0, 1]);
+        assert_eq!(
+            (stats.won_as_goats, stats.lost_as_tigers, stats.draws),
+            (1, 1, 1)
+        );
     }
 }

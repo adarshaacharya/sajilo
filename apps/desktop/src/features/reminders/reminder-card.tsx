@@ -220,6 +220,19 @@ export function ReminderCard() {
     close(null);
   };
 
+  const moreButton = (
+    <button
+      type="button"
+      onClick={() => setOptions((open) => !open)}
+      aria-expanded={options}
+      aria-label={t("reminder.options")}
+      title={t("reminder.options")}
+      className="reminder-card__more"
+    >
+      <Icon name="ellipsis" className="size-3.5" />
+    </button>
+  );
+
   return (
     <div
       key={`${reminder.id}.${shakes}`}
@@ -228,45 +241,50 @@ export function ReminderCard() {
       role="alert"
       data-tauri-drag-region
     >
-      <div className="flex items-start gap-3" data-tauri-drag-region>
-        <span className="break-card__icon" data-tauri-drag-region>
-          <Icon name={ICONS[reminder.kind]} className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1" data-tauri-drag-region>
-          {/* A festival or holiday title already says what it is. */}
-          {(!titleKey || view.preview) && (
-            <p className="break-card__eyebrow" data-tauri-drag-region>
-              {!titleKey && (quiz ? reminder.title : t(KIND_LABELS[reminder.kind]))}
+      {quiz ? (
+        // The question is the whole card: a slim header line, then the
+        // question and its answers across the full width.
+        <div className="space-y-2" data-tauri-drag-region>
+          <div className="flex items-center gap-2" data-tauri-drag-region>
+            <span className="reminder-card__badge" data-tauri-drag-region>
+              <Icon name={ICONS.quiz} className="size-3.5" />
+            </span>
+            <p
+              className="break-card__eyebrow reminder-card__heading min-w-0 flex-1"
+              data-tauri-drag-region
+            >
+              {reminder.title}
               {view.preview && <span className="break-card__example">{t("break.example")}</span>}
             </p>
-          )}
-          {/* The question is the quiz card's title; its label says what it is. */}
-          {!quiz && (
+            {moreButton}
+          </div>
+          <CardQuestion fallback={reminder.body} onAnswered={markQuizDone} t={t} />
+        </div>
+      ) : (
+        <div className="flex items-start gap-3" data-tauri-drag-region>
+          <span className="break-card__icon" data-tauri-drag-region>
+            <Icon name={ICONS[reminder.kind]} className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1" data-tauri-drag-region>
+            {/* A festival or holiday title already says what it is. */}
+            {(!titleKey || view.preview) && (
+              <p className="break-card__eyebrow" data-tauri-drag-region>
+                {!titleKey && t(KIND_LABELS[reminder.kind])}
+                {view.preview && <span className="break-card__example">{t("break.example")}</span>}
+              </p>
+            )}
             <p className="break-card__title" data-tauri-drag-region>
               {titleKey ? t(titleKey) : reminder.title}
             </p>
-          )}
-          {quiz ? (
-            <CardQuestion fallback={reminder.body} onAnswered={markQuizDone} t={t} />
-          ) : (
-            reminder.body && (
+            {reminder.body && (
               <p className="break-card__body" data-tauri-drag-region>
                 {reminder.body}
               </p>
-            )
-          )}
+            )}
+          </div>
+          {moreButton}
         </div>
-        <button
-          type="button"
-          onClick={() => setOptions((open) => !open)}
-          aria-expanded={options}
-          aria-label={t("reminder.options")}
-          title={t("reminder.options")}
-          className="reminder-card__more"
-        >
-          <Icon name="ellipsis" className="size-3.5" />
-        </button>
-      </div>
+      )}
 
       {options ? (
         <div className="reminder-card__options">
@@ -350,7 +368,7 @@ function CardQuestion({
     return <p className="break-card__body">{fallback}</p>;
   }
   return (
-    <div className="mt-1">
+    <div>
       <DailyQuestion
         daily={daily}
         busy={busy}

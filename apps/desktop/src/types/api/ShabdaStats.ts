@@ -2,10 +2,6 @@
 
 export type ShabdaStats = { played: number, won: number, 
 /**
- * Days won in a row, up to the last one finished.
+ * Words found in a row, up to the last one finished.
  */
-streak: number, bestStreak: number, 
-/**
- * Wins by the number of guesses they took: one to six.
- */
-distribution: Array<number>, };
+run: number, bestRun: number, };

@@ -5,6 +5,7 @@ import type { BaghLevel } from "../../../types/api/BaghLevel";
 import type { BaghPiece } from "../../../types/api/BaghPiece";
 import type { BaghView } from "../../../types/api/BaghView";
 import { useBagh } from "../games-data";
+import { StatTiles } from "./stat-tiles";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
@@ -170,9 +171,21 @@ function Start({
     ((outcome === "goatsWin" && view.game?.player === "goat") ||
       (outcome === "tigersWin" && view.game?.player === "tiger"));
   const { stats } = view;
+  const wins = stats.wonAsGoats + stats.wonAsTigers;
+  const played = wins + stats.lostAsGoats + stats.lostAsTigers + stats.draws;
 
   return (
     <div className="space-y-2.5">
+      {played > 0 && (
+        <StatTiles
+          stats={[
+            { value: `${wins}/${played}`, label: t("bagh.stat.won") },
+            { value: `${stats.wonAsGoats}–${stats.lostAsGoats}`, label: t("bagh.stat.goats") },
+            { value: `${stats.wonAsTigers}–${stats.lostAsTigers}`, label: t("bagh.stat.tigers") },
+            { value: String(stats.draws), label: t("bagh.stat.draws") },
+          ]}
+        />
+      )}
       {outcome && (
         <section className="surface-card p-3 text-center">
           <p className="text-[24px]">{outcome === "draw" ? "🤝" : won ? "🎉" : "😅"}</p>
@@ -207,15 +220,22 @@ function Start({
         <div className="space-y-1">
           <p className="text-[10.5px] text-text-muted">{t("bagh.level")}</p>
           <div className="grid grid-cols-3 gap-1.5">
-            {LEVELS.map((each) => (
+            {LEVELS.map((each, index) => (
               <button
                 key={each}
                 type="button"
                 aria-pressed={level === each}
                 onClick={() => setLevel(each)}
-                className={`toggle-chip ${level === each ? "toggle-chip--on" : "toggle-chip--off"}`}
+                className={`toggle-chip flex-col ${level === each ? "toggle-chip--on" : "toggle-chip--off"}`}
               >
-                {t(LEVEL_KEYS[each])}
+                <span>{t(LEVEL_KEYS[each])}</span>
+                {(stats.playedByLevel[index] ?? 0) > 0 && (
+                  <span className="text-[9.5px] font-normal tabular-nums opacity-70">
+                    {t("bagh.level-record")
+                      .replace("{won}", String(stats.wonByLevel[index] ?? 0))
+                      .replace("{played}", String(stats.playedByLevel[index] ?? 0))}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -228,16 +248,6 @@ function Start({
           {outcome ? t("bagh.again") : t("bagh.start")}
         </button>
       </section>
-      {stats.wonAsGoats + stats.lostAsGoats + stats.wonAsTigers + stats.lostAsTigers + stats.draws >
-        0 && (
-        <p className="px-0.5 text-[10.5px] text-text-muted">
-          {t("bagh.record")
-            .replace("{gw}", String(stats.wonAsGoats))
-            .replace("{gl}", String(stats.lostAsGoats))
-            .replace("{tw}", String(stats.wonAsTigers))
-            .replace("{tl}", String(stats.lostAsTigers))}
-        </p>
-      )}
     </div>
   );
 }

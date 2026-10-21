@@ -171,5 +171,691 @@
     "नगर",
     "मुस्कान",
     "मौसम"
-  ]
+  ],
+  "clues": {
+    "गमला": {
+      "en": "A pot for growing flowers",
+      "ne": "फूल रोप्ने भाँडो"
+    },
+    "इज्जत": {
+      "en": "Honour, respect",
+      "ne": "मान, प्रतिष्ठा"
+    },
+    "नास्पाती": {
+      "en": "A juicy fruit, a bit like an apple",
+      "ne": "स्याउजस्तै रसिलो फल"
+    },
+    "सुन्दर": {
+      "en": "Beautiful, lovely to look at",
+      "ne": "राम्रो, देख्दा मन पर्ने"
+    },
+    "दराज": {
+      "en": "A pull-out box in a desk",
+      "ne": "टेबलभित्र तानेर खोल्ने खोपा"
+    },
+    "कमल": {
+      "en": "A flower that blooms in mud",
+      "ne": "हिलोमा फुल्ने फूल"
+    },
+    "चौतारी": {
+      "en": "A roadside resting platform",
+      "ne": "बाटोमा थकाइ मार्ने ठाउँ"
+    },
+    "कछुवा": {
+      "en": "A slow animal that carries its shell",
+      "ne": "खोल बोकेर बिस्तारै हिँड्ने जनावर"
+    },
+    "कलम": {
+      "en": "Something you write with",
+      "ne": "लेख्ने चिज"
+    },
+    "ओछ्यान": {
+      "en": "Where you sleep",
+      "ne": "सुत्ने ठाउँ"
+    },
+    "कपाल": {
+      "en": "It grows on your head",
+      "ne": "टाउकोमा उम्रने"
+    },
+    "मिठास": {
+      "en": "Sweetness",
+      "ne": "गुलियोपन, मीठो भाव"
+    },
+    "केराउ": {
+      "en": "Green seeds in a pod",
+      "ne": "कोसाभित्रको हरियो दाना"
+    },
+    "पोखरी": {
+      "en": "A small pond",
+      "ne": "सानो ताल"
+    },
+    "साहस": {
+      "en": "Courage",
+      "ne": "नडराउने गुण"
+    },
+    "धनिया": {
+      "en": "A green herb for curries",
+      "ne": "तरकारीमा हाल्ने हरियो पात"
+    },
+    "पसल": {
+      "en": "A place to buy things",
+      "ne": "सामान किन्ने ठाउँ"
+    },
+    "पहेँलो": {
+      "en": "The colour of turmeric and gold",
+      "ne": "बेसार र सुनको रङ"
+    },
+    "पटुका": {
+      "en": "A cloth wrapped round the waist",
+      "ne": "कम्मरमा बेर्ने कपडा"
+    },
+    "कुकुर": {
+      "en": "A pet that guards the house",
+      "ne": "घर कुर्ने पाल्तु जनावर"
+    },
+    "रचना": {
+      "en": "A creation, a composition",
+      "ne": "लेखेर वा बनाएर तयार पारिएको कृति"
+    },
+    "गुलाफ": {
+      "en": "A fragrant flower with thorns",
+      "ne": "काँडा भएको सुगन्धित फूल"
+    },
+    "इनार": {
+      "en": "A deep hole for drawing water",
+      "ne": "पानी झिक्ने गहिरो खाल्डो"
+    },
+    "धरान": {
+      "en": "A well-known town in Sunsari",
+      "ne": "सुनसरीको चर्चित सहर"
+    },
+    "बिरालो": {
+      "en": "The animal that says meow",
+      "ne": "म्याउँ गर्ने जनावर"
+    },
+    "फलाम": {
+      "en": "A metal that rusts",
+      "ne": "खिया लाग्ने धातु"
+    },
+    "दमाहा": {
+      "en": "The big drum of the naumati baja",
+      "ne": "नौमती बाजाको ठूलो ढोल"
+    },
+    "कलश": {
+      "en": "A water pot used in worship",
+      "ne": "पूजामा पानी राखिने भाँडो"
+    },
+    "फागुन": {
+      "en": "The month of Holi",
+      "ne": "होली पर्ने महिना"
+    },
+    "साउन": {
+      "en": "The month of henna and green bangles",
+      "ne": "मेहन्दी र हरियो चुराको महिना"
+    },
+    "पाहुना": {
+      "en": "A guest at home",
+      "ne": "घरमा आउने अतिथि"
+    },
+    "केतली": {
+      "en": "A pot for making tea",
+      "ne": "चिया पकाउने भाँडो"
+    },
+    "अनार": {
+      "en": "A fruit full of red seeds",
+      "ne": "रातो दानाले भरिएको फल"
+    },
+    "अक्षर": {
+      "en": "A letter of the alphabet",
+      "ne": "वर्णमालाको एक चिन्ह"
+    },
+    "चाहना": {
+      "en": "A wish, a desire",
+      "ne": "इच्छा"
+    },
+    "लोसार": {
+      "en": "Tamang, Gurung and Sherpa new year",
+      "ne": "तामाङ, गुरुङ, शेर्पाको नयाँ वर्ष"
+    },
+    "गलैंचा": {
+      "en": "A patterned floor covering",
+      "ne": "भुइँमा ओछ्याउने बुट्टेदार कपडा"
+    },
+    "नेपाल": {
+      "en": "Our country",
+      "ne": "हाम्रो देश"
+    },
+    "गरम": {
+      "en": "The opposite of cold",
+      "ne": "चिसोको उल्टो"
+    },
+    "कम्बल": {
+      "en": "Something you cover up with in winter",
+      "ne": "जाडोमा ओढ्ने"
+    },
+    "सिपाही": {
+      "en": "A soldier",
+      "ne": "सेनाको जवान"
+    },
+    "कविता": {
+      "en": "Writing with rhythm and verse",
+      "ne": "लयमा लेखिएको रचना"
+    },
+    "समोसा": {
+      "en": "A triangular snack stuffed with potato",
+      "ne": "आलु भरिएको तिनकुने खाजा"
+    },
+    "आकाश": {
+      "en": "The blue above us",
+      "ne": "माथि नीलो देखिने"
+    },
+    "धनुष": {
+      "en": "A weapon that shoots arrows",
+      "ne": "काँड हान्ने हतियार"
+    },
+    "गणना": {
+      "en": "Counting",
+      "ne": "गन्ने काम"
+    },
+    "बजार": {
+      "en": "Where people buy and sell",
+      "ne": "किनबेच हुने ठाउँ"
+    },
+    "जनता": {
+      "en": "The people of a country",
+      "ne": "देशका नागरिक"
+    },
+    "खबर": {
+      "en": "News",
+      "ne": "समाचार, सूचना"
+    },
+    "बेलुका": {
+      "en": "After afternoon, before night",
+      "ne": "दिउँसोपछि, रातअघि"
+    },
+    "गर्दन": {
+      "en": "What joins the head to the body",
+      "ne": "टाउको र जीउ जोड्ने भाग"
+    },
+    "इलाम": {
+      "en": "A district famous for tea gardens",
+      "ne": "चियाबारीका लागि चर्चित जिल्ला"
+    },
+    "पातलो": {
+      "en": "The opposite of thick",
+      "ne": "मोटोको उल्टो"
+    },
+    "पुतली": {
+      "en": "An insect with colourful wings",
+      "ne": "रङ्गीन पखेटा भएको कीरा"
+    },
+    "सारङ्गी": {
+      "en": "The fiddle of the Gandharva singers",
+      "ne": "गन्धर्वले बजाउने बाजा"
+    },
+    "भ्यागुतो": {
+      "en": "A jumping creature that croaks",
+      "ne": "टर्र टर्र गर्ने उफ्रने जीव"
+    },
+    "इमान": {
+      "en": "Honesty, integrity",
+      "ne": "सच्चाइ, नैतिकता"
+    },
+    "खिचडी": {
+      "en": "Rice and lentils cooked together",
+      "ne": "चामल र दाल सँगै पकाएको"
+    },
+    "गिलास": {
+      "en": "Something you drink water from",
+      "ne": "पानी पिउने भाँडो"
+    },
+    "कात्तिक": {
+      "en": "The month of Tihar",
+      "ne": "तिहार पर्ने महिना"
+    },
+    "भतिजा": {
+      "en": "A brother's son",
+      "ne": "दाजुभाइको छोरा"
+    },
+    "बादल": {
+      "en": "It brings rain from the sky",
+      "ne": "पानी पार्ने आकाशको"
+    },
+    "उखान": {
+      "en": "An old saying full of wisdom",
+      "ne": "पुर्खाको छोटो ज्ञानको भनाइ"
+    },
+    "मादल": {
+      "en": "A drum played on both ends",
+      "ne": "दुवैतिर बजाइने ढोल"
+    },
+    "पैताला": {
+      "en": "The underside of the foot",
+      "ne": "खुट्टाको तल्लो भाग"
+    },
+    "कठिन": {
+      "en": "The opposite of easy",
+      "ne": "सजिलोको उल्टो"
+    },
+    "समुद्र": {
+      "en": "A vast body of salty water",
+      "ne": "नुनिलो पानीको ठूलो भाग"
+    },
+    "कोइली": {
+      "en": "A bird that sings sweetly in spring",
+      "ne": "वसन्तमा मीठो गाउने चरा"
+    },
+    "हरिण": {
+      "en": "A fast animal with antlers",
+      "ne": "सिङ भएको छिटो दौडने जनावर"
+    },
+    "चिउरा": {
+      "en": "Beaten, flattened rice",
+      "ne": "कुटेर चेप्टो पारेको चामल"
+    },
+    "किसान": {
+      "en": "Someone who farms",
+      "ne": "खेती गर्ने मान्छे"
+    },
+    "बतास": {
+      "en": "Wind",
+      "ne": "हावा"
+    },
+    "दैलेख": {
+      "en": "A district in Karnali",
+      "ne": "कर्णालीको एक जिल्ला"
+    },
+    "हरियो": {
+      "en": "The colour of leaves",
+      "ne": "पातको रङ"
+    },
+    "जमिन": {
+      "en": "Land, ground",
+      "ne": "भुइँ, जग्गा"
+    },
+    "जवाफ": {
+      "en": "The reply to a question",
+      "ne": "प्रश्नको उत्तर"
+    },
+    "हजुर": {
+      "en": "A respectful way to say 'you'",
+      "ne": "आदर गरेर भनिने 'तपाईं'"
+    },
+    "निधार": {
+      "en": "Where tika goes, above the eyes",
+      "ne": "आँखामाथि टीका लगाउने ठाउँ"
+    },
+    "नरम": {
+      "en": "The opposite of hard",
+      "ne": "कडाको उल्टो"
+    },
+    "गहना": {
+      "en": "Jewellery",
+      "ne": "लगाइने सुन, चाँदीका सामान"
+    },
+    "भँगेरा": {
+      "en": "A small bird seen around houses",
+      "ne": "घरवरिपरि देखिने सानो चरा"
+    },
+    "महल": {
+      "en": "A king's grand house",
+      "ne": "राजाको ठूलो घर"
+    },
+    "नमक": {
+      "en": "Salt",
+      "ne": "नुन"
+    },
+    "समय": {
+      "en": "What a clock shows",
+      "ne": "घडीले देखाउने"
+    },
+    "योजना": {
+      "en": "A plan",
+      "ne": "गर्ने कामको तयारी"
+    },
+    "खजाना": {
+      "en": "Hidden riches",
+      "ne": "लुकाइएको धन"
+    },
+    "सम्झना": {
+      "en": "A memory",
+      "ne": "याद"
+    },
+    "डाक्टर": {
+      "en": "Someone who treats the sick",
+      "ne": "बिरामी जाँच्ने मान्छे"
+    },
+    "सुगन्ध": {
+      "en": "A pleasant smell",
+      "ne": "मीठो बास्ना"
+    },
+    "नातिनी": {
+      "en": "A granddaughter",
+      "ne": "छोरा वा छोरीकी छोरी"
+    },
+    "मितेरी": {
+      "en": "A bond of sworn friendship",
+      "ne": "मित लगाएर गाँसिएको साइनो"
+    },
+    "जङ्गल": {
+      "en": "A place full of trees",
+      "ne": "रुखैरुख भएको ठाउँ"
+    },
+    "कागज": {
+      "en": "Sheets you write on",
+      "ne": "लेख्ने पाना"
+    },
+    "प्रार्थना": {
+      "en": "A request made to god",
+      "ne": "भगवान्सँग गरिने बिन्ती"
+    },
+    "तलाउ": {
+      "en": "A pool of standing water",
+      "ne": "पानी जम्मा भएको ठाउँ"
+    },
+    "अङ्गुर": {
+      "en": "A small fruit that grows in bunches",
+      "ne": "झुप्पामा फल्ने सानो फल"
+    },
+    "मुकुट": {
+      "en": "What a king wears on his head",
+      "ne": "राजाले शिरमा लगाउने"
+    },
+    "तुलना": {
+      "en": "Comparing two things",
+      "ne": "दुई कुरा दाँज्ने काम"
+    },
+    "कागती": {
+      "en": "A sour yellow fruit",
+      "ne": "अमिलो पहेँलो फल"
+    },
+    "साबुन": {
+      "en": "Used for washing hands",
+      "ne": "हात धुन प्रयोग हुने"
+    },
+    "घटना": {
+      "en": "Something that happened",
+      "ne": "भएको कुनै कुरा"
+    },
+    "सन्देश": {
+      "en": "A message",
+      "ne": "पठाइएको खबर"
+    },
+    "झरना": {
+      "en": "Water falling from a height",
+      "ne": "माथिबाट खस्ने पानी"
+    },
+    "मङ्सिर": {
+      "en": "The month of the rice harvest",
+      "ne": "धान काट्ने महिना"
+    },
+    "बतासा": {
+      "en": "A light sugar sweet",
+      "ne": "चिनीबाट बनेको हलुका मिठाई"
+    },
+    "परेवा": {
+      "en": "A bird that coos",
+      "ne": "गुटुर गुटुर गर्ने चरा"
+    },
+    "पोखरा": {
+      "en": "The city of Phewa Lake",
+      "ne": "फेवातालको सहर"
+    },
+    "पहाड": {
+      "en": "The hills between the mountains and the Terai",
+      "ne": "हिमाल र तराईबीचको भूभाग"
+    },
+    "सरल": {
+      "en": "Simple",
+      "ne": "सजिलो"
+    },
+    "सडक": {
+      "en": "A road for vehicles",
+      "ne": "गाडी गुड्ने बाटो"
+    },
+    "मुरली": {
+      "en": "Krishna's flute",
+      "ne": "कृष्णको बाजा"
+    },
+    "कचौरा": {
+      "en": "A small bowl for lentil soup",
+      "ne": "दाल राख्ने सानो भाँडो"
+    },
+    "तिहार": {
+      "en": "The festival of lamps and Bhai Tika",
+      "ne": "दियो र भाइटीकाको चाड"
+    },
+    "कलेज": {
+      "en": "Where you study after school",
+      "ne": "स्कुलपछि पढ्ने ठाउँ"
+    },
+    "लसुन": {
+      "en": "A strong-smelling spice",
+      "ne": "कडा गन्ध आउने मसला"
+    },
+    "तस्बिर": {
+      "en": "A picture",
+      "ne": "फोटो"
+    },
+    "चटनी": {
+      "en": "A spicy relish eaten with food",
+      "ne": "खानासँग खाइने पिरो अमिलो"
+    },
+    "सुन्तला": {
+      "en": "A juicy citrus fruit of winter",
+      "ne": "जाडोमा पाक्ने रसिलो फल"
+    },
+    "पुरानो": {
+      "en": "The opposite of new",
+      "ne": "नयाँको उल्टो"
+    },
+    "तराजु": {
+      "en": "Something that weighs things",
+      "ne": "तौल जोख्ने"
+    },
+    "सिरानी": {
+      "en": "A soft thing to rest your head on",
+      "ne": "टाउको राख्ने नरम चिज"
+    },
+    "बरफ": {
+      "en": "Frozen water",
+      "ne": "जमेको पानी"
+    },
+    "छहरा": {
+      "en": "A small waterfall",
+      "ne": "सानो झरना"
+    },
+    "रुपैयाँ": {
+      "en": "Nepal's money",
+      "ne": "नेपालको पैसा"
+    },
+    "चमेली": {
+      "en": "A white fragrant flower",
+      "ne": "सेतो सुगन्धित फूल"
+    },
+    "गजल": {
+      "en": "A song form of Urdu origin",
+      "ne": "उर्दू मूलको गीत"
+    },
+    "फापर": {
+      "en": "A grain made into flatbread",
+      "ne": "रोटी बनाइने अन्न"
+    },
+    "चप्पल": {
+      "en": "Light footwear",
+      "ne": "हल्का जुत्ता"
+    },
+    "मकल": {
+      "en": "A pot that holds burning coal",
+      "ne": "आगो राख्ने भाँडो"
+    },
+    "करेला": {
+      "en": "A bitter vegetable",
+      "ne": "तितो तरकारी"
+    },
+    "बाँदर": {
+      "en": "A playful tree-climbing animal",
+      "ne": "रुख चढ्ने चञ्चल जनावर"
+    },
+    "पिपल": {
+      "en": "A tree planted at resting platforms",
+      "ne": "चौतारीमा रोपिने रुख"
+    },
+    "टेबल": {
+      "en": "Furniture with legs to put things on",
+      "ne": "सामान राख्ने खुट्टे फर्निचर"
+    },
+    "बिहान": {
+      "en": "The start of the day",
+      "ne": "दिनको सुरु"
+    },
+    "संसार": {
+      "en": "The world",
+      "ne": "विश्व, दुनियाँ"
+    },
+    "बुहारी": {
+      "en": "A son's wife",
+      "ne": "छोराकी श्रीमती"
+    },
+    "मन्दिर": {
+      "en": "A house of god",
+      "ne": "देवताको घर"
+    },
+    "हिमाल": {
+      "en": "A tall snow-covered mountain",
+      "ne": "हिउँले ढाकिएको अग्लो पर्वत"
+    },
+    "बहिनी": {
+      "en": "A younger sister",
+      "ne": "आफूभन्दा कान्छी चेली"
+    },
+    "असार": {
+      "en": "The month of rice planting",
+      "ne": "धान रोप्ने महिना"
+    },
+    "व्यापार": {
+      "en": "Trade, business",
+      "ne": "किनबेचको काम"
+    },
+    "कल्पना": {
+      "en": "Imagination",
+      "ne": "मनमा बनाइएको चित्र"
+    },
+    "तनहुँ": {
+      "en": "The district with Damauli as its HQ",
+      "ne": "दमौली सदरमुकाम भएको जिल्ला"
+    },
+    "बैसाख": {
+      "en": "The month the new year begins",
+      "ne": "नयाँ वर्ष सुरु हुने महिना"
+    },
+    "सूचना": {
+      "en": "Information, a notice",
+      "ne": "जानकारी"
+    },
+    "बालुवा": {
+      "en": "Fine grains from a river bed",
+      "ne": "खोलाको मसिनो कण"
+    },
+    "शिक्षक": {
+      "en": "Someone who teaches",
+      "ne": "पढाउने मान्छे"
+    },
+    "लहर": {
+      "en": "A wave",
+      "ne": "पानीको छाल"
+    },
+    "किताब": {
+      "en": "Something you read",
+      "ne": "पढ्ने पुस्तक"
+    },
+    "समाज": {
+      "en": "A community of people",
+      "ne": "मानिसहरूको समूह"
+    },
+    "रेडियो": {
+      "en": "A device for songs and news",
+      "ne": "गीत र समाचार सुनिने यन्त्र"
+    },
+    "जलेबी": {
+      "en": "A spiral syrupy sweet",
+      "ne": "घुमाउरो रसिलो मिठाई"
+    },
+    "बाँसुरी": {
+      "en": "An instrument made of bamboo",
+      "ne": "बाँसबाट बनेको बाजा"
+    },
+    "सुँगुर": {
+      "en": "A farm animal that loves mud",
+      "ne": "हिलोमा रमाउने घरपालुवा जनावर"
+    },
+    "खरायो": {
+      "en": "An animal with long ears",
+      "ne": "लामो कान भएको जनावर"
+    },
+    "गोरखा": {
+      "en": "Birthplace of Prithvi Narayan Shah",
+      "ne": "पृथ्वीनारायण शाहको जन्मथलो"
+    },
+    "विश्वास": {
+      "en": "Trust",
+      "ne": "भरोसा"
+    },
+    "अचार": {
+      "en": "A tangy pickle eaten with meals",
+      "ne": "खानासँग खाइने अमिलो पिरो"
+    },
+    "पकौडा": {
+      "en": "A snack dipped in gram batter and fried",
+      "ne": "बेसनमा डुबाएर तारेको खाजा"
+    },
+    "मसला": {
+      "en": "What adds flavour to food",
+      "ne": "खानामा स्वाद थप्ने"
+    },
+    "चितुवा": {
+      "en": "A spotted big cat",
+      "ne": "थोप्ले बाघ"
+    },
+    "सहर": {
+      "en": "A settlement bigger than a village",
+      "ne": "गाउँभन्दा ठूलो बस्ती"
+    },
+    "कपडा": {
+      "en": "What you wear",
+      "ne": "लगाउने लुगा"
+    },
+    "सितार": {
+      "en": "A stringed classical instrument",
+      "ne": "तार भएको शास्त्रीय बाजा"
+    },
+    "भावना": {
+      "en": "A feeling",
+      "ne": "मनको अनुभूति"
+    },
+    "अदुवा": {
+      "en": "A spicy root added to tea",
+      "ne": "चियामा हालिने पिरो जरा"
+    },
+    "बेसार": {
+      "en": "A yellow spice",
+      "ne": "पहेँलो मसला"
+    },
+    "सपना": {
+      "en": "What you see while asleep",
+      "ne": "सुतेको बेला देखिने"
+    },
+    "नगर": {
+      "en": "A town",
+      "ne": "सहर"
+    },
+    "मुस्कान": {
+      "en": "A smile",
+      "ne": "ओठमा आउने हाँसो"
+    },
+    "मौसम": {
+      "en": "Sunshine, rain and cold",
+      "ne": "घाम, पानी, जाडो"
+    }
+  }
 }
