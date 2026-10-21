@@ -12,6 +12,11 @@ type TFn = ReturnType<typeof useSettings>["t"];
 const ZONE_Y = 0.82;
 /** How fast the chungi falls at the start, in scene heights per second². */
 const GRAVITY = 1.7;
+/** Misses a run can take: an early kick or a drop costs one. */
+const LIVES = 3;
+/** After a miss the chungi waits at the top this long before it falls
+ * again; taps meanwhile are ignored, so one mistake costs one life. */
+const RESET_MS = 550;
 
 /** Faster by 4.5% a kick, up to 30 kicks in. */
 const gravity = (kicks: number) => GRAVITY * (1 + Math.min(kicks, 30) * 0.045);
@@ -39,6 +44,9 @@ type Ball = {
   turn: number;
   kicks: number;
   perfect: number;
+  lives: number;
+  /** Until when (performance.now) it waits at the top after a miss. */
+  heldUntil: number;
   random: () => number;
 };
 
@@ -59,6 +67,9 @@ export function Chungi({ t }: { t: TFn }) {
   const [result, setResult] = useState<ChungiView | null>(null);
   const [closed, setClosed] = useState(false);
   const [perfectFlash, setPerfectFlash] = useState(0);
+  const [lives, setLives] = useState(LIVES);
+  // Bumped on each life lost, so the scene flashes red once each time.
+  const [hit, setHit] = useState(0);
 
   const scene = useRef<HTMLDivElement>(null);
   const ballEl = useRef<HTMLDivElement>(null);
@@ -114,25 +125,53 @@ export function Chungi({ t }: { t: TFn }) {
       turn: 0,
       kicks: 0,
       perfect: 0,
+      lives: LIVES,
+      heldUntil: 0,
       random: seeded(seed % 4294967296),
     };
     setKicks(0);
     setPerfectFlash(0);
+    setLives(LIVES);
+    setHit(0);
     setMiss(null);
     setResult(null);
     setPhase("playing");
     draw();
   }, [data?.dailySeed, draw]);
 
+  /** A miss, early or dropped: one life fewer, and the run ends with the
+   * last. Either way the chungi starts again from the top after a pause, so
+   * the same mistake can never cost a second life. */
+  const lose = useCallback(
+    (why: "early" | "drop") => {
+      const b = ball.current;
+      if (!b) return;
+      b.lives -= 1;
+      setLives(b.lives);
+      setHit((n) => n + 1);
+      if (b.lives <= 0) {
+        void finish(why);
+        return;
+      }
+      b.x = 0.5;
+      b.y = 0.08;
+      b.vx = 0;
+      b.vy = 0;
+      b.heldUntil = performance.now() + RESET_MS;
+      draw();
+    },
+    [finish, draw],
+  );
+
   const kick = useCallback(() => {
     const b = ball.current;
     if (!b || runRef.current.phase !== "playing") return;
     // A tap while it's still going up is ignored, not counted against you.
-    if (b.vy < 0) return;
+    if (b.vy < 0 || performance.now() < b.heldUntil) return;
     const half = zoneHalf(b.kicks);
     const off = Math.abs(b.y - ZONE_Y);
     if (off > half) {
-      void finish("early");
+      lose("early");
       return;
     }
     const perfect = off <= half * 0.3;
@@ -153,9 +192,9 @@ export function Chungi({ t }: { t: TFn }) {
       void foot.offsetWidth;
       foot.classList.add("chungi-foot--kick");
     }
-  }, [finish]);
+  }, [lose]);
 
-  // The loop: fall, drift, bounce off the walls, and end on a drop.
+  // The loop: fall, drift, bounce off the walls; a drop costs a life.
   useEffect(() => {
     if (phase !== "playing") return;
     let frame = 0;
@@ -165,6 +204,11 @@ export function Chungi({ t }: { t: TFn }) {
       if (!b) return;
       const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
+      // Waiting at the top after a miss.
+      if (now < b.heldUntil) {
+        frame = requestAnimationFrame(step);
+        return;
+      }
       b.vy += gravity(b.kicks) * dt;
       b.y += b.vy * dt;
       b.x += b.vx * dt;
@@ -173,16 +217,16 @@ export function Chungi({ t }: { t: TFn }) {
         b.x = Math.min(Math.max(b.x, 0.12), 0.88);
       }
       b.turn += b.spin * dt;
-      draw();
       if (b.y > 1.02) {
-        void finish("drop");
-        return;
+        lose("drop");
+        if (b.lives <= 0) return;
       }
+      draw();
       frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
-  }, [phase, draw, finish]);
+  }, [phase, draw, lose]);
 
   // Space or Enter kicks; on the ready screen, starts.
   useEffect(() => {
@@ -232,6 +276,28 @@ export function Chungi({ t }: { t: TFn }) {
         </svg>
         <div className="chungi-wall" />
         <div className="chungi-ground" />
+
+        {/* What's left of the run's lives, in the corner. */}
+        <div
+          className="chungi-lives"
+          role="img"
+          aria-label={t("chungi.lives").replace("{n}", String(lives))}
+        >
+          {Array.from({ length: LIVES }, (_, life) => (
+            <span
+              // biome-ignore lint/suspicious/noArrayIndexKey: one heart per life, fixed
+              key={life}
+              className={`chungi-heart ${life < lives ? "" : "chungi-heart--gone"}`}
+            >
+              ♥
+            </span>
+          ))}
+        </div>
+        {hit > 0 && phase === "playing" && (
+          <span key={`hit${hit}`} className="chungi-hit" aria-hidden="true">
+            −1 ♥
+          </span>
+        )}
 
         <div className="chungi-hud">
           <span className="chungi-hud__count">{kicks}</span>

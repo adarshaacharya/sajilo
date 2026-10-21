@@ -71,19 +71,7 @@ export function ToolsHome({
     <div className="space-y-3 pt-0.5">
       <EmergencyStrip onOpen={() => onOpen("emergency", "phones")} />
 
-      <Group title={t("tools.everyday")}>
-        {everyday.map((row) => (
-          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
-        ))}
-        <StopwatchRow onOpen={() => onOpen("stopwatch")} />
-      </Group>
-
-      <Group title={t("tools.calculators")}>
-        {calculators.map((row) => (
-          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
-        ))}
-      </Group>
-
+      {/* Numbers and official sites first: what people come to Tools for. */}
       <Group title={t("tools.directory")}>
         <ToolRow
           row={{
@@ -103,6 +91,19 @@ export function ToolsHome({
           }}
           onOpen={() => onOpen("emergency", "websites")}
         />
+      </Group>
+
+      <Group title={t("tools.everyday")}>
+        {everyday.map((row) => (
+          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
+        ))}
+        <StopwatchRow onOpen={() => onOpen("stopwatch")} />
+      </Group>
+
+      <Group title={t("tools.calculators")}>
+        {calculators.map((row) => (
+          <ToolRow key={row.id} row={row} onOpen={() => onOpen(row.id)} />
+        ))}
       </Group>
     </div>
   );

@@ -42,10 +42,9 @@ pub struct NotificationOptions {
     /// only the switch that silences them all at once.
     #[serde(default = "enabled_by_default")]
     pub sip_payment: bool,
-    /// Today's rashifal for the user's own sign, at its time. Off until
-    /// asked for: it only means anything once a sign
-    /// is chosen, and the Rashifal tab offers it then.
-    #[serde(default)]
+    /// Today's rashifal for the user's own sign, at its time. On by
+    /// default; it only comes once a sign is chosen.
+    #[serde(default = "enabled_by_default")]
     pub daily_rashifal: bool,
     /// When the daily rashifal comes: that time, or the first moment back at
     /// the computer after it. `None` is 10:00. See `rashifal::reading_time`.
@@ -75,9 +74,9 @@ pub struct NotificationOptions {
     pub sajilo_greetings: bool,
     #[serde(default = "enabled_by_default")]
     pub sajilo_updates: bool,
-    #[serde(default)]
+    #[serde(default = "enabled_by_default")]
     pub sajilo_tips: bool,
-    #[serde(default)]
+    #[serde(default = "enabled_by_default")]
     pub sajilo_asks: bool,
     /// One quiz question a day, on a card. On for everyone; Games › Quiz
     /// and Settings turn it off.
@@ -170,7 +169,7 @@ impl Default for NotificationOptions {
             hour: default_hour(),
             ipo_closing_day: enabled_by_default(),
             sip_payment: enabled_by_default(),
-            daily_rashifal: false,
+            daily_rashifal: enabled_by_default(),
             rashifal_time: None,
             style: ReminderStyle::default(),
             day_plans: enabled_by_default(),
@@ -179,8 +178,8 @@ impl Default for NotificationOptions {
             sajilo_notices: enabled_by_default(),
             sajilo_greetings: enabled_by_default(),
             sajilo_updates: enabled_by_default(),
-            sajilo_tips: false,
-            sajilo_asks: false,
+            sajilo_tips: enabled_by_default(),
+            sajilo_asks: enabled_by_default(),
             daily_quiz: enabled_by_default(),
             quiet: QuietHours::default(),
         }

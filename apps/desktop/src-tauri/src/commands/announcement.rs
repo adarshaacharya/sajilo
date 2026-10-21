@@ -453,8 +453,10 @@ mod tests {
             "urgent always pops up"
         );
 
-        let options = NotificationOptions::default();
-        assert!(!tip.allowed_by(&options), "tips are opt-in");
+        let mut options = NotificationOptions::default();
+        assert!(tip.allowed_by(&options), "tips are on by default");
         assert!(update.allowed_by(&options));
+        options.sajilo_tips = false;
+        assert!(!tip.allowed_by(&options), "and stay off once switched off");
     }
 }

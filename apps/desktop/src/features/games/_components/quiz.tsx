@@ -47,12 +47,15 @@ export function Quiz({ t }: { t: TFn }) {
           <span>
             {t(TOPIC_KEYS[q.category])} · {q.number}/{q.total}
           </span>
+          {/* Leaves the round for the topic list; what was answered still
+              counts as seen. */}
           <button
             type="button"
             onClick={() => void act(api.quizQuit())}
-            className="hover:text-text-secondary"
+            className="flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-text-secondary transition-colors hover:border-[color:var(--color-accent-mark)] hover:text-text"
           >
-            {t("quiz.quit")}
+            <Icon name="sliders" className="size-3" />
+            {t("quiz.change-topic")}
           </button>
         </div>
         <div className="h-1 overflow-hidden rounded-full bg-[color:var(--color-divider)]">

@@ -4668,12 +4668,11 @@ input[type="search"]::-webkit-search-decoration {
 }
 .chungi-hud {
   position: absolute;
-  top: 10px;
-  left: 0;
-  right: 0;
+  top: 8px;
+  left: 12px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   pointer-events: none;
   color: #1d1a16;
 }
@@ -4681,7 +4680,7 @@ input[type="search"]::-webkit-search-decoration {
   color: #fffdf6;
 }
 .chungi-hud__count {
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -4800,5 +4799,59 @@ input[type="search"]::-webkit-search-decoration {
   .chungi-foot--kick,
   .chungi-perfect {
     animation: none;
+  }
+}
+
+/* चुङ्गी's lives: three hearts in the corner; a lost one fades, and the
+   scene flashes red with a "−1 ♥" that floats away. */
+.chungi-lives {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  gap: 3px;
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
+.chungi-heart {
+  color: #e2453a;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.25);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.chungi-heart--gone {
+  opacity: 0.25;
+  transform: scale(0.8);
+}
+.chungi-hit {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 30%;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fffdf6;
+  text-shadow: 0 1px 0 #1d1a16;
+  pointer-events: none;
+  animation: chungi-hit 0.7s ease-out forwards;
+}
+@keyframes chungi-hit {
+  from {
+    background: rgb(226 69 58 / 0.35);
+    opacity: 1;
+  }
+  to {
+    background: rgb(226 69 58 / 0);
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chungi-hit {
+    animation: none;
+    opacity: 0;
   }
 }

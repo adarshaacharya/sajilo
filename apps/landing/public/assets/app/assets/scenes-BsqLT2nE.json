@@ -37308,7 +37308,7 @@
     },
     "get_notification_options": {
       "dailyQuiz": true,
-      "dailyRashifal": false,
+      "dailyRashifal": true,
       "dayPlans": true,
       "eveOfFestival": true,
       "eveOfPublicHoliday": true,
@@ -37328,10 +37328,10 @@
         }
       },
       "rashifalTime": null,
-      "sajiloAsks": false,
+      "sajiloAsks": true,
       "sajiloGreetings": true,
       "sajiloNotices": true,
-      "sajiloTips": false,
+      "sajiloTips": true,
       "sajiloUpdates": true,
       "sipPayment": true,
       "style": "card"

@@ -1562,7 +1562,6 @@
   "quiz.card": "Ten questions about Nepal. About two minutes.",
   "quiz.card-playing": "A round is under way. Pick up where you left it.",
   "quiz.card-best": "Best round so far: {best}/10.",
-  "quiz.quit": "Leave round",
   "quiz.next": "Next question",
   "quiz.see-score": "See score",
   "quiz.perfect": "All right! Perfect round.",
@@ -1709,7 +1708,7 @@
   "chungi.card": "Keep the chungi in the air, one tap at a time.",
   "chungi.card-best": "Your best: {n} kicks. Beat it?",
   "chungi.ready": "Ready for a kick?",
-  "chungi.how": "Tap anywhere, or press Space, when the chungi falls into the glow by your foot. Too early, or let it drop, and the run ends.",
+  "chungi.how": "Tap anywhere, or press Space, when the chungi falls into the glow by your foot. Too early, or a drop, costs one of your 3 lives.",
   "chungi.classic": "Classic",
   "chungi.daily": "Today's challenge",
   "chungi.start": "Start",
@@ -1719,10 +1718,12 @@
   "chungi.perfect": "Perfect!",
   "chungi.kicks": "{n} kicks",
   "chungi.new-best": "New best: {n} kicks!",
-  "chungi.early": "Kicked too early.",
-  "chungi.drop": "It hit the ground.",
+  "chungi.early": "Kicked too early on your last life.",
+  "chungi.drop": "It hit the ground on your last life.",
   "chungi.stat.best": "Best",
   "chungi.stat.today": "Today",
   "chungi.stat.perfect": "Perfect",
-  "chungi.stat.played": "Played"
+  "chungi.stat.played": "Played",
+  "chungi.lives": "{n} lives left",
+  "quiz.change-topic": "Change topic"
 }
