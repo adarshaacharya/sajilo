@@ -1,3 +1,29 @@
 {
-  "notices": []
+  "notices": [
+    {
+      "id": "linux-update-by-hand-0-1-36",
+      "level": "important",
+      "platforms": [
+        "linux"
+      ],
+      "maxVersion": "0.1.35",
+      "expiresAt": "2027-01-31T00:00:00Z",
+      "title": {
+        "en": "Update Sajilo once by hand",
+        "ne": "सजिलो एकपटक आफैं अपडेट गर्नुहोस्"
+      },
+      "body": {
+        "en": "Sajilo 0.1.36 fixes updates on Linux, but this version can't install it by itself. Run the install command again, or download the new package. After that, updates arrive on their own.",
+        "ne": "सजिलो ०.१.३६ ले लिनक्समा अपडेट ठीक गर्छ, तर यो भर्सनले आफैं इन्स्टल गर्न सक्दैन। इन्स्टल कमान्ड फेरि चलाउनुहोस्, वा नयाँ प्याकेज डाउनलोड गर्नुहोस्। त्यसपछि अपडेट आफैं आउँछन्।"
+      },
+      "action": {
+        "url": "https://sajilo.fyi/docs/install-linux.html",
+        "label": {
+          "en": "How to update",
+          "ne": "कसरी अपडेट गर्ने"
+        }
+      },
+      "category": "update"
+    }
+  ]
 }

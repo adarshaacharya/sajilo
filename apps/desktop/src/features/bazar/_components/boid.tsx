@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CONTROL, CONTROL_LABEL } from "../../../shared/components/control";
+import { CONTROL } from "../../../shared/components/control";
 import { Icon } from "../../../shared/components/icon";
 import { StateBanner } from "../../../shared/components/state-banner";
 import type { useSettings } from "../../../shared/context/settings-context";
@@ -441,9 +441,22 @@ function Manage({
       {full ? (
         <p className="text-[11px] text-text-muted">{t("boid.full")}</p>
       ) : (
-        <div className="flex items-end gap-1.5">
-          <label className="block w-[34%] min-w-0">
-            <span className={CONTROL_LABEL}>{t("boid.name-label")}</span>
+        // The BOID first and full width: it's the one thing that matters.
+        // The name, optional, sits under it beside Add.
+        <div className="space-y-1.5">
+          <input
+            value={boid}
+            maxLength={MAX_BOID}
+            inputMode="numeric"
+            onChange={(event) => setBoid(event.target.value.replace(/[^\d ]/g, ""))}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void add();
+            }}
+            placeholder={t("boid.placeholder")}
+            aria-label={t("boid.label")}
+            className={`${CONTROL} h-[30px] text-[12.5px] tabular-nums`}
+          />
+          <div className="flex gap-1.5">
             <input
               value={label}
               maxLength={MAX_LABEL}
@@ -451,32 +464,19 @@ function Manage({
               onKeyDown={(event) => {
                 if (event.key === "Enter") void add();
               }}
-              placeholder={t("boid.name-placeholder")}
-              className={CONTROL}
+              placeholder={t("boid.name-optional")}
+              aria-label={t("boid.name-label")}
+              className={`${CONTROL} h-[30px] min-w-0 flex-1`}
             />
-          </label>
-          <label className="block min-w-0 flex-1">
-            <span className={CONTROL_LABEL}>{t("boid.label")}</span>
-            <input
-              value={boid}
-              maxLength={MAX_BOID}
-              inputMode="numeric"
-              onChange={(event) => setBoid(event.target.value.replace(/[^\d ]/g, ""))}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") void add();
-              }}
-              placeholder="1301000000000001"
-              className={`${CONTROL} tabular-nums`}
-            />
-          </label>
-          <button
-            type="button"
-            onClick={() => void add()}
-            disabled={busy || !ready}
-            className="settings-btn settings-btn--accent h-[22px] shrink-0"
-          >
-            {t("boid.add")}
-          </button>
+            <button
+              type="button"
+              onClick={() => void add()}
+              disabled={busy || !ready}
+              className="settings-btn settings-btn--accent h-[30px] shrink-0 px-3"
+            >
+              {t("boid.add")}
+            </button>
+          </div>
         </div>
       )}
       <p className="text-[10px] leading-snug text-text-muted">{t("boid.privacy")}</p>
