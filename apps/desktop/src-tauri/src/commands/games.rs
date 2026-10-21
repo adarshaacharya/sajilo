@@ -3,14 +3,16 @@
 //! record stays on this computer.
 
 use sajilo_api::games::{
-    BaghView, KataView, QuizDaily, QuizView, SaapView, ShabdaView, SudokuView, bagh_view,
-    kata_view, quiz_daily as daily_view, quiz_view, saap_view, shabda_view, sudoku_view,
+    BaghView, ChungiView, KataView, QuizDaily, QuizView, SaapView, ShabdaView, SudokuView,
+    bagh_view, chungi_view, kata_view, quiz_daily as daily_view, quiz_view, saap_view, shabda_view,
+    sudoku_view,
 };
 use sajilo_core::config::Pack;
 use sajilo_core::config::quiz::{QuizCategory, QuizPack};
 use sajilo_core::config::words::WordsPack;
 use sajilo_core::focus::Language;
 use sajilo_core::games::bagh_chal::{BaghGame, BaghLevel, BaghPiece, BaghState};
+use sajilo_core::games::chungi::{ChungiMode, ChungiStats};
 use sajilo_core::games::katakuti::{KataLevel, KataState};
 use sajilo_core::games::quiz::QuizState;
 use sajilo_core::games::saap_sidhi::SaapState;
@@ -308,6 +310,29 @@ pub fn saap_roll(app: AppHandle<Wry>) -> SaapView {
     let moves = state.play(&mut die());
     store(&app, SAAP_KEY, &state);
     saap_view(&state, moves)
+}
+
+const CHUNGI_KEY: &str = "games.chungi.v1";
+
+/// The record, today's daily best, and today's seed.
+#[tauri::command]
+pub fn chungi_get(app: AppHandle<Wry>) -> ChungiView {
+    chungi_view(&stored::<ChungiStats>(&app, CHUNGI_KEY), quiz_day(), false)
+}
+
+/// A finished run: `kicks` kept up, `perfect` of them in the middle.
+#[tauri::command]
+pub fn chungi_record(
+    app: AppHandle<Wry>,
+    mode: ChungiMode,
+    kicks: u32,
+    perfect: u32,
+) -> ChungiView {
+    let mut stats: ChungiStats = stored(&app, CHUNGI_KEY);
+    let day = quiz_day();
+    let new_best = stats.record(mode, kicks, perfect, day);
+    store(&app, CHUNGI_KEY, &stats);
+    chungi_view(&stats, day, new_best)
 }
 
 /// Today in Nepal, as a day count: a new day, a new question.

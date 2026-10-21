@@ -792,6 +792,20 @@ fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
         "saap_get",
         &sajilo_api::games::saap_view(&saap, Vec::new()),
     );
+    // चुङ्गी as a first-time player sees it: no record yet, today's seed.
+    let day = now
+        .date_naive()
+        .signed_duration_since(chrono::NaiveDate::default())
+        .num_days();
+    insert(
+        commands,
+        "chungi_get",
+        &sajilo_api::games::chungi_view(
+            &sajilo_core::games::chungi::ChungiStats::default(),
+            day,
+            false,
+        ),
+    );
 }
 
 fn record_jobs(

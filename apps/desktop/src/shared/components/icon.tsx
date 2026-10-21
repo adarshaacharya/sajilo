@@ -104,6 +104,30 @@ import { SFXmark } from "sf-symbols-lib/monochrome/SFXmark";
 
 type SFComp = ComponentType<{ size?: number; className?: string }>;
 
+/** A chungi in the air over a kicking foot: SF Symbols has none. Drawn on
+ * the same 24-unit box, stroked in `currentColor`. */
+function ChungiGlyph({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="7" r="4" />
+      <path d="M8.5 5.5l7 3M8.5 8.5l7-3M12 3V1.5" />
+      <path d="M4 20c0-2 1.5-3 4-3h7c2.5 0 4 1 4 2.5S17.5 21 15 21H6c-1.2 0-2-.4-2-1z" />
+      <path d="M12 13v2" strokeDasharray="1 2" />
+    </svg>
+  );
+}
+
 /** A ladder with a snake across it: SF Symbols has neither. Drawn on the
  * same 24-unit box, stroked in `currentColor`. */
 function SnakesLadders({ size = 16, className }: { size?: number; className?: string }) {
@@ -268,6 +292,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   baghChal: SFPawprint,
   katakuti: TicTacToe,
   saapSidhi: SnakesLadders,
+  chungi: ChungiGlyph,
 };
 
 export type IconName =
@@ -381,7 +406,8 @@ export type IconName =
   | "sudoku"
   | "baghChal"
   | "katakuti"
-  | "saapSidhi";
+  | "saapSidhi"
+  | "chungi";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

@@ -177,6 +177,23 @@
       "weekday": 3,
       "weeklyHoliday": null
     },
+    "chungi_get": {
+      "dailyBest": 0,
+      "dailySeed": 6254020302805761,
+      "modes": [
+        "classic",
+        "daily"
+      ],
+      "newBest": false,
+      "stats": {
+        "best": 0,
+        "dailyBest": 0,
+        "dailyDay": null,
+        "kicks": 0,
+        "perfect": 0,
+        "played": 0
+      }
+    },
     "compute_interest": {
       "interest": 12000.0,
       "principal": 100000.0,
@@ -70737,6 +70754,9 @@
     "group_number:625.77:0": "626",
     "group_number:625.77:1": "625.8",
     "group_number:625.77:2": "625.77",
+    "group_number:6254020302805761:0": "6,25,40,20,30,28,05,761",
+    "group_number:6254020302805761:1": "6,25,40,20,30,28,05,761.0",
+    "group_number:6254020302805761:2": "6,25,40,20,30,28,05,761.00",
     "group_number:62583.26:0": "62,583",
     "group_number:62583.26:1": "62,583.3",
     "group_number:62583.26:2": "62,583.26",

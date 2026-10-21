@@ -434,3 +434,33 @@ mod saap_view {
         }
     }
 }
+
+pub use chungi_view::*;
+
+mod chungi_view {
+    use sajilo_core::games::chungi::{ChungiMode, ChungiStats, daily_seed};
+
+    dto! {
+        pub struct ChungiView {
+            pub stats: ChungiStats,
+            /// Today's best in the daily challenge.
+            pub daily_best: u32,
+            /// The seed for today's throws.
+            pub daily_seed: u64,
+            /// Whether the run just recorded beat the best for its mode.
+            pub new_best: bool,
+            /// The modes to pick from, in order.
+            pub modes: Vec<ChungiMode>,
+        }
+    }
+
+    pub fn chungi_view(stats: &ChungiStats, day: i64, new_best: bool) -> ChungiView {
+        ChungiView {
+            stats: stats.clone(),
+            daily_best: stats.daily_best_on(day),
+            daily_seed: daily_seed(day),
+            new_best,
+            modes: vec![ChungiMode::Classic, ChungiMode::Daily],
+        }
+    }
+}

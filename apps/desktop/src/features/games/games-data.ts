@@ -30,3 +30,8 @@ export function useKata() {
 export function useSaap() {
   return useSWR("saap", () => api.saapGet());
 }
+
+/** चुङ्गी: the record, today's daily best, and today's seed. */
+export function useChungi() {
+  return useSWR("chungi", () => api.chungiGet());
+}

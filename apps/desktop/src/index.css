@@ -4603,3 +4603,202 @@ input[type="search"]::-webkit-search-decoration {
   color: var(--color-accent-mark);
   background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
 }
+
+/* चुङ्गी — a courtyard in its own colours, in either theme: sky, far hills,
+   a brick wall and the ground. The sky warms to evening at 25 kicks and
+   turns to night at 50. The glow is the kick zone; the चप्पल follows the
+   chungi and swings up on each kick. */
+.chungi-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: 440px;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 3px solid #1d1a16;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  background: linear-gradient(#7cc4f2, #c9e8f7 58%);
+  transition: background 1.2s ease;
+}
+.chungi-scene--evening {
+  background: linear-gradient(#f29a6b, #f7d39b 58%);
+}
+.chungi-scene--night {
+  background: linear-gradient(#1c2752, #44507f 58%);
+}
+.chungi-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.chungi-hill {
+  fill: #4f9c5c;
+}
+.chungi-hill--far {
+  fill: #86b98a;
+}
+.chungi-scene--night .chungi-hill {
+  fill: #23452f;
+}
+.chungi-scene--night .chungi-hill--far {
+  fill: #33553f;
+}
+.chungi-wall {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 9%;
+  height: 22%;
+  background:
+    repeating-linear-gradient(0deg, #6e2f22 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(90deg, #6e2f22 0 1px, transparent 1px 28px),
+    #b4533a;
+  box-shadow: inset 0 3px 0 #8f3f2c;
+}
+.chungi-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 9%;
+  background: #8a7356;
+}
+.chungi-hud {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  color: #1d1a16;
+}
+.chungi-scene--night .chungi-hud {
+  color: #fffdf6;
+}
+.chungi-hud__count {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 0 rgb(255 255 255 / 0.35);
+}
+.chungi-hud__best {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.chungi-zone {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  border-radius: 999px;
+  background: radial-gradient(
+    closest-side,
+    rgb(255 236 150 / 0.75),
+    rgb(255 220 110 / 0.28) 70%,
+    transparent
+  );
+  box-shadow: 0 0 18px rgb(255 220 110 / 0.45);
+  pointer-events: none;
+  animation: chungi-glow 1.4s ease-in-out infinite;
+}
+@keyframes chungi-glow {
+  50% {
+    opacity: 0.7;
+  }
+}
+.chungi-ball {
+  position: absolute;
+  width: 14%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 3px 3px rgb(0 0 0 / 0.3));
+  pointer-events: none;
+  will-change: left, top, transform;
+}
+.chungi-foot {
+  position: absolute;
+  bottom: 4%;
+  width: 22%;
+  aspect-ratio: 60 / 28;
+  transform: translateX(-50%);
+  transform-origin: 20% 90%;
+  pointer-events: none;
+}
+.chungi-foot--kick {
+  animation: chungi-kick 0.24s ease-out;
+}
+@keyframes chungi-kick {
+  40% {
+    transform: translateX(-50%) translateY(-14%) rotate(-24deg);
+  }
+}
+.chungi-perfect {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px;
+  font-weight: 800;
+  color: #fffdf6;
+  text-shadow:
+    0 0 10px rgb(255 200 60 / 0.9),
+    0 1px 0 #1d1a16;
+  pointer-events: none;
+  animation: chungi-perfect 0.7s ease-out forwards;
+}
+@keyframes chungi-perfect {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.7);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-14px);
+  }
+}
+.chungi-ready {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
+  color: #fffdf6;
+  background: rgb(20 18 16 / 0.55);
+  backdrop-filter: blur(2px);
+  cursor: default;
+}
+.chungi-mode {
+  border-radius: 999px;
+  border: 1px solid rgb(255 253 246 / 0.4);
+  padding: 4px 11px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fffdf6;
+  transition: background-color 0.15s ease;
+}
+.chungi-mode--on {
+  border-color: var(--color-accent-mark);
+  background: var(--color-accent-mark);
+  color: #1d1a16;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chungi-zone,
+  .chungi-foot--kick,
+  .chungi-perfect {
+    animation: none;
+  }
+}

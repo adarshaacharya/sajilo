@@ -5,15 +5,16 @@ import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import { track } from "../../shared/lib/usage";
 import { BaghChal } from "./_components/bagh-chal";
+import { Chungi } from "./_components/chungi";
 import { Katakuti } from "./_components/katakuti";
 import { type Game, Lobby } from "./_components/lobby";
 import { Quiz } from "./_components/quiz";
 import { SaapSidhi } from "./_components/saap-sidhi";
 import { Shabda } from "./_components/shabda";
 import { Sudoku } from "./_components/sudoku";
-import { useBagh, useKata, useQuiz, useSaap, useShabda, useSudoku } from "./games-data";
+import { useBagh, useChungi, useKata, useQuiz, useSaap, useShabda, useSudoku } from "./games-data";
 
-const GAMES: Game[] = ["kata", "saap", "quiz", "shabda", "sudoku", "bagh"];
+const GAMES: Game[] = ["kata", "saap", "chungi", "quiz", "shabda", "sudoku", "bagh"];
 const TITLES = {
   shabda: "shabda.title",
   quiz: "quiz.title",
@@ -21,12 +22,14 @@ const TITLES = {
   bagh: "bagh.title",
   kata: "kata.title",
   saap: "saap.title",
+  chungi: "chungi.title",
 } as const satisfies Record<Game, string>;
 
 /** Each game's start-screen icon and one-line description. */
 const LOBBY = {
   kata: { icon: "katakuti", about: "kata.card" },
   saap: { icon: "saapSidhi", about: "saap.card" },
+  chungi: { icon: "chungi", about: "chungi.card" },
   quiz: { icon: "quiz", about: "quiz.card" },
   shabda: { icon: "wordGame", about: "shabda.card" },
   sudoku: { icon: "sudoku", about: "sudoku.card" },
@@ -82,11 +85,13 @@ export function Games() {
   if (open === "bagh") return <BaghChal t={t} />;
   if (open === "kata") return <Katakuti t={t} />;
   if (open === "saap") return <SaapSidhi t={t} />;
+  if (open === "chungi") return <Chungi t={t} />;
 
   return (
     <div className="space-y-2.5">
       <KataCard onOpen={() => choose("kata")} t={t} />
       <SaapCard onOpen={() => choose("saap")} t={t} />
+      <ChungiCard onOpen={() => choose("chungi")} t={t} />
       <QuizCard onOpen={() => choose("quiz")} t={t} />
       <ShabdaCard onOpen={() => choose("shabda")} t={t} />
       <SudokuCard onOpen={() => choose("sudoku")} t={t} />
@@ -164,6 +169,19 @@ function SaapCard({ onOpen, t }: { onOpen: () => void; t: ReturnType<typeof useS
       icon="saapSidhi"
       title={t("saap.title")}
       detail={playing ? t("saap.card-playing") : t("saap.card")}
+      onOpen={onOpen}
+    />
+  );
+}
+
+function ChungiCard({ onOpen, t }: { onOpen: () => void; t: ReturnType<typeof useSettings>["t"] }) {
+  const { data } = useChungi();
+  const best = data?.stats.best ?? 0;
+  return (
+    <GameCard
+      icon="chungi"
+      title={t("chungi.title")}
+      detail={best > 0 ? t("chungi.card-best").replace("{n}", String(best)) : t("chungi.card")}
       onOpen={onOpen}
     />
   );

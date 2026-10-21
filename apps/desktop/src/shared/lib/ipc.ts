@@ -5,6 +5,8 @@ import type { BaghPiece } from "../../types/api/BaghPiece";
 import type { BaghView } from "../../types/api/BaghView";
 import type { BoidAccount } from "../../types/api/BoidAccount";
 import type { BoidReport } from "../../types/api/BoidReport";
+import type { ChungiMode } from "../../types/api/ChungiMode";
+import type { ChungiView } from "../../types/api/ChungiView";
 import type { CryptoChart } from "../../types/api/CryptoChart";
 import type { CryptoCoin } from "../../types/api/CryptoCoin";
 import type { CryptoSearchHit } from "../../types/api/CryptoSearchHit";
@@ -1031,6 +1033,11 @@ export const api = {
   saapNew: () => invoke<SaapView>("saap_new"),
   /** Your roll and the computer's answer, every move in order. */
   saapRoll: () => invoke<SaapView>("saap_roll"),
+
+  chungiGet: () => invoke<ChungiView>("chungi_get"),
+  /** A finished run: kicks kept up, and how many were perfect. */
+  chungiRecord: (mode: ChungiMode, kicks: number, perfect: number) =>
+    invoke<ChungiView>("chungi_record", { mode, kicks, perfect }),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

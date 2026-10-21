@@ -1,11 +1,11 @@
 import { Icon, type IconName } from "../../../shared/components/icon";
 import type { useSettings } from "../../../shared/context/settings-context";
-import { useBagh, useKata, useQuiz, useSaap, useShabda, useSudoku } from "../games-data";
+import { useBagh, useChungi, useKata, useQuiz, useSaap, useShabda, useSudoku } from "../games-data";
 import { StatTiles } from "./stat-tiles";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
-export type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap";
+export type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap" | "chungi";
 
 type Stat = { value: string; label: string };
 
@@ -24,6 +24,7 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
   const shabda = useShabda().data;
   const sudoku = useSudoku().data;
   const bagh = useBagh().data;
+  const chungi = useChungi().data;
 
   switch (game) {
     case "kata": {
@@ -93,6 +94,19 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
         ],
         played: sum(stats?.solved ?? []) > 0,
         underway: Boolean(sudoku?.game && sudoku.game.solvedIn == null),
+      };
+    }
+    case "chungi": {
+      const stats = chungi?.stats;
+      return {
+        stats: [
+          { value: String(stats?.best ?? 0), label: t("chungi.stat.best") },
+          { value: String(chungi?.dailyBest ?? 0), label: t("chungi.stat.today") },
+          { value: String(stats?.perfect ?? 0), label: t("chungi.stat.perfect") },
+          { value: String(stats?.played ?? 0), label: t("chungi.stat.played") },
+        ],
+        played: (stats?.played ?? 0) > 0,
+        underway: false,
       };
     }
     case "bagh": {

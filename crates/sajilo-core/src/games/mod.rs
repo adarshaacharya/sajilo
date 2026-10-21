@@ -3,6 +3,7 @@
 //! the screen only draws it.
 
 pub mod bagh_chal;
+pub mod chungi;
 pub mod katakuti;
 pub mod quiz;
 pub mod saap_sidhi;

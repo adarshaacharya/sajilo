@@ -299,6 +299,8 @@ pub fn run() {
             commands::games::saap_get,
             commands::games::saap_new,
             commands::games::saap_roll,
+            commands::games::chungi_get,
+            commands::games::chungi_record,
             commands::games::sudoku_get,
             commands::games::sudoku_new,
             commands::games::sudoku_set,
