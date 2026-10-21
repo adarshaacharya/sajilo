@@ -1,0 +1,103 @@
+---
+// Games, as the app's own list shows them, from the showcase recording: the
+// real screen in a frame, never a picture of it.
+import AppFrame from "./AppFrame.astro";
+
+const points = [
+  { en: "Tic-Tac-Toe, Snakes & Ladders, Chungi and Bagh-Chal against the computer." },
+  { en: "A quiz about Nepal, with a question of the day at noon." },
+  { en: "Akshar Khoj: find the Nepali word from its clue, letter by letter." },
+  { en: "A few minutes a game. No ads, no accounts, all on your computer." },
+];
+---
+
+<section class="games wrap" id="games" aria-labelledby="games-title">
+  <div class="games-grid">
+    <div class="games-main">
+      <div class="section-head reveal">
+        <p class="games-mark">
+          <span lang="ne">खेल</span>
+          <span class="games-mark-en">Games</span>
+        </p>
+        <h2 id="games-title">A quick round of चुङ्गी between meetings. <em>We won't tell.</em></h2>
+      </div>
+
+      <ul class="games-points reveal">
+        {points.map((point) => <li>{point.en}</li>)}
+      </ul>
+    </div>
+
+    <div class="games-stage reveal">
+      <AppFrame route="/games" title="Sajilo's Games, every game in its own colour" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .games {
+    position: relative;
+    z-index: 1;
+    padding-top: clamp(80px, 11vw, 160px);
+  }
+  .games-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+    gap: clamp(32px, 6vw, 88px);
+    align-items: start;
+  }
+  /* The frame on the left here, so it alternates with Notes and Routine. */
+  .games-stage {
+    order: -1;
+  }
+  .games-mark {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .games-mark [lang="ne"] {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    color: var(--gilt-2);
+  }
+  .games-mark-en {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--paper-3);
+  }
+  .games-points {
+    display: grid;
+    gap: 12px;
+    margin-top: clamp(24px, 3vw, 36px);
+    padding: 0;
+    list-style: none;
+  }
+  .games-points li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--paper-2);
+  }
+  .games-points li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    border: 1.5px solid var(--gilt-2);
+  }
+  @media (max-width: 860px) {
+    .games-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .games-stage {
+      order: 0;
+      max-width: 340px;
+    }
+  }
+</style>
