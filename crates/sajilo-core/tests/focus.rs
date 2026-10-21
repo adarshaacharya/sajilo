@@ -37,10 +37,14 @@ fn watching(now: DateTime<Utc>, idle: u32) -> Tick {
 /// The intervals these walkthroughs were written for: a look away every
 /// 20 minutes and water every hour, as someone might set them. The shipped
 /// defaults are calmer (40 and 90); see `the_defaults_are_calm`.
+/// The three interval breaks off, so each test turns on just what it needs.
 fn classic() -> FocusSettings {
     let mut settings = FocusSettings::default();
     settings.eyes.every_minutes = 20;
     settings.water.every_minutes = 60;
+    settings.eyes.enabled = false;
+    settings.move_break.enabled = false;
+    settings.water.enabled = false;
     settings
 }
 
@@ -435,7 +439,10 @@ fn the_snapshot_counts_down_in_minutes_of_use() {
 fn stored_settings_fill_in_and_stay_within_the_editor() {
     let settings: FocusSettings = serde_json::from_str("{}").unwrap();
     assert_eq!(settings, FocusSettings::default());
-    assert!(!settings.any_enabled());
+    assert!(
+        settings.eyes.enabled && settings.move_break.enabled && settings.water.enabled,
+        "look away, stand up and water start on"
+    );
 
     let odd: FocusSettings =
         serde_json::from_str(r#"{"eyes":{"enabled":true,"everyMinutes":7},"waterGoalMl":1234}"#)

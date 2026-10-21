@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import useSWR from "swr";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
-import { useDirectory } from "../../../shared/lib/directory";
 import { api } from "../../../shared/lib/ipc";
 import { useNepalDay } from "../../../shared/lib/nepal-day";
 import { digits } from "../../../shared/lib/numerals";
@@ -29,8 +28,8 @@ type Row = { id: ToolId; icon: IconName; label: string; detail: ReactNode };
  * Tools' front page: one row style throughout, grouped by what the tools
  * are for, so the page reads as a list rather than a collage. Each row's
  * second line carries its live answer — today's date, a city's time, the
- * stopwatch — where it used to take a tile of its own. Emergency numbers
- * stay first, in the only red on the page.
+ * stopwatch — where it used to take a tile of its own. The Directory
+ * comes first: numbers and official sites are what people come here for.
  */
 export function ToolsHome({
   onOpen,
@@ -69,8 +68,6 @@ export function ToolsHome({
 
   return (
     <div className="space-y-3 pt-0.5">
-      <EmergencyStrip onOpen={() => onOpen("emergency", "phones")} />
-
       {/* Numbers and official sites first: what people come to Tools for. */}
       <Group title={t("tools.directory")}>
         <ToolRow
@@ -142,40 +139,6 @@ function ToolRow({
       </button>
       {trailing && <span className="shrink-0 pr-2.5">{trailing}</span>}
     </li>
-  );
-}
-
-/** 100 · 101 · 102 in one slim line: never a scroll away, never the
- * biggest thing on the page. */
-function EmergencyStrip({ onOpen }: { onOpen: () => void }) {
-  const { t, language } = useSettings();
-  const ne = language === "ne";
-  const { contacts } = useDirectory();
-  const emergency = contacts.filter((contact) => contact.category === "emergency").slice(0, 3);
-  return (
-    <section
-      aria-label={t("tools.directory-emergency")}
-      className="surface-card flex items-center gap-1 px-2 py-1.5"
-    >
-      <span className="shrink-0 px-1 text-[10px] font-semibold text-text-muted">
-        {t("tools.directory-emergency")}
-      </span>
-      {emergency.map((contact) => (
-        <button
-          key={contact.number}
-          type="button"
-          onClick={onOpen}
-          className="flex min-w-0 flex-1 flex-col items-center rounded-md px-1 py-1 transition-colors hover:bg-surface-hover"
-        >
-          <span className="text-[14px] font-bold leading-tight tabular-nums text-holiday">
-            {contact.number}
-          </span>
-          <span className="max-w-full truncate text-[10px] leading-tight text-text-muted">
-            {ne ? contact.nameNe : contact.name}
-          </span>
-        </button>
-      ))}
-    </section>
   );
 }
 

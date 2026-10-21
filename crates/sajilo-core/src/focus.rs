@@ -159,6 +159,13 @@ pub struct BreakRule {
 }
 
 impl BreakRule {
+    const fn on(every_minutes: u32) -> Self {
+        Self {
+            enabled: true,
+            every_minutes,
+        }
+    }
+
     const fn off(every_minutes: u32) -> Self {
         Self {
             enabled: false,
@@ -171,9 +178,9 @@ impl BreakRule {
     }
 }
 
-/// Every reminder starts off: a desktop app that begins interrupting people
-/// the day it is updated would be switched off, not thanked. The Focus screen
-/// offers to turn them on in one tap.
+/// Look away, stand up and drink water start on: the reason most people keep
+/// the app is that it reminds them. They only come within working hours and
+/// outside quiet hours, and one tap turns them off.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct FocusSettings {
@@ -423,9 +430,9 @@ impl Default for FocusSettings {
         Self {
             // Every 40 minutes, not the 20-20-20 rule's 20: three cards an
             // hour was more than anyone kept on.
-            eyes: BreakRule::off(40),
-            move_break: BreakRule::off(60),
-            water: BreakRule::off(90),
+            eyes: BreakRule::on(40),
+            move_break: BreakRule::on(60),
+            water: BreakRule::on(90),
             eyes_seconds: 20,
             move_seconds: 2 * 60,
             water_goal_ml: DEFAULT_WATER_GOAL_ML,

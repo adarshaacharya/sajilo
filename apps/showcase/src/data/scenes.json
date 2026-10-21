@@ -855,7 +855,7 @@
       "breaks": [
         {
           "breakSeconds": 20,
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 40,
           "kind": "eyes",
           "maxBreakSeconds": 120,
@@ -867,7 +867,7 @@
         },
         {
           "breakSeconds": 120,
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 60,
           "kind": "move",
           "maxBreakSeconds": 900,
@@ -879,7 +879,7 @@
         },
         {
           "breakSeconds": 0,
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 90,
           "kind": "water",
           "maxBreakSeconds": 0,
@@ -922,7 +922,7 @@
         "daysOff": "lighter",
         "endOfDay": true,
         "eyes": {
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 40
         },
         "eyesSeconds": 20,
@@ -939,7 +939,7 @@
           "water": ""
         },
         "move": {
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 60
         },
         "moveSeconds": 120,
@@ -984,7 +984,7 @@
         },
         "style": "card",
         "water": {
-          "enabled": false,
+          "enabled": true,
           "everyMinutes": 90
         },
         "waterGoalMl": 2500,
@@ -999,7 +999,7 @@
         ]
       },
       "snoozeMinutes": 5,
-      "status": "off",
+      "status": "afterHours",
       "summary": {
         "averageScreenSeconds": 0,
         "breaksReminded": 0,
