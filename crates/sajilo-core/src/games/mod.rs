@@ -5,5 +5,6 @@
 pub mod bagh_chal;
 pub mod katakuti;
 pub mod quiz;
+pub mod saap_sidhi;
 pub mod shabda;
 pub mod sudoku;

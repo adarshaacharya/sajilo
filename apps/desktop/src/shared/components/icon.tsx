@@ -104,6 +104,29 @@ import { SFXmark } from "sf-symbols-lib/monochrome/SFXmark";
 
 type SFComp = ComponentType<{ size?: number; className?: string }>;
 
+/** A ladder with a snake across it: SF Symbols has neither. Drawn on the
+ * same 24-unit box, stroked in `currentColor`. */
+function SnakesLadders({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M6 3v18M12 3v18M6 7h6M6 12h6M6 17h6" />
+      <path d="M20 4c-3 1-1 5-4 6s-1 5-4 6-2 4-5 4" />
+      <circle cx="20" cy="4" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** A tic-tac-toe board with an X and an O: SF Symbols has no such glyph.
  * Drawn on the same 24-unit box, stroked in `currentColor`. */
 function TicTacToe({ size = 16, className }: { size?: number; className?: string }) {
@@ -244,6 +267,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   sudoku: SFSquareGrid3x3,
   baghChal: SFPawprint,
   katakuti: TicTacToe,
+  saapSidhi: SnakesLadders,
 };
 
 export type IconName =
@@ -356,7 +380,8 @@ export type IconName =
   | "quiz"
   | "sudoku"
   | "baghChal"
-  | "katakuti";
+  | "katakuti"
+  | "saapSidhi";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

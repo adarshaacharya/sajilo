@@ -3,8 +3,8 @@
 //! record stays on this computer.
 
 use sajilo_api::games::{
-    BaghView, KataView, QuizDaily, QuizView, ShabdaView, SudokuView, bagh_view, kata_view,
-    quiz_daily as daily_view, quiz_view, shabda_view, sudoku_view,
+    BaghView, KataView, QuizDaily, QuizView, SaapView, ShabdaView, SudokuView, bagh_view,
+    kata_view, quiz_daily as daily_view, quiz_view, saap_view, shabda_view, sudoku_view,
 };
 use sajilo_core::config::Pack;
 use sajilo_core::config::quiz::{QuizCategory, QuizPack};
@@ -13,6 +13,7 @@ use sajilo_core::focus::Language;
 use sajilo_core::games::bagh_chal::{BaghGame, BaghLevel, BaghPiece, BaghState};
 use sajilo_core::games::katakuti::{KataLevel, KataState};
 use sajilo_core::games::quiz::QuizState;
+use sajilo_core::games::saap_sidhi::SaapState;
 use sajilo_core::games::shabda::{GuessError, HintError, ShabdaState};
 use sajilo_core::games::sudoku::{SudokuGame, SudokuLevel, SudokuState};
 use sajilo_core::nepal_time;
@@ -270,6 +271,43 @@ pub fn kata_play(app: AppHandle<Wry>, cell: u8) -> KataView {
     state.play(usize::from(cell));
     store(&app, KATA_KEY, &state);
     kata_view(&state)
+}
+
+const SAAP_KEY: &str = "games.saapSidhi.v1";
+
+/// A fair die for the board game, seeded from the clock.
+fn die() -> impl FnMut() -> u8 {
+    let mut state = seed();
+    move || {
+        state = state
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        ((state >> 33) % 6) as u8 + 1
+    }
+}
+
+#[tauri::command]
+pub fn saap_get(app: AppHandle<Wry>) -> SaapView {
+    saap_view(&stored::<SaapState>(&app, SAAP_KEY), Vec::new())
+}
+
+/// A new game; who rolls first alternates, and the computer's opening
+/// rolls come back to replay.
+#[tauri::command]
+pub fn saap_new(app: AppHandle<Wry>) -> SaapView {
+    let mut state: SaapState = stored(&app, SAAP_KEY);
+    let moves = state.start(&mut die());
+    store(&app, SAAP_KEY, &state);
+    saap_view(&state, moves)
+}
+
+/// The player's roll and the computer's answer, every move in order.
+#[tauri::command]
+pub fn saap_roll(app: AppHandle<Wry>) -> SaapView {
+    let mut state: SaapState = stored(&app, SAAP_KEY);
+    let moves = state.play(&mut die());
+    store(&app, SAAP_KEY, &state);
+    saap_view(&state, moves)
 }
 
 /// Today in Nepal, as a day count: a new day, a new question.

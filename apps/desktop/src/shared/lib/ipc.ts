@@ -47,6 +47,7 @@ import type { RadioDirectory } from "../../types/api/RadioDirectory";
 import type { RashifalPeriod } from "../../types/api/RashifalPeriod";
 import type { RashifalSnapshot } from "../../types/api/RashifalSnapshot";
 import type { RemoteConfigStatus } from "../../types/api/RemoteConfigStatus";
+import type { SaapView } from "../../types/api/SaapView";
 import type { ShabdaView } from "../../types/api/ShabdaView";
 import type { SipStatus } from "../../types/api/SipStatus";
 import type { StockAcquisitionSource } from "../../types/api/StockAcquisitionSource";
@@ -1024,6 +1025,12 @@ export const api = {
   kataNew: (level: KataLevel) => invoke<KataView>("kata_new", { level }),
   /** The player's move (cell 0–8) and the computer's answer. */
   kataPlay: (cell: number) => invoke<KataView>("kata_play", { cell }),
+
+  saapGet: () => invoke<SaapView>("saap_get"),
+  /** A new game; the computer's opening rolls come back to replay. */
+  saapNew: () => invoke<SaapView>("saap_new"),
+  /** Your roll and the computer's answer, every move in order. */
+  saapRoll: () => invoke<SaapView>("saap_roll"),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

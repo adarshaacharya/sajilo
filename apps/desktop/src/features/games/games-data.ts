@@ -25,3 +25,8 @@ export function useBagh() {
 export function useKata() {
   return useSWR("kata", () => api.kataGet());
 }
+
+/** साँप-सिँढी: the game under way, if any, and the record. */
+export function useSaap() {
+  return useSWR("saap", () => api.saapGet());
+}

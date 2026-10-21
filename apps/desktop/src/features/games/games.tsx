@@ -7,18 +7,20 @@ import { track } from "../../shared/lib/usage";
 import { BaghChal } from "./_components/bagh-chal";
 import { Katakuti } from "./_components/katakuti";
 import { Quiz } from "./_components/quiz";
+import { SaapSidhi } from "./_components/saap-sidhi";
 import { Shabda } from "./_components/shabda";
 import { Sudoku } from "./_components/sudoku";
-import { useBagh, useKata, useQuiz, useShabda, useSudoku } from "./games-data";
+import { useBagh, useKata, useQuiz, useSaap, useShabda, useSudoku } from "./games-data";
 
-type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata";
-const GAMES: Game[] = ["shabda", "quiz", "sudoku", "bagh", "kata"];
+type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap";
+const GAMES: Game[] = ["shabda", "quiz", "sudoku", "bagh", "kata", "saap"];
 const TITLES = {
   shabda: "shabda.title",
   quiz: "quiz.title",
   sudoku: "sudoku.title",
   bagh: "bagh.title",
   kata: "kata.title",
+  saap: "saap.title",
 } as const satisfies Record<Game, string>;
 
 /**
@@ -42,6 +44,7 @@ export function Games() {
   if (open === "sudoku") return <Sudoku t={t} />;
   if (open === "bagh") return <BaghChal t={t} />;
   if (open === "kata") return <Katakuti t={t} />;
+  if (open === "saap") return <SaapSidhi t={t} />;
 
   return (
     <div className="space-y-2.5">
@@ -50,6 +53,7 @@ export function Games() {
       <SudokuCard onOpen={() => setOpen("sudoku")} t={t} />
       <BaghCard onOpen={() => setOpen("bagh")} t={t} />
       <KataCard onOpen={() => setOpen("kata")} t={t} />
+      <SaapCard onOpen={() => setOpen("saap")} t={t} />
       <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">{t("games.note")}</p>
     </div>
   );
@@ -110,6 +114,19 @@ function KataCard({ onOpen, t }: { onOpen: () => void; t: ReturnType<typeof useS
       icon="katakuti"
       title={t("kata.title")}
       detail={playing ? t("kata.card-playing") : t("kata.card")}
+      onOpen={onOpen}
+    />
+  );
+}
+
+function SaapCard({ onOpen, t }: { onOpen: () => void; t: ReturnType<typeof useSettings>["t"] }) {
+  const { data } = useSaap();
+  const playing = data?.game && !data.game.winner;
+  return (
+    <GameCard
+      icon="saapSidhi"
+      title={t("saap.title")}
+      detail={playing ? t("saap.card-playing") : t("saap.card")}
       onOpen={onOpen}
     />
   );

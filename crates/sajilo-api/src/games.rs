@@ -375,3 +375,62 @@ mod kata_view {
         }
     }
 }
+
+pub use saap_view::*;
+
+mod saap_view {
+    use sajilo_core::games::saap_sidhi::{
+        LADDERS, SNAKES, SaapMove, SaapSide, SaapState, SaapStats,
+    };
+
+    dto! {
+        /// A ladder or a snake: from where it starts to where it leaves you.
+        pub struct SaapJump {
+            pub from: u8,
+            pub to: u8,
+        }
+
+        pub struct SaapGameView {
+            /// Squares: 0 is off the board.
+            pub you: u8,
+            pub computer: u8,
+            pub your_turn: bool,
+            pub winner: Option<SaapSide>,
+        }
+
+        pub struct SaapView {
+            pub game: Option<SaapGameView>,
+            pub ladders: Vec<SaapJump>,
+            pub snakes: Vec<SaapJump>,
+            /// The moves just made, in order, for the screen to replay.
+            pub moves: Vec<SaapMove>,
+            pub stats: SaapStats,
+            pub computer_starts: bool,
+        }
+    }
+
+    /// The game as it stands, with `moves` just played.
+    pub fn saap_view(state: &SaapState, moves: Vec<SaapMove>) -> SaapView {
+        let jumps = |list: &[(u8, u8)]| {
+            list.iter()
+                .map(|(from, to)| SaapJump {
+                    from: *from,
+                    to: *to,
+                })
+                .collect()
+        };
+        SaapView {
+            game: state.game.as_ref().map(|game| SaapGameView {
+                you: game.you,
+                computer: game.computer,
+                your_turn: game.winner.is_none() && game.turn == SaapSide::You,
+                winner: game.winner,
+            }),
+            ladders: jumps(&LADDERS),
+            snakes: jumps(&SNAKES),
+            moves,
+            stats: state.stats.clone(),
+            computer_starts: state.computer_starts,
+        }
+    }
+}

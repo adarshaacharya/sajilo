@@ -778,6 +778,20 @@ fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
     kata.start(KataLevel::Medium, 7);
     kata.play(4);
     insert(commands, "kata_get", &sajilo_api::games::kata_view(&kata));
+    // साँप-सिँढी a few rolls in, the rolls a fixed sequence through the engine.
+    use sajilo_core::games::saap_sidhi::SaapState;
+    let mut saap = SaapState::default();
+    let mut rolls = [3, 5, 4, 2, 6, 1].into_iter().cycle();
+    let mut dice = move || rolls.next().unwrap_or(1);
+    saap.start(&mut dice);
+    for _ in 0..3 {
+        saap.play(&mut dice);
+    }
+    insert(
+        commands,
+        "saap_get",
+        &sajilo_api::games::saap_view(&saap, Vec::new()),
+    );
 }
 
 fn record_jobs(

@@ -86723,6 +86723,90 @@
       ]
     },
     "request_notification_permission": "unknown",
+    "saap_get": {
+      "computerStarts": true,
+      "game": {
+        "computer": 7,
+        "winner": null,
+        "you": 46,
+        "yourTurn": true
+      },
+      "ladders": [
+        {
+          "from": 4,
+          "to": 25
+        },
+        {
+          "from": 13,
+          "to": 46
+        },
+        {
+          "from": 27,
+          "to": 64
+        },
+        {
+          "from": 33,
+          "to": 49
+        },
+        {
+          "from": 42,
+          "to": 63
+        },
+        {
+          "from": 50,
+          "to": 69
+        },
+        {
+          "from": 62,
+          "to": 81
+        },
+        {
+          "from": 74,
+          "to": 92
+        }
+      ],
+      "moves": [],
+      "snakes": [
+        {
+          "from": 40,
+          "to": 3
+        },
+        {
+          "from": 43,
+          "to": 18
+        },
+        {
+          "from": 54,
+          "to": 31
+        },
+        {
+          "from": 66,
+          "to": 45
+        },
+        {
+          "from": 76,
+          "to": 58
+        },
+        {
+          "from": 89,
+          "to": 53
+        },
+        {
+          "from": 95,
+          "to": 72
+        },
+        {
+          "from": 99,
+          "to": 41
+        }
+      ],
+      "stats": {
+        "ladders": 1,
+        "lost": 0,
+        "snakes": 0,
+        "won": 0
+      }
+    },
     "shabda_get": {
       "answer": null,
       "clue": "A pot for making tea",
