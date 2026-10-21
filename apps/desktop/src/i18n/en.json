@@ -899,10 +899,9 @@
   "boid.checked": "Checked: {list}.",
   "boid.failed": "Couldn't reach: {list}; tried again on the next check.",
   "boid.not-covered": "Other registrars don't offer a public lookup yet.",
-  "boid.setup-title": "Check your IPO results",
-  "boid.setup-body": "Add a BOID, yours or your family's. Sajilo tells you when shares are allotted.",
+  "boid.setup-body": "Add a BOID to see your IPO results.",
   "boid.label": "BOID",
-  "boid.privacy": "Stays on this computer; only the share registrars see it.",
+  "boid.privacy": "Only the share registrars see it.",
   "boid.remove": "Remove {name}",
   "boid.glance": "Allotted {n} kitta",
   "boid.people": "Checking for",
@@ -1762,6 +1761,6 @@
   "welcome.done.again": "You can run this welcome again from Settings › About.",
   "welcome.again": "Run the welcome again",
   "welcome.again-body": "Set language, place, rashi and breaks afresh.",
-  "boid.placeholder": "BOID: 16 digits, from MeroShare",
+  "boid.placeholder": "16-digit BOID",
   "boid.name-optional": "Name (optional)"
 }

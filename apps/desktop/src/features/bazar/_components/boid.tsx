@@ -366,17 +366,8 @@ function Manage({
   return (
     <section className="surface-card space-y-2.5 p-3">
       {accounts.length === 0 ? (
-        <div className="flex items-start gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
-            <Icon name="interest" className="size-4" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-[13px] font-semibold leading-snug">{t("boid.setup-title")}</h2>
-            <p className="mt-0.5 text-[11.5px] leading-snug text-text-secondary">
-              {t("boid.setup-body")}
-            </p>
-          </div>
-        </div>
+        // The page is already titled; one line says what to do.
+        <p className="text-[12px] text-text-secondary">{t("boid.setup-body")}</p>
       ) : (
         <div className="flex items-center justify-between">
           <h2 className="text-[12px] font-semibold">{t("boid.manage-title")}</h2>
@@ -479,7 +470,10 @@ function Manage({
           </div>
         </div>
       )}
-      <p className="text-[10px] leading-snug text-text-muted">{t("boid.privacy")}</p>
+      <p className="flex items-center gap-1 text-[10px] text-text-muted">
+        <Icon name="shield" className="size-2.5" />
+        {t("boid.privacy")}
+      </p>
       {error && (
         <p role="alert" className="text-[11px] text-holiday">
           {error}
