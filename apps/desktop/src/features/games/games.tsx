@@ -88,33 +88,46 @@ export function Games() {
 
   return (
     <div className="space-y-2.5">
-      {GAMES.map((game) => (
-        <GameCard
-          key={game}
-          icon={LOBBY[game].icon}
-          title={t(TITLES[game])}
-          onOpen={() => choose(game)}
-        />
-      ))}
+      <div className="games-grid">
+        {GAMES.map((game) => (
+          <GameCard
+            key={game}
+            game={game}
+            icon={LOBBY[game].icon}
+            title={t(TITLES[game])}
+            onOpen={() => choose(game)}
+          />
+        ))}
+      </div>
       <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">{t("games.note")}</p>
     </div>
   );
 }
 
-/** A game in the list: its icon and name. What it is, and the record, are
- * on its start screen. */
-function GameCard({ icon, title, onOpen }: { icon: IconName; title: string; onOpen: () => void }) {
+/** A game in the grid: a big icon in the game's own colour, and its name.
+ * A name with a gloss ("काटाकुटी · Tic-Tac-Toe") shows the gloss smaller,
+ * under it. What it is, and the record, are on its start screen. */
+function GameCard({
+  game,
+  icon,
+  title,
+  onOpen,
+}: {
+  game: Game;
+  icon: IconName;
+  title: string;
+  onOpen: () => void;
+}) {
+  const [name, gloss] = title.split(" · ");
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="surface-card flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
-    >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-[8px] bg-[color:color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] text-accent-mark">
-        <Icon name={icon} className="size-[18px]" />
+    <button type="button" onClick={onOpen} className={`game-tile game-tile--${game}`}>
+      <span className="game-tile__icon">
+        <Icon name={icon} className="size-6" />
       </span>
-      <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{title}</span>
-      <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+      <span className="game-tile__text">
+        <span className="game-tile__name">{name}</span>
+        {gloss && <span className="game-tile__gloss">{gloss}</span>}
+      </span>
     </button>
   );
 }
