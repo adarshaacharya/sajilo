@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import appIcon from "../../../../src-tauri/icons/128x128@2x.png";
 import { Icon, type IconName } from "../../../shared/components/icon";
 import { TrayPinTip } from "../../../shared/components/tray-pin-tip";
@@ -6,6 +7,7 @@ import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
 import { isWindows } from "../../../shared/lib/platform";
+import { runSetupAgain } from "../../calendar/_components/setup-card";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
 const LICENSE_URL = `${REPO_URL}/blob/main/LICENSE`;
@@ -112,6 +114,7 @@ function AboutUpdate() {
 
 export function AboutTab() {
   const { t } = useSettings();
+  const navigate = useNavigate();
   const [version, setVersion] = useState<string | null>(null);
   const [pinHelp, setPinHelp] = useState(false);
 
@@ -139,6 +142,24 @@ export function AboutTab() {
           )}
         </div>
         <AboutUpdate />
+      </section>
+
+      {/* The welcome a new install sees, again: it opens over Today. */}
+      <section className="surface-card overflow-hidden">
+        <button
+          type="button"
+          onClick={() => {
+            void runSetupAgain().then(() => navigate("/"));
+          }}
+          className="flex w-full items-center gap-2.5 px-3 py-2.5 text-left transition-colors hover:bg-surface-hover"
+        >
+          <Icon name="star" className="size-3.5 shrink-0 text-accent-mark" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[12px]">{t("welcome.again")}</span>
+            <span className="block text-[10.5px] text-text-muted">{t("welcome.again-body")}</span>
+          </span>
+          <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+        </button>
       </section>
 
       {/* Every way out, as rows: nothing to read before finding the one. */}

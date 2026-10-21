@@ -17,13 +17,14 @@ import {
 } from "../../shared/lib/ipc";
 import { useNepalDay } from "../../shared/lib/nepal-day";
 import { digits } from "../../shared/lib/numerals";
+import { Welcome } from "../onboarding/welcome";
 import { BillGlance } from "./_components/bill-glance";
 import { ClockRow } from "./_components/clock-row";
 import { DateHeader } from "./_components/date-header";
 import { DayPlanSection } from "./_components/day-plan-section";
 import { FocusGlance } from "./_components/focus-glance";
 import { GlanceCards } from "./_components/glance-cards";
-import { SetupCard, useSetupCard } from "./_components/setup-card";
+import { useSetupCard } from "./_components/setup-card";
 import { UpNext } from "./_components/up-next";
 
 /**
@@ -234,10 +235,18 @@ export function Dashboard() {
     <div className="space-y-2.5">
       {/* Above the date, once: a Windows user who cannot find the tray icon
           will not come back to read it anywhere lower. */}
-      {/* One first-run card at a time: setup first, then where the tray icon is. */}
       {trayPin.visible && !setup.visible && <TrayPinTip onDismiss={trayPin.dismiss} />}
+      {/* A new install's welcome, over the whole popover. Its last step says
+          where the tray icon lives, so the tip above isn't needed after it. */}
+      {setup.visible && (
+        <Welcome
+          onDone={() => {
+            trayPin.dismiss();
+            setup.dismiss();
+          }}
+        />
+      )}
       <DateHeader today={today} />
-      {setup.visible && <SetupCard onDone={setup.dismiss} />}
 
       <AnnouncementBanner />
 

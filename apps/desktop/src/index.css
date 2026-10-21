@@ -4855,3 +4855,197 @@ input[type="search"]::-webkit-search-decoration {
     opacity: 0;
   }
 }
+
+/* The welcome a new install sees: over the whole popover on the app's own
+   plain background, progress dots, one step at a time, and the way on
+   always at the bottom. */
+.welcome {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-canvas);
+}
+.welcome__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px 6px;
+}
+.welcome__dots {
+  display: flex;
+  gap: 5px;
+}
+.welcome__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 18%, transparent);
+  transition:
+    width 0.3s ease,
+    background-color 0.3s ease;
+}
+.welcome__dot--done {
+  background: color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+}
+.welcome__dot--on {
+  width: 18px;
+  background: var(--color-accent-mark);
+}
+.welcome__skip {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+.welcome__skip:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+.welcome__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 16px 12px;
+}
+.welcome__step {
+  min-height: 100%;
+}
+.welcome__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 6px;
+}
+.welcome__app-icon {
+  width: 76px;
+  height: 76px;
+  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--color-accent-mark) 40%, transparent));
+  animation: welcome-float 3.2s ease-in-out infinite;
+}
+@keyframes welcome-float {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+.welcome__badge {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 16px;
+  font-size: 26px;
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 15%, var(--color-surface));
+}
+.welcome__title {
+  margin-top: 12px;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.welcome__title--big {
+  font-size: 24px;
+}
+.welcome__lead {
+  margin-top: 6px;
+  max-width: 290px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+.welcome__date {
+  justify-content: center;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 12px;
+}
+.welcome__mini-badge {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+}
+.welcome-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 4px 10px;
+  font-size: 11.5px;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+.welcome-chip:hover {
+  border-color: color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+}
+.welcome-chip:active {
+  transform: scale(0.96);
+}
+.welcome-chip--on {
+  border-color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 16%, var(--color-surface));
+  color: var(--color-text);
+}
+.welcome-tile {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 10px;
+  animation: welcome-tile-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes welcome-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+.welcome__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 16px;
+  border-top: 1px solid color-mix(in srgb, var(--color-divider) 70%, transparent);
+}
+.welcome__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--color-text-secondary);
+  transition: background-color 0.15s ease;
+}
+.welcome__back:hover {
+  background: var(--color-surface-hover);
+}
+.welcome__next {
+  flex: 1;
+  height: 38px;
+  justify-content: center;
+  font-size: 13.5px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .welcome__app-icon,
+  .welcome-tile {
+    animation: none;
+  }
+}

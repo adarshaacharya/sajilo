@@ -75,7 +75,7 @@ export function GameOver({
 const COLOURS = ["#f6c945", "#62bf6e", "#5aa3e6", "#ef6f5c", "#a98be8"];
 
 /** Bits of paper falling from the top, each with its own drift and delay. */
-function Confetti() {
+export function Confetti() {
   const [pieces] = useState(() =>
     Array.from({ length: 36 }, (_, index) => ({
       left: Math.random() * 100,
