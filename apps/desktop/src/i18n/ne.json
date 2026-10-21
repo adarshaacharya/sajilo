@@ -1665,5 +1665,7 @@
   "kata.next-computer": "अर्को खेलमा कम्प्युटर पहिले।",
   "kata.stat.won": "जित",
   "kata.stat.drawn": "बराबरी",
-  "kata.stat.lost": "हार"
+  "kata.stat.lost": "हार",
+  "kata.impossible": "असम्भव",
+  "kata.impossible-note": "यसले कहिल्यै गल्ती गर्दैन। बराबरी नै सबैभन्दा राम्रो नतिजा हो।"
 }

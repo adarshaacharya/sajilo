@@ -2,10 +2,11 @@
 //! diagonal wins; X always moves first, and who is X alternates game by
 //! game, since going first is the bigger half of winning.
 //!
-//! No level is unbeatable. Easy mostly plays at random; Medium takes a win
-//! and blocks one but sees nothing deeper; Hard searches the whole game, as
-//! a perfect player would, yet slips about one move in six, so a careful
-//! player can still win.
+//! Easy mostly plays at random; Medium takes a win and blocks one but sees
+//! nothing deeper; Hard searches the whole game, as a perfect player would,
+//! yet slips about one move in six, so a careful player can still win.
+//! Impossible never slips: the game is solved, so against it a draw is the
+//! best there is.
 
 use serde::{Deserialize, Serialize};
 
@@ -58,10 +59,12 @@ pub enum KataLevel {
     #[default]
     Medium,
     Hard,
+    /// Perfect play: it can't lose.
+    Impossible,
 }
 
 impl KataLevel {
-    pub const ALL: [Self; 3] = [Self::Easy, Self::Medium, Self::Hard];
+    pub const ALL: [Self; 4] = [Self::Easy, Self::Medium, Self::Hard, Self::Impossible];
 
     pub fn index(self) -> usize {
         self as usize
@@ -170,8 +173,8 @@ pub fn computer_move(board: &Board, level: KataLevel, seed: u64) -> Option<usize
                 })
                 .unwrap_or_else(|| random(&mut rng)),
         ),
-        KataLevel::Hard => {
-            if rng.below(6) == 0 {
+        KataLevel::Hard | KataLevel::Impossible => {
+            if level == KataLevel::Hard && rng.below(6) == 0 {
                 return Some(random(&mut rng));
             }
             let scored: Vec<(usize, i32)> = moves
@@ -256,7 +259,7 @@ impl KataGame {
     }
 }
 
-/// Games finished against each level: easy, medium, hard.
+/// Games finished against each level: easy, medium, hard, impossible.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 #[cfg_attr(
@@ -397,6 +400,34 @@ mod tests {
         }
         explore([None; CELLS], KataMark::X);
         explore([None; CELLS], KataMark::O);
+    }
+
+    #[test]
+    fn impossible_never_slips() {
+        let b = board("XX. .O. ...");
+        for seed in 0..200 {
+            assert_eq!(computer_move(&b, KataLevel::Impossible, seed), Some(2));
+        }
+    }
+
+    /// Whatever the player does, Impossible never loses a whole game.
+    #[test]
+    fn impossible_never_loses_a_game() {
+        fn explore(game: KataGame) {
+            match game.outcome() {
+                Some(outcome) => assert_ne!(outcome, KataOutcome::Won),
+                None => {
+                    for cell in empty(&game.board) {
+                        let mut next = game.clone();
+                        if next.play(cell) {
+                            explore(next);
+                        }
+                    }
+                }
+            }
+        }
+        explore(KataGame::new(KataMark::X, KataLevel::Impossible, 3));
+        explore(KataGame::new(KataMark::O, KataLevel::Impossible, 3));
     }
 
     #[test]

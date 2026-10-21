@@ -1665,5 +1665,7 @@
   "kata.next-computer": "The computer goes first next game.",
   "kata.stat.won": "Won",
   "kata.stat.drawn": "Drawn",
-  "kata.stat.lost": "Lost"
+  "kata.stat.lost": "Lost",
+  "kata.impossible": "Impossible",
+  "kata.impossible-note": "It never makes a mistake. A draw is the best you can get."
 }

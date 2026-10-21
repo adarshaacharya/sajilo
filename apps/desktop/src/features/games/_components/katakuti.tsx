@@ -11,11 +11,12 @@ import { StatTiles } from "./stat-tiles";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
-const LEVELS: KataLevel[] = ["easy", "medium", "hard"];
+const LEVELS: KataLevel[] = ["easy", "medium", "hard", "impossible"];
 const LEVEL_KEYS = {
   easy: "sudoku.easy",
   medium: "sudoku.medium",
   hard: "sudoku.hard",
+  impossible: "kata.impossible",
 } as const satisfies Record<KataLevel, string>;
 
 const OUTCOME_KEYS = {
@@ -156,18 +157,24 @@ function LevelChips({
   t: TFn;
 }) {
   return (
-    <div className="grid grid-cols-3 gap-1.5">
-      {LEVELS.map((each) => (
-        <button
-          key={each}
-          type="button"
-          aria-pressed={level === each}
-          onClick={() => onLevel(each)}
-          className={`toggle-chip ${level === each ? "toggle-chip--on" : "toggle-chip--off"}`}
-        >
-          {t(LEVEL_KEYS[each])}
-        </button>
-      ))}
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-4 gap-1.5">
+        {LEVELS.map((each) => (
+          <button
+            key={each}
+            type="button"
+            aria-pressed={level === each}
+            onClick={() => onLevel(each)}
+            className={`toggle-chip ${level === each ? "toggle-chip--on" : "toggle-chip--off"}`}
+          >
+            {t(LEVEL_KEYS[each])}
+          </button>
+        ))}
+      </div>
+      {/* Say so up front: against perfect play the best result is a draw. */}
+      {level === "impossible" && (
+        <p className="text-center text-[10.5px] text-text-muted">{t("kata.impossible-note")}</p>
+      )}
     </div>
   );
 }
