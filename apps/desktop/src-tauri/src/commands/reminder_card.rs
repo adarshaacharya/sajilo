@@ -158,3 +158,9 @@ pub fn open_screen(app: AppHandle<Wry>, route: String) {
         let _ = window.emit("sajilo://navigate", route);
     }
 }
+
+/// Fits the calling card's window to its page, keeping it on screen.
+#[tauri::command]
+pub fn fit_card(window: tauri::WebviewWindow<tauri::Wry>, height: f64) {
+    crate::system::card_window::fit(&window, height);
+}

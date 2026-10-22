@@ -921,6 +921,8 @@ export const api = {
     invoke<PlannedNotification[]>("set_notification_options", { options }),
   pendingNotifications: () => invoke<PlannedNotification[]>("pending_notifications"),
   currentReminder: () => invoke<ReminderCardView | null>("current_reminder"),
+  /** Fits the calling card's window to `height`, moving it up if it would run off screen. */
+  fitCard: (height: number) => invoke<void>("fit_card", { height }),
   /** `open` is the screen to show in the popover; null just dismisses. */
   dismissReminder: (open: string | null) => invoke<void>("dismiss_reminder", { open }),
   previewReminderCard: () => invoke<void>("preview_reminder_card"),

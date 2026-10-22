@@ -4525,12 +4525,6 @@ input[type="search"]::-webkit-search-decoration {
     transform 0.25s ease,
     box-shadow 0.25s ease;
 }
-.jhandi-die--tumble {
-  animation: jhandi-tumble 0.42s ease-in-out infinite alternate;
-}
-.jhandi-die--land {
-  animation: jhandi-land 0.28s ease-out;
-}
 .jhandi-die--hit {
   transform: translateY(-2px);
   box-shadow:
@@ -4540,15 +4534,7 @@ input[type="search"]::-webkit-search-decoration {
 .jhandi-die--dim {
   opacity: 0.5;
 }
-/* No spin: a die bobs and shuffles while it tumbles, then settles. */
-@keyframes jhandi-tumble {
-  from {
-    transform: translate(-1.5px, -5px);
-  }
-  to {
-    transform: translate(1.5px, 1px);
-  }
-}
+/* A die drops onto the cloth as the cup lifts, and settles. */
 @keyframes jhandi-land {
   0% {
     transform: translateY(-4px);
@@ -4558,6 +4544,106 @@ input[type="search"]::-webkit-search-decoration {
   }
   100% {
     transform: none;
+  }
+}
+/* The cup: a brass lid that comes down over the dice, rattles, and lifts. */
+.jhandi-cup {
+  position: absolute;
+  inset: 5px 6px;
+  z-index: 2;
+  border-radius: 46% 46% 16px 16px / 90% 90% 16px 16px;
+  background:
+    linear-gradient(180deg, transparent 62%, rgb(0 0 0 / 0.18) 62%, rgb(0 0 0 / 0.18) 66%, transparent 66%),
+    radial-gradient(120% 140% at 50% 0%, #ffeaa6, #e2ad38 45%, #9a6b14);
+  box-shadow:
+    inset 0 -6px 10px rgb(0 0 0 / 0.25),
+    inset 0 2px 0 rgb(255 255 255 / 0.5),
+    0 6px 14px rgb(0 0 0 / 0.4);
+  opacity: 0;
+  transform: translateY(-115%);
+  transition:
+    transform 0.35s cubic-bezier(0.3, 0.7, 0.4, 1),
+    opacity 0.25s ease;
+  pointer-events: none;
+}
+.jhandi-cup::before {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3c4, #c99520 70%);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+.jhandi-cup--on {
+  opacity: 1;
+  transform: none;
+  animation: jhandi-rattle 0.14s ease-in-out 0.35s infinite alternate;
+}
+/* A shake side to side, never a spin. */
+@keyframes jhandi-rattle {
+  from {
+    transform: translate(-2.5px, 0);
+  }
+  to {
+    transform: translate(2.5px, -1.5px);
+  }
+}
+.jhandi-die--settle {
+  animation: jhandi-land 0.32s ease-out both;
+}
+/* What the roll paid, large over the dice for a moment. */
+.jhandi-burst {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  font-size: 34px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  pointer-events: none;
+  animation: jhandi-burst 1.7s ease-out 0.25s both;
+}
+.jhandi-burst > span {
+  border-radius: 999px;
+  padding: 2px 20px;
+  background: rgb(24 8 6 / 0.82);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.45);
+}
+.jhandi-burst--won {
+  color: #ffe27a;
+  text-shadow:
+    0 2px 0 #7a4b00,
+    0 0 18px rgb(255 214 90 / 0.8);
+}
+.jhandi-burst--lost {
+  color: #fff;
+  font-size: 26px;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.5);
+}
+@keyframes jhandi-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  30% {
+    transform: scale(1);
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 }
 .jhandi-mat {
@@ -4590,10 +4676,39 @@ input[type="search"]::-webkit-search-decoration {
     opacity 0.2s ease,
     transform 0.12s ease;
 }
-.jhandi-cell:not(:disabled):hover {
+.jhandi-cell__tap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  cursor: pointer;
+}
+.jhandi-cell__tap:disabled {
+  cursor: default;
+}
+.jhandi-cell > :not(.jhandi-cell__tap, .jhandi-cell__off) {
+  pointer-events: none;
+}
+.jhandi-cell__off {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 2;
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.35);
+}
+.jhandi-cell__off:hover {
+  background: rgb(0 0 0 / 0.55);
+}
+.jhandi-cell:has(.jhandi-cell__tap:not(:disabled):hover) {
   background: rgb(255 255 255 / 0.08);
 }
-.jhandi-cell:not(:disabled):active {
+.jhandi-cell:has(.jhandi-cell__tap:not(:disabled):active) {
   transform: scale(0.97);
 }
 .jhandi-cell--bet {
@@ -4681,8 +4796,8 @@ input[type="search"]::-webkit-search-decoration {
   outline-offset: 2px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .jhandi-die--tumble,
-  .jhandi-die--land {
+  .jhandi-die--settle,
+  .jhandi-cup--on {
     animation: none;
   }
 }

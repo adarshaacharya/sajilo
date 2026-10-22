@@ -81,6 +81,11 @@ pub fn open(app: &AppHandle<Wry>, label: &str, surface: &str, title: &str) {
                         x: f64::from(position.x) / scale,
                         y: f64::from(position.y) / scale,
                     };
+                    // A card lifted to fit its page isn't somewhere the user
+                    // chose: the next, smaller card shouldn't open there.
+                    if take_lift(place) {
+                        return;
+                    }
                     if let Ok(mut latest) = dragged_to.lock() {
                         *latest = Some(place);
                     }
@@ -100,6 +105,52 @@ pub fn open(app: &AppHandle<Wry>, label: &str, surface: &str, title: &str) {
             });
         }
         Err(error) => eprintln!("sajilo: could not open the {label} card: {error}"),
+    }
+}
+
+/// Where the last card lifted to fit its page was moved to, so the move it
+/// causes isn't taken for a drag.
+static LIFTED_TO: Mutex<Option<Place>> = Mutex::new(None);
+
+/// Whether `place` is where a card was just lifted to; forgets it either way.
+fn take_lift(place: Place) -> bool {
+    let Ok(mut lifted) = LIFTED_TO.lock() else {
+        return false;
+    };
+    lifted
+        .take()
+        .is_some_and(|to| (to.x - place.x).abs() < 1.5 && (to.y - place.y).abs() < 1.5)
+}
+
+/// Fits a card's window to its page's `height`, in logical pixels. A window
+/// grows downwards, so a card that would then run past the bottom of the
+/// screen — on Windows it opens just above the taskbar — moves up by as much
+/// instead of slipping under the taskbar.
+pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
+    let Ok(Some(monitor)) = window.current_monitor() else {
+        let _ = window.set_size(tauri::LogicalSize::new(WIDTH, height));
+        return;
+    };
+    let scale = monitor.scale_factor();
+    let area = monitor.work_area();
+    let top = f64::from(area.position.y) / scale;
+    let bottom = top + f64::from(area.size.height) / scale;
+    let height = height.min(bottom - top - 2.0 * MARGIN).max(1.0);
+    let _ = window.set_size(tauri::LogicalSize::new(WIDTH, height));
+    let Ok(position) = window.outer_position() else {
+        return;
+    };
+    let x = f64::from(position.x) / scale;
+    let y = f64::from(position.y) / scale;
+    if y + height > bottom - MARGIN {
+        let place = Place {
+            x,
+            y: (bottom - MARGIN - height).max(top + MARGIN),
+        };
+        if let Ok(mut lifted) = LIFTED_TO.lock() {
+            *lifted = Some(place);
+        }
+        let _ = window.set_position(tauri::LogicalPosition::new(place.x, place.y));
     }
 }
 
