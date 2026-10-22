@@ -89,19 +89,24 @@ export function JhandiBurja({ t }: { t: TFn }) {
     });
   const takeOff = (index: number) => change((now) => now.map((bet, i) => (i === index ? 0 : bet)));
 
-  const roll = async () => {
-    if (busy || staked === 0 || staked > purse) return;
+  /** Rolls for `placed`: the bets on the mat, or the last ones again. Each
+   * round is settled, as at a real mat: once the dice are seen, the mat is
+   * cleared for the next bet. */
+  const roll = async (placed: number[]) => {
+    const down = sum(placed);
+    if (busy || down === 0 || down > purse) return;
     setBusy(true);
     setError(null);
     setClosed(false);
     setPhase("rolling");
     setCovered(true);
     try {
-      const [view] = await Promise.all([api.jhandiRoll(bets), wait(CUP_DOWN_MS + RATTLE_MS)]);
+      const [view] = await Promise.all([api.jhandiRoll(placed), wait(CUP_DOWN_MS + RATTLE_MS)]);
       if (!alive.current) return;
       // The dice change under the cup; it lifts to show them.
       await mutate(view, { revalidate: false });
       setRound((n) => n + 1);
+      setBets(NONE);
       setCovered(false);
       await wait(CUP_UP_MS);
       setPhase("result");
@@ -114,7 +119,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
     }
   };
 
-  const newBet = () => change(() => NONE);
+  const clear = () => change(() => NONE);
 
   const refill = async () => {
     setBets(NONE);
@@ -126,7 +131,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
   // What lies on the cloth: the last roll, or before any, one of each face.
   const dice = data.last?.dice ?? faces;
   // The dice keep showing what the roll paid; the mat shows it for a
-  // moment, then the bets again, still down for the next roll.
+  // moment, then clears for the next bet.
   const rolled = last?.bets ?? bets;
   const pays = (index: number) =>
     last != null && (rolled[index] ?? 0) > 0 && (last.counts[index] ?? 0) >= TO_WIN;
@@ -134,7 +139,10 @@ export function JhandiBurja({ t }: { t: TFn }) {
     last != null && faces.some((_, i) => (rolled[i] ?? 0) > 0 && (last.counts[i] ?? 0) >= 3);
   const outcome = settled ? null : last;
   const broke = purse === 0 && !busy;
-  const canRepeat = staked > 0 && staked <= purse;
+  // The last round's bets, offered again in one tap while the mat is empty
+  // and the purse covers them.
+  const again = data.last?.bets ?? NONE;
+  const canRepeat = staked === 0 && sum(again) > 0 && sum(again) <= purse;
 
   const status = error
     ? error
@@ -160,9 +168,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
         </div>
         <div className="text-right">
           <p className="text-[10.5px] text-text-muted">{t("jhandi.on-mat")}</p>
-          <p className="text-[18px] font-semibold leading-tight tabular-nums">
-            {phase === "result" ? 0 : staked}
-          </p>
+          <p className="text-[18px] font-semibold leading-tight tabular-nums">{staked}</p>
         </div>
       </section>
 
@@ -270,7 +276,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
         {phase === "betting" && staked > 0 && (
           <button
             type="button"
-            onClick={newBet}
+            onClick={clear}
             disabled={busy}
             className="settings-btn h-[30px] px-3 text-[11.5px]"
           >
@@ -288,30 +294,20 @@ export function JhandiBurja({ t }: { t: TFn }) {
           <Icon name="refresh" className="size-3.5" />
           {t("jhandi.refill").replace("{n}", String(data.newPurse))}
         </button>
-      ) : phase === "result" ? (
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => void roll()}
-            disabled={busy || !canRepeat}
-            className="settings-btn settings-btn--accent h-10 flex-1 justify-center text-[13px]"
-          >
-            <Icon name="refresh" className="size-3.5" />
-            {t("jhandi.again").replace("{n}", String(staked))}
-          </button>
-          <button
-            type="button"
-            onClick={newBet}
-            disabled={busy}
-            className="settings-btn h-10 px-4 text-[13px]"
-          >
-            {t("jhandi.new-bet")}
-          </button>
-        </div>
+      ) : canRepeat ? (
+        <button
+          type="button"
+          onClick={() => void roll(again)}
+          disabled={busy}
+          className="settings-btn settings-btn--accent h-10 w-full justify-center text-[13px]"
+        >
+          <Icon name="refresh" className="size-3.5" />
+          {t("jhandi.same-again").replace("{n}", String(sum(again)))}
+        </button>
       ) : (
         <button
           type="button"
-          onClick={() => void roll()}
+          onClick={() => void roll(bets)}
           disabled={busy || staked === 0}
           className="settings-btn settings-btn--accent h-10 w-full justify-center text-[13px]"
         >
