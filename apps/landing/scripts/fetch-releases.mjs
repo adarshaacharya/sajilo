@@ -51,7 +51,13 @@ async function main() {
     throw new Error(`GitHub API responded ${res.status}: ${await res.text()}`);
   }
 
-  const releases = (await res.json()).map((r) => ({
+  const listed = await res.json();
+  // GitHub has answered an empty list now and then for a repo with dozens of
+  // releases. Taken at its word, that would publish a blank releases page.
+  if (!Array.isArray(listed) || listed.length === 0) {
+    throw new Error("GitHub listed no releases");
+  }
+  const releases = listed.map((r) => ({
     version: r.tag_name,
     name: r.name || r.tag_name,
     publishedAt: r.published_at,
