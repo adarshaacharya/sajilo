@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.38",
+    "name": "Sajilo v0.1.38",
+    "publishedAt": "2026-10-22T16:24:08Z",
+    "body": "## झन्डी बुर्जा · Jhandi Burja\n\nTihar's six-dice game, now in **More › Games**, with a red mat and yellow dice like the real set: सुरथ, बुर्जा, पान, चिडी, झन्डा and ईंट.\n\n- Tap a face to put coins on it, and the **×** on a face takes that bet off.\n- Roll: a brass bowl comes down over the dice, rattles, and lifts to show them.\n- A face on **two or more dice** pays your bet once for each, and you keep your bet. One or none, and it's lost.\n- You start with 100 coins. **New game** starts again from 100 whenever you like, and so does running out. Your record stays either way.\n\nThe coins are pretend. Nothing here is real money, and there's no way to buy more.\n\n## Turn notifications off, for good\n\n- **Settings › Notifications** has a new **All notifications** switch at the top. Off means nothing from Sajilo, breaks included, until you switch it back on. Your choices for each kind are kept.\n- **Routine breaks** now have their own on/off switch on that screen.\n- **Pause all** now pauses breaks too.\n- **Routine › Pause** has a new **Until I resume** option, alongside 30 min, 1 hour and the rest of the day.\n\n## Fixes and smaller things\n\n- **Windows:** a tall reminder card, like the quiz's question of the day, could slip under the taskbar. Cards now move up to stay on screen.\n- The Routine card says less: the next break and its countdown, nothing more.\n- The Games list is cleaner, with a colour of its own for every game.\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.38",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-macos-arm64.dmg",
+        "size": 12169891
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-macos-x64.dmg",
+        "size": 12914877
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-windows-x64.exe",
+        "size": 8945606
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-linux-amd64.deb",
+        "size": 16291912
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-linux-x86_64.AppImage",
+        "size": 161442296
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.38/Sajilo-linux-x86_64.rpm",
+        "size": 16293831
+      }
+    ]
+  },
+  {
     "version": "v0.1.37",
     "name": "Sajilo v0.1.37",
     "publishedAt": "2026-10-21T15:33:25Z",
