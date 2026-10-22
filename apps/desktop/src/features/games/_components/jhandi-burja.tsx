@@ -15,6 +15,9 @@ const CUP_DOWN_MS = 350;
 const RATTLE_MS = 900;
 const CUP_UP_MS = 450;
 const SETTLE_GAP_MS = 70;
+/** How long the mat shows what each face paid before it goes back to the
+ * bets, still down for the next roll. */
+const SHOW_RESULT_MS = 2400;
 /** How long the purse takes to count to its new total. */
 const COUNT_MS = 700;
 /** A face pays from this many dice. */
@@ -42,6 +45,14 @@ export function JhandiBurja({ t }: { t: TFn }) {
   const [covered, setCovered] = useState(false);
   // Counts rolls on this screen, so each result's burst plays afresh.
   const [round, setRound] = useState(0);
+  // Whether the mat has gone back from what the roll paid to the bets.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    setSettled(false);
+    if (phase !== "result") return;
+    const timer = window.setTimeout(() => setSettled(true), SHOW_RESULT_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // The empty-purse popup, until "See the dice" folds it.
@@ -114,12 +125,14 @@ export function JhandiBurja({ t }: { t: TFn }) {
 
   // What lies on the cloth: the last roll, or before any, one of each face.
   const dice = data.last?.dice ?? faces;
-  // The result shows the bets that were rolled; betting shows the new ones.
-  const placed = last?.bets ?? bets;
+  // The dice keep showing what the roll paid; the mat shows it for a
+  // moment, then the bets again, still down for the next roll.
+  const rolled = last?.bets ?? bets;
   const pays = (index: number) =>
-    last != null && (placed[index] ?? 0) > 0 && (last.counts[index] ?? 0) >= TO_WIN;
+    last != null && (rolled[index] ?? 0) > 0 && (last.counts[index] ?? 0) >= TO_WIN;
   const bigWin =
-    last != null && faces.some((_, i) => (placed[i] ?? 0) > 0 && (last.counts[i] ?? 0) >= 3);
+    last != null && faces.some((_, i) => (rolled[i] ?? 0) > 0 && (last.counts[i] ?? 0) >= 3);
+  const outcome = settled ? null : last;
   const broke = purse === 0 && !busy;
   const canRepeat = staked > 0 && staked <= purse;
 
@@ -194,15 +207,15 @@ export function JhandiBurja({ t }: { t: TFn }) {
 
       <div className="jhandi-mat">
         {faces.map((face, i) => {
-          const bet = placed[i] ?? 0;
-          const count = last?.counts[i] ?? 0;
+          const bet = (outcome ? outcome.bets : bets)[i] ?? 0;
+          const count = outcome?.counts[i] ?? 0;
           const [name, gloss] = t(`jhandi.face.${face}`).split(" · ");
-          const won = pays(i);
+          const won = outcome != null && pays(i);
           return (
             <div
               key={face}
               className={`jhandi-cell ${bet > 0 ? "jhandi-cell--bet" : ""} ${
-                last && bet > 0 ? (won ? "jhandi-cell--won" : "jhandi-cell--lost") : ""
+                outcome && bet > 0 ? (won ? "jhandi-cell--won" : "jhandi-cell--lost") : ""
               }`}
             >
               <button
@@ -212,8 +225,8 @@ export function JhandiBurja({ t }: { t: TFn }) {
                 className="jhandi-cell__tap"
                 aria-label={`${name}${bet > 0 ? `, ${bet}` : ""}`}
               />
-              {last && count > 0 && <span className="jhandi-cell__count">×{count}</span>}
-              {!last && bet > 0 && !busy && (
+              {outcome && count > 0 && <span className="jhandi-cell__count">×{count}</span>}
+              {!outcome && bet > 0 && !busy && (
                 <button
                   type="button"
                   onClick={() => takeOff(i)}
@@ -230,7 +243,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
               {gloss && <span className="jhandi-cell__gloss">{gloss}</span>}
               {bet > 0 && (
                 <span className="jhandi-cell__stake">
-                  {last ? (won ? `+${bet * count}` : `−${bet}`) : bet}
+                  {outcome ? (won ? `+${bet * count}` : `−${bet}`) : bet}
                 </span>
               )}
             </div>
