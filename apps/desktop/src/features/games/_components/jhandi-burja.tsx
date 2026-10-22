@@ -34,7 +34,7 @@ type Phase = "betting" | "rolling" | "result";
  * झन्डी बुर्जा: put pretend coins on faces of the mat, and the cup goes over
  * six dice, rattles and lifts. A face on two or more dice pays its stake
  * once for each and gives the stake back; one or none, and it's lost. Then
- * the same bets again, or new ones.
+ * the mat clears for a fresh bet.
  */
 export function JhandiBurja({ t }: { t: TFn }) {
   const { data, mutate } = useJhandi();
@@ -57,8 +57,6 @@ export function JhandiBurja({ t }: { t: TFn }) {
   const [error, setError] = useState<string | null>(null);
   // The empty-purse popup, until "See the dice" folds it.
   const [closed, setClosed] = useState(false);
-  // "New bet" turns down the offer of the same bet again, until the next roll.
-  const [declined, setDeclined] = useState(false);
   // Asking before a fresh start throws away what is left in the purse.
   const [confirming, setConfirming] = useState(false);
   // Whether the screen is still open, so a roll stops if it closes. Set on
@@ -93,25 +91,22 @@ export function JhandiBurja({ t }: { t: TFn }) {
     });
   const takeOff = (index: number) => change((now) => now.map((bet, i) => (i === index ? 0 : bet)));
 
-  /** Rolls for `placed`: the bets on the mat, or the last ones again. Each
-   * round is settled, as at a real mat: once the dice are seen, the mat is
-   * cleared for the next bet. */
-  const roll = async (placed: number[]) => {
-    const down = sum(placed);
-    if (busy || down === 0 || down > purse) return;
+  /** Rolls for the bets on the mat. Each round is settled, as at a real
+   * mat: once the dice are seen, the mat is cleared for a fresh bet. */
+  const roll = async () => {
+    if (busy || staked === 0 || staked > purse) return;
     setBusy(true);
     setError(null);
     setClosed(false);
     setPhase("rolling");
     setCovered(true);
     try {
-      const [view] = await Promise.all([api.jhandiRoll(placed), wait(CUP_DOWN_MS + RATTLE_MS)]);
+      const [view] = await Promise.all([api.jhandiRoll(bets), wait(CUP_DOWN_MS + RATTLE_MS)]);
       if (!alive.current) return;
       // The dice change under the cup; it lifts to show them.
       await mutate(view, { revalidate: false });
       setRound((n) => n + 1);
       setBets(NONE);
-      setDeclined(false);
       setCovered(false);
       await wait(CUP_UP_MS);
       setPhase("result");
@@ -124,16 +119,9 @@ export function JhandiBurja({ t }: { t: TFn }) {
     }
   };
 
-  const clear = () => change(() => NONE);
-  const newBet = () => {
-    setDeclined(true);
-    clear();
-  };
-
   const startOver = async () => {
     setConfirming(false);
     setBets(NONE);
-    setDeclined(false);
     setPhase("betting");
     setError(null);
     await mutate(await api.jhandiStartOver(), { revalidate: false });
@@ -157,10 +145,6 @@ export function JhandiBurja({ t }: { t: TFn }) {
     last != null && faces.some((_, i) => (rolled[i] ?? 0) > 0 && (last.counts[i] ?? 0) >= 3);
   const outcome = settled ? null : last;
   const broke = purse === 0 && !busy;
-  // The last round's bets, offered again in one tap while the mat is empty
-  // and the purse covers them.
-  const again = data.last?.bets ?? NONE;
-  const canRepeat = !declined && staked === 0 && sum(again) > 0 && sum(again) <= purse;
   // A fresh start is worth offering once anything has happened.
   const canStartOver = !busy && !broke && (purse !== data.newPurse || data.last != null);
 
@@ -293,14 +277,14 @@ export function JhandiBurja({ t }: { t: TFn }) {
             </button>
           ))}
         </div>
-        {phase === "betting" && staked > 0 && (
+        {canStartOver && (
           <button
             type="button"
-            onClick={clear}
-            disabled={busy}
+            onClick={() => setConfirming(true)}
             className="settings-btn h-[30px] px-3 text-[11.5px]"
           >
-            {t("jhandi.clear")}
+            <Icon name="refresh" className="size-3" />
+            {t("jhandi.new-game")}
           </button>
         )}
       </div>
@@ -314,30 +298,10 @@ export function JhandiBurja({ t }: { t: TFn }) {
           <Icon name="refresh" className="size-3.5" />
           {t("jhandi.refill").replace("{n}", String(data.newPurse))}
         </button>
-      ) : canRepeat ? (
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => void roll(again)}
-            disabled={busy}
-            className="settings-btn settings-btn--accent h-10 flex-1 justify-center text-[13px]"
-          >
-            <Icon name="refresh" className="size-3.5" />
-            {t("jhandi.same-again").replace("{n}", String(sum(again)))}
-          </button>
-          <button
-            type="button"
-            onClick={newBet}
-            disabled={busy}
-            className="settings-btn h-10 px-4 text-[13px]"
-          >
-            {t("jhandi.new-bet")}
-          </button>
-        </div>
       ) : (
         <button
           type="button"
-          onClick={() => void roll(bets)}
+          onClick={() => void roll()}
           disabled={busy || staked === 0}
           className="settings-btn settings-btn--accent h-10 w-full justify-center text-[13px]"
         >
@@ -368,21 +332,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
           </button>
         </div>
       ) : (
-        <p className="text-center text-[10px] text-text-muted">
-          {t("jhandi.pretend")}
-          {canStartOver && (
-            <>
-              {" · "}
-              <button
-                type="button"
-                onClick={() => setConfirming(true)}
-                className="underline underline-offset-2 hover:text-text-secondary"
-              >
-                {t("jhandi.start-over-link").replace("{m}", String(data.newPurse))}
-              </button>
-            </>
-          )}
-        </p>
+        <p className="text-center text-[10px] text-text-muted">{t("jhandi.pretend")}</p>
       )}
 
       {broke && !closed && phase !== "rolling" && (
