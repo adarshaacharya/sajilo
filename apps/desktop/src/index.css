@@ -5382,11 +5382,7 @@ input[type="search"]::-webkit-search-decoration {
   gap: 2px;
   border-radius: 14px;
   border: 1px solid var(--color-border);
-  background: linear-gradient(
-    160deg,
-    color-mix(in srgb, var(--tile-tint) 10%, var(--color-surface)),
-    var(--color-surface) 70%
-  );
+  background: var(--color-surface);
   padding: 10px 8px;
   text-align: center;
   transition:
@@ -5437,6 +5433,8 @@ input[type="search"]::-webkit-search-decoration {
   font-size: 10.5px;
   color: var(--color-text-muted);
 }
+/* Each game its own colour, in its icon only. Three have no app token to
+   borrow, so they carry their own, darker on a light screen. */
 .game-tile--kata {
   --tile-tint: var(--color-holiday);
 }
@@ -5446,6 +5444,9 @@ input[type="search"]::-webkit-search-decoration {
 .game-tile--chungi {
   --tile-tint: var(--color-accent-mark);
 }
+.game-tile--jhandi {
+  --tile-tint: #f2679f;
+}
 .game-tile--quiz {
   --tile-tint: var(--color-violet);
 }
@@ -5453,11 +5454,28 @@ input[type="search"]::-webkit-search-decoration {
   --tile-tint: var(--color-weather-tint);
 }
 .game-tile--sudoku {
-  --tile-tint: var(--color-forex-tint);
+  --tile-tint: #3ec3c9;
 }
 .game-tile--bagh {
-  --tile-tint: var(--color-accent-mark);
+  --tile-tint: #f0913f;
 }
-.game-tile--jhandi {
-  --tile-tint: var(--color-holiday);
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .game-tile--jhandi {
+    --tile-tint: #b5266a;
+  }
+  :root:not([data-theme="dark"]) .game-tile--sudoku {
+    --tile-tint: #0e7c83;
+  }
+  :root:not([data-theme="dark"]) .game-tile--bagh {
+    --tile-tint: #b05410;
+  }
+}
+:root[data-theme="light"] .game-tile--jhandi {
+  --tile-tint: #b5266a;
+}
+:root[data-theme="light"] .game-tile--sudoku {
+  --tile-tint: #0e7c83;
+}
+:root[data-theme="light"] .game-tile--bagh {
+  --tile-tint: #b05410;
 }
