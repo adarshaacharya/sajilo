@@ -165,7 +165,7 @@ fn pop_up(app: &AppHandle<Wry>, shown: &[Announcement], options: &NotificationOp
         &today,
         // Never at night: an announcement is never urgent enough to wake
         // anyone.
-        options.is_paused(Utc::now())
+        options.is_silenced(Utc::now())
             || crate::commands::notify::in_quiet_hours(options, Utc::now()),
     ) else {
         return;

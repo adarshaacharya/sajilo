@@ -66,8 +66,11 @@ fn with_tracker<R>(app: &AppHandle<Wry>, change: impl FnOnce(&mut Tracker) -> R)
         settings: read::<FocusSettings>(app, SETTINGS_KEY).normalised(),
         unsaved_ticks: 0,
     });
-    // One choice for every reminder, made in Settings: breaks follow it.
-    tracker.settings.style = crate::commands::notify::style(app);
+    // How reminders arrive, and whether they arrive at all, are chosen once
+    // in Settings › Notifications: breaks follow both.
+    let options = crate::commands::notify::options(app);
+    tracker.settings.style = options.style;
+    tracker.settings.muted = options.all_off;
     change(tracker)
 }
 
@@ -172,6 +175,29 @@ pub fn pause_focus(app: AppHandle<Wry>, choice: PauseChoice) -> Result<FocusSnap
         Ok(view(tracker))
     })
     .inspect(|_| sync_card(&app))
+}
+
+/// "Pause all" in Settings › Notifications pauses breaks for as long, unless
+/// a pause set in Routine runs longer; ending it early ends only the pause it
+/// set, not one set in Routine.
+pub fn follow_pause(
+    app: &AppHandle<Wry>,
+    before: Option<chrono::DateTime<Utc>>,
+    after: Option<chrono::DateTime<Utc>>,
+) {
+    with_tracker(app, |tracker| {
+        let own = tracker.state.paused_until;
+        tracker.state.paused_until = match after {
+            Some(until) => {
+                tracker.state.active_break = None;
+                Some(own.map_or(until, |own| own.max(until)))
+            }
+            None if own == before => None,
+            None => own,
+        };
+        let _ = save_state(app, tracker);
+    });
+    sync_card(app);
 }
 
 /// "Show me an example": the real card and chime, counting for nothing.

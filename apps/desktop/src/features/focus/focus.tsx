@@ -92,6 +92,13 @@ export function Focus() {
       onSettings={save}
       onWater={(steps) => act(() => api.logFocusWater(steps))}
       onPause={(choice) => act(() => api.pauseFocus(choice))}
+      onUnmute={() =>
+        act(async () => {
+          const options = await api.getNotificationOptions();
+          await api.setNotificationOptions({ ...options, allOff: false });
+          return api.focusSnapshot();
+        })
+      }
       onExample={(kind) => act(() => api.previewFocusBreak(kind))}
       onCustomise={() => setSettingsOpen(true)}
     />

@@ -41,6 +41,7 @@ export function duration(seconds: number, numerals: NumeralStyle, t: TFn): strin
 
 export const STATUS_LABELS: Record<FocusStatus, I18nKey> = {
   off: "focus.status.off",
+  muted: "focus.status.muted",
   paused: "focus.status.paused",
   held: "focus.status.held",
   dayOff: "focus.status.dayOff",

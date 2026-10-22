@@ -145,6 +145,8 @@ export function Notifications() {
   const [options, setOptions] = useState<NotificationOptions | null>(null);
   const [hasSign, setHasSign] = useState(false);
   const [permission, setPermission] = useState<PermissionState>("unknown");
+  // Whether any break is switched on, from Routine.
+  const [breaksOn, setBreaksOn] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -159,6 +161,10 @@ export function Notifications() {
     api
       .notificationPermission()
       .then(setPermission)
+      .catch(() => {});
+    api
+      .focusSnapshot()
+      .then((snapshot) => setBreaksOn(snapshot.status !== "off"))
       .catch(() => {});
     // A pause ends on its own; redraw so the switch notices.
     const timer = window.setInterval(() => setTick((tick) => tick + 1), 30_000);
@@ -181,177 +187,230 @@ export function Notifications() {
     if (next) setOptions(next);
   };
 
+  /** Breaks on (the recommended three) or off (every one, choices kept). */
+  const setBreaks = async (on: boolean) => {
+    setBreaksOn(on);
+    const snapshot = await (on ? api.enableRecommendedBreaks() : api.disableBreaks()).catch(
+      () => null,
+    );
+    if (snapshot) setBreaksOn(snapshot.status !== "off");
+  };
+
   const paused = options.pausedUntil !== null && new Date(options.pausedUntil) > new Date();
+  const allOff = options.allOff;
 
   return (
     <div className="space-y-2.5">
-      <section className={`surface-card p-2.5${paused ? " notifications-paused" : ""}`}>
+      <section className={`surface-card p-2.5${allOff ? " notifications-paused" : ""}`}>
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[12.5px] font-medium">{t("notifications.pause")}</p>
-            <p className="mt-0.5 text-[10.5px] text-text-muted">
-              {paused && options.pausedUntil
-                ? t("notifications.paused-until").replace("{time}", clockText(options.pausedUntil))
-                : t("notifications.pause-note")}
+            <p className="text-[12.5px] font-medium">{t("notifications.all")}</p>
+            <p className="mt-0.5 text-[10.5px] leading-snug text-text-muted">
+              {t(allOff ? "notifications.all-off" : "notifications.all-on")}
             </p>
           </div>
           <Switch
-            checked={paused}
-            onChange={(on) => void pause(on ? "oneDay" : null)}
-            ariaLabel={t("notifications.pause")}
+            checked={!allOff}
+            onChange={(on) => void update({ ...options, allOff: !on })}
+            ariaLabel={t("notifications.all")}
           />
         </div>
-        {!paused && (
-          <div className="mt-2 flex gap-1.5">
-            <button type="button" className="day-plan-option" onClick={() => void pause("oneHour")}>
-              {t("notifications.pause.hour")}
-            </button>
-            <button
-              type="button"
-              className="day-plan-option"
-              onClick={() => void pause("untilTomorrow")}
-            >
-              {t("notifications.pause.tomorrow")}
-            </button>
-          </div>
-        )}
       </section>
 
-      <SettingsSection
-        title={t("notifications.quiet")}
-        footnote={t(options.quiet.enabled ? "notifications.quiet-note" : "notifications.quiet-off")}
+      <div
+        className={
+          allOff ? "space-y-2.5 opacity-50 transition-opacity" : "space-y-2.5 transition-opacity"
+        }
       >
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[12px]">{t("notifications.quiet-label")}</p>
-          <Switch
-            checked={options.quiet.enabled}
-            onChange={(enabled) =>
-              void update({ ...options, quiet: { ...options.quiet, enabled } })
-            }
-            ariaLabel={t("notifications.quiet-label")}
-          />
-        </div>
-        {options.quiet.enabled && (
-          <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-hover px-2.5 py-1.5">
-            <span className="text-[11.5px] text-text-secondary">
-              {t("notifications.quiet-hours")}
-            </span>
-            <div className="flex shrink-0 items-center gap-1.5">
-              {(["from", "to"] as const).map((end, index) => (
-                <div key={end} className="flex items-center gap-1.5">
-                  {index > 0 && <span className="text-[11px] text-text-muted">–</span>}
-                  <div className="w-[84px]">
-                    <TimeField
-                      value={hhmm(options.quiet[end])}
-                      ariaLabel={t(
-                        end === "from" ? "notifications.quiet-from" : "notifications.quiet-to",
-                      )}
-                      onChange={(value) => {
-                        const [hour = 0, minute = 0] = value.split(":").map(Number);
-                        void update({
-                          ...options,
-                          quiet: { ...options.quiet, [end]: { hour, minute } },
-                        });
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+        {!allOff && (
+          <section className={`surface-card p-2.5${paused ? " notifications-paused" : ""}`}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-medium">{t("notifications.pause")}</p>
+                <p className="mt-0.5 text-[10.5px] text-text-muted">
+                  {paused && options.pausedUntil
+                    ? t("notifications.paused-until").replace(
+                        "{time}",
+                        clockText(options.pausedUntil),
+                      )
+                    : t("notifications.pause-note")}
+                </p>
+              </div>
+              <Switch
+                checked={paused}
+                onChange={(on) => void pause(on ? "oneDay" : null)}
+                ariaLabel={t("notifications.pause")}
+              />
             </div>
-          </div>
+            {!paused && (
+              <div className="mt-2 flex gap-1.5">
+                <button
+                  type="button"
+                  className="day-plan-option"
+                  onClick={() => void pause("oneHour")}
+                >
+                  {t("notifications.pause.hour")}
+                </button>
+                <button
+                  type="button"
+                  className="day-plan-option"
+                  onClick={() => void pause("untilTomorrow")}
+                >
+                  {t("notifications.pause.tomorrow")}
+                </button>
+              </div>
+            )}
+          </section>
         )}
-      </SettingsSection>
 
-      <div className={paused ? "opacity-50 transition-opacity" : "transition-opacity"}>
-        {GROUPS.map((group) => (
-          <div key={group.titleKey} className="mb-2.5">
-            <SettingsSection title={t(group.titleKey)}>
-              {group.rows.map((row) => {
-                const needsSign = row.source === "dailyRashifal" && !hasSign;
-                const line = (
-                  <div
-                    key={row.source}
-                    className={`flex items-center justify-between gap-3${needsSign ? " opacity-50" : ""}`}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[12px]">{t(row.labelKey)}</p>
-                      <p className="mt-0.5 text-[10px] leading-snug text-text-muted">
-                        {t(needsSign ? "reminder.daily-rashifal-no-sign" : row.whenKey)}
-                      </p>
+        <SettingsSection
+          title={t("notifications.quiet")}
+          footnote={t(
+            options.quiet.enabled ? "notifications.quiet-note" : "notifications.quiet-off",
+          )}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[12px]">{t("notifications.quiet-label")}</p>
+            <Switch
+              checked={options.quiet.enabled}
+              onChange={(enabled) =>
+                void update({ ...options, quiet: { ...options.quiet, enabled } })
+              }
+              ariaLabel={t("notifications.quiet-label")}
+            />
+          </div>
+          {options.quiet.enabled && (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-hover px-2.5 py-1.5">
+              <span className="text-[11.5px] text-text-secondary">
+                {t("notifications.quiet-hours")}
+              </span>
+              <div className="flex shrink-0 items-center gap-1.5">
+                {(["from", "to"] as const).map((end, index) => (
+                  <div key={end} className="flex items-center gap-1.5">
+                    {index > 0 && <span className="text-[11px] text-text-muted">–</span>}
+                    <div className="w-[84px]">
+                      <TimeField
+                        value={hhmm(options.quiet[end])}
+                        ariaLabel={t(
+                          end === "from" ? "notifications.quiet-from" : "notifications.quiet-to",
+                        )}
+                        onChange={(value) => {
+                          const [hour = 0, minute = 0] = value.split(":").map(Number);
+                          void update({
+                            ...options,
+                            quiet: { ...options.quiet, [end]: { hour, minute } },
+                          });
+                        }}
+                      />
                     </div>
-                    <Switch
-                      checked={options[row.source] && !needsSign}
-                      disabled={needsSign}
-                      onChange={(value) => void update({ ...options, [row.source]: value })}
-                      ariaLabel={t(row.labelKey)}
-                    />
                   </div>
-                );
-                // The daily reading's time sits under its switch while it is on.
-                if (row.source === "dailyRashifal" && options.dailyRashifal && !needsSign) {
-                  return (
-                    <div key={row.source} className="space-y-2">
-                      {line}
-                      <ReadingTime
-                        value={options.rashifalTime ?? null}
-                        onChange={(next) => void update({ ...options, rashifalTime: next })}
+                ))}
+              </div>
+            </div>
+          )}
+        </SettingsSection>
+
+        <div className={paused ? "opacity-50 transition-opacity" : "transition-opacity"}>
+          {GROUPS.map((group) => (
+            <div key={group.titleKey} className="mb-2.5">
+              <SettingsSection title={t(group.titleKey)}>
+                {group.rows.map((row) => {
+                  const needsSign = row.source === "dailyRashifal" && !hasSign;
+                  const line = (
+                    <div
+                      key={row.source}
+                      className={`flex items-center justify-between gap-3${needsSign ? " opacity-50" : ""}`}
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[12px]">{t(row.labelKey)}</p>
+                        <p className="mt-0.5 text-[10px] leading-snug text-text-muted">
+                          {t(needsSign ? "reminder.daily-rashifal-no-sign" : row.whenKey)}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={options[row.source] && !needsSign}
+                        disabled={needsSign}
+                        onChange={(value) => void update({ ...options, [row.source]: value })}
+                        ariaLabel={t(row.labelKey)}
                       />
                     </div>
                   );
-                }
-                return line;
-              })}
-              {group.titleKey === "notifications.group.yours" && (
-                <button
-                  type="button"
-                  onClick={() => navigate("/focus")}
-                  className="flex w-full items-center justify-between gap-3 text-left"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-[12px]">{t("notifications.routine")}</span>
-                    <span className="mt-0.5 block text-[10px] leading-snug text-text-muted">
-                      {t("notifications.when.routine")}
-                    </span>
-                  </span>
-                  <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
-                </button>
-              )}
-            </SettingsSection>
-          </div>
-        ))}
-      </div>
+                  // The daily reading's time sits under its switch while it is on.
+                  if (row.source === "dailyRashifal" && options.dailyRashifal && !needsSign) {
+                    return (
+                      <div key={row.source} className="space-y-2">
+                        {line}
+                        <ReadingTime
+                          value={options.rashifalTime ?? null}
+                          onChange={(next) => void update({ ...options, rashifalTime: next })}
+                        />
+                      </div>
+                    );
+                  }
+                  return line;
+                })}
+                {group.titleKey === "notifications.group.yours" && (
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/focus")}
+                      className="min-w-0 text-left"
+                    >
+                      <span className="block text-[12px]">{t("notifications.routine")}</span>
+                      <span className="mt-0.5 flex items-center gap-0.5 text-[10px] leading-snug text-text-muted">
+                        {t(
+                          breaksOn === false
+                            ? "notifications.when.routine-off"
+                            : "notifications.when.routine",
+                        )}
+                        <Icon name="chevronRight" className="size-2.5 shrink-0" />
+                      </span>
+                    </button>
+                    <Switch
+                      checked={breaksOn ?? false}
+                      disabled={breaksOn === null}
+                      onChange={(on) => void setBreaks(on)}
+                      ariaLabel={t("notifications.routine")}
+                    />
+                  </div>
+                )}
+              </SettingsSection>
+            </div>
+          ))}
+        </div>
 
-      <SettingsSection
-        title={t("notifications.look")}
-        footnote={
-          permission === "denied" && options.style === "notification"
-            ? t("settings.reminder-denied-note")
-            : t(
-                options.style === "card"
-                  ? "reminders.style-note.card"
-                  : "reminders.style-note.notification",
-              )
-        }
-      >
-        <Segmented<ReminderStyle>
-          label={t("reminders.style")}
-          value={options.style}
-          onChange={(style) => void update({ ...options, style })}
-          options={[
-            { id: "card", label: t("reminders.style.card") },
-            { id: "notification", label: t("reminders.style.notification") },
-          ]}
-        />
-        {options.style === "card" && (
-          <button
-            type="button"
-            onClick={() => api.previewReminderCard().catch(() => {})}
-            className="settings-btn"
-          >
-            {t("reminders.preview")}
-          </button>
-        )}
-      </SettingsSection>
+        <SettingsSection
+          title={t("notifications.look")}
+          footnote={
+            permission === "denied" && options.style === "notification"
+              ? t("settings.reminder-denied-note")
+              : t(
+                  options.style === "card"
+                    ? "reminders.style-note.card"
+                    : "reminders.style-note.notification",
+                )
+          }
+        >
+          <Segmented<ReminderStyle>
+            label={t("reminders.style")}
+            value={options.style}
+            onChange={(style) => void update({ ...options, style })}
+            options={[
+              { id: "card", label: t("reminders.style.card") },
+              { id: "notification", label: t("reminders.style.notification") },
+            ]}
+          />
+          {options.style === "card" && (
+            <button
+              type="button"
+              onClick={() => api.previewReminderCard().catch(() => {})}
+              className="settings-btn"
+            >
+              {t("reminders.preview")}
+            </button>
+          )}
+        </SettingsSection>
+      </div>
     </div>
   );
 }

@@ -423,6 +423,30 @@ fn pausing_for_the_rest_of_the_day_ends_at_midnight() {
 }
 
 #[test]
+fn every_notification_off_silences_breaks_and_keeps_them() {
+    let mut state = FocusState::default();
+    let settings = FocusSettings {
+        muted: true,
+        ..eyes_only()
+    };
+    let now = monday_at(10);
+    assert!(run(&mut state, &settings, now, 60, busy).is_empty());
+    assert_eq!(
+        snapshot(&mut state, &settings, now, now.naive_utc()).status,
+        FocusStatus::Muted
+    );
+    assert!(settings.eyes.enabled, "the break itself stays chosen");
+
+    // Switched back on, the eye break comes again after its twenty minutes.
+    let unmuted = FocusSettings {
+        muted: false,
+        ..settings
+    };
+    let later = now + Duration::minutes(60);
+    assert!(!run(&mut state, &unmuted, later, 21, busy).is_empty());
+}
+
+#[test]
 fn the_snapshot_counts_down_in_minutes_of_use() {
     let mut state = FocusState::default();
     let settings = eyes_only();

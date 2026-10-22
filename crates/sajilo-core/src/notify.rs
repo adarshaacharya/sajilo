@@ -66,6 +66,11 @@ pub struct NotificationOptions {
     /// the end of a quiet hour is what pausing was meant to avoid.
     #[serde(default)]
     pub paused_until: Option<DateTime<Utc>>,
+    /// Every notification off, breaks included, until switched back on. The
+    /// choices for each kind are kept, so switching it on brings back what
+    /// was there. Like a pause, what comes due meanwhile is let go.
+    #[serde(default)]
+    pub all_off: bool,
     /// Announcements from Sajilo, by kind. Civic notices, festival greetings
     /// and updates are on; tips and asks are opt-in.
     #[serde(default = "enabled_by_default")]
@@ -175,6 +180,7 @@ impl Default for NotificationOptions {
             day_plans: enabled_by_default(),
             keeper: enabled_by_default(),
             paused_until: None,
+            all_off: false,
             sajilo_notices: enabled_by_default(),
             sajilo_greetings: enabled_by_default(),
             sajilo_updates: enabled_by_default(),
@@ -198,6 +204,12 @@ impl NotificationOptions {
     /// Paused, at `now`.
     pub fn is_paused(&self, now: DateTime<Utc>) -> bool {
         self.paused_until.is_some_and(|until| now < until)
+    }
+
+    /// Whether nothing is delivered at `now`: everything switched off, or a
+    /// pause still running.
+    pub fn is_silenced(&self, now: DateTime<Utc>) -> bool {
+        self.all_off || self.is_paused(now)
     }
 
     fn festivals_enabled(self) -> bool {

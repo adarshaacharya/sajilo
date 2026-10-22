@@ -275,6 +275,8 @@ export interface FocusSettings {
   /** The moments a due break waits out. */
   hold: HoldRules;
   style: ReminderStyle;
+  /** Every notification off in Settings › Notifications; the shell keeps it in step. */
+  muted: boolean;
   chime: boolean;
   /** A rotating joke on the break card instead of the plain instruction. */
   jokes: boolean;
@@ -431,7 +433,15 @@ export interface WeekSummary {
   longestStretch: { weekday: number; today: boolean; seconds: number } | null;
 }
 
-export type FocusStatus = "off" | "paused" | "held" | "dayOff" | "afterHours" | "away" | "active";
+export type FocusStatus =
+  | "off"
+  | "muted"
+  | "paused"
+  | "held"
+  | "dayOff"
+  | "afterHours"
+  | "away"
+  | "active";
 
 export interface NextBreak {
   kind: BreakKind;
@@ -701,6 +711,8 @@ export interface NotificationOptions {
   dailyQuiz: boolean;
   /** Nothing arrives before this (ISO time); what comes due meanwhile is let go. */
   pausedUntil: string | null;
+  /** Every notification off, breaks included, until switched back on. */
+  allOff: boolean;
   /** The night, on this computer's clock: what comes due waits for the morning. */
   quiet: QuietHours;
 }

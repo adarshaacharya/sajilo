@@ -245,10 +245,13 @@ pub fn pause_reminders(
     pause: Option<sajilo_core::notify::PauseFor>,
 ) -> Result<NotificationOptions> {
     let mut options: NotificationOptions = read(&app, OPTIONS_KEY);
+    let before = options.paused_until;
     options.paused_until = pause.map(|pause| sajilo_core::notify::pause_end(pause, Utc::now()));
     let value = serde_json::to_value(options).map_err(|error| error.to_string())?;
     db::set_json(&app, OPTIONS_KEY, &value)?;
     reschedule();
+    // "Pause all" means breaks too.
+    crate::commands::focus::follow_pause(&app, before, options.paused_until);
     Ok(options)
 }
 
@@ -289,7 +292,7 @@ pub fn deliver_due(app: &AppHandle<Wry>) -> usize {
     let mut fired: LastFired = read(app, LAST_FIRED_KEY);
     let mut delivered = 0;
     let options: NotificationOptions = read(app, OPTIONS_KEY);
-    let paused = options.is_paused(now);
+    let paused = options.is_silenced(now);
     let as_cards = options.style == ReminderStyle::Card;
     let mut cards = Vec::new();
 

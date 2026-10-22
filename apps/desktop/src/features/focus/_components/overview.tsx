@@ -42,6 +42,7 @@ export function Overview({
   onSettings,
   onWater,
   onPause,
+  onUnmute,
   onExample,
   onCustomise,
 }: {
@@ -49,12 +50,14 @@ export function Overview({
   onSettings: (settings: FocusSettings) => void;
   onWater: (steps: 1 | -1) => void;
   onPause: (choice: PauseChoice) => void;
+  /** Turns every notification back on, in Settings › Notifications. */
+  onUnmute: () => void;
   onExample: (kind: BreakKind) => void;
   onCustomise: () => void;
 }) {
   return (
     <div className="space-y-2.5">
-      <StatusCard snapshot={snapshot} onPause={onPause} />
+      <StatusCard snapshot={snapshot} onPause={onPause} onUnmute={onUnmute} />
       <HowItWorks />
       {snapshot.settings.water.enabled && <WaterCard snapshot={snapshot} onWater={onWater} />}
       <ReminderList
@@ -75,9 +78,11 @@ export function Overview({
 function StatusCard({
   snapshot,
   onPause,
+  onUnmute,
 }: {
   snapshot: FocusSnapshot;
   onPause: (choice: PauseChoice) => void;
+  onUnmute: () => void;
 }) {
   const { t } = useSettings();
   const numerals = useSentenceNumerals();
@@ -97,6 +102,19 @@ function StatusCard({
     lead = <Ring fraction={1} color={KIND_TINTS[due.kind]} label="" size={56} due />;
     title = t("focus.now.title").replace("{kind}", kindLabel(due.kind, settings, t));
     detail = t("focus.ring.card-open");
+  } else if (status === "muted") {
+    lead = <Chip icon="bellOff" tint="var(--color-text-secondary)" />;
+    title = t("focus.muted.title");
+    detail = t("focus.muted.detail");
+    action = (
+      <button
+        type="button"
+        onClick={onUnmute}
+        className="settings-btn settings-btn--accent shrink-0 rounded-full px-3 text-[12px]"
+      >
+        {t("focus.muted.turn-on")}
+      </button>
+    );
   } else if (status === "paused" && snapshot.pausedUntil) {
     lead = <Chip icon="pause" tint="var(--color-text-secondary)" />;
     title = t("focus.paused.title").replace("{time}", time(snapshot.pausedUntil));

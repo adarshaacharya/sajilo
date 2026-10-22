@@ -161,7 +161,7 @@ pub mod reminder {
             .and_then(|value| serde_json::from_value(value).ok())
             .unwrap_or_default();
         if !options.daily_rashifal
-            || options.is_paused(Utc::now())
+            || options.is_silenced(Utc::now())
             || !background_refresh::enabled(app, prefs::RASHIFAL_ENABLED)
         {
             return None;

@@ -545,6 +545,21 @@ fn a_pause_until_tomorrow_ends_at_seven_nepal_time() {
 }
 
 #[test]
+fn all_off_silences_until_switched_back_on() {
+    let now = Utc.with_ymd_and_hms(2026, 10, 1, 6, 0, 0).unwrap();
+    let mut options = NotificationOptions::default();
+    assert!(!options.is_silenced(now));
+    options.all_off = true;
+    assert!(options.is_silenced(now));
+    assert!(
+        options.day_plans && options.keeper,
+        "each kind keeps its choice"
+    );
+    let saved: NotificationOptions = serde_json::from_str("{}").unwrap();
+    assert!(!saved.all_off, "options saved before the switch stay on");
+}
+
+#[test]
 fn options_saved_before_the_new_switches_keep_them_on() {
     let options: NotificationOptions = serde_json::from_str(r#"{"eveOfFestival":false}"#).unwrap();
     assert!(options.day_plans && options.keeper && options.paused_until.is_none());

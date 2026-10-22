@@ -211,6 +211,10 @@ pub struct FocusSettings {
     /// The moments a due break waits out.
     pub hold: HoldRules,
     pub style: ReminderStyle,
+    /// Every notification switched off in Settings › Notifications. Like
+    /// `style`, the shell copies it in from there: breaks follow it, and the
+    /// break choices themselves are kept.
+    pub muted: bool,
     /// A soft sound with each reminder, whichever style it takes.
     pub chime: bool,
     /// A rotating joke on the card instead of the plain instruction. Off for
@@ -445,6 +449,7 @@ impl Default for FocusSettings {
             days_off: DaysOff::default(),
             hold: HoldRules::default(),
             style: ReminderStyle::Card,
+            muted: false,
             chime: true,
             jokes: true,
             custom: CustomBreak::default(),
@@ -1002,6 +1007,8 @@ pub struct Tick {
 pub enum FocusStatus {
     /// Every reminder is switched off.
     Off,
+    /// Every notification is off, in Settings › Notifications.
+    Muted,
     Paused,
     /// A call, a fullscreen app or Do Not Disturb: breaks still come due,
     /// and wait.
@@ -1035,6 +1042,9 @@ fn quiet_reason(
 ) -> Option<FocusStatus> {
     if !settings.any_enabled() {
         return Some(FocusStatus::Off);
+    }
+    if settings.muted {
+        return Some(FocusStatus::Muted);
     }
     if state.paused_until.is_some_and(|until| now < until) {
         return Some(FocusStatus::Paused);
@@ -1151,6 +1161,10 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     }) {
         state.active_break = None;
     }
+    // Everything switched off: a card already up goes too.
+    if settings.muted {
+        state.active_break = None;
+    }
 
     // Asleep, shut, or not running: the gap itself was time away.
     let idle = if elapsed > MAX_TICK_GAP_SECONDS {
@@ -1184,7 +1198,7 @@ pub fn tick(state: &mut FocusState, settings: &FocusSettings, tick: Tick) -> Vec
     track_hold(state, settings.hold_reason(moment), tick.now);
     let held = state.held.is_some();
 
-    if !held {
+    if !held && !settings.muted {
         if let Some(kind) = routine_due(state, settings, tick, idle) {
             return vec![kind];
         }
