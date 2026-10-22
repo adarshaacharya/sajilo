@@ -912,6 +912,7 @@
       },
       "idleSupported": true,
       "pausedUntil": null,
+      "pausedUntilResumed": false,
       "settings": {
         "chime": true,
         "custom": {
@@ -943,6 +944,7 @@
           "everyMinutes": 60
         },
         "moveSeconds": 120,
+        "muted": false,
         "routine": {
           "bedtime": {
             "at": {
@@ -37307,6 +37309,7 @@
       }
     },
     "get_notification_options": {
+      "allOff": false,
       "dailyQuiz": true,
       "dailyRashifal": true,
       "dayPlans": true,
