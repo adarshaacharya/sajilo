@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import type { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
@@ -176,7 +176,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
         </div>
       </section>
 
-      <div className="jhandi-tray">
+      <div className={`jhandi-tray ${covered ? "jhandi-tray--covered" : ""}`}>
         {bigWin && <Confetti />}
         {dice.map((face, i) => (
           <span
@@ -190,7 +190,9 @@ export function JhandiBurja({ t }: { t: TFn }) {
             <FaceMark face={face} />
           </span>
         ))}
-        <span className={`jhandi-cup ${covered ? "jhandi-cup--on" : ""}`} aria-hidden="true" />
+        <span className={`jhandi-cup ${covered ? "jhandi-cup--on" : ""}`} aria-hidden="true">
+          <Bowl />
+        </span>
         {last && last.net !== 0 && (
           <span
             key={round}
@@ -352,6 +354,42 @@ export function JhandiBurja({ t }: { t: TFn }) {
         />
       )}
     </div>
+  );
+}
+
+/** The cup the dice are shaken under: an upturned brass bowl, its foot on
+ * top, a rim along the cloth, and a shine down one side. */
+function Bowl() {
+  const id = useId();
+  return (
+    <svg viewBox="0 0 140 84" className="jhandi-cup__bowl" aria-hidden="true">
+      <defs>
+        <linearGradient id={`${id}-brass`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#8a5c10" />
+          <stop offset="0.35" stopColor="#f3cd62" />
+          <stop offset="0.55" stopColor="#ffe9a6" />
+          <stop offset="1" stopColor="#9c6a14" />
+        </linearGradient>
+        <linearGradient id={`${id}-rim`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#6e4508" />
+          <stop offset="0.5" stopColor="#d9a536" />
+          <stop offset="1" stopColor="#6e4508" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="70" cy="79" rx="60" ry="5" fill="rgb(0 0 0 / 0.35)" />
+      <path d="M14 70C14 32 40 10 70 10s56 22 56 60z" fill={`url(#${id}-brass)`} />
+      <path d="M22 50c18-6 78-6 96 0" fill="none" stroke="rgb(90 55 5 / 0.35)" strokeWidth="1.5" />
+      <path d="M26 58c18-5 70-5 88 0" fill="none" stroke="rgb(90 55 5 / 0.25)" strokeWidth="1" />
+      <path
+        d="M36 60c0-20 12-36 26-42"
+        fill="none"
+        stroke="rgb(255 255 255 / 0.6)"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+      <rect x="8" y="66" width="124" height="10" rx="5" fill={`url(#${id}-rim)`} />
+      <ellipse cx="70" cy="10" rx="16" ry="4.5" fill={`url(#${id}-rim)`} />
+    </svg>
   );
 }
 

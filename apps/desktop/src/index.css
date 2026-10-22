@@ -4537,60 +4537,59 @@ input[type="search"]::-webkit-search-decoration {
 /* A die drops onto the cloth as the cup lifts, and settles. */
 @keyframes jhandi-land {
   0% {
-    transform: translateY(-4px);
+    opacity: 0;
+    transform: translateY(-14px) scale(0.9);
   }
-  70% {
+  65% {
+    opacity: 1;
     transform: translateY(1px) scale(1.04, 0.96);
   }
   100% {
+    opacity: 1;
     transform: none;
   }
 }
-/* The cup: a brass lid that comes down over the dice, rattles, and lifts. */
+/* The cup: an upturned brass bowl that comes down in the middle of the
+   cloth while the dice are hidden, rattles, and lifts away. */
 .jhandi-cup {
   position: absolute;
-  inset: 5px 6px;
+  top: 50%;
+  left: 50%;
   z-index: 2;
-  border-radius: 46% 46% 16px 16px / 90% 90% 16px 16px;
-  background:
-    linear-gradient(180deg, transparent 62%, rgb(0 0 0 / 0.18) 62%, rgb(0 0 0 / 0.18) 66%, transparent 66%),
-    radial-gradient(120% 140% at 50% 0%, #ffeaa6, #e2ad38 45%, #9a6b14);
-  box-shadow:
-    inset 0 -6px 10px rgb(0 0 0 / 0.25),
-    inset 0 2px 0 rgb(255 255 255 / 0.5),
-    0 6px 14px rgb(0 0 0 / 0.4);
+  width: 132px;
+  margin: -40px 0 0 -66px;
   opacity: 0;
-  transform: translateY(-115%);
+  transform: translateY(-70px) scale(0.9);
   transition:
     transform 0.35s cubic-bezier(0.3, 0.7, 0.4, 1),
     opacity 0.25s ease;
   pointer-events: none;
 }
-.jhandi-cup::before {
-  content: "";
-  position: absolute;
-  top: 7px;
-  left: 50%;
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #fff3c4, #c99520 70%);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+.jhandi-cup__bowl {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 .jhandi-cup--on {
   opacity: 1;
   transform: none;
-  animation: jhandi-rattle 0.14s ease-in-out 0.35s infinite alternate;
+}
+.jhandi-cup--on .jhandi-cup__bowl {
+  animation: jhandi-rattle 0.13s ease-in-out 0.35s infinite alternate;
 }
 /* A shake side to side, never a spin. */
 @keyframes jhandi-rattle {
   from {
-    transform: translate(-2.5px, 0);
+    transform: translateX(-3px);
   }
   to {
-    transform: translate(2.5px, -1.5px);
+    transform: translateX(3px) translateY(-1px);
   }
+}
+/* Under the cup the dice are out of sight. */
+.jhandi-tray--covered .jhandi-die {
+  opacity: 0;
+  transform: scale(0.85);
 }
 .jhandi-die--settle {
   animation: jhandi-land 0.32s ease-out both;
@@ -4797,7 +4796,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 @media (prefers-reduced-motion: reduce) {
   .jhandi-die--settle,
-  .jhandi-cup--on {
+  .jhandi-cup--on .jhandi-cup__bowl {
     animation: none;
   }
 }
