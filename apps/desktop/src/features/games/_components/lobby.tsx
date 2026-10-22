@@ -1,11 +1,20 @@
 import { Icon, type IconName } from "../../../shared/components/icon";
 import type { useSettings } from "../../../shared/context/settings-context";
-import { useBagh, useChungi, useKata, useQuiz, useSaap, useShabda, useSudoku } from "../games-data";
+import {
+  useBagh,
+  useChungi,
+  useJhandi,
+  useKata,
+  useQuiz,
+  useSaap,
+  useShabda,
+  useSudoku,
+} from "../games-data";
 import { StatTiles } from "./stat-tiles";
 
 type TFn = ReturnType<typeof useSettings>["t"];
 
-export type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap" | "chungi";
+export type Game = "shabda" | "quiz" | "sudoku" | "bagh" | "kata" | "saap" | "chungi" | "jhandi";
 
 type Stat = { value: string; label: string };
 
@@ -25,6 +34,7 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
   const sudoku = useSudoku().data;
   const bagh = useBagh().data;
   const chungi = useChungi().data;
+  const jhandi = useJhandi().data;
 
   switch (game) {
     case "kata": {
@@ -106,6 +116,19 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(stats?.played ?? 0), label: t("chungi.stat.played") },
         ],
         played: (stats?.played ?? 0) > 0,
+        underway: false,
+      };
+    }
+    case "jhandi": {
+      const stats = jhandi?.stats;
+      return {
+        stats: [
+          { value: String(jhandi?.purse ?? 0), label: t("jhandi.stat.purse") },
+          { value: String(stats?.bestPurse ?? 0), label: t("jhandi.stat.best") },
+          { value: String(stats?.biggestWin ?? 0), label: t("jhandi.stat.biggest") },
+          { value: String(stats?.rounds ?? 0), label: t("jhandi.stat.rounds") },
+        ],
+        played: (stats?.rounds ?? 0) > 0,
         underway: false,
       };
     }

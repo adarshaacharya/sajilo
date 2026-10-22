@@ -128,6 +128,30 @@ function ChungiGlyph({ size = 16, className }: { size?: number; className?: stri
   );
 }
 
+/** Two dice for झन्डी बुर्जा, a crown on the one in front: SF Symbols has
+ * no such dice. Drawn on the same 24-unit box, stroked in `currentColor`. */
+function JhandiGlyph({ size = 16, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M9 5.5V5a2.5 2.5 0 0 1 2.5-2.5h7A2.5 2.5 0 0 1 21 5v7a2.5 2.5 0 0 1-2.5 2.5H18" />
+      <rect x="3" y="8" width="12" height="13" rx="2.5" />
+      <path d="M6 17.5l-.6-5 2.4 1.8L9 11.5l1.2 2.8 2.4-1.8-.6 5z" />
+      <circle cx="17.5" cy="6" r=".6" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** A ladder with a snake across it: SF Symbols has neither. Drawn on the
  * same 24-unit box, stroked in `currentColor`. */
 function SnakesLadders({ size = 16, className }: { size?: number; className?: string }) {
@@ -293,6 +317,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   katakuti: TicTacToe,
   saapSidhi: SnakesLadders,
   chungi: ChungiGlyph,
+  jhandi: JhandiGlyph,
 };
 
 export type IconName =
@@ -407,7 +432,8 @@ export type IconName =
   | "baghChal"
   | "katakuti"
   | "saapSidhi"
-  | "chungi";
+  | "chungi"
+  | "jhandi";
 
 function sizeFromClass(className: string | undefined): number | undefined {
   if (!className) return undefined;

@@ -806,6 +806,19 @@ fn record_games(commands: &mut BTreeMap<String, Value>, now: DateTime<Utc>) {
             false,
         ),
     );
+    // झन्डी बुर्जा a few rolls in, the dice a fixed sequence through the engine.
+    use sajilo_core::games::jhandi_burja::JhandiState;
+    let mut jhandi = JhandiState::default();
+    let mut faces = [1, 1, 3, 4, 1, 6, 2, 5, 5, 3, 2, 6].into_iter().cycle();
+    let mut die = move || faces.next().unwrap_or(1);
+    for bets in [[10, 5, 0, 0, 0, 0], [5, 0, 0, 0, 10, 0]] {
+        let _ = jhandi.roll(bets, &mut die);
+    }
+    insert(
+        commands,
+        "jhandi_get",
+        &sajilo_api::games::jhandi_view(&jhandi),
+    );
 }
 
 fn record_jobs(

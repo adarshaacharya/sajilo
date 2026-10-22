@@ -6,6 +6,7 @@ import { useSettings } from "../../shared/context/settings-context";
 import { track } from "../../shared/lib/usage";
 import { BaghChal } from "./_components/bagh-chal";
 import { Chungi } from "./_components/chungi";
+import { JhandiBurja } from "./_components/jhandi-burja";
 import { Katakuti } from "./_components/katakuti";
 import { type Game, Lobby } from "./_components/lobby";
 import { Quiz } from "./_components/quiz";
@@ -13,7 +14,7 @@ import { SaapSidhi } from "./_components/saap-sidhi";
 import { Shabda } from "./_components/shabda";
 import { Sudoku } from "./_components/sudoku";
 
-const GAMES: Game[] = ["kata", "saap", "chungi", "quiz", "shabda", "sudoku", "bagh"];
+const GAMES: Game[] = ["kata", "saap", "chungi", "jhandi", "quiz", "shabda", "sudoku", "bagh"];
 const TITLES = {
   shabda: "shabda.title",
   quiz: "quiz.title",
@@ -22,6 +23,7 @@ const TITLES = {
   kata: "kata.title",
   saap: "saap.title",
   chungi: "chungi.title",
+  jhandi: "jhandi.title",
 } as const satisfies Record<Game, string>;
 
 /** Each game's start-screen icon and one-line description. */
@@ -29,6 +31,7 @@ const LOBBY = {
   kata: { icon: "katakuti", about: "kata.card" },
   saap: { icon: "saapSidhi", about: "saap.card" },
   chungi: { icon: "chungi", about: "chungi.card" },
+  jhandi: { icon: "jhandi", about: "jhandi.card" },
   quiz: { icon: "quiz", about: "quiz.card" },
   shabda: { icon: "wordGame", about: "shabda.card" },
   sudoku: { icon: "sudoku", about: "sudoku.card" },
@@ -85,6 +88,7 @@ export function Games() {
   if (open === "kata") return <Katakuti t={t} />;
   if (open === "saap") return <SaapSidhi t={t} />;
   if (open === "chungi") return <Chungi t={t} />;
+  if (open === "jhandi") return <JhandiBurja t={t} />;
 
   return (
     <div className="space-y-2.5">

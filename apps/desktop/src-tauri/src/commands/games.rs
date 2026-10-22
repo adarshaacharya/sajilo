@@ -3,9 +3,9 @@
 //! record stays on this computer.
 
 use sajilo_api::games::{
-    BaghView, ChungiView, KataView, QuizDaily, QuizView, SaapView, ShabdaView, SudokuView,
-    bagh_view, chungi_view, kata_view, quiz_daily as daily_view, quiz_view, saap_view, shabda_view,
-    sudoku_view,
+    BaghView, ChungiView, JhandiView, KataView, QuizDaily, QuizView, SaapView, ShabdaView,
+    SudokuView, bagh_view, chungi_view, jhandi_view, kata_view, quiz_daily as daily_view,
+    quiz_view, saap_view, shabda_view, sudoku_view,
 };
 use sajilo_core::config::Pack;
 use sajilo_core::config::quiz::{QuizCategory, QuizPack};
@@ -13,6 +13,7 @@ use sajilo_core::config::words::WordsPack;
 use sajilo_core::focus::Language;
 use sajilo_core::games::bagh_chal::{BaghGame, BaghLevel, BaghPiece, BaghState};
 use sajilo_core::games::chungi::{ChungiMode, ChungiStats};
+use sajilo_core::games::jhandi_burja::{BetError, JhandiState};
 use sajilo_core::games::katakuti::{KataLevel, KataState};
 use sajilo_core::games::quiz::QuizState;
 use sajilo_core::games::saap_sidhi::SaapState;
@@ -310,6 +311,41 @@ pub fn saap_roll(app: AppHandle<Wry>) -> SaapView {
     let moves = state.play(&mut die());
     store(&app, SAAP_KEY, &state);
     saap_view(&state, moves)
+}
+
+const JHANDI_KEY: &str = "games.jhandiBurja.v1";
+
+#[tauri::command]
+pub fn jhandi_get(app: AppHandle<Wry>) -> JhandiView {
+    jhandi_view(&stored::<JhandiState>(&app, JHANDI_KEY))
+}
+
+/// Rolls the six dice for `bets`, a stake per face in the mat's order.
+#[tauri::command]
+pub fn jhandi_roll(app: AppHandle<Wry>, bets: Vec<u32>) -> Result<JhandiView, String> {
+    let bets: [u32; 6] = bets
+        .try_into()
+        .map_err(|_| "A bet for each of the six faces.".to_owned())?;
+    let mut state: JhandiState = stored(&app, JHANDI_KEY);
+    state.roll(bets, &mut die()).map_err(|error| {
+        match error {
+            BetError::NoBet => "Put coins on a face first.",
+            BetError::OverPurse => "That's more than the purse holds.",
+        }
+        .to_owned()
+    })?;
+    store(&app, JHANDI_KEY, &state);
+    Ok(jhandi_view(&state))
+}
+
+/// A new purse, once the old one is empty.
+#[tauri::command]
+pub fn jhandi_refill(app: AppHandle<Wry>) -> JhandiView {
+    let mut state: JhandiState = stored(&app, JHANDI_KEY);
+    if state.refill() {
+        store(&app, JHANDI_KEY, &state);
+    }
+    jhandi_view(&state)
 }
 
 const CHUNGI_KEY: &str = "games.chungi.v1";

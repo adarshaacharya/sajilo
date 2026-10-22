@@ -21,6 +21,7 @@ import type { IndexIntraday } from "../../types/api/IndexIntraday";
 import type { InternetAccount } from "../../types/api/InternetAccount";
 import type { InternetStatus } from "../../types/api/InternetStatus";
 import type { IpoSnapshot } from "../../types/api/IpoSnapshot";
+import type { JhandiView } from "../../types/api/JhandiView";
 import type { JobDetailPart } from "../../types/api/JobDetailPart";
 import type { JobSource } from "../../types/api/JobSource";
 import type { JobSourceInfo } from "../../types/api/JobSourceInfo";
@@ -1038,6 +1039,12 @@ export const api = {
   /** A finished run: kicks kept up, and how many were perfect. */
   chungiRecord: (mode: ChungiMode, kicks: number, perfect: number) =>
     invoke<ChungiView>("chungi_record", { mode, kicks, perfect }),
+
+  jhandiGet: () => invoke<JhandiView>("jhandi_get"),
+  /** Rolls the six dice for `bets`, a stake per face in the mat's order. */
+  jhandiRoll: (bets: number[]) => invoke<JhandiView>("jhandi_roll", { bets }),
+  /** A new purse, once the old one is empty. */
+  jhandiRefill: () => invoke<JhandiView>("jhandi_refill"),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

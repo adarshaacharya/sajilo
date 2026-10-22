@@ -464,3 +464,38 @@ mod chungi_view {
         }
     }
 }
+
+pub use jhandi_view::*;
+
+mod jhandi_view {
+    use sajilo_core::games::jhandi_burja::{
+        FACES, JhandiFace, JhandiRound, JhandiState, JhandiStats, PURSE, STAKES,
+    };
+
+    dto! {
+        pub struct JhandiView {
+            /// Coins in the purse: pretend, never money.
+            pub purse: u32,
+            /// What a new purse holds.
+            pub new_purse: u32,
+            /// The faces, in the order the mat lays them out.
+            pub faces: Vec<JhandiFace>,
+            /// The coins one tap can put down.
+            pub stakes: Vec<u32>,
+            /// The last roll, to show where the dice lie.
+            pub last: Option<JhandiRound>,
+            pub stats: JhandiStats,
+        }
+    }
+
+    pub fn jhandi_view(state: &JhandiState) -> JhandiView {
+        JhandiView {
+            purse: state.purse,
+            new_purse: PURSE,
+            faces: FACES.to_vec(),
+            stakes: STAKES.to_vec(),
+            last: state.last.clone(),
+            stats: state.stats.clone(),
+        }
+    }
+}

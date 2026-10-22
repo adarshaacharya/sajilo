@@ -4486,6 +4486,207 @@ input[type="search"]::-webkit-search-decoration {
 }
 
 
+/* Games — झन्डी बुर्जा, as the real set looks: yellow dice on a dark red
+   cloth, and the red mat below, its six panels framed in white, the faces
+   printed in black and red. Printed colours, the same in either theme. */
+.jhandi-tray,
+.jhandi-mat {
+  --ink: #17110c;
+  --red: #c41e25;
+}
+.jhandi-tray {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 14px 12px;
+  background: radial-gradient(120% 140% at 50% 0%, #8e1a20, #560b10);
+  box-shadow:
+    inset 0 0 0 4px #560b10,
+    inset 0 0 0 5.5px rgb(255 255 255 / 0.55),
+    inset 0 6px 16px rgb(0 0 0 / 0.35);
+}
+.jhandi-die {
+  --paper: #f4d04e;
+  --edge: transparent;
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 8px;
+  padding: 3px;
+  background: linear-gradient(160deg, #f8dc6a, #ecc23c);
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 0.45),
+    inset 0 0 0 1px rgb(0 0 0 / 0.08);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.jhandi-die--tumble {
+  animation: jhandi-tumble 0.42s ease-in-out infinite alternate;
+}
+.jhandi-die--land {
+  animation: jhandi-land 0.28s ease-out;
+}
+.jhandi-die--hit {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 0 rgb(0 0 0 / 0.45),
+    0 0 0 2.5px #fff;
+}
+.jhandi-die--dim {
+  opacity: 0.5;
+}
+/* No spin: a die bobs and shuffles while it tumbles, then settles. */
+@keyframes jhandi-tumble {
+  from {
+    transform: translate(-1.5px, -5px);
+  }
+  to {
+    transform: translate(1.5px, 1px);
+  }
+}
+@keyframes jhandi-land {
+  0% {
+    transform: translateY(-4px);
+  }
+  70% {
+    transform: translateY(1px) scale(1.04, 0.96);
+  }
+  100% {
+    transform: none;
+  }
+}
+.jhandi-mat {
+  --paper: #fff;
+  --edge: #fff;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  border-radius: 12px;
+  border: 3px solid #2d3290;
+  padding: 6px;
+  background: var(--red);
+}
+.jhandi-cell {
+  position: relative;
+  display: flex;
+  /* Room for a stake, so the mat never grows when a bet goes down. */
+  min-height: 128px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 4px;
+  padding: 8px 4px 7px;
+  color: #fff;
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.85);
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.2s ease,
+    transform 0.12s ease;
+}
+.jhandi-cell:not(:disabled):hover {
+  background: rgb(255 255 255 / 0.08);
+}
+.jhandi-cell:not(:disabled):active {
+  transform: scale(0.97);
+}
+.jhandi-cell--bet {
+  background: rgb(0 0 0 / 0.12);
+  box-shadow: inset 0 0 0 2.5px #f6c945;
+}
+.jhandi-cell--won {
+  background: rgb(0 0 0 / 0.16);
+  box-shadow: inset 0 0 0 3px #f6c945, 0 0 14px rgb(246 201 69 / 0.55);
+}
+.jhandi-cell--lost {
+  opacity: 0.6;
+}
+.jhandi-mark {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 3px;
+}
+.jhandi-cell__name {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.jhandi-cell__gloss {
+  font-size: 9.5px;
+  color: rgb(255 255 255 / 0.75);
+}
+.jhandi-cell__count {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.jhandi-cell__stake {
+  margin-top: 4px;
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #3b2a05;
+  background: linear-gradient(180deg, #f7d774, #d9a92a);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.3);
+}
+.jhandi-cell--won .jhandi-cell__stake {
+  color: #fff;
+  background: #138a48;
+}
+.jhandi-cell--lost .jhandi-cell__stake {
+  color: #fff;
+  background: #3a0a0c;
+}
+.jhandi-coin,
+.jhandi-chip {
+  border-radius: 999px;
+  color: #3b2a05;
+  background: radial-gradient(circle at 35% 30%, #fbe48f, #e0ad2c 60%, #b8851a);
+  box-shadow:
+    inset 0 0 0 2px rgb(255 255 255 / 0.35),
+    0 1.5px 0 rgb(0 0 0 / 0.3);
+}
+.jhandi-coin {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+.jhandi-chip {
+  width: 34px;
+  height: 34px;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+.jhandi-chip--on {
+  opacity: 1;
+  transform: translateY(-2px);
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jhandi-die--tumble,
+  .jhandi-die--land {
+    animation: none;
+  }
+}
+
 /* Games — the end of a game: a card over the board, the same in every
    game. The board stays faintly visible behind; a win rains confetti. */
 .game-over {
@@ -5142,4 +5343,7 @@ input[type="search"]::-webkit-search-decoration {
 }
 .game-tile--bagh {
   --tile-tint: var(--color-accent-mark);
+}
+.game-tile--jhandi {
+  --tile-tint: var(--color-holiday);
 }

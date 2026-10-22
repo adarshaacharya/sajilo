@@ -35,3 +35,8 @@ export function useSaap() {
 export function useChungi() {
   return useSWR("chungi", () => api.chungiGet());
 }
+
+/** झन्डी बुर्जा: the purse, the last roll, and the record. */
+export function useJhandi() {
+  return useSWR("jhandi", () => api.jhandiGet());
+}

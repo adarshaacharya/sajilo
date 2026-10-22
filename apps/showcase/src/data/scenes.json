@@ -75494,6 +75494,59 @@
     "is_autostart_enabled": false,
     "is_dock_icon_visible": false,
     "is_first_run": false,
+    "jhandi_get": {
+      "faces": [
+        "hukum",
+        "burja",
+        "paan",
+        "chidi",
+        "jhanda",
+        "itta"
+      ],
+      "last": {
+        "bets": [
+          5,
+          0,
+          0,
+          0,
+          10,
+          0
+        ],
+        "counts": [
+          0,
+          2,
+          1,
+          0,
+          2,
+          1
+        ],
+        "dice": [
+          "burja",
+          "jhanda",
+          "jhanda",
+          "paan",
+          "burja",
+          "itta"
+        ],
+        "net": 15,
+        "returned": 30
+      },
+      "newPurse": 100,
+      "purse": 140,
+      "stakes": [
+        1,
+        5,
+        10,
+        25
+      ],
+      "stats": {
+        "bestPurse": 140,
+        "biggestWin": 25,
+        "broke": 0,
+        "rounds": 2,
+        "won": 2
+      }
+    },
     "job_sources": [
       {
         "group": "federal",
