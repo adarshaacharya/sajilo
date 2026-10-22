@@ -338,6 +338,15 @@ pub fn jhandi_roll(app: AppHandle<Wry>, bets: Vec<u32>) -> Result<JhandiView, St
     Ok(jhandi_view(&state))
 }
 
+/// A fresh start: a new purse in place of what is left. The record stays.
+#[tauri::command]
+pub fn jhandi_start_over(app: AppHandle<Wry>) -> JhandiView {
+    let mut state: JhandiState = stored(&app, JHANDI_KEY);
+    state.start_over();
+    store(&app, JHANDI_KEY, &state);
+    jhandi_view(&state)
+}
+
 /// A new purse, once the old one is empty.
 #[tauri::command]
 pub fn jhandi_refill(app: AppHandle<Wry>) -> JhandiView {

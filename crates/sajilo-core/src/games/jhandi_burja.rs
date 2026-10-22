@@ -186,6 +186,13 @@ impl JhandiState {
         }))
     }
 
+    /// A fresh start whenever the user wants one: a new purse in place of
+    /// whatever is left, and the mat cleared. The record stays.
+    pub fn start_over(&mut self) {
+        self.purse = PURSE;
+        self.last = None;
+    }
+
     /// A new purse, once the old one is empty.
     pub fn refill(&mut self) -> bool {
         if self.purse > 0 {
@@ -266,6 +273,19 @@ mod tests {
         assert!(state.refill());
         assert_eq!(state.purse, PURSE);
         assert!(state.last.is_none());
+    }
+
+    #[test]
+    fn starting_over_keeps_the_record() {
+        let mut state = JhandiState::default();
+        use JhandiFace::*;
+        let rolls = landing(&[Hukum, Hukum, Burja, Paan, Jhanda, Itta]);
+        state.roll(on(Hukum, 10), &mut dice(&rolls)).unwrap();
+        assert_eq!(state.purse, 120);
+        state.start_over();
+        assert_eq!(state.purse, PURSE);
+        assert!(state.last.is_none());
+        assert_eq!((state.stats.rounds, state.stats.best_purse), (1, 120));
     }
 
     #[test]

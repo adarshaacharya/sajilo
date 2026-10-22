@@ -57,6 +57,10 @@ export function JhandiBurja({ t }: { t: TFn }) {
   const [error, setError] = useState<string | null>(null);
   // The empty-purse popup, until "See the dice" folds it.
   const [closed, setClosed] = useState(false);
+  // "New bet" turns down the offer of the same bet again, until the next roll.
+  const [declined, setDeclined] = useState(false);
+  // Asking before a fresh start throws away what is left in the purse.
+  const [confirming, setConfirming] = useState(false);
   // Whether the screen is still open, so a roll stops if it closes. Set on
   // every mount: React may mount, unmount and mount again.
   const alive = useRef(true);
@@ -107,6 +111,7 @@ export function JhandiBurja({ t }: { t: TFn }) {
       await mutate(view, { revalidate: false });
       setRound((n) => n + 1);
       setBets(NONE);
+      setDeclined(false);
       setCovered(false);
       await wait(CUP_UP_MS);
       setPhase("result");
@@ -120,6 +125,19 @@ export function JhandiBurja({ t }: { t: TFn }) {
   };
 
   const clear = () => change(() => NONE);
+  const newBet = () => {
+    setDeclined(true);
+    clear();
+  };
+
+  const startOver = async () => {
+    setConfirming(false);
+    setBets(NONE);
+    setDeclined(false);
+    setPhase("betting");
+    setError(null);
+    await mutate(await api.jhandiStartOver(), { revalidate: false });
+  };
 
   const refill = async () => {
     setBets(NONE);
@@ -142,7 +160,9 @@ export function JhandiBurja({ t }: { t: TFn }) {
   // The last round's bets, offered again in one tap while the mat is empty
   // and the purse covers them.
   const again = data.last?.bets ?? NONE;
-  const canRepeat = staked === 0 && sum(again) > 0 && sum(again) <= purse;
+  const canRepeat = !declined && staked === 0 && sum(again) > 0 && sum(again) <= purse;
+  // A fresh start is worth offering once anything has happened.
+  const canStartOver = !busy && !broke && (purse !== data.newPurse || data.last != null);
 
   const status = error
     ? error
@@ -295,15 +315,25 @@ export function JhandiBurja({ t }: { t: TFn }) {
           {t("jhandi.refill").replace("{n}", String(data.newPurse))}
         </button>
       ) : canRepeat ? (
-        <button
-          type="button"
-          onClick={() => void roll(again)}
-          disabled={busy}
-          className="settings-btn settings-btn--accent h-10 w-full justify-center text-[13px]"
-        >
-          <Icon name="refresh" className="size-3.5" />
-          {t("jhandi.same-again").replace("{n}", String(sum(again)))}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => void roll(again)}
+            disabled={busy}
+            className="settings-btn settings-btn--accent h-10 flex-1 justify-center text-[13px]"
+          >
+            <Icon name="refresh" className="size-3.5" />
+            {t("jhandi.same-again").replace("{n}", String(sum(again)))}
+          </button>
+          <button
+            type="button"
+            onClick={newBet}
+            disabled={busy}
+            className="settings-btn h-10 px-4 text-[13px]"
+          >
+            {t("jhandi.new-bet")}
+          </button>
+        </div>
       ) : (
         <button
           type="button"
@@ -315,7 +345,45 @@ export function JhandiBurja({ t }: { t: TFn }) {
           {staked > 0 ? t("jhandi.roll-with").replace("{n}", String(staked)) : t("jhandi.roll")}
         </button>
       )}
-      <p className="text-center text-[10px] text-text-muted">{t("jhandi.pretend")}</p>
+      {confirming ? (
+        <div className="surface-card flex items-center gap-2 px-3 py-2">
+          <p className="min-w-0 flex-1 text-[11px] leading-snug text-text-secondary">
+            {t("jhandi.start-over-ask")
+              .replace("{n}", String(purse))
+              .replace("{m}", String(data.newPurse))}
+          </p>
+          <button
+            type="button"
+            onClick={() => setConfirming(false)}
+            className="settings-btn h-[28px] px-2.5 text-[11.5px]"
+          >
+            {t("jhandi.cancel")}
+          </button>
+          <button
+            type="button"
+            onClick={() => void startOver()}
+            className="settings-btn settings-btn--accent h-[28px] px-2.5 text-[11.5px]"
+          >
+            {t("jhandi.start-over")}
+          </button>
+        </div>
+      ) : (
+        <p className="text-center text-[10px] text-text-muted">
+          {t("jhandi.pretend")}
+          {canStartOver && (
+            <>
+              {" · "}
+              <button
+                type="button"
+                onClick={() => setConfirming(true)}
+                className="underline underline-offset-2 hover:text-text-secondary"
+              >
+                {t("jhandi.start-over-link").replace("{m}", String(data.newPurse))}
+              </button>
+            </>
+          )}
+        </p>
+      )}
 
       {broke && !closed && phase !== "rolling" && (
         <GameOver

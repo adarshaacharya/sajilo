@@ -1061,6 +1061,8 @@ export const api = {
   jhandiRoll: (bets: number[]) => invoke<JhandiView>("jhandi_roll", { bets }),
   /** A new purse, once the old one is empty. */
   jhandiRefill: () => invoke<JhandiView>("jhandi_refill"),
+  /** A fresh start: a new purse in place of what is left. The record stays. */
+  jhandiStartOver: () => invoke<JhandiView>("jhandi_start_over"),
 
   jobSources: () => invoke<JobSourceInfo[]>("job_sources"),
   getJobs: (source: JobSource, refresh = false) =>

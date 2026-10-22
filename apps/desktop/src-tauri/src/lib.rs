@@ -304,6 +304,7 @@ pub fn run() {
             commands::games::jhandi_get,
             commands::games::jhandi_roll,
             commands::games::jhandi_refill,
+            commands::games::jhandi_start_over,
             commands::games::sudoku_get,
             commands::games::sudoku_new,
             commands::games::sudoku_set,
