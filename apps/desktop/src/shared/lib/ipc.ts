@@ -467,6 +467,8 @@ export interface FocusSnapshot {
   today: FocusDay;
   breaks: NextBreak[];
   pausedUntil: string | null;
+  /** Paused with no end of its own, until the user resumes. */
+  pausedUntilResumed: boolean;
   idleSupported: boolean;
   /** What one tap on + logs, and the goal's limits, in millilitres. */
   waterStepMl: number;
@@ -493,7 +495,7 @@ export interface FocusSnapshot {
   callIgnored: boolean;
 }
 
-export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "resume";
+export type PauseChoice = "halfHour" | "hour" | "restOfDay" | "untilResumed" | "resume";
 
 export interface KeeperPerson {
   id: string;

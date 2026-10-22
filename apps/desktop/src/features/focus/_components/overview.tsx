@@ -12,7 +12,6 @@ import {
   HOLD_LABELS,
   type I18nKey,
   KIND_TINTS,
-  kindInSentence,
   kindLabel,
   litres,
   upcoming,
@@ -26,6 +25,7 @@ const PAUSES = [
   { choice: "halfHour", label: "focus.pause-half-hour" },
   { choice: "hour", label: "focus.pause-hour" },
   { choice: "restOfDay", label: "focus.pause-rest-of-day" },
+  { choice: "untilResumed", label: "focus.pause-until-resumed" },
 ] as const satisfies readonly { choice: PauseChoice; label: I18nKey }[];
 
 function time(iso: string) {
@@ -90,11 +90,11 @@ function StatusCard({
   const [menu, setMenu] = useState(false);
   // A preview is an example, not a break that is due.
   const due = snapshot.activeBreak && !snapshot.activeBreak.preview ? snapshot.activeBreak : null;
-  const [next, after] = upcoming(snapshot);
+  const [next] = upcoming(snapshot);
 
   let lead: ReactNode;
   let title: string;
-  let detail: string;
+  let detail: string | null = null;
   let action: ReactNode = null;
   let eyebrow: ReactNode = null;
 
@@ -117,8 +117,10 @@ function StatusCard({
     );
   } else if (status === "paused" && snapshot.pausedUntil) {
     lead = <Chip icon="pause" tint="var(--color-text-secondary)" />;
-    title = t("focus.paused.title").replace("{time}", time(snapshot.pausedUntil));
-    detail = t("focus.paused.detail");
+    title = snapshot.pausedUntilResumed
+      ? t("focus.status.paused")
+      : t("focus.paused.title").replace("{time}", time(snapshot.pausedUntil));
+    detail = t(snapshot.pausedUntilResumed ? "focus.paused.open-detail" : "focus.paused.detail");
     action = (
       <button
         type="button"
@@ -152,16 +154,9 @@ function StatusCard({
         resting={away}
       />
     );
-    title = t("focus.next.title")
-      .replace("{kind}", kindLabel(next.kind, settings, t))
-      .replace("{n}", digits(next.minutesLeft, numerals));
-    detail = away
-      ? t("focus.next.away")
-      : after && after.minutesLeft !== null
-        ? t("focus.next.then")
-            .replace("{kind}", kindInSentence(after.kind, settings, t))
-            .replace("{n}", digits(after.minutesLeft, numerals))
-        : t("focus.next.only");
+    // The ring has the minutes: the words only say what comes.
+    title = kindLabel(next.kind, settings, t);
+    if (away) detail = t("focus.next.away");
     action = <PauseMenu open={menu} setOpen={setMenu} onPause={onPause} />;
     if (snapshot.dayOff && settings.daysOff === "lighter") {
       eyebrow = (
@@ -176,9 +171,7 @@ function StatusCard({
         >
           <Icon name="sun" className="size-2.5" />
           {t(
-            snapshot.dayOff === "publicHoliday"
-              ? "focus.day-off.holiday-lighter"
-              : "focus.day-off.weekly-lighter",
+            snapshot.dayOff === "publicHoliday" ? "focus.day-off.holiday" : "focus.day-off.weekly",
           )}
         </span>
       );
@@ -196,7 +189,9 @@ function StatusCard({
       <div className="min-w-0 flex-1">
         {eyebrow}
         <p className="text-balance text-[14px] font-semibold leading-snug">{title}</p>
-        <p className="mt-0.5 text-balance text-[11px] leading-snug text-text-muted">{detail}</p>
+        {detail && (
+          <p className="mt-0.5 text-balance text-[11px] leading-snug text-text-muted">{detail}</p>
+        )}
       </div>
       {action}
     </section>

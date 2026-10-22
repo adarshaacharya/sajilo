@@ -1533,8 +1533,14 @@ pub enum PauseChoice {
     Hour,
     /// Until the computer's next midnight.
     RestOfDay,
+    /// Until the user resumes: no end of its own.
+    UntilResumed,
     Resume,
 }
+
+/// How far ahead a pause "until resumed" is set: far enough to never end on
+/// its own, near enough for every clock and date library to read.
+const UNTIL_RESUMED_YEARS: i64 = 100;
 
 pub fn pause(
     state: &mut FocusState,
@@ -1552,6 +1558,7 @@ pub fn pause(
                 .map(|next| next.and_time(NaiveTime::MIN));
             midnight.map(|midnight| now + (midnight - local))
         }
+        PauseChoice::UntilResumed => Some(now + Duration::days(365 * UNTIL_RESUMED_YEARS)),
         PauseChoice::Resume => None,
     };
     if choice != PauseChoice::Resume {
@@ -1589,6 +1596,8 @@ pub struct FocusSnapshot {
     pub today: FocusDay,
     pub breaks: Vec<NextBreak>,
     pub paused_until: Option<DateTime<Utc>>,
+    /// Paused with no end: until the user resumes.
+    pub paused_until_resumed: bool,
     /// What one tap on + logs, and the goal's limits, in ml.
     pub water_step_ml: u32,
     /// What the break card's second water button logs, in ml.
@@ -1816,6 +1825,10 @@ pub fn snapshot(
         today,
         breaks,
         paused_until: state.paused_until.filter(|until| now < *until),
+        // Anything over a year away was set to wait for the user.
+        paused_until_resumed: state
+            .paused_until
+            .is_some_and(|until| until - now > Duration::days(365)),
         idle_supported: state.last_idle.is_some() || state.last_tick.is_none(),
         water_step_ml: WATER_STEP_ML,
         water_bottle_ml: WATER_STEP_ML * WATER_BOTTLE_STEPS.unsigned_abs(),

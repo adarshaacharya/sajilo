@@ -81,14 +81,6 @@ export function kindLabel(kind: BreakKind, settings: FocusSettings, t: TFn): str
   return t(KIND_LABELS[kind]);
 }
 
-/** A break's name inside a sentence: "then stand up", not "then Stand up".
- * The user's own words are left as they wrote them, and Nepali has no case. */
-export function kindInSentence(kind: BreakKind, settings: FocusSettings, t: TFn): string {
-  const label = kindLabel(kind, settings, t);
-  if (kind === "custom") return label;
-  return label.charAt(0).toLowerCase() + label.slice(1);
-}
-
 export const KIND_ICONS = {
   eyes: "eye",
   move: "walk",

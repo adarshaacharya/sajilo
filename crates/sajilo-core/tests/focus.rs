@@ -423,6 +423,29 @@ fn pausing_for_the_rest_of_the_day_ends_at_midnight() {
 }
 
 #[test]
+fn a_pause_until_resumed_waits_for_the_user() {
+    let mut state = FocusState::default();
+    let settings = eyes_only();
+    let now = monday_at(14);
+    pause(&mut state, PauseChoice::UntilResumed, now, now.naive_utc());
+    let next_week = now + Duration::days(7);
+    assert!(run(&mut state, &settings, next_week, 60, busy).is_empty());
+    let view = snapshot(&mut state, &settings, next_week, next_week.naive_utc());
+    assert_eq!(view.status, FocusStatus::Paused);
+    assert!(view.paused_until_resumed);
+
+    pause(
+        &mut state,
+        PauseChoice::Resume,
+        next_week,
+        next_week.naive_utc(),
+    );
+    assert!(
+        !snapshot(&mut state, &settings, next_week, next_week.naive_utc()).paused_until_resumed
+    );
+}
+
+#[test]
 fn every_notification_off_silences_breaks_and_keeps_them() {
     let mut state = FocusState::default();
     let settings = FocusSettings {
