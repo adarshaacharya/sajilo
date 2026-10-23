@@ -6,6 +6,7 @@ import type { KataLevel } from "../../../types/api/KataLevel";
 import type { KataMark } from "../../../types/api/KataMark";
 import type { KataOutcome } from "../../../types/api/KataOutcome";
 import type { KataView } from "../../../types/api/KataView";
+import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useKata } from "../games-data";
 import { GameOver } from "./game-over";
 
@@ -40,12 +41,14 @@ export function Katakuti({ t }: { t: TFn }) {
   const [level, setLevel] = useState<KataLevel | null>(null);
   // The result popup, until "See board" folds it.
   const [closed, setClosed] = useState(false);
+  const { overOnOpen, forget } = useOverOnOpen(data ? data.game?.outcome != null : undefined);
 
   if (!data) return null;
   const game = data.game;
   const chosen = level ?? game?.level ?? "medium";
 
   const start = async (next: KataLevel) => {
+    forget();
     setLevel(next);
     setClosed(false);
     await mutate(await api.kataNew(next), { revalidate: false });
@@ -64,7 +67,8 @@ export function Katakuti({ t }: { t: TFn }) {
     }
   };
 
-  if (!game) return <Start view={data} level={chosen} onLevel={setLevel} onStart={start} t={t} />;
+  if (!game || overOnOpen)
+    return <Start view={data} level={chosen} onLevel={setLevel} onStart={start} t={t} />;
 
   const over = game.outcome != null;
   const cells = game.cells.map((mark, cell) => (cell === pending ? game.player : mark));

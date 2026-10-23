@@ -5,6 +5,7 @@ import { api } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import type { SudokuLevel } from "../../../types/api/SudokuLevel";
 import type { SudokuView } from "../../../types/api/SudokuView";
+import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useSudoku } from "../games-data";
 import { GameOver } from "./game-over";
 
@@ -50,6 +51,9 @@ export function Sudoku({ t }: { t: TFn }) {
   const [help, setHelp] = useState(false);
   // The solved popup, until "See board" folds it.
   const [closed, setClosed] = useState(false);
+  const { overOnOpen, forget } = useOverOnOpen(
+    data ? data.game != null && data.game.solvedIn != null : undefined,
+  );
   const game = data?.game ?? null;
   const elapsed = useElapsed(game?.startedAt, game?.solvedIn);
 
@@ -90,8 +94,17 @@ export function Sudoku({ t }: { t: TFn }) {
   });
 
   if (!data) return null;
-  if (!game)
-    return <Start view={data} onStart={(level) => void apply(api.sudokuNew(level))} t={t} />;
+  if (!game || overOnOpen)
+    return (
+      <Start
+        view={data}
+        onStart={(level) => {
+          forget();
+          void apply(api.sudokuNew(level));
+        }}
+        t={t}
+      />
+    );
 
   const solved = game.solvedIn != null;
   // The picked square's row and column, lit lightly; its box already shows

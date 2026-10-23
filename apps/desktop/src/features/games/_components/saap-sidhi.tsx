@@ -5,6 +5,7 @@ import { api } from "../../../shared/lib/ipc";
 import type { SaapJump } from "../../../types/api/SaapJump";
 import type { SaapMove } from "../../../types/api/SaapMove";
 import type { SaapView } from "../../../types/api/SaapView";
+import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useSaap } from "../games-data";
 import { GameOver } from "./game-over";
 
@@ -52,6 +53,7 @@ export function SaapSidhi({ t }: { t: TFn }) {
   const [closed, setClosed] = useState(false);
   // Whether the screen is still open, so a replay stops if it closes. Set
   // on every mount: React may mount, unmount and mount again.
+  const { overOnOpen, forget } = useOverOnOpen(data ? data.game?.winner != null : undefined);
   const alive = useRef(true);
   useEffect(() => {
     alive.current = true;
@@ -121,11 +123,12 @@ export function SaapSidhi({ t }: { t: TFn }) {
   if (!data) return null;
   const roll = () => void run(() => api.saapRoll(), pos);
   const begin = () => {
+    forget();
     setClosed(false);
     void run(() => api.saapNew(), { you: 0, computer: 0 });
   };
 
-  if (!game) return <Start view={data} onStart={begin} busy={busy} t={t} />;
+  if (!game || overOnOpen) return <Start view={data} onStart={begin} busy={busy} t={t} />;
 
   const over = game.winner != null && !busy;
   const status = over

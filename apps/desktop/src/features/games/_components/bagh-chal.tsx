@@ -4,6 +4,7 @@ import { api } from "../../../shared/lib/ipc";
 import type { BaghLevel } from "../../../types/api/BaghLevel";
 import type { BaghPiece } from "../../../types/api/BaghPiece";
 import type { BaghView } from "../../../types/api/BaghView";
+import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useBagh } from "../games-data";
 import { GameOver } from "./game-over";
 
@@ -45,6 +46,7 @@ export function BaghChal({ t }: { t: TFn }) {
   // The result popup over the final board, until it is folded; then the
   // setup to play again.
   const [closed, setClosed] = useState(false);
+  const { overOnOpen, forget } = useOverOnOpen(data ? data.game?.outcome != null : undefined);
   if (!data) return null;
   const game = data.game;
 
@@ -60,10 +62,11 @@ export function BaghChal({ t }: { t: TFn }) {
   };
 
   const startNew = (player: BaghPiece, level: BaghLevel) => {
+    forget();
     setClosed(false);
     void apply(api.baghNew(player, level));
   };
-  if (!game || (game.outcome && closed)) {
+  if (!game || (game.outcome && (closed || overOnOpen))) {
     return <Start view={data} onStart={startNew} t={t} />;
   }
   const result = !game.outcome
