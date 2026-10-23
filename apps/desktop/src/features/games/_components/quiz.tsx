@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { Icon } from "../../../shared/components/icon";
 import { Switch } from "../../../shared/components/switch";
@@ -156,7 +156,7 @@ export function Quiz({ t }: { t: TFn }) {
           </p>
         </section>
       )}
-      <TodaysQuestion onPlay={() => void act(api.quizStart(null))} t={t} />
+      <TodaysQuestion t={t} />
       {!data.finished && data.stats.answered === 0 && (
         <p className="px-0.5 text-[11px] leading-snug text-text-secondary">{t("quiz.how")}</p>
       )}
@@ -179,6 +179,7 @@ export function Quiz({ t }: { t: TFn }) {
           />
         ))}
       </div>
+      <DailyCardSwitch t={t} />
     </div>
   );
 }
@@ -206,79 +207,29 @@ function TopicButton({
   );
 }
 
+/** How long the answer to the question of the day stays up once given. */
+const ANSWER_MS = 2500;
+
 /**
- * The question of the day, and the switch for its daily card. Answered just
- * now, it shows the result and leads on to a round; answered earlier, it
- * folds to one line so the topics come first, and opens again on a tap.
+ * The question of the day, until it is answered: then the answer shows for
+ * a moment and the card goes, not to come back until tomorrow's question.
  */
-function TodaysQuestion({ onPlay, t }: { onPlay: () => void; t: TFn }) {
+function TodaysQuestion({ t }: { t: TFn }) {
   const { data: daily, mutate } = useSWR("quiz-daily", () => api.quizDaily());
   const { mutate: refresh } = useSWRConfig();
   const [busy, setBusy] = useState(false);
   const [justAnswered, setJustAnswered] = useState(false);
-  const [open, setOpen] = useState(false);
-  if (!daily) return null;
-  const answered = daily.chosen !== null;
-  const right = answered && daily.chosen === daily.correct;
-
-  const toggle = (
-    <div className="flex items-center justify-between gap-3 border-divider border-t pt-2">
-      <span className="text-[10.5px] text-text-muted">{t("quiz.daily.card-on")}</span>
-      <Switch
-        checked={daily.enabled}
-        onChange={(enabled) => {
-          void api
-            .quizDailyEnable(enabled)
-            .then(() => mutate({ ...daily, enabled }, { revalidate: false }));
-        }}
-        ariaLabel={t("quiz.daily.card-on")}
-      />
-    </div>
-  );
-
-  if (answered && !justAnswered && !open) {
-    return (
-      <section className="surface-card space-y-2 px-3 py-2.5">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex w-full items-center gap-2.5 text-left"
-        >
-          <span
-            className={`flex size-6 shrink-0 items-center justify-center rounded-full ${
-              right ? "bg-positive/15 text-positive" : "bg-holiday/15 text-holiday"
-            }`}
-          >
-            <Icon name={right ? "checkmark" : "close"} className="size-3" />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[12px] font-semibold">
-              {t(right ? "quiz.daily.done-right" : "quiz.daily.done-wrong")}
-            </span>
-            <span className="block text-[10.5px] text-text-muted">{t("quiz.daily.tomorrow")}</span>
-          </span>
-          <Icon name="chevronDown" className="size-3 shrink-0 text-text-muted" />
-        </button>
-        {toggle}
-      </section>
-    );
-  }
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    if (!justAnswered) return;
+    const timer = window.setTimeout(() => setGone(true), ANSWER_MS);
+    return () => window.clearTimeout(timer);
+  }, [justAnswered]);
+  if (!daily || gone || (daily.chosen !== null && !justAnswered)) return null;
 
   return (
     <section className="surface-card space-y-2.5 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] font-semibold text-accent-mark">{t("quiz.daily.title")}</p>
-        {answered && !justAnswered && (
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            aria-label={t("quiz.daily.fold")}
-            className="text-text-muted transition-colors hover:text-text"
-          >
-            <Icon name="chevronUp" className="size-3" />
-          </button>
-        )}
-      </div>
+      <p className="text-[11px] font-semibold text-accent-mark">{t("quiz.daily.title")}</p>
       <DailyQuestion
         daily={daily}
         busy={busy}
@@ -299,17 +250,27 @@ function TodaysQuestion({ onPlay, t }: { onPlay: () => void; t: TFn }) {
         }}
         t={t}
       />
-      {justAnswered && (
-        <button
-          type="button"
-          onClick={onPlay}
-          className="settings-btn settings-btn--accent w-full justify-center"
-        >
-          <Icon name="play" className="size-3" />
-          {t("quiz.daily.keep-going")}
-        </button>
-      )}
-      {toggle}
     </section>
+  );
+}
+
+/** The switch for the question of the day's noon card, under the topics:
+ * it stays whether or not today's question is answered. */
+function DailyCardSwitch({ t }: { t: TFn }) {
+  const { data: daily, mutate } = useSWR("quiz-daily", () => api.quizDaily());
+  if (!daily) return null;
+  return (
+    <div className="surface-card flex items-center justify-between gap-3 px-3 py-2.5">
+      <span className="text-[11px] text-text-secondary">{t("quiz.daily.card-on")}</span>
+      <Switch
+        checked={daily.enabled}
+        onChange={(enabled) => {
+          void api
+            .quizDailyEnable(enabled)
+            .then(() => mutate({ ...daily, enabled }, { revalidate: false }));
+        }}
+        ariaLabel={t("quiz.daily.card-on")}
+      />
+    </div>
   );
 }
