@@ -53,4 +53,16 @@ holdings: number | null,
 /**
  * How many shares it holds across those companies, in total.
  */
-heldShares: number | null, };
+heldShares: number | null, 
+/**
+ * How many times other funds have published since this one's latest
+ * NAV: days for a scheme that publishes daily, weeks for a weekly
+ * one. Counted from the source's own dates, so a market holiday, when
+ * nobody publishes, never counts. `None` for a matured scheme, whose
+ * last NAV is final.
+ */
+behind: number | null, 
+/**
+ * Behind by enough to have missed a NAV, not merely not posted yet.
+ */
+late: boolean, };

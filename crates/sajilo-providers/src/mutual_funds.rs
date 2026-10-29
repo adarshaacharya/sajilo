@@ -12,6 +12,7 @@ use sajilo_api::mutual_funds::{FundKind, MonthlyNav, MutualFund, MutualFundSnaps
 use sajilo_core::NepaliMonth;
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::BTreeSet;
 
 use crate::error::{ProviderError, Result};
 use crate::http::HttpClient;
@@ -271,6 +272,7 @@ fn snapshot(
             "no fund had a usable NAV",
         ));
     }
+    mark_behind(&mut funds);
     funds.sort_by(|a, b| {
         kind_rank(a.kind)
             .cmp(&kind_rank(b.kind))
@@ -281,6 +283,54 @@ fn snapshot(
         source: source_name.to_owned(),
         freshness: Freshness::new(now),
     })
+}
+
+/// Past this many publications missed, a NAV is late rather than not yet
+/// posted: most of a week of daily NAVs, or two weekly ones.
+const LATE_DAILY: u32 = 5;
+const LATE_WEEKLY: u32 = 2;
+
+/// How far each fund lags the others, counted in the days (or, for a weekly
+/// scheme, the weeks) on which any fund published. No calendar is needed:
+/// when the market shuts for Dashain nobody publishes, so the gap costs
+/// nothing; a fund that stops while others carry on falls further behind.
+fn mark_behind(funds: &mut [MutualFund]) {
+    let live = |fund: &&MutualFund| fund.kind != FundKind::Matured;
+    let daily: BTreeSet<String> = funds
+        .iter()
+        .filter(live)
+        .filter_map(|fund| fund.daily.as_ref().map(|nav| nav.date.clone()))
+        .collect();
+    let weekly: BTreeSet<String> = funds
+        .iter()
+        .filter(live)
+        .filter_map(|fund| fund.weekly.as_ref().map(|nav| nav.date.clone()))
+        .collect();
+    for fund in funds
+        .iter_mut()
+        .filter(|fund| fund.kind != FundKind::Matured)
+    {
+        // Daily where its latest NAV is the daily one; a scheme whose daily
+        // figure fell behind its weekly one now only publishes weekly.
+        let publishes_daily = fund
+            .daily
+            .as_ref()
+            .is_some_and(|nav| nav.date == fund.latest.date);
+        let (dates, late_at) = if publishes_daily {
+            (&daily, LATE_DAILY)
+        } else {
+            (&weekly, LATE_WEEKLY)
+        };
+        let behind = dates
+            .range::<str, _>((
+                std::ops::Bound::Excluded(fund.latest.date.as_str()),
+                std::ops::Bound::Unbounded,
+            ))
+            .count();
+        let behind = u32::try_from(behind).unwrap_or(u32::MAX);
+        fund.behind = Some(behind);
+        fund.late = behind >= late_at;
+    }
 }
 
 fn kind_rank(kind: FundKind) -> u8 {
@@ -348,6 +398,8 @@ fn fund(raw: RawFund) -> Option<MutualFund> {
         refund_nav: raw.refund_nav.filter(|nav| matured && *nav > 0.0),
         holdings: raw.holdings.filter(|count| *count > 0),
         held_shares: raw.held_shares.filter(|count| *count > 0.0),
+        behind: None,
+        late: false,
     })
 }
 
@@ -455,6 +507,65 @@ mod tests {
 
     fn now() -> DateTime<Utc> {
         "2026-09-18T06:00:00Z".parse().unwrap()
+    }
+
+    /// A ShareHub answer with one open-end fund per (symbol, daily date), and
+    /// one weekly-only closed-end fund per (symbol, weekly date).
+    fn listed(daily: &[(&str, &str)], weekly_only: &[(&str, &str)]) -> MutualFundSnapshot {
+        let open = daily.iter().map(|(symbol, date)| {
+            format!(
+                r#"{{"symbol":"{symbol}","name":"{symbol} Fund","type":"OpenEnd","dailyNavPrice":10.5,"dailyDate":"{date}","weeklyNavPrice":10.4,"weeklyDate":"2026-10-09"}}"#
+            )
+        });
+        let closed = weekly_only.iter().map(|(symbol, date)| {
+            format!(
+                r#"{{"symbol":"{symbol}","name":"{symbol} Fund","type":"CloseEnd","dailyNavPrice":"","dailyDate":"","weeklyNavPrice":9.8,"weeklyDate":"{date}"}}"#
+            )
+        });
+        let rows: Vec<String> = open.chain(closed).collect();
+        parse_sharehub(&format!(r#"{{"data":[{}]}}"#, rows.join(",")), now()).unwrap()
+    }
+
+    #[test]
+    fn a_holiday_nobody_publishes_through_costs_nothing() {
+        // Dashain: nothing between Oct 17 and Oct 25. KSLY's Oct 15 NAV is
+        // two publishing days behind, not the fortnight on the calendar.
+        let snapshot = listed(
+            &[
+                ("SSIS", "2026-10-25"),
+                ("NFCF", "2026-10-17"),
+                ("KSLY", "2026-10-15"),
+            ],
+            &[],
+        );
+        assert_eq!(find(&snapshot, "SSIS").behind, Some(0));
+        assert_eq!(find(&snapshot, "NFCF").behind, Some(1));
+        let ksly = find(&snapshot, "KSLY");
+        assert_eq!((ksly.behind, ksly.late), (Some(2), false));
+    }
+
+    #[test]
+    fn a_fund_that_stops_while_others_publish_falls_behind() {
+        let days = [
+            "2026-10-25",
+            "2026-10-26",
+            "2026-10-27",
+            "2026-10-28",
+            "2026-10-29",
+        ];
+        let mut daily: Vec<(&str, &str)> = days.iter().map(|day| ("SSIS", *day)).collect();
+        // Symbols are unique per listing, so each publishing day gets its own fund.
+        let symbols = ["A1", "A2", "A3", "A4", "A5"];
+        for (entry, symbol) in daily.iter_mut().zip(symbols) {
+            entry.0 = symbol;
+        }
+        daily.push(("KSLY", "2026-10-24"));
+        let snapshot = listed(&daily, &[("NMB50", "2026-10-09"), ("CMF2", "2026-10-23")]);
+        let ksly = find(&snapshot, "KSLY");
+        assert_eq!((ksly.behind, ksly.late), (Some(5), true));
+        // Weekly schemes count in weeks, against each other.
+        let nmb = find(&snapshot, "NMB50");
+        assert_eq!((nmb.behind, nmb.late), (Some(1), false));
     }
 
     fn find<'a>(snapshot: &'a MutualFundSnapshot, symbol: &str) -> &'a MutualFund {

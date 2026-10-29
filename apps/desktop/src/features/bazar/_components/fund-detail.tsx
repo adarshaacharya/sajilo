@@ -26,7 +26,6 @@ const shareCount = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
 export function FundDetail({
   fund,
-  today,
   followed,
   units,
   onBack,
@@ -34,7 +33,6 @@ export function FundDetail({
   onUnits,
 }: {
   fund: MutualFund;
-  today: number;
   followed: boolean;
   units: number;
   onBack: () => void;
@@ -130,7 +128,7 @@ export function FundDetail({
         </div>
         <p className="mt-1.5 text-[11px] text-text-muted tabular-nums">
           {!matured && `${t("funds.latest-nav")} · `}
-          <NavDate fund={fund} today={today} />
+          <NavDate fund={fund} />
           {move &&
             fund.previous &&
             ` · ${t("funds.since").replace("{date}", date(fund.previous.date))}`}

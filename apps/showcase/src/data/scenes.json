@@ -33064,6 +33064,7 @@
         },
         "funds": [
           {
+            "behind": 4,
             "daily": {
               "date": "2026-09-07",
               "nav": 9.92
@@ -33072,6 +33073,7 @@
             "heldShares": 4095459.0,
             "holdings": 49,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-07",
               "nav": 9.92
@@ -33101,6 +33103,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 9.84
@@ -33109,6 +33112,7 @@
             "heldShares": 681047.0,
             "holdings": 27,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 9.84
@@ -33138,6 +33142,7 @@
             }
           },
           {
+            "behind": 1,
             "daily": {
               "date": "2026-09-16",
               "nav": 11.2
@@ -33146,6 +33151,7 @@
             "heldShares": 6963327.0,
             "holdings": 63,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-16",
               "nav": 11.2
@@ -33175,6 +33181,7 @@
             }
           },
           {
+            "behind": 3,
             "daily": {
               "date": "2026-09-14",
               "nav": 11.6
@@ -33183,6 +33190,7 @@
             "heldShares": 695341.0,
             "holdings": 33,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-14",
               "nav": 11.6
@@ -33212,6 +33220,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 10.39
@@ -33220,6 +33229,7 @@
             "heldShares": 578441.0,
             "holdings": 43,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 10.39
@@ -33249,6 +33259,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 10.14
@@ -33257,6 +33268,7 @@
             "heldShares": 32631133.0,
             "holdings": 141,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 10.14
@@ -33286,6 +33298,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 9.71
@@ -33294,6 +33307,7 @@
             "heldShares": null,
             "holdings": null,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 9.71
@@ -33323,6 +33337,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 9.88
@@ -33331,6 +33346,7 @@
             "heldShares": 9039565.0,
             "holdings": 77,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 9.88
@@ -33360,6 +33376,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 10.12
@@ -33368,6 +33385,7 @@
             "heldShares": 17075965.0,
             "holdings": 47,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 10.12
@@ -33397,6 +33415,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 10.26
@@ -33405,6 +33424,7 @@
             "heldShares": 7873460.0,
             "holdings": 120,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 10.26
@@ -33434,6 +33454,7 @@
             }
           },
           {
+            "behind": 2,
             "daily": {
               "date": "2026-09-15",
               "nav": 11.22
@@ -33442,6 +33463,7 @@
             "heldShares": 974775.0,
             "holdings": 41,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-15",
               "nav": 11.22
@@ -33471,6 +33493,7 @@
             }
           },
           {
+            "behind": 1,
             "daily": {
               "date": "2026-09-16",
               "nav": 10.36
@@ -33479,6 +33502,7 @@
             "heldShares": 1680640.0,
             "holdings": 72,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-16",
               "nav": 10.36
@@ -33508,6 +33532,7 @@
             }
           },
           {
+            "behind": 1,
             "daily": {
               "date": "2026-09-16",
               "nav": 9.97
@@ -33516,6 +33541,7 @@
             "heldShares": 1133224.0,
             "holdings": 77,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-16",
               "nav": 9.97
@@ -33545,6 +33571,7 @@
             }
           },
           {
+            "behind": 0,
             "daily": {
               "date": "2026-09-17",
               "nav": 10.79
@@ -33553,6 +33580,7 @@
             "heldShares": 10917557.0,
             "holdings": 69,
             "kind": "openEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-17",
               "nav": 10.79
@@ -33582,11 +33610,13 @@
             }
           },
           {
+            "behind": 2,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 3176112.0,
             "holdings": 58,
             "kind": "closedEnd",
+            "late": true,
             "latest": {
               "date": "2026-08-28",
               "nav": 9.3
@@ -33613,11 +33643,13 @@
             }
           },
           {
+            "behind": 2,
             "daily": null,
             "fundSize": 750723900.0,
             "heldShares": 4859410.0,
             "holdings": 42,
             "kind": "closedEnd",
+            "late": true,
             "latest": {
               "date": "2026-08-28",
               "nav": 10.32
@@ -33644,11 +33676,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 4302473.0,
             "holdings": 79,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.94
@@ -33675,11 +33709,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1025763600.0,
             "heldShares": 11188138.0,
             "holdings": 96,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 11.55
@@ -33706,11 +33742,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1500000000.0,
             "heldShares": 3682283.0,
             "holdings": 78,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.84
@@ -33737,11 +33775,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 5000000000.0,
             "heldShares": 9071612.0,
             "holdings": 64,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 8.46
@@ -33768,11 +33808,13 @@
             }
           },
           {
+            "behind": 1,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": 6296904.0,
             "holdings": 89,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-04",
               "nav": 12.28
@@ -33799,11 +33841,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1225072590.0,
             "heldShares": 8669122.0,
             "holdings": 59,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.86
@@ -33830,11 +33874,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": 7853043.0,
             "holdings": 71,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.03
@@ -33861,11 +33907,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 744750700.0,
             "heldShares": 3904649.0,
             "holdings": 60,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.69
@@ -33892,11 +33940,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1500000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.97
@@ -33923,11 +33973,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 652623600.0,
             "heldShares": 1700807.0,
             "holdings": 56,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.97
@@ -33954,11 +34006,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 800000000.0,
             "heldShares": 3808998.0,
             "holdings": 63,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.73
@@ -33985,11 +34039,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1216253300.0,
             "heldShares": 2587025.0,
             "holdings": 30,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.94
@@ -34016,11 +34072,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 9268995.0,
             "holdings": 103,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.34
@@ -34047,11 +34105,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 4264166.0,
             "holdings": 79,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.1
@@ -34078,11 +34138,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1320000000.0,
             "heldShares": 5869737.0,
             "holdings": 108,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.68
@@ -34109,11 +34171,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1500000000.0,
             "heldShares": 6580274.0,
             "holdings": 116,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.56
@@ -34140,11 +34204,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1130000000.0,
             "heldShares": 5354809.0,
             "holdings": 96,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.27
@@ -34171,11 +34237,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 755000000.0,
             "heldShares": 4340455.0,
             "holdings": 66,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.85
@@ -34202,11 +34270,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1020000000.0,
             "heldShares": 6620389.0,
             "holdings": 65,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.79
@@ -34233,11 +34303,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 905000000.0,
             "heldShares": 8211560.0,
             "holdings": 71,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.65
@@ -34264,11 +34336,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 10591153.0,
             "holdings": 52,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.07
@@ -34295,11 +34369,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1364840000.0,
             "heldShares": 3668113.0,
             "holdings": 52,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.79
@@ -34326,11 +34402,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1200000000.0,
             "heldShares": 6448955.0,
             "holdings": 50,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.31
@@ -34357,11 +34435,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1120000000.0,
             "heldShares": 10933650.0,
             "holdings": 100,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.94
@@ -34388,11 +34468,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 5152041.0,
             "holdings": 100,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.92
@@ -34419,11 +34501,13 @@
             }
           },
           {
+            "behind": 3,
             "daily": null,
             "fundSize": 2000000000.0,
             "heldShares": 3177614.0,
             "holdings": 45,
             "kind": "closedEnd",
+            "late": true,
             "latest": {
               "date": "2026-08-14",
               "nav": 9.8
@@ -34450,11 +34534,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 8257417.0,
             "holdings": 54,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 11.74
@@ -34481,11 +34567,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": 5495596.0,
             "holdings": 45,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 12.73
@@ -34512,11 +34600,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 3913626.0,
             "holdings": 53,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.81
@@ -34543,11 +34633,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 7703088.0,
             "holdings": 78,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.01
@@ -34574,11 +34666,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 846119290.0,
             "heldShares": 4242945.0,
             "holdings": 70,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.58
@@ -34605,11 +34699,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1200000000.0,
             "heldShares": 2732624.0,
             "holdings": 82,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.19
@@ -34636,11 +34732,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.85
@@ -34667,11 +34765,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.9
@@ -34698,11 +34798,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 672532600.0,
             "heldShares": 5926789.0,
             "holdings": 83,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.82
@@ -34729,11 +34831,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1200000000.0,
             "heldShares": 5856335.0,
             "holdings": 84,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.86
@@ -34760,11 +34864,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1500000000.0,
             "heldShares": 4490303.0,
             "holdings": 53,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.35
@@ -34791,11 +34897,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.0
@@ -34822,11 +34930,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 805800000.0,
             "heldShares": 4576802.0,
             "holdings": 48,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.57
@@ -34853,11 +34963,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1200000000.0,
             "heldShares": 6339255.0,
             "holdings": 51,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.13
@@ -34884,11 +34996,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 5915252.0,
             "holdings": 69,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.7
@@ -34915,11 +35029,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 860000000.0,
             "heldShares": 6932956.0,
             "holdings": 57,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 10.01
@@ -34946,11 +35062,13 @@
             }
           },
           {
+            "behind": 0,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": 7783606.0,
             "holdings": 63,
             "kind": "closedEnd",
+            "late": false,
             "latest": {
               "date": "2026-09-11",
               "nav": 9.85
@@ -34977,11 +35095,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 560000000.0,
             "heldShares": 4008255.0,
             "holdings": 59,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2026-07-03",
               "nav": 10.07
@@ -35008,11 +35128,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 820000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2025-02-28",
               "nav": 11.22
@@ -35039,11 +35161,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2023-03-24",
               "nav": 9.53
@@ -35070,11 +35194,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2024-06-14",
               "nav": 9.99
@@ -35101,11 +35227,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 500000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2020-03-13",
               "nav": 10.25
@@ -35132,11 +35260,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 750000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2024-01-12",
               "nav": 9.81
@@ -35163,11 +35293,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2022-08-05",
               "nav": 8.77
@@ -35194,11 +35326,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 835200000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2025-03-07",
               "nav": 11.49
@@ -35225,11 +35359,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": 1835401.0,
             "holdings": 40,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2026-08-28",
               "nav": 9.97
@@ -35256,11 +35392,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2023-10-25",
               "nav": 10.3979
@@ -35287,11 +35425,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 750000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2019-10-18",
               "nav": 10.64
@@ -35318,11 +35458,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 750000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2018-04-06",
               "nav": 17.51
@@ -35349,11 +35491,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1250000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2023-11-03",
               "nav": 10.31
@@ -35380,11 +35524,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1300000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2024-12-25",
               "nav": 11.64
@@ -35411,11 +35557,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 1000000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2019-07-19",
               "nav": 11.32
@@ -35442,11 +35590,13 @@
             }
           },
           {
+            "behind": null,
             "daily": null,
             "fundSize": 500000000.0,
             "heldShares": null,
             "holdings": null,
             "kind": "matured",
+            "late": false,
             "latest": {
               "date": "2017-12-22",
               "nav": 21.46

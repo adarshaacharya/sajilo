@@ -73,6 +73,14 @@ dto! {
         pub holdings: Option<u32>,
         /// How many shares it holds across those companies, in total.
         pub held_shares: Option<f64>,
+        /// How many times other funds have published since this one's latest
+        /// NAV: days for a scheme that publishes daily, weeks for a weekly
+        /// one. Counted from the source's own dates, so a market holiday, when
+        /// nobody publishes, never counts. `None` for a matured scheme, whose
+        /// last NAV is final.
+        pub behind: Option<u32>,
+        /// Behind by enough to have missed a NAV, not merely not posted yet.
+        pub late: bool,
     }
 
     /// One NAV on a fund's chart.

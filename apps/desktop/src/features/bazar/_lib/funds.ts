@@ -4,7 +4,6 @@ import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import type { MutualFund } from "../../../types/api/MutualFund";
 import type { SipStatus } from "../../../types/api/SipStatus";
-import { daysUntil } from "./ipo";
 
 /**
  * Presentation helpers for the mutual funds view.
@@ -13,19 +12,6 @@ import { daysUntil } from "./ipo";
  * weekly, and some fall behind. The view compares each fund against its own
  * dates rather than one "as of" for the whole list.
  */
-
-/**
- * Past this many days a NAV has been missed, not merely not yet published. A
- * scheme that publishes daily is late within the week; one that publishes only
- * each Friday is a week old by design, so it is late once it misses one.
- */
-const LATE_AFTER_DAYS = { daily: 5, weekly: 10 };
-
-export function isLate(fund: MutualFund, ageDays: number | null): boolean {
-  // A matured scheme has stopped publishing for good; its last NAV is final.
-  if (fund.kind === "matured") return false;
-  return ageDays != null && ageDays > LATE_AFTER_DAYS[fund.daily ? "daily" : "weekly"];
-}
 
 /** NAVs are quoted to the paisa, so 10.1 reads 10.10 like its neighbours. */
 export const navFormat = new Intl.NumberFormat("en-IN", {
@@ -43,12 +29,6 @@ export function navMove(fund: MutualFund): NavMove | null {
 
 function movePercent(move: NavMove | null): number | null {
   return move && move.previous > 0 ? (move.change / move.previous) * 100 : null;
-}
-
-/** Whole days since the fund's latest NAV, against today in Kathmandu. */
-export function navAgeDays(fund: MutualFund, today: number): number | null {
-  const until = daysUntil(fund.latest.date, today);
-  return until == null ? null : -until;
 }
 
 export function searchFunds(funds: readonly MutualFund[], query: string): MutualFund[] {

@@ -24,7 +24,6 @@ import {
   useFundHoldings,
   useSips,
 } from "../_lib/funds";
-import { nepalToday } from "../_lib/ipo";
 import { FundDetail } from "./fund-detail";
 import { FundRow } from "./fund-row";
 import { FundsSkeleton } from "./funds-skeleton";
@@ -91,7 +90,6 @@ export function MutualFunds({
     KINDS.some((item) => item.id === linkedKind) ? (linkedKind as FundKind) : "openEnd",
   );
   const [open, setOpen] = useState<string | null>(linkedFund ?? null);
-  const today = nepalToday();
 
   const funds = snapshot?.funds ?? [];
   const bySymbol = useMemo(() => new Map(funds.map((fund) => [fund.symbol, fund])), [funds]);
@@ -110,7 +108,6 @@ export function MutualFunds({
     return (
       <FundDetail
         fund={openFund}
-        today={today}
         followed={openFund.symbol in holdings}
         units={holdings[openFund.symbol] ?? 0}
         onBack={() => setOpen(null)}
@@ -124,7 +121,6 @@ export function MutualFunds({
     <FundRow
       key={fund.symbol}
       fund={fund}
-      today={today}
       followed={fund.symbol in holdings}
       sip={sip}
       onOpen={() => setOpen(fund.symbol)}

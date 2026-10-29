@@ -4,9 +4,7 @@ import type { SipStatus } from "../../../types/api/SipStatus";
 import { money } from "../_lib/format";
 import {
   headlineNav,
-  isLate,
   monthYear,
-  navAgeDays,
   navFormat,
   navMove,
   sipDueDate,
@@ -40,28 +38,24 @@ export function PremiumBadge({ percent }: { percent: number }) {
  * `labelled` says what the date is ("NAV of Sep 17"), for where nothing
  * around it does.
  */
-export function NavDate({
-  fund,
-  today,
-  labelled = false,
-}: {
-  fund: MutualFund;
-  today: number;
-  labelled?: boolean;
-}) {
+export function NavDate({ fund, labelled = false }: { fund: MutualFund; labelled?: boolean }) {
   const { t, language } = useSettings();
   if (fund.kind === "matured" && fund.maturityDate) {
     return (
       <span>{t("funds.matured-on").replace("{date}", monthYear(fund.maturityDate, language))}</span>
     );
   }
-  const age = navAgeDays(fund, today);
-  const late = isLate(fund, age);
+  // Behind by a publication or so is ordinary; from two it is worth saying,
+  // and once late it is coloured. Counted by the shell, against other funds.
+  const behind = fund.behind ?? 0;
+  const late = fund.late;
+  const weekly = fund.daily?.date !== fund.latest.date;
   const date = issueDate(fund.latest.date, language) ?? fund.latest.date;
   return (
     <span className={late ? "text-[color:var(--color-accent-mark)]" : undefined}>
       {labelled ? t("funds.nav-of").replace("{date}", date) : date}
-      {late && ` · ${t("funds.days-old").replace("{n}", String(age))}`}
+      {behind >= 2 &&
+        ` · ${t(weekly ? "funds.weeks-behind" : "funds.days-behind").replace("{n}", String(behind))}`}
     </span>
   );
 }
@@ -103,14 +97,12 @@ function SipLine({ sip }: { sip: SipStatus }) {
 
 export function FundRow({
   fund,
-  today,
   followed,
   sip,
   onOpen,
   onToggle,
 }: {
   fund: MutualFund;
-  today: number;
   followed: boolean;
   /** Shown instead of the NAV date, in "Your funds". */
   sip?: SipStatus;
@@ -132,7 +124,7 @@ export function FundRow({
               <SipLine sip={sip} />
             ) : (
               <>
-                {fund.symbol} · <NavDate fund={fund} today={today} labelled />
+                {fund.symbol} · <NavDate fund={fund} labelled />
               </>
             )}
           </span>
