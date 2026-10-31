@@ -3207,6 +3207,46 @@ input[type="search"]::-webkit-search-decoration {
   border-bottom: 1px solid color-mix(in srgb, var(--color-accent-mark) 45%, transparent);
   cursor: pointer;
 }
+/* Code: a shaded box around a block, its fences gone unless being edited,
+   and a small shaded pill for code inside a line. */
+.cm-note-code {
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 12.5px;
+  background: var(--color-surface-hover);
+  padding: 0 10px !important;
+}
+.cm-note-code-first {
+  border-radius: 8px 8px 0 0;
+  padding-top: 6px !important;
+}
+.cm-note-code-last {
+  border-radius: 0 0 8px 8px;
+  padding-bottom: 6px !important;
+}
+.cm-note-code-first.cm-note-code-last {
+  border-radius: 8px;
+}
+.cm-note-inline-code {
+  font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+  font-size: 0.88em;
+  border-radius: 4px;
+  padding: 1px 4px;
+  background: var(--color-surface-hover);
+}
+/* A quote: a bar down its left, the > gone. */
+.cm-note-quote {
+  border-left: 3px solid color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+  padding-left: 10px !important;
+  color: var(--color-text-secondary);
+}
+/* --- as a real divider. */
+.cm-note-rule {
+  display: inline-block;
+  width: 100%;
+  height: 1px;
+  vertical-align: middle;
+  background: var(--color-border);
+}
 .cm-note-tag {
   border-radius: 4px;
   padding: 0 3px;

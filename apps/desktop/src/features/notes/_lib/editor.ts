@@ -77,7 +77,20 @@ class BulletWidget extends WidgetType {
   }
 }
 
+class RuleWidget extends WidgetType {
+  eq() {
+    return true;
+  }
+  toDOM() {
+    const rule = document.createElement("span");
+    rule.className = "cm-note-rule";
+    return rule;
+  }
+}
+
 const hide = Decoration.replace({});
+const rule = Decoration.replace({ widget: new RuleWidget() });
+const INLINE_CODE = Decoration.mark({ class: "cm-note-inline-code" });
 const bullet = Decoration.replace({ widget: new BulletWidget() });
 const lineClass = (name: string) => Decoration.line({ class: name });
 const HEADING_LINE: Record<string, Decoration> = {
@@ -87,6 +100,11 @@ const HEADING_LINE: Record<string, Decoration> = {
   ATXHeading4: lineClass("cm-note-h3"),
 };
 const TITLE_LINE = lineClass("cm-note-title");
+const CODE_LINE = lineClass("cm-note-code");
+const CODE_FIRST = lineClass("cm-note-code cm-note-code-first");
+const CODE_LAST = lineClass("cm-note-code cm-note-code-last");
+const CODE_ONLY = lineClass("cm-note-code cm-note-code-first cm-note-code-last");
+const QUOTE_LINE = lineClass("cm-note-quote");
 const DONE_LINE = lineClass("cm-note-done");
 const LINK = Decoration.mark({ class: "cm-note-link" });
 const TAG = Decoration.mark({ class: "cm-note-tag" });
@@ -126,6 +144,43 @@ function decorate(view: EditorView): DecorationSet {
         const heading = HEADING_LINE[node.name];
         if (heading) add(line.from, line.from, heading);
         switch (node.name) {
+          case "FencedCode":
+          case "CodeBlock": {
+            // A box around the whole block, its first and last line rounded.
+            const first = line.number;
+            const last = state.doc.lineAt(node.to).number;
+            for (let n = first; n <= last; n++) {
+              const deco =
+                first === last
+                  ? CODE_ONLY
+                  : n === first
+                    ? CODE_FIRST
+                    : n === last
+                      ? CODE_LAST
+                      : CODE_LINE;
+              add(state.doc.line(n).from, state.doc.line(n).from, deco);
+            }
+            break;
+          }
+          case "CodeInfo":
+            if (!editing) add(node.from, node.to, hide);
+            break;
+          case "InlineCode":
+            add(node.from, node.to, INLINE_CODE);
+            break;
+          case "Blockquote": {
+            const last = state.doc.lineAt(node.to).number;
+            for (let n = line.number; n <= last; n++) {
+              add(state.doc.line(n).from, state.doc.line(n).from, QUOTE_LINE);
+            }
+            break;
+          }
+          case "QuoteMark":
+            if (!editing) add(node.from, Math.min(node.to + 1, line.to), hide);
+            break;
+          case "HorizontalRule":
+            if (!editing) add(node.from, node.to, rule);
+            break;
           case "HeaderMark":
             if (!editing) add(node.from, Math.min(node.to + 1, line.to), hide);
             break;
@@ -188,7 +243,7 @@ function decorate(view: EditorView): DecorationSet {
   let lastEnd = -1;
   for (const { from, to, deco } of found) {
     // Replacements may not overlap; the first wins.
-    const replaces = from !== to && (deco.spec.widget || deco === hide);
+    const replaces = from !== to && (deco.spec.widget || deco === hide || deco === rule);
     if (replaces && from < lastEnd) continue;
     builder.add(from, to, deco);
     if (replaces) lastEnd = to;
@@ -309,6 +364,19 @@ const theme = EditorView.theme({
   ".cm-placeholder": { color: "var(--color-text-muted)" },
 });
 
+/**
+ * Text as it should be stored: pasted from a web page or a chat app it can
+ * carry non-breaking spaces (a `#` followed by one is no heading), Windows
+ * line endings, and invisible zero-width characters, all of which stop
+ * Markdown from being recognised.
+ */
+export function cleanText(text: string): string {
+  return text
+    .replace(/\r\n?/g, "\n")
+    .replace(/[\u00a0\u202f]/g, " ")
+    .replace(/[\u200b\u2060\ufeff]/g, "");
+}
+
 export interface EditorOptions {
   doc: string;
   cursor: number | null;
@@ -324,6 +392,7 @@ export function editorExtensions(options: EditorOptions): Extension[] {
     formatKeymap,
     history(),
     markdown({ base: markdownLanguage, extensions: [GFM] }),
+    EditorView.clipboardInputFilter.of(cleanText),
     syntaxHighlighting(markdownHighlight),
     livePreview,
     checklistShortcut,

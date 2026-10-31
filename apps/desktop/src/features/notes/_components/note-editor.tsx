@@ -9,6 +9,7 @@ import { api } from "../../../shared/lib/ipc";
 import type { NoteDocument } from "../../../types/api/NoteDocument";
 import type { NoteFolder } from "../../../types/api/NoteFolder";
 import {
+  cleanText,
   editorExtensions,
   formatBold,
   formatChecklist,
@@ -110,14 +111,17 @@ export function NoteEditor({
   // The editor, made once the note has loaded.
   useEffect(() => {
     if (!doc || !host.current) return;
-    const start = Math.min(doc.cursor ?? doc.body.length, doc.body.length);
+    // Cleaned as it opens, as a paste would be: a note pasted in before
+    // this existed may carry what stops its Markdown being recognised.
+    const body = cleanText(doc.body);
+    const start = Math.min(doc.cursor ?? body.length, body.length);
     const editor = new EditorView({
       parent: host.current,
       state: EditorState.create({
-        doc: doc.body,
+        doc: body,
         selection: { anchor: start },
         extensions: editorExtensions({
-          doc: doc.body,
+          doc: body,
           cursor: doc.cursor,
           placeholder: latest.current.placeholder,
           onChange: (body) => {
