@@ -1,6 +1,7 @@
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { HighlightStyle, syntaxHighlighting, syntaxTree } from "@codemirror/language";
+import { languages } from "@codemirror/language-data";
 import {
   type EditorState,
   type Extension,
@@ -349,6 +350,27 @@ const markdownHighlight = HighlightStyle.define([
   { tag: tags.quote, color: "var(--color-text-secondary)", fontStyle: "italic" },
   { tag: tags.url, color: "var(--color-accent-mark)" },
   { tag: [tags.processingInstruction, tags.meta], color: "var(--color-text-muted)" },
+  // Code inside a fenced block, in the app's own colours so it reads in
+  // either theme.
+  { tag: [tags.keyword, tags.modifier, tags.controlKeyword], color: "var(--color-violet)" },
+  { tag: [tags.string, tags.special(tags.string), tags.regexp], color: "var(--color-positive)" },
+  { tag: [tags.number, tags.bool, tags.null, tags.atom], color: "var(--color-accent-mark)" },
+  {
+    tag: [tags.comment, tags.lineComment, tags.blockComment],
+    color: "var(--color-text-muted)",
+    fontStyle: "italic",
+  },
+  {
+    tag: [
+      tags.function(tags.variableName),
+      tags.function(tags.propertyName),
+      tags.definition(tags.function(tags.variableName)),
+    ],
+    color: "var(--color-weather-tint)",
+  },
+  { tag: [tags.typeName, tags.className, tags.namespace], color: "var(--color-holiday)" },
+  { tag: [tags.propertyName, tags.attributeName], color: "var(--color-text-secondary)" },
+  { tag: [tags.tagName], color: "var(--color-violet)" },
 ]);
 
 const theme = EditorView.theme({
@@ -391,7 +413,9 @@ export function editorExtensions(options: EditorOptions): Extension[] {
   return [
     formatKeymap,
     history(),
-    markdown({ base: markdownLanguage, extensions: [GFM] }),
+    // A fenced block's language (```js, ```python) colours its code. Each
+    // language is fetched the first time a note uses it, not before.
+    markdown({ base: markdownLanguage, extensions: [GFM], codeLanguages: languages }),
     EditorView.clipboardInputFilter.of(cleanText),
     syntaxHighlighting(markdownHighlight),
     livePreview,
