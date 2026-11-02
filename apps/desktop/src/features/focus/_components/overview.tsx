@@ -4,7 +4,6 @@ import { Segmented } from "../../../shared/components/segmented";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { BreakKind, FocusSettings, FocusSnapshot, PauseChoice } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
-import { usePersistedList } from "../../../shared/lib/persisted";
 import {
   clock,
   duration,
@@ -58,7 +57,6 @@ export function Overview({
   return (
     <div className="space-y-2.5">
       <StatusCard snapshot={snapshot} onPause={onPause} onUnmute={onUnmute} onWater={onWater} />
-      <HowItWorks />
       <ReminderList
         snapshot={snapshot}
         onSettings={onSettings}
@@ -265,32 +263,6 @@ function PauseMenu({
         </div>
       )}
     </div>
-  );
-}
-
-/** The key to every number on this screen, said once and then put away:
- * without it "9 of 12 breaks taken" reads as a guess. */
-const HOW_KEY = "focus.tips";
-
-function HowItWorks() {
-  const { t } = useSettings();
-  const [dismissed, setDismissed, loaded] = usePersistedList(HOW_KEY);
-  if (!loaded || dismissed.includes("how")) return null;
-  return (
-    <section className="surface-card flex gap-2.5 p-3">
-      <Icon name="info" className="mt-0.5 size-3.5 shrink-0 text-accent-mark" />
-      <div className="min-w-0 flex-1">
-        <p className="text-[12px] font-semibold">{t("focus.how.title")}</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-text-secondary">{t("focus.how.body")}</p>
-        <button
-          type="button"
-          onClick={() => setDismissed((current) => [...current, "how"])}
-          className="settings-btn mt-2 rounded-full px-3 text-[11px]"
-        >
-          {t("focus.how.dismiss")}
-        </button>
-      </div>
-    </section>
   );
 }
 

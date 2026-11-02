@@ -267,6 +267,10 @@ export function SettingsPanel({
         </div>
       </Group>
 
+      {/* How the timers count, said where people come to adjust them,
+          rather than as a card on top of the screen. */}
+      <p className="px-0.5 text-[10.5px] leading-snug text-text-muted">{t("focus.how.body")}</p>
+
       <div className="px-0.5 pb-1">
         <button
           type="button"
