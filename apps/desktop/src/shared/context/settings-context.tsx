@@ -52,6 +52,9 @@ export interface ModulePrefs {
   /** The tabs on the tab bar after Today, in order (routes, `/news`). The
    * rest are under More; see `shared/lib/tab-layout`. */
   tabBar: string[];
+  /** The order of the tabs under More, as arranged; any not listed follow
+   * in their usual order. */
+  moreOrder: string[];
 }
 
 const DEFAULT_MODULES: ModulePrefs = {
@@ -74,6 +77,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   billsEnabled: true,
   gamesEnabled: true,
   tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/tools"],
+  moreOrder: [],
 };
 
 /** Keeps the home place and the pin list agreeing: the home place is the first
@@ -178,6 +182,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<boolean>("billsEnabled"),
       api.getSetting<boolean>("gamesEnabled"),
       api.getSetting<string[]>("tabBar"),
+      api.getSetting<string[]>("moreOrder"),
       api.getSetting<string>("accent"),
     ])
       .then(
@@ -205,6 +210,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           billsEnabled,
           gamesEnabled,
           tabBar,
+          moreOrder,
           storedAccent,
         ]) => {
           if (cancelled) return;
@@ -251,6 +257,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
               ...(billsEnabled !== null && { billsEnabled }),
               ...(gamesEnabled !== null && { gamesEnabled }),
               ...(Array.isArray(tabBar) && { tabBar: withoutOldDefault(tabBar) }),
+              ...(Array.isArray(moreOrder) && { moreOrder }),
             }),
           );
         },
@@ -293,6 +300,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("billsEnabled", next.billsEnabled);
         persist("gamesEnabled", next.gamesEnabled);
         persist("tabBar", next.tabBar);
+        persist("moreOrder", next.moreOrder);
         return next;
       });
     },

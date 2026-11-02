@@ -31,6 +31,7 @@ import { ErrorBoundary } from "./shared/components/error-boundary";
 import { Header } from "./shared/components/header";
 import { HeaderSlotProvider } from "./shared/components/header-slot";
 import { TabBar } from "./shared/components/tab-bar";
+import { TabDragProvider } from "./shared/components/tab-drag";
 import { UpdateWindow } from "./shared/components/update-prompt";
 import { SettingsProvider, useSettings } from "./shared/context/settings-context";
 import { UpdaterProvider } from "./shared/context/updater-context";
@@ -166,30 +167,32 @@ function Shell() {
       {/* Hidden rather than unmounted while mini, like the window itself:
           the radio keeps playing and every screen is as it was left. */}
       <div className="flex min-h-0 flex-1 flex-col" hidden={mini}>
-        <Routes location={location}>
-          {ROUTES.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                // Keyed so each screen gets its own scroll box: otherwise React
-                // reuses one, and a tab opens as far down as the last was left.
-                <div key={route.path} className="flex min-h-0 min-w-0 flex-1 flex-col">
-                  {route.path !== "/" && <Header title={t(route.titleKey)} />}
-                  <main
-                    className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
-                      route.path === "/" ? "p-3" : "p-2.5"
-                    }`}
-                  >
-                    <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
-                  </main>
-                </div>
-              }
-            />
-          ))}
-        </Routes>
-        <RadioMiniPlayer />
-        <TabBar />
+        <TabDragProvider>
+          <Routes location={location}>
+            {ROUTES.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={
+                  // Keyed so each screen gets its own scroll box: otherwise React
+                  // reuses one, and a tab opens as far down as the last was left.
+                  <div key={route.path} className="flex min-h-0 min-w-0 flex-1 flex-col">
+                    {route.path !== "/" && <Header title={t(route.titleKey)} />}
+                    <main
+                      className={`min-w-0 flex-1 overflow-x-hidden overflow-y-auto ${
+                        route.path === "/" ? "p-3" : "p-2.5"
+                      }`}
+                    >
+                      <ErrorBoundary key={route.path}>{route.element}</ErrorBoundary>
+                    </main>
+                  </div>
+                }
+              />
+            ))}
+          </Routes>
+          <RadioMiniPlayer />
+          <TabBar />
+        </TabDragProvider>
       </div>
     </div>
   );

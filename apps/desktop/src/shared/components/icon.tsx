@@ -50,6 +50,7 @@ import { SFHouse } from "sf-symbols-lib/monochrome/SFHouse";
 import { SFInfoCircle } from "sf-symbols-lib/monochrome/SFInfoCircle";
 import { SFKeyboard } from "sf-symbols-lib/monochrome/SFKeyboard";
 import { SFLeaf } from "sf-symbols-lib/monochrome/SFLeaf";
+import { SFLine3Horizontal } from "sf-symbols-lib/monochrome/SFLine3Horizontal";
 import { SFLink } from "sf-symbols-lib/monochrome/SFLink";
 import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
 import { SFMap } from "sf-symbols-lib/monochrome/SFMap";
@@ -298,6 +299,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   graduation: SFGraduationcap,
   pills: SFPills,
   ellipsis: SFEllipsis,
+  grip: SFLine3Horizontal,
   mail: SFEnvelope,
   notes: SFTextPadHeader,
   folder: SFFolder,
@@ -414,6 +416,7 @@ export type IconName =
   | "graduation"
   | "pills"
   | "ellipsis"
+  | "grip"
   | "mail"
   | "notes"
   | "folder"

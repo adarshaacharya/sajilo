@@ -605,24 +605,6 @@ html {
 .mini-view__switch:focus-visible .mini-view__swap {
   opacity: 1;
 }
-.mini-view__watch {
-  width: 12px;
-  height: 12px;
-  flex-shrink: 0;
-  margin-right: 6px;
-  transform: rotate(-90deg);
-}
-.mini-view__watch-track {
-  fill: none;
-  stroke: var(--color-surface-hover);
-  stroke-width: 2;
-}
-.mini-view__watch-arc {
-  fill: none;
-  stroke: var(--color-accent-mark);
-  stroke-width: 2;
-  stroke-linecap: round;
-}
 .mini-view__muted {
   font-weight: 400;
   color: var(--color-text-muted);
@@ -2411,6 +2393,46 @@ button.rashi-pin:hover {
 
 .tab-link {
   position: relative;
+  touch-action: none;
+}
+/* A tab being dragged leaves a faint place behind. */
+.tab-link.is-dragging,
+.more-row-item.is-dragging {
+  opacity: 0.35;
+}
+/* Where a dragged tab will go: a bar before this tab, or onto More. */
+.tab-link.is-drop::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: -2px;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
+}
+.tab-link.is-more.is-drop::before {
+  inset: 0;
+  width: auto;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+}
+.tab-drag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  box-shadow:
+    0 0 0 1px var(--color-border),
+    0 6px 16px rgb(0 0 0 / 24%);
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: grabbing;
+  pointer-events: none;
 }
 
 .tab-indicator {
@@ -3479,6 +3501,23 @@ input[type="search"]::-webkit-search-decoration {
   background: color-mix(in srgb, var(--color-accent-fill) 14%, transparent);
   color: var(--color-accent-mark);
 }
+.more-row-item {
+  position: relative;
+}
+.more-row-item.is-drop::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
+}
+/* A tab from the bar held over the list: it goes to the end. */
+.more-list.is-drop {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-accent-mark) 55%, transparent);
+}
 .more-edit {
   display: flex;
   width: 100%;
@@ -3525,6 +3564,57 @@ input[type="search"]::-webkit-search-decoration {
 .tab-editor__row .icon-btn:disabled {
   opacity: 0.3;
   pointer-events: none;
+}
+.tab-editor__list {
+  display: grid;
+  gap: 2px;
+  min-height: 30px;
+  margin: 0 -3px;
+  padding: 3px;
+  border-radius: 9px;
+  transition: background-color 150ms ease;
+}
+/* Where a dragged tab will land. */
+.tab-editor__list.is-over {
+  background: color-mix(in srgb, var(--color-accent-mark) 9%, transparent);
+}
+.tab-editor__list.is-hidden .tab-editor__row:not(.is-dragging) {
+  opacity: 0.7;
+}
+.tab-editor__row.is-draggable {
+  cursor: grab;
+  touch-action: none;
+}
+.tab-editor__row.is-draggable:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
+/* The row's place while it is carried: an outline of where it was. */
+.tab-editor__row.is-dragging {
+  opacity: 0.35;
+}
+/* Past the bar's limit mid-drag: these go under More on the drop. */
+.tab-editor__row.is-spill {
+  opacity: 0.45;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+.tab-editor__row.is-lifted {
+  cursor: grabbing;
+  background: var(--color-surface-raised);
+  box-shadow:
+    0 0 0 1px var(--color-border),
+    0 6px 16px rgb(0 0 0 / 22%);
+}
+.tab-editor__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  border: 1px dashed var(--color-border);
+  border-radius: 7px;
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 /* A small caps label over a figure, as NEPSE sites label theirs. */

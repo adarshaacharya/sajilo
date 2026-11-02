@@ -12,7 +12,8 @@ export interface TabLike {
 /**
  * Which tabs sit on the bar and which go under More. Today is always first.
  * The rest follow the user's chosen order (`modules.tabBar`), up to
- * [`MAX_BAR_TABS`]; tabs whose module is switched off are left out of both.
+ * [`MAX_BAR_TABS`]; More follows `modules.moreOrder`. Tabs whose module is
+ * switched off are left out of both.
  * One tab left over goes on the bar itself: a More holding one tab is a tap
  * for nothing.
  */
@@ -24,7 +25,12 @@ export function tabLayout<T extends TabLike>(tabs: readonly T[], modules: Module
     .map((to) => others.find((tab) => tab.to === to))
     .filter((tab): tab is T => tab !== undefined)
     .slice(0, MAX_BAR_TABS);
-  const rest = others.filter((tab) => !chosen.includes(tab));
+  const listed = (tab: T) => {
+    const at = modules.moreOrder.indexOf(tab.to);
+    return at === -1 ? Number.MAX_SAFE_INTEGER : at;
+  };
+  // Stable, so the tabs not yet arranged keep their usual order at the end.
+  const rest = others.filter((tab) => !chosen.includes(tab)).sort((a, b) => listed(a) - listed(b));
   if (rest.length <= 1) return { bar: [...today, ...chosen, ...rest], more: [] as T[] };
   return { bar: [...today, ...chosen], more: rest };
 }

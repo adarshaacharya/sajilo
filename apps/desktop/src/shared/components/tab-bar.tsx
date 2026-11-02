@@ -7,6 +7,7 @@ import { spring } from "../lib/motion";
 import { tabLayout } from "../lib/tab-layout";
 import { Equalizer } from "./equalizer";
 import { Icon, type IconName } from "./icon";
+import { DROP_BAR, DROP_MORE, useTabDrag } from "./tab-drag";
 
 type LabelKey = Parameters<ReturnType<typeof useSettings>["t"]>[0];
 
@@ -89,12 +90,7 @@ export function TabBar() {
   return (
     <nav className="tab-bar flex shrink-0 gap-0.5 px-1 py-1">
       {bar.map((tab) => (
-        <NavLink
-          key={tab.to}
-          to={tab.to}
-          end={tab.to === "/"}
-          className="tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1"
-        >
+        <DragTab key={tab.to} to={tab.to} drop={`${DROP_BAR}${tab.to}`} drag={tab.to !== "/"}>
           {({ isActive }) =>
             item(
               isActive,
@@ -108,13 +104,10 @@ export function TabBar() {
               t(tab.labelKey),
             )
           }
-        </NavLink>
+        </DragTab>
       ))}
       {more.length > 0 && (
-        <NavLink
-          to="/more"
-          className="tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1"
-        >
+        <DragTab to="/more" drop={`${DROP_MORE}button`} drag={false}>
           {() =>
             item(
               inMore,
@@ -128,8 +121,41 @@ export function TabBar() {
               t("tab.more"),
             )
           }
-        </NavLink>
+        </DragTab>
       )}
     </nav>
+  );
+}
+
+/**
+ * A tab on the bar: a link that can also be dragged to another place on the
+ * bar or under More, and that takes a tab dropped on it (see `TabDragProvider`).
+ */
+function DragTab({
+  to,
+  drop,
+  drag,
+  children,
+}: {
+  to: string;
+  drop: string;
+  drag: boolean;
+  children: (state: { isActive: boolean }) => ReactNode;
+}) {
+  const { ref, handlers, isDragging, isOver } = useTabDrag(to, drop, drag);
+  return (
+    <NavLink
+      ref={ref}
+      to={to}
+      end={to === "/"}
+      // The browser's own link drag would take the gesture first.
+      draggable={false}
+      {...handlers}
+      className={`tab-link flex flex-1 flex-col items-center gap-0.5 rounded-lg py-1${
+        to === "/more" ? " is-more" : ""
+      }${isDragging ? " is-dragging" : ""}${isOver ? " is-drop" : ""}`}
+    >
+      {children}
+    </NavLink>
   );
 }
