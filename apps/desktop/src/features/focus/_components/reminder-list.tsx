@@ -127,14 +127,14 @@ export function ReminderList({
           {t("focus.header.customise")}
         </button>
       </div>
-      <div className="surface-card flex items-center justify-between gap-2 px-3 py-2">
-        <div className="min-w-0">
-          <p className="text-[12px] font-medium">{t("focus.hours.title")}</p>
-          <p className="mt-0.5 text-[10px] leading-snug text-text-muted">{t("focus.hours.note")}</p>
-        </div>
-        <WorkHours settings={settings} onSettings={onSettings} t={t} />
-      </div>
       <div className="surface-card overflow-hidden">
+        {/* The hours every row below keeps to, as the list's first line. */}
+        <div className="flex items-center justify-between gap-2 border-b border-divider px-3 py-2">
+          <p className="min-w-0 truncate text-[12px] font-medium" title={t("focus.hours.note")}>
+            {t("focus.hours.title")}
+          </p>
+          <WorkHours settings={settings} onSettings={onSettings} t={t} />
+        </div>
         {INTERVALS.map((kind) => {
           const rule = item(kind);
           if (!rule) return null;

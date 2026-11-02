@@ -115,7 +115,6 @@ export function Games() {
           </ul>
         </section>
       ))}
-      <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">{t("games.note")}</p>
     </div>
   );
 }

@@ -57,9 +57,8 @@ export function Overview({
 }) {
   return (
     <div className="space-y-2.5">
-      <StatusCard snapshot={snapshot} onPause={onPause} onUnmute={onUnmute} />
+      <StatusCard snapshot={snapshot} onPause={onPause} onUnmute={onUnmute} onWater={onWater} />
       <HowItWorks />
-      {snapshot.settings.water.enabled && <WaterCard snapshot={snapshot} onWater={onWater} />}
       <ReminderList
         snapshot={snapshot}
         onSettings={onSettings}
@@ -72,17 +71,21 @@ export function Overview({
 }
 
 /**
- * What's next, in one card: a small ring and a sentence while a break counts
- * down, or a single line saying why nothing does — paused, a call, a day off.
+ * What's next, in one card: a small ring and the break's name while one
+ * counts down, or a single line saying why nothing does — paused, a call, a
+ * day off. Only a break that is due, or reminders switched off, says more.
+ * The water glass sits under it, one slim row, rather than a card of its own.
  */
 function StatusCard({
   snapshot,
   onPause,
   onUnmute,
+  onWater,
 }: {
   snapshot: FocusSnapshot;
   onPause: (choice: PauseChoice) => void;
   onUnmute: () => void;
+  onWater: (steps: 1 | -1) => void;
 }) {
   const { t } = useSettings();
   const numerals = useSentenceNumerals();
@@ -99,7 +102,7 @@ function StatusCard({
   let eyebrow: ReactNode = null;
 
   if (due) {
-    lead = <Ring fraction={1} color={KIND_TINTS[due.kind]} label="" size={56} due />;
+    lead = <Ring fraction={1} color={KIND_TINTS[due.kind]} label="" size={44} due />;
     title = t("focus.now.title").replace("{kind}", kindLabel(due.kind, settings, t));
     detail = t("focus.ring.card-open");
   } else if (status === "muted") {
@@ -120,7 +123,6 @@ function StatusCard({
     title = snapshot.pausedUntilResumed
       ? t("focus.status.paused")
       : t("focus.paused.title").replace("{time}", time(snapshot.pausedUntil));
-    detail = t(snapshot.pausedUntilResumed ? "focus.paused.open-detail" : "focus.paused.detail");
     action = (
       <button
         type="button"
@@ -133,16 +135,13 @@ function StatusCard({
   } else if (status === "held" && snapshot.hold) {
     lead = <Chip icon={HOLD_ICONS[snapshot.hold]} tint="var(--color-accent-mark)" />;
     title = t("focus.held.title").replace("{what}", t(HOLD_LABELS[snapshot.hold]));
-    detail = t("focus.held.detail");
   } else if (status === "afterHours") {
     lead = <Chip icon="moon" tint="var(--color-accent-mark)" />;
     title = t("focus.after-hours.title").replace("{time}", clock(snapshot.settings.startWorkAt));
-    detail = t("focus.after-hours.detail");
   } else if (status === "dayOff") {
     const holiday = snapshot.dayOff === "publicHoliday";
     lead = <Chip icon="sun" tint={holiday ? "var(--color-holiday)" : "var(--color-accent-mark)"} />;
     title = t(holiday ? "focus.day-off.holiday" : "focus.day-off.weekly");
-    detail = t("focus.day-off.off-detail");
   } else if (next && next.minutesLeft !== null) {
     const away = status === "away";
     lead = (
@@ -150,13 +149,12 @@ function StatusCard({
         fraction={1 - next.minutesLeft / Math.max(1, next.everyMinutes)}
         color={KIND_TINTS[next.kind]}
         label={`${digits(next.minutesLeft, numerals)}${t("focus.m-short")}`}
-        size={56}
+        size={44}
         resting={away}
       />
     );
     // The ring has the minutes: the words only say what comes.
     title = kindLabel(next.kind, settings, t);
-    if (away) detail = t("focus.next.away");
     action = <PauseMenu open={menu} setOpen={setMenu} onPause={onPause} />;
     if (snapshot.dayOff && settings.daysOff === "lighter") {
       eyebrow = (
@@ -180,20 +178,22 @@ function StatusCard({
     const done = settings.water.enabled && snapshot.today.waterMl >= settings.waterGoalMl;
     lead = <Chip icon={done ? "checkmark" : "focus"} tint="var(--color-positive)" />;
     title = t(done ? "focus.quiet.done" : "focus.quiet.idle");
-    detail = t(done ? "focus.quiet.done-detail" : "focus.quiet.idle-detail");
   }
 
   return (
-    <section className="surface-card relative flex items-center gap-3 p-3" aria-live="polite">
-      {lead}
-      <div className="min-w-0 flex-1">
-        {eyebrow}
-        <p className="text-balance text-[14px] font-semibold leading-snug">{title}</p>
-        {detail && (
-          <p className="mt-0.5 text-balance text-[11px] leading-snug text-text-muted">{detail}</p>
-        )}
+    <section className="surface-card relative" aria-live="polite">
+      <div className="flex items-center gap-3 p-3">
+        {lead}
+        <div className="min-w-0 flex-1">
+          {eyebrow}
+          <p className="text-balance text-[13.5px] font-semibold leading-snug">{title}</p>
+          {detail && (
+            <p className="mt-0.5 text-balance text-[11px] leading-snug text-text-muted">{detail}</p>
+          )}
+        </div>
+        {action}
       </div>
-      {action}
+      {settings.water.enabled && <WaterRow snapshot={snapshot} onWater={onWater} />}
     </section>
   );
 }
@@ -391,10 +391,11 @@ function Stat({ value, label }: { value: ReactNode; label: string }) {
 }
 
 /**
- * The water logger as a glass: tap it and it fills by one glass. Water is the
+ * Water, as one row under the status: tap the glass for a glass more, the
+ * bar fills toward the day's goal, Undo takes the last one back. It is the
  * one thing logged by hand, so the tap should feel like it did something.
  */
-function WaterCard({
+function WaterRow({
   snapshot,
   onWater,
 }: {
@@ -407,19 +408,21 @@ function WaterCard({
   const [splash, setSplash] = useState(0);
   const fraction = Math.min(1, today.waterMl / Math.max(1, settings.waterGoalMl));
   const level = 68 * fraction;
+  const add = t("focus.water-add").replace("{n}", String(waterStepMl));
 
   return (
-    <section className="surface-card grid grid-cols-[44px_1fr_auto] items-center gap-3 p-3">
+    <div className="flex items-center gap-2.5 border-t border-divider px-3 py-2">
       <button
         type="button"
         onClick={() => {
           onWater(1);
           setSplash((count) => count + 1);
         }}
-        aria-label={t("focus.water-add").replace("{n}", String(waterStepMl))}
-        className="focus-glass relative cursor-pointer"
+        aria-label={add}
+        title={add}
+        className="focus-glass relative shrink-0 cursor-pointer"
       >
-        <svg width="44" height="55" viewBox="0 0 64 80" aria-hidden="true">
+        <svg width="18" height="22" viewBox="0 0 64 80" aria-hidden="true">
           <defs>
             <clipPath id="focus-glass-shape">
               <path d="M10 6 L54 6 L48 74 L16 74 Z" />
@@ -439,7 +442,7 @@ function WaterCard({
             d="M10 6 L54 6 L48 74 L16 74 Z"
             fill="none"
             stroke="var(--color-weather-tint)"
-            strokeWidth="2.6"
+            strokeWidth="5"
             strokeLinejoin="round"
           />
         </svg>
@@ -449,40 +452,31 @@ function WaterCard({
           </span>
         )}
       </button>
-      <div className="min-w-0">
-        <p className="text-[13px] font-semibold">
-          {t("focus.water.amount")
-            .replace("{done}", litres(today.waterMl, numerals))
-            .replace("{goal}", litres(settings.waterGoalMl, numerals))}
-        </p>
-        {/* Wraps rather than truncates: beside Undo there was room only for
-            the instruction, and the glass size, the one number, was cut. */}
-        <p className="mt-0.5 text-[11px] leading-snug text-text-muted">
-          {fraction >= 1
-            ? t("focus.quiet.done-detail")
-            : t("focus.water.hint").replace("{n}", digits(waterStepMl, numerals))}
-        </p>
-        {/* Litres, not glasses: the goal is set in litres, so progress is too. */}
+      <p className="shrink-0 text-[11.5px] font-medium tabular-nums">
+        {t("focus.water.amount")
+          .replace("{done}", litres(today.waterMl, numerals))
+          .replace("{goal}", litres(settings.waterGoalMl, numerals))}
+      </p>
+      {/* Litres, not glasses: the goal is set in litres, so progress is too. */}
+      <div
+        className="h-[4px] min-w-0 flex-1 overflow-hidden rounded-full bg-[color:var(--color-divider)]"
+        aria-hidden="true"
+      >
         <div
-          className="mt-2 h-[5px] overflow-hidden rounded-full bg-[color:var(--color-divider)]"
-          aria-hidden="true"
-        >
-          <div
-            className="h-full rounded-full bg-[color:var(--color-weather-tint)] transition-[width] duration-300"
-            style={{ width: `${fraction * 100}%` }}
-          />
-        </div>
+          className="h-full rounded-full bg-[color:var(--color-weather-tint)] transition-[width] duration-300"
+          style={{ width: `${fraction * 100}%` }}
+        />
       </div>
       {today.waterMl > 0 && (
         <button
           type="button"
           onClick={() => onWater(-1)}
           aria-label={t("focus.water-remove").replace("{n}", String(waterStepMl))}
-          className="cursor-pointer self-start rounded-full border border-[color:var(--color-border)] px-2.5 py-0.5 text-[11px] text-text-secondary transition-colors hover:bg-surface-hover"
+          className="shrink-0 cursor-pointer text-[11px] text-text-muted transition-colors hover:text-text"
         >
           {t("focus.water.undo")}
         </button>
       )}
-    </section>
+    </div>
   );
 }
