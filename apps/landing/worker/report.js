@@ -12,9 +12,10 @@ import { createMimeMessage, Mailbox } from "mimetext";
 
 const KINDS = new Set(["Something is broken", "Data looks wrong", "The app crashed", "A feature idea", "Something else"]);
 const MAX_LEN = 10000;
-const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024; // all of them together
+const MAX_SCREENSHOTS = 4;
 
-const MAX_BODY_BYTES = 7 * 1024 * 1024; // ~5 MB screenshot, base64-inflated, plus headroom
+const MAX_BODY_BYTES = 7 * 1024 * 1024; // ~5 MB of screenshots, base64-inflated, plus headroom
 // Raster formats only: SVG is an image type that can carry script.
 const SCREENSHOT_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
@@ -68,9 +69,13 @@ export async function handleReport(request, env) {
     return new Response("A valid email is required", { status: 400 });
   }
 
-  const screenshot = validScreenshot(body.screenshot);
-  if (body.screenshot && !screenshot) {
-    return new Response("Screenshot must be an image under 5 MB", { status: 400 });
+  // `screenshot` is the form before it took several; a cached page may still send it.
+  const sent = Array.isArray(body.screenshots) ? body.screenshots : body.screenshot ? [body.screenshot] : [];
+  const screenshots = sent.map(validScreenshot);
+  // Base64 runs ~4/3 the size of the original bytes.
+  const bytes = screenshots.reduce((sum, shot) => sum + (shot ? shot.data.length * 0.75 : 0), 0);
+  if (sent.length > MAX_SCREENSHOTS || screenshots.some((shot) => !shot) || bytes > MAX_SCREENSHOT_BYTES) {
+    return new Response("Up to 4 screenshots, images only, 5 MB in all", { status: 400 });
   }
 
   const msg = createMimeMessage();
@@ -86,15 +91,16 @@ export async function handleReport(request, env) {
       "---",
       `App version: ${version}`,
       `OS: ${os}`,
+      `Screenshots: ${screenshots.length || "none"}`,
       `Reporter email: ${replyEmail}`,
       `Sent from: ${request.headers.get("Referer") ?? "unknown page"}`,
     ].join("\n"),
   });
-  if (screenshot) {
+  for (const shot of screenshots) {
     msg.addAttachment({
-      filename: screenshot.filename,
-      contentType: screenshot.contentType,
-      data: screenshot.data,
+      filename: shot.filename,
+      contentType: shot.contentType,
+      data: shot.data,
       encoding: "base64",
     });
   }
@@ -121,13 +127,11 @@ function validEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? value : "";
 }
 
-/** Optional. `null` for "none attached"; `false` for "attached but invalid". */
+/** The screenshot, or `null` when it isn't a valid one. */
 function validScreenshot(shot) {
   if (!shot || typeof shot !== "object") return null;
   const { filename, contentType, data } = shot;
-  if (typeof filename !== "string" || typeof contentType !== "string" || typeof data !== "string") return false;
-  if (!SCREENSHOT_TYPES.has(contentType)) return false;
-  // Base64 runs ~4/3 the size of the original bytes.
-  if (data.length * 0.75 > MAX_SCREENSHOT_BYTES) return false;
+  if (typeof filename !== "string" || typeof contentType !== "string" || typeof data !== "string") return null;
+  if (!SCREENSHOT_TYPES.has(contentType)) return null;
   return { filename: filename.slice(0, 120), contentType, data };
 }

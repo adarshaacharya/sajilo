@@ -42,15 +42,45 @@ const kinds = [
       </div>
 
       <div class="field">
-        <label for="details">What happened, and what you expected instead</label>
-        <textarea id="details" name="details" rows="6" placeholder="The more detail, the faster it gets fixed." maxlength="10000" required></textarea>
+        <label id="details-label">What happened, and what you expected instead</label>
+        <div class="md-editor" id="details-editor" aria-labelledby="details-label">
+          <div class="md-editor__toolbar" id="details-toolbar" role="toolbar" aria-label="Formatting">
+            <button type="button" data-cmd="bold" title="Bold (Ctrl/⌘ B)" aria-label="Bold"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Italic (Ctrl/⌘ I)" aria-label="Italic"><i>I</i></button>
+            <button type="button" data-cmd="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
+            <span class="md-editor__sep" aria-hidden="true"></span>
+            <button type="button" data-cmd="heading" title="Heading" aria-label="Heading">H</button>
+            <button type="button" data-cmd="bullets" title="Bulleted list" aria-label="Bulleted list">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="2.5" cy="4" r="1.2" /><circle cx="2.5" cy="8" r="1.2" /><circle cx="2.5" cy="12" r="1.2" /><path d="M6 4h8M6 8h8M6 12h8" /></svg>
+            </button>
+            <button type="button" data-cmd="numbers" title="Numbered list — steps to reproduce" aria-label="Numbered list">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><text x="0.5" y="5.5">1</text><text x="0.5" y="13.5">2</text><path d="M6 4h8M6 12h8" /></svg>
+            </button>
+            <button type="button" data-cmd="quote" title="Quote" aria-label="Quote">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3v10M7 5h7M7 8h7M7 11h5" /></svg>
+            </button>
+            <span class="md-editor__sep" aria-hidden="true"></span>
+            <button type="button" data-cmd="code" title="Inline code" aria-label="Inline code">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4" /></svg>
+            </button>
+            <button type="button" data-cmd="codeblock" title="Code or error message block" aria-label="Code block">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2" /><path d="M5 6.5 3.5 8 5 9.5M8 10h4" /></svg>
+            </button>
+            <button type="button" data-cmd="link" title="Link" aria-label="Link">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1" /></svg>
+            </button>
+          </div>
+          <div id="details-mount"></div>
+        </div>
+        <input type="hidden" id="details" name="details" />
         <p class="field-hint field-count" id="details-count" aria-live="polite"></p>
       </div>
 
       <div class="field">
-        <label for="screenshot">Screenshot <span class="field-optional">(optional, up to 5 MB)</span></label>
-        <input id="screenshot" name="screenshot" type="file" accept="image/png,image/jpeg,image/webp,image/gif" />
-        <p class="field-hint" id="screenshot-hint"></p>
+        <label for="screenshot">Screenshots <span class="field-optional">(optional, up to 4 and 5 MB in all — or paste them into the box above)</span></label>
+        <input id="screenshot" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" />
+        <ul class="shots" id="shots"></ul>
+        <p class="field-hint" id="screenshot-hint" aria-live="polite"></p>
       </div>
 
       <div class="field-row">
@@ -102,51 +132,124 @@ const kinds = [
   </main>
 </Base>
 
-<script is:inline>
-  const form = document.getElementById("report-form");
-  const sendBtn = document.getElementById("send-btn");
-  const copyBtn = document.getElementById("copy-report");
-  const note = document.getElementById("report-note");
-  const screenshotInput = document.getElementById("screenshot");
-  const screenshotHint = document.getElementById("screenshot-hint");
+<script>
+  import { createReportEditor } from "../scripts/report-editor";
 
-  const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024;
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const form = $<HTMLFormElement>("report-form");
+  const sendBtn = $<HTMLButtonElement>("send-btn");
+  const copyBtn = $<HTMLButtonElement>("copy-report");
+  const note = $("report-note");
+  const screenshotInput = $<HTMLInputElement>("screenshot");
+  const screenshotHint = $("screenshot-hint");
+  const shotList = $<HTMLUListElement>("shots");
+  const detailsInput = $<HTMLInputElement>("details");
+  const detailsCount = $("details-count");
+  const osInput = $<HTMLInputElement>("os");
+
+  const MAX_DETAILS = 10000;
+  const MAX_SHOTS = 4;
+  const MAX_SHOT_BYTES = 5 * 1024 * 1024;
   // The same four the server accepts; SVG is left out because it can carry script.
   const SCREENSHOT_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
-  const detailsInput = document.getElementById("details");
-  const detailsCount = document.getElementById("details-count");
 
-  // Only speaks up near the limit, so a short report never sees a number.
-  function updateDetailsCount() {
-    const max = Number(detailsInput.getAttribute("maxlength"));
-    const left = max - detailsInput.value.length;
-    detailsCount.textContent = left <= 400 ? `${left} characters left` : "";
-  }
-  detailsInput?.addEventListener("input", updateDetailsCount);
+  let shots: File[] = [];
 
-  screenshotInput?.addEventListener("change", () => {
-    const file = screenshotInput.files?.[0];
-    if (!file) {
-      screenshotHint.textContent = "";
-      return;
-    }
-    if (!SCREENSHOT_TYPES.includes(file.type)) {
-      screenshotHint.textContent = "Use a PNG, JPEG, WebP or GIF image.";
-      screenshotInput.value = "";
-      return;
-    }
-    if (file.size > MAX_SCREENSHOT_BYTES) {
-      screenshotHint.textContent = `That's ${(file.size / 1024 / 1024).toFixed(1)} MB — pick something under 5 MB.`;
-      screenshotInput.value = "";
-      return;
-    }
-    screenshotHint.textContent = `Attached: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+  const editor = createReportEditor({
+    mount: $("details-mount"),
+    toolbar: $("details-toolbar"),
+    placeholder: "The more detail, the faster it gets fixed. Steps to reproduce help most.",
+    onChange: (markdown) => {
+      detailsInput.value = markdown;
+      // Only speaks up near the limit, so a short report never sees a number.
+      const left = MAX_DETAILS - markdown.length;
+      detailsCount.textContent =
+        left < 0 ? `${-left} characters over` : left <= 400 ? `${left} characters left` : "";
+    },
+    onImages: addShots,
   });
 
-  function readAsBase64(file) {
+  // The OS field, filled in from the browser: most people report from the
+  // machine the app runs on, and can change it when they don't.
+  async function guessOs(): Promise<string> {
+    const ua = navigator.userAgent;
+    const hints = (navigator as Navigator & {
+      userAgentData?: { getHighEntropyValues(keys: string[]): Promise<{ platform?: string; platformVersion?: string }> };
+    }).userAgentData;
+    if (/Windows/.test(ua)) {
+      // Windows 11 still says "Windows NT 10.0"; only the client hints tell.
+      const v = await hints?.getHighEntropyValues(["platformVersion"]).catch(() => null);
+      const major = Number(v?.platformVersion?.split(".")[0] ?? 0);
+      return major >= 13 ? "Windows 11" : major > 0 ? "Windows 10" : "Windows";
+    }
+    if (/Macintosh/.test(ua)) {
+      const v = await hints?.getHighEntropyValues(["platformVersion"]).catch(() => null);
+      const major = v?.platformVersion?.split(".")[0];
+      return major ? `macOS ${major}` : "macOS";
+    }
+    if (/Ubuntu/.test(ua)) return "Ubuntu";
+    if (/Linux/.test(ua) && !/Android/.test(ua)) return "Linux";
+    return "";
+  }
+  void guessOs().then((os) => {
+    if (os && !osInput.value) osInput.value = os;
+  });
+
+  function size(bytes: number) {
+    return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  }
+
+  function addShots(files: File[]) {
+    let skipped = "";
+    for (const file of files) {
+      if (!SCREENSHOT_TYPES.includes(file.type)) {
+        skipped = "Use PNG, JPEG, WebP or GIF images.";
+      } else if (shots.length >= MAX_SHOTS) {
+        skipped = `Up to ${MAX_SHOTS} screenshots.`;
+      } else if (shots.reduce((sum, shot) => sum + shot.size, 0) + file.size > MAX_SHOT_BYTES) {
+        skipped = `That's ${size(file.size)} — screenshots can be 5 MB in all.`;
+      } else {
+        shots.push(file);
+      }
+    }
+    renderShots();
+    screenshotHint.textContent = skipped;
+  }
+
+  function renderShots() {
+    for (const img of shotList.querySelectorAll("img")) URL.revokeObjectURL(img.src);
+    shotList.replaceChildren(
+      ...shots.map((file, index) => {
+        const item = document.createElement("li");
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.alt = "";
+        const label = document.createElement("span");
+        label.textContent = size(file.size);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `Remove ${file.name || "screenshot"}`);
+        remove.addEventListener("click", () => {
+          shots.splice(index, 1);
+          renderShots();
+          screenshotHint.textContent = "";
+        });
+        item.append(img, label, remove);
+        return item;
+      }),
+    );
+  }
+
+  screenshotInput.addEventListener("change", () => {
+    addShots(Array.from(screenshotInput.files ?? []));
+    screenshotInput.value = "";
+  });
+
+  function readAsBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.toString().split(",")[1] ?? "");
+      reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
@@ -154,7 +257,7 @@ const kinds = [
 
   async function collect() {
     const data = new FormData(form);
-    const fields = {
+    const fields: Record<string, unknown> & Record<"kind" | "summary" | "details" | "version" | "os" | "email", string> = {
       website: (data.get("website") || "").toString(), // honeypot
       kind: (data.get("kind") || "").toString(),
       summary: (data.get("summary") || "").toString().trim(),
@@ -163,13 +266,15 @@ const kinds = [
       os: (data.get("os") || "").toString().trim(),
       email: (data.get("email") || "").toString().trim(),
     };
-    const file = screenshotInput?.files?.[0];
-    if (file && file.size <= MAX_SCREENSHOT_BYTES) {
-      fields.screenshot = {
-        filename: file.name,
-        contentType: file.type || "image/png",
-        data: await readAsBase64(file),
-      };
+    if (shots.length) {
+      fields.screenshots = await Promise.all(
+        shots.map(async (file, index) => ({
+          // A pasted image comes in as "image.png" every time.
+          filename: file.name && file.name !== "image.png" ? file.name : `screenshot-${index + 1}.png`,
+          contentType: file.type,
+          data: await readAsBase64(file),
+        })),
+      );
     }
     return fields;
   }
@@ -177,8 +282,13 @@ const kinds = [
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fields = await collect();
-    if (!fields.summary || !fields.details) {
+    if (!fields.summary || !fields.details.trim()) {
       note.textContent = "Fill in a one-line summary and what happened first.";
+      if (fields.summary) editor.focus();
+      return;
+    }
+    if (fields.details.length > MAX_DETAILS) {
+      note.textContent = "That's longer than the form takes. Trim it, or attach the rest as a screenshot.";
       return;
     }
     if (!fields.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email)) {
@@ -197,7 +307,12 @@ const kinds = [
         body: JSON.stringify(fields),
       });
       if (!res.ok) throw new Error(`status ${res.status}`);
+      const os = osInput.value;
       form.reset();
+      osInput.value = os;
+      editor.clear();
+      shots = [];
+      renderShots();
       screenshotHint.textContent = "";
       detailsCount.textContent = "";
       note.textContent = "Sent. Thanks — it goes straight to the person who reads these.";
@@ -221,6 +336,7 @@ const kinds = [
       `App version: ${fields.version || "not given"}`,
       `OS: ${fields.os || "not given"}`,
       `Reply to: ${fields.email || "not given"}`,
+      ...(shots.length ? [`Screenshots: ${shots.length}, attach them yourself`] : []),
     ].join("\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -329,6 +445,174 @@ const kinds = [
     background-repeat: no-repeat;
     background-position: right 14px center;
     padding-right: 36px;
+  }
+
+  /* The rich "what happened" box. Its content is drawn by the editor, out
+     of Astro's reach, so the inside is styled through :global. */
+  .md-editor {
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    background: var(--ink-2);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .md-editor:focus-within {
+    border-color: var(--gilt);
+    background: var(--ink-3);
+  }
+  .md-editor__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+  .md-editor__toolbar button {
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--paper-3);
+    font: 600 14px/1 var(--sans, inherit);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .md-editor__toolbar button:hover {
+    background: var(--ink-4);
+    color: var(--paper);
+  }
+  .md-editor__toolbar button[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--gilt) 18%, transparent);
+    color: var(--gilt-2);
+  }
+  .md-editor__toolbar svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .md-editor__toolbar svg circle,
+  .md-editor__toolbar svg text {
+    fill: currentColor;
+    stroke: none;
+    font: 700 6px/1 sans-serif;
+  }
+  .md-editor__sep {
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: var(--line-2);
+  }
+  .md-editor :global(.md-editor__body) {
+    min-height: 168px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding: 12px 14px;
+    color: var(--paper);
+    line-height: 1.6;
+    outline: none;
+  }
+  .md-editor :global(.md-editor__body > * + *) {
+    margin-top: 0.6em;
+  }
+  .md-editor :global(p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    color: var(--paper-4);
+    pointer-events: none;
+  }
+  .md-editor :global(h3) {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .md-editor :global(ul),
+  .md-editor :global(ol) {
+    padding-left: 1.4em;
+  }
+  .md-editor :global(ul) {
+    list-style: disc;
+  }
+  .md-editor :global(ol) {
+    list-style: decimal;
+  }
+  .md-editor :global(li > p) {
+    margin: 0;
+  }
+  .md-editor :global(blockquote) {
+    border-left: 3px solid var(--line-2);
+    padding-left: 12px;
+    color: var(--paper-2);
+  }
+  .md-editor :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--ink-4);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+  }
+  .md-editor :global(pre) {
+    background: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+  }
+  .md-editor :global(pre code) {
+    background: none;
+    padding: 0;
+    font-size: 13px;
+  }
+  .md-editor :global(a) {
+    color: var(--gilt-2);
+    text-decoration: underline;
+  }
+
+  .shots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .shots:empty {
+    display: none;
+  }
+  .shots :global(li) {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    width: 112px;
+    font-size: 12px;
+    color: var(--paper-3);
+  }
+  .shots :global(img) {
+    width: 112px;
+    height: 72px;
+    object-fit: cover;
+    border: 1px solid var(--line-2);
+    border-radius: 8px;
+    background: var(--ink-2);
+  }
+  .shots :global(button) {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 70%);
+    color: var(--paper);
+    font: 400 16px/1 system-ui, sans-serif;
+    cursor: pointer;
   }
 
   .field-row {
