@@ -24,9 +24,29 @@ const pct = (part: number, whole: number) =>
 const clock = (seconds: number) =>
   seconds > 0 ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : "—";
 
+/** Which games have one under way, to carry on with rather than start. */
+export function useUnderway(): Record<Game, boolean> {
+  const kata = useKata().data;
+  const saap = useSaap().data;
+  const quiz = useQuiz().data;
+  const shabda = useShabda().data;
+  const sudoku = useSudoku().data;
+  const bagh = useBagh().data;
+  return {
+    kata: Boolean(kata?.game && !kata.game.outcome),
+    saap: Boolean(saap?.game && !saap.game.winner),
+    quiz: Boolean(quiz?.inRound),
+    shabda: Boolean(shabda && shabda.status === "playing" && shabda.livesLeft < shabda.lives),
+    sudoku: Boolean(sudoku?.game && sudoku.game.solvedIn == null),
+    bagh: Boolean(bagh?.game && !bagh.game.outcome),
+    chungi: false,
+    jhandi: false,
+  };
+}
+
 /** Each game's record as its start screen shows it, and whether a game is
  * under way to carry on with. Every hook runs, so the order never changes. */
-function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; underway: boolean } {
+function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean } {
   const kata = useKata().data;
   const saap = useSaap().data;
   const quiz = useQuiz().data;
@@ -49,7 +69,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(lost), label: t("kata.stat.lost") },
         ],
         played: won + drawn + lost > 0,
-        underway: Boolean(kata?.game && !kata.game.outcome),
       };
     }
     case "saap": {
@@ -62,7 +81,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(stats?.snakes ?? 0), label: t("saap.stat.snakes") },
         ],
         played: (stats?.won ?? 0) + (stats?.lost ?? 0) > 0,
-        underway: Boolean(saap?.game && !saap.game.winner),
       };
     }
     case "quiz": {
@@ -77,7 +95,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: `${stats?.bestRound ?? 0}/10`, label: t("quiz.stat.best") },
         ],
         played: (stats?.answered ?? 0) > 0,
-        underway: Boolean(quiz?.inRound),
       };
     }
     case "shabda": {
@@ -90,7 +107,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(stats?.bestRun ?? 0), label: t("shabda.stat.best") },
         ],
         played: (stats?.played ?? 0) > 0,
-        underway: Boolean(shabda && shabda.status === "playing" && shabda.livesLeft < shabda.lives),
       };
     }
     case "sudoku": {
@@ -103,7 +119,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: clock(stats?.bestSeconds[0] ?? 0), label: t("lobby.best-easy") },
         ],
         played: sum(stats?.solved ?? []) > 0,
-        underway: Boolean(sudoku?.game && sudoku.game.solvedIn == null),
       };
     }
     case "chungi": {
@@ -116,7 +131,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(stats?.played ?? 0), label: t("chungi.stat.played") },
         ],
         played: (stats?.played ?? 0) > 0,
-        underway: false,
       };
     }
     case "jhandi": {
@@ -129,7 +143,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           { value: String(stats?.rounds ?? 0), label: t("jhandi.stat.rounds") },
         ],
         played: (stats?.rounds ?? 0) > 0,
-        underway: false,
       };
     }
     case "bagh": {
@@ -150,7 +163,6 @@ function useLobbyData(game: Game, t: TFn): { stats: Stat[]; played: boolean; und
           },
         ],
         played: played > 0,
-        underway: Boolean(bagh?.game && !bagh.game.outcome),
       };
     }
   }
@@ -175,7 +187,8 @@ export function Lobby({
   onPlay: () => void;
   t: TFn;
 }) {
-  const { stats, played, underway } = useLobbyData(game, t);
+  const { stats, played } = useLobbyData(game, t);
+  const underway = useUnderway()[game];
   return (
     <div className="space-y-3">
       <section className="surface-card flex flex-col items-center px-4 pt-5 pb-4 text-center">

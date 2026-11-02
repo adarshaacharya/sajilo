@@ -5537,117 +5537,88 @@ input[type="search"]::-webkit-search-decoration {
   }
 }
 
-/* The games list as a grid of tiles, each game in its own colour: a room
-   of games rather than a settings list, all seven in view at once. */
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-.game-tile {
+/* The games list: two short groups of rows, the way More and Tools read,
+   each game's own colour kept to its icon. */
+.game-row {
   --tile-tint: var(--color-accent-mark);
   display: flex;
-  min-height: 98px;
-  flex-direction: column;
+  width: 100%;
   align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border-radius: 14px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  padding: 10px 8px;
-  text-align: center;
-  transition:
-    border-color 0.15s ease,
-    transform 0.12s ease;
-}
-.game-tile:hover {
-  border-color: color-mix(in srgb, var(--tile-tint) 55%, transparent);
-}
-.game-tile:active {
-  transform: scale(0.97);
-}
-/* An odd one out spans the row, lying on its side: icon, then name. */
-.game-tile:last-child:nth-child(odd) {
-  grid-column: span 2;
-  min-height: 0;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 10px;
+  padding: 9px 12px;
+  color: var(--color-text);
   text-align: left;
+  transition: background 120ms ease;
 }
-.game-tile:last-child:nth-child(odd) .game-tile__icon {
-  margin-bottom: 0;
+.game-row:hover {
+  background: var(--color-surface-hover);
 }
-.game-tile__text {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-.game-tile__icon {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  margin-bottom: 6px;
+.game-row__icon {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
   place-items: center;
-  border-radius: 13px;
+  border-radius: 8px;
   color: var(--tile-tint);
-  background: color-mix(in srgb, var(--tile-tint) 16%, transparent);
+  background: color-mix(in srgb, var(--tile-tint) 15%, transparent);
 }
-.game-tile__name {
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
+.game-row__name {
+  font-size: 13px;
+  font-weight: 500;
 }
-.game-tile__gloss {
+.game-row__gloss {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+.game-row__state {
+  flex-shrink: 0;
   font-size: 10.5px;
   color: var(--color-text-muted);
 }
 /* Each game its own colour, in its icon only. Three have no app token to
    borrow, so they carry their own, darker on a light screen. */
-.game-tile--kata {
+.game-tint--kata {
   --tile-tint: var(--color-holiday);
 }
-.game-tile--saap {
+.game-tint--saap {
   --tile-tint: var(--color-positive);
 }
-.game-tile--chungi {
+.game-tint--chungi {
   --tile-tint: var(--color-accent-mark);
 }
-.game-tile--jhandi {
+.game-tint--jhandi {
   --tile-tint: #f2679f;
 }
-.game-tile--quiz {
+.game-tint--quiz {
   --tile-tint: var(--color-violet);
 }
-.game-tile--shabda {
+.game-tint--shabda {
   --tile-tint: var(--color-weather-tint);
 }
-.game-tile--sudoku {
+.game-tint--sudoku {
   --tile-tint: #3ec3c9;
 }
-.game-tile--bagh {
+.game-tint--bagh {
   --tile-tint: #f0913f;
 }
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) .game-tile--jhandi {
+  :root:not([data-theme="dark"]) .game-tint--jhandi {
     --tile-tint: #b5266a;
   }
-  :root:not([data-theme="dark"]) .game-tile--sudoku {
+  :root:not([data-theme="dark"]) .game-tint--sudoku {
     --tile-tint: #0e7c83;
   }
-  :root:not([data-theme="dark"]) .game-tile--bagh {
+  :root:not([data-theme="dark"]) .game-tint--bagh {
     --tile-tint: #b05410;
   }
 }
-:root[data-theme="light"] .game-tile--jhandi {
+:root[data-theme="light"] .game-tint--jhandi {
   --tile-tint: #b5266a;
 }
-:root[data-theme="light"] .game-tile--sudoku {
+:root[data-theme="light"] .game-tint--sudoku {
   --tile-tint: #0e7c83;
 }
-:root[data-theme="light"] .game-tile--bagh {
+:root[data-theme="light"] .game-tint--bagh {
   --tile-tint: #b05410;
 }

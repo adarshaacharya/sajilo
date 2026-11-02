@@ -8,13 +8,18 @@ import { BaghChal } from "./_components/bagh-chal";
 import { Chungi } from "./_components/chungi";
 import { JhandiBurja } from "./_components/jhandi-burja";
 import { Katakuti } from "./_components/katakuti";
-import { type Game, Lobby } from "./_components/lobby";
+import { type Game, Lobby, useUnderway } from "./_components/lobby";
 import { Quiz } from "./_components/quiz";
 import { SaapSidhi } from "./_components/saap-sidhi";
 import { Shabda } from "./_components/shabda";
 import { Sudoku } from "./_components/sudoku";
 
-const GAMES: Game[] = ["kata", "saap", "chungi", "jhandi", "quiz", "shabda", "sudoku", "bagh"];
+const GAMES: Game[] = ["kata", "saap", "chungi", "jhandi", "bagh", "quiz", "shabda", "sudoku"];
+/** The list in two short groups: games to play, and ones to think through. */
+const GROUPS = [
+  { label: "games.group.play", games: ["kata", "saap", "chungi", "jhandi", "bagh"] },
+  { label: "games.group.puzzles", games: ["quiz", "shabda", "sudoku"] },
+] as const satisfies readonly { label: string; games: readonly Game[] }[];
 const TITLES = {
   shabda: "shabda.title",
   quiz: "quiz.title",
@@ -45,6 +50,7 @@ const LOBBY = {
 export function Games() {
   const { t } = useSettings();
   const { search } = useLocation();
+  const underway = useUnderway();
   const [open, setOpen] = useState<Game | null>(() => {
     const linked = new URLSearchParams(search).get("open");
     return GAMES.find((game) => game === linked) ?? null;
@@ -91,47 +97,59 @@ export function Games() {
   if (open === "jhandi") return <JhandiBurja t={t} />;
 
   return (
-    <div className="space-y-2.5">
-      <div className="games-grid">
-        {GAMES.map((game) => (
-          <GameCard
-            key={game}
-            game={game}
-            icon={LOBBY[game].icon}
-            title={t(TITLES[game])}
-            onOpen={() => choose(game)}
-          />
-        ))}
-      </div>
+    <div className="space-y-3">
+      {GROUPS.map((group) => (
+        <section key={group.label} className="space-y-1.5">
+          <p className="px-0.5 text-[11px] font-semibold text-text-secondary">{t(group.label)}</p>
+          <ul className="surface-card overflow-hidden">
+            {group.games.map((game) => (
+              <GameRow
+                key={game}
+                game={game}
+                icon={LOBBY[game].icon}
+                title={t(TITLES[game])}
+                underway={underway[game] ? t("games.underway") : null}
+                onOpen={() => choose(game)}
+              />
+            ))}
+          </ul>
+        </section>
+      ))}
       <p className="px-0.5 text-[10px] leading-relaxed text-text-muted">{t("games.note")}</p>
     </div>
   );
 }
 
-/** A game in the grid: a big icon in the game's own colour, and its name.
- * A name with a gloss ("काटाकुटी · Tic-Tac-Toe") shows the gloss smaller,
- * under it. What it is, and the record, are on its start screen. */
-function GameCard({
+/** A game in the list: its icon in the game's own colour, its name (with the
+ * English gloss beside "काटाकुटी · Tic-Tac-Toe" smaller), and a word when
+ * a game is under way. What it is, and the record, are on its start screen. */
+function GameRow({
   game,
   icon,
   title,
+  underway,
   onOpen,
 }: {
   game: Game;
   icon: IconName;
   title: string;
+  underway: string | null;
   onOpen: () => void;
 }) {
   const [name, gloss] = title.split(" · ");
   return (
-    <button type="button" onClick={onOpen} className={`game-tile game-tile--${game}`}>
-      <span className="game-tile__icon">
-        <Icon name={icon} className="size-6" />
-      </span>
-      <span className="game-tile__text">
-        <span className="game-tile__name">{name}</span>
-        {gloss && <span className="game-tile__gloss">{gloss}</span>}
-      </span>
-    </button>
+    <li className="border-b border-divider last:border-b-0">
+      <button type="button" onClick={onOpen} className={`game-row game-tint--${game}`}>
+        <span className="game-row__icon">
+          <Icon name={icon} className="size-4" />
+        </span>
+        <span className="min-w-0 flex-1 truncate">
+          <span className="game-row__name">{name}</span>
+          {gloss && <span className="game-row__gloss"> {gloss}</span>}
+        </span>
+        {underway && <span className="game-row__state">{underway}</span>}
+        <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
+      </button>
+    </li>
   );
 }
