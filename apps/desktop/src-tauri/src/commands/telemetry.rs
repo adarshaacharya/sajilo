@@ -120,6 +120,9 @@ pub const EVENTS: &[&str] = &[
     "action.reminder-dismiss",
     "action.job-open",
     "action.job-remind",
+    // That a question was answered, never which answer.
+    "action.quiz-answer",
+    "action.quiz-daily-answer",
 ];
 
 /// Counts since the last report that got through, by event name.

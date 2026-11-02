@@ -150,6 +150,7 @@ pub fn quiz_answer(app: AppHandle<Wry>, place: u8) -> Result<QuizView, String> {
     state
         .answer(&QuizPack::active(), place)
         .map_err(|e| format!("{e:?}"))?;
+    crate::commands::telemetry::record(&app, "action.quiz-answer");
     Ok(quiz_save(&app, &state))
 }
 
@@ -412,7 +413,9 @@ pub fn quiz_daily_answer(app: AppHandle<Wry>, place: u8) -> Option<QuizDaily> {
     let mut state = quiz_state(&app);
     let pack = QuizPack::active();
     state.daily(&pack, quiz_day());
-    let _ = state.answer_daily(&pack, place);
+    if state.answer_daily(&pack, place).is_ok() {
+        crate::commands::telemetry::record(&app, "action.quiz-daily-answer");
+    }
     quiz_save(&app, &state);
     daily_view(
         &state,
