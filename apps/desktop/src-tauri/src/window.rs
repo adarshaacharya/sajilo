@@ -66,6 +66,14 @@ const MINI_KEY: &str = "popover.mini.v1";
 /// The popover's two sizes, in logical pixels. Full matches `tauri.conf.json`.
 const FULL_SIZE: (f64, f64) = (380.0, 560.0);
 const MINI_SIZE: (f64, f64) = (320.0, 72.0);
+/// How far a kept popover can be stretched from its edges. The full size is
+/// the least: below it, screens are laid out for nothing smaller.
+const MAX_SIZE: (f64, f64) = (720.0, 1200.0);
+
+/// The size a kept popover was last stretched to, in logical pixels. A
+/// popover at the tray is always the full size; this comes back with the pin.
+static KEPT_SIZE: std::sync::Mutex<Option<Dims>> = std::sync::Mutex::new(None);
+const KEPT_SIZE_KEY: &str = "popover.keptSize.v1";
 /// Window titles a tiling window manager's rules can match on Linux.
 const FULL_TITLE: &str = "Sajilo";
 const MINI_TITLE: &str = "Sajilo Mini";
@@ -76,10 +84,44 @@ struct Place {
     y: f64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+struct Dims {
+    width: f64,
+    height: f64,
+}
+
+impl Dims {
+    /// Within the full size and [`MAX_SIZE`].
+    fn bounded(self) -> Self {
+        Self {
+            width: self.width.clamp(FULL_SIZE.0, MAX_SIZE.0),
+            height: self.height.clamp(FULL_SIZE.1, MAX_SIZE.1),
+        }
+    }
+}
+
+fn kept_size() -> Dims {
+    KEPT_SIZE
+        .lock()
+        .ok()
+        .and_then(|size| *size)
+        .unwrap_or(Dims {
+            width: FULL_SIZE.0,
+            height: FULL_SIZE.1,
+        })
+}
+
 /// Reads whether the popover was left kept open, and where, at launch.
 pub fn load_kept(app: &AppHandle) {
     if let Ok(Some(mini)) = crate::db::get_json(app, MINI_KEY) {
         MINI.store(mini.as_bool() == Some(true), Ordering::SeqCst);
+    }
+    if let (Ok(Some(value)), Ok(mut kept)) =
+        (crate::db::get_json(app, KEPT_SIZE_KEY), KEPT_SIZE.lock())
+    {
+        *kept = serde_json::from_value::<Dims>(value)
+            .ok()
+            .map(Dims::bounded);
     }
     let Ok(Some(value)) = crate::db::get_json(app, KEPT_KEY) else {
         return;
@@ -134,9 +176,11 @@ pub fn set_mini(window: &WebviewWindow, mini: bool) {
     apply_window_kind(window);
 }
 
-/// Gives the window the size of the full popover or the mini strip. The
-/// top-left corner stays put, so the strip shrinks toward where it was
-/// dragged.
+/// Gives the window its size: the full popover, the mini strip, or, kept
+/// open in the full view, whatever the user last stretched it to. Only that
+/// last one can be resized from its edges; a popover at the tray is a fixed
+/// panel, and the strip has one height. The top-left corner stays put, so
+/// the strip shrinks toward where it was dragged.
 ///
 /// Tiling window managers (Hyprland, Sway, i3) ignore an app's own resize
 /// and keep the window at its tile's size, so the strip would sit in a big
@@ -144,23 +188,97 @@ pub fn set_mini(window: &WebviewWindow, mini: bool) {
 /// match the mini strip and float it at its size. The app-id would be the
 /// natural thing to match, but GTK fixes it at startup.
 pub fn apply_window_kind(window: &WebviewWindow) {
+    use tauri::LogicalSize;
+
     let mini = is_mini();
-    let (width, height) = if mini { MINI_SIZE } else { FULL_SIZE };
-    let size = tauri::LogicalSize::new(width, height);
+    let resizable = is_kept() && !mini;
+    let size = if mini {
+        LogicalSize::new(MINI_SIZE.0, MINI_SIZE.1)
+    } else if resizable {
+        let kept = kept_size();
+        LogicalSize::new(kept.width, kept.height)
+    } else {
+        LogicalSize::new(FULL_SIZE.0, FULL_SIZE.1)
+    };
+    // The bounds go first, or the old ones would hold the window at its old
+    // size: a strip can't be smaller than a stretchable popover's least. A
+    // fixed size is its own least and most, which on Linux also keeps the
+    // window manager from offering a resize while it is unlocked below.
+    let (least, most) = if resizable {
+        (
+            LogicalSize::new(FULL_SIZE.0, FULL_SIZE.1),
+            LogicalSize::new(MAX_SIZE.0, MAX_SIZE.1),
+        )
+    } else {
+        (size, size)
+    };
     // GTK keeps a non-resizable window at the size it first had and ignores
     // a resize, so the strip drew in the middle of a full-height window.
-    // Unlocked for the resize, with the size pinned by min and max so the
-    // window manager can't offer the user a different one meanwhile.
+    // Unlocked for the resize; locked again after if it is a fixed size.
     #[cfg(target_os = "linux")]
-    {
-        let _ = window.set_resizable(true);
-        let _ = window.set_min_size(Some(size));
-        let _ = window.set_max_size(Some(size));
-    }
+    let _ = window.set_resizable(true);
+    let _ = window.set_min_size(Some(least));
+    let _ = window.set_max_size(Some(most));
     let _ = window.set_size(size);
-    #[cfg(target_os = "linux")]
-    let _ = window.set_resizable(false);
+    let _ = window.set_resizable(resizable);
+    if resizable {
+        keep_on_screen(window, size);
+    }
     let _ = window.set_title(if mini { MINI_TITLE } else { FULL_TITLE });
+}
+
+/// Moves a kept popover back inside its screen's work area if its own size
+/// now reaches past it: pinned near the bottom at the full size, it would
+/// otherwise come back stretched below the taskbar.
+fn keep_on_screen(window: &WebviewWindow, size: tauri::LogicalSize<f64>) {
+    let (Ok(Some(monitor)), Ok(position)) = (window.current_monitor(), window.outer_position())
+    else {
+        return;
+    };
+    let size = size.to_physical::<i32>(monitor.scale_factor());
+    let area = monitor.work_area();
+    let (left, top) = (area.position.x, area.position.y);
+    let right = left.saturating_add(i32::try_from(area.size.width).unwrap_or(i32::MAX));
+    let bottom = top.saturating_add(i32::try_from(area.size.height).unwrap_or(i32::MAX));
+    let x = position.x.min(right - size.width).max(left);
+    let y = position.y.min(bottom - size.height).max(top);
+    if (x, y) != (position.x, position.y)
+        && window
+            .set_position(tauri::PhysicalPosition::new(x, y))
+            .is_ok()
+    {
+        remember_move(window);
+    }
+}
+
+/// Follows a kept popover as its edges are dragged. Kept in memory, and
+/// written with its place when it is put away.
+///
+/// Only a size from the stretchable view counts. A resize of the window's own
+/// (to the strip, or back to the tray size on unpinning) reports in after
+/// the view has already changed, and anything below the full size is one of
+/// those still arriving.
+pub fn remember_resize(window: &WebviewWindow, size: tauri::PhysicalSize<u32>) {
+    if !is_kept() || is_mini() {
+        return;
+    }
+    let Ok(scale) = window.scale_factor() else {
+        return;
+    };
+    let size = size.to_logical::<f64>(scale);
+    // Rounding at the screen's scale can land a hair under the least.
+    if size.width < FULL_SIZE.0 - 1.0 || size.height < FULL_SIZE.1 - 1.0 {
+        return;
+    }
+    if let Ok(mut kept) = KEPT_SIZE.lock() {
+        *kept = Some(
+            Dims {
+                width: size.width.round(),
+                height: size.height.round(),
+            }
+            .bounded(),
+        );
+    }
 }
 
 /// Follows a kept popover as it is dragged. Kept in memory; written when it
@@ -196,6 +314,12 @@ fn save_kept(app: &AppHandle) {
         serde_json::Value::Null
     };
     let _ = crate::db::set_json(app, KEPT_KEY, &value);
+    // The size outlives the pin, so pinning again brings it back.
+    if let Some(size) = KEPT_SIZE.lock().ok().and_then(|size| *size)
+        && let Ok(size) = serde_json::to_value(size)
+    {
+        let _ = crate::db::set_json(app, KEPT_SIZE_KEY, &size);
+    }
 }
 
 /// Puts a kept popover back where it was left, if a connected screen still

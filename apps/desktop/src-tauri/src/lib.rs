@@ -263,6 +263,11 @@ pub fn run() {
                     window::remember_move(&main);
                 }
             }
+            WindowEvent::Resized(size) if window.label() == window::MAIN => {
+                if let Some(main) = window.get_webview_window(window::MAIN) {
+                    window::remember_resize(&main, *size);
+                }
+            }
             WindowEvent::Focused(focused) if window.label() == window::MAIN => {
                 if let Some(main) = window.get_webview_window(window::MAIN) {
                     window::hide_on_blur(&main, *focused);
