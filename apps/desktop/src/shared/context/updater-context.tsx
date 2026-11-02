@@ -1,4 +1,4 @@
-import type { Update } from "@tauri-apps/plugin-updater";
+import type { DownloadEvent, Update } from "@tauri-apps/plugin-updater";
 import {
   createContext,
   type ReactNode,
@@ -24,6 +24,15 @@ export type UpdateState =
 /** Where a person updates by hand when the app can't install it itself. */
 export const DOWNLOAD_URL = "https://sajilo.fyi/download.html";
 
+/** The `error` of an update that stopped moving, rather than one that failed. */
+export const STALLED = "stalled";
+
+/** How much of the update has come down, in bytes; `total` when the server said. */
+export interface UpdateProgress {
+  done: number;
+  total: number | null;
+}
+
 interface Updater {
   enabled: boolean;
   /** How this copy updates; see `UpdateInstallKind`. */
@@ -32,6 +41,8 @@ interface Updater {
   state: UpdateState;
   /** The version on offer, once a check has found one. */
   version: string | null;
+  /** While downloading; null before the first byte and once it is in. */
+  progress: UpdateProgress | null;
   error: string | null;
   checkForUpdates: () => Promise<void>;
   installUpdate: () => Promise<boolean>;
@@ -43,6 +54,7 @@ interface Updater {
 interface UpdaterSnapshot {
   state: UpdateState;
   version: string | null;
+  progress: UpdateProgress | null;
   error: string | null;
   automaticUpdates: boolean;
 }
@@ -63,6 +75,14 @@ const INSTALL_NOW_EVENT = "sajilo://updater-install-now";
 const CHECK_INTERVAL_MS = 30 * 60 * 1000;
 /** While one of these holds, another check would only repeat what is known. */
 const SETTLED: readonly UpdateState[] = ["checking", "available", "downloading", "installed"];
+/** A download or install that shows no sign of life for this long is called
+ * stuck, so the user is offered the download page instead of a spinner that
+ * may never stop: a hidden password prompt, a VPN eating the connection, or a
+ * copy macOS runs read-only from the disk image. */
+const STALL_MS = 2 * 60 * 1000;
+const STALL_CHECK_MS = 5 * 1000;
+/** Without a total, progress is told in steps of this many bytes. */
+const PROGRESS_STEP = 256 * 1024;
 
 async function send(event: string, payload: UpdaterSnapshot | UpdaterRequest) {
   try {
@@ -122,6 +142,7 @@ export function UpdaterProvider({
   const [state, setState] = useState<UpdateState>("idle");
   const [version, setVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<UpdateProgress | null>(null);
   const update = useRef<Update | null>(null);
   /** Windows: downloaded, waiting for a quiet moment to install. */
   const downloaded = useRef(false);
@@ -134,6 +155,50 @@ export function UpdaterProvider({
   }, [state]);
 
   // ---- owner: the only window that checks, downloads and installs
+
+  /**
+   * Runs a download or install, reporting its progress and watching that it
+   * keeps moving. A stall is reported as failed with `STALLED`; the work
+   * itself can't be cancelled, so if it does finish later, the caller still
+   * gets to say so.
+   */
+  const watched = useCallback(
+    async (run: (onEvent: (event: DownloadEvent) => void) => Promise<void>) => {
+      let done = 0;
+      let total: number | null = null;
+      let step = -1;
+      let lastSign = Date.now();
+      const watchdog = window.setInterval(() => {
+        if (Date.now() - lastSign < STALL_MS) return;
+        window.clearInterval(watchdog);
+        setError(STALLED);
+        setState("failed");
+      }, STALL_CHECK_MS);
+      try {
+        await run((event) => {
+          lastSign = Date.now();
+          if (event.event === "Started") {
+            total = event.data.contentLength || null;
+          } else if (event.event === "Progress") {
+            done += event.data.chunkLength;
+          } else {
+            setProgress(null);
+            return;
+          }
+          // A chunk is a few kilobytes; every window re-renders on a change,
+          // so only a whole percent (or step) is worth telling.
+          const next = total ? Math.floor((done * 100) / total) : Math.floor(done / PROGRESS_STEP);
+          if (next === step) return;
+          step = next;
+          setProgress({ done, total });
+        });
+      } finally {
+        window.clearInterval(watchdog);
+        setProgress(null);
+      }
+    },
+    [],
+  );
 
   const runCheck = useCallback(async () => {
     setState("checking");
@@ -153,12 +218,12 @@ export function UpdaterProvider({
         if (isWindows) {
           // Windows' installer closes the app as it starts, so only download
           // now; the shell asks for the install once nobody's around.
-          await next.download();
+          await watched((onEvent) => next.download(onEvent));
           downloaded.current = true;
           setState("available");
           void api.updateDownloaded().catch(() => {});
         } else {
-          await next.downloadAndInstall();
+          await watched((onEvent) => next.downloadAndInstall(onEvent));
           setState("installed");
           void api.updateInstalled().catch(() => {});
         }
@@ -169,7 +234,7 @@ export function UpdaterProvider({
       setError(String(checkError));
       setState("failed");
     }
-  }, []);
+  }, [watched]);
 
   const runInstall = useCallback(async () => {
     const pending = update.current;
@@ -181,8 +246,8 @@ export function UpdaterProvider({
     setState("downloading");
     setError(null);
     try {
-      if (downloaded.current) await pending.install();
-      else await pending.downloadAndInstall();
+      if (downloaded.current) await watched(() => pending.install());
+      else await watched((onEvent) => pending.downloadAndInstall(onEvent));
       setState("installed");
       void api.updateInstalled().catch(() => {});
       return true;
@@ -191,16 +256,16 @@ export function UpdaterProvider({
       setState("failed");
       return false;
     }
-  }, []);
+  }, [watched]);
 
   useEffect(() => {
-    if (owner) void send(STATE_EVENT, { state, version, error, automaticUpdates });
-  }, [owner, state, version, error, automaticUpdates]);
+    if (owner) void send(STATE_EVENT, { state, version, progress, error, automaticUpdates });
+  }, [owner, state, version, progress, error, automaticUpdates]);
 
   useTauriEvent<UpdaterRequest>(REQUEST_EVENT, owner, (request) => {
     switch (request.action) {
       case "snapshot":
-        void send(STATE_EVENT, { state, version, error, automaticUpdates });
+        void send(STATE_EVENT, { state, version, progress, error, automaticUpdates });
         break;
       case "check":
         if (!SETTLED.includes(stateRef.current)) void runCheck();
@@ -224,6 +289,7 @@ export function UpdaterProvider({
   useTauriEvent<UpdaterSnapshot>(STATE_EVENT, !owner, (snapshot) => {
     setState(snapshot.state);
     setVersion(snapshot.version);
+    setProgress(snapshot.progress ?? null);
     setError(snapshot.error);
     automaticUpdatesRef.current = snapshot.automaticUpdates;
     setAutomaticUpdatesState(snapshot.automaticUpdates);
@@ -316,6 +382,7 @@ export function UpdaterProvider({
         automaticUpdates,
         state,
         version,
+        progress,
         error,
         checkForUpdates,
         installUpdate,

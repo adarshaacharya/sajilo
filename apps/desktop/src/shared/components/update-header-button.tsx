@@ -1,5 +1,7 @@
 import { useSettings } from "../context/settings-context";
 import { useUpdater } from "../context/updater-context";
+import { digits } from "../lib/numerals";
+import { progressPercent } from "../lib/update-progress";
 
 function formatVersionLabel(template: string, version: string): string {
   return template.replace("{version}", version);
@@ -7,15 +9,18 @@ function formatVersionLabel(template: string, version: string): string {
 
 /** Compact labelled update control for screen headers. */
 export function UpdateHeaderButton() {
-  const { t } = useSettings();
-  const { enabled, state, version, installUpdate, restartToUpdate } = useUpdater();
+  const { t, numerals } = useSettings();
+  const { enabled, state, version, progress, installUpdate, restartToUpdate } = useUpdater();
 
   if (!enabled) return null;
 
   if (state === "downloading") {
+    const percent = progressPercent(progress);
     return (
-      <span className="update-header-btn update-header-btn--busy shrink-0" aria-live="polite">
-        {t("header.update-downloading")}
+      <span className="update-header-btn update-header-btn--busy shrink-0 tabular-nums">
+        {percent === null
+          ? t("header.update-downloading")
+          : t("header.update-progress").replace("{percent}", digits(percent, numerals))}
       </span>
     );
   }

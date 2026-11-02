@@ -6,7 +6,9 @@ import { TrayPinTip } from "../../../shared/components/tray-pin-tip";
 import { useSettings } from "../../../shared/context/settings-context";
 import { useUpdater } from "../../../shared/context/updater-context";
 import { openExternalLink } from "../../../shared/lib/external-link";
+import { digits } from "../../../shared/lib/numerals";
 import { isWindows } from "../../../shared/lib/platform";
+import { progressPercent } from "../../../shared/lib/update-progress";
 import { runSetupAgain } from "../../calendar/_components/setup-card";
 
 const REPO_URL = "https://github.com/adarshaacharya/sajilo";
@@ -55,8 +57,9 @@ function LinkRow({
  * and stays out of the way otherwise.
  */
 function AboutUpdate() {
-  const { t } = useSettings();
-  const { enabled, state, version, installUpdate, restartToUpdate } = useUpdater();
+  const { t, numerals } = useSettings();
+  const { enabled, state, version, progress, installUpdate, restartToUpdate } = useUpdater();
+  const percent = progressPercent(progress);
 
   if (!enabled) return null;
 
@@ -83,12 +86,10 @@ function AboutUpdate() {
     );
     control =
       state === "downloading" ? (
-        <span
-          className="update-header-btn update-header-btn--busy"
-          style={{ maxWidth: "none" }}
-          aria-live="polite"
-        >
-          {t("updater.installing")}
+        <span className="update-header-btn update-header-btn--busy" style={{ maxWidth: "none" }}>
+          {percent === null
+            ? t("updater.installing")
+            : t("header.update-progress").replace("{percent}", digits(percent, numerals))}
         </span>
       ) : (
         <button

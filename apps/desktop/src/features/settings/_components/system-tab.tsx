@@ -3,21 +3,24 @@ import { useNavigate } from "react-router";
 import { Icon } from "../../../shared/components/icon";
 import { Toggle } from "../../../shared/components/toggle";
 import { useSettings } from "../../../shared/context/settings-context";
-import { useUpdater } from "../../../shared/context/updater-context";
+import { DOWNLOAD_URL, STALLED, useUpdater } from "../../../shared/context/updater-context";
+import { openExternalLink } from "../../../shared/lib/external-link";
 import { api, type NotificationOptions } from "../../../shared/lib/ipc";
+import { progressLabel } from "../../../shared/lib/update-progress";
 import { triggerSetupPreview } from "../../calendar/_components/setup-card";
 import { SOURCES } from "../notifications";
 import { ContentSection } from "./content-section";
 import { SettingsSection } from "./settings-section";
 
 export function SystemTab() {
-  const { t } = useSettings();
+  const { t, numerals } = useSettings();
   const navigate = useNavigate();
   const {
     enabled: updaterEnabled,
     installKind,
     state: updateState,
     version: updateVersion,
+    progress: updateProgress,
     error: updateError,
     checkForUpdates,
     installUpdate,
@@ -100,14 +103,31 @@ export function SystemTab() {
     downloading: updateVersion ? (
       <>
         {t("settings.update-available")} {version(updateVersion)}…
+        {updateProgress && (
+          <span className="tabular-nums"> {progressLabel(updateProgress, t, numerals)}</span>
+        )}
       </>
     ) : (
       t("settings.update-checking")
     ),
     installed: t("settings.update-installed"),
-    failed: updateError
-      ? `${t("settings.update-failed")} — ${updateError}`
-      : t("settings.update-failed"),
+    failed:
+      updateError === STALLED ? (
+        <>
+          {t("updater.stalled")}{" "}
+          <button
+            type="button"
+            onClick={() => openExternalLink(DOWNLOAD_URL)}
+            className="font-medium text-accent underline-offset-2 hover:underline"
+          >
+            {t("updater.download-instead")}
+          </button>
+        </>
+      ) : updateError ? (
+        `${t("settings.update-failed")} — ${updateError}`
+      ) : (
+        t("settings.update-failed")
+      ),
   }[updateState];
 
   return (

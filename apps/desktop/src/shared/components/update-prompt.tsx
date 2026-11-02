@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import appIconUrl from "../../../src-tauri/icons/128x128@2x.png";
 import { useSettings } from "../context/settings-context";
-import { DOWNLOAD_URL, useUpdater } from "../context/updater-context";
+import { DOWNLOAD_URL, STALLED, useUpdater } from "../context/updater-context";
 import { openExternalLink } from "../lib/external-link";
 import { api } from "../lib/ipc";
+import { progressLabel, progressPercent } from "../lib/update-progress";
 import { Icon } from "./icon";
 
 const SNOOZE_KEY = "sajilo.updater.windowSnooze.v1";
@@ -25,17 +26,20 @@ function isSnoozed(version: string): boolean {
 
 /** A dedicated desktop surface that stays hidden until an update is available. */
 export function UpdateWindow() {
-  const { t } = useSettings();
+  const { t, numerals } = useSettings();
   const {
     enabled,
     installKind,
     automaticUpdates,
     state,
     version,
+    progress,
+    error,
     installUpdate,
     restartToUpdate,
     setAutomaticUpdates,
   } = useUpdater();
+  const percent = progressPercent(progress);
   const [hiddenVersion, setHiddenVersion] = useState<string | null>(null);
   const [installFailed, setInstallFailed] = useState(false);
   const visible =
@@ -162,9 +166,29 @@ export function UpdateWindow() {
         <Icon name="openExternal" className="size-[9px]" />
       </button>
 
+      {state === "downloading" && progress && (
+        <div className="update-window__progress" aria-live="polite">
+          <div
+            className="update-window__bar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent ?? undefined}
+          >
+            <span
+              className={percent === null ? "update-window__bar-fill--unknown" : undefined}
+              style={percent === null ? undefined : { width: `${percent}%` }}
+            />
+          </div>
+          <span className="tabular-nums">{progressLabel(progress, t, numerals)}</span>
+        </div>
+      )}
+
       {(installFailed || state === "failed") && (
         <p role="alert" className="mt-2 text-[10px] leading-snug text-negative">
-          {t("updater.install-failed")}{" "}
+          {state === "failed" && error === STALLED
+            ? t("updater.stalled")
+            : t("updater.install-failed")}{" "}
           <button
             type="button"
             onClick={() => openExternalLink(DOWNLOAD_URL)}
@@ -175,8 +199,9 @@ export function UpdateWindow() {
         </p>
       )}
 
-      {/* Only a quiet install can be automatic. */}
-      {installKind === "auto" && (
+      {/* Only a quiet install can be automatic. While one runs, its progress
+          takes this place. */}
+      {installKind === "auto" && !(state === "downloading" && progress) && (
         <label className="update-window__automatic">
           <input
             type="checkbox"
