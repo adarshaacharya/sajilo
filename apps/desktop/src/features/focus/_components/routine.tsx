@@ -92,8 +92,10 @@ export function RoutineAsk({
       <p className="mt-1.5 text-[12px] leading-relaxed text-text-secondary">
         {t("focus.routine.ask-body")}
       </p>
-      <div className="mt-3 flex items-center justify-between gap-2">
-        <p className="text-[12px] font-medium">{t("focus.routine.ask-work")}</p>
+      {/* Time fields are wider on Linux; the question goes above them then,
+          rather than being squeezed a word to a line. */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+        <p className="min-w-[9rem] flex-1 text-[12px] font-medium">{t("focus.routine.ask-work")}</p>
         <WorkHours
           settings={{ ...settings, ...hours }}
           onSettings={(next) =>

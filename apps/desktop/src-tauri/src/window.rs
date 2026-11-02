@@ -146,7 +146,20 @@ pub fn set_mini(window: &WebviewWindow, mini: bool) {
 pub fn apply_window_kind(window: &WebviewWindow) {
     let mini = is_mini();
     let (width, height) = if mini { MINI_SIZE } else { FULL_SIZE };
-    let _ = window.set_size(tauri::LogicalSize::new(width, height));
+    let size = tauri::LogicalSize::new(width, height);
+    // GTK keeps a non-resizable window at the size it first had and ignores
+    // a resize, so the strip drew in the middle of a full-height window.
+    // Unlocked for the resize, with the size pinned by min and max so the
+    // window manager can't offer the user a different one meanwhile.
+    #[cfg(target_os = "linux")]
+    {
+        let _ = window.set_resizable(true);
+        let _ = window.set_min_size(Some(size));
+        let _ = window.set_max_size(Some(size));
+    }
+    let _ = window.set_size(size);
+    #[cfg(target_os = "linux")]
+    let _ = window.set_resizable(false);
     let _ = window.set_title(if mini { MINI_TITLE } else { FULL_TITLE });
 }
 
