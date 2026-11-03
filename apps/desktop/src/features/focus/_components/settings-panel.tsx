@@ -52,19 +52,16 @@ function daysOffNames(workDays: readonly boolean[], t: TFn): string {
   return `${names.slice(0, -1).join(", ")}${t("focus.days.and")}${names.at(-1)}`;
 }
 
-const HOLDS: { id: keyof HoldRules; label: I18nKey; note: I18nKey }[] = [
-  { id: "calls", label: "focus.hold.calls", note: "focus.hold.calls-note" },
-  { id: "fullscreen", label: "focus.hold.fullscreen", note: "focus.hold.fullscreen-note" },
-  { id: "doNotDisturb", label: "focus.hold.dnd", note: "focus.hold.dnd-note" },
+const HOLDS: { id: keyof HoldRules; label: I18nKey }[] = [
+  { id: "calls", label: "focus.hold.calls" },
+  { id: "fullscreen", label: "focus.hold.fullscreen" },
+  { id: "doNotDisturb", label: "focus.hold.dnd" },
 ];
 
-function Group({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="surface-card space-y-3 p-3">
-      <div>
-        <h3 className="text-[11px] font-semibold text-text-secondary">{title}</h3>
-        {note && <p className="mt-0.5 text-[10px] leading-snug text-text-muted">{note}</p>}
-      </div>
+      <h3 className="text-[11px] font-semibold text-text-secondary">{title}</h3>
       {children}
     </section>
   );
@@ -92,6 +89,12 @@ export function SettingsPanel({
   const { settings, holdSupport } = snapshot;
   const weekdays = language === "ne" ? WEEKDAYS_NE : DAYS_EN;
   const offNames = daysOffNames(settings.workDays, t);
+  const kept =
+    settings.daysOff === "lighter"
+      ? ON_A_DAY_OFF.filter((item) => item.in.includes("lighter"))
+          .map((item) => kindLabel(item.kind, settings, t))
+          .join(", ")
+      : "";
 
   // One choice for every Sajilo reminder, kept with the others in Settings;
   // Routine shows it here too, since this is where people look for it.
@@ -109,13 +112,12 @@ export function SettingsPanel({
         <h2 className="text-[13px] font-semibold">{t("focus.settings")}</h2>
       </div>
 
-      <Group title={t("focus.hold.title")} note={t("focus.hold.note")}>
+      <Group title={t("focus.hold.title")}>
         {/* A switch this computer could never act on is left out. */}
         {HOLDS.filter((hold) => holdSupport[hold.id]).map((hold) => (
           <Toggle
             key={hold.id}
             label={t(hold.label)}
-            note={t(hold.note)}
             checked={settings.hold[hold.id]}
             onChange={(on) =>
               onSettings({ ...settings, hold: { ...settings.hold, [hold.id]: on } })
@@ -191,40 +193,16 @@ export function SettingsPanel({
               );
             })}
           </fieldset>
-          {/* What the chosen option means, as a list to scan rather than a
-              sentence to decode. */}
-          <div className="rounded-[8px] bg-[color:var(--color-surface-hover)] px-2.5 py-2">
-            <p className="text-[10px] font-medium text-text-muted">{t("focus.days.you-get")}</p>
-            <ul className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
-              {ON_A_DAY_OFF.map((item) => {
-                const kept = item.in.includes(settings.daysOff);
-                return (
-                  <li
-                    key={item.kind}
-                    className={`flex items-center gap-1.5 text-[11px] ${kept ? "text-text" : "text-text-muted line-through"}`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={kept ? "text-[color:var(--color-positive)]" : "text-text-muted"}
-                    >
-                      {kept ? "✓" : "✕"}
-                    </span>
-                    <span className="truncate">{kindLabel(item.kind, settings, t)}</span>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-1.5 text-[10px] leading-snug text-text-muted">
-              {t("focus.days.meals")}
+          {/* Only the middle choice needs saying: which reminders it keeps. */}
+          {kept && (
+            <p className="px-0.5 text-[10px] leading-snug text-text-muted">
+              {t("focus.days.keeps").replace("{list}", kept)}
             </p>
-          </div>
-          <p className="text-[10px] leading-snug text-text-muted">
-            {t("focus.days.holidays-note")}
-          </p>
+          )}
         </div>
       </Group>
 
-      <Group title={t("focus.style")} note={t("focus.style-shared")}>
+      <Group title={t("focus.style")}>
         <Segmented<ReminderStyle>
           label={t("focus.style")}
           value={settings.style}
@@ -234,13 +212,14 @@ export function SettingsPanel({
             { id: "notification", label: t("focus.style.notification") },
           ]}
         />
-        <p className="-mt-1.5 text-[10px] leading-snug text-text-muted">
-          {t(settings.style === "card" ? "focus.style-note.card" : "focus.style-note.notification")}
-        </p>
+        {settings.style === "notification" && (
+          <p className="-mt-1.5 text-[10px] leading-snug text-text-muted">
+            {t("focus.style-note.notification")}
+          </p>
+        )}
         <div className="space-y-2.5 border-t border-divider pt-2.5">
           <Toggle
             label={t("focus.jokes")}
-            note={t("focus.jokes-note")}
             checked={settings.jokes}
             onChange={(jokes) => onSettings({ ...settings, jokes })}
           />
@@ -251,12 +230,7 @@ export function SettingsPanel({
             onClick={onMessages}
             className="-mx-1 flex w-[calc(100%+0.5rem)] items-center gap-3 rounded-md px-1 py-0.5 text-left hover:bg-surface-hover"
           >
-            <span className="min-w-0 flex-1">
-              <span className="block text-[12px] text-text">{t("focus.messages.open")}</span>
-              <span className="mt-0.5 block text-[10px] leading-snug text-text-muted">
-                {t("focus.messages.open-note")}
-              </span>
-            </span>
+            <span className="min-w-0 flex-1 text-[12px] text-text">{t("focus.messages.open")}</span>
             <Icon name="chevronRight" className="size-3 shrink-0 text-text-muted" />
           </button>
           <Toggle
@@ -266,10 +240,6 @@ export function SettingsPanel({
           />
         </div>
       </Group>
-
-      {/* How the timers count, said where people come to adjust them,
-          rather than as a card on top of the screen. */}
-      <p className="px-0.5 text-[10.5px] leading-snug text-text-muted">{t("focus.how.body")}</p>
 
       <div className="px-0.5 pb-1">
         <button
@@ -281,9 +251,6 @@ export function SettingsPanel({
         >
           {t("focus.turn-off")}
         </button>
-        <p className="mt-1.5 text-center text-[10px] leading-snug text-text-muted">
-          {t("focus.turn-off-note")}
-        </p>
       </div>
     </div>
   );

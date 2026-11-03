@@ -449,6 +449,18 @@ function WaterRow({
           {t("focus.water.undo")}
         </button>
       )}
+      {/* The glass is a button too, but nothing says so: this one does. */}
+      <button
+        type="button"
+        onClick={() => {
+          onWater(1);
+          setSplash((count) => count + 1);
+        }}
+        aria-label={add}
+        className="settings-btn shrink-0 rounded-full px-2.5 text-[11px]"
+      >
+        {t("focus.water.add-short").replace("{n}", digits(waterStepMl, numerals))}
+      </button>
     </div>
   );
 }

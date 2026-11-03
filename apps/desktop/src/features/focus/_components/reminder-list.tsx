@@ -76,6 +76,16 @@ function length(seconds: number, numerals: ReturnType<typeof useSentenceNumerals
     : t("focus.len.s").replace("{n}", digits(seconds, numerals));
 }
 
+/** An interval as the row says it: "30 min", "2 h", or "1 h 30 min". */
+function span(minutes: number, numerals: ReturnType<typeof useSentenceNumerals>, t: TFn) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const mins = t("focus.len.m").replace("{n}", digits(m, numerals));
+  if (h === 0) return mins;
+  const hours = t("focus.len.h").replace("{n}", digits(h, numerals));
+  return m === 0 ? hours : `${hours} ${mins}`;
+}
+
 /**
  * Every reminder as one row: what it is, when it comes, and a switch. A tap
  * opens the row in place to change its interval, length or time, so there is
@@ -105,9 +115,9 @@ export function ReminderList({
     if (rule.restsToday) return t("focus.row.rests");
     if (kind === "water") {
       if (snapshot.today.waterMl >= settings.waterGoalMl) return t("focus.row.water-done");
-      return t("focus.row.water").replace("{n}", digits(rule.everyMinutes, numerals));
+      return t("focus.row.water").replace("{t}", span(rule.everyMinutes, numerals, t));
     }
-    const every = t("focus.row.every").replace("{n}", digits(rule.everyMinutes, numerals));
+    const every = t("focus.row.every").replace("{t}", span(rule.everyMinutes, numerals, t));
     return rule.breakSeconds > 0 ? `${every} · ${length(rule.breakSeconds, numerals, t)}` : every;
   };
 

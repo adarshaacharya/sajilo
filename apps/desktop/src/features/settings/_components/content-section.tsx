@@ -56,7 +56,7 @@ export function ContentSection() {
       ].filter((line): line is string => line !== null);
 
   return (
-    <SettingsSection title={t("settings.content")} footnote={t("settings.content-note")}>
+    <SettingsSection title={t("settings.content")}>
       <div className="flex items-center justify-between gap-3">
         <span className="min-w-0 text-[10px] text-text-muted">
           {lines.map((line) => (

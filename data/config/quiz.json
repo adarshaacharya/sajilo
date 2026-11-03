@@ -3380,6 +3380,742 @@
         ]
       },
       "answer": 3
+    },
+    {
+      "id": "flag-sun-rays",
+      "category": "nepal",
+      "en": {
+        "q": "The constitution's drawing rules give the sun on Nepal's flag how many rays?",
+        "options": [
+          "8",
+          "12",
+          "16",
+          "24"
+        ]
+      },
+      "ne": {
+        "q": "संविधानको नियमअनुसार नेपालको झण्डाको सूर्यमा कतिवटा किरण हुन्छन्?",
+        "options": [
+          "८",
+          "१२",
+          "१६",
+          "२४"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "yam-between-boulders",
+      "category": "nepal",
+      "en": {
+        "q": "In his Divya Upadesh, Prithvi Narayan Shah compared Nepal, wedged between two empires, to what?",
+        "options": [
+          "A lamp between two winds",
+          "A yam between two boulders",
+          "A bird between two hawks",
+          "A boat between two rivers"
+        ]
+      },
+      "ne": {
+        "q": "दिव्य उपदेशमा पृथ्वीनारायण शाहले दुई ठूला राज्यबीचको नेपाललाई केसँग तुलना गरेका थिए?",
+        "options": [
+          "दुई हावाबीचको दियो",
+          "दुई ढुङ्गाबीचको तरुल",
+          "दुई बाजबीचको चरो",
+          "दुई नदीबीचको डुङ्गा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "changu-oldest-inscription",
+      "category": "nepal",
+      "en": {
+        "q": "The Kathmandu Valley's oldest dated inscription, from King Manadeva in 464 CE, stands at which temple?",
+        "options": [
+          "Pashupatinath",
+          "Swayambhu",
+          "Changu Narayan",
+          "Budhanilkantha"
+        ]
+      },
+      "ne": {
+        "q": "काठमाडौँ उपत्यकाको सबैभन्दा पुरानो मिति भएको अभिलेख (राजा मानदेव, सन् ४६४) कुन मन्दिरमा छ?",
+        "options": [
+          "पशुपतिनाथ",
+          "स्वयम्भू",
+          "चाँगुनारायण",
+          "बूढानीलकण्ठ"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "ashoka-lumbini-tax",
+      "category": "nepal",
+      "en": {
+        "q": "The Ashoka pillar at Lumbini records that, because the Buddha was born there, the village got what?",
+        "options": [
+          "A golden stupa",
+          "Its tax cut to one-eighth",
+          "A royal army garrison",
+          "Freedom from all wars"
+        ]
+      },
+      "ne": {
+        "q": "लुम्बिनीको अशोक स्तम्भअनुसार बुद्ध जन्मेको ठाउँ भएकाले त्यो गाउँले के पायो?",
+        "options": [
+          "सुनको स्तूप",
+          "कर घटाएर आठौँ भाग मात्र",
+          "शाही सेनाको छाउनी",
+          "सबै युद्धबाट मुक्ति"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "kot-parva-rise",
+      "category": "nepal",
+      "en": {
+        "q": "The 1846 Kot massacre in Kathmandu brought which man to power, starting 104 years of Rana rule?",
+        "options": [
+          "Bhimsen Thapa",
+          "Jung Bahadur Kunwar",
+          "Chandra Shumsher",
+          "Mathbar Singh Thapa"
+        ]
+      },
+      "ne": {
+        "q": "सन् १८४६ को कोतपर्वले कसलाई सत्तामा ल्यायो, जसबाट १०४ वर्षे राणा शासन सुरु भयो?",
+        "options": [
+          "भीमसेन थापा",
+          "जङ्गबहादुर कुँवर",
+          "चन्द्रशमशेर",
+          "माथवरसिंह थापा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "jung-bahadur-voyage",
+      "category": "nepal",
+      "en": {
+        "q": "In 1850 Jung Bahadur made a rare journey for a South Asian ruler of his time, visiting which country?",
+        "options": [
+          "Japan",
+          "Britain",
+          "Russia",
+          "The United States"
+        ]
+      },
+      "ne": {
+        "q": "सन् १८५० मा जङ्गबहादुरले त्यसबेलाका दक्षिण एसियाली शासकका लागि दुर्लभ यात्रामा कुन देशको भ्रमण गरे?",
+        "options": [
+          "जापान",
+          "बेलायत",
+          "रुस",
+          "संयुक्त राज्य अमेरिका"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "kathmandu-indra-jatra-1768",
+      "category": "nepal",
+      "en": {
+        "q": "Prithvi Narayan Shah's forces took Kathmandu in 1768 while the city was busy with which festival?",
+        "options": [
+          "Dashain",
+          "Indra Jatra",
+          "Gai Jatra",
+          "Bisket Jatra"
+        ]
+      },
+      "ne": {
+        "q": "सन् १७६८ मा पृथ्वीनारायण शाहका सेनाले काठमाडौँ कब्जा गर्दा सहर कुन पर्वमा व्यस्त थियो?",
+        "options": [
+          "दशैँ",
+          "इन्द्रजात्रा",
+          "गाईजात्रा",
+          "बिस्केट जात्रा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "bhrikuti-tibet",
+      "category": "nepal",
+      "en": {
+        "q": "The Licchavi princess Bhrikuti, daughter of Amshuverma, married which Tibetan king?",
+        "options": [
+          "Trisong Detsen",
+          "Songtsen Gampo",
+          "Ralpacan",
+          "Langdarma"
+        ]
+      },
+      "ne": {
+        "q": "अंशुवर्माकी छोरी लिच्छवि राजकुमारी भृकुटीको विवाह तिब्बतका कुन राजासँग भएको थियो?",
+        "options": [
+          "ठिसोङ देचेन",
+          "स्रोङचङ गम्पो",
+          "रालपाचन",
+          "लाङदर्मा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "gyanendra-child-king",
+      "category": "nepal",
+      "en": {
+        "q": "When King Tribhuvan fled to the Indian embassy in 1950, who was briefly put on the throne?",
+        "options": [
+          "Mahendra, his son",
+          "Gyanendra, his three-year-old grandson",
+          "Mohan Shumsher",
+          "Basundhara, his son"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९५० मा राजा त्रिभुवन भारतीय दूतावास पसेपछि छोटो समयका लागि गद्दीमा को राखिए?",
+        "options": [
+          "छोरा महेन्द्र",
+          "तीन वर्षका नाति ज्ञानेन्द्र",
+          "मोहनशमशेर",
+          "छोरा वसुन्धरा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "first-college-tri-chandra",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal's first college, Tri-Chandra, opened in which year?",
+        "options": [
+          "1885",
+          "1918",
+          "1951",
+          "1959"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको पहिलो कलेज त्रिचन्द्र कुन सालमा खुल्यो?",
+        "options": [
+          "सन् १८८५",
+          "सन् १९१८",
+          "सन् १९५१",
+          "सन् १९५९"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "pharping-hydro-1911",
+      "category": "nepal",
+      "en": {
+        "q": "Nepal's first hydropower plant, switched on in 1911, is at which place?",
+        "options": [
+          "Sundarijal",
+          "Pharping",
+          "Panauti",
+          "Trishuli"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९११ मा सुरु भएको नेपालको पहिलो जलविद्युत केन्द्र कहाँ छ?",
+        "options": [
+          "सुन्दरीजल",
+          "फर्पिङ",
+          "पनौती",
+          "त्रिशूली"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "sagarmatha-name-coiner",
+      "category": "nepal",
+      "en": {
+        "q": "Who is credited with giving Everest its Nepali name, Sagarmatha, in the 1960s?",
+        "options": [
+          "Bhanubhakta Acharya",
+          "Baburam Acharya",
+          "Balkrishna Sama",
+          "Laxmi Prasad Devkota"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९६० को दशकमा सगरमाथालाई 'सगरमाथा' नाम दिने श्रेय कसलाई जान्छ?",
+        "options": [
+          "भानुभक्त आचार्य",
+          "बाबुराम आचार्य",
+          "बालकृष्ण सम",
+          "लक्ष्मीप्रसाद देवकोटा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "pasang-lhamu-first",
+      "category": "nepal",
+      "en": {
+        "q": "Who was the first Nepali woman to climb Everest, in 1993—dying on the way down?",
+        "options": [
+          "Lakpa Sherpa",
+          "Pasang Lhamu Sherpa",
+          "Maya Sherpa",
+          "Purnima Shrestha"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९९३ मा सगरमाथा चढ्ने तर ओर्लँदा ज्यान गुमाउने पहिलो नेपाली महिला को हुन्?",
+        "options": [
+          "लाक्पा शेर्पा",
+          "पासाङ ल्हामु शेर्पा",
+          "माया शेर्पा",
+          "पूर्णिमा श्रेष्ठ"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "motiram-found-bhanubhakta",
+      "category": "nepal",
+      "en": {
+        "q": "Bhanubhakta's Ramayana became famous decades after he died, largely thanks to which writer who collected and printed it?",
+        "options": [
+          "Lekhnath Paudyal",
+          "Motiram Bhatta",
+          "Gopal Prasad Rimal",
+          "Bhim Nidhi Tiwari"
+        ]
+      },
+      "ne": {
+        "q": "भानुभक्तको रामायण उनको मृत्युको दशकौँपछि चर्चित भयो — त्यसलाई खोजेर छाप्ने श्रेय कसलाई जान्छ?",
+        "options": [
+          "लेखनाथ पौड्याल",
+          "मोतीराम भट्ट",
+          "गोपालप्रसाद रिमाल",
+          "भीमनिधि तिवारी"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "muna-madan-metre",
+      "category": "nepal",
+      "en": {
+        "q": "Devkota wrote Muna Madan in which folk metre, which helped it spread by word of mouth?",
+        "options": [
+          "Shardulvikridit",
+          "Jhyaure",
+          "Anushtup",
+          "Malini"
+        ]
+      },
+      "ne": {
+        "q": "देवकोटाले मुनामदन कुन लोकलयमा लेखे, जसले गर्दा यो मुखमुखै फैलियो?",
+        "options": [
+          "शार्दूलविक्रीडित",
+          "झ्याउरे",
+          "अनुष्टुप",
+          "मालिनी"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "kumari-32-qualities",
+      "category": "nepal",
+      "en": {
+        "q": "A girl chosen as Kumari is checked for how many traditional physical perfections (lakshan)?",
+        "options": [
+          "8",
+          "16",
+          "32",
+          "108"
+        ]
+      },
+      "ne": {
+        "q": "कुमारी छान्दा परम्परागत रूपमा कतिवटा लक्षण हेरिन्छ?",
+        "options": [
+          "८",
+          "१६",
+          "३२",
+          "१०८"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "pashupati-priests-south",
+      "category": "nepal",
+      "en": {
+        "q": "The main priests (Bhatta) of Pashupatinath traditionally come from which region?",
+        "options": [
+          "Kashi in Uttar Pradesh",
+          "South India, Karnataka",
+          "Mustang",
+          "Mithila"
+        ]
+      },
+      "ne": {
+        "q": "पशुपतिनाथका मूल पुजारी (भट्ट) परम्परागत रूपमा कहाँबाट आउँछन्?",
+        "options": [
+          "उत्तर प्रदेशको काशी",
+          "दक्षिण भारत, कर्नाटक",
+          "मुस्ताङ",
+          "मिथिला"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "manjushri-chobhar",
+      "category": "nepal",
+      "en": {
+        "q": "Legend says the Kathmandu Valley was a lake until Manjushri drained it by cutting which gorge with his sword?",
+        "options": [
+          "Kali Gandaki",
+          "Chobhar",
+          "Sundarijal",
+          "Tamakoshi"
+        ]
+      },
+      "ne": {
+        "q": "किंवदन्तीअनुसार मञ्जुश्रीले तरवारले कुन गल्छी काटेर काठमाडौँ उपत्यकाको ताल रित्याए?",
+        "options": [
+          "कालीगण्डकी",
+          "चोभार",
+          "सुन्दरीजल",
+          "तामाकोशी"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "nyatapola-builder",
+      "category": "nepal",
+      "en": {
+        "q": "Bhaktapur's five-roofed Nyatapola, which survived both the 1934 and 2015 earthquakes, was built by which king?",
+        "options": [
+          "Jayasthiti Malla",
+          "Bhupatindra Malla",
+          "Pratap Malla",
+          "Yaksha Malla"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९३४ र २०१५ का दुवै भूकम्प थेगेको भक्तपुरको पाँचतले न्यातपोल कुन राजाले बनाएका हुन्?",
+        "options": [
+          "जयस्थिति मल्ल",
+          "भूपतीन्द्र मल्ल",
+          "प्रताप मल्ल",
+          "यक्ष मल्ल"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "barpak-epicentre",
+      "category": "geography",
+      "en": {
+        "q": "The 2015 Gorkha earthquake's epicentre was near which village?",
+        "options": [
+          "Barpak",
+          "Bandipur",
+          "Sirubari",
+          "Ghandruk"
+        ]
+      },
+      "ne": {
+        "q": "२०७२ सालको गोरखा भूकम्पको केन्द्रबिन्दु कुन गाउँ नजिक थियो?",
+        "options": [
+          "बारपाक",
+          "बन्दीपुर",
+          "सिरुबारी",
+          "घान्द्रुक"
+        ]
+      },
+      "answer": 0
+    },
+    {
+      "id": "nabbe-saal-quake",
+      "category": "calendar",
+      "en": {
+        "q": "The great 1934 earthquake is still remembered in Nepali by the year it struck in Bikram Sambat. Which?",
+        "options": [
+          "1975 BS",
+          "1990 BS",
+          "2007 BS",
+          "2045 BS"
+        ]
+      },
+      "ne": {
+        "q": "सन् १९३४ को महाभूकम्पलाई विक्रम संवत्‌को कुन सालको भूकम्प भनेर सम्झिन्छन्?",
+        "options": [
+          "१९७५ साल",
+          "१९९० साल",
+          "२००७ साल",
+          "२०४५ साल"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "nepal-sambat-879",
+      "category": "calendar",
+      "en": {
+        "q": "Nepal Sambat, the Newar calendar, counts its years from which year CE?",
+        "options": [
+          "57 BCE",
+          "78 CE",
+          "879 CE",
+          "1200 CE"
+        ]
+      },
+      "ne": {
+        "q": "नेपाल संवत्‌ ईस्वी कुन सालदेखि गनिन्छ?",
+        "options": [
+          "ईसापूर्व ५७",
+          "ईस्वी ७८",
+          "ईस्वी ८७९",
+          "ईस्वी १२००"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "republic-jestha-15",
+      "category": "calendar",
+      "en": {
+        "q": "Nepal was declared a republic on which Bikram Sambat date, now Republic Day?",
+        "options": [
+          "Falgun 7",
+          "Jestha 15",
+          "Asoj 3",
+          "Baisakh 1"
+        ]
+      },
+      "ne": {
+        "q": "नेपाल गणतन्त्र घोषणा भएको दिन, अहिलेको गणतन्त्र दिवस, कुन हो?",
+        "options": [
+          "फागुन ७",
+          "जेठ १५",
+          "असोज ३",
+          "वैशाख १"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "president-min-age",
+      "category": "civics",
+      "en": {
+        "q": "What is the minimum age to become Nepal's President?",
+        "options": [
+          "35",
+          "40",
+          "45",
+          "50"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको राष्ट्रपति बन्न कम्तीमा कति वर्ष पुगेको हुनुपर्छ?",
+        "options": [
+          "३५",
+          "४०",
+          "४५",
+          "५०"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "assembly-min-age",
+      "category": "civics",
+      "en": {
+        "q": "A member of the House of Representatives must be at least 25. How old must a National Assembly member be?",
+        "options": [
+          "25",
+          "30",
+          "35",
+          "40"
+        ]
+      },
+      "ne": {
+        "q": "प्रतिनिधिसभा सदस्य कम्तीमा २५ वर्षको हुनुपर्छ। राष्ट्रिय सभा सदस्य कम्तीमा कति वर्षको हुनुपर्छ?",
+        "options": [
+          "२५",
+          "३०",
+          "३५",
+          "४०"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "local-levels-753",
+      "category": "civics",
+      "en": {
+        "q": "How many local levels (municipalities and rural municipalities) does Nepal have?",
+        "options": [
+          "601",
+          "753",
+          "775",
+          "1,000"
+        ]
+      },
+      "ne": {
+        "q": "नेपालमा जम्मा कति स्थानीय तह छन्?",
+        "options": [
+          "६०१",
+          "७५३",
+          "७७५",
+          "१,०००"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "smallest-district-bhaktapur",
+      "category": "geography",
+      "en": {
+        "q": "Which is Nepal's smallest district by area?",
+        "options": [
+          "Lalitpur",
+          "Bhaktapur",
+          "Kathmandu",
+          "Dhanusha"
+        ]
+      },
+      "ne": {
+        "q": "क्षेत्रफलका हिसाबले नेपालको सबैभन्दा सानो जिल्ला कुन हो?",
+        "options": [
+          "ललितपुर",
+          "भक्तपुर",
+          "काठमाडौँ",
+          "धनुषा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "rara-mugu",
+      "category": "geography",
+      "en": {
+        "q": "Rara, Nepal's largest lake, lies in which district?",
+        "options": [
+          "Humla",
+          "Mugu",
+          "Jumla",
+          "Dolpa"
+        ]
+      },
+      "ne": {
+        "q": "नेपालको सबैभन्दा ठूलो ताल रारा कुन जिल्लामा छ?",
+        "options": [
+          "हुम्ला",
+          "मुगु",
+          "जुम्ला",
+          "डोल्पा"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "mahakali-west-border",
+      "category": "geography",
+      "en": {
+        "q": "Which river marks most of Nepal's western border with India?",
+        "options": [
+          "Mechi",
+          "Mahakali",
+          "Karnali",
+          "Rapti"
+        ]
+      },
+      "ne": {
+        "q": "नेपाल–भारतको पश्चिमी सिमाना धेरैजसो कुन नदीले छुट्याउँछ?",
+        "options": [
+          "मेची",
+          "महाकाली",
+          "कर्णाली",
+          "राप्ती"
+        ]
+      },
+      "answer": 1
+    },
+    {
+      "id": "muri-in-pathi",
+      "category": "units",
+      "en": {
+        "q": "One muri of grain equals how many pathi?",
+        "options": [
+          "8",
+          "16",
+          "20",
+          "40"
+        ]
+      },
+      "ne": {
+        "q": "एक मुरी अन्न कति पाथी हुन्छ?",
+        "options": [
+          "८",
+          "१६",
+          "२०",
+          "४०"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "kattha-in-dhur",
+      "category": "units",
+      "en": {
+        "q": "In the Terai, one kattha is divided into how many dhur?",
+        "options": [
+          "4",
+          "16",
+          "20",
+          "100"
+        ]
+      },
+      "ne": {
+        "q": "तराईमा एक कट्ठामा कति धुर हुन्छ?",
+        "options": [
+          "४",
+          "१६",
+          "२०",
+          "१००"
+        ]
+      },
+      "answer": 2
+    },
+    {
+      "id": "ropani-in-aana",
+      "category": "units",
+      "en": {
+        "q": "One ropani is divided into how many aana?",
+        "options": [
+          "4",
+          "8",
+          "16",
+          "20"
+        ]
+      },
+      "ne": {
+        "q": "एक रोपनीमा कति आना हुन्छ?",
+        "options": [
+          "४",
+          "८",
+          "१६",
+          "२०"
+        ]
+      },
+      "answer": 2
     }
   ]
 }
