@@ -8,7 +8,7 @@ import { ItemEditor } from "./_components/item-editor";
 import type { NewPerson } from "./_components/person-select";
 import { usePhotoSummaries } from "./_components/photo-strip";
 import { ItemGroupRow, ItemRow } from "./_components/rows";
-import { personName, RECURRENCE_LABELS } from "./_lib/documents";
+import { personName } from "./_lib/documents";
 import { groupItems, type ItemGroup, itemGroupName } from "./_lib/groups";
 import { REMINDER_ICONS } from "./_lib/icons";
 import { type I18nKey, id, type TFn, todayKeeperDate } from "./_lib/shared";
@@ -213,7 +213,6 @@ export function BillPicker({
             key={template.id}
             icon={REMINDER_ICONS[template.id] ?? "bills"}
             label={template.title}
-            hint={template.recurrence ? t(RECURRENCE_LABELS[template.recurrence]) : undefined}
             onClick={() => onPick(template)}
           />
         ))}

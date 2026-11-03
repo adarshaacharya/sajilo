@@ -267,16 +267,13 @@ function Setup({
 
   return (
     <section className="surface-card space-y-2.5 p-3">
-      <div className="flex items-start gap-2.5">
+      <div className="flex items-center gap-2.5">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
           <Icon name="bolt" className="size-4" />
         </span>
-        <div className="min-w-0">
-          <h2 className="text-[13px] font-semibold leading-snug">{t("electricity.setup-title")}</h2>
-          <p className="mt-0.5 text-[11.5px] leading-snug text-text-secondary">
-            {t("electricity.setup-body")}
-          </p>
-        </div>
+        <h2 className="min-w-0 text-[13px] font-semibold leading-snug">
+          {t("electricity.setup-title")}
+        </h2>
       </div>
 
       <Select
