@@ -7,6 +7,7 @@ import type { SaapMove } from "../../../types/api/SaapMove";
 import type { SaapView } from "../../../types/api/SaapView";
 import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useSaap } from "../games-data";
+import { GameIntro } from "./game-intro";
 import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
@@ -447,10 +448,7 @@ function Start({
   return (
     <div className="space-y-2.5">
       <section className="surface-card space-y-3 p-3">
-        <div>
-          <p className="text-[14px] font-semibold">{t("saap.title")}</p>
-          <p className="mt-0.5 text-[11px] leading-snug text-text-secondary">{t("saap.rules")}</p>
-        </div>
+        <GameIntro title={t("saap.title")} rules={t("saap.rules")} t={t} />
         <button
           type="button"
           onClick={onStart}

@@ -6,6 +6,7 @@ import type { BaghPiece } from "../../../types/api/BaghPiece";
 import type { BaghView } from "../../../types/api/BaghView";
 import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useBagh } from "../games-data";
+import { GameIntro } from "./game-intro";
 import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
@@ -212,12 +213,7 @@ function Start({
         </section>
       )}
       <section className="surface-card space-y-3 p-3">
-        {!outcome && (
-          <div>
-            <p className="text-[14px] font-semibold">{t("bagh.title")}</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-text-secondary">{t("bagh.rules")}</p>
-          </div>
-        )}
+        {!outcome && <GameIntro title={t("bagh.title")} rules={t("bagh.rules")} t={t} />}
         <div className="space-y-1">
           <p className="text-[10.5px] text-text-muted">{t("bagh.play-as")}</p>
           <div className="grid grid-cols-2 gap-1.5">

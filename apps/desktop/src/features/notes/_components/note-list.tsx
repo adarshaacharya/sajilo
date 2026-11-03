@@ -378,7 +378,7 @@ function FolderChips({
             >
               <Icon name="folder" className="size-3" />
               {folderName(item)}
-              <span className="notes-chip__count">{item.count}</span>
+              {item.count > 0 && <span className="notes-chip__count">{item.count}</span>}
             </button>
             {menu === item.id && (
               <Menu onClose={() => setMenu(null)}>

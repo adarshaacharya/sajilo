@@ -65,6 +65,9 @@ export function NoteEditor({
   const saveTimer = useRef(0);
   const cursorTimer = useRef(0);
   const saving = useRef<Promise<void>>(Promise.resolve());
+  // Each finished save; "Saved" shows after one and fades, rather than sitting
+  // on every note from the moment it opens.
+  const [saves, setSaves] = useState(0);
 
   // The latest callbacks, for the editor made once per note.
   const latest = useRef({ onOpenTitle, onChanged, placeholder: t("notes.placeholder") });
@@ -98,6 +101,7 @@ export function NoteEditor({
         .then((saved) => {
           revision.current = saved.revision;
           setSaveState(pending.current === null ? "saved" : "saving");
+          if (pending.current === null) setSaves((count) => count + 1);
           latest.current.onChanged();
         })
         .catch((error) => {
@@ -254,13 +258,15 @@ export function NoteEditor({
       {/* The note's own bar, in the screen rather than the app's header:
           whether it's saved, pin, and the rest in ⋯. */}
       <div className="notes-editor__bar">
-        <span className={`notes-save-state is-${saveState}`}>
-          {saveState === "saving"
-            ? t("notes.saving")
-            : saveState === "failed"
-              ? t("notes.save-failed")
-              : t("notes.saved")}
-        </span>
+        {(saveState !== "saved" || saves > 0) && (
+          <span key={`${saveState}-${saves}`} className={`notes-save-state is-${saveState}`}>
+            {saveState === "saving"
+              ? t("notes.saving")
+              : saveState === "failed"
+                ? t("notes.save-failed")
+                : t("notes.saved")}
+          </span>
+        )}
         <button
           type="button"
           onClick={() => void togglePin()}

@@ -3222,6 +3222,18 @@ input[type="search"]::-webkit-search-decoration {
 .notes-save-state.is-failed {
   color: var(--color-holiday);
 }
+.notes-save-state.is-saved {
+  animation: notes-saved-fade 1.8s ease forwards;
+}
+@keyframes notes-saved-fade {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 /* The editor's own marks: title, headings, checklist boxes, links, tags. */
 .cm-note-title {
@@ -3438,13 +3450,14 @@ input[type="search"]::-webkit-search-decoration {
   height: 30px;
   padding: 0 10px;
   border-radius: 8px;
-  /* The holiday red, softly: easy to spot, not alarming. */
-  background: color-mix(in srgb, var(--color-holiday) 12%, transparent);
-  color: var(--color-holiday);
-  transition: background 150ms ease;
+  /* Quiet like search beside it: always there, never shouting. */
+  background: color-mix(in srgb, var(--color-text) 5%, transparent);
+  color: var(--color-text-muted);
+  transition: background 150ms ease, color 150ms ease;
 }
 .notes-trash-open:hover {
-  background: color-mix(in srgb, var(--color-holiday) 20%, transparent);
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  color: var(--color-text-secondary);
 }
 .notes-trash-actions {
   display: flex;

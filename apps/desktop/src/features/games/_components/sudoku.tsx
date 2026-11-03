@@ -7,6 +7,7 @@ import type { SudokuLevel } from "../../../types/api/SudokuLevel";
 import type { SudokuView } from "../../../types/api/SudokuView";
 import { useOverOnOpen } from "../_lib/use-over-on-open";
 import { useSudoku } from "../games-data";
+import { GameIntro } from "./game-intro";
 import { GameOver } from "./game-over";
 
 type TFn = ReturnType<typeof useSettings>["t"];
@@ -299,10 +300,7 @@ function Start({
 }) {
   return (
     <section className="surface-card space-y-2.5 p-3">
-      <div>
-        <p className="text-[14px] font-semibold">{t("sudoku.title")}</p>
-        <p className="mt-0.5 text-[11px] leading-snug text-text-secondary">{t("sudoku.rules")}</p>
-      </div>
+      <GameIntro title={t("sudoku.title")} rules={t("sudoku.rules")} t={t} />
       <LevelButtons stats={view.stats} onStart={onStart} t={t} />
     </section>
   );
