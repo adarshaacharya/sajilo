@@ -7,11 +7,16 @@ import { api } from "./ipc";
 export function useFitWindow(element: HTMLElement | null) {
   useLayoutEffect(() => {
     if (!element) return;
+    // The window opens before it knows the card's height, so the card stays
+    // out of sight until its window fits it, rather than showing cut off and
+    // then jumping. Hidden, it still lays out and can be measured.
+    element.style.visibility = "hidden";
+    const reveal = () => requestAnimationFrame(() => element.style.removeProperty("visibility"));
     const fit = () => {
       const height = Math.ceil(element.getBoundingClientRect().height);
       // The shell sizes it, so a card that grows can move up rather than
       // run off the bottom of the screen.
-      void api.fitCard(height).catch(() => {});
+      api.fitCard(height).then(reveal, reveal);
     };
     fit();
     const observer = new ResizeObserver(fit);

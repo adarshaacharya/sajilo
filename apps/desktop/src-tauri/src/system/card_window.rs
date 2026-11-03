@@ -128,7 +128,7 @@ fn take_lift(place: Place) -> bool {
 /// instead of slipping under the taskbar.
 pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
     let Ok(Some(monitor)) = window.current_monitor() else {
-        let _ = window.set_size(tauri::LogicalSize::new(WIDTH, height));
+        resize(window, height);
         return;
     };
     let scale = monitor.scale_factor();
@@ -136,7 +136,7 @@ pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
     let top = f64::from(area.position.y) / scale;
     let bottom = top + f64::from(area.size.height) / scale;
     let height = height.min(bottom - top - 2.0 * MARGIN).max(1.0);
-    let _ = window.set_size(tauri::LogicalSize::new(WIDTH, height));
+    resize(window, height);
     let Ok(position) = window.outer_position() else {
         return;
     };
@@ -152,6 +152,24 @@ pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
         }
         let _ = window.set_position(tauri::LogicalPosition::new(place.x, place.y));
     }
+}
+
+/// Sets a card's height. GTK keeps a non-resizable window at the size it
+/// first had and ignores a resize, so on Linux every card stayed at its
+/// opening height with the rest cut off. Unlocked for the resize, with the
+/// size pinned by min and max so the window manager can't offer the user a
+/// different one meanwhile — as `window::apply_window_kind` does.
+fn resize(window: &tauri::WebviewWindow<Wry>, height: f64) {
+    let size = tauri::LogicalSize::new(WIDTH, height);
+    #[cfg(target_os = "linux")]
+    {
+        let _ = window.set_resizable(true);
+        let _ = window.set_min_size(Some(size));
+        let _ = window.set_max_size(Some(size));
+    }
+    let _ = window.set_size(size);
+    #[cfg(target_os = "linux")]
+    let _ = window.set_resizable(false);
 }
 
 /// Lets a card that was held back while another was showing come up now.
