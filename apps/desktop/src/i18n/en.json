@@ -600,6 +600,8 @@
   "updater.progress": "{done} of {total} MB",
   "updater.progress-size": "{done} MB",
   "updater.stalled": "The update is taking too long.",
+  "updater.stuck-body": "Something on this computer has kept updates from installing for a few days. Download the latest version to get back up to date.",
+  "updater.stuck-title": "Sajilo couldn't update itself",
   "updater.close": "Close update window",
   "updater.install-restart": "Install & restart",
   "updater.installing": "Installing…",

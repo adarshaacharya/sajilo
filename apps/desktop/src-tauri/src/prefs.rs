@@ -117,6 +117,9 @@ pub const AUTOSTART_DEFAULTED: &str = "autostartDefaulted";
 pub const TRAY_PIN_TIP_DISMISSED: &str = "trayPinTipDismissed";
 /// Set once the matching one-time Windows notification has been sent.
 pub const TRAY_PIN_NOTIFIED: &str = "trayPinNotified";
+/// Set once a Mac copy running where it can't update itself has offered to
+/// move into Applications.
+pub const MOVE_TO_APPLICATIONS_ASKED: &str = "moveToApplicationsAsked";
 pub const VEGETABLE_FAVOURITES: &str = "vegetableFavourites";
 pub const STOCK_WATCHLIST: &str = "stockWatchlist";
 /// Monthly SIP payment schedules, per fund. Written by `commands::sips`.

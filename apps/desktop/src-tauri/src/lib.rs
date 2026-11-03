@@ -243,6 +243,12 @@ pub fn run() {
             #[cfg(target_os = "windows")]
             system::tray_pin::notify_once(app.handle());
 
+            // Run from the disk image or a quarantined download, a Mac copy
+            // can't replace itself, so no update would ever install. Once
+            // per install it offers to move where it can.
+            #[cfg(target_os = "macos")]
+            system::move_to_applications::offer_once(app.handle());
+
             Ok(())
         })
         .on_window_event(|window, event| match event {

@@ -600,6 +600,8 @@
   "updater.progress": "{total} MB मध्ये {done} MB",
   "updater.progress-size": "{done} MB",
   "updater.stalled": "अपडेट हुन धेरै समय लागिरहेको छ।",
+  "updater.stuck-body": "केही दिनदेखि यो कम्प्युटरमा अपडेट इन्स्टल हुन सकेको छैन। नयाँ संस्करण डाउनलोड गरेर अपडेट गर्नुहोस्।",
+  "updater.stuck-title": "सजिलो आफैं अपडेट हुन सकेन",
   "updater.close": "अपडेट विन्डो बन्द गर्नुहोस्",
   "updater.install-restart": "अपडेट गर्नुहोस्",
   "updater.installing": "इन्स्टल हुँदै…",

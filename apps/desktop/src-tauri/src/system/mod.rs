@@ -7,6 +7,8 @@ pub mod dbus;
 pub mod display;
 pub mod dock;
 pub mod idle;
+#[cfg(target_os = "macos")]
+pub mod move_to_applications;
 pub mod newer_data;
 pub mod tray_pin;
 pub mod update_restart;

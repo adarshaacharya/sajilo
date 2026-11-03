@@ -11,6 +11,7 @@ import {
 import { openExternalLink } from "../lib/external-link";
 import { api, type UpdateInstallKind } from "../lib/ipc";
 import { isWindows } from "../lib/platform";
+import { track } from "../lib/usage";
 
 export type UpdateState =
   | "idle"
@@ -43,6 +44,9 @@ interface Updater {
   /** While downloading; null before the first byte and once it is in. */
   progress: UpdateProgress | null;
   error: string | null;
+  /** Installs have kept failing for days: something on this computer stops
+   * the app updating itself, and only the user can fix it. */
+  stuck: boolean;
   checkForUpdates: () => Promise<void>;
   installUpdate: () => Promise<boolean>;
   restartToUpdate: () => Promise<void>;
@@ -54,6 +58,7 @@ interface UpdaterSnapshot {
   version: string | null;
   progress: UpdateProgress | null;
   error: string | null;
+  stuck: boolean;
 }
 
 type UpdaterRequest = { action: "snapshot" } | { action: "check" } | { action: "install" };
@@ -76,6 +81,21 @@ const STALL_MS = 2 * 60 * 1000;
 const STALL_CHECK_MS = 5 * 1000;
 /** Without a total, progress is told in steps of this many bytes. */
 const PROGRESS_STEP = 256 * 1024;
+/** One failed install says little; the next check tries again. Failing for
+ * this long says something on the computer stops it for good. */
+const STUCK_AFTER_MS = 3 * 24 * 60 * 60 * 1000;
+/** When installs started failing, as epoch ms; any success clears it. */
+const FAILING_SINCE_KEY = "updateFailingSince";
+
+/** A rough cause for the usage report; the error itself never leaves. */
+function failureCause(error: string): "offline" | "stalled" | "permission" | "other" {
+  if (error === STALLED) return "stalled";
+  if (/permission|denied|not permitted|read-only|os error (1|13|30)\b/i.test(error)) {
+    return "permission";
+  }
+  if (/network|connect|dns|timed out|sending request|offline/i.test(error)) return "offline";
+  return "other";
+}
 
 async function send(event: string, payload: UpdaterSnapshot | UpdaterRequest) {
   try {
@@ -135,6 +155,7 @@ export function UpdaterProvider({
   const [version, setVersion] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<UpdateProgress | null>(null);
+  const [stuck, setStuck] = useState(false);
   const update = useRef<Update | null>(null);
   /** Windows: downloaded, waiting for a quiet moment to install. */
   const downloaded = useRef(false);
@@ -146,6 +167,22 @@ export function UpdaterProvider({
   }, [state]);
 
   // ---- owner: the only window that checks, downloads and installs
+
+  const noteFailure = useCallback((reason: string) => {
+    track(`action.update-fail.${failureCause(reason)}`);
+    api
+      .getSetting<number>(FAILING_SINCE_KEY)
+      .then((since) => {
+        if (since === null) void api.setSetting(FAILING_SINCE_KEY, Date.now());
+        else setStuck(Date.now() - since >= STUCK_AFTER_MS);
+      })
+      .catch(() => {});
+  }, []);
+
+  const noteSuccess = useCallback(() => {
+    setStuck(false);
+    void api.deleteSetting(FAILING_SINCE_KEY).catch(() => {});
+  }, []);
 
   /**
    * Runs a download or install, reporting its progress and watching that it
@@ -164,6 +201,7 @@ export function UpdaterProvider({
         window.clearInterval(watchdog);
         setError(STALLED);
         setState("failed");
+        noteFailure(STALLED);
       }, STALL_CHECK_MS);
       try {
         await run((event) => {
@@ -188,20 +226,25 @@ export function UpdaterProvider({
         setProgress(null);
       }
     },
-    [],
+    [noteFailure],
   );
 
   const runCheck = useCallback(async () => {
     setState("checking");
     setError(null);
+    // A check that can't reach the server is routine (a laptop just woken);
+    // only a found update that won't install counts as failing.
+    let found = false;
     try {
       const { check } = await import("@tauri-apps/plugin-updater");
       const next = await check();
+      found = next !== null;
       update.current = next;
       downloaded.current = false;
       setVersion(next?.version ?? null);
       if (!next) {
         setState("up-to-date");
+        noteSuccess();
       } else if (installKindRef.current === "auto") {
         // Wherever installing is quiet, it just happens: nobody is asked.
         // A Linux package would pop a password prompt out of nowhere, so it
@@ -217,6 +260,7 @@ export function UpdaterProvider({
         } else {
           await watched((onEvent) => next.downloadAndInstall(onEvent));
           setState("installed");
+          noteSuccess();
           void api.updateInstalled().catch(() => {});
         }
       } else {
@@ -225,8 +269,9 @@ export function UpdaterProvider({
     } catch (checkError) {
       setError(String(checkError));
       setState("failed");
+      if (found) noteFailure(String(checkError));
     }
-  }, [watched]);
+  }, [watched, noteFailure, noteSuccess]);
 
   const runInstall = useCallback(async () => {
     const pending = update.current;
@@ -241,23 +286,25 @@ export function UpdaterProvider({
       if (downloaded.current) await watched(() => pending.install());
       else await watched((onEvent) => pending.downloadAndInstall(onEvent));
       setState("installed");
+      noteSuccess();
       void api.updateInstalled().catch(() => {});
       return true;
     } catch (installError) {
       setError(String(installError));
       setState("failed");
+      noteFailure(String(installError));
       return false;
     }
-  }, [watched]);
+  }, [watched, noteFailure, noteSuccess]);
 
   useEffect(() => {
-    if (owner) void send(STATE_EVENT, { state, version, progress, error });
-  }, [owner, state, version, progress, error]);
+    if (owner) void send(STATE_EVENT, { state, version, progress, error, stuck });
+  }, [owner, state, version, progress, error, stuck]);
 
   useTauriEvent<UpdaterRequest>(REQUEST_EVENT, owner, (request) => {
     switch (request.action) {
       case "snapshot":
-        void send(STATE_EVENT, { state, version, progress, error });
+        void send(STATE_EVENT, { state, version, progress, error, stuck });
         break;
       case "check":
         if (!SETTLED.includes(stateRef.current)) void runCheck();
@@ -279,6 +326,7 @@ export function UpdaterProvider({
     setVersion(snapshot.version);
     setProgress(snapshot.progress ?? null);
     setError(snapshot.error);
+    setStuck(snapshot.stuck ?? false);
     if (snapshot.state === "installed" || snapshot.state === "failed") {
       installWaiter.current?.(snapshot.state === "installed");
       installWaiter.current = null;
@@ -355,6 +403,7 @@ export function UpdaterProvider({
         version,
         progress,
         error,
+        stuck,
         checkForUpdates,
         installUpdate,
         restartToUpdate,

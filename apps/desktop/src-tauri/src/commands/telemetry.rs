@@ -123,6 +123,11 @@ pub const EVENTS: &[&str] = &[
     // That a question was answered, never which answer.
     "action.quiz-answer",
     "action.quiz-daily-answer",
+    // An update that couldn't install itself, by rough cause; never the error.
+    "action.update-fail.offline",
+    "action.update-fail.stalled",
+    "action.update-fail.permission",
+    "action.update-fail.other",
 ];
 
 /// Counts since the last report that got through, by event name.

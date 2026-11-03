@@ -9,6 +9,8 @@ import { Icon } from "./icon";
 
 const SNOOZE_KEY = "sajilo.updater.windowSnooze.v1";
 const SNOOZE_MS = 24 * 60 * 60 * 1000;
+/** "Couldn't update itself" is said once a version, not daily. */
+const STUCK_SNOOZE_MS = 30 * 24 * 60 * 60 * 1000;
 
 interface Snooze {
   version: string;
@@ -27,8 +29,21 @@ function isSnoozed(version: string): boolean {
 /** A dedicated desktop surface that stays hidden until an update is available. */
 export function UpdateWindow() {
   const { t, numerals } = useSettings();
-  const { enabled, installKind, state, version, progress, error, installUpdate, restartToUpdate } =
-    useUpdater();
+  const {
+    enabled,
+    installKind,
+    state,
+    version,
+    progress,
+    error,
+    stuck,
+    installUpdate,
+    restartToUpdate,
+  } = useUpdater();
+  // Quiet installs that have failed for days: the one time the user hears of
+  // it, with the download that gets them going again.
+  const notice = installKind === "auto" && stuck;
+  const manual = installKind === "manual" || notice;
   const percent = progressPercent(progress);
   const [hiddenVersion, setHiddenVersion] = useState<string | null>(null);
   const [installFailed, setInstallFailed] = useState(false);
@@ -40,15 +55,20 @@ export function UpdateWindow() {
     // Where installing is quiet it happens on its own, and the app restarts
     // into it once nobody's looking, so there is nothing to ask. A failed
     // attempt is retried by the next half-hourly check; Settings shows it.
-    // The window is only for installs that need the user.
-    installKind !== "auto" &&
-    ["available", "downloading", "installed", "failed"].includes(state);
+    // Otherwise the window is only for installs that need the user.
+    (notice ||
+      (installKind !== "auto" &&
+        ["available", "downloading", "installed", "failed"].includes(state)));
 
   useEffect(() => {
-    if (!visible) return;
     void import("@tauri-apps/api/window")
       .then(async ({ getCurrentWindow }) => {
         const current = getCurrentWindow();
+        if (!visible) {
+          // An install that went through after all takes the notice away.
+          await current.hide();
+          return;
+        }
         await current.show();
         await current.setFocus();
       })
@@ -69,10 +89,8 @@ export function UpdateWindow() {
   if (!version) return null;
 
   const later = () => {
-    localStorage.setItem(
-      SNOOZE_KEY,
-      JSON.stringify({ version, until: Date.now() + SNOOZE_MS } satisfies Snooze),
-    );
+    const until = Date.now() + (notice ? STUCK_SNOOZE_MS : SNOOZE_MS);
+    localStorage.setItem(SNOOZE_KEY, JSON.stringify({ version, until } satisfies Snooze));
     setHiddenVersion(version);
     void import("@tauri-apps/api/window")
       .then(({ getCurrentWindow }) => getCurrentWindow().hide())
@@ -82,7 +100,7 @@ export function UpdateWindow() {
   const install = async () => {
     setInstallFailed(false);
     // Nothing to install here: the download page, and out of the way.
-    if (installKind === "manual") {
+    if (manual) {
       openExternalLink(DOWNLOAD_URL);
       later();
       return;
@@ -108,7 +126,7 @@ export function UpdateWindow() {
       <button
         type="button"
         aria-label={t("updater.close")}
-        disabled={state === "downloading"}
+        disabled={state === "downloading" && !notice}
         onClick={later}
         className="update-window__close"
       >
@@ -123,7 +141,11 @@ export function UpdateWindow() {
             className="text-[15px] font-semibold leading-tight text-text"
             data-tauri-drag-region
           >
-            {state === "installed" ? t("updater.ready-title") : t("updater.prompt-title")}
+            {notice
+              ? t("updater.stuck-title")
+              : state === "installed"
+                ? t("updater.ready-title")
+                : t("updater.prompt-title")}
           </h2>
           <p
             className="mt-1 text-[11px] font-medium tabular-nums text-text-secondary"
@@ -139,11 +161,13 @@ export function UpdateWindow() {
         className="mt-3 text-[12px] leading-relaxed text-text-secondary"
         data-tauri-drag-region
       >
-        {state === "installed"
-          ? t("updater.ready-body")
-          : installKind === "manual"
-            ? t("updater.manual-body")
-            : t("updater.prompt-body")}
+        {notice
+          ? t("updater.stuck-body")
+          : state === "installed"
+            ? t("updater.ready-body")
+            : installKind === "manual"
+              ? t("updater.manual-body")
+              : t("updater.prompt-body")}
       </p>
       {installKind === "prompt" && state !== "installed" && (
         <p className="mt-1 text-[11px] leading-snug text-text-muted" data-tauri-drag-region>
@@ -160,7 +184,7 @@ export function UpdateWindow() {
         <Icon name="openExternal" className="size-[9px]" />
       </button>
 
-      {state === "downloading" && progress && (
+      {!notice && state === "downloading" && progress && (
         <div className="update-window__progress" aria-live="polite">
           <div
             className="update-window__bar"
@@ -178,7 +202,7 @@ export function UpdateWindow() {
         </div>
       )}
 
-      {(installFailed || state === "failed") && (
+      {!notice && (installFailed || state === "failed") && (
         <p role="alert" className="mt-2 text-[10px] leading-snug text-negative">
           {state === "failed" && error === STALLED
             ? t("updater.stalled")
@@ -196,7 +220,7 @@ export function UpdateWindow() {
       <div className="update-window__actions">
         <button
           type="button"
-          disabled={state === "downloading"}
+          disabled={state === "downloading" && !notice}
           onClick={later}
           className="settings-btn min-w-[64px] justify-center disabled:opacity-50"
         >
@@ -204,14 +228,14 @@ export function UpdateWindow() {
         </button>
         <button
           type="button"
-          disabled={state === "downloading"}
+          disabled={state === "downloading" && !notice}
           onClick={() => install()}
           className="settings-btn settings-btn--accent min-w-[126px] justify-center disabled:opacity-60"
         >
-          {state === "installed"
-            ? t("settings.update-restart")
-            : installKind === "manual"
-              ? t("updater.download")
+          {manual
+            ? t("updater.download")
+            : state === "installed"
+              ? t("settings.update-restart")
               : state === "downloading"
                 ? t("updater.installing")
                 : state === "failed" || installFailed
