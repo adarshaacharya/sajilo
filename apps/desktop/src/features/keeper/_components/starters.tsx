@@ -28,10 +28,7 @@ export function Starters({
         key: type,
         icon: DOCUMENT_ICONS[type],
         title: docTypeLabel(t, type),
-        hint:
-          spec.kind === "repeats"
-            ? t(RECURRENCE_LABELS[spec.defaultRecurrence])
-            : t("keeper.hint.renews"),
+        hint: spec.kind === "repeats" ? t(RECURRENCE_LABELS[spec.defaultRecurrence]) : "",
         onPick: () => onDocument(type),
       };
     }),
@@ -61,7 +58,9 @@ export function Starters({
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12px] font-semibold">{row.title}</span>
-                <span className="block truncate text-[10px] text-text-muted">{row.hint}</span>
+                {row.hint && (
+                  <span className="block truncate text-[10px] text-text-muted">{row.hint}</span>
+                )}
               </span>
               <Icon name="plus" className="size-3.5 shrink-0 text-accent-mark" />
             </button>

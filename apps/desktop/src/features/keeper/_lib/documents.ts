@@ -27,6 +27,8 @@ export type RecordField = {
   label: I18nKey;
   /** Spans both columns. Short values (CC, premium) sit side by side. */
   wide?: boolean;
+  /** Rarely needed: folded under "More details" until asked for or filled. */
+  extra?: boolean;
   options?: readonly { id: string; label: I18nKey }[];
 };
 
@@ -216,10 +218,10 @@ export function documentSpec(
               { id: "other", label: "keeper.bluebook.class.other" },
             ],
           },
-          { key: "makeModel", label: "keeper.bluebook.make-model" },
-          { key: "engineCc", label: "keeper.bluebook.engine-cc" },
-          { key: "engineNumber", label: "keeper.bluebook.engine-number" },
-          { key: "chassisNumber", label: "keeper.bluebook.chassis-number" },
+          { key: "makeModel", label: "keeper.bluebook.make-model", extra: true },
+          { key: "engineCc", label: "keeper.bluebook.engine-cc", extra: true },
+          { key: "engineNumber", label: "keeper.bluebook.engine-number", extra: true },
+          { key: "chassisNumber", label: "keeper.bluebook.chassis-number", extra: true },
         ],
         required: NUMBER,
         issued: "keeper.bluebook.registered",

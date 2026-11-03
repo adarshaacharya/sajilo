@@ -52,6 +52,11 @@ export function RecordEditor({
   t: TFn;
 }) {
   const spec = documentSpec(record);
+  const extras = spec.fields.filter((field) => field.extra);
+  const [showExtras, setShowExtras] = useState(() =>
+    extras.some((field) => fieldValue(record, field.key)),
+  );
+  const fields = spec.fields.filter((field) => showExtras || !field.extra);
   const bluebooks = records.filter((other) => other.documentType === "bluebook");
   const setField = (key: string, value: string) => {
     if (key === NUMBER) {
@@ -83,7 +88,7 @@ export function RecordEditor({
                 ],
               )
             : spec.kind === "expires"
-              ? t("keeper.hint.renews")
+              ? undefined
               : t("keeper.hint.on-file")
         }
       />
@@ -97,7 +102,7 @@ export function RecordEditor({
       />
 
       <div className="grid grid-cols-2 gap-1.5">
-        {spec.fields.map((field) => (
+        {fields.map((field) => (
           <div key={field.key} className={field.wide ? "col-span-2" : "min-w-0"}>
             {field.key === "insured" && isVehicleInsurance(record) && bluebooks.length > 0 ? (
               <VehiclePicker record={record} bluebooks={bluebooks} onChange={onChange} t={t} />
@@ -125,6 +130,16 @@ export function RecordEditor({
           </div>
         ))}
       </div>
+      {extras.length > 0 && !showExtras && (
+        <button
+          type="button"
+          onClick={() => setShowExtras(true)}
+          className="flex items-center gap-1 px-0.5 text-[10px] font-medium text-accent-mark hover:underline"
+        >
+          <Icon name="plus" className="size-2.5" />
+          {t("keeper.more-details")}
+        </button>
+      )}
 
       {record.documentType === "custom" && (
         <>
