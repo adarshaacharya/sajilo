@@ -37,7 +37,6 @@ interface Updater {
   enabled: boolean;
   /** How this copy updates; see `UpdateInstallKind`. */
   installKind: UpdateInstallKind;
-  automaticUpdates: boolean;
   state: UpdateState;
   /** The version on offer, once a check has found one. */
   version: string | null;
@@ -47,7 +46,6 @@ interface Updater {
   checkForUpdates: () => Promise<void>;
   installUpdate: () => Promise<boolean>;
   restartToUpdate: () => Promise<void>;
-  setAutomaticUpdates: (enabled: boolean) => void;
 }
 
 /** What the checking window broadcasts and every other window mirrors. */
@@ -56,14 +54,9 @@ interface UpdaterSnapshot {
   version: string | null;
   progress: UpdateProgress | null;
   error: string | null;
-  automaticUpdates: boolean;
 }
 
-type UpdaterRequest =
-  | { action: "snapshot" }
-  | { action: "check" }
-  | { action: "install" }
-  | { action: "automatic"; enabled: boolean };
+type UpdaterRequest = { action: "snapshot" } | { action: "check" } | { action: "install" };
 
 const STATE_EVENT = "sajilo://updater-state";
 const REQUEST_EVENT = "sajilo://updater-request";
@@ -136,7 +129,6 @@ export function UpdaterProvider({
 }) {
   const owner = mode === "owner";
   const [enabled, setEnabled] = useState(false);
-  const [automaticUpdates, setAutomaticUpdatesState] = useState(true);
   const [installKind, setInstallKind] = useState<UpdateInstallKind>("auto");
   const installKindRef = useRef<UpdateInstallKind>("auto");
   const [state, setState] = useState<UpdateState>("idle");
@@ -147,7 +139,6 @@ export function UpdaterProvider({
   /** Windows: downloaded, waiting for a quiet moment to install. */
   const downloaded = useRef(false);
   const stateRef = useRef<UpdateState>("idle");
-  const automaticUpdatesRef = useRef(true);
   const installWaiter = useRef<((installed: boolean) => void) | null>(null);
 
   useEffect(() => {
@@ -211,9 +202,10 @@ export function UpdaterProvider({
       setVersion(next?.version ?? null);
       if (!next) {
         setState("up-to-date");
-      } else if (automaticUpdatesRef.current && installKindRef.current === "auto") {
-        // Only a quiet install happens on its own. A Linux package would
-        // pop a password prompt out of nowhere, so it waits for a click.
+      } else if (installKindRef.current === "auto") {
+        // Wherever installing is quiet, it just happens: nobody is asked.
+        // A Linux package would pop a password prompt out of nowhere, so it
+        // waits for a click.
         setState("downloading");
         if (isWindows) {
           // Windows' installer closes the app as it starts, so only download
@@ -259,23 +251,19 @@ export function UpdaterProvider({
   }, [watched]);
 
   useEffect(() => {
-    if (owner) void send(STATE_EVENT, { state, version, progress, error, automaticUpdates });
-  }, [owner, state, version, progress, error, automaticUpdates]);
+    if (owner) void send(STATE_EVENT, { state, version, progress, error });
+  }, [owner, state, version, progress, error]);
 
   useTauriEvent<UpdaterRequest>(REQUEST_EVENT, owner, (request) => {
     switch (request.action) {
       case "snapshot":
-        void send(STATE_EVENT, { state, version, progress, error, automaticUpdates });
+        void send(STATE_EVENT, { state, version, progress, error });
         break;
       case "check":
         if (!SETTLED.includes(stateRef.current)) void runCheck();
         break;
       case "install":
         void runInstall();
-        break;
-      case "automatic":
-        automaticUpdatesRef.current = request.enabled;
-        setAutomaticUpdatesState(request.enabled);
         break;
     }
   });
@@ -291,8 +279,6 @@ export function UpdaterProvider({
     setVersion(snapshot.version);
     setProgress(snapshot.progress ?? null);
     setError(snapshot.error);
-    automaticUpdatesRef.current = snapshot.automaticUpdates;
-    setAutomaticUpdatesState(snapshot.automaticUpdates);
     if (snapshot.state === "installed" || snapshot.state === "failed") {
       installWaiter.current?.(snapshot.state === "installed");
       installWaiter.current = null;
@@ -319,16 +305,6 @@ export function UpdaterProvider({
     await relaunch();
   }, []);
 
-  const setAutomaticUpdates = useCallback(
-    (next: boolean) => {
-      automaticUpdatesRef.current = next;
-      setAutomaticUpdatesState(next);
-      void api.setSetting("automaticUpdates", next).catch(() => {});
-      if (!owner) void send(REQUEST_EVENT, { action: "automatic", enabled: next });
-    },
-    [owner],
-  );
-
   useEffect(() => {
     let cancelled = false;
     let interval: number | undefined;
@@ -345,16 +321,12 @@ export function UpdaterProvider({
     }
     Promise.all([
       api.updaterEnabled(),
-      api.getSetting<boolean>("automaticUpdates"),
       api.updateInstallKind().catch((): UpdateInstallKind => "auto"),
     ])
-      .then(([isEnabled, storedAutomaticUpdates, kind]) => {
+      .then(([isEnabled, kind]) => {
         if (cancelled) return;
         installKindRef.current = kind;
         setInstallKind(kind);
-        const nextAutomaticUpdates = storedAutomaticUpdates ?? true;
-        automaticUpdatesRef.current = nextAutomaticUpdates;
-        setAutomaticUpdatesState(nextAutomaticUpdates);
         setEnabled(isEnabled);
         if (!isEnabled) return;
         if (!owner) {
@@ -379,7 +351,6 @@ export function UpdaterProvider({
       value={{
         enabled,
         installKind,
-        automaticUpdates,
         state,
         version,
         progress,
@@ -387,7 +358,6 @@ export function UpdaterProvider({
         checkForUpdates,
         installUpdate,
         restartToUpdate,
-        setAutomaticUpdates,
       }}
     >
       {children}

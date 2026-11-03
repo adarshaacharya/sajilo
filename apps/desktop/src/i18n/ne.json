@@ -601,7 +601,6 @@
   "updater.progress-size": "{done} MB",
   "updater.stalled": "अपडेट हुन धेरै समय लागिरहेको छ।",
   "updater.close": "अपडेट विन्डो बन्द गर्नुहोस्",
-  "updater.automatic-updates": "आउने अपडेटहरू आफैं डाउनलोड र इन्स्टल गर्नुहोस्",
   "updater.install-restart": "अपडेट गर्नुहोस्",
   "updater.installing": "इन्स्टल हुँदै…",
   "updater.later": "पछि",

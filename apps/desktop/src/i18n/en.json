@@ -601,7 +601,6 @@
   "updater.progress-size": "{done} MB",
   "updater.stalled": "The update is taking too long.",
   "updater.close": "Close update window",
-  "updater.automatic-updates": "Automatically download and install future updates",
   "updater.install-restart": "Install & restart",
   "updater.installing": "Installing…",
   "updater.later": "Later",

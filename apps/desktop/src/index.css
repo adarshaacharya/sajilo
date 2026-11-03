@@ -482,8 +482,7 @@ html {
   .update-header-btn,
   .copy-chip,
   .toggle-chip,
-  .settings-btn,
-  .update-window__automatic
+  .settings-btn
 ) { font-size: var(--text-size-11); }
 
 :root[data-text-size] .update-window__close { font-size: var(--text-size-18); }
@@ -1626,30 +1625,6 @@ button.rashi-pin:hover {
   to {
     transform: translateX(340%);
   }
-}
-
-.update-window__automatic {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 12px;
-  color: var(--color-text-secondary);
-  font-size: 11px;
-  line-height: 1.3;
-  cursor: pointer;
-}
-
-.update-window__automatic input {
-  width: 14px;
-  height: 14px;
-  margin: 0;
-  accent-color: var(--color-accent-fill);
-}
-
-.update-window__automatic:has(input:focus-visible) {
-  outline: var(--focus-ring);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
 }
 
 .update-window__close:focus-visible {

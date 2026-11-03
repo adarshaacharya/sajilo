@@ -27,18 +27,8 @@ function isSnoozed(version: string): boolean {
 /** A dedicated desktop surface that stays hidden until an update is available. */
 export function UpdateWindow() {
   const { t, numerals } = useSettings();
-  const {
-    enabled,
-    installKind,
-    automaticUpdates,
-    state,
-    version,
-    progress,
-    error,
-    installUpdate,
-    restartToUpdate,
-    setAutomaticUpdates,
-  } = useUpdater();
+  const { enabled, installKind, state, version, progress, error, installUpdate, restartToUpdate } =
+    useUpdater();
   const percent = progressPercent(progress);
   const [hiddenVersion, setHiddenVersion] = useState<string | null>(null);
   const [installFailed, setInstallFailed] = useState(false);
@@ -47,8 +37,12 @@ export function UpdateWindow() {
     version !== null &&
     hiddenVersion !== version &&
     !isSnoozed(version) &&
-    ["available", "downloading", "installed", "failed"].includes(state) &&
-    !(automaticUpdates && state === "downloading");
+    // Where installing is quiet it happens on its own, and the app restarts
+    // into it once nobody's looking, so there is nothing to ask. A failed
+    // attempt is retried by the next half-hourly check; Settings shows it.
+    // The window is only for installs that need the user.
+    installKind !== "auto" &&
+    ["available", "downloading", "installed", "failed"].includes(state);
 
   useEffect(() => {
     if (!visible) return;
@@ -197,19 +191,6 @@ export function UpdateWindow() {
             {t("updater.download-instead")}
           </button>
         </p>
-      )}
-
-      {/* Only a quiet install can be automatic. While one runs, its progress
-          takes this place. */}
-      {installKind === "auto" && !(state === "downloading" && progress) && (
-        <label className="update-window__automatic">
-          <input
-            type="checkbox"
-            checked={automaticUpdates}
-            onChange={(event) => setAutomaticUpdates(event.currentTarget.checked)}
-          />
-          <span>{t("updater.automatic-updates")}</span>
-        </label>
       )}
 
       <div className="update-window__actions">
