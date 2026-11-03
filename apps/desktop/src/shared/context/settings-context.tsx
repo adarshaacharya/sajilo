@@ -76,7 +76,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   jobsEnabled: true,
   billsEnabled: true,
   gamesEnabled: true,
-  tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/tools"],
+  tabBar: ["/bazar", "/news", "/focus", "/rashifal", "/games"],
   moreOrder: [],
 };
 
@@ -107,17 +107,20 @@ interface Settings {
 
 const SettingsContext = createContext<Settings | null>(null);
 
-/** The tab bar before Tools and Notes swapped places (0.1.36). */
-const OLD_DEFAULT_TAB_BAR = ["/bazar", "/news", "/focus", "/rashifal", "/notes"];
+/** Earlier default bars: Notes last until 0.1.36, then Tools until 0.1.39. */
+const OLD_DEFAULT_TAB_BARS = [
+  ["/bazar", "/news", "/focus", "/rashifal", "/notes"],
+  ["/bazar", "/news", "/focus", "/rashifal", "/tools"],
+];
 
 /**
  * A saved bar identical to the old default was never really chosen, so it
  * moves with the default; any bar someone arranged themselves is kept.
  */
 function withoutOldDefault(tabBar: string[]): string[] {
-  const untouched =
-    tabBar.length === OLD_DEFAULT_TAB_BAR.length &&
-    tabBar.every((to, index) => to === OLD_DEFAULT_TAB_BAR[index]);
+  const untouched = OLD_DEFAULT_TAB_BARS.some(
+    (old) => tabBar.length === old.length && tabBar.every((to, index) => to === old[index]),
+  );
   return untouched ? DEFAULT_MODULES.tabBar : tabBar;
 }
 
