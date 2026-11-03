@@ -236,7 +236,7 @@ export function DisplayTab({
         )}
       </SettingsSection>
 
-      <SettingsSection title={t("settings.mini-view")} footnote={t("settings.mini-view-note")}>
+      <SettingsSection title={t("settings.mini-view")}>
         <Select
           label={t("settings.mini-view-shows")}
           value={miniLine}

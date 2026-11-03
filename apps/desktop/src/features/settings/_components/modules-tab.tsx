@@ -76,7 +76,6 @@ export function ModulesTab() {
             "forexEnabled",
             <CurrencyPicker
               title={t("settings.currencies")}
-              hint={t("settings.currencies-hint")}
               selected={modules.forexFavourites}
               onToggle={(code) =>
                 setModules((current) => ({

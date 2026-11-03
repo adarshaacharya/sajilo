@@ -265,9 +265,7 @@ export function Notifications() {
 
         <SettingsSection
           title={t("notifications.quiet")}
-          footnote={t(
-            options.quiet.enabled ? "notifications.quiet-note" : "notifications.quiet-off",
-          )}
+          footnote={options.quiet.enabled ? t("notifications.quiet-note") : undefined}
         >
           <div className="flex items-center justify-between gap-3">
             <p className="text-[12px]">{t("notifications.quiet-label")}</p>

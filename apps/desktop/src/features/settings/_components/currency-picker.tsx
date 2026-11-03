@@ -21,12 +21,10 @@ const NAMES: Record<string, string> = {
  */
 export function CurrencyPicker({
   title,
-  hint,
   selected,
   onToggle,
 }: {
   title: string;
-  hint: string;
   selected: string[];
   onToggle: (code: string) => void;
 }) {
@@ -66,7 +64,6 @@ export function CurrencyPicker({
           );
         })}
       </div>
-      <p className="mt-2 text-[10px] text-text-muted">{hint}</p>
     </div>
   );
 }
