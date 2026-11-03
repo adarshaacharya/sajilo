@@ -119,22 +119,29 @@ export function Converter() {
     };
   }, [direction, fields]);
 
-  const swap = () => {
-    if (result) {
-      if (direction === "bsToAd") {
-        const [year, month, day] = result.gregorian.split("-").map(Number);
-        if (year && month && day) {
-          setFields({ year: String(year), month: String(month), day: String(day) });
-        }
-      } else {
-        setFields({
-          year: String(result.nepali.year),
-          month: String(result.nepali.month),
-          day: String(result.nepali.day),
-        });
-      }
+  // Switching direction keeps the date being looked at: the converted date
+  // becomes the input. With nothing converted yet, it starts from today.
+  const changeDirection = (targetDirection: Direction) => {
+    if (targetDirection === direction) return;
+    setError(null);
+    if (!result) {
+      setDirection(targetDirection);
+      setToday(targetDirection);
+      return;
     }
-    setDirection((current) => (current === "bsToAd" ? "adToBs" : "bsToAd"));
+    if (direction === "bsToAd") {
+      const [year, month, day] = result.gregorian.split("-").map(Number);
+      if (year && month && day) {
+        setFields({ year: String(year), month: String(month), day: String(day) });
+      }
+    } else {
+      setFields({
+        year: String(result.nepali.year),
+        month: String(result.nepali.month),
+        day: String(result.nepali.day),
+      });
+    }
+    setDirection(targetDirection);
   };
 
   const setToday = (targetDirection = direction) => {
@@ -157,17 +164,6 @@ export function Converter() {
       .catch(() => {});
   };
 
-  // Mirrors the Swift converter: changing the segmented direction starts with
-  // a valid date in that calendar, while the swap button below keeps the
-  // already-converted instant in view.
-  const changeDirection = (targetDirection: Direction) => {
-    if (targetDirection === direction) return;
-    setResult(null);
-    setError(null);
-    setDirection(targetDirection);
-    setToday(targetDirection);
-  };
-
   const bounds =
     direction === "bsToAd"
       ? { min: range?.firstYear ?? 1992, max: range?.lastYear ?? 2090 }
@@ -180,21 +176,20 @@ export function Converter() {
   const copyFormats = result
     ? [
         {
-          title: "Nepali numerals",
-          value: `${digits(result.nepali.year, numerals)}/${digits(result.nepali.month, numerals)}/${digits(result.nepali.day, numerals)}`,
+          title: t("converter.copy.devanagari"),
+          // Always Devanagari: this row is the Nepali-numeral copy whatever the app shows.
+          value: `${digits(result.nepali.year, "devanagari")}/${digits(result.nepali.month, "devanagari", 2)}/${digits(result.nepali.day, "devanagari", 2)}`,
         },
         {
-          title: "English numerals",
+          title: t("converter.copy.latin"),
           value: `${result.nepali.year}/${String(result.nepali.month).padStart(2, "0")}/${String(result.nepali.day).padStart(2, "0")}`,
         },
         {
-          title: "Long date",
+          title: t("converter.copy.long"),
           value: longGregorian(result.gregorian),
         },
       ]
     : [];
-
-  const convert = () => setFields((current) => ({ ...current }));
 
   return (
     <ToolSection>
@@ -261,26 +256,9 @@ export function Converter() {
         </section>
       )}
 
-      <div className="flex items-center justify-between pt-0.5">
-        <div className="flex items-center gap-1.5">
-          <button type="button" onClick={() => setToday()} className="btn-ghost text-[11px]">
-            {t("action.today")}
-          </button>
-          <button
-            type="button"
-            onClick={swap}
-            className="btn-ghost inline-flex items-center gap-1 text-[11px]"
-          >
-            <Icon name="swap" className="size-3.5" />
-            {t("action.swap")}
-          </button>
-        </div>
-        <button
-          type="button"
-          onClick={convert}
-          className="rounded-md bg-accent-fill px-3 py-1.5 text-[11px] font-semibold text-accent-ink transition-opacity hover:opacity-90 active:opacity-75"
-        >
-          {t("action.convert")}
+      <div className="pt-0.5">
+        <button type="button" onClick={() => setToday()} className="btn-ghost text-[11px]">
+          {t("action.today")}
         </button>
       </div>
     </ToolSection>

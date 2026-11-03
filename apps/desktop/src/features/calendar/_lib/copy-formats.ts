@@ -5,8 +5,6 @@ import { digits } from "../../../shared/lib/numerals";
 /** The BS date in Devanagari and in Latin digits, and the AD date. */
 export type CopyFormat = "bsDevanagari" | "bsLatin" | "ad";
 
-export const COPY_FORMATS: CopyFormat[] = ["bsDevanagari", "bsLatin", "ad"];
-
 export function nepaliLongText(conversion: Conversion, numerals: NumeralStyle): string {
   return `${digits(conversion.nepali.day, numerals)} ${conversion.nepaliMonthName} ${digits(conversion.nepali.year, numerals)}`;
 }

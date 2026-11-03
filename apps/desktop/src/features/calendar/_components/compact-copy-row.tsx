@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Icon } from "../../../shared/components/icon";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Conversion } from "../../../shared/lib/ipc";
-import { COPY_FORMATS, type CopyFormat, copyText } from "../_lib/copy-formats";
+import { type CopyFormat, copyText } from "../_lib/copy-formats";
 
 async function writeClipboard(text: string) {
   try {
@@ -12,9 +12,11 @@ async function writeClipboard(text: string) {
   }
 }
 
-/** One chip per format, each showing the very text it copies. */
+/** One chip per format, each showing the very text it copies: the BS date in
+ * the numerals the app shows, and the AD date. */
 export function CompactCopyRow({ conversion }: { conversion: Conversion }) {
-  const { t } = useSettings();
+  const { t, numerals } = useSettings();
+  const formats: CopyFormat[] = [numerals === "devanagari" ? "bsDevanagari" : "bsLatin", "ad"];
   const [copied, setCopied] = useState<CopyFormat | null>(null);
 
   const handleCopy = async (format: CopyFormat) => {
@@ -25,7 +27,7 @@ export function CompactCopyRow({ conversion }: { conversion: Conversion }) {
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      {COPY_FORMATS.map((format) => {
+      {formats.map((format) => {
         const isCopied = copied === format;
         const value = copyText(format, conversion);
         return (

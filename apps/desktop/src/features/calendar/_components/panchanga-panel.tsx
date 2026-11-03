@@ -147,7 +147,7 @@ export function PanchangaPanel({ panchanga, isToday }: { panchanga: Panchanga; i
               {clockTime(panchanga.rahuKaalEnd)}
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-text-muted">
-              {t("panchanga.rahu-note")} {t("panchanga.computed")}
+              {t("panchanga.computed")}
             </p>
           </div>
         </div>

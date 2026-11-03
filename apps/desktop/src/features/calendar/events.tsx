@@ -6,6 +6,17 @@ import { useSettings } from "../../shared/context/settings-context";
 import { api, type NepaliDate, type UpcomingEvent, type UpcomingPlan } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
 
+/** "2026-08-27" as "Aug 27": the year is the BS line's job. */
+function shortGregorian(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return iso;
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
 type Filter = "current" | "festivals" | "publicHolidays" | "plans";
 
 /** Mirrors `UpcomingEventFilter` in `sajilo-core`. */
@@ -59,7 +70,7 @@ export function Events() {
   const openDay = (date: NepaliDate) =>
     navigate(`/day?y=${date.year}&m=${date.month}&d=${date.day}`);
   const dateLine = (date: NepaliDate, gregorian: string) =>
-    `${digits(date.day, numerals)}/${digits(date.month, numerals)}/${digits(date.year, numerals)} · ${gregorian}`;
+    `${digits(date.day, numerals)}/${digits(date.month, numerals)}/${digits(date.year, numerals)} · ${shortGregorian(gregorian)}`;
 
   const shown = events.filter((event) => includes(filter, event));
   const filters = [
