@@ -4,6 +4,7 @@ import { Icon } from "../../../shared/components/icon";
 import { Pressable } from "../../../shared/components/motion";
 import { SkeletonBlock } from "../../../shared/components/skeleton";
 import { useSettings } from "../../../shared/context/settings-context";
+import { relativeFreshness } from "../../../shared/lib/freshness";
 import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
@@ -14,28 +15,6 @@ import { money } from "../../bazar/_lib/format";
 import { LIVE_REFRESH_MS } from "../../bazar/_lib/live";
 import { changeTone } from "../../bazar/_lib/stock-tone";
 import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
-
-function relativeFreshness(
-  iso: string | undefined,
-  t: (
-    key:
-      | "dashboard.updated-now"
-      | "dashboard.updated-minute"
-      | "dashboard.updated-minutes"
-      | "dashboard.updated-hour"
-      | "dashboard.updated-hours",
-  ) => string,
-): string | null {
-  if (!iso) return null;
-  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  if (mins < 1) return t("dashboard.updated-now");
-  if (mins === 1) return t("dashboard.updated-minute");
-  if (mins < 60) return t("dashboard.updated-minutes").replace("{n}", String(mins));
-  const hours = Math.round(mins / 60);
-  return hours === 1
-    ? t("dashboard.updated-hour")
-    : t("dashboard.updated-hours").replace("{n}", String(hours));
-}
 
 export function GlanceCards() {
   const { language, modules, t } = useSettings();

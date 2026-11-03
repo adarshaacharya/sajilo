@@ -5,6 +5,7 @@ import { useHeaderInner, useHeaderSlot } from "../../shared/components/header-sl
 import { Icon } from "../../shared/components/icon";
 import { ToastBar } from "../../shared/components/toast";
 import { useSettings } from "../../shared/context/settings-context";
+import { relativeFreshness } from "../../shared/lib/freshness";
 import { api } from "../../shared/lib/ipc";
 import {
   catchAsFailed,
@@ -271,7 +272,9 @@ export function Weather() {
       )}
 
       {snapshot && (
-        <p className="px-0.5 text-[10px] text-text-muted">{fetchedAtLabel(snapshot.freshness)}</p>
+        <p className="px-0.5 text-[10px] text-text-muted">
+          {relativeFreshness(snapshot.freshness?.fetchedAt, t)}
+        </p>
       )}
       <ToastBar toast={refreshToast} onDone={dismissRefresh} />
     </div>

@@ -120,3 +120,30 @@ fn rejects_a_page_it_cannot_read() {
     let nameless = r#"<a href="https://www.ratopati.com/radio/x">x</a>"#;
     assert!(ratopati::parse_directory(nameless, now).is_err());
 }
+
+/// Every frequency comes out in one spelling: Latin digits, then " MHz".
+#[test]
+fn spells_every_frequency_the_same_way() {
+    let directory = parsed();
+    for station in &directory.stations {
+        let Some(frequency) = &station.frequency else {
+            continue;
+        };
+        if !frequency.to_lowercase().contains("mhz") {
+            continue;
+        }
+        for part in frequency.split(", ") {
+            let number = part.strip_suffix(" MHz").unwrap_or_else(|| {
+                panic!(
+                    "{}: {frequency} is not in the \"91.2 MHz\" form",
+                    station.name
+                )
+            });
+            assert!(
+                number.chars().all(|c| c.is_ascii_digit() || c == '.'),
+                "{}: {frequency}",
+                station.name
+            );
+        }
+    }
+}

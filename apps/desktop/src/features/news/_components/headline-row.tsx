@@ -11,10 +11,14 @@ function age(item: NewsItem): string {
     if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
     return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
   }
-  return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(
-    Math.round((date.getTime() - Date.now()) / 3_600_000),
-    "hour",
-  );
+  // Hours read well for a day; past that, days, and past a week the date.
+  const hours = Math.round((date.getTime() - Date.now()) / 3_600_000);
+  if (hours > -24)
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(hours, "hour");
+  const days = Math.round(hours / 24);
+  if (days >= -7)
+    return new Intl.RelativeTimeFormat(undefined, { numeric: "auto" }).format(days, "day");
+  return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
 /** A steady colour per publisher, so each is recognisable at a glance. */
