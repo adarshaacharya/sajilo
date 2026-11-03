@@ -38,12 +38,6 @@ export function conversionText(rate: ForexRate, amount: number, reversed: boolea
   return `${formatAmount(amount)} ${rate.currencyCode} = Rs ${formatAmount(nprForAmount(rate, amount))}`;
 }
 
-export function rateFootnote(rate: ForexRate, reversed: boolean): string {
-  return reversed
-    ? `At NRB's sell rate, Rs ${formatAmount(rate.sell)} per ${unitLabel(rate)}`
-    : `At NRB's buy rate, Rs ${formatAmount(rate.buy)} per ${unitLabel(rate)}`;
-}
-
 /** NRB can publish `modified_on` before `published_on` — show whichever is later. */
 export function sourceTimestamp(snapshot: ForexSnapshot): Date {
   const stamps = [snapshot.publishedOn, snapshot.modifiedOn, snapshot.date]

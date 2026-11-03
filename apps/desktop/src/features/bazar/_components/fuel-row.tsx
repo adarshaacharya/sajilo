@@ -18,7 +18,7 @@ const shortDate = (time: number | string) =>
 /** One fuel's price. Tapping it shows when it last changed, and every
  * revision NOC's records hold as a step chart. */
 export function FuelRow({ price }: { price: FuelPrice }) {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const [open, setOpen] = useState(false);
   const change = fuelChange(price);
   const moved = Math.abs(change) >= 0.005;
@@ -34,8 +34,9 @@ export function FuelRow({ price }: { price: FuelPrice }) {
         className="flex w-full items-center gap-3 py-2.5 text-left"
       >
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-medium">{fuelName(price.fuel)}</p>
-          <p className="truncate text-[11px] text-text-muted">{fuelNepaliName(price.fuel)}</p>
+          <p className="text-[13px] font-medium">
+            {language === "ne" ? fuelNepaliName(price.fuel) : fuelName(price.fuel)}
+          </p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-[18px] font-semibold leading-none tabular-nums">
@@ -43,8 +44,7 @@ export function FuelRow({ price }: { price: FuelPrice }) {
           </p>
           <p className="mt-0.5 text-[11px] text-text-muted">{fuelUnitLabel(price.fuel)}</p>
         </div>
-        {/* Only a change is news; "No change" on every row was noise. The
-            card says it once when nothing moved. */}
+        {/* Only a change is news; "No change" on every row was noise. */}
         {moved && <ChangeBadge change={change} previous={price.previousPrice} />}
       </button>
 

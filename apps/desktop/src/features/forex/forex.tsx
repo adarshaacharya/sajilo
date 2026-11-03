@@ -11,7 +11,7 @@ import type { LoadState } from "../../types/api/LoadState";
 import { ForexChart } from "./_components/forex-chart";
 import { ForexRateRow } from "./_components/forex-rate-row";
 import { ConverterSkeleton, RateCardSkeleton } from "./_components/forex-skeleton";
-import { conversionText, rateFootnote, sourceTimestamp } from "./_lib/format";
+import { conversionText, sourceTimestamp } from "./_lib/format";
 
 const NRB_URL = "https://www.nrb.org.np/";
 
@@ -95,7 +95,6 @@ export function ForexRates({
                   {conversion}
                 </p>
               )}
-              <p className="text-[11px] text-text-muted">{rateFootnote(selected, reversed)}</p>
               <div className="section-divider pt-2">
                 <ForexChart code={selected.currencyCode} />
               </div>

@@ -9,7 +9,6 @@ import {
   metalUnitLabel,
   money,
   priceChange,
-  pricePerGram,
   sourceStamp,
 } from "../_lib/format";
 import { ChangeBadge } from "./change-badge";
@@ -68,17 +67,12 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
             <p className="mt-1 text-[18px] font-semibold leading-none tabular-nums">
               Rs {money.format(headline.price)}
             </p>
-            <div className="mt-2 flex items-end justify-between gap-2">
-              <p className="text-[11px] text-text-muted tabular-nums">
-                {headlineOther && (
-                  <>
-                    Rs {money.format(headlineOther.price)} {metalUnitLabel(headlineOther.unit)}
-                    {" · "}
-                  </>
-                )}
-                Rs {money.format(pricePerGram(headline))}/g
+            {/* Grams and ounces are the calculator's job; this is the other quote. */}
+            {headlineOther && (
+              <p className="mt-2 text-[11px] text-text-muted tabular-nums">
+                Rs {money.format(headlineOther.price)} {metalUnitLabel(headlineOther.unit)}
               </p>
-            </div>
+            )}
           </div>
           <div className="section-divider mt-2.5 pt-2">
             <MetalChart />

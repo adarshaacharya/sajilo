@@ -14,8 +14,8 @@ const PREVIEW = 3;
  *
  * It sits beside the NEPSE card rather than behind a second tab bar: an open
  * issue is a deadline, and a deadline hidden one tap away is one people miss.
- * When nothing is open it collapses to a single line so it costs the market
- * view almost nothing.
+ * When nothing is open it collapses to its header, "None open" and the way
+ * to the full list; with no issues at all it is not shown.
  */
 export function IpoCard({
   state,
@@ -36,6 +36,7 @@ export function IpoCard({
   const shown = active.slice(0, PREVIEW);
   const openCount = groups?.open.length ?? 0;
   const total = groups?.total ?? 0;
+  if (snapshot && shown.length === 0 && total === 0) return null;
 
   return (
     <section className="surface-card p-2.5" aria-label={t("stocks.ipos")}>
@@ -45,6 +46,9 @@ export function IpoCard({
           <span className="rounded-md bg-[color-mix(in_srgb,var(--color-accent-mark)_14%,transparent)] px-1.5 text-[10px] font-medium leading-4 tabular-nums text-[color:var(--color-accent-mark)]">
             {t("stocks.ipo-open-count").replace("{n}", String(openCount))}
           </span>
+        )}
+        {snapshot && shown.length === 0 && (
+          <span className="text-[11px] text-text-muted">{t("stocks.none-open")}</span>
         )}
         {total > 0 && (
           <button
@@ -60,16 +64,13 @@ export function IpoCard({
       </div>
 
       <SectionState state={state} failedLabel={t("stocks.ipo-failed")} onRetry={onRetry}>
-        {snapshot &&
-          (shown.length === 0 ? (
-            <p className="mt-0.5 text-[11px] text-text-secondary">{t("stocks.no-open-ipos")}</p>
-          ) : (
-            <div className="mt-0.5">
-              {shown.map((entry) => (
-                <IpoRow key={entry.key} entry={entry} onOpen={() => onOpenIssue(entry.key)} />
-              ))}
-            </div>
-          ))}
+        {snapshot && shown.length > 0 && (
+          <div className="mt-0.5">
+            {shown.map((entry) => (
+              <IpoRow key={entry.key} entry={entry} onOpen={() => onOpenIssue(entry.key)} />
+            ))}
+          </div>
+        )}
       </SectionState>
     </section>
   );

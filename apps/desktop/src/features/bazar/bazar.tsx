@@ -26,7 +26,6 @@ import { ForexRates } from "../forex/forex";
 import { Crypto } from "./_components/crypto";
 import { FuelSkeleton, MetalsSkeleton, VegetablesSkeleton } from "./_components/feed-skeletons";
 import { FuelTab } from "./_components/fuel";
-import { FundsLink } from "./_components/funds-link";
 import { MetalsTab } from "./_components/metals";
 import { MutualFunds } from "./_components/mutual-funds";
 import { Stocks } from "./_components/stocks";
@@ -155,7 +154,7 @@ export function Bazar() {
     inSession,
   );
 
-  // Asked for on the NEPSE view too: its footer link says how fresh the NAVs are.
+  // The NEPSE tab holds the mutual funds view, so it asks while that tab shows.
   const {
     data: funds,
     isValidating: loadingFunds,
@@ -399,7 +398,6 @@ export function Bazar() {
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
           linkedBoid={linked.has("boid")}
-          footer={<FundsLink state={funds} onOpen={() => pickView("funds")} />}
         />
       )}
 

@@ -1,6 +1,6 @@
 import { Icon } from "../../../shared/components/icon";
 import type { VegetablePrice } from "../../../types/api/VegetablePrice";
-import { marketUnitLabel, money } from "../_lib/format";
+import { marketUnitLabel, money, money0 } from "../_lib/format";
 
 export function ProduceRow({
   price,
@@ -33,7 +33,7 @@ export function ProduceRow({
       </div>
       <div className="shrink-0 text-right">
         <p className="text-[13px] font-medium tabular-nums">
-          Rs {money.format(price.average)} {marketUnitLabel(price.unit)}
+          Rs {money0.format(price.average)} {marketUnitLabel(price.unit)}
         </p>
         <p className="text-[11px] text-text-muted tabular-nums">
           {money.format(price.minimum)}–{money.format(price.maximum)}

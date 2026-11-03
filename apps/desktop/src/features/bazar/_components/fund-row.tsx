@@ -32,13 +32,19 @@ export function PremiumBadge({ percent }: { percent: number }) {
   );
 }
 
+/** Whether a fund's NAV date is news: matured, late, or two or more behind.
+ * The list says the usual date once, so its rows name only these. */
+export function navDateNotable(fund: MutualFund): boolean {
+  return (
+    (fund.kind === "matured" && Boolean(fund.maturityDate)) || fund.late || (fund.behind ?? 0) >= 2
+  );
+}
+
 /**
  * The fund's latest NAV date, and how late it is once it has been missed. A
  * matured scheme shows when it matured instead: its last NAV is final.
- * `labelled` says what the date is ("NAV of Sep 17"), for where nothing
- * around it does.
  */
-export function NavDate({ fund, labelled = false }: { fund: MutualFund; labelled?: boolean }) {
+export function NavDate({ fund }: { fund: MutualFund }) {
   const { t, language } = useSettings();
   if (fund.kind === "matured" && fund.maturityDate) {
     return (
@@ -53,7 +59,7 @@ export function NavDate({ fund, labelled = false }: { fund: MutualFund; labelled
   const date = issueDate(fund.latest.date, language) ?? fund.latest.date;
   return (
     <span className={late ? "text-[color:var(--color-accent-mark)]" : undefined}>
-      {labelled ? t("funds.nav-of").replace("{date}", date) : date}
+      {date}
       {behind >= 2 &&
         ` · ${t(weekly ? "funds.weeks-behind" : "funds.days-behind").replace("{n}", String(behind))}`}
     </span>
@@ -124,7 +130,13 @@ export function FundRow({
               <SipLine sip={sip} />
             ) : (
               <>
-                {fund.symbol} · <NavDate fund={fund} labelled />
+                {fund.symbol}
+                {navDateNotable(fund) && (
+                  <>
+                    {" · "}
+                    <NavDate fund={fund} />
+                  </>
+                )}
               </>
             )}
           </span>

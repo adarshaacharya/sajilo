@@ -48,6 +48,8 @@ export function DividendCard({
     })
     .sort((a, b) => Number(b.followed) - Number(a.followed) || a.days - b.days);
   const shown = expanded ? rows : rows.slice(0, PREVIEW);
+  // Nothing coming up is no news: the card waits until there is.
+  if (snapshot && rows.length === 0) return null;
 
   return (
     <section className="surface-card p-2.5" aria-label={t("stocks.dividends")}>
@@ -74,20 +76,17 @@ export function DividendCard({
       </div>
 
       <SectionState state={state} failedLabel={t("stocks.dividend-failed")} onRetry={onRetry}>
-        {snapshot &&
-          (shown.length === 0 ? (
-            <p className="mt-0.5 text-[11px] text-text-secondary">{t("stocks.no-dividends")}</p>
-          ) : (
-            <div className="mt-0.5">
-              {shown.map((row) => (
-                <DividendRow
-                  key={`${row.closure.symbol}-${row.closure.bookClosureDate}`}
-                  row={row}
-                  onOpen={() => onOpen(row.closure.symbol)}
-                />
-              ))}
-            </div>
-          ))}
+        {snapshot && (
+          <div className="mt-0.5">
+            {shown.map((row) => (
+              <DividendRow
+                key={`${row.closure.symbol}-${row.closure.bookClosureDate}`}
+                row={row}
+                onOpen={() => onOpen(row.closure.symbol)}
+              />
+            ))}
+          </div>
+        )}
       </SectionState>
     </section>
   );

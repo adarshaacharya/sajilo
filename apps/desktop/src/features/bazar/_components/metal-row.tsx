@@ -1,3 +1,4 @@
+import { useSettings } from "../../../shared/context/settings-context";
 import type { Metal } from "../../../types/api/Metal";
 import type { MetalRate } from "../../../types/api/MetalRate";
 import { metalName, metalNepaliName, metalUnitLabel, money, priceChange } from "../_lib/format";
@@ -24,6 +25,7 @@ export function MetalRow({
   tola: MetalRate | undefined;
   tenGram: MetalRate | undefined;
 }) {
+  const { language } = useSettings();
   const main = tola ?? tenGram;
   if (!main) return null;
   const other = main === tola ? tenGram : undefined;
@@ -37,8 +39,9 @@ export function MetalRow({
         aria-hidden="true"
       />
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-medium">{metalName(metal)}</p>
-        <p className="truncate text-[11px] text-text-muted">{metalNepaliName(metal)}</p>
+        <p className="text-[13px] font-medium">
+          {language === "ne" ? metalNepaliName(metal) : metalName(metal)}
+        </p>
       </div>
       {Math.abs(change) >= 0.005 && (
         <ChangeBadge change={change} previous={main.previousPrice} percentOnly />

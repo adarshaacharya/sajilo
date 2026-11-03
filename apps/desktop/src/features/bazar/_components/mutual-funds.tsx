@@ -24,10 +24,20 @@ import {
   useFundHoldings,
   useSips,
 } from "../_lib/funds";
+import { issueDate } from "../_lib/ipo";
 import { FundDetail } from "./fund-detail";
 import { FundRow } from "./fund-row";
 import { FundsSkeleton } from "./funds-skeleton";
 import { SourceLink, SourceNote } from "./source-note";
+
+/** The newest NAV date among the funds, said once under the list. */
+function newestNav(funds: MutualFund[], language: "en" | "ne"): string | undefined {
+  const newest = funds.reduce(
+    (latest, fund) => (fund.latest.date > latest ? fund.latest.date : latest),
+    "",
+  );
+  return newest ? (issueDate(newest, language) ?? newest) : undefined;
+}
 
 const SHAREHUB_LINK = "https://sharehubnepal.com/company/mutual-fund-nav/open-end";
 const SOURCE_LINKS: Record<string, string> = {
@@ -81,7 +91,7 @@ export function MutualFunds({
   linkedKind?: string | null;
   settingUpSip?: boolean;
 }) {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
   const snapshot = loadedValue(state);
   const sips = useSips();
   const { holdings, toggle, setUnits } = useFundHoldings();
@@ -186,7 +196,7 @@ export function MutualFunds({
             </>
           )}
 
-          <SourceNote label={t("funds.source")}>
+          <SourceNote label={t("funds.navs-to")} stamp={newestNav(snapshot.funds, language)}>
             <SourceLink href={SOURCE_LINKS[snapshot.source] ?? SHAREHUB_LINK}>
               {snapshot.source}
             </SourceLink>
