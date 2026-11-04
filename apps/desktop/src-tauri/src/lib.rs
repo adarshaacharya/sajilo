@@ -207,6 +207,7 @@ pub fn run() {
             }
             commands::notify::spawn_scheduler(app.handle().clone());
             background_refresh::spawn(app.handle().clone());
+            commands::news_follow::spawn(app.handle().clone());
             commands::focus::spawn(app.handle().clone());
             commands::rashifal::reminder::spawn(app.handle().clone());
 
@@ -386,6 +387,11 @@ pub fn run() {
             commands::notes::notes_delete_folder,
             commands::notes::notes_transliterate,
             commands::news::news_sources,
+            commands::tips::break_tip,
+            commands::news_follow::news_follows,
+            commands::news_follow::set_news_follow,
+            commands::news_follow::set_news_daily_hour,
+            commands::news_follow::set_news_every_hours,
             commands::announcement::get_announcement,
             commands::announcement::dismiss_announcement,
             remote_config::remote_config_status,
@@ -478,6 +484,8 @@ pub fn run() {
             commands::tray::popover_pointer,
             commands::tray::popover_kept,
             commands::tray::set_popover_kept,
+            commands::tray::popover_pinned_on_top,
+            commands::tray::set_popover_pinned_on_top,
             commands::tray::popover_mini,
             commands::tray::set_popover_mini,
             commands::tray::set_tray_update,

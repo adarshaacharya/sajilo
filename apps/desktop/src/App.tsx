@@ -30,6 +30,7 @@ import { BackgroundFeedRefresh } from "./shared/components/background-feed-refre
 import { ErrorBoundary } from "./shared/components/error-boundary";
 import { Header } from "./shared/components/header";
 import { HeaderSlotProvider } from "./shared/components/header-slot";
+import { ResizeEdges } from "./shared/components/resize-edges";
 import { TabBar } from "./shared/components/tab-bar";
 import { TabDragProvider } from "./shared/components/tab-drag";
 import { UpdateWindow } from "./shared/components/update-prompt";
@@ -163,6 +164,7 @@ function Shell() {
       <DismissOnEscape />
       <ReportPointer />
       <TrackScreens />
+      <ResizeEdges />
       {mini && <MiniView />}
       {/* Hidden rather than unmounted while mini, like the window itself:
           the radio keeps playing and every screen is as it was left. */}

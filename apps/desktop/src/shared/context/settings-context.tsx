@@ -38,6 +38,8 @@ export interface ModulePrefs {
   /** Every pinned place, home first. */
   weatherPins: string[];
   forexFavourites: string[];
+  /** The NEPSE card on Today. Bazar itself is `bazarEnabled`. */
+  nepseCardEnabled: boolean;
   clocksEnabled: boolean;
   /** IANA timezones, in the order they were added — the dashboard preview
    * shows the first few in this order. */
@@ -67,6 +69,7 @@ const DEFAULT_MODULES: ModulePrefs = {
   weatherLocation: "kathmandu",
   weatherPins: ["kathmandu"],
   forexFavourites: ["USD", "AUD", "GBP", "EUR", "JPY"],
+  nepseCardEnabled: true,
   clocksEnabled: false,
   clocks: [],
   keeperEnabled: true,
@@ -175,6 +178,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<string>("weatherLocation"),
       api.getSetting<string[]>("weatherPins"),
       api.getSetting<string[]>("forexFavourites"),
+      api.getSetting<boolean>("nepseCardEnabled"),
       api.getSetting<boolean>("clocksEnabled"),
       api.getSetting<string[]>("clocks"),
       api.getSetting<boolean>("keeperEnabled"),
@@ -203,6 +207,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           weatherLocation,
           weatherPins,
           forexFavourites,
+          nepseCardEnabled,
           clocksEnabled,
           clocks,
           keeperEnabled,
@@ -243,6 +248,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
               ...(weatherLocation && { weatherLocation, weatherPins: [weatherLocation] }),
               ...(Array.isArray(weatherPins) && weatherPins.length > 0 && { weatherPins }),
               ...(forexFavourites && { forexFavourites }),
+              ...(nepseCardEnabled !== null && { nepseCardEnabled }),
               // Cities saved before the module switch existed: having picked one
               // is the opt-in. Only an explicitly stored `false` keeps the row
               // hidden, so turning it off in Settings still sticks.
@@ -293,6 +299,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         persist("weatherLocation", next.weatherLocation);
         persist("weatherPins", next.weatherPins);
         persist("forexFavourites", next.forexFavourites);
+        persist("nepseCardEnabled", next.nepseCardEnabled);
         persist("clocksEnabled", next.clocksEnabled);
         persist("clocks", next.clocks);
         persist("keeperEnabled", next.keeperEnabled);

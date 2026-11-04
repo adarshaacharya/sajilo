@@ -53,6 +53,13 @@ export function DisplayTab({
   const [trayIcon, setTrayIcon] = useState<string>("flag");
   const [autostart, setAutostart] = useState(false);
   const [dockIcon, setDockIcon] = useState(false);
+  const [pinnedOnTop, setPinnedOnTop] = useState(false);
+  useEffect(() => {
+    api
+      .popoverPinnedOnTop()
+      .then(setPinnedOnTop)
+      .catch(() => {});
+  }, []);
   // Only on GNOME, where Sajilo has its own top-bar button; null hides it.
   const [gnomeButton, setGnomeButton] = useState<boolean | null>(null);
 
@@ -242,6 +249,17 @@ export function DisplayTab({
           value={miniLine}
           onChange={setMiniLine}
           options={MINI_LINES.map((id) => ({ id, label: t(`mini.line.${id}`) }))}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t("settings.pinned")}>
+        <Toggle
+          label={t("settings.pinned-on-top")}
+          checked={pinnedOnTop}
+          onChange={(value) => {
+            setPinnedOnTop(value);
+            api.setPopoverPinnedOnTop(value).catch(() => setPinnedOnTop(!value));
+          }}
         />
       </SettingsSection>
 

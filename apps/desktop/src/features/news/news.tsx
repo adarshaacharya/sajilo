@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import useSWR from "swr";
 import { AnnouncementBanner } from "../../shared/components/announcement-banner";
 import { useHeaderSlot } from "../../shared/components/header-slot";
@@ -22,6 +22,7 @@ import { track } from "../../shared/lib/usage";
 import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
+import { FollowBell } from "./_components/follow-bell";
 import { HeadlineRow } from "./_components/headline-row";
 import { NewsSkeleton } from "./_components/news-skeleton";
 
@@ -96,6 +97,15 @@ export function News() {
     },
     [setSaved],
   );
+
+  // A followed newsroom's notification opens News on that newsroom.
+  const [params, setParams] = useSearchParams();
+  const opened = params.get("source");
+  useEffect(() => {
+    if (!opened) return;
+    pick(opened);
+    setParams({}, { replace: true });
+  }, [opened, pick, setParams]);
 
   const refreshButton = useMemo(
     () => (
@@ -198,14 +208,17 @@ export function News() {
       skeleton={<NewsSkeleton showNotices={selected === ALL} />}
     >
       <AnnouncementBanner screen="news" className="mb-2" />
-      <div className="mb-2">
-        <Select
-          ariaLabel={t("news.source")}
-          value={selected}
-          onChange={pick}
-          options={[{ id: ALL, label: t("news.all-sources") }]}
-          groups={sourceGroups}
-        />
+      <div className="mb-2 flex items-center gap-1.5">
+        <div className="min-w-0 flex-1">
+          <Select
+            ariaLabel={t("news.source")}
+            value={selected}
+            onChange={pick}
+            options={[{ id: ALL, label: t("news.all-sources") }]}
+            groups={sourceGroups}
+          />
+        </div>
+        <FollowBell source={selected} />
       </div>
 
       {selected === ALL && notices.length > 0 && (
@@ -296,3 +309,7 @@ export function News() {
     </StateBanner>
   );
 }
+
+/** Following the chosen newsroom: every new story, or its top stories once a
+ * day. "All sources" is daily only; every story from every newsroom would be
+ * dozens of notifications a day. */

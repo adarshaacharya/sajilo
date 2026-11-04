@@ -80,6 +80,19 @@ pub fn set_popover_kept(app: AppHandle<Wry>, kept: bool) {
     }
 }
 
+/// Whether a pinned popover floats above other apps.
+#[tauri::command]
+pub fn popover_pinned_on_top(app: AppHandle<Wry>) -> bool {
+    crate::window::pinned_on_top(&app)
+}
+
+#[tauri::command]
+pub fn set_popover_pinned_on_top(app: AppHandle<Wry>, on: bool) {
+    if let Some(window) = crate::window::main_window(&app) {
+        crate::window::set_pinned_on_top(&window, on);
+    }
+}
+
 /// Whether the popover is the mini strip.
 #[tauri::command]
 pub fn popover_mini() -> bool {

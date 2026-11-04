@@ -161,6 +161,9 @@ pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
 /// different one meanwhile — as `window::apply_window_kind` does.
 fn resize(window: &tauri::WebviewWindow<Wry>, height: f64) {
     let size = tauri::LogicalSize::new(WIDTH, height);
+    // Left unlocked on Linux: locking again straight after the resize lands
+    // before GTK has laid it out, and the lock wins. See
+    // `window::apply_window_kind`.
     #[cfg(target_os = "linux")]
     {
         let _ = window.set_resizable(true);
@@ -168,8 +171,6 @@ fn resize(window: &tauri::WebviewWindow<Wry>, height: f64) {
         let _ = window.set_max_size(Some(size));
     }
     let _ = window.set_size(size);
-    #[cfg(target_os = "linux")]
-    let _ = window.set_resizable(false);
 }
 
 /// Lets a card that was held back while another was showing come up now.

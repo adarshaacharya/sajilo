@@ -1,6 +1,8 @@
 //! Merged headlines from Nepali and English publishers plus official Nepal
 //! Government updates. Ported from `NewsItem.swift`.
 
+use std::collections::BTreeMap;
+
 use chrono::{DateTime, Utc};
 
 use crate::load_state::Freshness;
@@ -151,6 +153,53 @@ impl NewsSourceInfo {
                 official: false,
             }))
             .collect()
+    }
+}
+
+dto_enum! {
+    /// How a followed newsroom is heard from.
+    pub enum NewsFollowMode {
+        /// A notification as each new story arrives.
+        Each,
+        /// The stories new since the last one, every
+        /// `NewsFollows::every_hours`.
+        Hours,
+        /// Its top stories once a day, at `NewsFollows::daily_hour`.
+        Daily,
+    }
+}
+
+dto! {
+    /// The newsrooms the user follows, by source id. `"all"` stands for every
+    /// newsroom together.
+    #[serde(default)]
+    pub struct NewsFollows {
+        pub sources: BTreeMap<String, NewsFollowMode>,
+        /// Local hour the daily summaries come, 0–23.
+        pub daily_hour: u8,
+        /// Hours between the summaries of new stories, one of
+        /// `NewsFollows::EVERY_HOURS`.
+        pub every_hours: u8,
+    }
+}
+
+impl NewsFollows {
+    /// The id that follows every newsroom at once.
+    pub const ALL: &str = "all";
+    pub const DEFAULT_DAILY_HOUR: u8 = 8;
+    /// The spacings a summary of new stories may have. Six at most: a story
+    /// is kept for the late window only, so a longer one would lose some.
+    pub const EVERY_HOURS: [u8; 5] = [1, 2, 3, 4, 6];
+    pub const DEFAULT_EVERY_HOURS: u8 = 3;
+}
+
+impl Default for NewsFollows {
+    fn default() -> Self {
+        Self {
+            sources: BTreeMap::new(),
+            daily_hour: Self::DEFAULT_DAILY_HOUR,
+            every_hours: Self::DEFAULT_EVERY_HOURS,
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import { loadedValue } from "../../../shared/lib/load-state";
 import { type MiniLine as Choice, nextMiniLine, setMiniLine } from "../../../shared/lib/mini-line";
 import { digits } from "../../../shared/lib/numerals";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
+import { cityFor, flagFor, formatDayOffset, useWorldClocks } from "../../../shared/lib/world-clock";
 import type { ForexSnapshot } from "../../../types/api/ForexSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
@@ -40,6 +41,9 @@ function usePolled<T>(on: boolean, load: () => Promise<T>): T | undefined {
 
 const loadForex = () => api.getForex(false);
 const loadStocks = () => api.getStocks();
+/** Two clocks fit beside each other on the line; past that it would truncate. */
+const MINI_CLOCKS = 2;
+
 const loadNext = () => api.upcomingEvents(1, 180).then((events) => events[0] ?? null);
 
 /**
@@ -59,6 +63,7 @@ export function MiniLine({ choice }: { choice: Choice }) {
     ...(modules.weatherEnabled ? (["weather"] as const) : []),
     ...(modules.bazarEnabled ? (["nepse"] as const) : []),
     ...(modules.forexEnabled ? (["forex"] as const) : []),
+    ...(modules.clocksEnabled && modules.clocks.length > 0 ? (["clock"] as const) : []),
     ...(modules.radioEnabled ? (["radio"] as const) : []),
   ];
   const wanted = available.includes(choice) ? choice : "festival";
@@ -80,6 +85,9 @@ export function MiniLine({ choice }: { choice: Choice }) {
   const stocks = usePolled<LoadState<StockMarketSnapshot>>(shown === "nepse", loadStocks);
   const forex = usePolled<LoadState<ForexSnapshot>>(shown === "forex", loadForex);
   const next = usePolled<UpcomingEvent | null>(shown === "festival", loadNext);
+  // The first clocks on Today, in the order they were dragged into there.
+  const clockZones = shown === "clock" ? modules.clocks.slice(0, MINI_CLOCKS) : [];
+  const clocks = useWorldClocks(clockZones);
 
   const stale = (state: LoadState<unknown> | undefined) =>
     state?.status === "stale" ? ` · ${t("mini.not-current")}` : "";
@@ -141,6 +149,23 @@ export function MiniLine({ choice }: { choice: Choice }) {
         </span>
       );
     }
+  } else if (shown === "clock" && clockZones.every((tz) => clocks[tz])) {
+    content = (
+      <span className="min-w-0 truncate tabular-nums">
+        {clockZones.map((tz, index) => {
+          const reading = clocks[tz];
+          return (
+            <span key={tz}>
+              {index > 0 && <span className="mini-view__muted"> · </span>}
+              {flagFor(tz)} {cityFor(tz).city} {reading?.time}
+              {reading && reading.dayOffset !== 0 && (
+                <span className="mini-view__muted"> {formatDayOffset(reading.dayOffset)}</span>
+              )}
+            </span>
+          );
+        })}
+      </span>
+    );
   } else if (shown === "radio" && radio.nowPlaying) {
     content = (
       <span className="min-w-0 truncate">

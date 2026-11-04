@@ -213,7 +213,21 @@ pub fn parse_sharehub(body: &str, now: DateTime<Utc>) -> Result<MutualFundSnapsh
             held_shares: fund.total_holding_quantity.as_ref().and_then(number),
         })
     });
-    snapshot(SHAREHUB_SOURCE, raw, now)
+    let snapshot = snapshot(SHAREHUB_SOURCE, raw, now)?;
+    // ShareHub has answered with only part of its list, the closed-end
+    // schemes without a single open-end one. That is not a market with no
+    // SIP funds; it is a short answer, and ShareSansar has the whole list.
+    if !snapshot
+        .funds
+        .iter()
+        .any(|fund| fund.kind == FundKind::OpenEnd)
+    {
+        return Err(ProviderError::parse(
+            SHAREHUB_SOURCE,
+            "no open-end fund in the list",
+        ));
+    }
+    Ok(snapshot)
 }
 
 /// ShareSansar's rows carry no scheme type of their own, so each page comes
@@ -800,5 +814,16 @@ mod tests {
     fn rejects_a_response_that_is_not_the_fund_list() {
         assert!(parse_sharehub("<html></html>", now()).is_err());
         assert!(parse_sharesansar(&[(FundKind::OpenEnd, "<!DOCTYPE html>")], now()).is_err());
+    }
+
+    #[test]
+    fn a_sharehub_list_without_open_end_funds_is_refused() {
+        let mut body: serde_json::Value = serde_json::from_str(SHAREHUB).unwrap();
+        body["data"]
+            .as_array_mut()
+            .unwrap()
+            .retain(|fund| fund["type"] != "OpenEnd");
+        let short = serde_json::to_string(&body).unwrap();
+        assert!(parse_sharehub(&short, now()).is_err());
     }
 }

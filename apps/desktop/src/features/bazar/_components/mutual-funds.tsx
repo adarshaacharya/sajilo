@@ -106,7 +106,9 @@ export function MutualFunds({
   // A tab is drawn only when the source sent funds of that kind; a fallback
   // that could only reach open-end NAVs shows them without empty tabs beside.
   const kinds = KINDS.filter((item) => funds.some((fund) => fund.kind === item.id));
-  const shownKind = kinds.some((item) => item.id === kind) ? kind : "openEnd";
+  // Never an empty tab: when the asked-for kind is missing, the first that
+  // has funds.
+  const shownKind = kinds.some((item) => item.id === kind) ? kind : (kinds[0]?.id ?? "openEnd");
   const listed = useMemo(() => {
     const ofKind = funds.filter((fund) => fund.kind === shownKind);
     return searchFunds(ofKind, query).sort(ORDER[shownKind]);

@@ -264,6 +264,20 @@ cheers after a break (`eyes`, `move`, `water`, and `any`).
 - Keep the voice: Kathmandu-specific, about the day at the desk, never about
   anyone's family.
 
+`tips` are the one line a break card may add about another part of Sajilo:
+`{ "feature": "games", "en": "…", "ne": "…" }`, at most 40.
+
+- `feature` is one of `games`, `radio`, `notes`, `rashifal`, `weather`,
+  `jobs`, `bills`, `documents`, `tools`, `converter`. The app owns where
+  each leads; a new destination needs a release.
+- Optional `from` / `until` (`"2026-10-01"`, AD, Nepal's day, both
+  inclusive) run a tip for a season only, e.g. Dashain week. Inside its
+  dates a dated tip goes ahead of the undated ones.
+- Remove a tip by deleting it; `"tips": []` turns them all off.
+- How often a tip shows is code, not data: one a day at most, only for a
+  screen the user hasn't opened, never the same feature two days running,
+  never with the user's Sajilo tips switch off.
+
 ### Add or fix puzzle words
 
 `words.json`: `answers` is the daily word puzzle's list, played in order:

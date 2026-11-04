@@ -7,11 +7,13 @@ import {
   api,
   type BreakKind,
   type BreakOutcome,
+  type BreakTip,
   type FocusSettings,
   type FocusSnapshot,
   type Joke,
 } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
+import { track } from "../../shared/lib/usage";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
 
@@ -219,6 +221,27 @@ export function BreakCard() {
   // The cheer was dealt by the engine when the card opened, so it stays put
   // for as long as the card is up.
   const [taken, setTaken] = useState(false);
+
+  // At most one quiet line a day about a screen not opened yet; the shell
+  // decides whether one is due. Asked once per card.
+  const [tip, setTip] = useState<BreakTip | null>(null);
+  const cardKey = card ? `${card.kind}:${card.startedAt}` : null;
+  const preview = card?.preview ?? false;
+  useEffect(() => {
+    if (!cardKey) return;
+    api
+      .breakTip(preview)
+      .then(setTip)
+      .catch(() => {});
+  }, [cardKey, preview]);
+  const noTips = () => {
+    setTip(null);
+    setOptions(false);
+    api
+      .getNotificationOptions()
+      .then((current) => api.setNotificationOptions({ ...current, sajiloTips: false }))
+      .catch(() => {});
+  };
   // The ⋯ choices replace the buttons in place, as on a reminder card: the
   // card is its own small window, so a dropdown would be cut off.
   const [options, setOptions] = useState(false);
@@ -299,11 +322,18 @@ export function BreakCard() {
     >
       {/* The whole card drags; Tauri only starts a drag on an element that
           carries the attribute itself, so the buttons stay plain buttons. */}
+      {/* The countdown stands where the icon would: the title already names
+          the break, and one round thing on the left leaves the words the
+          width of the card instead of a narrow column between two. */}
       <div className="flex items-start gap-3" data-tauri-drag-region>
-        <span className="break-card__icon" data-tauri-drag-region>
-          <Icon name={KIND_ICONS[card.kind]} className="size-5" />
-        </span>
-        <div className="min-w-0 flex-1" data-tauri-drag-region>
+        {card.seconds > 0 ? (
+          <Countdown remaining={remaining} seconds={card.seconds} />
+        ) : (
+          <span className="break-card__icon" data-tauri-drag-region>
+            <Icon name={KIND_ICONS[card.kind]} className="size-5" />
+          </span>
+        )}
+        <div className="min-w-0 flex-1 pr-6" data-tauri-drag-region>
           {heldNote && (
             <p className="break-card__eyebrow" data-tauri-drag-region>
               {heldNote}
@@ -327,7 +357,6 @@ export function BreakCard() {
           {/* A joke replaces the instruction, but never the number that matters. */}
           {card.kind === "water" && <WaterBar ml={waterMl} goalMl={goalMl} />}
         </div>
-        {card.seconds > 0 && <Countdown remaining={remaining} seconds={card.seconds} />}
         {!taken && (
           <button
             type="button"
@@ -335,7 +364,7 @@ export function BreakCard() {
             aria-expanded={options}
             aria-label={t("reminder.options")}
             title={t("reminder.options")}
-            className="reminder-card__more"
+            className="reminder-card__more break-card__more"
           >
             <Icon name="ellipsis" className="size-3.5" />
           </button>
@@ -365,6 +394,11 @@ export function BreakCard() {
           >
             {t("break.settings")}
           </button>
+          {tip && (
+            <button type="button" onClick={noTips}>
+              {t("break.no-tips")}
+            </button>
+          )}
         </div>
       )}
 
@@ -411,6 +445,20 @@ export function BreakCard() {
           </button>
         )}
       </div>
+
+      {tip && !taken && !options && (
+        <button
+          type="button"
+          onClick={() => {
+            track("action.tip-open");
+            void api.openScreen(tip.route).catch(() => {});
+          }}
+          className="break-card__tip"
+        >
+          <span className="min-w-0 flex-1">{tip.text}</span>
+          <Icon name="chevronRight" className="size-2.5 shrink-0" />
+        </button>
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   type ReminderStyle,
 } from "../../shared/lib/ipc";
 import { ReadingTime } from "../rashifal/reading-time";
+import { NewsFollowsSection } from "./_components/news-follows";
 import { SettingsSection } from "./_components/settings-section";
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -375,6 +376,9 @@ export function Notifications() {
               </SettingsSection>
             </div>
           ))}
+          <div className="mb-2.5">
+            <NewsFollowsSection />
+          </div>
         </div>
 
         <SettingsSection

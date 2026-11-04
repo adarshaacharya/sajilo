@@ -30,6 +30,10 @@ static FOCUSED_SINCE_SHOWN: AtomicBool = AtomicBool::new(false);
 /// tray icon was last pressed; see [`tray_press`].
 static BLUR_HIDDEN_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
 static UP_AT_PRESS: AtomicBool = AtomicBool::new(false);
+/// When the popover last lost focus. Pressing the tray icon itself takes focus
+/// on some desktops, so a pinned popover that lost it only just now was in
+/// front a moment ago.
+static FOCUS_LOST_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
 
 /// How close together a focus-out and a press on the tray icon come when they
 /// are one click. Both are the same mouse-down, a few milliseconds apart.
@@ -63,6 +67,9 @@ const KEPT_KEY: &str = "popover.keptOpen.v1";
 /// and what is next, to leave on the desktop. Only ever kept; see [`set_mini`].
 static MINI: AtomicBool = AtomicBool::new(false);
 const MINI_KEY: &str = "popover.mini.v1";
+/// Whether a pinned full popover floats above other apps. Off by default: a
+/// pinned window is an ordinary one, as a detached window is in other apps.
+const PINNED_ON_TOP_KEY: &str = "popover.pinnedOnTop.v1";
 /// The popover's two sizes, in logical pixels. Full matches `tauri.conf.json`.
 const FULL_SIZE: (f64, f64) = (380.0, 560.0);
 const MINI_SIZE: (f64, f64) = (320.0, 72.0);
@@ -155,6 +162,44 @@ pub fn set_kept(window: &WebviewWindow, kept: bool) {
     apply_window_kind(window);
 }
 
+/// The popover at the tray floats, like any tray menu, and so does the mini
+/// strip: floating is what it is for. A pinned full popover is an ordinary
+/// window that other apps can cover, unless the user asked it to float.
+fn stays_on_top(app: &AppHandle) -> bool {
+    !is_kept() || is_mini() || pinned_on_top(app)
+}
+
+/// A pinned popover that other apps may cover, with one of them in front of
+/// it now. Focus lost only a moment ago was lost to the tray click itself.
+fn covered(window: &WebviewWindow) -> bool {
+    let just_lost = FOCUS_LOST_AT
+        .lock()
+        .ok()
+        .and_then(|at| *at)
+        .is_some_and(|at| at.elapsed() < PRESS_BLUR);
+    is_kept()
+        && !stays_on_top(window.app_handle())
+        && !window.is_focused().unwrap_or(true)
+        && !just_lost
+}
+
+pub fn pinned_on_top(app: &AppHandle) -> bool {
+    crate::db::get_json(app, PINNED_ON_TOP_KEY)
+        .ok()
+        .flatten()
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
+}
+
+pub fn set_pinned_on_top(window: &WebviewWindow, on: bool) {
+    let _ = crate::db::set_json(
+        window.app_handle(),
+        PINNED_ON_TOP_KEY,
+        &serde_json::Value::Bool(on),
+    );
+    let _ = window.set_always_on_top(stays_on_top(window.app_handle()));
+}
+
 pub fn is_mini() -> bool {
     MINI.load(Ordering::SeqCst) && is_kept()
 }
@@ -214,32 +259,52 @@ pub fn apply_window_kind(window: &WebviewWindow) {
     };
     // GTK keeps a non-resizable window at the size it first had and ignores
     // a resize, so the strip drew in the middle of a full-height window.
-    // Unlocked for the resize; locked again after if it is a fixed size.
-    #[cfg(target_os = "linux")]
-    let _ = window.set_resizable(true);
+    // Unlocking for the resize and locking again after does not help: the
+    // shell carries out all three before GTK lays the window out, so the
+    // lock wins. On Linux it stays unlocked, and a fixed size is held by its
+    // least and most instead, which the window manager keeps to.
     let _ = window.set_min_size(Some(least));
     let _ = window.set_max_size(Some(most));
     let _ = window.set_size(size);
+    #[cfg(target_os = "linux")]
+    let _ = window.set_resizable(true);
+    #[cfg(not(target_os = "linux"))]
     let _ = window.set_resizable(resizable);
-    if resizable {
+    let _ = window.set_always_on_top(stays_on_top(window.app_handle()));
+    if is_kept() {
         keep_on_screen(window, size);
     }
     let _ = window.set_title(if mini { MINI_TITLE } else { FULL_TITLE });
 }
 
-/// Moves a kept popover back inside its screen's work area if its own size
-/// now reaches past it: pinned near the bottom at the full size, it would
-/// otherwise come back stretched below the taskbar.
+/// Keeps a kept popover inside its screen's work area: moved back in if it
+/// reaches past an edge, and made shorter if it is taller than the area.
+/// Pinned low, or stretched tall, it would otherwise run under the taskbar,
+/// which on Windows draws over it and hides the tab bar.
 fn keep_on_screen(window: &WebviewWindow, size: tauri::LogicalSize<f64>) {
     let (Ok(Some(monitor)), Ok(position)) = (window.current_monitor(), window.outer_position())
     else {
         return;
     };
-    let size = size.to_physical::<i32>(monitor.scale_factor());
+    let scale = monitor.scale_factor();
+    let mut size = size.to_physical::<i32>(scale);
     let area = monitor.work_area();
     let (left, top) = (area.position.x, area.position.y);
     let right = left.saturating_add(i32::try_from(area.size.width).unwrap_or(i32::MAX));
     let bottom = top.saturating_add(i32::try_from(area.size.height).unwrap_or(i32::MAX));
+    if size.height > bottom - top {
+        size.height = bottom - top;
+        let logical = tauri::PhysicalSize::new(size.width, size.height).to_logical::<f64>(scale);
+        // Shorter than the least a stretchable popover allows is still
+        // better than a tab bar under the taskbar.
+        if logical.height < FULL_SIZE.1 {
+            let _ = window.set_min_size(Some(tauri::LogicalSize::new(
+                logical.width.min(FULL_SIZE.0),
+                logical.height,
+            )));
+        }
+        let _ = window.set_size(tauri::PhysicalSize::new(size.width, size.height));
+    }
     let x = position.x.min(right - size.width).max(left);
     let y = position.y.min(bottom - size.height).max(top);
     if (x, y) != (position.x, position.y)
@@ -331,10 +396,19 @@ fn place_kept(window: &WebviewWindow) -> bool {
     let Some(place) = KEPT_PLACE.lock().ok().and_then(|place| *place) else {
         return false;
     };
-    on_a_screen(window, place)
-        && window
+    if !on_a_screen(window, place)
+        || window
             .set_position(tauri::LogicalPosition::new(place.x, place.y))
-            .is_ok()
+            .is_err()
+    {
+        return false;
+    }
+    // The spot may be fine for the header and still leave the bottom under
+    // the taskbar: a smaller screen now, or the taskbar moved or grown.
+    if let (Ok(size), Ok(scale)) = (window.outer_size(), window.scale_factor()) {
+        keep_on_screen(window, size.to_logical(scale));
+    }
+    true
 }
 
 /// Whether a connected screen still shows enough of the header at `place` to
@@ -402,7 +476,10 @@ pub fn tray_press(app: &AppHandle) {
         .ok()
         .and_then(|at| *at)
         .is_some_and(|at| at.elapsed() < PRESS_BLUR);
-    let up = seen(&window) || just_hidden;
+    // A pinned popover that other apps may cover is "up" only when it is in
+    // front: if another window is, the click brings Sajilo forward instead of
+    // putting away a window the user cannot see.
+    let up = (seen(&window) || just_hidden) && !covered(&window);
     UP_AT_PRESS.store(up, Ordering::SeqCst);
 }
 
@@ -423,7 +500,7 @@ pub fn toggle(app: &AppHandle) {
     let Some(window) = main_window(app) else {
         return;
     };
-    if seen(&window) {
+    if seen(&window) && !covered(&window) {
         hide(&window);
     } else {
         show(&window);
@@ -857,6 +934,9 @@ pub fn hide_on_blur(window: &WebviewWindow, focused: bool) {
     #[cfg(target_os = "linux")]
     if focused {
         FOCUSED_SINCE_SHOWN.store(true, Ordering::SeqCst);
+    }
+    if !focused && let Ok(mut at) = FOCUS_LOST_AT.lock() {
+        *at = Some(std::time::Instant::now());
     }
     if is_kept() || std::env::var_os("SAJILO_NO_BLUR_HIDE").is_some() {
         return;

@@ -16,6 +16,7 @@
     "core:window:allow-set-focus",
     "core:window:allow-close",
     "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging",
     "core:event:default",
     "notification:default",
     "dialog:default",

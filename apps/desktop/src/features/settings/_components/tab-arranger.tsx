@@ -124,11 +124,14 @@ export function TabArranger() {
     <section className="surface-card space-y-2 p-3">
       <div className="flex items-baseline justify-between gap-2">
         <p className="tab-editor__label">{t("settings.tab-bar")}</p>
-        <p className="text-[10.5px] text-text-muted">
-          {t("customize.bar-limit").replace("{n}", digits(MAX_BAR_TABS, numerals))}
-        </p>
+        {/* The limit only matters once it is reached: "To tab bar" is gone
+            from the menus then, and this says why. */}
+        {full && (
+          <p className="text-[10.5px] text-text-muted">
+            {t("customize.bar-limit").replace("{n}", digits(MAX_BAR_TABS, numerals))}
+          </p>
+        )}
       </div>
-      <p className="text-[10.5px] leading-snug text-text-muted">{t("customize.drag-hint")}</p>
 
       <DndContext
         sensors={sensors}
@@ -152,6 +155,8 @@ export function TabArranger() {
                 : t(group === "more" ? "settings.tab-bar-in-more" : "customize.hidden")
             }
             empty={t("customize.drop-here")}
+            // Empty lists fold to their title until a tab is being carried.
+            dragging={moving !== null}
             // Past the limit, mid-drag: these go under More on the drop.
             spillFrom={group === "bar" && moving && groups.more.length > 0 ? MAX_BAR_TABS : null}
             renderRow={(to) => {
@@ -189,7 +194,6 @@ export function TabArranger() {
         <DragOverlay dropAnimation={null}>
           {activeTab ? (
             <div className="tab-editor__row is-lifted">
-              <Icon name="grip" className="size-3 text-text-muted" />
               <Icon name={activeTab.icon} className="size-3.5" />
               <span className="min-w-0 flex-1 truncate">{t(activeTab.labelKey)}</span>
             </div>
@@ -205,6 +209,7 @@ function TabList({
   ids,
   label,
   empty,
+  dragging,
   spillFrom,
   renderRow,
 }: {
@@ -212,24 +217,27 @@ function TabList({
   ids: string[];
   label: string | null;
   empty: string;
+  dragging: boolean;
   spillFrom: number | null;
   renderRow: (to: string) => React.ReactNode;
 }) {
   const { t } = useSettings();
   const { setNodeRef, isOver } = useDroppable({ id: `${GROUP_ID}${group}` });
 
+  const folded = ids.length === 0 && group !== "bar" && !dragging;
   return (
     <div className="space-y-1">
-      {label && <p className="tab-editor__label pt-1">{label}</p>}
+      {label && (
+        <p className="tab-editor__label pt-1">
+          {label}
+          {folded && <span className="normal-case tracking-normal"> · {t("customize.none")}</span>}
+        </p>
+      )}
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <ul ref={setNodeRef} className={`tab-editor__list is-${group}${isOver ? " is-over" : ""}`}>
-          {group === "bar" && (
-            <li className="tab-editor__row is-fixed">
-              <span className="size-3" aria-hidden="true" />
-              <Icon name="today" className="size-3.5" />
-              <span className="min-w-0 flex-1 truncate">{t("tab.today")}</span>
-            </li>
-          )}
+        <ul
+          ref={setNodeRef}
+          className={`tab-editor__list is-${group}${isOver ? " is-over" : ""}${folded ? " is-folded" : ""}`}
+        >
           {ids.map((to, index) => (
             <SortableRow
               key={to}
@@ -240,7 +248,9 @@ function TabList({
               {renderRow(to)}
             </SortableRow>
           ))}
-          {ids.length === 0 && group !== "bar" && <li className="tab-editor__empty">{empty}</li>}
+          {ids.length === 0 && group !== "bar" && dragging && (
+            <li className="tab-editor__empty">{empty}</li>
+          )}
         </ul>
       </SortableContext>
     </div>
@@ -274,9 +284,9 @@ function SortableRow({
       {...attributes}
       {...listeners}
     >
-      <Icon name="grip" className="size-3 text-text-muted" />
       <Icon name={tab.icon} className="size-3.5" />
       <span className="min-w-0 flex-1 truncate">{t(tab.labelKey)}</span>
+      <Icon name="grip" className="tab-editor__grip size-3 text-text-muted" />
       {children}
     </li>
   );

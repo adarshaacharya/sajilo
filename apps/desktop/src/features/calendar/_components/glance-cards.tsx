@@ -8,6 +8,7 @@ import { relativeFreshness } from "../../../shared/lib/freshness";
 import { api } from "../../../shared/lib/ipc";
 import { loadedValue } from "../../../shared/lib/load-state";
 import { placeLabel, usePlaces } from "../../../shared/lib/places";
+import type { ForexSnapshot } from "../../../types/api/ForexSnapshot";
 import type { LoadState } from "../../../types/api/LoadState";
 import type { StockMarketSnapshot } from "../../../types/api/StockMarketSnapshot";
 import type { WeatherSnapshot } from "../../../types/api/WeatherSnapshot";
@@ -16,12 +17,25 @@ import { LIVE_REFRESH_MS } from "../../bazar/_lib/live";
 import { changeTone } from "../../bazar/_lib/stock-tone";
 import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
 
+/** Rates that fit one line of the popover beside their codes. */
+const FOREX_ON_TODAY = 3;
+
 export function GlanceCards() {
   const { language, modules, t } = useSettings();
   const navigate = useNavigate();
   const places = usePlaces();
   const [weather, setWeather] = useState<LoadState<WeatherSnapshot>>();
   const [stocks, setStocks] = useState<LoadState<StockMarketSnapshot>>();
+  const [forex, setForex] = useState<LoadState<ForexSnapshot>>();
+  const showNepse = modules.bazarEnabled && modules.nepseCardEnabled;
+
+  useEffect(() => {
+    if (!modules.forexEnabled) return;
+    api
+      .getForex(false)
+      .then(setForex)
+      .catch(() => {});
+  }, [modules.forexEnabled]);
 
   useEffect(() => {
     if (!modules.weatherEnabled) return;
@@ -33,7 +47,7 @@ export function GlanceCards() {
 
   const marketOpen = loadedValue(stocks)?.marketStatus?.isOpen ?? false;
   useEffect(() => {
-    if (!modules.bazarEnabled) return;
+    if (!showNepse) return;
     const load = () =>
       api
         .getStocks()
@@ -45,7 +59,7 @@ export function GlanceCards() {
     if (!marketOpen) return;
     const timer = window.setInterval(load, LIVE_REFRESH_MS);
     return () => window.clearInterval(timer);
-  }, [modules.bazarEnabled, marketOpen]);
+  }, [showNepse, marketOpen]);
 
   // A reading for another place (the home place just changed) is not drawn
   // under this one's name.
@@ -59,7 +73,17 @@ export function GlanceCards() {
     t,
   );
 
-  if (!modules.weatherEnabled && !modules.bazarEnabled) return null;
+  // The pinned currencies, as many as fit one line.
+  const rates = (modules.forexEnabled ? (loadedValue(forex)?.rates ?? []) : [])
+    .filter((rate) => modules.forexFavourites.includes(rate.currencyCode))
+    .sort(
+      (a, b) =>
+        modules.forexFavourites.indexOf(a.currencyCode) -
+        modules.forexFavourites.indexOf(b.currencyCode),
+    )
+    .slice(0, FOREX_ON_TODAY);
+
+  if (!modules.weatherEnabled && !showNepse && rates.length === 0) return null;
 
   return (
     <div className="space-y-1.5">
@@ -77,13 +101,13 @@ export function GlanceCards() {
                   {placeLabel(places, modules.weatherLocation, language)}
                 </span>
               </div>
-              <p className="mt-0.5 text-[20px] font-semibold leading-none">
+              <div className="mt-0.5 text-[20px] font-semibold leading-none">
                 {weatherSnap ? (
                   formatCelsius(weatherSnap.temperatureCelsius)
                 ) : (
                   <SkeletonBlock className="h-[18px] w-14" />
                 )}
-              </p>
+              </div>
               <p className="mt-1 truncate text-[10px] text-text-muted">
                 {weatherSnap
                   ? `${conditionTitle(weatherSnap.condition, language)} · ${t("dashboard.high")} ${formatCelsius(weatherSnap.highCelsius)} ${t("dashboard.low")} ${formatCelsius(weatherSnap.lowCelsius)}`
@@ -93,7 +117,7 @@ export function GlanceCards() {
           </Pressable>
         )}
 
-        {modules.bazarEnabled && (
+        {showNepse && (
           <Pressable className="min-w-0 flex-1">
             <button
               type="button"
@@ -104,9 +128,9 @@ export function GlanceCards() {
                 <Icon name="interest" className="size-3 text-[color:var(--color-accent-mark)]" />
                 <span className="text-[10px]">{t("dashboard.nepse")}</span>
               </div>
-              <p className="mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
+              <div className="mt-0.5 text-[18px] font-semibold leading-none tabular-nums">
                 {nepse ? money.format(nepse.value) : <SkeletonBlock className="h-[16px] w-16" />}
-              </p>
+              </div>
               <p
                 className={`mt-1 truncate text-[10px] tabular-nums ${
                   nepse && nepse.change !== 0 ? changeTone(nepse.change) : "text-text-muted"
@@ -122,6 +146,30 @@ export function GlanceCards() {
           </Pressable>
         )}
       </div>
+      {rates.length > 0 && (
+        // One slim card of equal cells, in the cards' own type: the code as
+        // their label, the rate as their figure. Glanced at, not read.
+        <Pressable>
+          <button
+            type="button"
+            onClick={() => navigate("/bazar?tab=forex")}
+            aria-label={t("feature.forex")}
+            className="surface-card grid w-full divide-x divide-divider py-2 text-left"
+            style={{ gridTemplateColumns: `repeat(${rates.length}, minmax(0, 1fr))` }}
+          >
+            {rates.map((rate) => (
+              <span key={rate.currencyCode} className="min-w-0 px-2.5">
+                <span className="flex items-center gap-1 text-[10px] text-text-muted">
+                  {rate.currencyCode}
+                </span>
+                <span className="mt-0.5 block truncate text-[13px] font-semibold leading-tight tabular-nums">
+                  {money.format(rate.buy / rate.unit)}
+                </span>
+              </span>
+            ))}
+          </button>
+        </Pressable>
+      )}
       {freshness && <p className="px-0.5 text-[10px] text-text-muted">{freshness}</p>}
     </div>
   );

@@ -106,6 +106,10 @@ pub const EVENTS: &[&str] = &[
     "action.radio-play",
     "action.rashi-pick",
     "action.news-open",
+    // A newsroom followed, never which.
+    "action.news-follow",
+    // A break card's tip followed, never which.
+    "action.tip-open",
     "action.keeper-save",
     "action.plan-save",
     // A note made, never what it says.
@@ -316,6 +320,8 @@ fn sendable(events: BTreeMap<String, u32>) -> BTreeMap<String, u32> {
 
 #[tauri::command]
 pub fn record_usage(app: AppHandle<Wry>, event: String) {
+    // Break-card tips skip what has been opened; that stays on the computer.
+    super::tips::note_opened(&app, &event);
     record(&app, &event);
 }
 

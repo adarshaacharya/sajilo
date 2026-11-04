@@ -34,7 +34,7 @@ pub async fn get_news(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadState<N
     let now = Utc::now();
     let handle = app.clone();
 
-    cache
+    let state = cache
         .feed
         .get(&app, now, refresh.unwrap_or(false), || {
             let handle = handle.clone();
@@ -43,7 +43,15 @@ pub async fn get_news(app: AppHandle<Wry>, refresh: Option<bool>) -> LoadState<N
                 Ok(article_dates::augment(&handle, client, digest).await)
             }
         })
-        .await
+        .await;
+    // Followed newsrooms learn what is new from every fetch, whoever asked.
+    super::news_follow::record(&app);
+    state
+}
+
+/// The last digest fetched, without fetching.
+pub fn cached(app: &AppHandle<Wry>) -> Option<(NewsDigest, chrono::DateTime<Utc>)> {
+    app.try_state::<NewsCache>()?.feed.peek(app)
 }
 
 /// The source picker's options. Static — no network, no cache.

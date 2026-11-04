@@ -6,7 +6,7 @@ import { api } from "./ipc";
  * one line besides the date and time. Changed by clicking that line, or in
  * Settings › Display; both read this one value.
  */
-export const MINI_LINES = ["festival", "weather", "nepse", "forex", "radio"] as const;
+export const MINI_LINES = ["festival", "weather", "nepse", "forex", "clock", "radio"] as const;
 export type MiniLine = (typeof MINI_LINES)[number];
 
 const KEY = "miniViewShows";

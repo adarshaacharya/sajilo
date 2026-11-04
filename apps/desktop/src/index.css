@@ -1304,6 +1304,7 @@ button.rashi-pin:hover {
    icon and the countdown ring. */
 .break-card {
   --break-tint: var(--color-accent-mark);
+  position: relative;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1500,11 +1501,16 @@ button.rashi-pin:hover {
 }
 .break-card__actions {
   gap: 8px;
+  /* Linux fonts run wider than the Mac's: past the card's width the
+     buttons go to a second row rather than each wrapping its own label. The
+     card's window grows to fit. */
+  flex-wrap: wrap;
 }
 .break-card__actions button {
   cursor: pointer;
   padding: 5px 14px;
   font-size: 12px;
+  white-space: nowrap;
 }
 /* Tinted, not solid or outlined: the main action carries a gilt wash behind
    gilt text, the same voice as the header's update button, so it stands out
@@ -3542,8 +3548,24 @@ input[type="search"]::-webkit-search-decoration {
   color: var(--color-text);
   background: color-mix(in srgb, var(--color-text) 4%, transparent);
 }
-.tab-editor__row.is-fixed {
-  color: var(--color-text-muted);
+/* A row is its name at rest; the grip and its ⋯ come with the pointer or
+   keyboard focus, and stay while its menu is open. */
+.tab-editor__row .tab-editor__grip,
+.tab-editor__row .icon-btn {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.tab-editor__row:hover .tab-editor__grip,
+.tab-editor__row:hover .icon-btn,
+.tab-editor__row:focus-within .tab-editor__grip,
+.tab-editor__row:focus-within .icon-btn,
+.tab-editor__row .icon-btn[aria-expanded="true"] {
+  opacity: 1;
+}
+/* An empty list is just its title until something is carried to it. */
+.tab-editor__list.is-folded {
+  min-height: 0;
+  padding: 0;
 }
 .tab-editor__row.is-more {
   background: transparent;
@@ -3834,6 +3856,31 @@ input[type="search"]::-webkit-search-decoration {
   background: color-mix(in srgb, var(--color-text) 6%, transparent);
   color: var(--color-text-secondary);
   transition: background 120ms ease, color 120ms ease;
+}
+/* A line about somewhere else in Sajilo: under a hairline, in the card's
+   quietest voice, so it reads as an aside and never as part of the break. */
+.break-card__tip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-divider);
+  text-align: left;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+.break-card__tip:hover {
+  color: var(--color-text-secondary);
+}
+/* In the corner, out of the row, so the words get the card's width. */
+.break-card__more {
+  position: absolute;
+  top: 12px;
+  right: 12px;
 }
 .reminder-card__more:hover,
 .reminder-card__more[aria-expanded="true"] {
@@ -5609,4 +5656,50 @@ input[type="search"]::-webkit-search-decoration {
 }
 :root[data-theme="light"] .game-tint--bagh {
   --tile-tint: #b05410;
+}
+
+/* A followed newsroom's bell carries a dot, so the state shows at a glance. */
+.icon-btn:has(> .news-follow-dot) {
+  position: relative;
+}
+/* A bell-menu line that carries its own time: the picker sits in the
+   sentence, quietly underlined, and opens the system's list. */
+.news-follow-choice {
+  gap: 4px;
+}
+.news-follow-pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 5px 1px 6px;
+  border-radius: 6px;
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.news-follow-pick:hover {
+  background: var(--color-border);
+}
+.news-follow-pick select {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+}
+.news-follow-pick:focus-within {
+  box-shadow: 0 0 0 1px var(--color-accent-mark);
+}
+.news-follow-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--color-accent-mark);
 }

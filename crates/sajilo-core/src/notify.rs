@@ -244,6 +244,8 @@ pub enum ReminderKind {
     Announcement,
     /// The quiz's question of the day, answered on the card.
     Quiz,
+    /// New stories from a followed newsroom, or its daily summary.
+    News,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.

@@ -23,6 +23,7 @@ const ICONS: Record<ReminderKind, IconName> = {
   rashifal: "rashifal",
   announcement: "bell",
   quiz: "quiz",
+  news: "news",
 };
 
 /** Where "Open" takes the popover for each kind of reminder. */
@@ -36,11 +37,17 @@ const ROUTES: Record<ReminderKind, string> = {
   rashifal: "/rashifal",
   announcement: "/",
   quiz: "/games?open=quiz",
+  news: "/news",
 };
 
 /** Keeper's kind is shared by the bills, the documents and share allotments,
  * so its cards say by their id which screen they belong to. */
 function routeOf(reminder: ReminderCardView["reminder"]): string {
+  // `sajilo.news.<each|daily>.<source>.<when>`: opens News on that source.
+  if (reminder.kind === "news") {
+    const source = reminder.id.split(".")[3];
+    return source ? `/news?source=${encodeURIComponent(source)}` : ROUTES.news;
+  }
   if (reminder.kind !== "keeper") return ROUTES[reminder.kind];
   if (reminder.id.startsWith("sajilo.boid.")) return "/bazar?tab=stocks&view=nepse&boid=1";
   if (reminder.id.startsWith("sajilo.keeper.record.")) return "/keeper";
@@ -57,6 +64,7 @@ const KIND_LABELS = {
   rashifal: "reminder.kind.rashifal",
   announcement: "reminder.kind.announcement",
   quiz: "reminder.kind.quiz",
+  news: "reminder.kind.news",
 } as const satisfies Record<ReminderKind, string>;
 
 /** Festival and holiday titles are ours, so they follow the language; the
@@ -70,7 +78,10 @@ type CardSwitch = { option: keyof NotificationOptions; label: TurnOffLabel };
 type TurnOffLabel = (typeof TURN_OFF_LABELS)[keyof typeof TURN_OFF_LABELS];
 
 /** The Settings › Notifications switch behind each kind of card. */
-const SWITCHES: Record<Exclude<ReminderKind, "announcement">, keyof NotificationOptions> = {
+const SWITCHES: Record<
+  Exclude<ReminderKind, "announcement" | "news">,
+  keyof NotificationOptions
+> = {
   plan: "dayPlans",
   festival: "eveOfFestival",
   holiday: "eveOfPublicHoliday",
@@ -108,6 +119,8 @@ const ANNOUNCEMENT_SWITCHES: Record<string, keyof NotificationOptions> = {
 };
 
 function switchFor(reminder: ReminderCardView["reminder"]): CardSwitch | null {
+  // Following is per newsroom, undone from the News screen's bell.
+  if (reminder.kind === "news") return null;
   if (reminder.kind === "announcement") {
     const category = reminder.id.split(":")[1] ?? "";
     const option = ANNOUNCEMENT_SWITCHES[category];

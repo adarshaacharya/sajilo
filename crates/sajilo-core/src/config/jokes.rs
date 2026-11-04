@@ -2,10 +2,57 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 use super::{Pack, Slot};
 use crate::focus::jokes::{EDITABLE, Joke, MAX_LINE, MIN_DECK, deck_name};
+
+/// The parts of Sajilo a tip may point to. The app owns where each one leads
+/// and when it may be suggested; a pack only words the suggestion.
+pub const TIP_FEATURES: [&str; 10] = [
+    "games",
+    "radio",
+    "notes",
+    "rashifal",
+    "weather",
+    "jobs",
+    "bills",
+    "documents",
+    "tools",
+    "converter",
+];
+/// Enough to rotate through for a month without a pack growing into a feed.
+const MAX_TIPS: usize = 40;
+
+/// One quiet line a break card may add about a part of Sajilo the user has
+/// not opened yet.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Tip {
+    /// One of [`TIP_FEATURES`].
+    pub feature: String,
+    pub en: String,
+    pub ne: String,
+    /// The first day it may show, in Nepal; none means from now.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub from: Option<NaiveDate>,
+    /// The last day it may show, in Nepal; none means no end.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub until: Option<NaiveDate>,
+}
+
+impl Tip {
+    /// Whether `day` falls inside the tip's dates.
+    pub fn runs_on(&self, day: NaiveDate) -> bool {
+        self.from.is_none_or(|from| from <= day) && self.until.is_none_or(|until| day <= until)
+    }
+
+    /// Whether it was given dates: a promotion for a season rather than a
+    /// standing suggestion.
+    pub fn is_dated(&self) -> bool {
+        self.from.is_some() || self.until.is_some()
+    }
+}
 
 /// The done decks a break kind can have of its own; `any` fits every break.
 pub const DONE_DECKS: [&str; 4] = ["eyes", "move", "water", "any"];
@@ -20,6 +67,10 @@ pub struct JokesPack {
     pub decks: BTreeMap<String, Vec<Joke>>,
     /// The lines a card may say once its break is taken, by [`DONE_DECKS`].
     pub done: BTreeMap<String, Vec<Joke>>,
+    /// Lines about other parts of Sajilo, for break cards. Absent from packs
+    /// published before tips existed, which older apps still read.
+    #[serde(default)]
+    pub tips: Vec<Tip>,
 }
 
 impl JokesPack {
@@ -75,6 +126,24 @@ impl Pack for JokesPack {
         }
         for (name, lines) in &self.done {
             check_lines(&format!("done.{name}"), lines)?;
+        }
+        if self.tips.len() > MAX_TIPS {
+            return Err(format!("tips has more than {MAX_TIPS} lines"));
+        }
+        for (index, tip) in self.tips.iter().enumerate() {
+            if !TIP_FEATURES.contains(&tip.feature.as_str()) {
+                return Err(format!(
+                    "tips[{index}].feature {} is not one of {TIP_FEATURES:?}",
+                    tip.feature
+                ));
+            }
+            super::check::text(&format!("tips[{index}].en"), &tip.en, MAX_LINE)?;
+            super::check::text(&format!("tips[{index}].ne"), &tip.ne, MAX_NE_LINE)?;
+            if let (Some(from), Some(until)) = (tip.from, tip.until)
+                && until < from
+            {
+                return Err(format!("tips[{index}].until is before its from"));
+            }
         }
         Ok(())
     }

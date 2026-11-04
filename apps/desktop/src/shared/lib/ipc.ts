@@ -36,6 +36,8 @@ import type { NavHistory } from "../../types/api/NavHistory";
 import type { NeaAccount } from "../../types/api/NeaAccount";
 import type { NeaOffice } from "../../types/api/NeaOffice";
 import type { NewsDigest } from "../../types/api/NewsDigest";
+import type { NewsFollowMode } from "../../types/api/NewsFollowMode";
+import type { NewsFollows } from "../../types/api/NewsFollows";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
 import type { NoteDocument } from "../../types/api/NoteDocument";
 import type { NoteSaved } from "../../types/api/NoteSaved";
@@ -684,6 +686,12 @@ export interface InterestResult {
 
 export type PermissionState = "granted" | "denied" | "unknown";
 
+/** One quiet line on a break card, and the screen it opens. */
+export interface BreakTip {
+  text: string;
+  route: string;
+}
+
 export interface NotificationOptions {
   eveOfPublicHoliday: boolean;
   eveOfFestival: boolean;
@@ -736,7 +744,8 @@ export type ReminderKind =
   | "keeper"
   | "rashifal"
   | "announcement"
-  | "quiz";
+  | "quiz"
+  | "news";
 
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {
@@ -1144,6 +1153,8 @@ export const api = {
   dismissAnnouncement: (id: string) => invoke<void>("dismiss_announcement", { id }),
   /** Shows the popover at an in-app route, from a card. */
   openScreen: (route: string) => invoke<void>("open_screen", { route }),
+  /** A break card's quiet line about a screen not opened yet, if one is due. */
+  breakTip: (preview: boolean) => invoke<BreakTip | null>("break_tip", { preview }),
   /** The signed remote config: what's installed, and when it was checked. */
   remoteConfigStatus: () => invoke<RemoteConfigStatus>("remote_config_status"),
   /** Checks for new config now, whatever the schedule says. */
@@ -1158,6 +1169,12 @@ export const api = {
   setAudioPlaying: (playing: boolean) => invoke<void>("set_audio_playing", { playing }),
   /** The source picker's options — static, named in Rust. */
   newsSources: () => invoke<NewsSourceInfo[]>("news_sources"),
+  newsFollows: () => invoke<NewsFollows>("news_follows"),
+  /** `null` stops following. */
+  setNewsFollow: (source: string, mode: NewsFollowMode | null) =>
+    invoke<NewsFollows>("set_news_follow", { source, mode }),
+  setNewsDailyHour: (hour: number) => invoke<NewsFollows>("set_news_daily_hour", { hour }),
+  setNewsEveryHours: (hours: number) => invoke<NewsFollows>("set_news_every_hours", { hours }),
 
   getStations: (refresh = false) => invoke<LoadState<RadioDirectory>>("get_stations", { refresh }),
   /** Resolved per station, on play — the directory lists around 270 of them. */
@@ -1182,6 +1199,9 @@ export const api = {
   /** The header's pin: whether the popover is kept open and movable. */
   popoverKept: () => invoke<boolean>("popover_kept"),
   setPopoverKept: (kept: boolean) => invoke<void>("set_popover_kept", { kept }),
+  /** Whether a pinned popover floats above other apps. */
+  popoverPinnedOnTop: () => invoke<boolean>("popover_pinned_on_top"),
+  setPopoverPinnedOnTop: (on: boolean) => invoke<void>("set_popover_pinned_on_top", { on }),
   popoverMini: () => invoke<boolean>("popover_mini"),
   setPopoverMini: (mini: boolean) => invoke<void>("set_popover_mini", { mini }),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),
