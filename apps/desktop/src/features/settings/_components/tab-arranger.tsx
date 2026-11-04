@@ -13,10 +13,10 @@ import {
 } from "@dnd-kit/core";
 import {
   arrayMove,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRef, useState } from "react";
@@ -48,11 +48,12 @@ function groupOf(groups: Groups, id: string): Group | undefined {
 }
 
 /**
- * The tab bar, More and the hidden tabs as three lists to drag between: a tab
+ * The tab bar, More and the hidden tabs as three rows of chips to drag
+ * between: a tab
  * dragged onto the bar goes on it, into Hidden switches it off. The bar holds
  * Today and [`MAX_BAR_TABS`] more; a tab dropped past that pushes the last one
- * under More, which the rows past the limit show while dragging. Every row
- * also has a ⋯ menu, for the same moves without a drag.
+ * under More, which the chips past the limit show while dragging. A click on
+ * a chip opens the same moves as a menu, for anyone who would rather not drag.
  */
 export function TabArranger() {
   const { t, numerals, modules, setModules } = useSettings();
@@ -64,7 +65,7 @@ export function TabArranger() {
   const groups = moving ?? tabGroups(TABS, modules);
 
   const sensors = useSensors(
-    // A few pixels of travel before it's a drag, so the ⋯ button still clicks.
+    // A few pixels of travel before it's a drag, so a click opens the menu.
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
@@ -159,14 +160,13 @@ export function TabArranger() {
             dragging={moving !== null}
             // Past the limit, mid-drag: these go under More on the drop.
             spillFrom={group === "bar" && moving && groups.more.length > 0 ? MAX_BAR_TABS : null}
+            menuOpen={(to) => menu === to}
+            onChipClick={(to) => setMenu((open) => (open === to ? null : to))}
             renderRow={(to) => {
               const tab = tabAt(to);
-              if (!tab) return null;
+              if (!tab || menu !== to) return null;
               return (
                 <RowMenu
-                  open={menu === to}
-                  label={t(tab.labelKey)}
-                  onToggle={() => setMenu((open) => (open === to ? null : to))}
                   onClose={() => setMenu(null)}
                   items={[
                     ...(group !== "bar" && !full
@@ -185,7 +185,6 @@ export function TabArranger() {
                         ]
                       : []),
                   ]}
-                  optionsLabel={t("customize.options")}
                 />
               );
             }}
@@ -194,8 +193,8 @@ export function TabArranger() {
         <DragOverlay dropAnimation={null}>
           {activeTab ? (
             <div className="tab-editor__row is-lifted">
-              <Icon name={activeTab.icon} className="size-3.5" />
-              <span className="min-w-0 flex-1 truncate">{t(activeTab.labelKey)}</span>
+              <Icon name={activeTab.icon} className="size-3" />
+              <span>{t(activeTab.labelKey)}</span>
             </div>
           ) : null}
         </DragOverlay>
@@ -212,6 +211,8 @@ function TabList({
   dragging,
   spillFrom,
   renderRow,
+  menuOpen,
+  onChipClick,
 }: {
   group: Group;
   ids: string[];
@@ -220,6 +221,8 @@ function TabList({
   dragging: boolean;
   spillFrom: number | null;
   renderRow: (to: string) => React.ReactNode;
+  menuOpen: (to: string) => boolean;
+  onChipClick: (to: string) => void;
 }) {
   const { t } = useSettings();
   const { setNodeRef, isOver } = useDroppable({ id: `${GROUP_ID}${group}` });
@@ -233,7 +236,7 @@ function TabList({
           {folded && <span className="normal-case tracking-normal"> · {t("customize.none")}</span>}
         </p>
       )}
-      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+      <SortableContext items={ids} strategy={rectSortingStrategy}>
         <ul
           ref={setNodeRef}
           className={`tab-editor__list is-${group}${isOver ? " is-over" : ""}${folded ? " is-folded" : ""}`}
@@ -244,6 +247,8 @@ function TabList({
               id={to}
               group={group}
               spill={spillFrom !== null && index >= spillFrom}
+              open={menuOpen(to)}
+              onClick={() => onChipClick(to)}
             >
               {renderRow(to)}
             </SortableRow>
@@ -261,11 +266,15 @@ function SortableRow({
   id,
   group,
   spill,
+  open,
+  onClick,
   children,
 }: {
   id: string;
   group: Group;
   spill: boolean;
+  open: boolean;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   const { t } = useSettings();
@@ -273,62 +282,60 @@ function SortableRow({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
   });
+  // A chip in the right half opens its menu leftward, so it stays in the card.
+  const [leftward, setLeftward] = useState(false);
+  const toggle = (chip: HTMLElement) => {
+    const box = chip.getBoundingClientRect();
+    const list = chip.parentElement?.getBoundingClientRect();
+    setLeftward(Boolean(list && box.left - list.left > list.width / 2));
+    onClick();
+  };
   if (!tab) return null;
   return (
     <li
       ref={setNodeRef}
+      onClick={(event) => {
+        // Clicks inside the open menu belong to the menu.
+        if ((event.target as HTMLElement).closest(".notes-menu")) return;
+        toggle(event.currentTarget);
+      }}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={`tab-editor__row is-draggable${group === "bar" ? "" : " is-more"}${
         isDragging ? " is-dragging" : ""
-      }${spill ? " is-spill" : ""}`}
+      }${spill ? " is-spill" : ""}${leftward ? " menu-left" : ""}`}
       {...attributes}
       {...listeners}
+      data-open={open || undefined}
+      onKeyDown={(event) => {
+        // Space and Enter pick the chip up; the menu key, or Shift+F10,
+        // opens its moves.
+        if (event.key === "ContextMenu" || (event.shiftKey && event.key === "F10")) {
+          event.preventDefault();
+          toggle(event.currentTarget);
+          return;
+        }
+        listeners?.onKeyDown?.(event);
+      }}
     >
-      <Icon name={tab.icon} className="size-3.5" />
-      <span className="min-w-0 flex-1 truncate">{t(tab.labelKey)}</span>
-      <Icon name="grip" className="tab-editor__grip size-3 text-text-muted" />
+      <Icon name={tab.icon} className="size-3" />
+      <span>{t(tab.labelKey)}</span>
       {children}
     </li>
   );
 }
 
 function RowMenu({
-  open,
-  label,
-  optionsLabel,
   items,
-  onToggle,
   onClose,
 }: {
-  open: boolean;
-  label: string;
-  optionsLabel: string;
   items: { label: string; run: () => void; danger?: boolean }[];
-  onToggle: () => void;
   onClose: () => void;
 }) {
   return (
-    <span className="relative">
-      <button
-        type="button"
-        className="icon-btn"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        // The row is the drag handle; a press on the menu isn't the start of one.
-        onPointerDown={(event) => event.stopPropagation()}
-        onKeyDown={(event) => event.stopPropagation()}
-        onClick={onToggle}
-        aria-label={`${label}: ${optionsLabel}`}
-      >
-        <Icon name="ellipsis" className="size-3" />
-      </button>
-      {open && (
-        <Menu onClose={onClose}>
-          {items.map((item) => (
-            <MenuItem key={item.label} label={item.label} danger={item.danger} onClick={item.run} />
-          ))}
-        </Menu>
-      )}
-    </span>
+    <Menu onClose={onClose}>
+      {items.map((item) => (
+        <MenuItem key={item.label} label={item.label} danger={item.danger} onClick={item.run} />
+      ))}
+    </Menu>
   );
 }

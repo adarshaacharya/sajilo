@@ -8,6 +8,7 @@ import {
   type ReminderKind,
 } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
+import { nextTarget, savePriceAlert, usePriceAlerts } from "../../shared/lib/price-alerts";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import type { QuizDaily } from "../../types/api/QuizDaily";
 import { useSentenceNumerals } from "../focus/_lib/format";
@@ -24,6 +25,7 @@ const ICONS: Record<ReminderKind, IconName> = {
   announcement: "bell",
   quiz: "quiz",
   news: "news",
+  priceAlert: "bell",
 };
 
 /** Where "Open" takes the popover for each kind of reminder. */
@@ -38,6 +40,7 @@ const ROUTES: Record<ReminderKind, string> = {
   announcement: "/",
   quiz: "/games?open=quiz",
   news: "/news",
+  priceAlert: "/bazar",
 };
 
 /** Keeper's kind is shared by the bills, the documents and share allotments,
@@ -47,6 +50,14 @@ function routeOf(reminder: ReminderCardView["reminder"]): string {
   if (reminder.kind === "news") {
     const source = reminder.id.split(".")[3];
     return source ? `/news?source=${encodeURIComponent(source)}` : ROUTES.news;
+  }
+  // `sajilo.alert.<stock|metal>.<symbol|metal>.<alert>.<when>`: opens it.
+  if (reminder.kind === "priceAlert") {
+    const [, , kind, what] = reminder.id.split(".");
+    if (kind === "stock" && what) {
+      return `/bazar?tab=stocks&view=nepse&symbol=${encodeURIComponent(what)}`;
+    }
+    return "/bazar?tab=metals";
   }
   if (reminder.kind !== "keeper") return ROUTES[reminder.kind];
   if (reminder.id.startsWith("sajilo.boid.")) return "/bazar?tab=stocks&view=nepse&boid=1";
@@ -65,6 +76,7 @@ const KIND_LABELS = {
   announcement: "reminder.kind.announcement",
   quiz: "reminder.kind.quiz",
   news: "reminder.kind.news",
+  priceAlert: "reminder.kind.price-alert",
 } as const satisfies Record<ReminderKind, string>;
 
 /** Festival and holiday titles are ours, so they follow the language; the
@@ -79,7 +91,7 @@ type TurnOffLabel = (typeof TURN_OFF_LABELS)[keyof typeof TURN_OFF_LABELS];
 
 /** The Settings › Notifications switch behind each kind of card. */
 const SWITCHES: Record<
-  Exclude<ReminderKind, "announcement" | "news">,
+  Exclude<ReminderKind, "announcement" | "news" | "priceAlert">,
   keyof NotificationOptions
 > = {
   plan: "dayPlans",
@@ -120,7 +132,7 @@ const ANNOUNCEMENT_SWITCHES: Record<string, keyof NotificationOptions> = {
 
 function switchFor(reminder: ReminderCardView["reminder"]): CardSwitch | null {
   // Following is per newsroom, undone from the News screen's bell.
-  if (reminder.kind === "news") return null;
+  if (reminder.kind === "news" || reminder.kind === "priceAlert") return null;
   if (reminder.kind === "announcement") {
     const category = reminder.id.split(":")[1] ?? "";
     const option = ANNOUNCEMENT_SWITCHES[category];
@@ -331,6 +343,9 @@ export function ReminderCard() {
             </button>
           ) : (
             <>
+              {reminder.kind === "priceAlert" && !view.preview && (
+                <AgainAt id={reminder.id} onDone={() => dismiss(false)} disabled={busy} />
+              )}
               <button
                 type="button"
                 onClick={() => dismiss(true)}
@@ -352,6 +367,35 @@ export function ReminderCard() {
         </div>
       )}
     </div>
+  );
+}
+
+/** One tap to watch for the next level: the same way, 5% further on. */
+function AgainAt({ id, onDone, disabled }: { id: string; onDone: () => void; disabled: boolean }) {
+  const { t } = useSettings();
+  const alerts = usePriceAlerts();
+  const alertId = id.split(".")[4];
+  const alert = alerts.find((each) => each.id === alertId);
+  if (!alert || alert.active) return null;
+  const next = nextTarget(alert.price, alert.direction);
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={() =>
+        void savePriceAlert({
+          id: alert.id,
+          item: alert.item,
+          direction: alert.direction,
+          price: next,
+        })
+          .then(onDone)
+          .catch(() => {})
+      }
+      className="break-card__button break-card__button--quiet"
+    >
+      {t("alerts.again-at").replace("{price}", new Intl.NumberFormat("en-IN").format(next))}
+    </button>
   );
 }
 

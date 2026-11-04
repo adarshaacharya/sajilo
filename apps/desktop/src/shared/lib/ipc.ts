@@ -45,6 +45,8 @@ import type { NoteSearchHit } from "../../types/api/NoteSearchHit";
 import type { NotesList } from "../../types/api/NotesList";
 import type { NoteTrashed } from "../../types/api/NoteTrashed";
 import type { Place } from "../../types/api/Place";
+import type { PriceAlert } from "../../types/api/PriceAlert";
+import type { PriceAlertInput } from "../../types/api/PriceAlertInput";
 import type { QuizCategory } from "../../types/api/QuizCategory";
 import type { QuizDaily } from "../../types/api/QuizDaily";
 import type { QuizView } from "../../types/api/QuizView";
@@ -745,7 +747,8 @@ export type ReminderKind =
   | "rashifal"
   | "announcement"
   | "quiz"
-  | "news";
+  | "news"
+  | "priceAlert";
 
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {
@@ -1175,6 +1178,10 @@ export const api = {
     invoke<NewsFollows>("set_news_follow", { source, mode }),
   setNewsDailyHour: (hour: number) => invoke<NewsFollows>("set_news_daily_hour", { hour }),
   setNewsEveryHours: (hours: number) => invoke<NewsFollows>("set_news_every_hours", { hours }),
+  priceAlerts: () => invoke<PriceAlert[]>("price_alerts"),
+  /** A new alert, or a changed one (armed again) when `input.id` names it. */
+  setPriceAlert: (input: PriceAlertInput) => invoke<PriceAlert[]>("set_price_alert", { input }),
+  deletePriceAlert: (id: string) => invoke<PriceAlert[]>("delete_price_alert", { id }),
 
   getStations: (refresh = false) => invoke<LoadState<RadioDirectory>>("get_stations", { refresh }),
   /** Resolved per station, on play — the directory lists around 270 of them. */

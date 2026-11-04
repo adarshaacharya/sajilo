@@ -21,7 +21,7 @@ import { conditionTitle, formatCelsius } from "../../weather/_lib/format";
 const FOREX_ON_TODAY = 3;
 
 export function GlanceCards() {
-  const { language, modules, t } = useSettings();
+  const { language, modules, setModules, t } = useSettings();
   const navigate = useNavigate();
   const places = usePlaces();
   const [weather, setWeather] = useState<LoadState<WeatherSnapshot>>();
@@ -148,27 +148,43 @@ export function GlanceCards() {
       </div>
       {rates.length > 0 && (
         // One slim card of equal cells, in the cards' own type: the code as
-        // their label, the rate as their figure. Glanced at, not read.
-        <Pressable>
-          <button
-            type="button"
-            onClick={() => navigate("/bazar?tab=forex")}
-            aria-label={t("feature.forex")}
-            className="surface-card grid w-full divide-x divide-divider py-2 text-left"
-            style={{ gridTemplateColumns: `repeat(${rates.length}, minmax(0, 1fr))` }}
-          >
-            {rates.map((rate) => (
-              <span key={rate.currencyCode} className="min-w-0 px-2.5">
-                <span className="flex items-center gap-1 text-[10px] text-text-muted">
-                  {rate.currencyCode}
-                </span>
+        // their label, the rate as their figure. Each opens Forex; pointed
+        // at, a cell's filled star takes it off Today.
+        <div
+          className="surface-card grid w-full divide-x divide-divider py-2"
+          style={{ gridTemplateColumns: `repeat(${rates.length}, minmax(0, 1fr))` }}
+        >
+          {rates.map((rate) => (
+            <div key={rate.currencyCode} className="group relative min-w-0">
+              <button
+                type="button"
+                onClick={() => navigate("/bazar?tab=forex")}
+                className="block w-full min-w-0 px-2.5 text-left"
+              >
+                <span className="block text-[10px] text-text-muted">{rate.currencyCode}</span>
                 <span className="mt-0.5 block truncate text-[13px] font-semibold leading-tight tabular-nums">
                   {money.format(rate.buy / rate.unit)}
                 </span>
-              </span>
-            ))}
-          </button>
-        </Pressable>
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setModules((current) => ({
+                    ...current,
+                    forexFavourites: current.forexFavourites.filter(
+                      (code) => code !== rate.currencyCode,
+                    ),
+                  }))
+                }
+                aria-label={`${t("forex.unfavourite")} ${rate.currencyCode}`}
+                title={t("forex.unfavourite")}
+                className="absolute top-0 right-1.5 grid size-4 place-items-center text-accent-mark opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              >
+                <Icon name="starFill" className="size-2.5" />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
       {freshness && <p className="px-0.5 text-[10px] text-text-muted">{freshness}</p>}
     </div>

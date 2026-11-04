@@ -208,6 +208,7 @@ pub fn run() {
             commands::notify::spawn_scheduler(app.handle().clone());
             background_refresh::spawn(app.handle().clone());
             commands::news_follow::spawn(app.handle().clone());
+            commands::price_alerts::spawn(app.handle().clone());
             commands::focus::spawn(app.handle().clone());
             commands::rashifal::reminder::spawn(app.handle().clone());
 
@@ -392,6 +393,9 @@ pub fn run() {
             commands::news_follow::set_news_follow,
             commands::news_follow::set_news_daily_hour,
             commands::news_follow::set_news_every_hours,
+            commands::price_alerts::price_alerts,
+            commands::price_alerts::set_price_alert,
+            commands::price_alerts::delete_price_alert,
             commands::announcement::get_announcement,
             commands::announcement::dismiss_announcement,
             remote_config::remote_config_status,

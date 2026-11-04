@@ -17,6 +17,7 @@ import { money, money0, money2 } from "../_lib/format";
 import { signedMoney, signedPercent } from "../_lib/portfolio";
 import { changeTone, week52Position } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";
+import { AlertBell, AlertPanel } from "./price-alert";
 import { RangeBar } from "./range-bar";
 import { StatementRow } from "./statement";
 import { StockChart } from "./stock-chart";
@@ -180,6 +181,7 @@ export function CompanyDetail({
     transaction?: StockTransaction;
   } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [alerting, setAlerting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const held = position != null && position.quantity > 0;
   const dayPos =
@@ -257,6 +259,11 @@ export function CompanyDetail({
               <p className="text-[11px] text-text-muted">{quote.companyName}</p>
             )}
           </div>
+          <AlertBell
+            item={{ kind: "stock", symbol: quote.symbol }}
+            open={alerting}
+            onToggle={() => setAlerting((was) => !was)}
+          />
           <FollowButton followed={followed} onToggle={onToggle} />
         </div>
 
@@ -278,6 +285,14 @@ export function CompanyDetail({
           </p>
           <p className="text-[10px] text-text-muted">{t("stocks.today")}</p>
         </div>
+        {alerting && (
+          <AlertPanel
+            item={{ kind: "stock", symbol: quote.symbol }}
+            name={quote.symbol}
+            price={quote.ltp}
+            onClose={() => setAlerting(false)}
+          />
+        )}
 
         <StockChart symbol={quote.symbol} />
       </section>

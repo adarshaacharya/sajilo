@@ -87,6 +87,7 @@ export function Stocks({
   linkedIpo = null,
   linkedIpoList = false,
   linkedBoid = false,
+  linkedSymbol = null,
   footer = null,
 }: {
   state: LoadState<StockMarketSnapshot> | undefined;
@@ -102,6 +103,8 @@ export function Stocks({
   linkedIpoList?: boolean;
   /** Opens the BOID allotments page, as a new-allotment card does. */
   linkedBoid?: boolean;
+  /** A company to open on arrival, e.g. from a price alert. */
+  linkedSymbol?: string | null;
   /** Drawn under the market view only, never under a drilled-in panel. */
   footer?: ReactNode;
 }) {
@@ -111,6 +114,7 @@ export function Stocks({
   const [query, setQuery] = useState("");
   const [panel, setPanel] = useState<Panel | null>(() => {
     if (linkedBoid) return { kind: "boid" };
+    if (linkedSymbol) return { kind: "quote", symbol: linkedSymbol.toUpperCase() };
     if (linkedIpo) return { kind: "ipo", key: linkedIpo, from: "market" };
     return linkedIpoList ? { kind: "ipos" } : null;
   });

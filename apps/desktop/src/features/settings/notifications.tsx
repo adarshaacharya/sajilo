@@ -16,6 +16,7 @@ import {
 } from "../../shared/lib/ipc";
 import { ReadingTime } from "../rashifal/reading-time";
 import { NewsFollowsSection } from "./_components/news-follows";
+import { PriceAlertsSection } from "./_components/price-alerts";
 import { SettingsSection } from "./_components/settings-section";
 
 type TranslationKey = Parameters<typeof translate>[0];
@@ -378,6 +379,7 @@ export function Notifications() {
           ))}
           <div className="mb-2.5">
             <NewsFollowsSection />
+            <PriceAlertsSection />
           </div>
         </div>
 

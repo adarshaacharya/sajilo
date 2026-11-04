@@ -246,6 +246,8 @@ pub enum ReminderKind {
     Quiz,
     /// New stories from a followed newsroom, or its daily summary.
     News,
+    /// A stock or metal reached the price the user set an alert for.
+    PriceAlert,
 }
 
 /// Platform notification centres cap pending local notifications — macOS at 64.

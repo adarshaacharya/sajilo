@@ -4,6 +4,7 @@ import type { StockQuote } from "../../../types/api/StockQuote";
 import { money, money0 } from "../_lib/format";
 import { changeTone, percentText } from "../_lib/stock-tone";
 import { FollowButton } from "./follow-button";
+import { AlertHint } from "./price-alert";
 
 /**
  * A company as the market sees it: last price and today's move. Ownership only
@@ -50,6 +51,7 @@ export function QuoteRow({
           <span
             className={`block text-[10px] font-medium tabular-nums ${changeTone(quote.change)}`}
           >
+            <AlertHint item={{ kind: "stock", symbol: quote.symbol }} price={quote.ltp} />
             {percentText(quote.change, quote.changePercent)}
           </span>
         </span>

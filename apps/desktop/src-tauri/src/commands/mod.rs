@@ -23,6 +23,7 @@ pub mod notes;
 pub mod notify;
 pub mod plans;
 pub mod portfolio;
+pub mod price_alerts;
 pub mod radio;
 pub mod rashifal;
 pub mod reminder_card;

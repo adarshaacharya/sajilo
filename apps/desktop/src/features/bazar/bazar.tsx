@@ -398,6 +398,7 @@ export function Bazar() {
           linkedIpo={linked.get("ipo")}
           linkedIpoList={linked.has("ipos")}
           linkedBoid={linked.has("boid")}
+          linkedSymbol={linked.get("symbol")}
         />
       )}
 

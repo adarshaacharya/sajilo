@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSettings } from "../../../shared/context/settings-context";
 import type { Metal } from "../../../types/api/Metal";
 import type { MetalRateSnapshot } from "../../../types/api/MetalRateSnapshot";
@@ -6,6 +7,7 @@ import type { MetalUnit } from "../../../types/api/MetalUnit";
 import {
   headlineMetal,
   metalName,
+  metalNepaliName,
   metalUnitLabel,
   money,
   priceChange,
@@ -15,6 +17,7 @@ import { ChangeBadge } from "./change-badge";
 import { MetalCalculator } from "./metal-calculator";
 import { MetalChart } from "./metal-chart";
 import { MetalRow } from "./metal-row";
+import { AlertBell, AlertHint, AlertPanel } from "./price-alert";
 import { SourceLink, SourceNote } from "./source-note";
 
 /** Who published the prices on screen: the Federation, or the fallback that
@@ -29,7 +32,8 @@ const CREDITS: Record<MetalSource, { href: string; name: string }> = {
 };
 
 export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
-  const { t } = useSettings();
+  const { t, language } = useSettings();
+  const [alerting, setAlerting] = useState(false);
   // A source this build does not know (newer data, or none) drops the credit
   // line rather than the screen.
   const credit = CREDITS[snapshot.source] as (typeof CREDITS)[MetalSource] | undefined;
@@ -42,6 +46,7 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
   const others = [...new Set(snapshot.rates.map((rate) => rate.metal))].filter(
     (metal) => metal !== headline?.metal,
   );
+  const headlineTola = headline ? rateOf(headline.metal, "tola") : undefined;
   const headlineOther = headline
     ? rateOf(headline.metal, headline.unit === "tola" ? "tenGram" : "tola")
     : undefined;
@@ -58,11 +63,20 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
                 </p>
                 <p className="text-[10px] text-text-muted">{metalUnitLabel(headline.unit)}</p>
               </div>
-              <ChangeBadge
-                change={priceChange(headline.price, headline.previousPrice)}
-                previous={headline.previousPrice}
-                percentOnly
-              />
+              <div className="flex items-center gap-1">
+                <ChangeBadge
+                  change={priceChange(headline.price, headline.previousPrice)}
+                  previous={headline.previousPrice}
+                  percentOnly
+                />
+                {headlineTola && (
+                  <AlertBell
+                    item={{ kind: "metal", metal: headline.metal }}
+                    open={alerting}
+                    onToggle={() => setAlerting((was) => !was)}
+                  />
+                )}
+              </div>
             </div>
             <p className="mt-1 text-[18px] font-semibold leading-none tabular-nums">
               Rs {money.format(headline.price)}
@@ -72,6 +86,18 @@ export function MetalsTab({ snapshot }: { snapshot: MetalRateSnapshot }) {
               <p className="mt-2 text-[11px] text-text-muted tabular-nums">
                 Rs {money.format(headlineOther.price)} {metalUnitLabel(headlineOther.unit)}
               </p>
+            )}
+            <AlertHint
+              item={{ kind: "metal", metal: headline.metal }}
+              price={headlineTola?.price}
+            />
+            {alerting && headlineTola && (
+              <AlertPanel
+                item={{ kind: "metal", metal: headline.metal }}
+                name={`${language === "ne" ? metalNepaliName(headline.metal) : metalName(headline.metal)} (${metalUnitLabel("tola")})`}
+                price={headlineTola.price}
+                onClose={() => setAlerting(false)}
+              />
             )}
           </div>
           <div className="section-divider mt-2.5 pt-2">
