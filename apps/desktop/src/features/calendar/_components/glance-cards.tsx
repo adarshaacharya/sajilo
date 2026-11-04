@@ -74,6 +74,17 @@ export function GlanceCards() {
   );
 
   // The pinned currencies, as many as fit one line.
+  const history = loadedValue(forex)?.history ?? {};
+  /** Since NRB's last rate before today's, per one unit, as NEPSE's card
+   * shows its index: the move, and the move in percent. */
+  const moveOf = (code: string, unit: number) => {
+    const points = history[code] ?? [];
+    if (points.length < 2) return null;
+    const now = (points[points.length - 1] ?? 0) / unit;
+    const before = (points[points.length - 2] ?? 0) / unit;
+    if (!before) return null;
+    return { change: now - before, percent: ((now - before) / before) * 100 };
+  };
   const rates = (modules.forexEnabled ? (loadedValue(forex)?.rates ?? []) : [])
     .filter((rate) => modules.forexFavourites.includes(rate.currencyCode))
     .sort(
@@ -151,39 +162,60 @@ export function GlanceCards() {
         // their label, the rate as their figure. Each opens Forex; pointed
         // at, a cell's filled star takes it off Today.
         <div
-          className="surface-card grid w-full divide-x divide-divider py-2"
+          // Alone, a currency takes a card's width, as weather and NEPSE do,
+          // not the whole row.
+          className={`surface-card grid divide-x divide-divider py-2 ${
+            rates.length === 1 ? "w-[calc(50%-4px)]" : "w-full"
+          }`}
           style={{ gridTemplateColumns: `repeat(${rates.length}, minmax(0, 1fr))` }}
         >
-          {rates.map((rate) => (
-            <div key={rate.currencyCode} className="group relative min-w-0">
-              <button
-                type="button"
-                onClick={() => navigate("/bazar?tab=forex")}
-                className="block w-full min-w-0 px-2.5 text-left"
+          {rates.map((rate) => {
+            const move = moveOf(rate.currencyCode, rate.unit);
+            const moveLine = move && (
+              <span
+                className={`block truncate text-[10px] tabular-nums ${
+                  Math.abs(move.change) < 0.005 ? "text-text-muted" : changeTone(move.change)
+                }`}
               >
-                <span className="block text-[10px] text-text-muted">{rate.currencyCode}</span>
-                <span className="mt-0.5 block truncate text-[13px] font-semibold leading-tight tabular-nums">
-                  {money.format(rate.buy / rate.unit)}
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setModules((current) => ({
-                    ...current,
-                    forexFavourites: current.forexFavourites.filter(
-                      (code) => code !== rate.currencyCode,
-                    ),
-                  }))
-                }
-                aria-label={`${t("forex.unfavourite")} ${rate.currencyCode}`}
-                title={t("forex.unfavourite")}
-                className="absolute top-0 right-1.5 grid size-4 place-items-center text-accent-mark opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-              >
-                <Icon name="starFill" className="size-2.5" />
-              </button>
-            </div>
-          ))}
+                {Math.abs(move.change) < 0.005
+                  ? t("dashboard.nepse-no-change")
+                  : `${move.change > 0 ? "↑" : "↓"} ${money.format(Math.abs(move.change))} · ${Math.abs(move.percent).toFixed(2)}%`}
+              </span>
+            );
+            return (
+              <div key={rate.currencyCode} className="group relative min-w-0">
+                <button
+                  type="button"
+                  onClick={() => navigate("/bazar?tab=forex")}
+                  className="block w-full min-w-0 px-2.5 text-left"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-[10px] text-text-muted">{rate.currencyCode}</span>
+                    <span className="mt-0.5 block truncate text-[13px] font-semibold leading-tight tabular-nums">
+                      {money.format(rate.buy / rate.unit)}
+                    </span>
+                    {moveLine}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setModules((current) => ({
+                      ...current,
+                      forexFavourites: current.forexFavourites.filter(
+                        (code) => code !== rate.currencyCode,
+                      ),
+                    }))
+                  }
+                  aria-label={`${t("forex.unfavourite")} ${rate.currencyCode}`}
+                  title={t("forex.unfavourite")}
+                  className="absolute top-0 right-1.5 grid size-4 place-items-center text-accent-mark opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <Icon name="starFill" className="size-2.5" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
       {freshness && <p className="px-0.5 text-[10px] text-text-muted">{freshness}</p>}
