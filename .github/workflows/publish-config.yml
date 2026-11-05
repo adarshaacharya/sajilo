@@ -28,13 +28,13 @@ concurrency:
 jobs:
   publish:
     name: Sign and deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Holds the signing key and the Cloudflare token. Its deployment rule
     # allows only `main`, so neither a fork's PR nor another branch can use it.
     environment: config-publish
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
       - name: Set up bun

@@ -29,7 +29,7 @@ jobs:
             args: ""
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Linux webkit dependencies
         if: matrix.os == 'ubuntu-22.04'
         run: |
@@ -61,7 +61,7 @@ jobs:
       # Kept as a download on the run's page, for handing a test build to
       # someone before a release. Unsigned, and it won't self-update.
       - name: Upload the installers
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: sajilo-${{ matrix.target }}
           retention-days: 14
