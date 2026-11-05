@@ -98,12 +98,15 @@ interface Settings {
   theme: ThemeMode;
   accent: Accent;
   textSize: TextSize;
+  /** Clocks read 24-hour (`15:05`) rather than 12-hour (`3:05 PM`). */
+  clock24: boolean;
   modules: ModulePrefs;
   setLanguage: (value: Language) => void;
   setNumerals: (value: NumeralStyle) => void;
   setTheme: (value: ThemeMode) => void;
   setAccent: (value: Accent) => void;
   setTextSize: (value: TextSize) => void;
+  setClock24: (value: boolean) => void;
   setModules: (value: ModulePrefs | ((current: ModulePrefs) => ModulePrefs)) => void;
   t: (key: Parameters<typeof translate>[0]) => string;
 }
@@ -152,6 +155,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeMode>("system");
   const [accent, setAccentState] = useState<Accent>("marigold");
   const [textSize, setTextSizeState] = useState<TextSize>("default");
+  const [clock24, setClock24State] = useState(false);
   const [modules, setModulesState] = useState<ModulePrefs>(DEFAULT_MODULES);
 
   useEffect(() => applyTheme(theme), [theme]);
@@ -191,6 +195,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       api.getSetting<string[]>("tabBar"),
       api.getSetting<string[]>("moreOrder"),
       api.getSetting<string>("accent"),
+      api.getSetting<boolean>("clock24h"),
     ])
       .then(
         ([
@@ -220,8 +225,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           tabBar,
           moreOrder,
           storedAccent,
+          storedClock24,
         ]) => {
           if (cancelled) return;
+          if (storedClock24 !== null) setClock24State(storedClock24);
           if (storedLanguage) setLanguage(storedLanguage);
           if (storedNumerals) setNumerals(storedNumerals);
           if (storedTheme === "system" || storedTheme === "light" || storedTheme === "dark") {
@@ -323,6 +330,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     theme,
     accent,
     textSize,
+    clock24,
     modules,
     setLanguage: (next) => {
       setLanguage(next);
@@ -343,6 +351,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setTextSize: (next) => {
       setTextSizeState(next);
       persist("textSize", next);
+    },
+    setClock24: (next) => {
+      setClock24State(next);
+      // The tray's clock reads the same setting.
+      api
+        .setSetting("clock24h", next)
+        .then(() => api.refreshTray())
+        .catch(() => {});
     },
     setModules,
     t: (key) => translate(key, language),

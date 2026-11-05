@@ -18,6 +18,8 @@ pub const CUSTOM_MENU_BAR_SHOWS_YEAR: &str = "customMenuBarShowsYear";
 /// Appends `HH:MM` to whatever date format is already showing — composes with
 /// every `MenuBarFormat`, not a format of its own.
 pub const SHOW_TRAY_TIME: &str = "showTrayTime";
+/// Clocks read 24-hour (`15:05`) when on, 12-hour (`3:05 PM`) when off.
+pub const CLOCK_24H: &str = "clock24h";
 /// The tray icon on Windows and Linux: `"app"` for Sajilo's own icon, `"flag"`
 /// for the Nepal flag. macOS shows the date alone, with no icon.
 pub const TRAY_ICON: &str = "trayIcon";
@@ -175,6 +177,16 @@ pub fn tray_preferences(
         },
         read_bool(app, SHOW_TRAY_TIME, false),
     )
+}
+
+/// Whether clocks read 24-hour. Off unless Settings turns it on: most people
+/// in Nepal read the time on a 12-hour clock.
+pub fn clock_24h(app: &AppHandle<Wry>) -> bool {
+    db::get_json(app, CLOCK_24H)
+        .ok()
+        .flatten()
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false)
 }
 
 /// Whether the tray shows the Nepal flag rather than Sajilo's icon. The flag

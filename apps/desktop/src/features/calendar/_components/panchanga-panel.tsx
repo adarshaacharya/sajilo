@@ -24,7 +24,7 @@ function ChaughadiyaParts({
   night: Chaughadiya[];
   isToday: boolean;
 }) {
-  const { t, language } = useSettings();
+  const { t, language, clock24 } = useSettings();
   const now = Date.now();
   const current = (part: Chaughadiya) =>
     isToday && Date.parse(part.start) <= now && now < Date.parse(part.end);
@@ -60,7 +60,7 @@ function ChaughadiyaParts({
               current(part) ? "bg-surface-hover" : ""
             }`}
           >
-            <span className="tabular-nums text-text-muted">{clockTime(part.start)}</span>
+            <span className="tabular-nums text-text-muted">{clockTime(part.start, clock24)}</span>
             <span className={`font-medium ${QUALITY[part.quality]}`}>
               {language === "ne" ? part.name.ne : part.name.en}
             </span>
@@ -87,7 +87,7 @@ function along(iso: string, start: number, span: number): number {
  * only places them.
  */
 export function PanchangaPanel({ panchanga, isToday }: { panchanga: Panchanga; isToday: boolean }) {
-  const { t } = useSettings();
+  const { t, clock24 } = useSettings();
   const start = new Date(panchanga.sunrise).getTime();
   const span = new Date(panchanga.sunset).getTime() - start;
   const rahu =
@@ -111,7 +111,7 @@ export function PanchangaPanel({ panchanga, isToday }: { panchanga: Panchanga; i
       <div
         className="day-arc relative mt-3 h-1.5 rounded-full"
         role="img"
-        aria-label={`${t("panchanga.sunrise")} ${clockTime(panchanga.sunrise)}, ${t("panchanga.sunset")} ${clockTime(panchanga.sunset)}`}
+        aria-label={`${t("panchanga.sunrise")} ${clockTime(panchanga.sunrise, clock24)}, ${t("panchanga.sunset")} ${clockTime(panchanga.sunset, clock24)}`}
       >
         {rahu && (
           <span
@@ -130,10 +130,10 @@ export function PanchangaPanel({ panchanga, isToday }: { panchanga: Panchanga; i
       <div className="mt-1.5 flex justify-between text-[11px] tabular-nums text-text-secondary">
         <span className="flex items-center gap-1">
           <Icon name="sunrise" className="size-3 opacity-70" />
-          {clockTime(panchanga.sunrise)}
+          {clockTime(panchanga.sunrise, clock24)}
         </span>
         <span className="flex items-center gap-1">
-          {clockTime(panchanga.sunset)}
+          {clockTime(panchanga.sunset, clock24)}
           <Icon name="sunset" className="size-3 opacity-70" />
         </span>
       </div>
@@ -143,8 +143,8 @@ export function PanchangaPanel({ panchanga, isToday }: { panchanga: Panchanga; i
           <span className="mt-[3px] size-2.5 shrink-0 rounded-[3px] bg-holiday/85" />
           <div className="min-w-0">
             <p className="text-[12px] tabular-nums">
-              {t("panchanga.rahu-kaal")} {clockTime(panchanga.rahuKaalStart)}–
-              {clockTime(panchanga.rahuKaalEnd)}
+              {t("panchanga.rahu-kaal")} {clockTime(panchanga.rahuKaalStart, clock24)}–
+              {clockTime(panchanga.rahuKaalEnd, clock24)}
             </p>
             <p className="mt-0.5 text-[10px] leading-snug text-text-muted">
               {t("panchanga.computed")}

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useSettings } from "../context/settings-context";
+import { hourOptions } from "./clock-format";
 
 export interface ClockCity {
   timeZone: string;
@@ -94,12 +96,11 @@ export function searchTimezones(query: string): ClockCity[] {
 
 const NEPAL_TIME_ZONE = "Asia/Kathmandu";
 
-function formatTime(timeZone: string): string {
+function formatTime(timeZone: string, h24: boolean): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone,
-    hour: "2-digit",
+    ...hourOptions(h24),
     minute: "2-digit",
-    hourCycle: "h23",
   }).format(new Date());
 }
 
@@ -148,6 +149,7 @@ export function formatDayOffset(offset: number): string {
  */
 export function useWorldClocks(timeZones: string[]): Record<string, WorldClockReading> {
   const key = timeZones.join(",");
+  const { clock24 } = useSettings();
   const [times, setTimes] = useState<Record<string, WorldClockReading>>({});
 
   useEffect(() => {
@@ -156,14 +158,14 @@ export function useWorldClocks(timeZones: string[]): Record<string, WorldClockRe
       const now = new Date();
       const next: Record<string, WorldClockReading> = {};
       for (const tz of zones) {
-        next[tz] = { time: formatTime(tz), dayOffset: dayOffsetFromNepal(tz, now) };
+        next[tz] = { time: formatTime(tz, clock24), dayOffset: dayOffsetFromNepal(tz, now) };
       }
       setTimes(next);
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [key]);
+  }, [key, clock24]);
 
   return times;
 }

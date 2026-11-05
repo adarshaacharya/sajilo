@@ -104,19 +104,28 @@ pub fn today() -> Option<NepaliDate> {
     bs::nepali_date_from(nepal_time::today()).ok()
 }
 
-/// `HH:MM` in Nepal time, in the chosen digits. Zero-padded, 24-hour — the
-/// tray has no room to spend on an AM/PM marker.
+/// The time in Nepal, in the chosen digits: `15:05` on the 24-hour clock,
+/// `3:05 PM` on the 12-hour one.
 ///
 /// Kept separate from [`title`] rather than folded into `MenuBarFormat`: the
 /// "show time" preference is an on/off suffix that composes with *any* date
 /// format, not a format of its own to pick between.
-pub fn clock(now: chrono::DateTime<chrono::FixedOffset>, numerals: NumeralStyle) -> String {
+pub fn clock(
+    now: chrono::DateTime<chrono::FixedOffset>,
+    numerals: NumeralStyle,
+    h24: bool,
+) -> String {
     use chrono::Timelike;
-    format!(
-        "{}:{}",
-        numerals.format(i64::from(now.hour()), Some(2)),
-        numerals.format(i64::from(now.minute()), Some(2)),
-    )
+    let minute = numerals.format(i64::from(now.minute()), Some(2));
+    if h24 {
+        return format!(
+            "{}:{minute}",
+            numerals.format(i64::from(now.hour()), Some(2))
+        );
+    }
+    let (pm, hour) = now.hour12();
+    let half = if pm { "PM" } else { "AM" };
+    format!("{}:{minute} {half}", numerals.format(i64::from(hour), None))
 }
 
 /// Seconds until the next minute boundary in Nepal time. Used only when the

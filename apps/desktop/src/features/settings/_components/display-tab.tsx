@@ -6,6 +6,7 @@ import {
   type ThemeMode,
   useSettings,
 } from "../../../shared/context/settings-context";
+import { clockText } from "../../../shared/lib/clock-format";
 import type { Language } from "../../../shared/lib/i18n";
 import { api } from "../../../shared/lib/ipc";
 import { MINI_LINES, setMiniLine, useMiniLine } from "../../../shared/lib/mini-line";
@@ -43,7 +44,7 @@ export function DisplayTab({
   numerals: NumeralStyle;
   setNumerals: (value: NumeralStyle) => void;
 }) {
-  const { t, theme, setTheme, textSize, setTextSize } = useSettings();
+  const { t, theme, setTheme, textSize, setTextSize, clock24, setClock24 } = useSettings();
   const miniLine = useMiniLine();
   const [format, setFormat] = useState<string>("nepaliLong");
   const [showFlag, setShowFlag] = useState(true);
@@ -166,6 +167,21 @@ export function DisplayTab({
               label: `${t("numerals.devanagari")} · ${digits(2083, "devanagari")}`,
             },
             { id: "latin", label: `${t("numerals.latin")} · ${digits(2083, "latin")}` },
+          ]}
+        />
+        <Select
+          label={t("settings.clock")}
+          value={clock24 ? "24" : "12"}
+          onChange={(value) => setClock24(value === "24")}
+          options={[
+            {
+              id: "12",
+              label: `${t("settings.clock-12")} · ${clockText({ hour: 15, minute: 5 }, numerals, false)}`,
+            },
+            {
+              id: "24",
+              label: `${t("settings.clock-24")} · ${clockText({ hour: 15, minute: 5 }, numerals, true)}`,
+            },
           ]}
         />
       </SettingsSection>

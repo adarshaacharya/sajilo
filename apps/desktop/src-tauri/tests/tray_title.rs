@@ -149,8 +149,25 @@ fn renders_the_clock_zero_padded_and_in_the_chosen_digits() {
     let nepal = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
     let just_after_nine = nepal.with_ymd_and_hms(2026, 8, 16, 9, 5, 0).unwrap();
 
-    assert_eq!(clock(just_after_nine, NumeralStyle::Latin), "09:05");
-    assert_eq!(clock(just_after_nine, NumeralStyle::Devanagari), "०९:०५");
+    assert_eq!(clock(just_after_nine, NumeralStyle::Latin, true), "09:05");
+    assert_eq!(
+        clock(just_after_nine, NumeralStyle::Devanagari, true),
+        "०९:०५"
+    );
+}
+
+#[test]
+fn renders_the_twelve_hour_clock_with_am_and_pm() {
+    let nepal = FixedOffset::east_opt(5 * 3600 + 45 * 60).unwrap();
+    let at = |h, m| nepal.with_ymd_and_hms(2026, 8, 16, h, m, 0).unwrap();
+
+    assert_eq!(clock(at(9, 5), NumeralStyle::Latin, false), "9:05 AM");
+    assert_eq!(clock(at(15, 30), NumeralStyle::Latin, false), "3:30 PM");
+    assert_eq!(clock(at(0, 0), NumeralStyle::Latin, false), "12:00 AM");
+    assert_eq!(
+        clock(at(12, 0), NumeralStyle::Devanagari, false),
+        "१२:०० PM"
+    );
 }
 
 /// The tray wakes every minute once the time is shown, not once a day.

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
+import { clockText } from "../../shared/lib/clock-format";
 import { api, type Today } from "../../shared/lib/ipc";
 import { useMiniLine } from "../../shared/lib/mini-line";
 import { digits } from "../../shared/lib/numerals";
@@ -32,7 +33,7 @@ function shortGregorian(iso: string): string {
  * app again, still pinned.
  */
 export function MiniView() {
-  const { t, numerals, language } = useSettings();
+  const { t, numerals, language, clock24 } = useSettings();
   const clock = useNepalClock();
   const [today, setToday] = useState<Today | null>(null);
   const line = useMiniLine();
@@ -75,7 +76,7 @@ export function MiniView() {
       </div>
 
       <span className="mini-view__clock tabular-nums">
-        {digits(clock.hour, numerals, 2)}:{digits(clock.minute, numerals, 2)}
+        {clockText({ hour: clock.hour, minute: clock.minute }, numerals, clock24)}
       </span>
 
       <button

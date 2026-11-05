@@ -354,7 +354,11 @@ fn today(app: &AppHandle) -> Option<(NepaliDate, NumeralStyle, String)> {
     if show_time {
         label = format!(
             "{label} · {}",
-            title::clock(sajilo_core::nepal_time::now(), numerals)
+            title::clock(
+                sajilo_core::nepal_time::now(),
+                numerals,
+                crate::prefs::clock_24h(app),
+            )
         );
     }
     Some((date, numerals, label))

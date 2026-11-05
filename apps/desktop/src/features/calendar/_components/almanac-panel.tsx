@@ -19,13 +19,13 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
  * Rust for Kathmandu; this lays it out.
  */
 export function AlmanacPanel({ almanac, date }: { almanac: Almanac; date: string }) {
-  const { t, language } = useSettings();
+  const { t, language, clock24 } = useSettings();
   const name = (item: AlmanacName) => (language === "ne" ? item.ne : item.en);
 
   // An ending after midnight belongs to the next morning, and says so.
   const until = (item: AlmanacName) => {
     if (!item.ends) return null;
-    const time = nepalClock(item.ends);
+    const time = nepalClock(item.ends, clock24);
     const later = nepalDay(item.ends) !== date;
     return (
       <span className="ml-1.5 text-[10px] tabular-nums text-text-muted">
@@ -72,9 +72,9 @@ export function AlmanacPanel({ almanac, date }: { almanac: Almanac; date: string
         {(moon.rise || moon.set) && (
           <Row label={t("panchang.moonrise-set")}>
             <span className="tabular-nums">
-              {moon.rise ? nepalClock(moon.rise) : "—"}
+              {moon.rise ? nepalClock(moon.rise, clock24) : "—"}
               <span className="text-text-muted"> / </span>
-              {moon.set ? nepalClock(moon.set) : "—"}
+              {moon.set ? nepalClock(moon.set, clock24) : "—"}
             </span>
           </Row>
         )}

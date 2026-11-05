@@ -5,6 +5,7 @@ import { KeepOpenButton } from "../../../shared/components/keep-open-button";
 import { MiniViewButton } from "../../../shared/components/mini-view-button";
 import { UpdateHeaderButton } from "../../../shared/components/update-header-button";
 import { useSettings } from "../../../shared/context/settings-context";
+import { clockText } from "../../../shared/lib/clock-format";
 import type { Today } from "../../../shared/lib/ipc";
 import { digits } from "../../../shared/lib/numerals";
 import { useDragWhenKept, useKept } from "../../../shared/lib/popover-kept";
@@ -34,14 +35,14 @@ async function quitApp() {
 }
 
 export function DateHeader({ today }: { today: Today }) {
-  const { numerals, language, t } = useSettings();
+  const { numerals, language, clock24, t } = useSettings();
   const navigate = useNavigate();
   const weekday = language === "en" ? WEEKDAYS_EN[today.weekday] : WEEKDAYS_NE[today.weekday];
   const clock = useNepalClock();
   const kept = useKept();
   const bar = useRef<HTMLDivElement>(null);
   useDragWhenKept(bar);
-  const clockText = `${digits(clock.hour, numerals, 2)}:${digits(clock.minute, numerals, 2)}:${digits(clock.second, numerals, 2)}`;
+  const clockLabel = clockText(clock, numerals, clock24);
 
   return (
     <div
@@ -70,7 +71,7 @@ export function DateHeader({ today }: { today: Today }) {
           {formatGregorian(today.gregorian)}
         </p>
         <p className="mt-0.5 text-[11px] tabular-nums tracking-[0.3px] text-text-muted">
-          {clockText}
+          {clockLabel}
         </p>
       </div>
 
