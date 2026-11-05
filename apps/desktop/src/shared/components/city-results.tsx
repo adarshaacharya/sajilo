@@ -57,17 +57,21 @@ export function AddCityField({
   chosen,
   onPick,
   onClose,
+  chip = false,
 }: {
   chosen: readonly string[];
   onPick: (timeZone: string) => void;
   onClose: () => void;
+  /** Sized as a clock chip, in a grid cell: the matches float below it
+   * rather than pushing the row apart. */
+  chip?: boolean;
 }) {
   const { t } = useSettings();
   const [query, setQuery] = useState("");
   const results = useMemo(() => searchTimezones(query), [query]);
   return (
-    <div>
-      <div className="day-plan-add field-shell is-typing">
+    <div className={chip ? "relative" : undefined}>
+      <div className={`day-plan-add field-shell is-typing${chip ? " day-plan-add--chip" : ""}`}>
         <Icon name="plus" className="size-3 shrink-0 text-accent-mark" />
         <input
           // biome-ignore lint/a11y/noAutofocus: opened by a click on purpose
@@ -86,7 +90,7 @@ export function AddCityField({
             }
           }}
           onBlur={onClose}
-          placeholder={t("clock.add-placeholder")}
+          placeholder={t(chip ? "clock.add" : "clock.add-placeholder")}
           aria-label={t("clock.add")}
           className="min-w-0 flex-1 bg-transparent text-[12.5px] outline-none placeholder:text-text-muted"
         />
@@ -97,7 +101,11 @@ export function AddCityField({
           chosen={chosen}
           onPick={onPick}
           empty={t("bazar.no-match")}
-          className="max-h-[160px]"
+          className={
+            chip
+              ? "absolute top-full right-0 z-20 max-h-[160px] w-[200px] shadow-lg"
+              : "max-h-[160px]"
+          }
         />
       )}
     </div>

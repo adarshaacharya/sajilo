@@ -48,9 +48,16 @@ export function ClockRow({ timeZones }: { timeZones: string[] }) {
     setAdding(false);
   };
 
+  // An odd count leaves a free cell beside the last clock: adding happens
+  // there, in the same line. An even count has none, so the + floats over the
+  // grid's corner and the field opens under it.
+  const freeCell = preview.length > 1 && preview.length % 2 === 1;
+  const canAdd = preview.length < PREVIEW_LIMIT;
+  const field = (chip: boolean) => (
+    <AddCityField chip={chip} chosen={timeZones} onPick={add} onClose={() => setAdding(false)} />
+  );
+
   return (
-    // The + shows on hover, like each clock's ✕, and floats over the grid's
-    // corner so nothing below moves until a city is actually being typed.
     <div className="group/clocks relative">
       <Reorder.Group
         as="div"
@@ -94,8 +101,23 @@ export function ClockRow({ timeZones }: { timeZones: string[] }) {
             </Reorder.Item>
           );
         })}
+        {canAdd &&
+          freeCell &&
+          (adding ? (
+            field(true)
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              aria-label={t("clock.add")}
+              className="clock-add-cell opacity-0 transition-opacity group-hover/clocks:opacity-100 focus-visible:opacity-100"
+            >
+              <Icon name="plus" className="size-3" />
+              {t("clock.add")}
+            </button>
+          ))}
       </Reorder.Group>
-      {preview.length < PREVIEW_LIMIT && !adding && (
+      {canAdd && !freeCell && !adding && (
         <button
           type="button"
           onClick={() => setAdding(true)}
@@ -106,11 +128,7 @@ export function ClockRow({ timeZones }: { timeZones: string[] }) {
           <Icon name="plus" className="size-2.5" />
         </button>
       )}
-      {adding && (
-        <div className="pt-1.5">
-          <AddCityField chosen={timeZones} onPick={add} onClose={() => setAdding(false)} />
-        </div>
-      )}
+      {canAdd && !freeCell && adding && <div className="pt-1.5">{field(false)}</div>}
     </div>
   );
 }
