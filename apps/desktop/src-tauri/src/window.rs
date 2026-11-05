@@ -978,12 +978,10 @@ const HOVER_FOCUS: std::time::Duration = std::time::Duration::from_millis(120);
 #[cfg(target_os = "linux")]
 const CLICK_POLL: std::time::Duration = std::time::Duration::from_millis(25);
 
-/// When the page last saw the pointer leave the popover, and when the popover
-/// last lost focus; see [`HOVER_FOCUS`].
+/// When the page last saw the pointer leave the popover; compared with
+/// [`FOCUS_LOST_AT`], see [`HOVER_FOCUS`].
 #[cfg(target_os = "linux")]
 static POINTER_LEFT_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
-#[cfg(target_os = "linux")]
-static FOCUS_LOST_AT: std::sync::Mutex<Option<std::time::Instant>> = std::sync::Mutex::new(None);
 
 /// Counts focus changes, so a watch started by an older focus-out stops once a
 /// newer one has taken over.
@@ -1017,9 +1015,7 @@ fn click_away_on_linux(window: &WebviewWindow, focused: bool) {
         FOCUSED_SINCE_SHOWN.store(true, Ordering::SeqCst);
         return;
     }
-    if let Ok(mut lost) = FOCUS_LOST_AT.lock() {
-        *lost = Some(std::time::Instant::now());
-    }
+    // FOCUS_LOST_AT was stamped by `hide_on_blur` before this watch began.
     let settled = SHOWN_AT
         .lock()
         .ok()
