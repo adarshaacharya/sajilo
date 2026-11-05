@@ -10,7 +10,7 @@ use crate::focus::jokes::{EDITABLE, Joke, MAX_LINE, MIN_DECK, deck_name};
 
 /// The parts of Sajilo a tip may point to. The app owns where each one leads
 /// and when it may be suggested; a pack only words the suggestion.
-pub const TIP_FEATURES: [&str; 17] = [
+pub const TIP_FEATURES: [&str; 18] = [
     "games",
     "radio",
     "notes",
@@ -28,6 +28,7 @@ pub const TIP_FEATURES: [&str; 17] = [
     "panchang",
     "crypto",
     "shares",
+    "typing",
 ];
 /// Enough to rotate through for a month without a pack growing into a feed.
 const MAX_TIPS: usize = 40;

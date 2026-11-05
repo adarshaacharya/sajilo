@@ -20,10 +20,10 @@ type Tab = ToolId;
 export function Tools() {
   const { t } = useSettings();
   const { search } = useLocation();
-  // A link may open one tool directly: /tools?tab=clock.
+  // A link may open one tool directly: /tools?tab=clock, /tools?tab=nepali.
   const [tab, setTab] = useState<Tab | null>(() => {
     const requested = new URLSearchParams(search).get("tab");
-    return requested === "clock" ? "clock" : null;
+    return requested === "clock" || requested === "nepali" ? requested : null;
   });
   const [directorySection, setDirectorySection] = useState<DirectorySection>("phones");
   useEffect(() => {

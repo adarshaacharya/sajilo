@@ -788,6 +788,11 @@
       "feature": "shares",
       "en": "Check today's share prices on NEPSE",
       "ne": "आज नेप्सेमा सेयरको मूल्य हेर्नुहोस्"
+    },
+    {
+      "feature": "typing",
+      "en": "Type in English letters, get Nepali to copy",
+      "ne": "अंग्रेजी अक्षरमा लेख्नुहोस्, नेपाली पाउनुहोस्"
     }
   ]
 }
