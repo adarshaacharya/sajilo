@@ -483,6 +483,7 @@ pub fn pending_notifications(
         .to_owned(),
         body: question,
         fire_at,
+        link: None,
     }]
 }
 

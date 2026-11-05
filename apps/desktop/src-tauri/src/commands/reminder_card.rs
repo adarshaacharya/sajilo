@@ -32,6 +32,10 @@ struct Queued {
 #[serde(rename_all = "camelCase")]
 pub struct ReminderCardView {
     pub reminder: PlannedNotification,
+    /// With news in front, every other news card queued: they are shown and
+    /// dealt with together, never one story per click.
+    pub also: Vec<PlannedNotification>,
+    /// Other reminders behind this card, not counting `also`.
     pub waiting: usize,
     /// "Show me an example": the real card, reminding of nothing.
     pub preview: bool,
@@ -70,12 +74,29 @@ pub fn show(app: &AppHandle<Wry>) {
     }
 }
 
+/// News is merged into one card; an example card stands alone.
+fn bundles(queued: &Queued) -> bool {
+    queued.reminder.kind == ReminderKind::News && !queued.preview
+}
+
 #[tauri::command]
 pub fn current_reminder(app: AppHandle<Wry>) -> Option<ReminderCardView> {
     with_queue(&app, |queue| {
-        queue.front().map(|front| ReminderCardView {
+        let front = queue.front()?;
+        let also: Vec<PlannedNotification> = if bundles(front) {
+            queue
+                .iter()
+                .skip(1)
+                .filter(|queued| bundles(queued))
+                .map(|queued| queued.reminder.clone())
+                .collect()
+        } else {
+            Vec::new()
+        };
+        Some(ReminderCardView {
             reminder: front.reminder.clone(),
-            waiting: queue.len() - 1,
+            waiting: queue.len() - 1 - also.len(),
+            also,
             preview: front.preview,
         })
     })
@@ -87,8 +108,12 @@ pub fn current_reminder(app: AppHandle<Wry>) -> Option<ReminderCardView> {
 #[tauri::command]
 pub fn dismiss_reminder(app: AppHandle<Wry>, open: Option<String>) {
     let (remaining, preview) = with_queue(&app, |queue| {
-        let preview = queue.pop_front().is_some_and(|front| front.preview);
-        (queue.len(), preview)
+        let front = queue.pop_front();
+        // The news merged into this card goes with it.
+        if front.as_ref().is_some_and(bundles) {
+            queue.retain(|queued| !bundles(queued));
+        }
+        (queue.len(), front.is_some_and(|front| front.preview))
     });
     // An example card is not a reminder anyone acted on.
     if !preview {
@@ -130,6 +155,7 @@ pub fn preview_reminder_card(app: AppHandle<Wry>) {
             title: "Festival tomorrow".to_owned(),
             body: "This is how a reminder arrives.".to_owned(),
             fire_at: chrono::Utc::now(),
+            link: None,
         });
     with_queue(&app, |queue| {
         queue.push_front(Queued {

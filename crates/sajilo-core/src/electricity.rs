@@ -118,6 +118,7 @@ pub fn plan(bills: &[UnpaidBill], now: DateTime<Utc>) -> Vec<PlannedNotification
                     title,
                     body,
                     fire_at,
+                    link: None,
                 });
             }
         }

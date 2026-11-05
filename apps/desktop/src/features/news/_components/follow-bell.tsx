@@ -1,200 +1,245 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { Icon } from "../../../shared/components/icon";
-import { Menu } from "../../../shared/components/menu";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
-import {
-  EVERY_HOURS,
-  everyLabel,
-  followSummary,
-  HOUR_OPTIONS,
-} from "../../../shared/lib/news-follow";
+import { EVERY_HOURS, followSummary, parseTime, timeLabel } from "../../../shared/lib/news-follow";
 import { track } from "../../../shared/lib/usage";
 import type { NewsFollowMode } from "../../../types/api/NewsFollowMode";
 import type { NewsFollows } from "../../../types/api/NewsFollows";
 
-const DEFAULTS: NewsFollows = { sources: {}, dailyHour: 8, everyHours: 3 };
+const DEFAULTS: NewsFollows = { sources: {}, dailyTimes: [660, 900], everyHours: 3 };
+/** See `NewsFollows::MAX_DAILY_HOURS`. */
+const MAX_DAILY = 6;
 
-/**
- * The bell beside News's source picker: how the chosen newsroom, or all of
- * them, is heard from. Four lines; the two with a time carry it inline, as a
- * small picker inside the line itself, so nothing opens a second level.
- */
-export function FollowBell({ source }: { source: string }) {
-  const { t } = useSettings();
+/** The followed newsrooms, read once and saved optimistically: shown at
+ * once, and the shell's answer, when there is one, is the truth. */
+export function useNewsFollows() {
   const [follows, setFollows] = useState<NewsFollows | null>(null);
-  const [open, setOpen] = useState(false);
-
   useEffect(() => {
     api
       .newsFollows()
       .then(setFollows)
       .catch(() => {});
   }, []);
-
   const current = follows ?? DEFAULTS;
-  const mode = current.sources[source] ?? null;
-
-  /** Shown at once; the shell's answer, when there is one, is the truth. */
   const save = (next: NewsFollows, call: Promise<NewsFollows | null>) => {
     const before = follows;
     setFollows(next);
     call.then((saved) => saved && setFollows(saved)).catch(() => setFollows(before));
   };
+  return { follows: current, save };
+}
 
-  const choose = (next: NewsFollowMode | null, close = true) => {
-    if (close) setOpen(false);
+type Follows = ReturnType<typeof useNewsFollows>;
+
+/** The bell beside News's source picker; lit, with a dot, while followed. */
+export function FollowBell({
+  source,
+  follows,
+  open,
+  onToggle,
+}: {
+  source: string;
+  follows: NewsFollows;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const { t } = useSettings();
+  const mode = follows.sources[source] ?? null;
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={t("news.follow")}
+      aria-expanded={open}
+      title={mode ? followSummary(t, mode, follows) : t("news.follow")}
+      className={`icon-btn size-[22px] ${open ? "bg-surface-hover" : ""}`}
+    >
+      <Icon name="bell" className={`size-3 ${mode ? "text-accent-mark" : ""}`} />
+      {mode && <span className="news-follow-dot" aria-hidden="true" />}
+    </button>
+  );
+}
+
+/**
+ * How the chosen newsroom, or all of them, is heard from: four lines under
+ * the source picker, the chosen one opening its own small choices in place.
+ */
+export function FollowPanel({
+  source,
+  follows: { follows, save },
+  onClose,
+}: {
+  source: string;
+  follows: Follows;
+  onClose: () => void;
+}) {
+  const { t } = useSettings();
+  const mode = follows.sources[source] ?? null;
+
+  const choose = (next: NewsFollowMode | null) => {
+    // Nothing more to pick for these two, so the panel is done.
+    if (next === null || next === "each") onClose();
     if (next === mode) return;
     if (next) {
       track("action.news-follow");
       // Following is the moment notifications start to matter.
       void api.requestNotificationPermission().catch(() => {});
     }
-    const sources = { ...current.sources };
+    const sources = { ...follows.sources };
     if (next) sources[source] = next;
     else delete sources[source];
-    save({ ...current, sources }, api.setNewsFollow(source, next));
-  };
-
-  const setEvery = (hours: number) => {
-    save({ ...current, everyHours: hours }, api.setNewsEveryHours(hours));
-    choose("hours", false);
-  };
-  const setHour = (hour: number) => {
-    save({ ...current, dailyHour: hour }, api.setNewsDailyHour(hour));
-    choose("daily", false);
+    save({ ...follows, sources }, api.setNewsFollow(source, next));
   };
 
   return (
-    <div className="relative shrink-0">
-      <button
-        type="button"
-        // Its own click toggles; the menu's outside-click must not reopen it.
-        onMouseDown={(event) => event.stopPropagation()}
-        onClick={() => setOpen((was) => !was)}
-        aria-label={t("news.follow")}
-        aria-expanded={open}
-        title={mode ? followSummary(t, mode, current) : t("news.follow")}
-        className="icon-btn size-[22px]"
-      >
-        <Icon name="bell" className={`size-3 ${mode ? "text-accent-mark" : ""}`} />
-        {mode && <span className="news-follow-dot" aria-hidden="true" />}
-      </button>
-      {open && (
-        <Menu onClose={() => setOpen(false)}>
-          <Choice checked={!mode} onClick={() => choose(null)}>
-            {t("news.follow.off")}
-          </Choice>
-          <Choice checked={mode === "each"} onClick={() => choose("each")}>
-            {t("news.follow.each")}
-          </Choice>
-          <Choice
-            checked={mode === "hours"}
-            onClick={() => choose("hours")}
-            label={t("news.follow.hours-menu")}
-            pick={
-              <InlinePick
-                ariaLabel={t("news.follow.hours-menu").replace("{pick}", "").trim()}
-                value={String(current.everyHours)}
-                options={EVERY_HOURS.map((hours) => ({
-                  id: String(hours),
-                  label: everyLabel(t, hours),
-                }))}
-                onChange={(value) => setEvery(Number(value))}
-              />
-            }
-          />
-          <Choice
-            checked={mode === "daily"}
-            onClick={() => choose("daily")}
-            label={t("news.follow.daily-menu")}
-            pick={
-              <InlinePick
-                ariaLabel={t("news.daily-at")}
-                value={String(current.dailyHour)}
-                options={HOUR_OPTIONS}
-                onChange={(value) => setHour(Number(value))}
-              />
-            }
-          />
-        </Menu>
+    <section className="news-follow-panel" aria-label={t("news.follow")}>
+      <Line checked={!mode} onClick={() => choose(null)}>
+        {t("news.follow.off")}
+      </Line>
+      <Line checked={mode === "each"} onClick={() => choose("each")}>
+        {t("news.follow.each")}
+      </Line>
+      <Line checked={mode === "hours"} onClick={() => choose("hours")}>
+        {t("news.follow.hours-line")}
+      </Line>
+      {mode === "hours" && (
+        <div className="news-follow-chips">
+          {EVERY_HOURS.map((hours) => (
+            <button
+              key={hours}
+              type="button"
+              aria-pressed={follows.everyHours === hours}
+              onClick={() => save({ ...follows, everyHours: hours }, api.setNewsEveryHours(hours))}
+              className="news-follow-chip"
+            >
+              {t("news.hours-short").replace("{n}", String(hours))}
+            </button>
+          ))}
+        </div>
       )}
+      <Line checked={mode === "daily"} onClick={() => choose("daily")}>
+        {t("news.follow.daily-line")}
+      </Line>
+      {mode === "daily" && <DailyTimes follows={follows} save={save} />}
+    </section>
+  );
+}
+
+/** The times of day a daily summary comes, as chips: ✕ takes one away; +
+ * turns into a small box to type another in. One always stays. */
+export function DailyTimes({ follows, save }: Follows) {
+  const { t } = useSettings();
+  const times = follows.dailyTimes;
+  const [adding, setAdding] = useState(false);
+  const set = (next: number[]) => {
+    const sorted = [...new Set(next)].sort((a, b) => a - b);
+    save({ ...follows, dailyTimes: sorted }, api.setNewsDailyTimes(sorted));
+  };
+  return (
+    <div className="news-follow-chips">
+      {times.map((time) => (
+        <span key={time} className="news-follow-chip news-follow-chip--on">
+          {timeLabel(time)}
+          {times.length > 1 && (
+            <button
+              type="button"
+              onClick={() => set(times.filter((each) => each !== time))}
+              aria-label={`${t("action.remove")} ${timeLabel(time)}`}
+              className="news-follow-chip__x"
+            >
+              <Icon name="close" className="size-2" />
+            </button>
+          )}
+        </span>
+      ))}
+      {times.length < MAX_DAILY &&
+        (adding ? (
+          <TimeBox
+            taken={times}
+            onAdd={(time) => {
+              set([...times, time]);
+              setAdding(false);
+            }}
+            onCancel={() => setAdding(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            aria-label={t("news.add-time")}
+            title={t("news.add-time")}
+            className="news-follow-chip news-follow-chip--add"
+          >
+            <Icon name="plus" className="size-2.5" />
+          </button>
+        ))}
     </div>
   );
 }
 
-/** One line of the menu. With `label` and `pick`, `{pick}` in the label is
- * where the picker sits, so each language keeps its own word order. */
-function Choice({
+/** A chip-sized box a time is typed into: Enter or clicking away adds it,
+ * Esc lets it go. A time it can't read, or one already there, shakes it. */
+function TimeBox({
+  taken,
+  onAdd,
+  onCancel,
+}: {
+  taken: number[];
+  onAdd: (time: number) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useSettings();
+  const [text, setText] = useState("");
+  const [wrong, setWrong] = useState(false);
+  const [shaking, setShaking] = useState(false);
+  const commit = () => {
+    if (!text.trim()) return onCancel();
+    const time = parseTime(text);
+    if (time === null || taken.includes(time)) {
+      setWrong(true);
+      setShaking(true);
+      return;
+    }
+    onAdd(time);
+  };
+  return (
+    <input
+      // biome-ignore lint/a11y/noAutofocus: it appears because + was just pressed
+      autoFocus
+      maxLength={8}
+      value={text}
+      placeholder="9:30"
+      aria-label={t("news.add-time")}
+      aria-invalid={wrong}
+      onChange={(event) => {
+        setText(event.target.value);
+        setWrong(false);
+      }}
+      onAnimationEnd={() => setShaking(false)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit();
+        if (event.key === "Escape") onCancel();
+      }}
+      onBlur={commit}
+      className={`news-follow-time${wrong ? " is-wrong" : ""}${shaking ? " is-shaking" : ""}`}
+    />
+  );
+}
+
+function Line({
   checked,
   onClick,
   children,
-  label,
-  pick,
 }: {
   checked: boolean;
   onClick: () => void;
-  children?: ReactNode;
-  label?: string;
-  pick?: ReactNode;
-}) {
-  const [before, after] = label ? label.split("{pick}") : [undefined, undefined];
-  return (
-    <div className="notes-menu__item news-follow-choice">
-      <button
-        type="button"
-        role="menuitemradio"
-        aria-checked={checked}
-        onClick={onClick}
-        className="min-w-0 truncate text-left"
-      >
-        {children ?? before}
-      </button>
-      {pick}
-      {after ? (
-        <button type="button" onClick={onClick} className="truncate text-left">
-          {after}
-        </button>
-      ) : null}
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-hidden="true"
-        onClick={onClick}
-        className="flex flex-1 justify-end self-stretch"
-      >
-        {checked && <Icon name="checkmark" className="size-3 text-accent-mark" />}
-      </button>
-    </div>
-  );
-}
-
-/** A small native picker that reads as part of the sentence it sits in. */
-function InlinePick({
-  ariaLabel,
-  value,
-  options,
-  onChange,
-}: {
-  ariaLabel: string;
-  value: string;
-  options: { id: string; label: string }[];
-  onChange: (value: string) => void;
+  children: ReactNode;
 }) {
   return (
-    <span className="news-follow-pick">
-      <select
-        aria-label={ariaLabel}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <Icon name="chevronDown" className="size-2 shrink-0" />
-    </span>
+    <button type="button" aria-pressed={checked} onClick={onClick} className="news-follow-line">
+      <span className="min-w-0 flex-1 truncate">{children}</span>
+      {checked && <Icon name="checkmark" className="size-3 text-accent-mark" />}
+    </button>
   );
 }

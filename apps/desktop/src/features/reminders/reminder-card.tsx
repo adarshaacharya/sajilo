@@ -161,6 +161,8 @@ export function ReminderCard() {
   // The ⋯ choices replace the buttons in place: the card is its own small
   // window, sized to fit, so a dropdown would be cut off.
   const [options, setOptions] = useState(false);
+  /** The other news on this card, opened under its headline. */
+  const [stories, setStories] = useState(false);
   const [quizDone, setQuizDone] = useState(false);
   const markQuizDone = useCallback(() => setQuizDone(true), []);
   const [element, setElement] = useState<HTMLDivElement | null>(null);
@@ -209,6 +211,7 @@ export function ReminderCard() {
 
   if (!view) return null;
   const { reminder } = view;
+  const also = view.also ?? [];
   const quiz = reminder.kind === "quiz";
   const titleKey =
     reminder.kind === "festival" || reminder.kind === "holiday"
@@ -230,7 +233,14 @@ export function ReminderCard() {
     setBusy(true);
     api.dismissReminder(route).catch(() => setBusy(false));
   };
-  const dismiss = (open: boolean) => close(open ? routeOf(reminder) : null);
+  /** Opens what a reminder is about: its web page when it is about one (a
+   * single story, in the browser), else its screen. Either way, done. */
+  const openOf = (about: ReminderCardView["reminder"]) => {
+    if (!about.link) return close(routeOf(about));
+    void api.openExternalUrl(about.link).catch(() => {});
+    close(null);
+  };
+  const dismiss = (open: boolean) => (open ? openOf(reminder) : close(null));
   const cardSwitch = switchFor(reminder);
   /** Switches this kind off, as Settings › Notifications would, and moves on. */
   const turnOff = async () => {
@@ -306,6 +316,18 @@ export function ReminderCard() {
                 {reminder.body}
               </p>
             )}
+            {stories && also.length > 0 && (
+              <ul className="reminder-card__stories">
+                {also.map((story) => (
+                  <li key={story.id}>
+                    <button type="button" onClick={() => openOf(story)} disabled={busy}>
+                      <span className="reminder-card__story-source">{story.title}</span>
+                      <span className="reminder-card__story-title">{story.body}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           {moreButton}
         </div>
@@ -325,9 +347,23 @@ export function ReminderCard() {
       ) : (
         <div className="break-card__actions" data-tauri-drag-region>
           <span className="mr-auto flex min-w-0 items-center gap-1.5 text-[11px] text-text-muted">
+            {also.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setStories((open) => !open)}
+                aria-expanded={stories}
+                className="reminder-card__expand"
+              >
+                {t("reminder.more-stories").replace("{n}", digits(also.length, numerals))}
+                <Icon
+                  name="chevronDown"
+                  className={`size-2.5 transition-transform ${stories ? "rotate-180" : ""}`}
+                />
+              </button>
+            )}
             {view.waiting > 0 && (
               <span data-tauri-drag-region>
-                {t("reminder.more").replace("{n}", digits(view.waiting, numerals))} ·
+                {t("reminder.more").replace("{n}", digits(view.waiting, numerals))}
               </span>
             )}
           </span>

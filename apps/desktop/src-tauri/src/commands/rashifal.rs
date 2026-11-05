@@ -242,6 +242,7 @@ pub mod reminder {
                     title,
                     body,
                     fire_at: Utc::now(),
+                    link: None,
                 }],
             );
         } else if let Err(error) = app

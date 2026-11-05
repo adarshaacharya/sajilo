@@ -44,6 +44,7 @@ pub fn plan(
                 title,
                 body: format!("{package}.{price}"),
                 fire_at,
+                link: None,
             })
         })
         .collect()

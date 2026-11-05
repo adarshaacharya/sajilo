@@ -263,6 +263,7 @@ pub fn pending_notifications(app: &AppHandle<Wry>, now: DateTime<Utc>) -> Vec<Pl
                 title,
                 body,
                 fire_at: hit.at,
+                link: None,
             })
         })
         .collect()

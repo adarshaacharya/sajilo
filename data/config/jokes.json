@@ -40,6 +40,30 @@
       {
         "en": "Staying up doesn't make tomorrow come any later. Sleep.",
         "ne": "जागा बस्दैमा भोलि ढिलो आउँदैन। सुत्नुहोस्।"
+      },
+      {
+        "en": "The Ring Road will be jammed tomorrow whether you sleep or not.",
+        "ne": "भोलि रिङरोड जाम हुन्छ, सुत्नुस् या नसुत्नुस्।"
+      },
+      {
+        "en": "One more episode is how 2 AM happens. Sleep.",
+        "ne": "'एउटा मात्र एपिसोड' भन्दाभन्दै रातिको २ बज्छ। सुत्नुस्।"
+      },
+      {
+        "en": "Your phone needs charging and so do you. Both go to bed.",
+        "ne": "फोनलाई चार्ज चाहिन्छ, तपाईंलाई पनि। दुवै ओछ्यानमा।"
+      },
+      {
+        "en": "Even the Bhatbhateni lights are off. Your turn.",
+        "ne": "भाटभटेनीको बत्ती पनि निभिसक्यो। अब तपाईंको पालो।"
+      },
+      {
+        "en": "Sleep now. The 6 AM pressure-cooker whistle comes for everyone.",
+        "ne": "अब सुत्नुस्। बिहान ६ बजेको कुकरको सिट्ठी सबैलाई आउँछ।"
+      },
+      {
+        "en": "Scrolling won't make the news any better. Goodnight.",
+        "ne": "स्क्रोल गरेर समाचार राम्रो हुँदैन। शुभरात्रि।"
       }
     ],
     "breakfast": [
@@ -74,6 +98,26 @@
       {
         "en": "Eat breakfast. Your brain runs on glucose, not optimism.",
         "ne": "खाना खानुहोस्। दिमाग आशाले होइन, ग्लुकोजले चल्छ।"
+      },
+      {
+        "en": "Breakfast now. Lunch in Nepal is at 10 anyway, so hurry.",
+        "ne": "अहिले नै खाजा। नेपालमा खाना त १० बजे नै हुन्छ, छिटो।"
+      },
+      {
+        "en": "Eat before the microbus ride. Nobody wants a hungry commute.",
+        "ne": "माइक्रोमा चढ्नुअघि केही खानुस्। भोकै यात्रा कसैलाई मन पर्दैन।"
+      },
+      {
+        "en": "A boiled egg takes less time than reading that email twice.",
+        "ne": "त्यो इमेल दुईपटक पढ्नुभन्दा अण्डा उमाल्न छिटो हुन्छ।"
+      },
+      {
+        "en": "Eat first. Every Nepali house agrees on this one rule.",
+        "ne": "पहिले खाना। यो एउटा नियममा हरेक नेपाली घर सहमत छ।"
+      },
+      {
+        "en": "Breakfast: the only meeting today that's actually worth it.",
+        "ne": "बिहानको खाजा: आजको एउटै बैठक जुन साँच्चै काम लाग्छ।"
       }
     ],
     "dinner": [
@@ -108,6 +152,26 @@
       {
         "en": "Go eat. The tarkari has been reheated twice already.",
         "ne": "खान जानुहोस्। तरकारी दुईपटक तताइसकियो।"
+      },
+      {
+        "en": "Dinner's ready, or it should be. Go check.",
+        "ne": "खाना तयार छ, या हुनुपर्ने हो। गएर हेर्नुस्।"
+      },
+      {
+        "en": "Eat now. The neighbour's pressure cooker already won.",
+        "ne": "अब खानुस्। छिमेकीको कुकरले त जितिसक्यो।"
+      },
+      {
+        "en": "Dinner first. The meme can be forwarded later.",
+        "ne": "पहिले खाना। मिम पछि फर्वार्ड गर्दा हुन्छ।"
+      },
+      {
+        "en": "Dal, bhat, tarkari, and no laptop. Perfect dinner.",
+        "ne": "दाल, भात, तरकारी, अनि ल्यापटप छैन। उत्तम खाना।"
+      },
+      {
+        "en": "Go eat before someone calls you three times.",
+        "ne": "कसैले तीनपटक बोलाउनुअघि खान जानुस्।"
       }
     ],
     "endOfDay": [
@@ -154,6 +218,22 @@
       {
         "en": "Close the laptop. Tomorrow-you can handle it; that's what they're for.",
         "ne": "ल्यापटप बन्द गर्नुहोस्। भोलिको तपाईंले सम्हाल्नुहुन्छ, त्यसैका लागि त हुनुहुन्छ।"
+      },
+      {
+        "en": "Log off. The Ring Road isn't getting any emptier.",
+        "ne": "लग अफ गर्नुस्। रिङरोड अझै खाली हुँदैन।"
+      },
+      {
+        "en": "Day's done. The to-do list will be just as long tomorrow.",
+        "ne": "दिन सकियो। भोलि पनि काम गर्नुपर्ने सूची उत्तिकै लामो हुन्छ।"
+      },
+      {
+        "en": "Close up. Your evening has been waiting since lunch.",
+        "ne": "बन्द गर्नुस्। तपाईंको साँझ खानाको बेलादेखि पर्खिरहेको छ।"
+      },
+      {
+        "en": "Go home. The tea at home is better than the office tea anyway.",
+        "ne": "घर जानुस्। घरको चिया अफिसको भन्दा मीठो त छँदैछ।"
       }
     ],
     "eyes": [
@@ -290,6 +370,30 @@
       {
         "en": "The khaja ghar is open and the momos won't eat themselves.",
         "ne": "खाजाघर खुला छ, मःम आफैं खाइँदैन।"
+      },
+      {
+        "en": "Lunch o'clock. The spreadsheet won't notice you're gone.",
+        "ne": "खाने बेला भयो। स्प्रेडसिटले तपाईं गएको थाहै पाउँदैन।"
+      },
+      {
+        "en": "Go eat. Hungry decisions are how bad emails get sent.",
+        "ne": "खान जानुस्। भोको बेलाका निर्णयले नै नराम्रो इमेल पठाउँछ।"
+      },
+      {
+        "en": "A plate of momo is ten minutes. Your excuses take longer.",
+        "ne": "एक प्लेट मम दस मिनेटको कुरा हो। बहानाले बढी समय लिन्छ।"
+      },
+      {
+        "en": "Lunch. Step away and let the Wi-Fi miss you a little.",
+        "ne": "खाना। अलि टाढा जानुस्, वाइफाइलाई अलिकति सम्झन दिनुस्।"
+      },
+      {
+        "en": "Eat now, or it's chow mein from the corner at 4 again.",
+        "ne": "अहिले खानुस्, नत्र फेरि ४ बजे कुनाको चाउमिन।"
+      },
+      {
+        "en": "Lunch break. Even the traffic police take one.",
+        "ne": "खाना खाने बेला। ट्राफिक प्रहरीले पनि लिन्छन्।"
       }
     ],
     "move": [
@@ -498,6 +602,18 @@
       {
         "en": "Healthiest thing you've done since Tihar.",
         "ne": "तिहारयता तपाईंले गरेको सबैभन्दा स्वस्थ काम।"
+      },
+      {
+        "en": "Done. That counts as self-care; tell your friends.",
+        "ne": "सकियो। यसलाई आफ्नो हेरचाह भनिन्छ, साथीलाई सुनाउनुस्।"
+      },
+      {
+        "en": "Good job. The laptop is jealous.",
+        "ne": "स्याबास। ल्यापटपलाई डाह लागेको छ।"
+      },
+      {
+        "en": "Done. Even your chiya is impressed.",
+        "ne": "सकियो। तपाईंको चिया पनि प्रभावित छ।"
       }
     ],
     "eyes": [
@@ -516,6 +632,14 @@
       {
         "en": "Blinking: back in service.",
         "ne": "आँखा झिम्काउने सेवा: फेरि सुचारु।"
+      },
+      {
+        "en": "Eyes rested. The screen can wait its turn.",
+        "ne": "आँखाले आराम पाए। स्क्रिन आफ्नो पालो पर्खोस्।"
+      },
+      {
+        "en": "Nice. Twenty seconds well spent.",
+        "ne": "राम्रो। बीस सेकेन्ड राम्रोसँग बित्यो।"
       }
     ],
     "move": [
@@ -542,6 +666,14 @@
       {
         "en": "Back already? The meeting didn't miss you either.",
         "ne": "फर्किनुभयो? मिटिङले पनि तपाईंलाई सम्झेन।"
+      },
+      {
+        "en": "You moved. Your spine noticed.",
+        "ne": "तपाईं हलचल गर्नुभयो। ढाडले थाहा पायो।"
+      },
+      {
+        "en": "Stretch done. The chair can feel lonely for once.",
+        "ne": "तन्काइ सकियो। एकपटक कुर्सीलाई एक्लो महसुस होस्।"
       }
     ],
     "water": [
@@ -560,6 +692,14 @@
       {
         "en": "Hydrated. The tulsi finally has competition.",
         "ne": "पानी पुग्यो। अब तुलसीको मोठसँग प्रतिस्पर्धा छ।"
+      },
+      {
+        "en": "Hydrated. Your kidneys send their regards.",
+        "ne": "पानी पियो। मिर्गौलाले नमस्कार पठाएको छ।"
+      },
+      {
+        "en": "A whole glass. Melamchi would be proud.",
+        "ne": "पूरै गिलास। मेलम्चीलाई गर्व हुन्थ्यो।"
       }
     ]
   },

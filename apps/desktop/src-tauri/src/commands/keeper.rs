@@ -976,6 +976,7 @@ fn plan_due(
                 title: title.to_owned(),
                 body: due_body(person, days),
                 fire_at,
+                link: None,
             })
         })
         .collect()

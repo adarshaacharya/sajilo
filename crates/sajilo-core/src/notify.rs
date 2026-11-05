@@ -225,6 +225,10 @@ pub struct PlannedNotification {
     pub title: String,
     pub body: String,
     pub fire_at: DateTime<Utc>,
+    /// Where "Open" goes when the reminder is about one web page, such as a
+    /// single news story; otherwise it opens its screen in the popover.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub link: Option<String>,
 }
 
 /// What a reminder is about, so a card can show the right icon and open the
@@ -317,6 +321,7 @@ pub fn plan_festivals(
                     .collect::<Vec<_>>()
                     .join(" · "),
                 fire_at,
+                link: None,
             })
         })
         .take(LIMIT)
@@ -394,6 +399,7 @@ pub fn plan_ipo_closing(
                 title,
                 body,
                 fire_at,
+                link: None,
             })
         })
         .take(LIMIT)
@@ -441,6 +447,7 @@ pub fn plan_sip_payments(
                     title,
                     body: format!("{}{amount} on {on}", plan.name),
                     fire_at,
+                    link: None,
                 });
             }
         };
@@ -585,6 +592,7 @@ fn notification_for(
             format!("{} · {}", when_line(time, reminder.0), plan.note)
         },
         fire_at,
+        link: None,
     })
 }
 

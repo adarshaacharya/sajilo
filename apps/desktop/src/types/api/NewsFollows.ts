@@ -7,9 +7,10 @@ import type { NewsFollowMode } from "./NewsFollowMode";
  */
 export type NewsFollows = { sources: { [key in string]?: NewsFollowMode }, 
 /**
- * Local hour the daily summaries come, 0–23.
+ * Local times the top-stories summaries come, as minutes after
+ * midnight (0–1439), in order.
  */
-dailyHour: number, 
+dailyTimes: Array<number>, 
 /**
  * Hours between the summaries of new stories, one of
  * `NewsFollows::EVERY_HOURS`.

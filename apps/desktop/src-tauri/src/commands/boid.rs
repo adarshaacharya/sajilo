@@ -206,6 +206,7 @@ pub fn pending_notifications(app: &AppHandle<Wry>, now: DateTime<Utc>) -> Vec<Pl
                             allotment.registrar.name()
                         ),
                         fire_at: *found,
+                        link: None,
                     })
                 })
                 .collect::<Vec<_>>()

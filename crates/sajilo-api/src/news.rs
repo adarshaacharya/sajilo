@@ -164,7 +164,7 @@ dto_enum! {
         /// The stories new since the last one, every
         /// `NewsFollows::every_hours`.
         Hours,
-        /// Its top stories once a day, at `NewsFollows::daily_hour`.
+        /// Its top stories at set times of day, `NewsFollows::daily_times`.
         Daily,
     }
 }
@@ -175,8 +175,9 @@ dto! {
     #[serde(default)]
     pub struct NewsFollows {
         pub sources: BTreeMap<String, NewsFollowMode>,
-        /// Local hour the daily summaries come, 0–23.
-        pub daily_hour: u8,
+        /// Local times the top-stories summaries come, as minutes after
+        /// midnight (0–1439), in order.
+        pub daily_times: Vec<u16>,
         /// Hours between the summaries of new stories, one of
         /// `NewsFollows::EVERY_HOURS`.
         pub every_hours: u8,
@@ -186,7 +187,11 @@ dto! {
 impl NewsFollows {
     /// The id that follows every newsroom at once.
     pub const ALL: &str = "all";
-    pub const DEFAULT_DAILY_HOUR: u8 = 8;
+    /// Peak laptop hours, late morning and mid-afternoon: two, not more.
+    pub const DEFAULT_DAILY_TIMES: [u16; 2] = [11 * 60, 15 * 60];
+    /// More than this a day is what "each new story" is for.
+    pub const MAX_DAILY_TIMES: usize = 6;
+    pub const MINUTES_IN_DAY: u16 = 24 * 60;
     /// The spacings a summary of new stories may have. Six at most: a story
     /// is kept for the late window only, so a longer one would lose some.
     pub const EVERY_HOURS: [u8; 5] = [1, 2, 3, 4, 6];
@@ -197,7 +202,7 @@ impl Default for NewsFollows {
     fn default() -> Self {
         Self {
             sources: BTreeMap::new(),
-            daily_hour: Self::DEFAULT_DAILY_HOUR,
+            daily_times: Self::DEFAULT_DAILY_TIMES.to_vec(),
             every_hours: Self::DEFAULT_EVERY_HOURS,
         }
     }

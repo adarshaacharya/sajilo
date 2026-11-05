@@ -194,6 +194,7 @@ fn pop_up(app: &AppHandle<Wry>, shown: &[Announcement], options: &NotificationOp
                     title: pick(&notice.title),
                     body: pick(&notice.body),
                     fire_at: Utc::now(),
+                    link: None,
                 }],
             );
             true

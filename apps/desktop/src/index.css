@@ -3972,6 +3972,54 @@ input[type="search"]::-webkit-search-decoration {
   background: color-mix(in srgb, var(--color-text) 12%, transparent);
   color: var(--color-text);
 }
+/* The other news merged into one card: a quiet "N more stories" that opens
+   them under the headline, each a line that opens its own newsroom. */
+.reminder-card__expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  transition: color 120ms ease;
+}
+.reminder-card__expand:hover,
+.reminder-card__expand[aria-expanded="true"] {
+  color: var(--color-text);
+}
+.reminder-card__stories {
+  margin-top: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-divider);
+}
+.reminder-card__stories button {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 6px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--color-divider);
+}
+.reminder-card__stories li:last-child button {
+  border-bottom: 0;
+}
+.reminder-card__story-source {
+  display: block;
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+}
+.reminder-card__story-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-text-secondary);
+  transition: color 120ms ease;
+}
+.reminder-card__stories button:hover .reminder-card__story-title {
+  color: var(--color-text);
+}
 /* Its two choices, in place of the buttons. */
 .reminder-card__options {
   display: grid;
@@ -5747,37 +5795,120 @@ input[type="search"]::-webkit-search-decoration {
 .icon-btn:has(> .news-follow-dot) {
   position: relative;
 }
-/* A bell-menu line that carries its own time: the picker sits in the
-   sentence, quietly underlined, and opens the system's list. */
-.news-follow-choice {
-  gap: 4px;
+/* See `OPTICAL` in icon.tsx. */
+.icon-optical {
+  transform: scale(0.78);
 }
-.news-follow-pick {
+
+/* The bell's choices, opened in place under the source picker: four quiet
+   lines, the chosen one unfolding its small chips beneath it. */
+.news-follow-panel {
+  margin-bottom: 8px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  animation: news-follow-open 140ms ease-out;
+}
+@keyframes news-follow-open {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+.news-follow-line {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 12px;
+  text-align: left;
+  color: var(--color-text-secondary);
+  transition: background 120ms ease, color 120ms ease;
+}
+.news-follow-line:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.news-follow-line[aria-pressed="true"] {
+  color: var(--color-text);
+}
+.news-follow-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 2px 8px 6px;
+}
+.news-follow-chip {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 1px 5px 1px 6px;
-  border-radius: 6px;
-  background: var(--color-surface-hover);
-  color: var(--color-text);
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-hover);
+  transition: background 120ms ease, color 120ms ease;
 }
-.news-follow-pick:hover {
-  background: var(--color-border);
+.news-follow-chip:hover {
+  color: var(--color-text);
 }
-.news-follow-pick select {
-  appearance: none;
+.news-follow-chip[aria-pressed="true"],
+.news-follow-chip--on {
+  color: var(--color-accent-mark);
+  background: color-mix(in srgb, var(--color-accent-mark) 14%, transparent);
+}
+.news-follow-chip__x {
+  display: inline-flex;
+  margin-right: -3px;
+  padding: 2px;
+  border-radius: 999px;
+  opacity: 0.6;
+}
+.news-follow-chip__x:hover {
+  opacity: 1;
+}
+.news-follow-chip--add {
+  padding: 0 7px;
+}
+/* The box + turns into: a chip's size, typed into. A time it can't use
+   reddens its edge and shakes it once. */
+.news-follow-time {
+  width: 58px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-accent-mark);
   background: transparent;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
+  color: var(--color-text);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
   outline: none;
 }
-.news-follow-pick:focus-within {
-  box-shadow: 0 0 0 1px var(--color-accent-mark);
+.news-follow-time::placeholder {
+  color: var(--color-text-muted);
+}
+.news-follow-time.is-wrong {
+  border-color: var(--color-holiday);
+}
+.news-follow-time.is-shaking {
+  animation: news-follow-shake 260ms ease;
+}
+@keyframes news-follow-shake {
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
 }
 .news-follow-dot {
   position: absolute;

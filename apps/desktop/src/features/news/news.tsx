@@ -22,7 +22,7 @@ import { track } from "../../shared/lib/usage";
 import { useRefreshFeedback } from "../../shared/lib/use-refresh-feedback";
 import type { NewsDigest } from "../../types/api/NewsDigest";
 import type { NewsSourceInfo } from "../../types/api/NewsSourceInfo";
-import { FollowBell } from "./_components/follow-bell";
+import { FollowBell, FollowPanel, useNewsFollows } from "./_components/follow-bell";
 import { HeadlineRow } from "./_components/headline-row";
 import { NewsSkeleton } from "./_components/news-skeleton";
 
@@ -174,6 +174,8 @@ export function News() {
   // fully shown — nothing left dangling once every headline is on screen.
   const hasMore = visible < filtered.length;
   const [loadingMore, setLoadingMore] = useState(false);
+  const newsFollows = useNewsFollows();
+  const [following, setFollowing] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
@@ -218,8 +220,16 @@ export function News() {
             groups={sourceGroups}
           />
         </div>
-        <FollowBell source={selected} />
+        <FollowBell
+          source={selected}
+          follows={newsFollows.follows}
+          open={following}
+          onToggle={() => setFollowing((open) => !open)}
+        />
       </div>
+      {following && (
+        <FollowPanel source={selected} follows={newsFollows} onClose={() => setFollowing(false)} />
+      )}
 
       {selected === ALL && notices.length > 0 && (
         <button

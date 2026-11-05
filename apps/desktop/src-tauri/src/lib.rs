@@ -391,7 +391,7 @@ pub fn run() {
             commands::tips::break_tip,
             commands::news_follow::news_follows,
             commands::news_follow::set_news_follow,
-            commands::news_follow::set_news_daily_hour,
+            commands::news_follow::set_news_daily_times,
             commands::news_follow::set_news_every_hours,
             commands::price_alerts::price_alerts,
             commands::price_alerts::set_price_alert,

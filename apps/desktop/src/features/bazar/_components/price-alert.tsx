@@ -165,11 +165,11 @@ export function AlertPanel({
           <span className="text-text-muted">Rs</span>
           <input
             inputMode="decimal"
+            maxLength={12}
             value={text}
             onChange={(event) => type(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && save()}
             aria-label={t("alerts.price")}
-            maxLength={12}
           />
         </label>
       </div>

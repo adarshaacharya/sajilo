@@ -753,6 +753,8 @@ export type ReminderKind =
 /** The reminder card's contents: the reminder in front, and how many wait. */
 export interface ReminderCardView {
   reminder: PlannedNotification;
+  /** With news in front, the other news cards queued, shown on this one. */
+  also: PlannedNotification[];
   waiting: number;
   preview: boolean;
 }
@@ -763,6 +765,8 @@ export interface PlannedNotification {
   title: string;
   body: string;
   fireAt: string;
+  /** The one web page this is about, opened by "Open" in its place. */
+  link?: string;
 }
 
 /*
@@ -1176,7 +1180,7 @@ export const api = {
   /** `null` stops following. */
   setNewsFollow: (source: string, mode: NewsFollowMode | null) =>
     invoke<NewsFollows>("set_news_follow", { source, mode }),
-  setNewsDailyHour: (hour: number) => invoke<NewsFollows>("set_news_daily_hour", { hour }),
+  setNewsDailyTimes: (times: number[]) => invoke<NewsFollows>("set_news_daily_times", { times }),
   setNewsEveryHours: (hours: number) => invoke<NewsFollows>("set_news_every_hours", { hours }),
   priceAlerts: () => invoke<PriceAlert[]>("price_alerts"),
   /** A new alert, or a changed one (armed again) when `input.id` names it. */

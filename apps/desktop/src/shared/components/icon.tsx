@@ -479,5 +479,11 @@ export function Icon({
 }) {
   const Comp = GLYPHS[name];
   const px = size ?? sizeFromClass(className) ?? 16;
-  return <Comp size={px} className={className} />;
+  const optical = OPTICAL.has(name) ? " icon-optical" : "";
+  return <Comp size={px} className={`${className}${optical}`} />;
 }
+
+/** Glyphs drawn edge to edge in their box, where the rest leave a margin:
+ * shown a little smaller, so a tick sits at the size of the text beside it
+ * wherever it is used. */
+const OPTICAL = new Set<IconName>(["checkmark"]);

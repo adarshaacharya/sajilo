@@ -11,7 +11,7 @@
 use std::collections::{BTreeMap, HashSet};
 use std::time::Duration;
 
-use chrono::{DateTime, Days, FixedOffset, NaiveDate, TimeZone, Timelike, Utc};
+use chrono::{DateTime, Days, FixedOffset, TimeZone, Timelike, Utc};
 use sajilo_api::news::{NewsDigest, NewsFollowMode, NewsFollows, NewsItem, NewsSourceInfo};
 use sajilo_core::focus::Language;
 use sajilo_core::notify::{PlannedNotification, ReminderKind, still_deliverable};
@@ -46,6 +46,13 @@ struct SourceLedger {
 struct Fresh {
     title: String,
     found_at: DateTime<Utc>,
+    /// The newsroom it came from, so a story heard about through "all"
+    /// says whose it is. Empty in ledgers written before it was kept.
+    #[serde(default)]
+    source: String,
+    /// The story's page, for a card about it alone to open.
+    #[serde(default)]
+    link: String,
 }
 
 type Ledger = BTreeMap<String, SourceLedger>;
@@ -117,22 +124,26 @@ fn items_of<'a>(digest: &'a NewsDigest, source: &str) -> Vec<&'a NewsItem> {
 fn advance(
     ledger: &mut SourceLedger,
     first_time: bool,
-    items: &[(&str, &str)],
+    items: &[(&str, &str, &str)],
     now: DateTime<Utc>,
 ) -> bool {
     let seen: HashSet<&str> = ledger.seen.iter().map(String::as_str).collect();
-    let new: Vec<(&str, &str)> = items
+    let new: Vec<(&str, &str, &str)> = items
         .iter()
         .copied()
-        .filter(|(link, _)| !seen.contains(link))
+        .filter(|(link, ..)| !seen.contains(link))
         .collect();
     if !first_time {
-        ledger.fresh.extend(new.iter().map(|(_, title)| Fresh {
-            title: (*title).to_owned(),
-            found_at: now,
-        }));
+        ledger
+            .fresh
+            .extend(new.iter().map(|(link, title, source)| Fresh {
+                title: (*title).to_owned(),
+                found_at: now,
+                source: (*source).to_owned(),
+                link: (*link).to_owned(),
+            }));
     }
-    let mut next: Vec<String> = new.iter().map(|(link, _)| (*link).to_owned()).collect();
+    let mut next: Vec<String> = new.iter().map(|(link, ..)| (*link).to_owned()).collect();
     next.append(&mut ledger.seen);
     next.truncate(SEEN_LIMIT);
     ledger.seen = next;
@@ -162,9 +173,15 @@ pub fn record(app: &AppHandle<Wry>) {
     let now = Utc::now();
     let mut found = false;
     for source in each {
-        let items: Vec<(&str, &str)> = items_of(&digest, source)
+        let items: Vec<(&str, &str, &str)> = items_of(&digest, source)
             .into_iter()
-            .map(|item| (item.link.as_str(), item.title.as_str()))
+            .map(|item| {
+                (
+                    item.link.as_str(),
+                    item.title.as_str(),
+                    item.source_name.as_str(),
+                )
+            })
             .collect();
         // A source whose feed came back empty this time says nothing about
         // what is new; it is left as it was.
@@ -237,12 +254,24 @@ pub fn set_news_follow(
 }
 
 #[tauri::command]
-pub fn set_news_daily_hour(app: AppHandle<Wry>, hour: u8) -> Result<NewsFollows, String> {
-    if hour > 23 {
-        return Err(format!("no hour {hour}"));
+pub fn set_news_daily_times(app: AppHandle<Wry>, times: Vec<u16>) -> Result<NewsFollows, String> {
+    let mut times = times;
+    times.sort_unstable();
+    times.dedup();
+    if let Some(time) = times
+        .iter()
+        .find(|time| **time >= NewsFollows::MINUTES_IN_DAY)
+    {
+        return Err(format!("no time {time} minutes after midnight"));
+    }
+    if times.is_empty() || times.len() > NewsFollows::MAX_DAILY_TIMES {
+        return Err(format!(
+            "between 1 and {} daily times",
+            NewsFollows::MAX_DAILY_TIMES
+        ));
     }
     let mut follows = follows(&app);
-    follows.daily_hour = hour;
+    follows.daily_times = times;
     write(&app, FOLLOWS_KEY, &follows)?;
     super::notify::reschedule();
     Ok(follows)
@@ -275,13 +304,27 @@ pub fn pending_notifications(app: &AppHandle<Wry>, now: DateTime<Utc>) -> Vec<Pl
     let language = prefs::language(app);
     let offset = super::notify::local_offset();
     let today = now.with_timezone(&offset).date_naive();
-    let fire_on = |day: NaiveDate| {
-        let at = day.and_hms_opt(u32::from(follows.daily_hour.min(23)), 0, 0)?;
-        offset
-            .from_local_datetime(&at)
-            .single()
-            .map(|local| local.with_timezone(&Utc))
-    };
+    // Every daily time today and tomorrow, in order, so the scheduler knows
+    // when to wake. Of the times already passed, only the latest is still
+    // told: the summary missed at 9 is not worth a card once 2 has come.
+    let mut slots: Vec<DateTime<Utc>> = [Some(today), today.checked_add_days(Days::new(1))]
+        .into_iter()
+        .flatten()
+        .flat_map(|day| {
+            follows.daily_times.iter().filter_map(move |time| {
+                let time = u32::from(*time);
+                let at = day.and_hms_opt(time / 60, time % 60, 0)?;
+                offset
+                    .from_local_datetime(&at)
+                    .single()
+                    .map(|local| local.with_timezone(&Utc))
+            })
+        })
+        .collect();
+    slots.sort_unstable();
+    slots.dedup();
+    let latest_due = slots.iter().rev().find(|slot| **slot <= now).copied();
+    slots.retain(|slot| *slot > now || Some(*slot) == latest_due);
 
     let mut planned = Vec::new();
     for (source, mode) in &follows.sources {
@@ -315,24 +358,18 @@ pub fn pending_notifications(app: &AppHandle<Wry>, now: DateTime<Utc>) -> Vec<Pl
                 if top.is_empty() {
                     continue;
                 }
-                // Today's and tomorrow's, so the scheduler knows when to wake;
-                // the headlines are re-read from the cache each time it plans.
-                for day in [Some(today), today.checked_add_days(Days::new(1))]
-                    .into_iter()
-                    .flatten()
-                {
-                    let Some(fire_at) = fire_on(day) else {
-                        continue;
-                    };
+                // The headlines are re-read from the cache each time it plans.
+                for &fire_at in &slots {
                     if !still_deliverable(fire_at, now) {
                         continue;
                     }
                     planned.push(PlannedNotification {
-                        id: format!("sajilo.news.daily.{source}.{day}"),
+                        id: format!("sajilo.news.daily.{source}.{}", fire_at.timestamp()),
                         kind: ReminderKind::News,
                         title: daily_title(source, &name, language),
                         body: top.join(" · "),
                         fire_at,
+                        link: None,
                     });
                 }
             }
@@ -361,20 +398,42 @@ fn plan_each(
         .into_iter()
         .filter_map(|(found_at, stories)| {
             let first = stories.first()?;
-            let title = match (stories.len(), language) {
-                (1, _) => name.to_owned(),
-                (n, Language::Ne) => format!("{name} · {} नयाँ समाचार", nepali_digits(n)),
-                (n, Language::En) => format!("{name} · {n} new stories"),
-            };
+            let title = stories_title(source, name, &stories, language);
             Some(PlannedNotification {
                 id: format!("sajilo.news.each.{source}.{}", found_at.timestamp()),
                 kind: ReminderKind::News,
                 title,
                 body: first.title.clone(),
                 fire_at: found_at,
+                link: only_link(&stories),
             })
         })
         .collect()
+}
+
+/// A card about one story opens that story; several open News.
+fn only_link(stories: &[&Fresh]) -> Option<String> {
+    match stories {
+        [one] if one.link.starts_with("https://") || one.link.starts_with("http://") => {
+            Some(one.link.clone())
+        }
+        _ => None,
+    }
+}
+
+/// A card's title for stories found together. The card already says
+/// "News" above it, so a follow of every newsroom names the newsroom instead
+/// of saying "News" twice.
+fn stories_title(source: &str, name: &str, stories: &[&Fresh], language: Language) -> String {
+    let all = source == NewsFollows::ALL;
+    match (stories, language) {
+        ([one], _) if all && !one.source.is_empty() => one.source.clone(),
+        ([_], _) => name.to_owned(),
+        (many, Language::Ne) if all => format!("{} नयाँ समाचार", nepali_digits(many.len())),
+        (many, Language::En) if all => format!("{} new stories", many.len()),
+        (many, Language::Ne) => format!("{name} · {} नयाँ समाचार", nepali_digits(many.len())),
+        (many, Language::En) => format!("{name} · {} new stories", many.len()),
+    }
 }
 
 /// Where a story found at `found_at` is told: the end of its `every`-hour
@@ -413,11 +472,7 @@ fn plan_hours(
             // Found later is newer; within one fetch the feed's own order is.
             let mut newest: Vec<&Fresh> = stories.clone();
             newest.sort_by_key(|fresh| std::cmp::Reverse(fresh.found_at));
-            let title = match (stories.len(), language) {
-                (1, _) => name.to_owned(),
-                (n, Language::Ne) => format!("{name} · {} नयाँ समाचार", nepali_digits(n)),
-                (n, Language::En) => format!("{name} · {n} new stories"),
-            };
+            let title = stories_title(source, name, &stories, language);
             PlannedNotification {
                 id: format!("sajilo.news.hours.{source}.{}", end.timestamp()),
                 kind: ReminderKind::News,
@@ -429,6 +484,7 @@ fn plan_hours(
                     .collect::<Vec<_>>()
                     .join(" · "),
                 fire_at: end,
+                link: only_link(&stories),
             }
         })
         .collect()
@@ -436,10 +492,10 @@ fn plan_hours(
 
 fn daily_title(source: &str, name: &str, language: Language) -> String {
     match (source == NewsFollows::ALL, language) {
-        (true, Language::Ne) => "आजका मुख्य समाचार".to_owned(),
-        (true, Language::En) => "Today's top stories".to_owned(),
-        (false, Language::Ne) => format!("{name} · आजका मुख्य समाचार"),
-        (false, Language::En) => format!("{name} · today's top stories"),
+        (true, Language::Ne) => "मुख्य समाचार".to_owned(),
+        (true, Language::En) => "Top stories".to_owned(),
+        (false, Language::Ne) => format!("{name} · मुख्य समाचार"),
+        (false, Language::En) => format!("{name} · top stories"),
     }
 }
 
@@ -464,7 +520,7 @@ mod tests {
     #[test]
     fn a_new_follow_starts_from_what_is_there() {
         let mut ledger = SourceLedger::default();
-        let found = advance(&mut ledger, true, &[("a", "A"), ("b", "B")], at(0));
+        let found = advance(&mut ledger, true, &[("a", "A", ""), ("b", "B", "")], at(0));
         assert!(!found);
         assert!(ledger.fresh.is_empty());
         assert_eq!(ledger.seen, ["a", "b"]);
@@ -473,8 +529,13 @@ mod tests {
     #[test]
     fn only_unseen_links_are_new() {
         let mut ledger = SourceLedger::default();
-        advance(&mut ledger, true, &[("a", "A"), ("b", "B")], at(0));
-        let found = advance(&mut ledger, false, &[("c", "C"), ("a", "A")], at(15));
+        advance(&mut ledger, true, &[("a", "A", ""), ("b", "B", "")], at(0));
+        let found = advance(
+            &mut ledger,
+            false,
+            &[("c", "C", ""), ("a", "A", "")],
+            at(15),
+        );
         assert!(found);
         assert_eq!(ledger.fresh.len(), 1);
         assert_eq!(ledger.fresh[0].title, "C");
@@ -483,7 +544,7 @@ mod tests {
         assert!(!advance(
             &mut ledger,
             false,
-            &[("c", "C"), ("a", "A")],
+            &[("c", "C", ""), ("a", "A", "")],
             at(30)
         ));
     }
@@ -491,12 +552,17 @@ mod tests {
     #[test]
     fn stories_past_the_late_window_are_let_go() {
         let mut ledger = SourceLedger::default();
-        advance(&mut ledger, true, &[("a", "A")], at(0));
-        advance(&mut ledger, false, &[("b", "B"), ("a", "A")], at(10));
+        advance(&mut ledger, true, &[("a", "A", "")], at(0));
         advance(
             &mut ledger,
             false,
-            &[("b", "B"), ("a", "A")],
+            &[("b", "B", ""), ("a", "A", "")],
+            at(10),
+        );
+        advance(
+            &mut ledger,
+            false,
+            &[("b", "B", ""), ("a", "A", "")],
             at(10 + 7 * 60),
         );
         assert!(ledger.fresh.is_empty());
@@ -505,14 +571,19 @@ mod tests {
     #[test]
     fn stories_found_together_are_one_notification() {
         let mut ledger = SourceLedger::default();
-        advance(&mut ledger, true, &[("a", "A")], at(0));
+        advance(&mut ledger, true, &[("a", "A", "")], at(0));
         advance(
             &mut ledger,
             false,
-            &[("c", "C"), ("b", "B"), ("a", "A")],
+            &[("c", "C", ""), ("b", "B", ""), ("a", "A", "")],
             at(15),
         );
-        advance(&mut ledger, false, &[("d", "D"), ("c", "C")], at(30));
+        advance(
+            &mut ledger,
+            false,
+            &[("d", "D", ""), ("c", "C", "")],
+            at(30),
+        );
         let planned = plan_each("kantipur", "Kantipur", &ledger, Language::En, at(31));
         assert_eq!(planned.len(), 2);
         assert_eq!(planned[0].title, "Kantipur · 2 new stories");
@@ -534,6 +605,8 @@ mod tests {
         let fresh = |title: &str, found_at| Fresh {
             title: title.to_owned(),
             found_at,
+            source: String::new(),
+            link: String::new(),
         };
         let ledger = SourceLedger {
             seen: Vec::new(),
@@ -554,7 +627,7 @@ mod tests {
         );
         assert_eq!(planned.len(), 2);
         assert_eq!(planned[0].fire_at, local(12, 0));
-        assert_eq!(planned[0].title, "News · 2 new stories");
+        assert_eq!(planned[0].title, "2 new stories");
         assert_eq!(planned[0].body, "B · A");
         assert_eq!(planned[1].fire_at, local(15, 0));
         assert_eq!(planned[1].body, "C");
@@ -578,7 +651,7 @@ mod tests {
     fn the_seen_list_stays_bounded() {
         let mut ledger = SourceLedger::default();
         let links: Vec<String> = (0..SEEN_LIMIT + 50).map(|n| n.to_string()).collect();
-        let items: Vec<(&str, &str)> = links.iter().map(|l| (l.as_str(), "t")).collect();
+        let items: Vec<(&str, &str, &str)> = links.iter().map(|l| (l.as_str(), "t", "")).collect();
         advance(&mut ledger, true, &items, at(0));
         assert_eq!(ledger.seen.len(), SEEN_LIMIT);
     }

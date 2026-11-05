@@ -2,14 +2,10 @@ import { useEffect, useState } from "react";
 import { Select } from "../../../shared/components/select";
 import { useSettings } from "../../../shared/context/settings-context";
 import { api } from "../../../shared/lib/ipc";
-import {
-  EVERY_HOURS,
-  everyLabel,
-  followSummary,
-  HOUR_OPTIONS,
-} from "../../../shared/lib/news-follow";
+import { EVERY_HOURS, everyLabel, followSummary } from "../../../shared/lib/news-follow";
 import type { NewsFollows } from "../../../types/api/NewsFollows";
 import type { NewsSourceInfo } from "../../../types/api/NewsSourceInfo";
+import { DailyTimes } from "../../news/_components/follow-bell";
 import { SettingsSection } from "./settings-section";
 
 const ALL = "all";
@@ -65,21 +61,15 @@ export function NewsFollowsSection() {
         </div>
       ))}
       {anyDaily && (
-        <div className="flex items-center justify-between gap-3 rounded-lg bg-surface-hover px-2.5 py-1.5">
-          <span className="text-[11.5px] text-text-secondary">{t("news.daily-at")}</span>
-          <div className="w-[96px] shrink-0">
-            <Select
-              ariaLabel={t("news.daily-at")}
-              value={String(follows.dailyHour)}
-              onChange={(next) =>
-                api
-                  .setNewsDailyHour(Number(next))
-                  .then(setFollows)
-                  .catch(() => {})
-              }
-              options={HOUR_OPTIONS}
-            />
-          </div>
+        <div className="rounded-lg bg-surface-hover px-2.5 py-1.5">
+          <span className="text-[11.5px] text-text-secondary">{t("news.follow.daily-line")}</span>
+          <DailyTimes
+            follows={follows}
+            save={(next, call) => {
+              setFollows(next);
+              call.then((saved) => saved && setFollows(saved)).catch(() => {});
+            }}
+          />
         </div>
       )}
       {anyHours && (
