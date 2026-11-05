@@ -2,13 +2,18 @@ import { useSettings } from "../context/settings-context";
 import { useUpdater } from "../context/updater-context";
 import { digits } from "../lib/numerals";
 import { progressPercent } from "../lib/update-progress";
+import { Icon } from "./icon";
 
 function formatVersionLabel(template: string, version: string): string {
   return template.replace("{version}", version);
 }
 
-/** Compact labelled update control for screen headers. */
-export function UpdateHeaderButton() {
+/**
+ * The update control for screen headers: a labelled pill, or with `compact`
+ * a glowing icon that says what it does when pointed at, for a header whose
+ * title needs the width (Today's date).
+ */
+export function UpdateHeaderButton({ compact = false }: { compact?: boolean }) {
   const { t, numerals } = useSettings();
   const { enabled, state, version, progress, installUpdate, restartToUpdate } = useUpdater();
 
@@ -19,8 +24,12 @@ export function UpdateHeaderButton() {
     return (
       <span className="update-header-btn update-header-btn--busy shrink-0 tabular-nums">
         {percent === null
-          ? t("header.update-downloading")
-          : t("header.update-progress").replace("{percent}", digits(percent, numerals))}
+          ? compact
+            ? "…"
+            : t("header.update-downloading")
+          : compact
+            ? `${digits(percent, numerals)}%`
+            : t("header.update-progress").replace("{percent}", digits(percent, numerals))}
       </span>
     );
   }
@@ -32,9 +41,9 @@ export function UpdateHeaderButton() {
         onClick={() => restartToUpdate()}
         aria-label={t("action.restart-update")}
         title={t("action.restart-update")}
-        className="update-header-btn update-header-btn--glow shrink-0"
+        className={`update-header-btn update-header-btn--glow shrink-0${compact ? " update-header-btn--icon" : ""}`}
       >
-        {t("dashboard.update-restart")}
+        {compact ? <Icon name="refresh" className="size-3.5" /> : t("dashboard.update-restart")}
       </button>
     );
   }
@@ -47,9 +56,9 @@ export function UpdateHeaderButton() {
         onClick={() => installUpdate()}
         aria-label={label}
         title={label}
-        className="update-header-btn update-header-btn--glow shrink-0"
+        className={`update-header-btn update-header-btn--glow shrink-0${compact ? " update-header-btn--icon" : ""}`}
       >
-        {label}
+        {compact ? <Icon name="refresh" className="size-3.5" /> : label}
       </button>
     );
   }

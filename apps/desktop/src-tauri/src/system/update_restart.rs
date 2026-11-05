@@ -9,15 +9,18 @@
 //!
 //! So once an update is installed, Sajilo restarts itself at the first moment
 //! nobody would notice: the person has been away for a while, the window is
-//! closed, no card is on screen, and the radio is silent. Someone who is using
-//! the computer is never interrupted.
+//! closed or pinned, no card is on screen, and the radio is silent. Someone
+//! who is using the computer is never interrupted. A pinned window counts as
+//! out of the way: it stays up all day, and would otherwise hold the update
+//! back for good.
 //!
 //! Windows can't swap the files of a running app, so its installer closes
 //! Sajilo the moment it starts. There the update is only downloaded at first,
 //! and the install itself waits for the same quiet moment.
 //!
 //! Either way the restart leaves a note, so the new version comes back the way
-//! the old one was: in the tray, window closed — not as if opened by hand.
+//! the old one was: in the tray, or pinned open where it was — not as if
+//! opened by hand.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
@@ -27,7 +30,8 @@ use tauri::{AppHandle, Emitter, Manager, Wry};
 use super::{card_window, idle};
 use crate::db;
 
-/// When the last quiet restart happened, as Unix seconds.
+/// When the last quiet restart happened, as Unix seconds, and whether the
+/// pinned window was up then: `{ "at": 1730000000, "reopen": true }`.
 const QUIET_RESTART_KEY: &str = "quietRestartAt";
 /// A note older than this belongs to an install that never finished.
 const QUIET_RESTART_FRESH_SECONDS: u64 = 15 * 60;
@@ -79,7 +83,8 @@ fn moment(app: &AppHandle<Wry>) -> Moment {
         pending: PENDING.load(Ordering::SeqCst),
         audio_playing: AUDIO_PLAYING.load(Ordering::SeqCst),
         idle_seconds: idle::seconds(),
-        popover_open: visible(app, crate::window::MAIN),
+        // Pinned, it is part of the desktop, not something in use.
+        popover_open: visible(app, crate::window::MAIN) && !crate::window::is_kept(),
         card_open: visible(app, card_window::BREAK) || visible(app, card_window::REMINDER),
     }
 }
@@ -101,20 +106,36 @@ fn now_seconds() -> u64 {
 }
 
 fn note_quiet_restart(app: &AppHandle<Wry>) {
-    let _ = db::set_json(app, QUIET_RESTART_KEY, &serde_json::json!(now_seconds()));
+    let reopen = visible(app, crate::window::MAIN);
+    let _ = db::set_json(
+        app,
+        QUIET_RESTART_KEY,
+        &serde_json::json!({ "at": now_seconds(), "reopen": reopen }),
+    );
 }
 
-/// Whether this launch is the app coming back from a quiet restart, and so
-/// should stay in the tray. Reads the note once.
-pub fn returning_from_quiet_restart(app: &AppHandle<Wry>) -> bool {
-    let noted = db::get_json(app, QUIET_RESTART_KEY)
-        .ok()
-        .flatten()
-        .and_then(|value| value.as_u64());
-    if noted.is_some() {
-        let _ = db::delete_json(app, QUIET_RESTART_KEY);
-    }
-    noted.is_some_and(|at| fresh(at, now_seconds()))
+/// How this launch came back from a quiet restart, if it did: `Some(true)`
+/// when the pinned window was up and should be again, `Some(false)` when it
+/// stays in the tray. Reads the note once.
+pub fn returning_from_quiet_restart(app: &AppHandle<Wry>) -> Option<bool> {
+    let noted = db::get_json(app, QUIET_RESTART_KEY).ok().flatten()?;
+    let _ = db::delete_json(app, QUIET_RESTART_KEY);
+    read_note(&noted, now_seconds())
+}
+
+/// A note, in either shape: an older version wrote the bare timestamp.
+fn read_note(noted: &serde_json::Value, now: u64) -> Option<bool> {
+    let (at, reopen) = match noted.as_u64() {
+        Some(at) => (at, false),
+        None => (
+            noted.get("at")?.as_u64()?,
+            noted
+                .get("reopen")
+                .and_then(serde_json::Value::as_bool)
+                .unwrap_or(false),
+        ),
+    };
+    fresh(at, now).then_some(reopen)
 }
 
 fn fresh(noted_at: u64, now: u64) -> bool {
@@ -213,6 +234,19 @@ mod tests {
         for moment in cases {
             assert!(!should_restart(moment), "{moment:?}");
         }
+    }
+
+    #[test]
+    fn a_note_says_whether_the_pinned_window_comes_back() {
+        let now = 10_000;
+        let note = |reopen| serde_json::json!({ "at": now - 5, "reopen": reopen });
+        assert_eq!(read_note(&note(true), now), Some(true));
+        assert_eq!(read_note(&note(false), now), Some(false));
+        // The older bare timestamp still means "back to the tray".
+        assert_eq!(read_note(&serde_json::json!(now - 5), now), Some(false));
+        let stale =
+            serde_json::json!({ "at": now - QUIET_RESTART_FRESH_SECONDS - 1, "reopen": true });
+        assert_eq!(read_note(&stale, now), None);
     }
 
     #[test]

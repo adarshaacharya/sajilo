@@ -229,13 +229,13 @@ pub fn run() {
                     );
                 }
                 system::autostart::refresh_login_item(app.handle());
-                // After a quiet restart into an update, it goes back to the
-                // tray, the way it was.
+                // After a quiet restart into an update, it comes back the way
+                // it was: in the tray, or pinned open.
                 let quiet_restart =
                     system::update_restart::returning_from_quiet_restart(app.handle());
-                if (first_run || !(system::autostart::launched_at_login() || quiet_restart))
-                    && let Some(main) = window::main_window(app.handle())
-                {
+                let show = quiet_restart
+                    .unwrap_or_else(|| first_run || !system::autostart::launched_at_login());
+                if show && let Some(main) = window::main_window(app.handle()) {
                     window::show(&main);
                 }
             }

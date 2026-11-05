@@ -75,7 +75,7 @@ export function DateHeader({ today }: { today: Today }) {
       </div>
 
       <div className="flex shrink-0 gap-0.5 pt-0.5">
-        <UpdateHeaderButton />
+        <UpdateHeaderButton compact />
         <MiniViewButton />
         <KeepOpenButton />
         <button

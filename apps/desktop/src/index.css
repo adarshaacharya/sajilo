@@ -973,6 +973,13 @@ button.row-line + button.row-line::before {
   }
 }
 
+/* Icon-only, sized like the header's other icon buttons. */
+.update-header-btn--icon {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
 .update-header-btn:hover {
   background: color-mix(in srgb, var(--color-accent-mark) 20%, transparent);
   border-color: color-mix(in srgb, var(--color-accent-mark) 60%, transparent);
