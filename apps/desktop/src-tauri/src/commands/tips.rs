@@ -25,7 +25,7 @@ const LAST_KEY: &str = "tips.last";
 
 /// Where each tip feature leads, the screen whose opening retires it, and the
 /// module switch that must be on for it to be suggested.
-const FEATURES: [(&str, &str, &str, Option<&str>); 18] = [
+const FEATURES: [(&str, &str, &str, Option<&str>); 22] = [
     ("games", "/games", "games", Some(prefs::GAMES_ENABLED)),
     ("radio", "/radio", "radio", Some(prefs::RADIO_ENABLED)),
     ("notes", "/notes", "notes", Some(prefs::NOTES_ENABLED)),
@@ -80,6 +80,30 @@ const FEATURES: [(&str, &str, &str, Option<&str>); 18] = [
         "typing",
         "/tools?tab=nepali",
         "tab.tools.nepali",
+        Some(prefs::TOOLS_ENABLED),
+    ),
+    (
+        "forex",
+        "/bazar?tab=forex",
+        "tab.bazar.forex",
+        Some(prefs::FOREX_ENABLED),
+    ),
+    (
+        "fuel",
+        "/bazar?tab=fuel",
+        "tab.bazar.fuel",
+        Some(prefs::BAZAR_ENABLED),
+    ),
+    (
+        "vegetables",
+        "/bazar?tab=vegetables",
+        "tab.bazar.vegetables",
+        Some(prefs::BAZAR_ENABLED),
+    ),
+    (
+        "emergency",
+        "/tools?tab=emergency",
+        "tab.tools.emergency",
         Some(prefs::TOOLS_ENABLED),
     ),
 ];

@@ -793,6 +793,26 @@
       "feature": "typing",
       "en": "Type in English letters, get Nepali to copy",
       "ne": "अंग्रेजी अक्षरमा लेख्नुहोस्, नेपाली पाउनुहोस्"
+    },
+    {
+      "feature": "forex",
+      "en": "See today's dollar rate from NRB",
+      "ne": "राष्ट्र बैंकको आजको डलर दर हेर्नुहोस्"
+    },
+    {
+      "feature": "fuel",
+      "en": "Check today's petrol and diesel prices",
+      "ne": "आजको पेट्रोल र डिजेलको मूल्य हेर्नुहोस्"
+    },
+    {
+      "feature": "vegetables",
+      "en": "Check today's Kalimati vegetable prices",
+      "ne": "आजको कालीमाटी तरकारी मूल्य हेर्नुहोस्"
+    },
+    {
+      "feature": "emergency",
+      "en": "Police, ambulance and fire numbers in one place",
+      "ne": "प्रहरी, एम्बुलेन्स र दमकलका नम्बर एकै ठाउँमा"
     }
   ]
 }
