@@ -290,6 +290,7 @@ export function CompanyDetail({
             item={{ kind: "stock", symbol: quote.symbol }}
             name={quote.symbol}
             price={quote.ltp}
+            holding={held && position ? position : undefined}
             onClose={() => setAlerting(false)}
           />
         )}

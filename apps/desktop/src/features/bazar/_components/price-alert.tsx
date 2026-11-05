@@ -15,8 +15,8 @@ import type { AlertDirection } from "../../../types/api/AlertDirection";
 import type { AlertItem } from "../../../types/api/AlertItem";
 import type { PriceAlert } from "../../../types/api/PriceAlert";
 import { money } from "../_lib/format";
+import { signedMoney } from "../_lib/portfolio";
 
-const QUICK = [-10, -5, 5, 10] as const;
 /** Within this of its target, an alert's bell glows: nearly there. */
 const NEAR = 0.01;
 
@@ -88,18 +88,22 @@ export function AlertHint({
 }
 
 /**
- * Setting an alert, as quick as setting an alarm: which way, the price,
- * and four one-tap targets. Opens in place under the price it is about.
+ * Setting an alert, as quick as setting an alarm: which way and the price.
+ * Opens in place under the price it is about. For shares you own, it says
+ * what the target means in rupees: up or down on what you paid.
  */
 export function AlertPanel({
   item,
   name,
   price,
+  holding,
   onClose,
 }: {
   item: AlertItem;
   name: string;
   price: number | undefined;
+  /** What you own of it, when you do: the target is read against your cost. */
+  holding?: { quantity: number; averageCost: number };
   onClose: () => void;
 }) {
   const { t } = useSettings();
@@ -123,11 +127,7 @@ export function AlertPanel({
       setDirection(next < price ? "below" : "above");
     }
   };
-  const quick = (percent: number) => {
-    if (!price) return;
-    setText(String(roundTarget(price * (1 + percent / 100))));
-    setDirection(percent < 0 ? "below" : "above");
-  };
+  const gain = valid && holding ? (target - holding.averageCost) * holding.quantity : null;
 
   const save = () => {
     if (!valid || saving) return;
@@ -173,20 +173,29 @@ export function AlertPanel({
           />
         </label>
       </div>
-      {price !== undefined && (
-        <div className="mt-1.5 flex flex-wrap gap-1">
-          {QUICK.map((percent) => (
-            <button
-              key={percent}
-              type="button"
-              onClick={() => quick(percent)}
-              className="price-alert-chip"
-            >
-              {percent > 0 ? "+" : "−"}
-              {Math.abs(percent)}%
-            </button>
-          ))}
-        </div>
+      {holding && (
+        <p className="mt-1.5 text-[10.5px] text-text-muted">
+          {t("alerts.your-cost").replace("{price}", money.format(holding.averageCost))}
+          {gain !== null && (
+            <>
+              {" · "}
+              <span
+                className={
+                  gain > 0
+                    ? "text-[color:var(--color-positive)]"
+                    : gain < 0
+                      ? "text-[color:var(--color-holiday)]"
+                      : ""
+                }
+              >
+                {t(gain >= 0 ? "alerts.you-gain" : "alerts.you-lose").replace(
+                  "{amount}",
+                  signedMoney(gain),
+                )}
+              </span>
+            </>
+          )}
+        </p>
       )}
       <p
         className={`mt-1.5 text-[10.5px] ${already ? "text-[color:var(--color-accent-mark)]" : "text-text-muted"}`}
