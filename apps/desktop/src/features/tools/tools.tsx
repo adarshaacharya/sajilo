@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 import { useHeaderInner } from "../../shared/components/header-slot";
 import { useSettings } from "../../shared/context/settings-context";
 import { track } from "../../shared/lib/usage";
@@ -18,7 +19,12 @@ type Tab = ToolId;
 
 export function Tools() {
   const { t } = useSettings();
-  const [tab, setTab] = useState<Tab | null>(null);
+  const { search } = useLocation();
+  // A link may open one tool directly: /tools?tab=clock.
+  const [tab, setTab] = useState<Tab | null>(() => {
+    const requested = new URLSearchParams(search).get("tab");
+    return requested === "clock" ? "clock" : null;
+  });
   const [directorySection, setDirectorySection] = useState<DirectorySection>("phones");
   useEffect(() => {
     if (tab) track(`tab.tools.${tab}`);

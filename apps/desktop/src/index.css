@@ -3947,16 +3947,22 @@ input[type="search"]::-webkit-search-decoration {
 .break-card__tip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: -4px;
-  padding-top: 10px;
+  gap: 4px;
+  margin-top: -6px;
+  padding-top: 7px;
   border-top: 1px solid var(--color-divider);
   text-align: left;
-  font-size: 11.5px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.3;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: color 120ms ease;
+}
+/* One quiet line: a tip that runs long ends in an ellipsis, never wraps. */
+.break-card__tip > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .break-card__tip:hover {
   color: var(--color-text-secondary);

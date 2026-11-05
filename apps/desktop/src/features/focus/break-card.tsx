@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CardTip, useCardTip } from "../../shared/components/card-tip";
 import { Icon } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import type { translate } from "../../shared/lib/i18n";
@@ -7,13 +8,11 @@ import {
   api,
   type BreakKind,
   type BreakOutcome,
-  type BreakTip,
   type FocusSettings,
   type FocusSnapshot,
   type Joke,
 } from "../../shared/lib/ipc";
 import { digits } from "../../shared/lib/numerals";
-import { track } from "../../shared/lib/usage";
 import { useFitWindow } from "../../shared/lib/use-fit-window";
 import { KIND_ICONS, kindLabel, litres, useSentenceNumerals } from "./_lib/format";
 
@@ -222,20 +221,12 @@ export function BreakCard() {
   // for as long as the card is up.
   const [taken, setTaken] = useState(false);
 
-  // At most one quiet line a day about a screen not opened yet; the shell
-  // decides whether one is due. Asked once per card.
-  const [tip, setTip] = useState<BreakTip | null>(null);
   const cardKey = card ? `${card.kind}:${card.startedAt}` : null;
-  const preview = card?.preview ?? false;
-  useEffect(() => {
-    if (!cardKey) return;
-    api
-      .breakTip(preview)
-      .then(setTip)
-      .catch(() => {});
-  }, [cardKey, preview]);
+  const offered = useCardTip(cardKey, card?.preview ?? false);
+  const [tipsOff, setTipsOff] = useState(false);
+  const tip = tipsOff ? null : offered;
   const noTips = () => {
-    setTip(null);
+    setTipsOff(true);
     setOptions(false);
     api
       .getNotificationOptions()
@@ -446,19 +437,7 @@ export function BreakCard() {
         )}
       </div>
 
-      {tip && !taken && !options && (
-        <button
-          type="button"
-          onClick={() => {
-            track("action.tip-open");
-            void api.openScreen(tip.route).catch(() => {});
-          }}
-          className="break-card__tip"
-        >
-          <span className="min-w-0 flex-1">{tip.text}</span>
-          <Icon name="chevronRight" className="size-2.5 shrink-0" />
-        </button>
-      )}
+      {tip && !taken && !options && <CardTip tip={tip} />}
     </div>
   );
 }

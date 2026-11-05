@@ -25,7 +25,7 @@ const LAST_KEY: &str = "tips.last";
 
 /// Where each tip feature leads, the screen whose opening retires it, and the
 /// module switch that must be on for it to be suggested.
-const FEATURES: [(&str, &str, &str, Option<&str>); 10] = [
+const FEATURES: [(&str, &str, &str, Option<&str>); 17] = [
     ("games", "/games", "games", Some(prefs::GAMES_ENABLED)),
     ("radio", "/radio", "radio", Some(prefs::RADIO_ENABLED)),
     ("notes", "/notes", "notes", Some(prefs::NOTES_ENABLED)),
@@ -51,7 +51,62 @@ const FEATURES: [(&str, &str, &str, Option<&str>); 10] = [
     ),
     ("tools", "/tools", "tools", Some(prefs::TOOLS_ENABLED)),
     ("converter", "/converter", "converter", None),
+    // Parts of screens people already open: told about until first used,
+    // not until the screen is seen. See `already_used`.
+    ("newsAlerts", "/news", "", Some(prefs::NEWS_ENABLED)),
+    ("clocks", "/tools?tab=clock", "", None),
+    (
+        "stocks",
+        "/bazar?tab=stocks",
+        "",
+        Some(prefs::BAZAR_ENABLED),
+    ),
+    ("gold", "/bazar?tab=metals", "", Some(prefs::BAZAR_ENABLED)),
+    // A day's page, and markets inside Bazar's Stocks tab, seen as tabs are.
+    ("panchang", "/day", "day", None),
+    (
+        "crypto",
+        "/bazar?tab=stocks&view=crypto",
+        "tab.stocks.crypto",
+        Some(prefs::BAZAR_ENABLED),
+    ),
+    (
+        "shares",
+        "/bazar?tab=stocks&view=nepse",
+        "tab.stocks.nepse",
+        Some(prefs::BAZAR_ENABLED),
+    ),
 ];
+
+/// Whether a part of a screen has been put to use: a newsroom followed, a
+/// city's clock added, a price alert set on a share or on gold.
+fn already_used(app: &AppHandle<Wry>, feature: &str) -> bool {
+    let stored = |key: &str| db::get_json(app, key).ok().flatten();
+    let alert_on = |kind: &str| {
+        stored("priceAlerts.v1")
+            .and_then(|value| value.as_array().cloned())
+            .is_some_and(|alerts| {
+                alerts
+                    .iter()
+                    .any(|alert| alert["item"]["kind"].as_str() == Some(kind))
+            })
+    };
+    match feature {
+        "newsAlerts" => stored("news.follows")
+            .and_then(|value| {
+                value["sources"]
+                    .as_object()
+                    .map(|sources| !sources.is_empty())
+            })
+            .unwrap_or(false),
+        "clocks" => stored("clocks")
+            .and_then(|value| value.as_array().map(|cities| !cities.is_empty()))
+            .unwrap_or(false),
+        "stocks" => alert_on("stock"),
+        "gold" => alert_on("metal"),
+        _ => false,
+    }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,8 +134,11 @@ fn read<T: serde::de::DeserializeOwned + Default>(app: &AppHandle<Wry>, key: &st
 /// Notes a screen as opened, from the same event the usage report counts.
 /// Kept whether or not that report is on: it never leaves the computer.
 pub fn note_opened(app: &AppHandle<Wry>, event: &str) {
-    let Some(screen) = event.strip_prefix("screen.") else {
-        return;
+    // A screen by its name; a tab inside one by its whole event.
+    let screen = match event.strip_prefix("screen.") {
+        Some(screen) => screen,
+        None if event.starts_with("tab.") => event,
+        None => return,
     };
     let mut opened: Vec<String> = read(app, OPENED_KEY);
     if opened.iter().any(|seen| seen == screen) {
@@ -126,8 +184,9 @@ pub fn break_tip(app: AppHandle<Wry>, preview: bool) -> Option<BreakTip> {
     let opened: Vec<String> = read(&app, OPENED_KEY);
     let feature = |name: &str| FEATURES.iter().find(|(id, ..)| *id == name);
     let eligible = |name: &str| {
-        feature(name).is_some_and(|(_, _, screen, module)| {
-            !opened.iter().any(|seen| seen == screen)
+        feature(name).is_some_and(|(id, _, screen, module)| {
+            (screen.is_empty() || !opened.iter().any(|seen| seen == screen))
+                && !already_used(&app, id)
                 && module.is_none_or(|key| crate::background_refresh::enabled(&app, key))
         })
     };

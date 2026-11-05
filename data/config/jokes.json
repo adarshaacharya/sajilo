@@ -706,53 +706,88 @@
   "tips": [
     {
       "feature": "games",
-      "en": "Got two minutes? A round of Bagh-Chal is waiting in Games.",
-      "ne": "दुई मिनेट छ? खेलमा बाघचालको एक बाजी पर्खिरहेको छ।"
+      "en": "Play a quick game of Bagh-Chal",
+      "ne": "बाघचालको एक बाजी खेल्नुहोस्"
     },
     {
       "feature": "radio",
-      "en": "Too quiet? Nepali FM stations play right inside Sajilo.",
-      "ne": "धेरै शान्त छ? नेपाली एफएम सजिलोभित्रै बज्छन्।"
+      "en": "Listen to Nepali FM radio",
+      "ne": "नेपाली एफएम रेडियो सुन्नुहोस्"
     },
     {
       "feature": "notes",
-      "en": "Thought of something mid-break? Jot it in Notes before it escapes.",
-      "ne": "ब्रेकमा केही सम्झनुभयो? भाग्नुअघि नोटमा लेख्नुहोस्।"
+      "en": "Save quick notes in Notes",
+      "ne": "नोट्समा छिटो टिपोट राख्नुहोस्"
     },
     {
       "feature": "rashifal",
-      "en": "Curious what today holds? Your rashifal is one tap away.",
-      "ne": "आज के छ भन्ने जिज्ञासा? तपाईंको राशिफल एक ट्याप पर।"
+      "en": "Check today's rashifal",
+      "ne": "आजको राशिफल हेर्नुहोस्"
     },
     {
       "feature": "weather",
-      "en": "Umbrella or not? Weather has the answer for your town.",
-      "ne": "छाता बोक्ने कि नबोक्ने? मौसमले तपाईंको ठाउँको जवाफ दिन्छ।"
+      "en": "Check the weather for your town",
+      "ne": "आफ्नो ठाउँको मौसम हेर्नुहोस्"
     },
     {
       "feature": "jobs",
-      "en": "Loksewa and TSC vacancies, all in one list under Jobs.",
-      "ne": "लोकसेवा र शिक्षक सेवाका विज्ञापन, जागिरमा एउटै सूचीमा।"
+      "en": "See new Loksewa and TSC vacancies",
+      "ne": "लोकसेवा र शिक्षक सेवाका नयाँ विज्ञापन हेर्नुहोस्"
     },
     {
       "feature": "bills",
-      "en": "Electricity bill due? Bills shows what you owe before the queue does.",
-      "ne": "बिजुलीको बिल कहिले? लाइन लाग्नुअघि बिलले देखाउँछ।"
+      "en": "Add a reminder for your electricity bill",
+      "ne": "बिजुलीको बिलको रिमाइन्डर राख्नुहोस्"
     },
     {
       "feature": "documents",
-      "en": "Licence or passport expiring? Documents reminds you in time.",
-      "ne": "लाइसेन्स वा राहदानीको म्याद सकिँदै? कागजातले समयमै सम्झाउँछ।"
+      "en": "Get reminded before your licence expires",
+      "ne": "लाइसेन्सको म्याद सकिनुअघि सम्झना पाउनुहोस्"
     },
     {
       "feature": "tools",
-      "en": "Ropani to sq ft, VAT, interest: the sums live in Tools.",
-      "ne": "रोपनीबाट वर्गफिट, भ्याट, ब्याज: हिसाब औजारमा छ।"
+      "en": "Convert ropani, aana and sq ft in Tools",
+      "ne": "टुल्समा रोपनी, आना र वर्गफिट बदल्नुहोस्"
     },
     {
       "feature": "converter",
-      "en": "Need a date in BS or AD? The converter does it in a second.",
-      "ne": "वि.सं. वा ई.सं. मिति चाहियो? मिति परिवर्तकले एकै छिनमा गर्छ।"
+      "en": "Convert any date between BS and AD",
+      "ne": "बिसं र इस्वी मिति बदल्नुहोस्"
+    },
+    {
+      "feature": "newsAlerts",
+      "en": "Get Nepali news alerts at times you choose",
+      "ne": "आफूले रोजेको समयमा नेपाली समाचार पाउनुहोस्"
+    },
+    {
+      "feature": "clocks",
+      "en": "Family abroad? Add their city's clock",
+      "ne": "परिवार विदेशमा? उनीहरूको शहरको घडी थप्नुहोस्"
+    },
+    {
+      "feature": "stocks",
+      "en": "Get an alert when a share hits your price",
+      "ne": "सेयर तपाईंको मूल्यमा पुग्दा सूचना पाउनुहोस्"
+    },
+    {
+      "feature": "gold",
+      "en": "Planning to buy gold? Set a price alert",
+      "ne": "सुन किन्ने योजना छ? मूल्य सूचना राख्नुहोस्"
+    },
+    {
+      "feature": "panchang",
+      "en": "Planning something? Check today's Rahu Kaal",
+      "ne": "केही योजना छ? आजको राहुकाल हेर्नुहोस्"
+    },
+    {
+      "feature": "crypto",
+      "en": "Follow Bitcoin and crypto prices in Bazar",
+      "ne": "बजारमा बिटकोइन र क्रिप्टोको मूल्य हेर्नुहोस्"
+    },
+    {
+      "feature": "shares",
+      "en": "Check today's share prices on NEPSE",
+      "ne": "आज नेप्सेमा सेयरको मूल्य हेर्नुहोस्"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { CardTip, useCardTip } from "../../shared/components/card-tip";
 import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
 import {
@@ -145,6 +146,10 @@ function switchFor(reminder: ReminderCardView["reminder"]): CardSwitch | null {
 
 /** Shell event: the reminder in front changed (dismissed, or an example). */
 const CHANGED_EVENT = "sajilo://reminder-changed";
+/** The calm cards, which may carry a tip; news, price alerts and the quiz are
+ * about something now, and a tip there would read as an ad. */
+const TIP_KINDS = new Set<ReminderKind>(["festival", "holiday", "plan", "keeper"]);
+
 /** A card still waiting after this long shakes once more. */
 const NUDGE_MS = 30_000;
 
@@ -164,6 +169,9 @@ export function ReminderCard() {
   /** The other news on this card, opened under its headline. */
   const [stories, setStories] = useState(false);
   const [quizDone, setQuizDone] = useState(false);
+  const tipKey =
+    view && TIP_KINDS.has(view.reminder.kind) ? `${view.reminder.id}:${view.preview}` : null;
+  const tip = useCardTip(tipKey, view?.preview ?? false);
   const markQuizDone = useCallback(() => setQuizDone(true), []);
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   useFitWindow(element);
@@ -211,6 +219,7 @@ export function ReminderCard() {
 
   if (!view) return null;
   const { reminder } = view;
+  const showTip = tip && !options && TIP_KINDS.has(reminder.kind);
   const also = view.also ?? [];
   const quiz = reminder.kind === "quiz";
   const titleKey =
@@ -402,6 +411,7 @@ export function ReminderCard() {
           )}
         </div>
       )}
+      {showTip && <CardTip tip={tip} />}
     </div>
   );
 }

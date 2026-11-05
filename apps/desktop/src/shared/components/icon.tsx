@@ -50,6 +50,7 @@ import { SFHouse } from "sf-symbols-lib/monochrome/SFHouse";
 import { SFInfoCircle } from "sf-symbols-lib/monochrome/SFInfoCircle";
 import { SFKeyboard } from "sf-symbols-lib/monochrome/SFKeyboard";
 import { SFLeaf } from "sf-symbols-lib/monochrome/SFLeaf";
+import { SFLightbulb } from "sf-symbols-lib/monochrome/SFLightbulb";
 import { SFLine3Horizontal } from "sf-symbols-lib/monochrome/SFLine3Horizontal";
 import { SFLink } from "sf-symbols-lib/monochrome/SFLink";
 import { SFMagnifyingglass } from "sf-symbols-lib/monochrome/SFMagnifyingglass";
@@ -254,6 +255,7 @@ const GLYPHS: Record<IconName, SFComp> = {
   chevronLeft: SFChevronLeft,
   copy: SFSquareOnSquare,
   checkmark: SFCheckmark,
+  lightbulb: SFLightbulb,
   openExternal: SFArrowUpForward,
   play: SFPlayFill,
   pause: SFPauseFill,
@@ -371,6 +373,7 @@ export type IconName =
   | "chevronLeft"
   | "copy"
   | "checkmark"
+  | "lightbulb"
   | "openExternal"
   | "play"
   | "pause"
