@@ -49,7 +49,9 @@ pub fn open(app: &AppHandle<Wry>, label: &str, surface: &str, title: &str) {
     )
     .title(title)
     .inner_size(WIDTH, HEIGHT)
-    .resizable(false)
+    // Resizable on Linux, where GTK won't resize a fixed-size window; there
+    // is no border or title bar to drag it by either way. See `resize`.
+    .resizable(cfg!(target_os = "linux"))
     .maximizable(false)
     .minimizable(false)
     .decorations(false)
@@ -154,32 +156,13 @@ pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
     }
 }
 
-/// Sets a card's height. GTK keeps a non-resizable window at the size it
-/// first had and ignores a resize, so on Linux every card stayed at its
-/// opening height with the rest cut off. Unlocked for the resize, with the
-/// size pinned by min and max so the window manager can't offer the user a
-/// different one meanwhile — as `window::apply_window_kind` does.
+/// Sets a card's height. On Linux the card is resizable from the start and
+/// never given a min or max size: GTK ignores a resize on a fixed-size
+/// window, and min/max hints set in a row with the resize race it, so a card
+/// that grew kept its first height and was cut off. A plain resize is enough;
+/// the page checks the window took it and asks again if not.
 fn resize(window: &tauri::WebviewWindow<Wry>, height: f64) {
-    let size = tauri::LogicalSize::new(WIDTH, height);
-    // Left unlocked on Linux: locking again straight after the resize lands
-    // before GTK has laid it out, and the lock wins. See
-    // `window::apply_window_kind`.
-    //
-    // The old bounds come off first: a card that grows (a tip line arriving,
-    // buttons wrapping) still has its earlier height as its maximum, and GTK
-    // clamped the new size to it, cutting the bottom off.
-    #[cfg(target_os = "linux")]
-    {
-        let _ = window.set_resizable(true);
-        let _ = window.set_max_size(None::<tauri::LogicalSize<f64>>);
-        let _ = window.set_min_size(None::<tauri::LogicalSize<f64>>);
-    }
-    let _ = window.set_size(size);
-    #[cfg(target_os = "linux")]
-    {
-        let _ = window.set_min_size(Some(size));
-        let _ = window.set_max_size(Some(size));
-    }
+    let _ = window.set_size(tauri::LogicalSize::new(WIDTH, height));
 }
 
 /// Lets a card that was held back while another was showing come up now.
