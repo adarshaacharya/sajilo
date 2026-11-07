@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.43",
+    "name": "Sajilo v0.1.43",
+    "publishedAt": "2026-11-07T18:06:01Z",
+    "body": "## 12-hour clock\n\nClocks now read the way most of us say the time: **3:05 PM**. The Today clock, mini view, world clocks, panchang times and the menu-bar time all follow it. Prefer 24-hour? Settings › Display › Clock.\n\n## Price alerts\n\nThe −5% / +10% buttons are gone. If you own the share, the alert now shows what the target means for you: what you paid, and how much you'd be up or down.\n\n## Windows that stay where you want\n\n- The mini view stays on top of other apps, as before. Turn it off in Settings › Mini view.\n- The full pinned window sits behind other apps unless you turn on \"Keep on top\" in Settings › Pinned.\n\n## Fixes\n\n- Linux: reminder and break cards that grow after they open (a tip line, a wrapped button) are no longer cut off at the bottom.\n- Today: a new world clock goes in the empty spot beside an odd last clock.\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.43",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-macos-arm64.dmg",
+        "size": 12840059
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-macos-x64.dmg",
+        "size": 13597206
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-windows-x64.exe",
+        "size": 9438941
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-linux-amd64.deb",
+        "size": 16897226
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-linux-x86_64.AppImage",
+        "size": 162015736
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.43/Sajilo-linux-x86_64.rpm",
+        "size": 16898340
+      }
+    ]
+  },
+  {
     "version": "v0.1.42",
     "name": "Sajilo v0.1.42",
     "publishedAt": "2026-11-05T08:32:31Z",
