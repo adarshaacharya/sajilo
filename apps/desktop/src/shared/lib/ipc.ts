@@ -1213,6 +1213,8 @@ export const api = {
   /** Whether a pinned popover floats above other apps. */
   popoverPinnedOnTop: () => invoke<boolean>("popover_pinned_on_top"),
   setPopoverPinnedOnTop: (on: boolean) => invoke<void>("set_popover_pinned_on_top", { on }),
+  popoverMiniOnTop: () => invoke<boolean>("popover_mini_on_top"),
+  setPopoverMiniOnTop: (on: boolean) => invoke<void>("set_popover_mini_on_top", { on }),
   popoverMini: () => invoke<boolean>("popover_mini"),
   setPopoverMini: (mini: boolean) => invoke<void>("set_popover_mini", { mini }),
   pinPopover: (pinned: boolean) => invoke<void>("pin_popover", { pinned }),

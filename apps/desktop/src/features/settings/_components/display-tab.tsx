@@ -55,10 +55,15 @@ export function DisplayTab({
   const [autostart, setAutostart] = useState(false);
   const [dockIcon, setDockIcon] = useState(false);
   const [pinnedOnTop, setPinnedOnTop] = useState(false);
+  const [miniOnTop, setMiniOnTop] = useState(true);
   useEffect(() => {
     api
       .popoverPinnedOnTop()
       .then(setPinnedOnTop)
+      .catch(() => {});
+    api
+      .popoverMiniOnTop()
+      .then(setMiniOnTop)
       .catch(() => {});
   }, []);
   // Only on GNOME, where Sajilo has its own top-bar button; null hides it.
@@ -265,6 +270,14 @@ export function DisplayTab({
           value={miniLine}
           onChange={setMiniLine}
           options={MINI_LINES.map((id) => ({ id, label: t(`mini.line.${id}`) }))}
+        />
+        <Toggle
+          label={t("settings.pinned-on-top")}
+          checked={miniOnTop}
+          onChange={(value) => {
+            setMiniOnTop(value);
+            api.setPopoverMiniOnTop(value).catch(() => setMiniOnTop(!value));
+          }}
         />
       </SettingsSection>
 

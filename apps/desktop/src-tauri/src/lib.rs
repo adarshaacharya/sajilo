@@ -490,6 +490,8 @@ pub fn run() {
             commands::tray::set_popover_kept,
             commands::tray::popover_pinned_on_top,
             commands::tray::set_popover_pinned_on_top,
+            commands::tray::popover_mini_on_top,
+            commands::tray::set_popover_mini_on_top,
             commands::tray::popover_mini,
             commands::tray::set_popover_mini,
             commands::tray::set_tray_update,

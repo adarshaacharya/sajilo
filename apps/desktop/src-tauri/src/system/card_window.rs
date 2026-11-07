@@ -164,13 +164,22 @@ fn resize(window: &tauri::WebviewWindow<Wry>, height: f64) {
     // Left unlocked on Linux: locking again straight after the resize lands
     // before GTK has laid it out, and the lock wins. See
     // `window::apply_window_kind`.
+    //
+    // The old bounds come off first: a card that grows (a tip line arriving,
+    // buttons wrapping) still has its earlier height as its maximum, and GTK
+    // clamped the new size to it, cutting the bottom off.
     #[cfg(target_os = "linux")]
     {
         let _ = window.set_resizable(true);
+        let _ = window.set_max_size(None::<tauri::LogicalSize<f64>>);
+        let _ = window.set_min_size(None::<tauri::LogicalSize<f64>>);
+    }
+    let _ = window.set_size(size);
+    #[cfg(target_os = "linux")]
+    {
         let _ = window.set_min_size(Some(size));
         let _ = window.set_max_size(Some(size));
     }
-    let _ = window.set_size(size);
 }
 
 /// Lets a card that was held back while another was showing come up now.

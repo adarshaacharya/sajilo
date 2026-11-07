@@ -70,6 +70,7 @@ const MINI_KEY: &str = "popover.mini.v1";
 /// Whether a pinned full popover floats above other apps. Off by default: a
 /// pinned window is an ordinary one, as a detached window is in other apps.
 const PINNED_ON_TOP_KEY: &str = "popover.pinnedOnTop.v1";
+const MINI_ON_TOP_KEY: &str = "popover.miniOnTop.v1";
 /// The popover's two sizes, in logical pixels. Full matches `tauri.conf.json`.
 const FULL_SIZE: (f64, f64) = (380.0, 560.0);
 const MINI_SIZE: (f64, f64) = (320.0, 72.0);
@@ -162,11 +163,19 @@ pub fn set_kept(window: &WebviewWindow, kept: bool) {
     apply_window_kind(window);
 }
 
-/// The popover at the tray floats, like any tray menu, and so does the mini
-/// strip: floating is what it is for. A pinned full popover is an ordinary
-/// window that other apps can cover, unless the user asked it to float.
+/// The popover at the tray floats, like any tray menu. The mini strip floats
+/// too unless Settings says otherwise: floating is what it is for. A pinned
+/// full popover is an ordinary window that other apps can cover, unless the
+/// user asked it to float.
 fn stays_on_top(app: &AppHandle) -> bool {
-    !is_kept() || is_mini() || pinned_on_top(app)
+    if !is_kept() {
+        return true;
+    }
+    if is_mini() {
+        mini_on_top(app)
+    } else {
+        pinned_on_top(app)
+    }
 }
 
 /// A pinned popover that other apps may cover, with one of them in front of
@@ -183,21 +192,35 @@ fn covered(window: &WebviewWindow) -> bool {
         && !just_lost
 }
 
-pub fn pinned_on_top(app: &AppHandle) -> bool {
-    crate::db::get_json(app, PINNED_ON_TOP_KEY)
+fn read_flag(app: &AppHandle, key: &str, default: bool) -> bool {
+    crate::db::get_json(app, key)
         .ok()
         .flatten()
         .and_then(|value| value.as_bool())
-        .unwrap_or(false)
+        .unwrap_or(default)
+}
+
+fn store_flag(window: &WebviewWindow, key: &str, on: bool) {
+    let _ = crate::db::set_json(window.app_handle(), key, &serde_json::Value::Bool(on));
+    let _ = window.set_always_on_top(stays_on_top(window.app_handle()));
+}
+
+/// Whether the pinned full popover floats above other apps. Off by default.
+pub fn pinned_on_top(app: &AppHandle) -> bool {
+    read_flag(app, PINNED_ON_TOP_KEY, false)
 }
 
 pub fn set_pinned_on_top(window: &WebviewWindow, on: bool) {
-    let _ = crate::db::set_json(
-        window.app_handle(),
-        PINNED_ON_TOP_KEY,
-        &serde_json::Value::Bool(on),
-    );
-    let _ = window.set_always_on_top(stays_on_top(window.app_handle()));
+    store_flag(window, PINNED_ON_TOP_KEY, on);
+}
+
+/// Whether the mini strip floats above other apps. On by default.
+pub fn mini_on_top(app: &AppHandle) -> bool {
+    read_flag(app, MINI_ON_TOP_KEY, true)
+}
+
+pub fn set_mini_on_top(window: &WebviewWindow, on: bool) {
+    store_flag(window, MINI_ON_TOP_KEY, on);
 }
 
 pub fn is_mini() -> bool {

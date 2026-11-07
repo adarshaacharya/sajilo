@@ -12,15 +12,25 @@ export function useFitWindow(element: HTMLElement | null) {
     // then jumping. Hidden, it still lays out and can be measured.
     element.style.visibility = "hidden";
     const reveal = () => requestAnimationFrame(() => element.style.removeProperty("visibility"));
-    const fit = () => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const fit = (tries = 0) => {
+      clearTimeout(timer);
       const height = Math.ceil(element.getBoundingClientRect().height);
       // The shell sizes it, so a card that grows can move up rather than
       // run off the bottom of the screen.
       api.fitCard(height).then(reveal, reveal);
+      // Some window managers (GTK on Linux) apply a resize late or not at
+      // all; check the window really took the height, and ask again if not.
+      timer = setTimeout(() => {
+        if (window.innerHeight + 1 < height && tries < 5) fit(tries + 1);
+      }, 150);
     };
     fit();
-    const observer = new ResizeObserver(fit);
+    const observer = new ResizeObserver(() => fit());
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, [element]);
 }
