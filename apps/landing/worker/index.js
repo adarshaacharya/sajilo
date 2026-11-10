@@ -41,6 +41,10 @@ export default {
       return handleReport(request, env);
     }
 
+    if (url.pathname.endsWith(".mp4")) {
+      return serveRanged(request, env);
+    }
+
     const platform = url.pathname.startsWith("/dl/")
       ? url.pathname.slice("/dl/".length)
       : null;
@@ -71,6 +75,58 @@ export default {
     });
   },
 };
+
+/**
+ * Video, with byte ranges. The static asset server answers every request
+ * with the whole file and no `Accept-Ranges`, and without ranges a browser
+ * cannot seek in a video: dragging the playhead just snaps back. So videos go
+ * through here: the file is read from the assets and the asked-for slice is
+ * sent back as a 206. Files are a few megabytes, well inside a Worker's
+ * memory.
+ */
+async function serveRanged(request, env) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return new Response(null, { status: 405, headers: { Allow: "GET, HEAD" } });
+  }
+  // Asked for whole, without the Range the asset server would ignore anyway.
+  const asset = await env.ASSETS.fetch(new Request(request.url, { method: "GET" }));
+  if (!asset.ok) return asset;
+
+  const body = await asset.arrayBuffer();
+  const size = body.byteLength;
+  const headers = new Headers({
+    "Content-Type": asset.headers.get("Content-Type") ?? "application/octet-stream",
+    "Accept-Ranges": "bytes",
+    "Cache-Control": "public, max-age=86400",
+  });
+  const etag = asset.headers.get("ETag");
+  if (etag) headers.set("ETag", etag);
+
+  const range = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get("Range") ?? "");
+  if (!range || (range[1] === "" && range[2] === "")) {
+    headers.set("Content-Length", String(size));
+    return new Response(request.method === "HEAD" ? null : body, { status: 200, headers });
+  }
+
+  // "bytes=a-b", "bytes=a-" (to the end) or "bytes=-n" (the last n bytes).
+  let start;
+  let end;
+  if (range[1] === "") {
+    start = Math.max(0, size - Number(range[2]));
+    end = size - 1;
+  } else {
+    start = Number(range[1]);
+    end = range[2] === "" ? size - 1 : Math.min(Number(range[2]), size - 1);
+  }
+  if (start >= size || start > end) {
+    headers.set("Content-Range", `bytes */${size}`);
+    return new Response(null, { status: 416, headers });
+  }
+
+  headers.set("Content-Range", `bytes ${start}-${end}/${size}`);
+  headers.set("Content-Length", String(end - start + 1));
+  return new Response(request.method === "HEAD" ? null : body.slice(start, end + 1), { status: 206, headers });
+}
 
 async function record(env, platform, request) {
   if (!env.DB) return;

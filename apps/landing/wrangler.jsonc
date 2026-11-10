@@ -17,7 +17,7 @@
     // which match no file — were answered with 404.html and never reached the
     // Worker. These routes have to reach the Worker first; every other path
     // keeps the assets-first behaviour.
-    "run_worker_first": ["/dl/*", "/api/*"]
+    "run_worker_first": ["/dl/*", "/api/*", "/assets/film/*"]
   },
   "d1_databases": [
     {
