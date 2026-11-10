@@ -1,28 +1,14 @@
 ---
 import Base from "../layouts/Base.astro";
-import Hero from "../components/Hero.astro";
-import Ticker from "../components/Ticker.astro";
-import Film, { YOUTUBE_ID } from "../components/Film.astro";
-import PatroLeaf from "../components/PatroLeaf.astro";
-import Tour from "../components/Tour.astro";
-import Stocks from "../components/Stocks.astro";
-import Bazar from "../components/Bazar.astro";
-import Chhutti from "../components/Chhutti.astro";
-import Weather from "../components/Weather.astro";
-import Rashifal from "../components/Rashifal.astro";
-import Radio from "../components/Radio.astro";
-import Tools from "../components/Tools.astro";
-import Handy from "../components/Handy.astro";
-import Keeper from "../components/Keeper.astro";
-import Notes from "../components/Notes.astro";
-import Themes from "../components/Themes.astro";
-import Focus from "../components/Focus.astro";
-import Games from "../components/Games.astro";
-import News from "../components/News.astro";
-import Principles from "../components/Principles.astro";
-import Install from "../components/Install.astro";
-import Help from "../components/Help.astro";
-import Support from "../components/Support.astro";
+import Hero from "../components/home/Hero.astro";
+import Film, { YOUTUBE_ID } from "../components/home/Film.astro";
+import Calendar from "../components/home/Calendar.astro";
+import Markets from "../components/home/Markets.astro";
+import Everyday from "../components/home/Everyday.astro";
+import Workday from "../components/home/Workday.astro";
+import Tools from "../components/home/Tools.astro";
+import Themes from "../components/home/Themes.astro";
+import Close from "../components/home/Close.astro";
 
 const description =
   "Bikram Sambat calendar, festivals, NEPSE, gold, fuel, Kalimati prices, weather, exchange rates, rashifal, radio, Nepali news and break reminders in a menu bar app. Free and open source. macOS, Windows, Linux.";
@@ -60,27 +46,28 @@ const videoLd = {
 <Base title="Sajilo: Nepal in your menu bar" description={description}>
   <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
   <script is:inline type="application/ld+json" slot="head" set:html={JSON.stringify(videoLd)} />
-  <Hero />
-  <Ticker />
-  <Film />
-  <PatroLeaf />
-  <Chhutti />
-  <Weather />
-  <Tour />
-  <Stocks />
-  <Bazar />
-  <Rashifal />
-  <Radio />
-  <Keeper />
-  <Notes />
-  <Focus />
-  <Games />
-  <Tools />
-  <Handy />
-  <News />
-  <Themes />
-  <Principles />
-  <Install />
-  <Help />
-  <Support />
+  <main>
+    <Hero />
+    <Film />
+    <Calendar />
+    <Markets />
+    <Everyday />
+    <Workday />
+    <Tools />
+    <Themes />
+    <Close />
+  </main>
+
+  <script>
+    // A soft light follows the pointer across whichever panel it is over.
+    if (matchMedia("(hover: hover)").matches) {
+      document.querySelectorAll<HTMLElement>(".panel").forEach((panel) => {
+        panel.addEventListener("pointermove", (event) => {
+          const box = panel.getBoundingClientRect();
+          panel.style.setProperty("--mx", `${event.clientX - box.left}px`);
+          panel.style.setProperty("--my", `${event.clientY - box.top}px`);
+        });
+      });
+    }
+  </script>
 </Base>

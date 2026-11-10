@@ -32,14 +32,19 @@ const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&t
   .app-frame[data-theme="light"] iframe {
     background: #f5f5f7;
   }
+  /* Never wider than the app itself: scaled down to fit, never blown up. */
   .app-frame {
     position: relative;
+    width: 100%;
+    max-width: 380px;
+    margin-inline: auto;
     aspect-ratio: 380 / 560;
-    border-radius: 18px;
+    border-radius: 16px;
     overflow: hidden;
     background: #0e0e10;
-    border: 1px solid var(--line-2);
-    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.7);
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.08),
+      0 30px 60px -24px rgb(0 0 0 / 0.8);
   }
   .app-frame-screen {
     position: absolute;

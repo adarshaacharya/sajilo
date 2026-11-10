@@ -1,0 +1,617 @@
+---
+// The first screen: what Sajilo is, the download, and the app itself open
+// under a menu bar. The popover is the real app (the showcase build, answering
+// from the recording), not a picture of it; the menu bar around it is ours,
+// set to the recorded day and time.
+import { today, recordedAt } from "../../data/showcase";
+import { latestVersion } from "../../lib/releases";
+import { ne } from "../../lib/format";
+
+const platforms = [
+  { id: "macos-arm64", short: "macOS (Apple Silicon)" },
+  { id: "macos-x64", short: "macOS (Intel)" },
+  { id: "windows", short: "Windows" },
+  { id: "linux-deb", short: "Linux (.deb)" },
+  { id: "linux-rpm", short: "Linux (.rpm)" },
+  { id: "linux-appimage", short: "Linux (AppImage)" },
+];
+
+const version = latestVersion();
+const pill = `${ne(today.nepali.day)} ${today.nepaliMonthName} ${ne(today.nepali.year)}`;
+// The menu bar shows the recorded day, as the app inside it does; its time is
+// filled in from the visitor's own clock, as the app's is.
+const clockDay = new Date(recordedAt)
+  .toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Kathmandu" })
+  .replace(",", "");
+const clockTime = new Date(recordedAt).toLocaleTimeString("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "Asia/Kathmandu",
+});
+---
+
+<section class="hero" id="main">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      {version && (
+        <a class="hero-release" href={`/releases/${version}.html`}>
+          <span class="hero-release-tag">New</span>
+          <span>Sajilo {version} is out</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>
+        </a>
+      )}
+
+      <h1 class="hero-h1">Nepal, in your menu bar.</h1>
+
+      <p class="hero-lead">
+        Today's Bikram Sambat date beside your clock. One click for festivals, NEPSE, gold and fuel
+        prices, Kalimati, weather, news, rashifal and FM radio.
+      </p>
+
+      <div class="cta" id="download">
+        <a id="primary-download" class="btn btn--accent" href="/dl/macos-arm64">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
+          <span id="primary-download-label">Download for macOS</span>
+        </a>
+        <details class="platforms">
+          <summary class="btn btn--ghost">
+            Other platforms
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"/></svg>
+          </summary>
+          <ul>
+            {platforms.map((p) => (
+              <li><a href={`/dl/${p.id}`} data-platform={p.id}>{p.short}</a></li>
+            ))}
+          </ul>
+        </details>
+      </div>
+
+      <p class="hero-meta">Free and open source. No account. macOS, Windows and Linux.</p>
+
+      <!-- After a Linux download starts: the one-line install as an alternative,
+           since the script picks the right package itself. -->
+      <div class="linux-cmd" id="linux-cmd" hidden>
+        <code>curl -fsSL https://sajilo.fyi/install/linux | sh</code>
+        <button type="button" class="linux-cmd-copy" aria-label="Copy the install command">Copy</button>
+      </div>
+      <!-- After a macOS download starts. Builds are unsigned, so macOS blocks
+           the first open; the next step is said where people clicked. -->
+      <p class="hero-note" id="mac-note" hidden aria-live="polite">
+        Downloading. Drag Sajilo to Applications, open it, then choose <b>Open Anyway</b> in System
+        Settings → Privacy &amp; Security. <a href="/docs/install-macos.html">Screenshots</a>
+      </p>
+    </div>
+
+    <div class="hero-stage" aria-hidden="true">
+      <div class="desk" id="desk">
+        <div class="menubar">
+          <span class="mb-pill" id="mb-pill" lang="ne">{pill}</span>
+          <span class="mb-glyph mb-wifi"></span>
+          <span class="mb-glyph mb-batt"></span>
+          <span class="mb-clock">{clockDay}<span class="mb-time" id="mb-time">{clockTime}</span></span>
+        </div>
+        <div class="popover" id="popover">
+          <span class="nib"></span>
+          <iframe
+            class="popover-app"
+            id="hero-app"
+            title="Sajilo open from the menu bar, on its Today screen"
+            tabindex="-1"
+            scrolling="no"
+            data-src="/assets/app/index.html?route=%2F&inert=1&theme=dark"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    align-items: center;
+    min-height: calc(100svh - 60px);
+    padding-block: clamp(40px, 6vw, 88px) clamp(56px, 8vw, 120px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(40px, 5vw, 80px);
+    align-items: center;
+  }
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: start;
+    animation: enter 0.9s var(--ease) both;
+  }
+
+  .hero-release {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 32px;
+    padding: 0 10px 0 4px;
+    margin-bottom: 28px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    color: var(--paper-2);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    background: var(--ink-2);
+    transition: color 0.2s, box-shadow 0.2s;
+  }
+  .hero-release:hover {
+    color: var(--paper);
+    box-shadow: inset 0 0 0 1px var(--paper-4);
+  }
+  .hero-release-tag {
+    display: inline-grid;
+    place-items: center;
+    height: 24px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent);
+  }
+  .hero-release svg {
+    width: 14px;
+    height: 14px;
+    color: var(--paper-3);
+  }
+
+  .hero-h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(52px, 6.6vw, 92px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .hero-lead {
+    margin-top: 24px;
+    max-width: 46ch;
+    font-size: clamp(17px, 1.45vw, 19px);
+    line-height: 1.55;
+    color: var(--paper-2);
+    text-wrap: pretty;
+  }
+
+  .cta {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 36px;
+  }
+  .platforms {
+    position: relative;
+  }
+  .platforms summary {
+    list-style: none;
+  }
+  .platforms summary::-webkit-details-marker {
+    display: none;
+  }
+  .platforms summary svg {
+    width: 14px;
+    height: 14px;
+    color: var(--paper-3);
+    transition: transform 0.2s var(--ease);
+  }
+  .platforms[open] summary svg {
+    transform: rotate(180deg);
+  }
+  .platforms ul {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 230px;
+    padding: 6px;
+    border-radius: 14px;
+    background: var(--ink-4);
+    box-shadow:
+      inset 0 0 0 1px var(--line-2),
+      0 24px 48px -12px rgb(0 0 0 / 0.7);
+    animation: drop 0.18s var(--ease);
+  }
+  .platforms a {
+    display: block;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--paper-2);
+  }
+  .platforms a:hover {
+    color: var(--paper);
+    background: rgb(255 255 255 / 0.05);
+  }
+  .platforms a[hidden] {
+    display: none;
+  }
+
+  .linux-cmd[hidden],
+  .hero-note[hidden] {
+    display: none;
+  }
+  .hero-meta {
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+
+  .linux-cmd {
+    display: flex;
+    min-width: 0;
+    animation: enter 0.4s var(--ease);
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    padding: 6px 6px 6px 14px;
+    max-width: 100%;
+    border-radius: 12px;
+    background: var(--ink-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .linux-cmd code {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--paper-2);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .linux-cmd-copy {
+    flex: none;
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--paper);
+    background: var(--ink-4);
+  }
+  .linux-cmd-copy:hover {
+    background: var(--line-2);
+  }
+
+  .hero-note {
+    margin-top: 18px;
+    max-width: 50ch;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--paper-2);
+    animation: enter 0.4s var(--ease);
+  }
+  .hero-note b {
+    font-weight: 550;
+    color: var(--paper-2);
+  }
+  .hero-note a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: rgb(212 168 74 / 0.4);
+    text-underline-offset: 3px;
+  }
+
+  /* ---------- The desk: a menu bar with the app hanging from it ---------- */
+
+  .hero-stage {
+    position: relative;
+    animation: enter 1.1s var(--ease) 0.12s both;
+  }
+  .desk {
+    position: relative;
+    height: clamp(560px, 46vw, 660px);
+    border-radius: 22px;
+    overflow: hidden;
+    background:
+      radial-gradient(70% 60% at 72% 30%, rgb(212 168 74 / 0.16), transparent 70%),
+      radial-gradient(60% 50% at 10% 100%, rgb(94 174 242 / 0.08), transparent 70%),
+      linear-gradient(180deg, #121215, #0b0b0d);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .menubar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    height: 34px;
+    padding: 0 16px;
+    font-size: 13px;
+    color: rgb(245 245 247 / 0.86);
+    background: rgb(255 255 255 / 0.04);
+    border-bottom: 1px solid rgb(255 255 255 / 0.05);
+    backdrop-filter: blur(20px);
+  }
+  .mb-pill {
+    padding: 2px 9px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent);
+  }
+  .mb-clock {
+    font-variant-numeric: tabular-nums;
+  }
+  .mb-time {
+    margin-left: 8px;
+  }
+  .mb-glyph {
+    display: inline-block;
+    opacity: 0.8;
+  }
+  .mb-wifi {
+    width: 15px;
+    height: 11px;
+    border: 2px solid currentColor;
+    border-color: currentColor transparent transparent;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .mb-batt {
+    position: relative;
+    width: 22px;
+    height: 11px;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1.2px currentColor;
+  }
+  .mb-batt::before {
+    content: "";
+    position: absolute;
+    inset: 2.5px 7px 2.5px 2.5px;
+    border-radius: 1px;
+    background: currentColor;
+  }
+
+  /* The popover hangs from the gold date pill, as the real one does; the
+     script measures the pill and sets --pop-left and --nib-x. Until it does
+     (or without it) the popover sits at the right of the desk. */
+  .popover {
+    position: absolute;
+    top: 50px;
+    left: var(--pop-left, auto);
+    right: var(--pop-right, 48px);
+    width: 380px;
+    height: 560px;
+    transform-origin: var(--nib-x, 50%) 0;
+    transform: scale(var(--pop-scale, 1));
+  }
+  .nib {
+    position: absolute;
+    top: -7px;
+    left: calc(var(--nib-x, 50%) - 8px);
+    width: 16px;
+    height: 8px;
+    background: #0e0e10;
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    filter: drop-shadow(0 -1px 0 rgb(255 255 255 / 0.1));
+  }
+  .popover-app {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 16px;
+    background: #0e0e10;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.08),
+      0 40px 80px -20px rgb(0 0 0 / 0.8),
+      0 24px 60px -24px rgb(212 168 74 / 0.18);
+    pointer-events: none;
+  }
+
+  /* ---------- Opening, once, on load ----------
+     The pill is clicked, then the popover drops out of it. Armed by the
+     script, so without it (or with reduced motion) the app is simply open. */
+  .desk.is-armed .popover {
+    opacity: 0;
+    transform: translateY(-10px) scale(calc(var(--pop-scale, 1) * 0.94));
+  }
+  .desk.is-armed.is-open .popover {
+    opacity: 1;
+    transform: scale(var(--pop-scale, 1));
+    transition:
+      opacity 0.35s var(--ease),
+      transform 0.7s cubic-bezier(0.2, 1.1, 0.3, 1);
+  }
+  .mb-pill {
+    position: relative;
+    transition: transform 0.15s var(--ease), filter 0.15s;
+  }
+  .desk.is-armed .mb-pill::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9px;
+    box-shadow: 0 0 0 1.5px var(--accent);
+    opacity: 0;
+  }
+  .desk.is-armed.is-calling .mb-pill::after {
+    animation: call 1.1s var(--ease) 2;
+  }
+  .desk.is-armed.is-pressed .mb-pill {
+    transform: scale(0.94);
+    filter: brightness(1.15);
+  }
+  @keyframes call {
+    0% {
+      opacity: 0.9;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.25);
+    }
+  }
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+  @keyframes drop {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .popover {
+      --pop-scale: 0.9;
+    }
+  }
+  @media (max-width: 960px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .desk {
+      height: 600px;
+    }
+    .popover {
+      --pop-scale: 0.95;
+    }
+  }
+  @media (max-width: 480px) {
+    .desk {
+      height: 520px;
+    }
+    .popover {
+      --pop-scale: 0.8;
+    }
+    .mb-glyph {
+      display: none;
+    }
+    .cta,
+    .cta .btn,
+    .platforms,
+    .platforms summary {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  import { detectPlatform, DOWNLOAD_STARTED } from "../../scripts/platform";
+
+  // Which download the big button offers; see `detectPlatform`.
+  const btn = document.getElementById("primary-download") as HTMLAnchorElement;
+  const label = document.getElementById("primary-download-label")!;
+  const detected = detectPlatform();
+  btn.href = `/dl/${detected.platform}`;
+  label.textContent = detected.label;
+  document.querySelectorAll<HTMLAnchorElement>(".platforms a").forEach((a) => {
+    a.hidden = a.dataset.platform === detected.platform;
+  });
+
+  // Next steps appear under the buttons only once a download has started, so
+  // the first screen stays clean: on a Mac, how to get past the unsigned-app
+  // warning; on Linux, the one-line install as an alternative.
+  const linuxCmd = document.getElementById("linux-cmd");
+  const macNote = document.getElementById("mac-note");
+  const started = (href: string) => {
+    if (/\/dl\/macos-/.test(href) && macNote) macNote.hidden = false;
+    if (/\/dl\/linux-/.test(href) && linuxCmd) linuxCmd.hidden = false;
+  };
+  [btn, ...document.querySelectorAll<HTMLAnchorElement>(".platforms a")].forEach((a) =>
+    a.addEventListener("click", () => started(a.getAttribute("href") ?? "")),
+  );
+  // The nav's Download starts the same file from further down the page.
+  addEventListener(DOWNLOAD_STARTED, () => started(`/dl/${detected.platform}`));
+
+  const copy = linuxCmd?.querySelector<HTMLButtonElement>(".linux-cmd-copy");
+  copy?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(linuxCmd?.querySelector("code")?.textContent ?? "");
+      copy.textContent = "Copied";
+    } catch {
+      copy.textContent = "Select it";
+    }
+    window.setTimeout(() => (copy.textContent = "Copy"), 1600);
+  });
+
+  // A menu, not a disclosure: it closes on a click elsewhere, on Escape, and
+  // once a platform is picked.
+  const platforms = document.querySelector<HTMLDetailsElement>(".platforms");
+  if (platforms) {
+    document.addEventListener("click", (event) => {
+      if (platforms.open && !platforms.contains(event.target as Node)) platforms.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && platforms.open) {
+        platforms.open = false;
+        platforms.querySelector("summary")?.focus();
+      }
+    });
+    platforms.querySelectorAll("a").forEach((a) =>
+      a.addEventListener("click", () => {
+        platforms.open = false;
+      }),
+    );
+  }
+
+  // ---------- The desk ----------
+  const desk = document.getElementById("desk")!;
+  const pill = document.getElementById("mb-pill")!;
+  const popover = document.getElementById("popover")!;
+  const frame = document.getElementById("hero-app") as HTMLIFrameElement;
+
+  // Hang the popover from the pill: centred under it where the desk allows,
+  // the nib always pointing at the pill.
+  const place = () => {
+    const d = desk.getBoundingClientRect();
+    const p = pill.getBoundingClientRect();
+    const scale = Number(getComputedStyle(popover).getPropertyValue("--pop-scale")) || 1;
+    const width = 380 * scale;
+    const centre = p.left + p.width / 2 - d.left;
+    const left = Math.min(Math.max(16, centre - width / 2), d.width - width - 16);
+    popover.style.setProperty("--pop-left", `${left}px`);
+    popover.style.setProperty("--pop-right", "auto");
+    popover.style.setProperty("--nib-x", `${(centre - left) / scale}px`);
+  };
+  place();
+  new ResizeObserver(place).observe(desk);
+  document.fonts?.ready.then(place);
+
+  // The menu bar's clock reads the visitor's own time, as the app's does.
+  const time = document.getElementById("mb-time");
+  const tick = () => {
+    if (time) time.textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  };
+  tick();
+  setInterval(tick, 10_000);
+
+  // The app is only mounted once the fonts are in, so its first paint is the
+  // right one rather than a fallback-font flash inside the frame. Then, once,
+  // the pill is clicked and the popover opens with the app already drawn.
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce) desk.classList.add("is-armed");
+  let opened = false;
+  const open = () => {
+    if (opened) return;
+    opened = true;
+    desk.classList.add("is-pressed");
+    setTimeout(() => {
+      desk.classList.remove("is-pressed");
+      desk.classList.add("is-open");
+    }, 160);
+  };
+  const mount = () => {
+    if (frame.src) return;
+    // Not before the pill has had a moment to be seen.
+    frame.addEventListener("load", () => setTimeout(open, Math.max(250, 1100 - performance.now())), { once: true });
+    frame.src = frame.dataset.src!;
+  };
+  if (!reduce) setTimeout(() => desk.classList.add("is-calling"), 350);
+  if (document.fonts?.ready) document.fonts.ready.then(mount, mount);
+  else mount();
+  setTimeout(mount, 1500);
+  // Never leave the desk empty if the frame is slow.
+  setTimeout(open, 2600);
+</script>

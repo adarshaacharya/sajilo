@@ -1,0 +1,232 @@
+---
+// The work-day tools: break reminders, notes, documents and games. Each card
+// holds the real screen (the showcase build): Routine as a fresh install
+// ships it, the Notes welcome note, the Documents empty state (it holds ID
+// numbers, so nothing is recorded in it) and the games list. The reminder
+// intervals in the copy are the engine's own defaults from the recording.
+import AppFrame from "../AppFrame.astro";
+import { focus } from "../../data/showcase";
+
+const stopAt = `${String(focus.stopWorkAt.hour).padStart(2, "0")}:${String(focus.stopWorkAt.minute).padStart(2, "0")}`;
+
+const cards = [
+  {
+    id: "routine",
+    label: "Routine",
+    ne: "दिनचर्या",
+    title: "Reminds you to rest your eyes, stand up and drink water",
+    copy: `Eyes every ${focus.eyesEvery} minutes, a walk every ${focus.moveEvery}, ${focus.waterGoal} litres a day, and a card at ${stopAt} that says the work day is over.`,
+    route: "/focus",
+    frame: "Sajilo's Routine screen with the break reminders",
+  },
+  {
+    id: "notes",
+    label: "Notes",
+    ne: "नोट",
+    title: "Keeps a note for every day, next to the date",
+    copy: "Office and Personal kept apart. Turn on ने and mero naam becomes मेरो नाम as you type. Notes stay on your computer.",
+    route: "/notes?open=welcome",
+    frame: "Sajilo Notes, showing the welcome note",
+  },
+  {
+    id: "documents",
+    label: "Documents",
+    ne: "कागजपत्र",
+    title: "Remembers bluebook tax, renewals and monthly bills",
+    copy: "Citizenship, passport, licence, bluebook, insurance and bills, filed by family member with a photo of each page, and a reminder before each is due.",
+    route: "/keeper",
+    frame: "Sajilo's Documents screen",
+  },
+  {
+    id: "games",
+    label: "Games",
+    ne: "खेल",
+    title: "Plays Bagh-Chal and Chungi between meetings",
+    copy: "Tic-Tac-Toe, Snakes & Ladders, Jhandi Burja, a quiz about Nepal and Akshar Khoj. A few minutes a game, offline, no ads.",
+    route: "/games",
+    frame: "Sajilo's Games screen",
+  },
+];
+---
+
+<section class="chapter" id="workday" aria-labelledby="workday-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="workday-title">
+        Breaks, notes, documents and games <em>for the hours you spend at the laptop.</em>
+      </h2>
+    </div>
+
+    <!-- One screen at its real size; the list picks which. All four are
+         loaded and stacked, so switching is instant. -->
+    <div class="switch" data-switch>
+      <ol class="switch-list" role="tablist" aria-label="Work-day tools">
+        {cards.map((card, i) => (
+          <li>
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${card.id}`}
+              aria-controls={`screen-${card.id}`}
+              aria-selected={i === 0 ? "true" : "false"}
+              tabindex={i === 0 ? 0 : -1}
+              data-index={i}
+            >
+              <span class="label">{card.label} <span lang="ne">{card.ne}</span></span>
+              <span class="switch-title">{card.title}</span>
+              <span class="switch-text">{card.copy}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+      <div class="switch-stage">
+        {cards.map((card, i) => (
+          <div class:list={["switch-screen", { "is-on": i === 0 }]} id={`screen-${card.id}`} role="tabpanel" aria-labelledby={`tab-${card.id}`} hidden={i !== 0}>
+            <AppFrame route={card.route} title={card.frame} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+    /* The glow behind the screen may spill past the page edge; never scroll. */
+    overflow-x: clip;
+  }
+  .switch {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    gap: clamp(40px, 7vw, 120px);
+    align-items: center;
+  }
+
+  /* ---------- The list ---------- */
+  .switch-list {
+    border-top: 1px solid var(--line);
+  }
+  .switch-list button {
+    position: relative;
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    padding: 24px 0 24px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+  }
+  .switch-list button::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 24px;
+    bottom: 24px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s var(--ease);
+  }
+  .switch-list [aria-selected="true"]::before {
+    transform: scaleY(1);
+  }
+  .switch-title {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+    color: var(--paper-3);
+    transition: color 0.25s;
+  }
+  .switch-list button:hover .switch-title,
+  .switch-list [aria-selected="true"] .switch-title {
+    color: var(--paper);
+  }
+  /* Only the chosen tool says more. */
+  .switch-text {
+    display: grid;
+    max-width: 52ch;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--paper-3);
+    overflow: hidden;
+    opacity: 0;
+    max-height: 0;
+    transition:
+      max-height 0.45s var(--ease),
+      opacity 0.3s;
+  }
+  .switch-list [aria-selected="true"] .switch-text {
+    max-height: 8em;
+    opacity: 1;
+  }
+
+  /* ---------- The screen ---------- */
+  .switch-stage {
+    position: relative;
+  }
+  .switch-stage::before {
+    content: "";
+    position: absolute;
+    inset: -15% -25%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(212 168 74 / 0.12), transparent);
+    pointer-events: none;
+  }
+  .switch-screen {
+    animation: show 0.45s var(--ease);
+  }
+  .switch-screen[hidden] {
+    display: block;
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    animation: none;
+  }
+  @keyframes show {
+    from {
+      opacity: 0;
+      transform: translateY(8px) scale(0.985);
+    }
+  }
+
+  @media (max-width: 860px) {
+    .switch {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .switch-stage {
+      order: -1;
+      width: 100%;
+      max-width: 340px;
+      justify-self: center;
+    }
+  }
+</style>
+
+<script>
+  // A tab list: click or arrow keys pick the tool, and its screen shows.
+  document.querySelectorAll<HTMLElement>("[data-switch]").forEach((root) => {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const screens = [...root.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    const pick = (index: number, focus = false) => {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute("aria-selected", String(on));
+        tab.tabIndex = on ? 0 : -1;
+        screens[i].hidden = !on;
+      });
+      if (focus) tabs[index].focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => pick(i));
+      tab.addEventListener("keydown", (event) => {
+        const step = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        event.preventDefault();
+        pick((i + step + tabs.length) % tabs.length, true);
+      });
+    });
+  });
+</script>

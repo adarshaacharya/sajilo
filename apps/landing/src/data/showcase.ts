@@ -216,6 +216,15 @@ export const nepseIntraday = c.get_nepse_intraday.value.points;
 const forex = c.get_forex.value;
 export const usd = forex.rates.find((r) => r.currencyCode === "USD")!;
 export const forexCount = forex.rates.length;
+/** NRB's published buying rate for each currency over the recorded days,
+ * oldest first, as the Forex screen charts it. */
+export const forexHistory = forex.history as Record<string, number[]>;
+export const forexDate = forex.date;
+/** A few of the currencies Nepali families send money home in, as NRB lists
+ * them (rate per `unit`). */
+export const remittanceRates = ["USD", "QAR", "AED", "SAR", "MYR", "KRW", "INR"]
+  .map((code) => forex.rates.find((r) => r.currencyCode === code))
+  .filter((r) => r !== undefined);
 
 // ---------- News ----------
 

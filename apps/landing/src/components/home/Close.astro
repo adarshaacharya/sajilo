@@ -1,0 +1,230 @@
+---
+// The end of the page: what Sajilo promises, how to install it on each
+// system, where people get stuck, and how to support it.
+import PlatformCards from "../PlatformCards.astro";
+
+const MOMO_URL = "https://buymemomo.com/adarsha";
+
+const principles = [
+  { title: "Calendar works offline", copy: "Dates, tithi, festivals and holidays are compiled into the app." },
+  { title: "No account", copy: "Nothing to sign up for. One anonymous daily count, with an off switch in Settings." },
+  { title: "Open source", copy: "MIT licensed. Rust and a small web UI, every parser in the repository." },
+  { title: "Kept current", copy: "Markets, news and weather refresh online, and say so when they are stale." },
+];
+
+const questions = [
+  {
+    q: "Opened it and nothing happened?",
+    a: "Sajilo lives in the menu bar or tray, not in a window.",
+    href: "/docs/troubleshooting.html#i-opened-sajilo-and-nothing-happened",
+  },
+  {
+    q: "Can't find the icon on Windows?",
+    a: "Windows hides new tray icons behind the ^ arrow.",
+    href: "/docs/install-windows.html#put-sajilo-on-your-taskbar",
+  },
+  {
+    q: "Reminders not arriving?",
+    a: "Four things to check, from Do Not Disturb onwards.",
+    href: "/docs/troubleshooting.html#reminders-dont-arrive",
+  },
+  {
+    q: "Linux: installs, but never opens?",
+    a: "Older builds can't start on Ubuntu 22.04 and Mint 21.",
+    href: "/docs/troubleshooting.html#linux-it-installs-but-never-opens",
+  },
+];
+---
+
+<section class="chapter principles" aria-label="How Sajilo is built">
+  <ul class="wrap pr-grid">
+    {principles.map((p) => (
+      <li>
+        <h3>{p.title}</h3>
+        <p>{p.copy}</p>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<section class="chapter" id="install" aria-labelledby="install-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="install-title">
+        Install on macOS, Windows or Linux. <em>Builds are not code-signed yet, so each system warns once on first open.</em>
+      </h2>
+    </div>
+    <PlatformCards />
+  </div>
+</section>
+
+<section class="chapter" id="help" aria-labelledby="help-title">
+  <div class="wrap help-grid">
+    <div>
+      <h2 class="h2" id="help-title">Help and docs. <span class="muted">Every feature step by step, and the fixes for what people run into.</span></h2>
+      <div class="help-cta">
+        <a class="btn btn--ghost" href="/docs.html">Read the docs</a>
+        <a class="btn btn--ghost" href="/report.html">Report an issue</a>
+      </div>
+    </div>
+    <ul class="faq">
+      {questions.map((item) => (
+        <li>
+          <a href={item.href}>
+            <span class="faq-q">{item.q}</span>
+            <span class="faq-a">{item.a}</span>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<section class="chapter closing" id="support" aria-labelledby="close-title">
+  <div class="wrap">
+    <div class="panel close-card">
+      <img class="close-icon" src="/assets/icon.png" alt="" width="72" height="72" loading="lazy" />
+      <h2 class="h2 close-h2" id="close-title">Put the Nepali calendar in your menu bar.</h2>
+      <p class="close-sub">
+        Free, without ads, and made by one person. If it becomes part of your day, a plate of momo
+        pays for code signing and for what comes next.
+      </p>
+      <div class="close-cta">
+        <a class="btn btn--accent" href="/#download" data-download>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a.75.75 0 0 1 .75.75v6.19l2.22-2.22a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l2.22 2.22V2.25A.75.75 0 0 1 8 1.5ZM2.75 11a.75.75 0 0 1 .75.75v1.5h9v-1.5a.75.75 0 0 1 1.5 0v2.25a.75.75 0 0 1-.75.75h-10.5a.75.75 0 0 1-.75-.75v-2.25a.75.75 0 0 1 .75-.75Z"/></svg>
+          Download Sajilo
+        </a>
+        <a class="btn btn--ghost" href={MOMO_URL} target="_blank" rel="noopener">Buy me a momo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+  .principles {
+    padding-top: clamp(96px, 10vw, 140px);
+  }
+  .pr-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+  }
+  .pr-grid li {
+    padding-top: 20px;
+    border-top: 1px solid var(--line-2);
+  }
+  .pr-grid h3 {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .pr-grid p {
+    margin-top: 8px;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--paper-3);
+  }
+
+  .help-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+  }
+  .help-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .faq {
+    border-top: 1px solid var(--line);
+  }
+  .faq a {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 16px;
+    align-items: center;
+    padding: 22px 4px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.2s;
+  }
+  .faq a:hover {
+    background: rgb(255 255 255 / 0.02);
+  }
+  .faq-q {
+    font-size: 17px;
+    font-weight: 550;
+    letter-spacing: -0.015em;
+  }
+  .faq-a {
+    grid-row: 2;
+    font-size: 14.5px;
+    color: var(--paper-3);
+  }
+  .faq svg {
+    grid-row: span 2;
+    width: 16px;
+    height: 16px;
+    color: var(--paper-4);
+    transition: transform 0.25s var(--ease), color 0.2s;
+  }
+  .faq a:hover svg {
+    color: var(--paper);
+    transform: translateX(3px);
+  }
+
+  .closing {
+    padding-bottom: clamp(96px, 10vw, 140px);
+  }
+  .close-card {
+    display: grid;
+    justify-items: center;
+    padding: clamp(56px, 8vw, 96px) 24px;
+    text-align: center;
+    background:
+      radial-gradient(60% 80% at 50% 0%, rgb(212 168 74 / 0.12), transparent 70%),
+      var(--ink-3);
+  }
+  .close-icon {
+    width: 72px;
+    height: 72px;
+  }
+  .close-h2 {
+    margin-top: 28px;
+    max-width: 18ch;
+  }
+  .close-sub {
+    margin-top: 18px;
+    max-width: 50ch;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--paper-2);
+  }
+  .close-cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 36px;
+  }
+
+  @media (max-width: 900px) {
+    .pr-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .help-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 520px) {
+    .pr-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+</style>

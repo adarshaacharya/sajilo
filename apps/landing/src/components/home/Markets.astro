@@ -1,0 +1,507 @@
+---
+// Markets, paced as one big number, one wide chart, then a dense price
+// board: the NEPSE session drawn from the recorded minute-by-minute series,
+// the day's prices from Bazar (gold, fuel, Kalimati, NRB's rates), and the
+// investing screens (IPOs, mutual fund NAVs, crypto). Every figure is the
+// recording's (src/data/showcase.ts).
+import {
+  bazarPrices,
+  crypto,
+  forexDate,
+  forexHistory,
+  ipo,
+  mutualFunds,
+  nepse,
+  nepseIntraday,
+  remittanceRates,
+  vegetables,
+  vegetableTags,
+} from "../../data/showcase";
+import { nepalClock, rs, signed } from "../../lib/format";
+import { sparkPath } from "../../lib/spark";
+
+// ---------- The session ----------
+const W = 1600;
+const H = 280;
+const values = nepseIntraday.map((p) => p.value);
+const previousClose = nepse.value - nepse.change;
+const lo = Math.min(...values, previousClose);
+const hi = Math.max(...values, previousClose);
+const span = hi - lo || 1;
+const x = (i: number) => (i / (values.length - 1)) * W;
+const y = (v: number) => 16 + (1 - (v - lo) / span) * (H - 32);
+const line = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+const area = `${line} L${W} ${H} L0 ${H} Z`;
+const closeY = y(previousClose).toFixed(1);
+const up = nepse.change >= 0;
+const opened = nepseIntraday[0].time;
+const closed = nepseIntraday[nepseIntraday.length - 1].time;
+const { advanced, declined, unchanged } = nepse.breadth;
+const crore = (n: number) => `${(n / 1e7).toFixed(1)} crore`;
+
+// ---------- The board ----------
+const day = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const delta = (now: number, before: number) => (now === before ? null : now - before);
+const FUEL: Record<string, { en: string; unit: string }> = {
+  petrol: { en: "Petrol", unit: "litre" },
+  diesel: { en: "Diesel", unit: "litre" },
+  kerosene: { en: "Kerosene", unit: "litre" },
+  lpg: { en: "LPG", unit: "cylinder" },
+};
+const UNIT: Record<string, string> = { kilogram: "kg", dozen: "dozen", piece: "piece" };
+const vegName = (name: string) => name.replace(/\(.*?\)/g, "").trim();
+
+interface Row {
+  name: string;
+  ne?: boolean;
+  price: string;
+  unit: string;
+  change: number | null;
+  digits?: number;
+}
+const groups: { title: string; ne: string; source: string; rows: Row[] }[] = [
+  {
+    title: "Gold and silver",
+    ne: "सुनचाँदी",
+    source: "FENEGOSIDA",
+    rows: [
+      { name: "Fine gold", price: rs(bazarPrices.gold.price), unit: "tola", change: delta(bazarPrices.gold.price, bazarPrices.gold.previousPrice) },
+      { name: "Silver", price: rs(bazarPrices.silver.price), unit: "tola", change: delta(bazarPrices.silver.price, bazarPrices.silver.previousPrice) },
+    ],
+  },
+  {
+    title: "Fuel",
+    ne: "इन्धन",
+    source: `Nepal Oil Corporation, since ${day(bazarPrices.fuelEffectiveFrom)}`,
+    rows: bazarPrices.fuel
+      .filter((f) => f.fuel in FUEL)
+      .map((f) => ({ name: FUEL[f.fuel].en, price: rs(f.price), unit: FUEL[f.fuel].unit, change: delta(f.price, f.previousPrice) })),
+  },
+  {
+    title: "Kalimati",
+    ne: "तरकारी",
+    source: `${vegetables.count} prices a day`,
+    rows: vegetableTags.slice(0, 4).map((v) => ({
+      name: vegName(v.name),
+      ne: true,
+      price: rs(Math.round(v.average)),
+      unit: UNIT[v.unit] ?? v.unit,
+      change: null,
+    })),
+  },
+  {
+    title: "Exchange rates",
+    ne: "विदेशी मुद्रा",
+    source: `Nepal Rastra Bank, ${day(forexDate)}`,
+    rows: remittanceRates.slice(0, 4).map((r) => {
+      const week = forexHistory[r.currencyCode] ?? [];
+      return {
+        name: `${r.unit > 1 ? `${r.unit} ` : ""}${r.currencyCode}`,
+        price: r.buy.toFixed(2),
+        unit: "buying",
+        change: week.length > 1 ? Number((week[week.length - 1] - week[0]).toFixed(2)) || null : null,
+        digits: 2,
+      };
+    }),
+  },
+];
+
+// ---------- Investing ----------
+const times = ipo && ipo.units > 0 ? Math.round(ipo.applied / ipo.units) : 0;
+const navAsOf = mutualFunds.largest[0] ? day(mutualFunds.largest[0].navDate) : "";
+const dollars = (n: number) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: n >= 1000 ? 0 : n >= 1 ? 2 : 4,
+  }).format(n);
+---
+
+<section class="chapter" id="markets" aria-labelledby="markets-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="markets-title">
+        Check NEPSE, gold, fuel and Kalimati prices <em>from the menu bar, wherever you are working.</em>
+      </h2>
+    </div>
+  </div>
+
+  <!-- One number, then the session it came from, edge to edge. -->
+  <div class:list={["session", up ? "is-up" : "is-down"]} data-draw>
+    <div class="wrap session-head">
+      <div>
+        <p class="session-name">NEPSE index <span lang="ne">नेप्से</span></p>
+        <p class="session-value mono">{rs(nepse.value)}</p>
+      </div>
+      <dl class="session-facts">
+        <div><dt>Change</dt><dd class="mono tone">{signed(nepse.change, 2)} ({signed(nepse.changePercent, 2)}%)</dd></div>
+        <div><dt>Turnover</dt><dd class="mono">Rs {crore(nepse.turnover)}</dd></div>
+        <div><dt>Breadth</dt><dd class="mono"><span class="t-up">{advanced}</span> / {unchanged} / <span class="t-down">{declined}</span></dd></div>
+        <div><dt>Closed</dt><dd class="mono">{nepalClock(closed)}</dd></div>
+      </dl>
+    </div>
+    <svg class="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label={`NEPSE through the session, from ${rs(values[0])} to ${rs(values[values.length - 1])}`}>
+      <defs>
+        <linearGradient id="mk-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="currentColor" stop-opacity="0.18" />
+          <stop offset="1" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <line class="chart-close" x1="0" x2={W} y1={closeY} y2={closeY} />
+      <path class="chart-area" d={area} fill="url(#mk-fill)" />
+      <path class="chart-line" d={line} pathLength="1" />
+    </svg>
+    <p class="wrap chart-axis mono">
+      <span>{nepalClock(opened)}</span>
+      <span>Previous close {rs(previousClose)}</span>
+      <span>{nepalClock(closed)}</span>
+    </p>
+  </div>
+
+  <div class="wrap">
+    <!-- The day's prices, as a board. -->
+    <div class="board">
+      {groups.map((g) => (
+        <div class="board-group">
+          <p class="board-title">{g.title} <span lang="ne">{g.ne}</span></p>
+          <ul>
+            {g.rows.map((r) => (
+              <li>
+                <span class="row-name" lang={r.ne ? "ne" : undefined}>{r.name}</span>
+                <span class="row-price mono">Rs {r.price}</span>
+                <span class="row-unit">{r.unit}</span>
+                <span class:list={["row-change", "mono", r.change == null ? "" : r.change > 0 ? "t-up" : "t-down"]}>
+                  {r.change == null ? "–" : signed(r.change, r.digits ?? 0)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p class="board-source">{g.source}</p>
+        </div>
+      ))}
+    </div>
+
+    <!-- Investing, in three short columns. -->
+    <div class="invest">
+      {ipo && (
+        <div class="inv">
+          <p class="inv-title">IPOs</p>
+          <p class="inv-lead"><span class="sym">{ipo.symbol}</span> {ipo.name}</p>
+          <p class="inv-body">
+            <span class="mono">{rs(ipo.applications)}</span> people applied for <span class="mono">{rs(ipo.units)}</span>
+            units{times > 1 && <>, <span class="mono t-up">{times}×</span> oversubscribed</>}. Every open issue, with a
+            reminder on its last day.
+          </p>
+        </div>
+      )}
+      {mutualFunds.largest.length > 0 && (
+        <div class="inv">
+          <p class="inv-title">Mutual fund NAVs <span class="mono">{navAsOf}</span></p>
+          <ul class="inv-rows">
+            {mutualFunds.largest.slice(0, 3).map((f) => (
+              <li>
+                <span class="sym">{f.symbol}</span>
+                <span class="mono">Rs {f.nav.toFixed(2)}</span>
+                <span class:list={["mono", f.change >= 0 ? "t-up" : "t-down"]}>{signed(f.change, 2)}</span>
+              </li>
+            ))}
+          </ul>
+          <p class="inv-body">All {mutualFunds.openEnd + mutualFunds.closedEnd} funds, and a reminder before your SIP leaves the bank.</p>
+        </div>
+      )}
+      {crypto.count > 0 && (
+        <div class="inv">
+          <p class="inv-title">Crypto, in dollars</p>
+          <ul class="inv-rows">
+            {crypto.top.slice(0, 3).map((coin) => {
+              const rising = coin.week.length > 1 && coin.week[coin.week.length - 1] >= coin.week[0];
+              return (
+                <li>
+                  <span class="sym">{coin.symbol}</span>
+                  <span class="mono">{dollars(coin.price)}</span>
+                  {coin.week.length > 1 ? (
+                    <svg class:list={["spark", rising ? "t-up" : "t-down"]} viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+                      <path d={sparkPath(coin.week)} />
+                    </svg>
+                  ) : <span />}
+                </li>
+              );
+            })}
+          </ul>
+          <p class="inv-body">The top {crypto.count} coins, and what the ones you hold add up to.</p>
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+  .t-up {
+    color: var(--leaf);
+  }
+  .t-down {
+    color: var(--sindoor);
+  }
+
+  /* ---------- The session ---------- */
+  .session {
+    color: var(--leaf);
+  }
+  .session.is-down {
+    color: var(--sindoor);
+  }
+  .session-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px 64px;
+    color: var(--paper);
+  }
+  .session-name {
+    font-size: 15px;
+    color: var(--paper-3);
+  }
+  .session-name span {
+    color: var(--paper-4);
+    margin-left: 6px;
+  }
+  .session-value {
+    margin-top: 8px;
+    font-size: clamp(80px, 12vw, 176px);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.065em;
+  }
+  .session-facts {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 18px 48px;
+    padding-bottom: 12px;
+  }
+  .session-facts div {
+    display: grid;
+    gap: 4px;
+  }
+  .session-facts dt {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .session-facts dd {
+    font-size: 17px;
+  }
+  .session-facts .tone {
+    color: var(--leaf);
+  }
+  .is-down .session-facts .tone {
+    color: var(--sindoor);
+  }
+  .chart {
+    display: block;
+    width: 100%;
+    height: clamp(180px, 22vw, 300px);
+    margin-top: 48px;
+    overflow: visible;
+  }
+  .chart-close {
+    stroke: var(--paper-4);
+    stroke-width: 1;
+    stroke-dasharray: 3 6;
+    vector-effect: non-scaling-stroke;
+  }
+  .chart-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  .chart-area {
+    transition: opacity 1s var(--ease) 1.2s;
+  }
+  /* The session draws itself once, the first time it scrolls into view. */
+  .session.is-armed .chart-line {
+    stroke-dashoffset: 1;
+  }
+  .session.is-armed .chart-area {
+    opacity: 0;
+  }
+  .session.is-armed.is-drawn .chart-line {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 2.2s cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  .session.is-armed.is-drawn .chart-area {
+    opacity: 1;
+  }
+  .chart-axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--paper-4);
+  }
+
+  /* ---------- The board ---------- */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 56px 64px;
+    margin-top: clamp(80px, 9vw, 120px);
+  }
+  .board-title {
+    padding-bottom: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .board-title span {
+    margin-left: 6px;
+    font-weight: 400;
+    color: var(--paper-4);
+  }
+  .board-group li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 72px 72px;
+    align-items: baseline;
+    gap: 16px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.2s;
+  }
+  .board-group li:hover {
+    background: rgb(255 255 255 / 0.015);
+  }
+  .row-name {
+    font-size: 15.5px;
+  }
+  .row-price {
+    font-size: 17px;
+    text-align: right;
+  }
+  .row-unit {
+    font-size: 12.5px;
+    color: var(--paper-4);
+  }
+  .row-change {
+    font-size: 13.5px;
+    text-align: right;
+    color: var(--paper-4);
+  }
+  .board-source {
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: var(--paper-4);
+  }
+
+  /* ---------- Investing ---------- */
+  .invest {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 48px;
+    margin-top: clamp(80px, 9vw, 120px);
+    padding-top: 40px;
+    border-top: 1px solid var(--line);
+  }
+  .inv {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .inv-title {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .inv-title .mono {
+    margin-left: 6px;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--paper-4);
+  }
+  .inv-lead {
+    font-size: 19px;
+    font-weight: 550;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .inv-body {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--paper-3);
+  }
+  .inv-body .mono {
+    color: var(--paper);
+  }
+  .inv-rows li {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sym {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .spark {
+    width: 72px;
+    height: 20px;
+    overflow: visible;
+  }
+  .spark path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+
+  @media (max-width: 900px) {
+    .board {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .invest {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (max-width: 520px) {
+    .board-group li {
+      grid-template-columns: minmax(0, 1fr) auto 52px;
+    }
+    .row-unit {
+      display: none;
+    }
+    .session-facts {
+      gap: 14px 28px;
+    }
+  }
+</style>
+
+<script>
+  // Arm the chart only when script runs, so without it the line is simply
+  // there; then draw it the first time it scrolls into view.
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll<HTMLElement>("[data-draw]").forEach((el) => {
+    if (reduce || !("IntersectionObserver" in window)) return;
+    if (el.getBoundingClientRect().top < innerHeight * 0.8) return;
+    el.classList.add("is-armed");
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          el.classList.add("is-drawn");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(el);
+  });
+</script>

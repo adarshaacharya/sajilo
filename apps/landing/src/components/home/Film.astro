@@ -1,0 +1,162 @@
+---
+// The tour video: the real app, recorded frame by frame against the same
+// showcase data this page reads. Nothing loads until someone presses play:
+// the poster is the only request.
+export const YOUTUBE_ID = "fpuhyNWzHFg";
+---
+
+<section class="film" id="watch" aria-labelledby="film-title">
+  <div class="wrap">
+    <div class="film-head">
+      <h2 class="h2" id="film-title">
+        Sajilo in 84 seconds. <span class="muted">The date, holidays, NEPSE, Kalimati prices, a second
+        clock and break reminders, recorded from the app.</span>
+      </h2>
+      <a class="film-yt" href={`https://youtu.be/${YOUTUBE_ID}`} rel="noopener">Watch on YouTube</a>
+    </div>
+    <figure class="film-frame">
+      <video
+        class="film-video"
+        id="film-video"
+        poster="/assets/film/sajilo-tour.jpg"
+        preload="none"
+        playsinline
+        aria-label="Sajilo tour: the app answering everyday questions, from the Nepali date to break reminders"
+      >
+        <source src="/assets/film/sajilo-tour.mp4" type="video/mp4" />
+      </video>
+      <button class="film-play" id="film-play" type="button" aria-controls="film-video">
+        <span class="film-disc" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5.14v13.72a1 1 0 0 0 1.52.85l10.9-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z" /></svg>
+        </span>
+        <span class="film-label">Play the tour <span class="mono">1:24</span></span>
+      </button>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .film {
+    padding-top: clamp(40px, 6vw, 80px);
+  }
+  .film-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px 48px;
+    margin-bottom: 40px;
+  }
+  .film-head .h2 {
+    max-width: 26ch;
+  }
+  .film-yt {
+    flex: none;
+    font-size: 14px;
+    color: var(--paper-2);
+    text-decoration: underline;
+    text-decoration-color: var(--line-2);
+    text-underline-offset: 4px;
+    transition: color 0.2s, text-decoration-color 0.2s;
+  }
+  .film-yt:hover {
+    color: var(--paper);
+    text-decoration-color: var(--paper-3);
+  }
+  /* Wider than the text column: the one picture on the page that bleeds
+     past the wrap. */
+  .film-frame {
+    margin-inline: calc((min(100vw - 2 * var(--gutter), 1440px) - 100%) / -2);
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--ink-2);
+    box-shadow:
+      0 0 0 1px var(--line),
+      0 40px 100px -40px rgb(0 0 0 / 0.9);
+  }
+  .film-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .film-play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    background: linear-gradient(180deg, transparent 40%, rgb(0 0 0 / 0.35));
+    transition: background 0.3s;
+  }
+  .film-disc {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    color: var(--accent-ink);
+    background: var(--accent);
+    box-shadow: 0 16px 40px -8px rgb(212 168 74 / 0.5);
+    transition: transform 0.35s var(--ease);
+  }
+  .film-disc svg {
+    width: 28px;
+    height: 28px;
+    margin-left: 4px;
+  }
+  .film-play:hover .film-disc {
+    transform: scale(1.06);
+  }
+  .film-play:active .film-disc {
+    transform: scale(0.97);
+  }
+  .film-label {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--paper);
+    background: rgb(9 9 11 / 0.6);
+    backdrop-filter: blur(10px);
+  }
+  .film-label .mono {
+    margin-left: 6px;
+    color: var(--paper-3);
+  }
+  .film.is-playing .film-play {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .film-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .film-frame {
+      border-radius: 14px;
+    }
+    .film-disc {
+      width: 60px;
+      height: 60px;
+    }
+  }
+</style>
+
+<script>
+  // The poster is a button until pressed; then the browser's own controls take
+  // over, so seeking, fullscreen and volume behave as people expect.
+  const section = document.getElementById("watch");
+  const video = document.getElementById("film-video") as HTMLVideoElement | null;
+  const play = document.getElementById("film-play");
+  if (section && video && play) {
+    play.addEventListener("click", () => {
+      section.classList.add("is-playing");
+      video.controls = true;
+      void video.play().catch(() => {});
+      video.focus();
+    });
+  }
+</script>

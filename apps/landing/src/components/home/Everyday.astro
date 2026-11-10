@@ -1,0 +1,821 @@
+---
+// The rest of the morning: weather and air quality, rashifal, the newsrooms
+// and FM radio. Readings, stations, sources and the weather are the
+// recording's (src/data/showcase.ts); sign names and first syllables are the
+// app's own table. The rashifal picker and the FM dial are live.
+import {
+  highestPlace,
+  kathmandu,
+  lowestPlace,
+  newsItems,
+  newsSources,
+  placeCount,
+  radioDial,
+  rashifal,
+  stationCount,
+} from "../../data/showcase";
+import { ne, nepalClock } from "../../lib/format";
+
+// ---------- Weather ----------
+const CONDITION: Record<string, string> = {
+  clear: "Clear",
+  "partly-cloudy": "Partly cloudy",
+  cloudy: "Cloudy",
+  overcast: "Overcast",
+  fog: "Fog",
+  drizzle: "Drizzle",
+  rain: "Rain",
+  "heavy-rain": "Heavy rain",
+  thunderstorm: "Thunderstorm",
+  snow: "Snow",
+};
+function aqiBand(aqi: number) {
+  if (aqi <= 50) return { label: "Good", tone: "#4ecf8a" };
+  if (aqi <= 100) return { label: "Moderate", tone: "#e8c06a" };
+  if (aqi <= 150) return { label: "Unhealthy for sensitive groups", tone: "#f39b4a" };
+  if (aqi <= 200) return { label: "Unhealthy", tone: "#ff6a52" };
+  if (aqi <= 300) return { label: "Very unhealthy", tone: "#c973d8" };
+  return { label: "Hazardous", tone: "#b8284a" };
+}
+const band = aqiBand(kathmandu.aqi);
+const aqiAt = Math.min(100, (kathmandu.aqi / 300) * 100);
+
+// ---------- Rashifal ----------
+const SWATCH: Record<string, string> = {
+  "सेतो": "#f3ede0",
+  "गुलाबी": "#f29ac0",
+  "हरियो": "#4fb872",
+  "हल्का हरियो": "#9ad89a",
+  "रातो": "#e4472f",
+  "पहेलो": "#f0c64a",
+  "खैरो": "#8a5a3b",
+  "निलो": "#4d86e0",
+  "कालो": "#1a1a1a",
+  "सुन्तला": "#f08a2a",
+  "बैजनी": "#9a6ad0",
+  "आकाशे": "#7cc6f0",
+};
+const first = rashifal[0];
+
+// ---------- Radio ----------
+const MIN = 87.5;
+const MAX = 108;
+const pos = (f: number) => ((f - MIN) / (MAX - MIN)) * 100;
+const ticks = [88, 92, 96, 100, 104, 108];
+const startAt = radioDial.findIndex((stop) => stop.frequency >= 96);
+const tuned = radioDial[Math.max(0, startAt)];
+---
+
+<section class="chapter" id="everyday" aria-labelledby="everyday-title">
+  <div class="wrap ev-split">
+    <div class="ev-side">
+      <h2 class="h2" id="everyday-title">
+        Weather, rashifal, news and FM radio <em>for the rest of your morning.</em>
+      </h2>
+      <ol class="ev-index">
+        {[
+          { id: "ev-weather", title: "Weather and air quality", copy: `${placeCount} places, with AQI.` },
+          { id: "rashifal", title: "Rashifal", copy: "All twelve signs, every morning." },
+          { id: "ev-news", title: "News", copy: `${newsSources.length} newsrooms in one list.` },
+          { id: "ev-radio", title: "FM radio", copy: `${stationCount} stations.` },
+        ].map((item, i) => (
+          <li>
+            <a href={`#${item.id}`} data-for={item.id} class:list={[{ "is-on": i === 0 }]}>
+              <span class="ev-i-title">{item.title}</span>
+              <span class="ev-i-copy">{item.copy}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="ev-stack">
+      <article class="panel weather" id="ev-weather">
+        <p class="label">Weather <span lang="ne">मौसम</span></p>
+        <div class="w-now">
+          <p class="w-temp mono">{kathmandu.temperature}°</p>
+          <div>
+            <p class="w-place">Kathmandu</p>
+            <p class="w-cond">{CONDITION[kathmandu.condition] ?? kathmandu.condition}</p>
+          </div>
+        </div>
+        <div class="aqi" style={`--tone:${band.tone}`}>
+          <p class="aqi-row">
+            <span>Air quality</span>
+            <span><b class="mono">{kathmandu.aqi}</b> {band.label}</span>
+          </p>
+          <div class="aqi-scale" aria-hidden="true"><span style={`left:${aqiAt}%`}></span></div>
+          <p class="aqi-pm mono">PM2.5 {kathmandu.pm25} µg/m³</p>
+        </div>
+        <dl class="w-facts">
+          <div><dt>Sunrise</dt><dd class="mono">{nepalClock(kathmandu.sunrise)}</dd></div>
+          <div><dt>Sunset</dt><dd class="mono">{nepalClock(kathmandu.sunset)}</dd></div>
+          <div><dt>Forecast</dt><dd><span class="mono">{kathmandu.days}</span> days</dd></div>
+        </dl>
+        <p class="note">
+          {placeCount} places, from {highestPlace.name} at {Math.round(highestPlace.elevation).toLocaleString("en")} m
+          to {lowestPlace.name} at {Math.round(lowestPlace.elevation)} m. The last forecast stays when the signal drops.
+        </p>
+      </article>
+
+      <article class="panel rashi" id="rashifal">
+        <div class="rashi-top">
+          <p class="label">Rashifal <span lang="ne">राशिफल</span></p>
+          <label class="finder">
+            <span>Your name starts with</span>
+            <input type="text" lang="ne" maxlength="3" placeholder="का" autocomplete="off" aria-label="First syllable of your name, in Nepali" />
+            <span class="finder-hint" data-bind="hint" aria-live="polite"></span>
+          </label>
+        </div>
+        <div class="signs" role="group" aria-label="Choose a sign">
+          {rashifal.map((s, i) => (
+            <button type="button" class:list={["sign", { "is-on": i === 0 }]} data-index={i} aria-pressed={i === 0 ? "true" : "false"} aria-label={`${s.en} (${s.western})`}>
+              <span lang="ne">{s.ne}</span>
+            </button>
+          ))}
+        </div>
+        <div class="reading" aria-live="polite">
+          <p class="reading-sign">
+            <span lang="ne" data-bind="ne">{first.ne}</span>
+            <span class="reading-en" data-bind="en">{first.en} · {first.western}</span>
+          </p>
+          <p class="reading-text" lang="ne" data-bind="reading">{first.reading}</p>
+          <div class="lucky" data-bind="lucky" hidden={!first.colour}>
+            <span class="lucky-item">
+              <span class="swatch" data-bind="swatch" style={`--swatch:${SWATCH[first.colour ?? ""] ?? "transparent"}`}></span>
+              <span lang="ne">शुभ रंग</span>
+              <b lang="ne" data-bind="colour">{first.colour}</b>
+            </span>
+            <span class="lucky-item">
+              <span lang="ne">शुभ अंक</span>
+              <b lang="ne" data-bind="number">{first.number}</b>
+            </span>
+          </div>
+        </div>
+        <script type="application/json" id="rashi-data" set:html={JSON.stringify({ signs: rashifal, swatch: SWATCH })} />
+      </article>
+
+      <article class="panel news" id="ev-news">
+        <p class="label">News <span lang="ne">समाचार</span></p>
+        <p class="news-lead">
+          <span class="mono">{newsSources.length}</span> newsrooms and the government's notices, in one list by
+          time. <span class="dim">{newsItems} headlines the morning this page was recorded.</span>
+        </p>
+        <ul class="sources">
+          {newsSources.map((s) => (
+            <li>
+              <span class="src-name">{s.name}</span>
+              <span class:list={["src-tag", { official: s.official }]}>
+                {s.official ? "Notices" : s.english ? "English" : "नेपाली"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </article>
+
+      <article class="panel radio" id="ev-radio" data-stops={JSON.stringify(radioDial)}>
+        <p class="label">FM radio <span lang="ne">रेडियो</span></p>
+        <div class="tuner" aria-live="polite">
+          <p class="freq"><span class="mono" data-bind="freq">{tuned.frequency.toFixed(1)}</span><small>MHz</small></p>
+          <p class="station" lang="ne" data-bind="name">{tuned.names[0]}</p>
+          <p class="station-more" data-bind="more">
+            {tuned.names.length > 1 ? `and ${tuned.names.length - 1} more on this frequency elsewhere` : " "}
+          </p>
+        </div>
+        <div
+          class="dial"
+          role="slider"
+          tabindex="0"
+          aria-label="Tuning dial"
+          aria-valuemin={MIN}
+          aria-valuemax={MAX}
+          aria-valuenow={tuned.frequency}
+          aria-valuetext={`${tuned.frequency} MHz`}
+          style={`--needle:${pos(tuned.frequency)}%`}
+        >
+          <div class="dial-track" aria-hidden="true">
+            {radioDial.map((stop) => <span class="stop" style={`left:${pos(stop.frequency)}%`}></span>)}
+          </div>
+          <span class="needle" aria-hidden="true"></span>
+          <div class="dial-ticks mono" aria-hidden="true">
+            {ticks.map((t) => <span style={`left:${pos(t)}%`}>{t}</span>)}
+          </div>
+        </div>
+        <div class="seek">
+          <button type="button" class="btn btn--ghost btn--sm" data-seek="-1" aria-label="Previous station">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z"/></svg>
+          </button>
+          <p class="note">{stationCount} stations from across Nepal. Drag the dial or press ← →.</p>
+          <button type="button" class="btn btn--ghost btn--sm" data-seek="1" aria-label="Next station">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z"/></svg>
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+  /* The heading and an index stay put while the four panels pass by. */
+  .ev-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(40px, 6vw, 96px);
+    align-items: start;
+  }
+  .ev-side {
+    position: sticky;
+    top: 120px;
+  }
+  .ev-index {
+    margin-top: 48px;
+    border-top: 1px solid var(--line);
+  }
+  .ev-index a {
+    position: relative;
+    display: grid;
+    gap: 2px;
+    padding: 16px 0 16px 20px;
+    border-bottom: 1px solid var(--line);
+    color: var(--paper-3);
+    transition: color 0.3s;
+  }
+  .ev-index a::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.35s var(--ease);
+  }
+  .ev-index a.is-on,
+  .ev-index a:hover {
+    color: var(--paper);
+  }
+  .ev-index a.is-on::before {
+    transform: scaleY(1);
+  }
+  .ev-i-title {
+    font-size: 17px;
+    font-weight: 550;
+    letter-spacing: -0.015em;
+  }
+  .ev-i-copy {
+    font-size: 14px;
+    color: var(--paper-4);
+  }
+  .ev-stack {
+    display: grid;
+    gap: 24px;
+  }
+  .ev-stack > .panel {
+    scroll-margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+  }
+  .note {
+    margin-top: auto;
+    padding-top: 20px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--paper-3);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Weather ---------- */
+  .w-now {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 22px;
+  }
+  .w-temp {
+    font-size: 76px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
+  .w-place {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .w-cond {
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .aqi {
+    margin-top: 28px;
+  }
+  .aqi-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .aqi-row b {
+    font-weight: 600;
+    color: var(--tone);
+  }
+  .aqi-scale {
+    position: relative;
+    height: 6px;
+    margin-top: 10px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #4ecf8a 0 16.6%, #e8c06a 16.6% 33.3%, #f39b4a 33.3% 50%, #ff6a52 50% 66.6%, #c973d8 66.6% 100%);
+    opacity: 0.85;
+  }
+  .aqi-scale span {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 0 0 3px var(--ink-3);
+    transform: translate(-50%, -50%);
+  }
+  .aqi-pm {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--paper-4);
+  }
+  .w-facts {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: start;
+    gap: 4px 32px;
+    margin-top: 24px;
+  }
+  .w-facts div {
+    display: grid;
+    gap: 2px;
+  }
+  .w-facts dt {
+    font-size: 12.5px;
+    color: var(--paper-3);
+  }
+  .w-facts dd {
+    font-size: 15px;
+  }
+
+  /* ---------- Rashifal ---------- */
+  .rashi-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .finder {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .finder input {
+    width: 56px;
+    height: 32px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-family: var(--deva);
+    font-size: 15px;
+    color: var(--paper);
+    background: var(--ink-2);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+  }
+  .finder input:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+  .finder-hint {
+    min-width: 3ch;
+    font-family: var(--deva);
+    color: var(--accent);
+  }
+  .signs {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 6px;
+    margin-top: 20px;
+  }
+  .sign {
+    height: 40px;
+    border-radius: 10px;
+    font-size: 15px;
+    color: var(--paper-2);
+    background: var(--ink-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    transition: color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .sign:hover {
+    color: var(--paper);
+    background: var(--ink-4);
+  }
+  .sign.is-on {
+    color: var(--accent-ink);
+    background: var(--accent);
+    box-shadow: none;
+    font-weight: 600;
+  }
+  .reading {
+    margin-top: 24px;
+    transition: opacity 0.2s;
+  }
+  .reading.is-swapping {
+    opacity: 0;
+  }
+  .reading-sign {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 650;
+  }
+  .reading-en {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--paper-3);
+  }
+  .reading-text {
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--paper-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lucky {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    margin-top: 18px;
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .lucky[hidden] {
+    display: none;
+  }
+  .lucky-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .lucky b {
+    font-weight: 600;
+    color: var(--paper);
+  }
+  .swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.2);
+  }
+
+  /* ---------- News ---------- */
+  .news-lead {
+    margin-top: 18px;
+    max-width: 52ch;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -0.01em;
+  }
+  .news-lead .dim {
+    color: var(--paper-3);
+    font-weight: 400;
+  }
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 28px;
+    margin-top: 20px;
+  }
+  .sources li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    font-size: 14.5px;
+    border-bottom: 1px solid var(--line);
+  }
+  .src-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .src-tag {
+    flex: none;
+    font-size: 12px;
+    color: var(--paper-4);
+  }
+  .src-tag.official {
+    color: var(--accent);
+  }
+
+  /* ---------- Radio ---------- */
+  .tuner {
+    margin-top: 22px;
+  }
+  .freq {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .freq .mono {
+    font-size: 88px;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .freq small {
+    font-size: 14px;
+    color: var(--paper-3);
+  }
+  .station {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    min-height: 1.5em;
+  }
+  .tuner.is-static .station {
+    color: var(--paper-4);
+    font-weight: 400;
+  }
+  .station-more {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .dial {
+    position: relative;
+    height: 64px;
+    margin-top: 24px;
+    padding: 0 12px;
+    border-radius: 12px;
+    background: var(--ink-2);
+    box-shadow: inset 0 0 0 1px var(--line);
+    cursor: ew-resize;
+    touch-action: none;
+  }
+  .dial:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .dial-track,
+  .dial-ticks {
+    position: absolute;
+    inset: 0 18px;
+  }
+  .stop {
+    position: absolute;
+    top: 14px;
+    width: 1px;
+    height: 16px;
+    background: var(--paper-4);
+  }
+  .dial-ticks span {
+    position: absolute;
+    bottom: 8px;
+    font-size: 10.5px;
+    color: var(--paper-4);
+    transform: translateX(-50%);
+  }
+  .needle {
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: calc(18px + (100% - 36px) * var(--needle) / 100);
+    width: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+    box-shadow: 0 0 12px rgb(212 168 74 / 0.6);
+    transition: left 0.25s var(--ease);
+  }
+  .dial.is-dragging .needle {
+    transition: none;
+  }
+  .seek {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .radio .tuner {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+  .seek .note {
+    flex: 1;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  .seek .btn {
+    width: 36px;
+    padding: 0;
+  }
+
+  @media (max-width: 900px) {
+    .ev-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .ev-side {
+      position: static;
+    }
+    .ev-index {
+      display: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .ev-stack > .panel {
+      padding: 22px;
+    }
+    .signs {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .sources {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // ---------- Rashifal: pick a sign, or find it from a name ----------
+  type Sign = {
+    ne: string;
+    en: string;
+    western: string;
+    syllables: string[];
+    reading: string;
+    colour: string | null;
+    number: string | null;
+  };
+  const panel = document.getElementById("rashifal");
+  const raw = document.getElementById("rashi-data");
+  if (panel && raw) {
+    const { signs, swatch } = JSON.parse(raw.textContent ?? "{}") as { signs: Sign[]; swatch: Record<string, string> };
+    const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>(".sign"));
+    const reading = panel.querySelector<HTMLElement>(".reading")!;
+    const input = panel.querySelector<HTMLInputElement>(".finder input")!;
+    const bind = (name: string) => Array.from(panel.querySelectorAll<HTMLElement>(`[data-bind="${name}"]`));
+    let current = 0;
+
+    const show = (index: number) => {
+      if (index === current) return;
+      const sign = signs[index];
+      current = index;
+      buttons.forEach((b, i) => {
+        b.classList.toggle("is-on", i === index);
+        b.setAttribute("aria-pressed", String(i === index));
+      });
+      reading.classList.add("is-swapping");
+      window.setTimeout(() => {
+        bind("ne").forEach((el) => (el.textContent = sign.ne));
+        bind("en").forEach((el) => (el.textContent = `${sign.en} · ${sign.western}`));
+        bind("reading").forEach((el) => (el.textContent = sign.reading));
+        bind("colour").forEach((el) => (el.textContent = sign.colour ?? ""));
+        bind("number").forEach((el) => (el.textContent = sign.number ?? ""));
+        bind("swatch").forEach((el) => el.style.setProperty("--swatch", swatch[sign.colour ?? ""] ?? "transparent"));
+        bind("lucky").forEach((el) => (el.hidden = !sign.colour));
+        reading.classList.remove("is-swapping");
+      }, 180);
+    };
+    buttons.forEach((b) => b.addEventListener("click", () => show(Number(b.dataset.index))));
+
+    // The longest listed syllable the typed text starts with.
+    const hint = bind("hint")[0];
+    input.addEventListener("input", () => {
+      const typed = input.value.trim();
+      if (!typed) {
+        hint.textContent = "";
+        return;
+      }
+      let best = -1;
+      let bestLength = 0;
+      signs.forEach((sign, i) => {
+        for (const syllable of sign.syllables) {
+          if (typed.startsWith(syllable) && syllable.length > bestLength) {
+            best = i;
+            bestLength = syllable.length;
+          }
+        }
+      });
+      if (best < 0) {
+        hint.textContent = "—";
+        return;
+      }
+      hint.textContent = `→ ${signs[best].ne}`;
+      show(best);
+    });
+  }
+
+  // ---------- The index follows the panel in view ----------
+  const links = [...document.querySelectorAll<HTMLAnchorElement>(".ev-index a[data-for]")];
+  if (links.length && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          links.forEach((a) => a.classList.toggle("is-on", a.dataset.for === e.target.id));
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" },
+    );
+    links.forEach((a) => {
+      const panel = document.getElementById(a.dataset.for ?? "");
+      if (panel) io.observe(panel);
+    });
+  }
+
+  // ---------- Radio: a dial that locks onto real stations ----------
+  type Stop = { frequency: number; names: string[] };
+  const MIN = 87.5;
+  const MAX = 108;
+  const LOCK = 0.15;
+  const radio = document.querySelector<HTMLElement>(".radio[data-stops]");
+  if (radio) {
+    const stops = JSON.parse(radio.dataset.stops ?? "[]") as Stop[];
+    const dial = radio.querySelector<HTMLElement>(".dial")!;
+    const tuner = radio.querySelector<HTMLElement>(".tuner")!;
+    const bind = (name: string) => radio.querySelector<HTMLElement>(`[data-bind="${name}"]`)!;
+    let frequency = Number(dial.getAttribute("aria-valuenow")) || 96;
+
+    const nearest = (value: number) =>
+      stops.reduce((best, stop) => (Math.abs(stop.frequency - value) < Math.abs(best.frequency - value) ? stop : best));
+
+    const tune = (value: number, snap: boolean) => {
+      frequency = Math.min(MAX, Math.max(MIN, value));
+      const near = stops.length ? nearest(frequency) : null;
+      const locked = near && Math.abs(near.frequency - frequency) <= LOCK ? near : null;
+      if (snap && locked) frequency = locked.frequency;
+      dial.style.setProperty("--needle", String(((frequency - MIN) / (MAX - MIN)) * 100));
+      dial.setAttribute("aria-valuenow", frequency.toFixed(1));
+      dial.setAttribute("aria-valuetext", `${frequency.toFixed(1)} MHz`);
+      bind("freq").textContent = frequency.toFixed(1);
+      tuner.classList.toggle("is-static", !locked);
+      if (locked) {
+        bind("name").textContent = locked.names[0];
+        bind("name").setAttribute("lang", "ne");
+        bind("more").textContent =
+          locked.names.length > 1 ? `and ${locked.names.length - 1} more on this frequency elsewhere` : " ";
+      } else {
+        bind("name").textContent = "No station here";
+        bind("name").removeAttribute("lang");
+        bind("more").textContent = " ";
+      }
+    };
+
+    const seek = (direction: number) => {
+      const next =
+        direction > 0
+          ? stops.find((s) => s.frequency > frequency + 0.05)
+          : [...stops].reverse().find((s) => s.frequency < frequency - 0.05);
+      if (next) tune(next.frequency, true);
+    };
+
+    const fromPointer = (clientX: number) => {
+      const box = dial.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (clientX - box.left - 18) / (box.width - 36)));
+      return MIN + ratio * (MAX - MIN);
+    };
+    dial.addEventListener("pointerdown", (event) => {
+      dial.setPointerCapture(event.pointerId);
+      dial.classList.add("is-dragging");
+      tune(fromPointer(event.clientX), false);
+    });
+    dial.addEventListener("pointermove", (event) => {
+      if (dial.hasPointerCapture(event.pointerId)) tune(fromPointer(event.clientX), false);
+    });
+    const release = () => {
+      dial.classList.remove("is-dragging");
+      tune(frequency, true);
+    };
+    dial.addEventListener("pointerup", release);
+    dial.addEventListener("pointercancel", release);
+    dial.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight" || event.key === "ArrowUp") seek(1);
+      else if (event.key === "ArrowLeft" || event.key === "ArrowDown") seek(-1);
+      else return;
+      event.preventDefault();
+    });
+    radio.querySelectorAll<HTMLButtonElement>("[data-seek]").forEach((b) =>
+      b.addEventListener("click", () => seek(Number(b.dataset.seek))),
+    );
+  }
+</script>

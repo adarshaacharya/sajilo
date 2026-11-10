@@ -1,0 +1,237 @@
+---
+// Nepal's everyday arithmetic and lookups: the answers the app's own tools
+// gave when the page was recorded (src/data/showcase.ts), a second clock for
+// family abroad that keeps the visitor's real time, and the emergency numbers
+// from the app's Directory (data/config/directory.json).
+import { convertedDate, interestExample, landBreakdown, tolaInGrams, vatExample } from "../../data/showcase";
+import { CONTACTS } from "../../../../desktop/src/features/tools/_lib/directory";
+import { longDate, ne, rs } from "../../lib/format";
+
+const vatRate = Math.round((vatExample.vat / vatExample.base) * 100);
+const terai = landBreakdown.terai;
+
+const sums = [
+  { topic: "Land, hill", left: `${landBreakdown.hill.ropani} ropani`, right: `${rs(landBreakdown.squareFeet)} sq ft` },
+  { topic: "Land, Terai", left: `${landBreakdown.hill.ropani} ropani`, right: `${terai.kattha} kattha ${terai.dhur.toFixed(2)} dhur` },
+  { topic: "Gold", left: "1 tola", right: `${tolaInGrams.toFixed(2)} g` },
+  { topic: "VAT", left: `Rs ${rs(vatExample.base)} + ${vatRate}%`, right: `Rs ${rs(vatExample.total)}` },
+  { topic: "Interest", left: `Rs ${rs(interestExample.principal)}`, right: `Rs ${rs(interestExample.total)}`, arrow: true },
+  {
+    topic: "Date",
+    left: `${ne(convertedDate.nepali.day)} ${convertedDate.nepaliMonthName} ${ne(convertedDate.nepali.year)}`,
+    leftNe: true,
+    right: longDate(convertedDate.gregorian).replace(/^\w+, /, ""),
+  },
+];
+
+const clocks = [
+  { tz: "Asia/Kathmandu", en: "Kathmandu" },
+  { tz: "Asia/Qatar", en: "Doha" },
+  { tz: "Asia/Dubai", en: "Dubai" },
+  { tz: "Asia/Seoul", en: "Seoul" },
+  { tz: "Australia/Sydney", en: "Sydney" },
+  { tz: "Europe/London", en: "London" },
+  { tz: "America/New_York", en: "New York" },
+];
+
+const numbers = CONTACTS.filter((c) => /^\d{3,4}$/.test(c.number)).slice(0, 8);
+---
+
+<section class="chapter" id="tools" aria-labelledby="tools-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 id="tools-title">
+        Ropani, tola, VAT and a second clock, <em>measured the way Nepal measures.</em>
+      </h2>
+    </div>
+
+    <div class="tl-split">
+      <!-- The answers, set as sums. -->
+      <ul class="sums" aria-label="Worked examples from the app's tools">
+        {sums.map((x) => (
+          <li>
+            <span class="sum-topic">{x.topic}</span>
+            <span class="sum-line">
+              <span class="sum-left" lang={x.leftNe ? "ne" : undefined}>{x.left}</span>
+              <span class="sum-eq" aria-hidden="true">{x.arrow ? "→" : "="}</span>
+              <span class="sum-right mono">{x.right}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <div class="tl-side">
+        <div class="tl-block">
+          <h3>A second clock for family abroad</h3>
+          <ul class="clock-list">
+            {clocks.map((c, i) => (
+              <li class:list={["clock", { home: i === 0 }]} data-tz={c.tz}>
+                <span class="clock-city">{c.en}</span>
+                <span class="clock-time mono" data-time>--:--</span>
+                <span class="clock-mood" data-mood></span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div class="tl-block">
+          <h3>Emergency numbers, always one click away</h3>
+          <ul class="num-list">
+            {numbers.slice(0, 6).map((c) => (
+              <li>
+                <span>{c.name}</span>
+                <span class="mono">{c.number}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+  .tl-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+    gap: clamp(40px, 6vw, 112px);
+    align-items: start;
+  }
+
+  .sums li {
+    display: grid;
+    gap: 6px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sums li:first-child {
+    border-top: 1px solid var(--line);
+  }
+  .sum-topic {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .sum-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 18px;
+    font-size: clamp(24px, 2.8vw, 36px);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.035em;
+  }
+  .sum-eq {
+    color: var(--paper-4);
+  }
+  .sum-right {
+    color: var(--accent);
+    letter-spacing: -0.05em;
+  }
+
+  .tl-side {
+    display: grid;
+    gap: 56px;
+  }
+  .tl-block h3 {
+    padding-bottom: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .clock,
+  .num-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 2px 12px;
+    padding: 11px 0;
+    font-size: 14.5px;
+    border-bottom: 1px solid var(--line);
+  }
+  .clock {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .clock-time {
+    font-size: 15px;
+    text-align: right;
+  }
+  .clock-mood {
+    grid-column: 1 / -1;
+    font-size: 12.5px;
+    color: var(--paper-4);
+  }
+  .clock.home .clock-city,
+  .clock.home .clock-time {
+    color: var(--accent);
+  }
+  .clock.night .clock-time {
+    color: var(--paper-3);
+  }
+
+  @media (max-width: 900px) {
+    .tl-split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+
+<script>
+  const HOME = "Asia/Kathmandu";
+
+  /** Wall-clock reading in a zone, and that zone's UTC offset in minutes. */
+  function read(timeZone: string, now: Date) {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        hourCycle: "h23",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      })
+        .formatToParts(now)
+        .map((part) => [part.type, part.value]),
+    );
+    const h = Number(parts.hour);
+    const m = Number(parts.minute);
+    const wall = Date.UTC(+parts.year, +parts.month - 1, +parts.day, h, m, Number(parts.second));
+    return { h, m, offset: Math.round((wall - now.getTime()) / 60_000) };
+  }
+
+  const span = (minutes: number) => {
+    const sign = minutes < 0 ? "−" : "+";
+    const abs = Math.abs(minutes);
+    return `${sign}${Math.floor(abs / 60)}:${String(abs % 60).padStart(2, "0")}`;
+  };
+
+  const moodOf = (h: number) => {
+    if (h >= 23 || h < 6) return "Asleep. Text instead.";
+    if (h < 9) return "Getting ready";
+    if (h >= 21) return "Winding down";
+    if (h < 18) return "At work";
+    return "Good time to call";
+  };
+
+  const clocks = [...document.querySelectorAll<HTMLElement>(".clock[data-tz]")];
+  function tick() {
+    const now = new Date();
+    const home = read(HOME, now);
+    for (const clock of clocks) {
+      const tz = clock.dataset.tz ?? HOME;
+      const r = read(tz, now);
+      clock.classList.toggle("night", r.h >= 21 || r.h < 6);
+      clock.querySelector("[data-time]")!.textContent = `${String(r.h).padStart(2, "0")}:${String(r.m).padStart(2, "0")}`;
+      const mood = clock.querySelector("[data-mood]")!;
+      mood.textContent = tz === HOME ? "Home" : `${span(r.offset - home.offset)} · ${moodOf(r.h)}`;
+    }
+  }
+  if (clocks.length) {
+    tick();
+    setInterval(tick, 15_000);
+  }
+</script>

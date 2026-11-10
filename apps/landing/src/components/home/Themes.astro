@@ -1,0 +1,178 @@
+---
+// The app in each of its accents, light or dark. The frame is the app itself
+// (the showcase answers the accent and theme from the URL); the swatches are
+// the app's own accent colours, as Settings draws them.
+import AppFrame from "../AppFrame.astro";
+
+const accents = [
+  { id: "marigold", en: "Marigold", ne: "सयपत्री", color: "#d4a84a" },
+  { id: "himali", en: "Himalayan blue", ne: "हिमाली नीलो", color: "#5eaef2" },
+  { id: "chandi", en: "Chandi", ne: "चाँदी", color: "#aab0b8" },
+  { id: "phewa", en: "Phewa", ne: "फेवा", color: "#3cc4b4" },
+  { id: "ilam", en: "Ilam tea", ne: "इलामे चिया", color: "#a5c75c" },
+  { id: "makhamali", en: "Makhamali", ne: "मखमली", color: "#b98cf2" },
+  { id: "kamal", en: "Kamal", ne: "कमल", color: "#ec6fb2" },
+  { id: "dhaka", en: "Dhaka red", ne: "ढाका", color: "#b8284a" },
+  { id: "rudraksha", en: "Rudraksha", ne: "रुद्राक्ष", color: "#c47a4c" },
+];
+---
+
+<section class="chapter" id="themes" aria-labelledby="themes-title">
+  <div class="wrap th-grid">
+    <div class="th-main">
+      <h2 class="h2" id="themes-title">
+        Nine accent colours, light or dark. <span class="muted">Each named for something Nepali. Pick one.</span>
+      </h2>
+
+      <div class="picker" role="radiogroup" aria-label="Accent colour">
+        {accents.map((a, i) => (
+          <button type="button" role="radio" aria-checked={i === 0 ? "true" : "false"} data-accent={a.id} class="swatch" style={`--swatch:${a.color}`}>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="swatch-en">{a.en}</span>
+            <span class="swatch-ne" lang="ne">{a.ne}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="mode" role="radiogroup" aria-label="Theme">
+        <button type="button" role="radio" aria-checked="true" data-mode="dark">Dark</button>
+        <button type="button" role="radio" aria-checked="false" data-mode="light">Light</button>
+      </div>
+    </div>
+
+    <div class="th-stage" data-themes-stage>
+      <AppFrame route="/" title="Sajilo's Today screen in the chosen colour" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+  .th-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+    gap: clamp(40px, 6vw, 96px);
+    align-items: center;
+  }
+  .picker {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 40px;
+  }
+  .swatch {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-align: left;
+    background: var(--ink-3);
+    box-shadow: inset 0 0 0 1px var(--line);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .swatch:hover {
+    background: var(--ink-4);
+  }
+  .swatch[aria-checked="true"] {
+    box-shadow: inset 0 0 0 1.5px var(--swatch);
+  }
+  .dot {
+    grid-row: span 2;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+  }
+  .swatch-en {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .swatch-ne {
+    font-size: 12.5px;
+    color: var(--paper-3);
+  }
+  .mode {
+    display: inline-flex;
+    gap: 2px;
+    margin-top: 16px;
+    padding: 3px;
+    border-radius: 11px;
+    background: var(--ink-3);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+  .mode button {
+    height: 32px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--paper-3);
+    transition: color 0.2s, background 0.2s;
+  }
+  .mode button[aria-checked="true"] {
+    color: var(--paper);
+    background: var(--line-2);
+  }
+  .th-stage {
+    width: 100%;
+    max-width: 380px;
+    justify-self: end;
+  }
+
+  @media (max-width: 900px) {
+    .th-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .th-stage {
+      justify-self: center;
+    }
+  }
+  @media (max-width: 560px) {
+    .picker {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  // Picking a colour or a mode reloads the frame with it: the app reads the
+  // accent and theme at load, the same way it would from Settings.
+  const section = document.getElementById("themes");
+  const frame = section?.querySelector<HTMLIFrameElement>("[data-themes-stage] iframe");
+  const wrapper = section?.querySelector<HTMLElement>("[data-themes-stage] [data-app-frame]");
+  let accent = "marigold";
+  let mode: "dark" | "light" = "dark";
+
+  const show = () => {
+    if (!frame) return;
+    const url = new URL(frame.src, window.location.href);
+    url.searchParams.set("accent", accent);
+    url.searchParams.set("theme", mode);
+    frame.src = url.toString();
+    wrapper?.setAttribute("data-theme", mode);
+  };
+  const pick = (group: Element | null | undefined, chosen: Element) => {
+    group?.querySelectorAll("[role=radio]").forEach((item) => {
+      item.setAttribute("aria-checked", item === chosen ? "true" : "false");
+    });
+  };
+
+  section?.querySelectorAll<HTMLButtonElement>("[data-accent]").forEach((button) => {
+    button.addEventListener("click", () => {
+      accent = button.dataset.accent ?? "marigold";
+      pick(button.parentElement, button);
+      show();
+    });
+  });
+  section?.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      mode = button.dataset.mode === "light" ? "light" : "dark";
+      pick(button.parentElement, button);
+      show();
+    });
+  });
+</script>

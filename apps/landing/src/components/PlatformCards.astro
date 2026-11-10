@@ -115,11 +115,13 @@ const Heading = level;
 <style>
   .platform-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
   }
   .platform {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
     gap: 14px;
     align-content: start;
     padding: 28px 26px 30px;
@@ -198,7 +200,7 @@ const Heading = level;
     color: var(--gilt-2);
   }
   @media (max-width: 760px) {
-    .platform-grid { grid-template-columns: 1fr; }
+    .platform-grid { grid-template-columns: minmax(0, 1fr); }
     .platform-step { min-height: 0; }
   }
   .platform-head {

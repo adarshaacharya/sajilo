@@ -1,0 +1,349 @@
+---
+// The calendar chapter, set as type rather than cards: today as a patro
+// leaf would print it, the next festivals on a line, and the months ahead
+// with every public holiday in red. All of it is the app's bundled calendar,
+// recorded by apps/showcase-data (src/data/showcase.ts).
+import {
+  chhath,
+  dashain,
+  holidayYear,
+  holidaysAhead,
+  panchang,
+  supportedRange,
+  tihar,
+  today,
+  todayTithi,
+  upcoming,
+} from "../../data/showcase";
+import { daysAway, longDate, ne, nepalClock, weekdayNe } from "../../lib/format";
+
+const clean = (name: string) => name.replace(/\(.*?\)/g, "").trim();
+const short = (name: string) => clean(name).split(",")[0].trim();
+
+const facts = [
+  { label: "Tithi", value: todayTithi ?? "—", ne: true },
+  ...(panchang
+    ? [
+        { label: "Nakshatra", value: panchang.almanac.nakshatra.ne, ne: true },
+        { label: "Yoga", value: panchang.almanac.yoga.ne, ne: true },
+      ]
+    : []),
+  ...(panchang?.rahuKaalStart && panchang.rahuKaalEnd
+    ? [{ label: "Rahu Kaal", value: `${nepalClock(panchang.rahuKaalStart)}–${nepalClock(panchang.rahuKaalEnd)}` }]
+    : []),
+];
+
+const countdowns = [
+  { ne: "दशैं", when: dashain },
+  { ne: "तिहार", when: tihar },
+  { ne: "छठ", when: chhath },
+].filter((c) => c.when);
+---
+
+<section class="chapter" id="features" aria-labelledby="calendar-title">
+  <div class="wrap">
+    <div class="section-head" id="calendar">
+      <h2 id="calendar-title">
+        Bikram Sambat calendar, built in. <em>Festivals, tithi and public holidays from
+        {supportedRange.firstEventYear} to {supportedRange.lastEventYear} work without internet.</em>
+      </h2>
+    </div>
+
+    <!-- Today, as the leaf on the wall would print it. -->
+    <div class="leaf">
+      <div class="leaf-date">
+        <p class="leaf-month" lang="ne">{today.nepaliMonthName} {ne(today.nepali.year)}</p>
+        <p class="leaf-day" lang="ne">{ne(today.nepali.day)}</p>
+      </div>
+      <div class="leaf-side">
+        <p class="leaf-week" lang="ne">{weekdayNe(today.weekday)}</p>
+        <p class="leaf-ad">{longDate(today.gregorian)}</p>
+        <dl class="leaf-facts">
+          {facts.map((f) => (
+            <div>
+              <dt>{f.label}</dt>
+              <dd class:list={[{ mono: !f.ne }]} lang={f.ne ? "ne" : undefined}>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+
+    <!-- The next days with something on them, on one line. -->
+    <ol class="line" aria-label="Coming up">
+      {upcoming.map((e) => (
+        <li class:list={[{ "is-holiday": e.is_public_holiday }]}>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="line-when">{daysAway(e.days_away)}</span>
+          <span class="line-name" lang="ne">{short(e.name)}</span>
+          {e.is_public_holiday && <span class="line-tag">Public holiday</span>}
+        </li>
+      ))}
+    </ol>
+
+    <!-- The months ahead. -->
+    <div class="year">
+      <div class="year-head">
+        <p class="year-total">
+          <span class="mono">{holidaysAhead}</span> public holidays in the months ahead.
+          <span class="dim">Line them up with Saturdays before the office does.</span>
+        </p>
+        <ul class="counts">
+          {countdowns.map((c) => (
+            <li>
+              <span class="count-days mono">{c.when!.daysAway}</span>
+              <span class="count-what">days to <span lang="ne">{c.ne}</span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div class="months" role="list" aria-label="The months ahead, with public holidays marked">
+        {holidayYear.map((month) => {
+          const byDay = new Map(month.holidays.map((h) => [h.day, h]));
+          return (
+            <div class="month" role="listitem">
+              <p class="month-name">
+                <span lang="ne">{month.name}</span>
+                {month.holidays.length > 0 && <span class="month-n mono">{month.holidays.length}</span>}
+              </p>
+              <div class="cells" aria-hidden="true">
+                {Array.from({ length: month.days }, (_, i) => {
+                  const day = i + 1;
+                  const h = byDay.get(day);
+                  const saturday = (month.firstWeekday + i) % 7 === 6;
+                  return (
+                    <span
+                      class:list={["cell", { saturday, holiday: h && h.daysAway >= 0, past: h && h.daysAway < 0 }]}
+                      title={h ? `${ne(day)} ${month.name}: ${short(h.name)}` : undefined}
+                      style={day === 1 ? `grid-column-start:${month.firstWeekday + 1}` : undefined}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapter {
+    padding-block: clamp(120px, 13vw, 200px) 0;
+  }
+
+  /* ---------- Today ---------- */
+  .leaf {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: end;
+    gap: clamp(32px, 6vw, 96px);
+    padding-bottom: clamp(48px, 6vw, 72px);
+    border-bottom: 1px solid var(--line);
+  }
+  .leaf-month {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--paper-2);
+  }
+  .leaf-day {
+    margin-top: 12px;
+    font-family: var(--deva);
+    font-weight: 700;
+    font-size: clamp(180px, 24vw, 340px);
+    line-height: 0.82;
+    letter-spacing: -0.03em;
+    color: var(--accent);
+  }
+  .leaf-week {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 650;
+    line-height: 1.1;
+  }
+  .leaf-ad {
+    margin-top: 6px;
+    font-size: 16px;
+    color: var(--paper-3);
+  }
+  .leaf-facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, auto));
+    justify-content: start;
+    gap: 8px 48px;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+  }
+  .leaf-facts div {
+    display: grid;
+    gap: 4px;
+  }
+  .leaf-facts dt {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .leaf-facts dd {
+    font-size: 18px;
+    font-weight: 500;
+  }
+
+  /* ---------- The line ---------- */
+  .line {
+    --pad: clamp(48px, 6vw, 72px);
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
+    padding-block: var(--pad);
+    border-bottom: 1px solid var(--line);
+  }
+  .line::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--pad) + 5px);
+    height: 1px;
+    background: linear-gradient(90deg, var(--line-2) 80%, transparent);
+  }
+  .line li {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 6px;
+  }
+  .dot {
+    position: relative;
+    width: 11px;
+    height: 11px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: inset 0 0 0 2px var(--paper-3);
+  }
+  .is-holiday .dot {
+    background: var(--sindoor);
+    box-shadow: 0 0 0 4px rgb(255 106 82 / 0.15);
+  }
+  .line-when {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .line-name {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .line-tag {
+    font-size: 12.5px;
+    color: var(--sindoor);
+  }
+
+  /* ---------- The months ahead ---------- */
+  .year {
+    padding-top: clamp(48px, 6vw, 72px);
+  }
+  .year-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px 48px;
+  }
+  .year-total {
+    max-width: 34ch;
+    font-size: 22px;
+    font-weight: 550;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+  .year-total .dim {
+    color: var(--paper-3);
+  }
+  .counts {
+    display: flex;
+    gap: 40px;
+  }
+  .counts li {
+    display: grid;
+    gap: 4px;
+  }
+  .count-days {
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .count-what {
+    font-size: 13px;
+    color: var(--paper-3);
+  }
+  .months {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 28px 24px;
+    margin-top: 44px;
+  }
+  .month-name {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--paper-2);
+  }
+  .month-n {
+    font-size: 12px;
+    color: var(--sindoor);
+  }
+  .cells {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--ink-4);
+  }
+  .cell.saturday {
+    background: #26262c;
+  }
+  .cell.holiday {
+    background: var(--sindoor);
+  }
+  .cell.past {
+    background: rgb(255 106 82 / 0.3);
+  }
+
+  @media (max-width: 900px) {
+    .leaf {
+      grid-template-columns: minmax(0, 1fr);
+      align-items: start;
+    }
+    .leaf-facts {
+      grid-template-columns: repeat(2, minmax(0, auto));
+    }
+    .line {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 28px;
+      padding-left: 32px;
+    }
+    .line::before {
+      top: var(--pad);
+      bottom: var(--pad);
+      left: 5px;
+      right: auto;
+      width: 1px;
+      height: auto;
+      background: var(--line-2);
+    }
+    .dot {
+      position: absolute;
+      left: -32px;
+      top: 3px;
+      margin: 0;
+    }
+  }
+</style>

@@ -1,17 +1,17 @@
 ---
 const links = [
-  { href: "/#tour", label: "Screens" },
-  { href: "/releases.html", label: "Releases" },
+  { href: "/#features", label: "Features" },
   { href: "/download.html", label: "Install" },
   { href: "/docs.html", label: "Docs" },
+  { href: "/releases.html", label: "Releases" },
   { href: "/support.html", label: "Support" },
-  { href: "/report.html", label: "Report issue" },
 ];
 ---
 
 <header class="nav-shell" id="top">
   <nav class="wrap nav" aria-label="Primary">
-    <a class="brand" href="/">
+    <a class="brand" href="/" aria-label="Sajilo, home">
+      <img class="brand-icon" src="/assets/icon.png" alt="" width="26" height="26" />
       <span class="brand-deva" lang="ne">सजिलो</span>
     </a>
     <ul class="nav-links">
@@ -21,7 +21,7 @@ const links = [
       <a class="nav-gh" href="https://github.com/adarshaacharya/sajilo" target="_blank" rel="noopener" aria-label="Source on GitHub">
         <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
       </a>
-      <a class="btn btn--sm" href="/#download" data-download>Download</a>
+      <a class="btn btn--sm btn--accent" href="/#download" data-download>Download</a>
       <button
         class="nav-toggle"
         type="button"
@@ -48,7 +48,7 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--ink) 82%, transparent);
+    background: color-mix(in srgb, var(--ink) 78%, transparent);
     backdrop-filter: blur(14px) saturate(1.2);
     -webkit-backdrop-filter: blur(14px) saturate(1.2);
     border-bottom: 1px solid transparent;
@@ -61,32 +61,37 @@ const links = [
   .nav {
     display: flex;
     align-items: center;
-    gap: 28px;
-    height: 64px;
+    gap: 24px;
+    height: 60px;
   }
   .brand {
     display: inline-flex;
-    align-items: baseline;
+    align-items: center;
     gap: 10px;
     margin-right: auto;
   }
+  .brand-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+  }
   .brand-deva {
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 26px;
+    font-family: var(--deva);
+    font-weight: 650;
+    font-size: 20px;
     line-height: 1;
     color: var(--paper);
   }
   .nav-links {
     display: flex;
-    gap: 4px;
+    gap: 2px;
   }
   .nav-links a {
     display: inline-block;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 14.5px;
-    font-weight: 500;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 450;
     color: var(--paper-2);
     transition: color 0.2s, background 0.2s;
   }
@@ -102,9 +107,9 @@ const links = [
   .nav-gh {
     display: grid;
     place-items: center;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     color: var(--paper-2);
     box-shadow: inset 0 0 0 1px var(--line-2);
     transition: color 0.2s, background 0.2s;
@@ -122,9 +127,9 @@ const links = [
   .nav-toggle {
     display: none;
     position: relative;
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     box-shadow: inset 0 0 0 1px var(--line-2);
     transition: background 0.2s;
   }
