@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { api } from "./ipc";
+import { isLinux } from "./platform";
 
 /** A card's own window, fitted to what it holds: the same card can be one
  * line of text in English and two in Nepali, and a fixed height leaves either
@@ -7,6 +8,14 @@ import { api } from "./ipc";
 export function useFitWindow(element: HTMLElement | null) {
   useLayoutEffect(() => {
     if (!element) return;
+    // Linux won't resize a card's window once open (see `card_window::HEIGHT`),
+    // so the card fills the window it opened in and scrolls if it runs longer.
+    if (isLinux) {
+      element.style.minHeight = "100vh";
+      element.style.maxHeight = "100vh";
+      element.style.overflowY = "auto";
+      return;
+    }
     // The window opens before it knows the card's height, so the card stays
     // out of sight until its window fits it, rather than showing cut off and
     // then jumping. Hidden, it still lays out and can be measured.

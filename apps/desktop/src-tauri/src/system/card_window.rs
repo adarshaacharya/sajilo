@@ -17,7 +17,15 @@ use crate::db;
 /// Every card's width, in logical pixels; the page fits the height to what it
 /// holds.
 pub const WIDTH: f64 = 380.0;
+/// The height a card opens at, before its page fits it.
+#[cfg(not(target_os = "linux"))]
 const HEIGHT: f64 = 114.0;
+/// On Linux a card keeps the height it opened at: GTK ignores every later
+/// resize on some desktops (issue #10, Ubuntu 26.04, X11 and Wayland alike),
+/// however it is asked. So it opens tall enough for the tallest card, the page
+/// fills it, and anything longer scrolls inside it rather than being cut off.
+#[cfg(target_os = "linux")]
+const HEIGHT: f64 = 260.0;
 /// Space between the card and the screen edge it sits against.
 const MARGIN: f64 = 14.0;
 /// Where the user last dragged a card, in logical pixels. One spot for every
@@ -129,6 +137,10 @@ fn take_lift(place: Place) -> bool {
 /// screen — on Windows it opens just above the taskbar — moves up by as much
 /// instead of slipping under the taskbar.
 pub fn fit(window: &tauri::WebviewWindow<Wry>, height: f64) {
+    // Linux keeps the opening height; see `HEIGHT`.
+    if cfg!(target_os = "linux") {
+        return;
+    }
     let Ok(Some(monitor)) = window.current_monitor() else {
         resize(window, height);
         return;
