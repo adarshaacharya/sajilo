@@ -30,6 +30,14 @@ const ogImageAlt =
     <link rel="icon" href="/assets/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
     <meta name="theme-color" content="#09090b" />
+    <script is:inline>
+      // The visitor's pick from the nav switch, before first paint so the page
+      // never flashes the other theme. No pick: the system's, via CSS.
+      try {
+        const saved = localStorage.getItem("sajilo-theme");
+        if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+      } catch {}
+    </script>
 
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={description} />

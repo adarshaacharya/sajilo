@@ -9,19 +9,20 @@ interface Props {
   route: string;
   /** What the frame shows, for screen readers. */
   title: string;
-  /** Light or dark; dark unless asked. */
+  /** Light or dark; unless asked, it follows the page's own theme. */
   theme?: "light" | "dark";
   /** One of the app's accents (`phewa`, `dhaka`…); the user's default unless asked. */
   accent?: string;
 }
 
-const { route, title, theme = "dark", accent } = Astro.props;
+const { route, title, theme: asked, accent } = Astro.props;
+const theme = asked ?? "dark";
 const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&theme=${theme}${
   accent ? `&accent=${encodeURIComponent(accent)}` : ""
 }`;
 ---
 
-<div class="app-frame" data-app-frame data-theme={theme}>
+<div class="app-frame" data-app-frame data-theme={theme} data-follow={asked ? undefined : ""}>
   <div class="app-frame-screen">
     <iframe {title} {src} tabindex="-1" scrolling="no" loading="lazy"></iframe>
   </div>
@@ -75,4 +76,23 @@ const src = `/assets/app/index.html?route=${encodeURIComponent(route)}&inert=1&t
     }
   });
   document.querySelectorAll("[data-app-frame]").forEach((frame) => fit.observe(frame));
+
+  // Frames that weren't given a theme wear the page's: on load, and again
+  // whenever the nav switch flips it.
+  const pageTheme = () =>
+    document.documentElement.dataset.theme ??
+    (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  const follow = (theme: string) => {
+    document.querySelectorAll<HTMLElement>("[data-app-frame][data-follow]").forEach((frame) => {
+      if (frame.dataset.theme === theme) return;
+      frame.dataset.theme = theme;
+      const iframe = frame.querySelector("iframe");
+      if (!iframe) return;
+      const url = new URL(iframe.src, location.href);
+      url.searchParams.set("theme", theme);
+      iframe.src = url.pathname + url.search;
+    });
+  };
+  follow(pageTheme());
+  addEventListener("sajilo:theme", (event) => follow((event as CustomEvent<string>).detail));
 </script>
