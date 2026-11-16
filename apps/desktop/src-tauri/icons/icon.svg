@@ -1,11 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect x="41.98" y="41.98" width="428.03" height="428.03" rx="99.63" fill="#100f0d"/>
-  <rect x="42.98" y="42.98" width="426.03" height="426.03" rx="98.63" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
-  <g transform="translate(256 255) scale(0.9225) translate(-256 -291)">
-    <!-- Chandra: the lunar month (tithi) -->
-    <path transform="translate(0 -14)" d="M184.8 149.85A74 74 0 1 0 327.2 149.85A78 78 0 0 1 184.8 149.85Z" fill="#eaa833"/>
-    <!-- Surya: twelve rays for the twelve solar months of Bikram Sambat -->
-    <g stroke="#ff5a3c" stroke-width="16" stroke-linecap="round"><line x1="256.00" y1="272.00" x2="256.00" y2="248.00"/><line x1="290.00" y1="281.11" x2="302.00" y2="260.33"/><line x1="314.89" y1="306.00" x2="335.67" y2="294.00"/><line x1="324.00" y1="340.00" x2="348.00" y2="340.00"/><line x1="314.89" y1="374.00" x2="335.67" y2="386.00"/><line x1="290.00" y1="398.89" x2="302.00" y2="419.67"/><line x1="256.00" y1="408.00" x2="256.00" y2="432.00"/><line x1="222.00" y1="398.89" x2="210.00" y2="419.67"/><line x1="197.11" y1="374.00" x2="176.33" y2="386.00"/><line x1="188.00" y1="340.00" x2="164.00" y2="340.00"/><line x1="197.11" y1="306.00" x2="176.33" y2="294.00"/><line x1="222.00" y1="281.11" x2="210.00" y2="260.33"/></g>
-    <circle cx="256" cy="340" r="50" fill="#ff5a3c"/>
-  </g>
+  <!-- Sajilo: the Nepali letter स on a marigold tile. The letter's outline is
+       from Noto Sans Devanagari Black (SIL Open Font License 1.1). -->
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6cb5c"/>
+      <stop offset="1" stop-color="#d99a2b"/>
+    </linearGradient>
+  </defs>
+  <rect x="41.98" y="41.98" width="428.04" height="428.04" rx="99.63" fill="url(#gold)"/>
+  <rect x="42.98" y="42.98" width="426.04" height="426.04" rx="98.63" fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2"/>
+  <path fill="#17120a" transform="translate(125.02 353.95) scale(0.33034 -0.33034)" d="M271 -29Q184 59 133.0 119.5Q82 180 58 221Q41 250 34.0 273.0Q27 296 27 316Q27 351 49.0 374.5Q71 398 115 398Q138 398 157.5 390.5Q177 383 195 371Q211 396 211 434Q211 460 203 484H0V622H793V484H708V0H531V208Q493 202 450 202Q408 202 364.5 211.5Q321 221 278 244Q261 232 244 223Q278 187 319.0 149.0Q360 111 400 75ZM451 340Q493 340 531 348V484H377Q382 469 385.0 452.5Q388 436 388 416Q388 396 384.0 378.5Q380 361 373 347Q408 340 451 340Z"/>
 </svg>
