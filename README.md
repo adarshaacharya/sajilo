@@ -79,29 +79,6 @@ operating system asks for confirmation the first time Sajilo opens.
 
 Choose the Apple Silicon build for M-series Macs and the Intel build for older Macs.
 
-## Data sources
-
-Sajilo reads public pages and keyless public APIs. Each value shows when it was last
-fetched.
-
-| Data                        | Source                                                  |
-| --------------------------- | ------------------------------------------------------- |
-| Exchange rates              | Nepal Rastra Bank                                       |
-| NEPSE and share prices      | ShareSansar                                             |
-| Open IPOs                   | CDS and Clearing Ltd. (CDSC)                            |
-| Gold and silver             | Federation of Nepal Gold and Silver Dealers' Association |
-| Fuel prices                 | Nepal Oil Corporation                                   |
-| Crypto prices               | [CoinGecko](https://www.coingecko.com), with Kraken as a backup |
-| Vegetable prices            | Kalimati Fruits and Vegetable Market Development Board  |
-| Weather and air quality     | [Open-Meteo](https://open-meteo.com) (CC BY 4.0)        |
-| Rashifal                    | Hamro Patro                                             |
-| Radio directory             | Ratopati                                                |
-| Official updates            | Government of Nepal                                     |
-| News                        | Each publisher's own RSS feed or public endpoint        |
-
-Credit and details for every source are in
-[THIRD_PARTY_ATTRIBUTIONS.md](THIRD_PARTY_ATTRIBUTIONS.md).
-
 ## Development
 
 ### Prerequisites
@@ -146,26 +123,6 @@ bun run lint
 
 Provider tests read recorded responses from [`fixtures/`](fixtures) and never make a
 network call.
-
-## Project structure
-
-Sajilo is a single Cargo workspace with a Tauri desktop app, a React interface, and a
-small set of Cloudflare Workers.
-
-| Path                       | Purpose                                                                                   |
-| -------------------------- | ----------------------------------------------------------------------------------------- |
-| `crates/sajilo-core`       | Calendar engine, numerals, and unit tools. Pure Rust with no I/O.                         |
-| `crates/sajilo-providers`  | Fetchers and parsers for every public data source.                                        |
-| `crates/sajilo-api`        | Shared data contract. Generates the TypeScript types used by the interface.               |
-| `apps/desktop`             | The Tauri app: Rust tray shell in `src-tauri/`, React and TypeScript interface in `src/`. |
-| `apps/server`              | Background service that fetches and caches sources and serves them over HTTP.             |
-| `apps/landing`             | [sajilo.fyi](https://sajilo.fyi), built with Astro, and its download counter Worker.      |
-| `apps/showcase`            | The live app preview on the website, running the real interface with recorded data.      |
-| `apps/showcase-data`       | Records the preview data by running the real parsers over `fixtures/`.                    |
-| `apps/announcements`       | Worker that serves the occasional notice shown on the Today screen.                       |
-| `apps/telemetry`           | Worker that receives the anonymous daily count.                                           |
-| `data/calendar-events`     | Bundled Bikram Sambat events, embedded into the app at build time.                        |
-| `fixtures`                 | Recorded upstream responses for parser tests.                                             |
 
 ## Releasing
 
