@@ -79,21 +79,6 @@ operating system asks for confirmation the first time Sajilo opens.
 
 Choose the Apple Silicon build for M-series Macs and the Intel build for older Macs.
 
-## Privacy
-
-Sajilo is local-first. Your plans, reminders, documents, and settings are stored in a
-database on your device and never leave it.
-
-To understand how many people use the app, Sajilo sends **one anonymous count per
-day**: the app version, the previous version after an update, operating system, CPU
-architecture, and days since the last count. The service stores only aggregate
-totals, with no account, device identifier, IP address, or in-app activity. It is on
-by default and can be switched off in **Settings › System › Privacy**, after which
-nothing is sent.
-
-The same text is on [sajilo.fyi/privacy.html](https://sajilo.fyi/privacy.html).
-See [SECURITY.md](SECURITY.md) for engineering notes.
-
 ## Data sources
 
 Sajilo reads public pages and keyless public APIs. Each value shows when it was last
