@@ -68,7 +68,11 @@ pub fn open(app: &AppHandle<Wry>, label: &str, surface: &str, title: &str) {
     .visible_on_all_workspaces(true)
     .skip_taskbar(true)
     .shadow(true)
-    .focused(false);
+    // On Linux an unfocused start makes GTK refuse focus, and tao's switch
+    // back (on first draw) doesn't happen for this borderless, transparent
+    // window on GNOME Wayland: every click then goes to focusing it, and no
+    // button ever responds. There the card takes focus like any window.
+    .focused(cfg!(target_os = "linux"));
     if let Some(place) = remembered_place(app).or_else(|| default_place(app)) {
         builder = builder.position(place.x, place.y);
     }

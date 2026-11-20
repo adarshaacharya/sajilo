@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CardTip, useCardTip } from "../../shared/components/card-tip";
 import { Icon, type IconName } from "../../shared/components/icon";
 import { useSettings } from "../../shared/context/settings-context";
@@ -217,6 +217,16 @@ export function ReminderCard() {
     return () => window.clearTimeout(timer);
   }, [id]);
 
+  // A way out that needs no aim: Esc dismisses, as Skip would.
+  const escRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented) escRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   if (!view) return null;
   const { reminder } = view;
   const showTip = tip && !options && TIP_KINDS.has(reminder.kind);
@@ -250,6 +260,7 @@ export function ReminderCard() {
     close(null);
   };
   const dismiss = (open: boolean) => (open ? openOf(reminder) : close(null));
+  escRef.current = () => close(null);
   const cardSwitch = switchFor(reminder);
   /** Switches this kind off, as Settings › Notifications would, and moves on. */
   const turnOff = async () => {
