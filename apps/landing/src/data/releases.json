@@ -1,5 +1,57 @@
 [
   {
+    "version": "v0.1.44",
+    "name": "Sajilo v0.1.44",
+    "publishedAt": "2026-11-20T09:14:28Z",
+    "body": "## What's new\n\n- **New app icon.** A marigold स, easier to spot in the dock, taskbar and menu bar.\n- **Esc dismisses a card.** Reminder and question cards close with Esc, same as Skip.\n\n## Fixes\n\n- **Linux: cards respond to clicks again.** On GNOME Wayland, reminder and question-of-the-day cards ignored every click, so Skip and the answers did nothing. Cards now take focus on Linux, so buttons work.\n- **Linux: cards no longer cut off.** Cards open at a fixed height and scroll inside, instead of resizing (which GTK didn't honour).\n",
+    "prerelease": false,
+    "htmlUrl": "https://github.com/adarshaacharya/sajilo/releases/tag/v0.1.44",
+    "assets": [
+      {
+        "platform": "macos-arm64",
+        "label": "macOS (Apple Silicon)",
+        "filename": "Sajilo-macos-arm64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-macos-arm64.dmg",
+        "size": 12833403
+      },
+      {
+        "platform": "macos-x64",
+        "label": "macOS (Intel)",
+        "filename": "Sajilo-macos-x64.dmg",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-macos-x64.dmg",
+        "size": 13590274
+      },
+      {
+        "platform": "windows",
+        "label": "Windows",
+        "filename": "Sajilo-windows-x64.exe",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-windows-x64.exe",
+        "size": 9424991
+      },
+      {
+        "platform": "linux-deb",
+        "label": "Linux (.deb)",
+        "filename": "Sajilo-linux-amd64.deb",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-linux-amd64.deb",
+        "size": 16882124
+      },
+      {
+        "platform": "linux-appimage",
+        "label": "Linux (AppImage)",
+        "filename": "Sajilo-linux-x86_64.AppImage",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-linux-x86_64.AppImage",
+        "size": 162028024
+      },
+      {
+        "platform": "linux-rpm",
+        "label": "Linux (.rpm)",
+        "filename": "Sajilo-linux-x86_64.rpm",
+        "url": "https://github.com/adarshaacharya/sajilo/releases/download/v0.1.44/Sajilo-linux-x86_64.rpm",
+        "size": 16886685
+      }
+    ]
+  },
+  {
     "version": "v0.1.43",
     "name": "Sajilo v0.1.43",
     "publishedAt": "2026-11-07T18:06:01Z",
